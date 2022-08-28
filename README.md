@@ -1,13 +1,13 @@
 #### XIDL - Handy download links for your automated scripts
 
 ## 7za.exe
-[https://xidl.github.io/7za/7za.exe](https://xidl.github.io/7za/7za.exe)
+[https://xidl.github.io/7za.exe](https://xidl.github.io/7za.exe)
 
 ## Usage example
 `myroutinarysetup.bat`
 ```cmd
 @echo off
-if not exist "7z.exe" curl -L -sS "https://xidl.github.io/7za/7za.exe" -o 7z.exe
+if not exist "7z.exe" curl -L -sS "https://xidl.github.io/7za.exe" -o 7z.exe
 if not exist "wget.exe" curl -L -sS "https://xidl.github.io/wget.7z" -o wget.7z
 echo Downloading dependencies...
 wget -nc https://example.com/dep1.zip -q --show-progress
