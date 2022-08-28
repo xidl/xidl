@@ -23,3 +23,4 @@ echo Uncompressing files...
 echo Done!
 pause
 ```
+##### Looking for [64-bit binaries](https://xidl.github.io/64/)?
