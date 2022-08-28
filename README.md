@@ -3,6 +3,11 @@
 ## 7za.exe
 [https://xidl.github.io/7za.exe](https://xidl.github.io/7za.exe)
 
+## wget
+[32-bit] [.exe](https://xidl.github.io/wget.7z) | [.7z](https://xidl.github.io/64/wget.7z)
+
+[64-bit] [.exe](https://xidl.github.io/wget.exe) | [.7z](https://xidl.github.io/64/wget.exe)
+
 ## Usage example
 `myroutinarysetup.bat`
 ```cmd
