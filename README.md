@@ -1,4 +1,4 @@
-#### XIDL - Handy download links for your automated scripts
+#### Handy download links for your automated scripts
 
 ## 7za.exe
 [https://xidl.github.io/7za.exe](https://xidl.github.io/7za.exe)
