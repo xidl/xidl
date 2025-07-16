@@ -1,0 +1,13 @@
+[package]
+name = "idl_rs"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+members = ["crates/derive"]
+
+[dependencies]
+tree-sitter = "=0.22.5"
+tree-sitter-idl = "3.12.1"
+derive = { path = "crates/derive" }
+thiserror = "2.0.12"
