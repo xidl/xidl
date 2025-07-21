@@ -1,160 +1,74 @@
-#[derive(Debug, Clone, PartialEq)]
-pub struct Identifier(String);
-
-pub struct PositiveIntConst(pub ConstExpr);
-
-pub struct ConstExpr(pub OrExpr);
-
-pub enum OrExpr {
-    XorExpr(XorExpr),
-    OrExpr(Box<OrExpr>, XorExpr),
+macro_rules! sub_mod {
+    ($name:ident) => {
+        mod $name;
+        #[allow(unused_imports)]
+        pub use $name::*;
+    };
 }
 
-pub enum XorExpr {
-    AndExpr(AndExpr),
-    XorExpr(Box<XorExpr>, AndExpr),
+sub_mod!(base_types);
+sub_mod!(expr);
+sub_mod!(bitmask);
+sub_mod!(typedef_dcl_imp);
+
+pub enum Definition {
+    TypeDcl(TypeDcl),
 }
 
-pub enum AndExpr {
-    ShiftExpr(ShiftExpr),
-    AndExpr(Box<AndExpr>, ShiftExpr),
+pub struct TypeDcl(pub Vec<TypeDclInner>);
+
+pub enum TypeDclInner {
+    ConstrTypeDcl(ConstrTypeDcl),
 }
 
-pub enum ShiftExpr {
-    AdditiveExpr(AddExpr),
-    LeftShiftExpr(Box<ShiftExpr>, AddExpr),
-    RightShiftExpr(Box<ShiftExpr>, AddExpr),
+pub enum ConstrTypeDcl {
+    BitmaskDcl(BitmaskDcl),
 }
 
-pub enum AddExpr {
-    MultExpr(MultExpr),
-    AddExpr(Box<AddExpr>, MultExpr),
-    SubExpr(Box<AddExpr>, MultExpr),
+pub enum StructDcl {
+    StructForwardDcl(StructForwardDcl),
+    StructDef(StructDef),
 }
 
-pub enum MultExpr {
-    UnaryExpr(UnaryExpr),
-    MultExpr(Box<MultExpr>, UnaryExpr),
-    DivExpr(Box<MultExpr>, UnaryExpr),
-    ModExpr(Box<MultExpr>, UnaryExpr),
+pub struct StructForwardDcl {
+    pub ident: Identifier,
 }
 
-pub enum UnaryExpr {
-    UnaryExpr(UnaryOperator, PrimaryExpr),
-    PrimaryExpr(PrimaryExpr),
+pub struct StructDef {
+    pub ident: Identifier,
+    pub parent: Vec<ScopedName>,
+    pub member: Vec<Member>,
 }
 
-pub enum PrimaryExpr {
-    ScopedName(ScopedName),
-    Literal(Literal),
-    ConstExpr(Box<ConstExpr>),
+pub struct Member {
+    pub ty: TypeSpec,
+    pub ident: Declarators,
+    pub default: Option<Default>,
 }
 
-pub enum UnaryOperator {
-    Add,
-    Sub,
-    Not,
+pub struct Default(pub ConstExpr);
+
+pub struct ConstDcl {
+    pub ty: ConstType,
+    pub ident: Identifier,
+    pub value: ConstExpr,
 }
 
-pub struct ScopedName(pub String);
-
-pub enum Literal {
-    IntegerLiteral(IntegerLiteral),
-    FloatingPtLiteral,
-    FixedPtLiteral,
-    CharLiteral(char),
-    WideCharacterLiteral,
-    StringLiteral(String),
-    WideStringLiteral,
-    BooleanLiteral(bool),
-}
-
-pub enum IntegerLiteral {
-    BinNumber(String),
-    OctNumber(String),
-    DecNumber(String),
-    HexNumber(String),
-}
-
-pub struct SignedShortInt;
-pub struct SignedLongInt;
-pub struct SignedLongLongInt;
-pub struct UnsignedInt;
-pub struct UnsignedTinyInt;
-pub struct BooleanType;
-pub struct FixedPtConstType;
-pub struct OctetType;
-pub struct IntegerType;
-pub enum SignedInt {
-    SignedShortInt,
-    SignedLongInt,
-    SignedLongLongInt,
-    SignedTinyInt,
-}
-
-pub struct SignedTinyInt;
-pub struct UnsignedShortInt;
-pub struct UnsignedLongInt;
-pub struct UnsignedLongLongInt;
-
-pub struct FloatingPtType;
-pub struct CharType;
-pub struct WideCharType;
-pub struct StringType {
-    pub bound: Option<PositiveIntConst>,
-}
-
-pub struct WideStringType {
-    pub bound: Option<PositiveIntConst>,
-}
-
-pub enum TypeSpec {
-    SimpleTypeSpec(SimpleTypeSpec),
-    TemplateTypeSpec(TemplateTypeSpec),
-}
-
-pub enum SimpleTypeSpec {
-    BaseTypeSpec(BaseTypeSpec),
-    ScopedName(ScopedName),
-}
-
-pub enum BaseTypeSpec {
+pub enum ConstType {
     IntegerType(IntegerType),
     FloatingPtType(FloatingPtType),
+    FixedPtConstType(FixedPtConstType),
     CharType(CharType),
     WideCharType(WideCharType),
     BooleanType(BooleanType),
     OctetType(OctetType),
-    AnyType(AnyType),
-    ObjectType(ObjectType),
-    ValueBaseType(ValueBaseType),
-}
-
-pub struct AnyType;
-
-pub struct FixedPtType {
-    pub integer: PositiveIntConst,
-    pub fraction: PositiveIntConst,
-}
-
-pub enum TemplateTypeSpec {
-    SequenceType(SequenceType),
     StringType(StringType),
     WideStringType(WideStringType),
-    FixedPtType(FixedPtType),
-    MapType(MapType),
+    ScopedName(ScopedName),
+    SequenceType(SequenceType),
 }
 
-pub struct SequenceType {
-    pub ty: Box<TypeSpec>,
-    pub len: Option<PositiveIntConst>,
-}
+#[derive(Debug, Clone, PartialEq)]
+pub struct Identifier(String);
 
-pub struct MapType {
-    pub key: Box<TypeSpec>,
-    pub value: Box<TypeSpec>,
-    pub len: Option<PositiveIntConst>,
-}
-
-pub struct ObjectType;
-pub struct ValueBaseType;
+pub struct PositiveIntConst(pub ConstExpr);
