@@ -9,6 +9,7 @@ macro_rules! sub_mod {
 sub_mod!(base_types);
 sub_mod!(expr);
 sub_mod!(bitmask);
+sub_mod!(union);
 sub_mod!(typedef_dcl_imp);
 
 pub enum Definition {
@@ -22,6 +23,10 @@ pub enum TypeDclInner {
 }
 
 pub enum ConstrTypeDcl {
+    StructDcl(StructDcl),
+    UnionDcl(UnionDcl),
+    EnumDcl(EnumDcl),
+    BitsetDcl(BitsetDcl),
     BitmaskDcl(BitmaskDcl),
 }
 
