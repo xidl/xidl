@@ -8,7 +8,12 @@ use syn::{parse_macro_input, Ident, LitStr};
 
 pub fn tree_sitter_parser(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as syn::DeriveInput);
-    let DeriveInput { ident, data, kind } = DeriveInput::from_derive_input(&input).unwrap();
+    let DeriveInput {
+        ident,
+        data,
+        kind,
+        text,
+    } = DeriveInput::from_derive_input(&input).unwrap();
     let ident_str = LitStr::new(
         &kind.unwrap_or_else(|| ident.to_string().to_lowercase().to_string()),
         Span::call_site(),
@@ -19,6 +24,28 @@ pub fn tree_sitter_parser(input: TokenStream) -> TokenStream {
             let mut gen_declare = quote! {};
             let mut gen_fields = quote! {};
             let mut gen_self = quote! {};
+
+            // struct Type;
+            if fields.is_empty()  {
+                let text_str = LitStr::new(
+                    &text.unwrap_or_else(||ident.to_string().to_lowercase().to_string()),
+                    Span::call_site()
+                );
+                return quote! {
+                        impl<'a> FromTreeSitter<'_> for #ident {
+                            fn from_node(
+                                node: tree_sitter::Node<'_>,
+                                context: &mut crate::parser::ParseContext<'_>,
+                            ) -> crate::error::ParserResult<Self> {
+                                assert_eq!(node.utf8_text(context.source)?, #text_str);
+
+                                Ok(Self)
+                            }
+                        }
+                }.into();
+
+
+            }
 
             for (idx, field) in fields.iter().enumerate() {
                 let name = field.ident.clone().unwrap_or_else(||{
@@ -81,6 +108,9 @@ struct DeriveInput {
     data: darling::ast::Data<DerivedVariant, DeriveField>,
     #[darling(default)]
     kind: Option<String>,
+
+    #[darling(default)]
+    text: Option<String>,
 }
 
 #[derive(FromVariant)]
