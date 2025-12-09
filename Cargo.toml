@@ -10,4 +10,7 @@ members = ["crates/derive"]
 tree-sitter = "=0.22.5"
 tree-sitter-idl = "3.12.1"
 derive = { path = "crates/derive" }
-thiserror = "2.0.12"
+thiserror = "2.0"
+
+[dev-dependencies]
+insta = "1.44"

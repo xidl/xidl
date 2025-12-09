@@ -42,7 +42,7 @@ pub struct UnsignedInt;
 #[ts(text = "uint8")]
 pub struct UnsignedTinyInt;
 
-#[derive(Parser)]
+#[derive(Debug, Parser)]
 #[ts(text = "boolean")]
 pub struct BooleanType;
 
@@ -50,10 +50,13 @@ pub struct BooleanType;
 #[ts(text = "fixed")]
 pub struct FixedPtConstType;
 
-#[derive(Parser)]
+#[derive(Debug, Parser)]
 #[ts(text = "octet")]
 pub struct OctetType;
+
+#[derive(Debug)]
 pub struct IntegerType;
+
 pub enum SignedInt {
     SignedShortInt,
     SignedLongInt,
@@ -100,45 +103,53 @@ pub struct UnsignedLongLong;
 #[derive(Parser)]
 pub struct UInt64;
 
+#[derive(Debug)]
 pub enum FloatingPtType {
     Float(Float),
     Double(Double),
     LongDouble(LongDouble),
 }
 
-#[derive(Parser)]
+#[derive(Debug, Parser)]
 pub struct Float;
-#[derive(Parser)]
+
+#[derive(Debug, Parser)]
 pub struct Double;
-#[derive(Parser)]
+
+#[derive(Debug, Parser)]
 pub struct LongDouble;
 
-#[derive(Parser)]
+#[derive(Debug, Parser)]
 #[ts(text = "char")]
 pub struct CharType;
 
-#[derive(Parser)]
+#[derive(Debug, Parser)]
 #[ts(text = "wchar")]
 pub struct WideCharType;
 
+#[derive(Debug)]
 pub struct StringType {
     pub bound: Option<PositiveIntConst>,
 }
 
+#[derive(Debug)]
 pub struct WideStringType {
     pub bound: Option<PositiveIntConst>,
 }
 
+#[derive(Debug)]
 pub enum TypeSpec {
     SimpleTypeSpec(SimpleTypeSpec),
     TemplateTypeSpec(TemplateTypeSpec),
 }
 
+#[derive(Debug)]
 pub enum SimpleTypeSpec {
     BaseTypeSpec(BaseTypeSpec),
     ScopedName(ScopedName),
 }
 
+#[derive(Debug)]
 pub enum BaseTypeSpec {
     IntegerType(IntegerType),
     FloatingPtType(FloatingPtType),
@@ -151,15 +162,17 @@ pub enum BaseTypeSpec {
     ValueBaseType(ValueBaseType),
 }
 
-#[derive(Parser)]
+#[derive(Debug, Parser)]
 #[ts(text = "any")]
 pub struct AnyType;
 
+#[derive(Debug)]
 pub struct FixedPtType {
     pub integer: PositiveIntConst,
     pub fraction: PositiveIntConst,
 }
 
+#[derive(Debug)]
 pub enum TemplateTypeSpec {
     SequenceType(SequenceType),
     StringType(StringType),
@@ -168,16 +181,21 @@ pub enum TemplateTypeSpec {
     MapType(MapType),
 }
 
+#[derive(Debug)]
 pub struct SequenceType {
     pub ty: Box<TypeSpec>,
     pub len: Option<PositiveIntConst>,
 }
 
+#[derive(Debug)]
 pub struct MapType {
     pub key: Box<TypeSpec>,
     pub value: Box<TypeSpec>,
     pub len: Option<PositiveIntConst>,
 }
 
+#[derive(Debug)]
 pub struct ObjectType;
+
+#[derive(Debug)]
 pub struct ValueBaseType;

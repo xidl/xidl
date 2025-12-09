@@ -38,25 +38,32 @@ pub enum TypeDeclaratorInner {
     ConstrTypeDcl(ConstrTypeDcl),
 }
 
+#[derive(Debug)]
 pub struct AnyDeclarators(pub Vec<AnyDeclarator>);
 
+#[derive(Debug)]
 pub enum AnyDeclarator {
     SimpleDeclarator(SimpleDeclarator),
     ArrayDeclarator(ArrayDeclarator),
 }
 
+#[derive(Debug)]
 pub struct SimpleDeclarator(pub Identifier);
 
+#[derive(Debug)]
 pub enum Declarator {
     SimpleDeclarator(SimpleDeclarator),
     ArrayDeclarator(ArrayDeclarator),
 }
 
+#[derive(Debug)]
 pub struct Declarators(pub Vec<Declarator>);
 
+#[derive(Debug)]
 pub struct ArrayDeclarator {
     pub ident: Identifier,
     pub len: Vec<FixedArraySize>,
 }
 
+#[derive(Debug)]
 pub struct FixedArraySize(pub PositiveIntConst);
