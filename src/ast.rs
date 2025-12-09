@@ -1,16 +1,17 @@
-macro_rules! sub_mod {
-    ($name:ident) => {
-        mod $name;
-        #[allow(unused_imports)]
-        pub use $name::*;
-    };
-}
+mod base_types;
+pub use base_types::*;
 
-sub_mod!(base_types);
-sub_mod!(expr);
-sub_mod!(bitmask);
-sub_mod!(union);
-sub_mod!(typedef_dcl_imp);
+mod expr;
+pub use expr::*;
+
+mod bitmask;
+pub use bitmask::*;
+
+mod union;
+pub use union::*;
+
+mod typedef_dcl_imp;
+pub use typedef_dcl_imp::*;
 
 pub enum Definition {
     TypeDcl(TypeDcl),
