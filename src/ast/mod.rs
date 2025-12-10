@@ -2,6 +2,7 @@ mod base_types;
 pub use base_types::*;
 
 mod expr;
+use derive::Parser;
 pub use expr::*;
 
 mod bitmask;
@@ -13,7 +14,10 @@ pub use union::*;
 mod typedef_dcl_imp;
 pub use typedef_dcl_imp::*;
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
+pub struct Specification(pub Vec<Definition>);
+
+#[derive(Debug, Parser)]
 pub enum Definition {
     TypeDcl(TypeDcl),
 }
@@ -21,27 +25,45 @@ pub enum Definition {
 #[derive(Debug)]
 pub struct TypeDcl(pub Vec<TypeDclInner>);
 
-#[derive(Debug)]
+impl<'a> crate::parser::FromTreeSitter<'a> for TypeDcl {
+    fn from_node(
+        node: tree_sitter::Node<'a>,
+        ctx: &mut crate::parser::ParseContext<'a>,
+    ) -> crate::error::ParserResult<Self> {
+        use crate::parser::FromTreeSitter;
+        assert_eq!(node.kind_id(), derive::node_id!("type_dcl"));
+        let mut field_0 = vec![];
+        for ch in node.children(&mut node.walk()) {
+            if let Ok(node) = FromTreeSitter::from_node(ch, ctx) {
+                field_0.push(node)
+            }
+        }
+
+        Ok(Self(field_0))
+    }
+}
+
+#[derive(Debug, Parser)]
 pub enum TypeDclInner {
     ConstrTypeDcl(ConstrTypeDcl),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub enum ConstrTypeDcl {
     StructDcl(StructDcl),
-    UnionDcl(UnionDcl),
-    EnumDcl(EnumDcl),
-    BitsetDcl(BitsetDcl),
-    BitmaskDcl(BitmaskDcl),
+    // UnionDcl(UnionDcl),
+    // EnumDcl(EnumDcl),
+    // BitsetDcl(BitsetDcl),
+    // BitmaskDcl(BitmaskDcl),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub enum StructDcl {
     StructForwardDcl(StructForwardDcl),
-    StructDef(StructDef),
+    // StructDef(StructDef),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub struct StructForwardDcl {
     pub ident: Identifier,
 }
@@ -83,7 +105,8 @@ pub enum ConstType {
     SequenceType(SequenceType),
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Parser)]
+#[ts(text)]
 pub struct Identifier(String);
 
 #[derive(Debug)]

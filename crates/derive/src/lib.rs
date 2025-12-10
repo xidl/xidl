@@ -9,17 +9,13 @@ pub fn derive_parser(input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro]
-pub fn id(input: TokenStream) -> TokenStream {
+pub fn node_id(input: TokenStream) -> TokenStream {
     let name = syn::parse_macro_input!(input as syn::LitStr);
     let name = name.value();
 
     let l = &tree_sitter_idl::language();
-    let Some(id) = l.field_id_for_name(&name) else {
-        return syn::Error::new(Span::call_site(), format!("unknown field name: {name}"))
-            .into_compile_error()
-            .into();
-    };
-    let id = id.get() as usize;
+    let id = l.id_for_node_kind(&name, true);
+    let id = id as usize;
     let id = syn::LitInt::new(&id.to_string(), Span::call_site());
 
     quote! {

@@ -1,7 +1,5 @@
 use derive::Parser;
 
-use crate::parser::FromTreeSitter;
-
 use super::*;
 
 pub enum SignedShortInt {
@@ -31,7 +29,7 @@ pub enum SignedLongLongInt {
 }
 
 #[derive(Parser)]
-#[ts(text = "long long")]
+#[ts(name = "long long")]
 pub struct LongLong;
 
 #[derive(Parser)]
@@ -39,19 +37,19 @@ pub struct Int64;
 
 pub struct UnsignedInt;
 #[derive(Parser)]
-#[ts(text = "uint8")]
+#[ts(name = "uint8")]
 pub struct UnsignedTinyInt;
 
 #[derive(Debug, Parser)]
-#[ts(text = "boolean")]
+#[ts(name = "boolean")]
 pub struct BooleanType;
 
 #[derive(Parser)]
-#[ts(text = "fixed")]
+#[ts(name = "fixed")]
 pub struct FixedPtConstType;
 
 #[derive(Debug, Parser)]
-#[ts(text = "octet")]
+#[ts(name = "octet")]
 pub struct OctetType;
 
 #[derive(Debug)]
@@ -65,7 +63,7 @@ pub enum SignedInt {
 }
 
 #[derive(Parser)]
-#[ts(text = "int8")]
+#[ts(name = "int8")]
 pub struct SignedTinyInt;
 pub enum UnsignedShortInt {
     UnsignedShort(UnsignedShort),
@@ -73,7 +71,7 @@ pub enum UnsignedShortInt {
 }
 
 #[derive(Parser)]
-#[ts(text = "unsigned short")]
+#[ts(name = "unsigned short")]
 pub struct UnsignedShort;
 
 #[derive(Parser)]
@@ -85,7 +83,7 @@ pub enum UnsignedLongInt {
 }
 
 #[derive(Parser)]
-#[ts(text = "unsigned long")]
+#[ts(name = "unsigned long")]
 pub struct UnsignedLong;
 
 #[derive(Parser)]
@@ -97,7 +95,7 @@ pub enum UnsignedLongLongInt {
 }
 
 #[derive(Parser)]
-#[ts(text = "unsigned long long")]
+#[ts(name = "unsigned long long")]
 pub struct UnsignedLongLong;
 
 #[derive(Parser)]
@@ -120,11 +118,11 @@ pub struct Double;
 pub struct LongDouble;
 
 #[derive(Debug, Parser)]
-#[ts(text = "char")]
+#[ts(name = "char")]
 pub struct CharType;
 
 #[derive(Debug, Parser)]
-#[ts(text = "wchar")]
+#[ts(name = "wchar")]
 pub struct WideCharType;
 
 #[derive(Debug)]
@@ -163,7 +161,7 @@ pub enum BaseTypeSpec {
 }
 
 #[derive(Debug, Parser)]
-#[ts(text = "any")]
+#[ts(name = "any")]
 pub struct AnyType;
 
 #[derive(Debug)]

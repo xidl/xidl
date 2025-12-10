@@ -1,9 +1,10 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
+use convert_case::{Case, Casing};
 use darling::{FromDeriveInput, FromField, FromVariant};
 use proc_macro::TokenStream;
 use proc_macro2::Span;
-use quote::quote;
+use quote::{quote, ToTokens};
 use syn::{parse_macro_input, Ident, LitStr};
 
 pub fn tree_sitter_parser(input: TokenStream) -> TokenStream {
@@ -12,27 +13,65 @@ pub fn tree_sitter_parser(input: TokenStream) -> TokenStream {
         ident,
         data,
         kind,
+        name,
         text,
     } = DeriveInput::from_derive_input(&input).unwrap();
     let ident_str = LitStr::new(
-        &kind.unwrap_or_else(|| ident.to_string().to_lowercase().to_string()),
+        &kind.unwrap_or_else(|| ident.to_string().to_case(Case::Snake)),
         Span::call_site(),
     );
     match data {
-        darling::ast::Data::Enum(vec) => quote! {},
+        darling::ast::Data::Enum(vec) => {
+            let mut gen_variants = quote! {};
+            for variant in vec {
+                let variant_ident = &variant.ident;
+                let variant_str = LitStr::new(&variant_ident.to_string().to_case(Case::Snake), Span::call_site());
+
+                match &variant.fields.style {
+                    darling::ast::Style::Unit => {
+                        gen_variants.extend(quote! {
+                            derive::node_id!(#variant_str) => Ok(Self::#variant_ident),
+                        });
+                    }
+                    darling::ast::Style::Tuple => {
+                        let fields = &variant.fields.fields;
+                        if fields.len() == 1 {
+                            let field = &fields[0];
+                            gen_variants.extend(quote! {
+                                derive::node_id!(#variant_str) => {
+                                    Ok(Self::#variant_ident(crate::parser::FromTreeSitter::from_node(node, ctx)?))
+                                }
+                            });
+                        }
+                    }
+                    darling::ast::Style::Struct => {
+                    }
+                }
+            }
+            quote! {
+                impl<'a> crate::parser::FromTreeSitter<'a> for #ident {
+                    fn from_node(node: tree_sitter::Node<'a>, ctx: &mut crate::parser::ParseContext<'a>) -> crate::error::ParserResult<Self> {
+                        match node.kind_id() {
+                            #gen_variants
+                            _ => Err(crate::error::ParseError::UnexpectedNode(node.kind().to_string()))
+                        }
+                    }
+                }
+            }
+        },
         darling::ast::Data::Struct(fields) => {
             let mut gen_declare = quote! {};
             let mut gen_fields = quote! {};
             let mut gen_self = quote! {};
 
             // struct Type;
-            if fields.is_empty()  {
+            if fields.is_empty() {
                 let text_str = LitStr::new(
-                    &text.unwrap_or_else(||ident.to_string().to_lowercase().to_string()),
+                    &name.unwrap_or_else(||ident.to_string().to_case(Case::Snake)),
                     Span::call_site()
                 );
                 return quote! {
-                        impl<'a> FromTreeSitter<'_> for #ident {
+                        impl<'a> crate::parser::FromTreeSitter<'_> for #ident {
                             fn from_node(
                                 node: tree_sitter::Node<'_>,
                                 context: &mut crate::parser::ParseContext<'_>,
@@ -43,11 +82,87 @@ pub fn tree_sitter_parser(input: TokenStream) -> TokenStream {
                             }
                         }
                 }.into();
-
-
             }
 
+            if text {
+                 let text_str = LitStr::new(
+                    &name.unwrap_or_else(||ident.to_string().to_lowercase().to_string()),
+                    Span::call_site()
+                );
+                return quote! {
+                        impl<'a> crate::parser::FromTreeSitter<'_> for #ident {
+                            fn from_node(
+                                node: tree_sitter::Node<'_>,
+                                context: &mut crate::parser::ParseContext<'_>,
+                            ) -> crate::error::ParserResult<Self> {
+
+                                Ok(Self(node.utf8_text(context.source)?.into()  ))
+                            }
+                        }
+                }.into();
+            }
+
+            // Unit strcut
+
+            if fields.iter().any(|item|item.ident.is_none()) {
+                for (idx, field) in fields.iter().enumerate() {
+                    let name = field.ident.clone().unwrap_or_else(||{
+                        Ident::new(&format!("field_{idx}"), Span::call_site())
+                    });
+
+                    if field.is_vec() {
+                        gen_declare.extend(quote! {
+                            let mut #name = vec![];
+                        });
+                        gen_fields.extend(quote! {
+                            if let Ok(item) = crate::parser::FromTreeSitter::from_node(ch, ctx) {
+                                #name.push(item);
+                            }
+                        });
+                    } else {
+                        gen_declare.extend(quote! {
+                            let mut #name = None;
+                        });
+                        gen_fields.extend(quote! {
+                            if #name.is_none() {
+                                if let Ok(item) = crate::parser::FromTreeSitter::from_node(ch, ctx) {
+                                    #name = Some(item);
+                                }
+                            }
+                        });
+                    }
+
+                    if field.is_vec() {
+                        gen_self.extend(quote!{
+                            #name,
+                        });
+                    } else {
+                        gen_self.extend(quote!{
+                            #name.unwrap(),
+                        });
+                    }
+                }
+
+                return quote! {
+                    impl<'a> crate::parser::FromTreeSitter<'a> for #ident {
+                        fn from_node(node: tree_sitter::Node<'a>, ctx: &mut crate::parser::ParseContext<'a>) -> crate::error::ParserResult<Self> {
+                            #gen_declare
+                            for ch in node.children(&mut node.walk()) {
+                                #gen_fields
+                            }
+                            Ok(Self(
+                                #gen_self
+                            ))
+                        }
+                    }
+                }.into();
+            }else {
+
+
+
+
             for (idx, field) in fields.iter().enumerate() {
+
                 let name = field.ident.clone().unwrap_or_else(||{
                     Ident::new(&format!("field_{idx}"), Span::call_site())
                 });
@@ -58,16 +173,25 @@ pub fn tree_sitter_parser(input: TokenStream) -> TokenStream {
                     continue;
                 }
                 let name_str = LitStr::new(&name.to_string(), Span::call_site());
-                if field.is_text() {
-                    gen_declare.extend(quote! {
-                        let mut #name = None;
-                    });
+                gen_declare.extend(quote! {
+                    let mut #name = None;
+                });
+                 if field.is_text() {
                     gen_fields.extend(quote! {
-                        derive::id!(#name_str) => {
+                        derive::node_id!(#name_str) => {
                             #name = Some(ctx.node_text(&ch)?.to_string());
                         }
                     });
-                    if field.is_unit() {
+                }else {
+                let ty = field.ty.to_token_stream().to_string().to_case(Case::Snake);
+                let ty = LitStr::new(&ty, Span::call_site() );
+                    gen_fields.extend(quote!{
+                        derive::node_id!(#ty) => {
+                            #name = Some(crate::parser::FromTreeSitter::from_node(ch, ctx)?);
+                        }
+                    });
+                }
+                if field.is_unit() {
                         gen_self.extend(quote! {
                             #name.unwrap(),
                         });
@@ -76,12 +200,12 @@ pub fn tree_sitter_parser(input: TokenStream) -> TokenStream {
                             #name: #name.unwrap(),
                         });
                     }
-                }
+            }
             }
             quote! {
                 impl<'a> crate::parser::FromTreeSitter<'a> for #ident {
                     fn from_node(node: tree_sitter::Node<'a>, ctx: &mut crate::parser::ParseContext<'a>) -> crate::error::ParserResult<Self> {
-                        assert_eq!(node.kind_id(), derive::id!(#ident_str));
+                        assert_eq!(node.kind_id(), derive::node_id!(#ident_str));
                         #gen_declare
                         for ch in node.children(&mut node.walk()) {
                             match node.id() {
@@ -110,24 +234,30 @@ struct DeriveInput {
     kind: Option<String>,
 
     #[darling(default)]
-    text: Option<String>,
+    name: Option<String>,
+
+    #[darling(default)]
+    text: bool,
 }
 
 #[derive(FromVariant)]
 #[darling(attributes(ts))]
 struct DerivedVariant {
     ident: syn::Ident,
+    fields: darling::ast::Fields<DeriveField>,
     #[darling(default)]
     text: bool,
 }
 
-#[derive(FromField)]
+#[derive(Debug, FromField)]
 #[darling(attributes(ts))]
 struct DeriveField {
     ident: Option<syn::Ident>,
     ty: syn::Type,
     #[darling(default)]
     text: bool,
+    #[darling(default)]
+    id: Option<String>,
 }
 
 impl DeriveField {

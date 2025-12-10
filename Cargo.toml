@@ -7,7 +7,7 @@ edition = "2021"
 members = ["crates/derive"]
 
 [dependencies]
-tree-sitter = "=0.22.5"
+tree-sitter = "=0.25.0"
 tree-sitter-idl = "3.12.1"
 derive = { path = "crates/derive" }
 thiserror = "2.0"

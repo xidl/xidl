@@ -23,3 +23,19 @@ impl<'a> ParseContext<'a> {
 pub trait FromTreeSitter<'a>: Sized {
     fn from_node(node: Node<'a>, context: &mut ParseContext<'a>) -> ParserResult<Self>;
 }
+
+pub fn parser_text(text: &str) -> ParserResult<crate::ast::Specification> {
+    use crate::ast::Specification;
+
+    let mut parser = tree_sitter::Parser::new();
+    parser.set_language(&tree_sitter_idl::language()).unwrap();
+
+    let tree = parser.parse(text, None).ok_or_else(|| {
+        crate::error::ParseError::TreeSitterError("Failed to parse text".to_string())
+    })?;
+
+    let root_node = tree.root_node();
+    let mut context = ParseContext::new(text.as_bytes());
+
+    Specification::from_node(root_node, &mut context)
+}
