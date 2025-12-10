@@ -1,12 +1,12 @@
 use super::*;
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub struct EnumDcl {
     pub ident: Identifier,
     pub member: Vec<Enumerator>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub struct Enumerator {
     pub ident: Identifier,
 }

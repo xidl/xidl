@@ -1,0 +1,35 @@
+---
+source: tests/test-enum.rs
+expression: ast
+---
+Specification(
+    [
+        TypeDcl(
+            TypeDcl(
+                [
+                    ConstrTypeDcl(
+                        EnumDcl(
+                            EnumDcl {
+                                ident: Identifier(
+                                    "A",
+                                ),
+                                member: [
+                                    Enumerator {
+                                        ident: Identifier(
+                                            "B",
+                                        ),
+                                    },
+                                    Enumerator {
+                                        ident: Identifier(
+                                            "C",
+                                        ),
+                                    },
+                                ],
+                            },
+                        ),
+                    ),
+                ],
+            ),
+        ),
+    ],
+)

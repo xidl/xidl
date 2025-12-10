@@ -1,8 +1,0 @@
----
-source: tests/test-struct.rs
-assertion_line: 3
-expression: "idl_rs::parser::parser_text(\"\").unwrap()"
----
-Specification(
-    [],
-)

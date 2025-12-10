@@ -22,28 +22,11 @@ pub enum Definition {
     TypeDcl(TypeDcl),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub struct TypeDcl(pub Vec<TypeDclInner>);
 
-impl<'a> crate::parser::FromTreeSitter<'a> for TypeDcl {
-    fn from_node(
-        node: tree_sitter::Node<'a>,
-        ctx: &mut crate::parser::ParseContext<'a>,
-    ) -> crate::error::ParserResult<Self> {
-        use crate::parser::FromTreeSitter;
-        assert_eq!(node.kind_id(), derive::node_id!("type_dcl"));
-        let mut field_0 = vec![];
-        for ch in node.children(&mut node.walk()) {
-            if let Ok(node) = FromTreeSitter::from_node(ch, ctx) {
-                field_0.push(node)
-            }
-        }
-
-        Ok(Self(field_0))
-    }
-}
-
 #[derive(Debug, Parser)]
+#[ts(transparent)]
 pub enum TypeDclInner {
     ConstrTypeDcl(ConstrTypeDcl),
 }
@@ -52,7 +35,7 @@ pub enum TypeDclInner {
 pub enum ConstrTypeDcl {
     StructDcl(StructDcl),
     // UnionDcl(UnionDcl),
-    // EnumDcl(EnumDcl),
+    EnumDcl(EnumDcl),
     // BitsetDcl(BitsetDcl),
     // BitmaskDcl(BitmaskDcl),
 }
