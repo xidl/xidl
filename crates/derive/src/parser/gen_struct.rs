@@ -177,7 +177,7 @@ pub fn generate_variant(
                 }
             }
 
-            if field.is_vec() {
+            if field.is_vec() || field.is_option() {
                 gen_self.extend(quote! {
                     #name,
                 });

@@ -95,5 +95,5 @@ pub enum ConstType {
 #[ts(text)]
 pub struct Identifier(String);
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub struct PositiveIntConst(pub ConstExpr);

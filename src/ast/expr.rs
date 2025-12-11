@@ -67,7 +67,7 @@ pub enum UnaryOperator {
 
 #[derive(Debug, Parser)]
 pub struct ScopedName {
-    identifier: Vec<Identifier>,
+    pub identifier: Vec<Identifier>,
 }
 
 #[derive(Debug, Parser)]
@@ -75,11 +75,11 @@ pub enum Literal {
     IntegerLiteral(IntegerLiteral),
     FloatingPtLiteral,
     FixedPtLiteral,
-    CharLiteral(char),
-    WideCharacterLiteral,
-    StringLiteral(String),
-    WideStringLiteral,
-    BooleanLiteral(bool),
+    // CharLiteral(char),
+    // WideCharacterLiteral,
+    // StringLiteral(String),
+    // WideStringLiteral,
+    // BooleanLiteral(bool),
 }
 
 #[derive(Debug, Parser)]

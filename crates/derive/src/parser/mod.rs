@@ -80,6 +80,16 @@ impl DeriveField {
             _ => false,
         }
     }
+
+    pub fn is_option(&self) -> bool {
+        match self.ty {
+            syn::Type::Path(ref path) => {
+                path.path.segments.len() == 1 && path.path.segments[0].ident == "Option"
+            }
+            _ => false,
+        }
+    }
+
     pub fn inner_ty(&self) -> syn::Type {
         match &self.ty {
             syn::Type::Path(ref path) => {
