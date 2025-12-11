@@ -44,6 +44,11 @@ pub fn parser_text(text: &str) -> ParserResult<crate::ast::Specification> {
     })?;
 
     let root_node = tree.root_node();
+    if root_node.has_error() {
+        return Err(crate::error::ParseError::TreeSitterError(
+            "Failed to parse text".to_string(),
+        ));
+    }
     let mut context = ParseContext::new(text.as_bytes());
 
     Specification::from_node(root_node, &mut context)
