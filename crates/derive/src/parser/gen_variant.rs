@@ -1,7 +1,7 @@
 use crate::parser::{DeriveInput, DerivedVariant};
 use convert_case::{Case, Casing};
 use proc_macro2::Span;
-use quote::quote;
+use quote::{quote, ToTokens};
 use syn::LitStr;
 
 pub fn generate_variant(input: &DeriveInput, vec: &[DerivedVariant]) -> proc_macro2::TokenStream {
@@ -23,11 +23,20 @@ pub fn generate_variant(input: &DeriveInput, vec: &[DerivedVariant]) -> proc_mac
                 let fields = &variant.fields.fields;
                 if fields.len() == 1 {
                     let field = &fields[0];
-                    gen_variants.extend(quote! {
-                                derive::node_id!(#variant_str) => {
-                                    Ok(Self::#variant_ident(crate::parser::FromTreeSitter::from_node(node, ctx)?))
-                                }
-                            });
+                    let is_text = field.text || field.ty.to_token_stream().to_string() == "String";
+                    if is_text {
+                        gen_variants.extend(quote! {
+                            derive::node_id!(#variant_str) => {
+                                Ok(Self::#variant_ident(ctx.node_text(&node)?.to_string()))
+                            }
+                        });
+                    } else {
+                        gen_variants.extend(quote! {
+                            derive::node_id!(#variant_str) => {
+                                Ok(Self::#variant_ident(crate::parser::FromTreeSitter::from_node(node, ctx)?))
+                            }
+                        });
+                    }
                 }
             }
             darling::ast::Style::Struct => {}

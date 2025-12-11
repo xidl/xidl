@@ -20,6 +20,7 @@ pub struct Specification(pub Vec<Definition>);
 #[derive(Debug, Parser)]
 pub enum Definition {
     TypeDcl(TypeDcl),
+    ConstDcl(ConstDcl),
 }
 
 #[derive(Debug, Parser)]
@@ -68,12 +69,14 @@ pub struct Member {
 #[derive(Debug)]
 pub struct Default(pub ConstExpr);
 
+#[derive(Debug, Parser)]
 pub struct ConstDcl {
     pub ty: ConstType,
     pub ident: Identifier,
     pub value: ConstExpr,
 }
 
+#[derive(Debug, Parser)]
 pub enum ConstType {
     IntegerType(IntegerType),
     FloatingPtType(FloatingPtType),

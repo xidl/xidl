@@ -1,39 +1,43 @@
-#[derive(Debug)]
+use derive::Parser;
+
+use crate::ast::Identifier;
+
+#[derive(Debug, Parser)]
 pub struct ConstExpr(pub OrExpr);
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub enum OrExpr {
     XorExpr(XorExpr),
     OrExpr(Box<OrExpr>, XorExpr),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub enum XorExpr {
     AndExpr(AndExpr),
     XorExpr(Box<XorExpr>, AndExpr),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub enum AndExpr {
     ShiftExpr(ShiftExpr),
     AndExpr(Box<AndExpr>, ShiftExpr),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub enum ShiftExpr {
     AdditiveExpr(AddExpr),
     LeftShiftExpr(Box<ShiftExpr>, AddExpr),
     RightShiftExpr(Box<ShiftExpr>, AddExpr),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub enum AddExpr {
     MultExpr(MultExpr),
     AddExpr(Box<AddExpr>, MultExpr),
     SubExpr(Box<AddExpr>, MultExpr),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub enum MultExpr {
     UnaryExpr(UnaryExpr),
     MultExpr(Box<MultExpr>, UnaryExpr),
@@ -41,30 +45,32 @@ pub enum MultExpr {
     ModExpr(Box<MultExpr>, UnaryExpr),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub enum UnaryExpr {
     UnaryExpr(UnaryOperator, PrimaryExpr),
     PrimaryExpr(PrimaryExpr),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub enum PrimaryExpr {
     ScopedName(ScopedName),
     Literal(Literal),
     ConstExpr(Box<ConstExpr>),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub enum UnaryOperator {
     Add,
     Sub,
     Not,
 }
 
-#[derive(Debug)]
-pub struct ScopedName(pub String);
+#[derive(Debug, Parser)]
+pub struct ScopedName {
+    identifier: Vec<Identifier>,
+}
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub enum Literal {
     IntegerLiteral(IntegerLiteral),
     FloatingPtLiteral,
@@ -76,7 +82,7 @@ pub enum Literal {
     BooleanLiteral(bool),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub enum IntegerLiteral {
     BinNumber(String),
     OctNumber(String),

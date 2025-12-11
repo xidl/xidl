@@ -44,7 +44,7 @@ pub struct UnsignedTinyInt;
 #[ts(name = "boolean")]
 pub struct BooleanType;
 
-#[derive(Parser)]
+#[derive(Debug, Parser)]
 #[ts(name = "fixed")]
 pub struct FixedPtConstType;
 
@@ -52,7 +52,7 @@ pub struct FixedPtConstType;
 #[ts(name = "octet")]
 pub struct OctetType;
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub struct IntegerType;
 
 pub enum SignedInt {
@@ -101,7 +101,7 @@ pub struct UnsignedLongLong;
 #[derive(Parser)]
 pub struct UInt64;
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub enum FloatingPtType {
     Float(Float),
     Double(Double),
@@ -125,29 +125,29 @@ pub struct CharType;
 #[ts(name = "wchar")]
 pub struct WideCharType;
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub struct StringType {
     pub bound: Option<PositiveIntConst>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub struct WideStringType {
     pub bound: Option<PositiveIntConst>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub enum TypeSpec {
     SimpleTypeSpec(SimpleTypeSpec),
     TemplateTypeSpec(TemplateTypeSpec),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub enum SimpleTypeSpec {
     BaseTypeSpec(BaseTypeSpec),
     ScopedName(ScopedName),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub enum BaseTypeSpec {
     IntegerType(IntegerType),
     FloatingPtType(FloatingPtType),
@@ -164,13 +164,13 @@ pub enum BaseTypeSpec {
 #[ts(name = "any")]
 pub struct AnyType;
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub struct FixedPtType {
     pub integer: PositiveIntConst,
     pub fraction: PositiveIntConst,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub enum TemplateTypeSpec {
     SequenceType(SequenceType),
     StringType(StringType),
@@ -179,21 +179,21 @@ pub enum TemplateTypeSpec {
     MapType(MapType),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub struct SequenceType {
     pub ty: Box<TypeSpec>,
     pub len: Option<PositiveIntConst>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub struct MapType {
     pub key: Box<TypeSpec>,
     pub value: Box<TypeSpec>,
     pub len: Option<PositiveIntConst>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub struct ObjectType;
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub struct ValueBaseType;

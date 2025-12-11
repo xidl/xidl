@@ -24,6 +24,15 @@ pub trait FromTreeSitter<'a>: Sized {
     fn from_node(node: Node<'a>, context: &mut ParseContext<'a>) -> ParserResult<Self>;
 }
 
+impl<'a, T> FromTreeSitter<'a> for Box<T>
+where
+    T: FromTreeSitter<'a>,
+{
+    fn from_node(node: Node<'a>, context: &mut ParseContext<'a>) -> ParserResult<Self> {
+        Ok(Box::new(T::from_node(node, context)?))
+    }
+}
+
 pub fn parser_text(text: &str) -> ParserResult<crate::ast::Specification> {
     use crate::ast::Specification;
 
