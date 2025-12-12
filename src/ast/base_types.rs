@@ -53,8 +53,11 @@ pub struct FixedPtConstType;
 pub struct OctetType;
 
 #[derive(Debug, Parser)]
-pub struct IntegerType;
+pub enum IntegerType {
+    SignedInt(SignedInt),
+}
 
+#[derive(Debug, Parser)]
 pub enum SignedInt {
     SignedShortInt,
     SignedLongInt,

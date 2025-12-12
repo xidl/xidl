@@ -9,6 +9,9 @@ pub fn generate_variant(
     input: &DeriveInput,
     fields: &Fields<DeriveField>,
 ) -> proc_macro2::TokenStream {
+    // if fields.transparent | count > 1 => panic
+    // if fields.transparent | count > 1 && fields.last.transparent == false => panic
+
     let debug = input.ident == "EnumDcl";
     let mut gen_declare = quote! {};
     let mut gen_fields = quote! {};
@@ -75,13 +78,24 @@ pub fn generate_variant(
                 .clone()
                 .unwrap_or_else(|| Ident::new(&format!("field_{idx}"), Span::call_site()));
 
+            let ts_node_name = field.ts_node_name();
+            let condition = if field.transparent {
+                quote! {
+                    _
+                }
+            } else {
+                quote! {
+                    derive::node_id!(#ts_node_name)
+                }
+            };
+
             if field.is_vec() {
                 gen_declare.extend(quote! {
                     let mut #name = vec![];
                 });
                 gen_fields.extend(quote! {
-                    if let Ok(item) = crate::parser::FromTreeSitter::from_node(ch, ctx) {
-                        #name.push(item);
+                    #condition => {
+                        #name.push(crate::parser::FromTreeSitter::from_node(ch, ctx)?);
                     }
                 });
             } else {
@@ -89,10 +103,8 @@ pub fn generate_variant(
                     let mut #name = None;
                 });
                 gen_fields.extend(quote! {
-                    if #name.is_none() {
-                        if let Ok(item) = crate::parser::FromTreeSitter::from_node(ch, ctx) {
-                            #name = Some(item);
-                        }
+                    #condition => {
+                        #name = Some(crate::parser::FromTreeSitter::from_node(ch, ctx)?);
                     }
                 });
             }
@@ -108,12 +120,24 @@ pub fn generate_variant(
             }
         }
 
+        let has_transparent = fields.iter().any(|f| f.transparent);
+        let default_branch = if has_transparent {
+            quote! {}
+        } else {
+            quote! {
+                _ => {}
+            }
+        };
+
         return quote! {
             impl<'a> crate::parser::FromTreeSitter<'a> for #ident {
                 fn from_node(node: tree_sitter::Node<'a>, ctx: &mut crate::parser::ParseContext<'a>) -> crate::error::ParserResult<Self> {
                     #gen_declare
                     for ch in node.children(&mut node.walk()) {
-                        #gen_fields
+                        match ch.kind_id() {
+                            #gen_fields
+                            #default_branch
+                        }
                     }
                     Ok(Self(
                         #gen_self

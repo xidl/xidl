@@ -8,6 +8,7 @@ use convert_case::{Case, Casing};
 use darling::{FromDeriveInput, FromField, FromVariant};
 use proc_macro::TokenStream;
 use proc_macro2::Span;
+use quote::ToTokens;
 use syn::{parse_macro_input, LitStr};
 
 use crate::parser::gen_variant::generate_variant;
@@ -66,9 +67,29 @@ struct DeriveField {
     text: bool,
     #[darling(default)]
     id: Option<String>,
+    #[darling(default)]
+    transparent: bool,
 }
 
 impl DeriveField {
+    pub fn ts_node_name(&self) -> LitStr {
+        let mut id = self.id.clone().unwrap_or_else(|| {
+            self.ident
+                .clone()
+                .map(|v| v.to_string())
+                .unwrap_or_else(|| {
+                    self.inner_ty()
+                        .to_token_stream()
+                        .to_string()
+                        .to_case(Case::Snake)
+                })
+        });
+        if self.transparent {
+            id = "-".to_string();
+        }
+        LitStr::new(&id, Span::call_site())
+    }
+
     pub fn is_unit(&self) -> bool {
         self.ident.is_none()
     }
@@ -91,6 +112,9 @@ impl DeriveField {
     }
 
     pub fn inner_ty(&self) -> syn::Type {
+        if !self.is_vec() {
+            return self.ty.clone();
+        }
         match &self.ty {
             syn::Type::Path(ref path) => {
                 let args = &path.path.segments[0].arguments;

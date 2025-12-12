@@ -27,13 +27,13 @@ pub fn generate_variant(input: &DeriveInput, vec: &[DerivedVariant]) -> proc_mac
                     if is_text {
                         gen_variants.extend(quote! {
                             derive::node_id!(#variant_str) => {
-                                Ok(Self::#variant_ident(ctx.node_text(&node)?.to_string()))
+                                Ok(Self::#variant_ident(ctx.node_text(&ch)?.to_string()))
                             }
                         });
                     } else {
                         gen_variants.extend(quote! {
                             derive::node_id!(#variant_str) => {
-                                Ok(Self::#variant_ident(crate::parser::FromTreeSitter::from_node(node, ctx)?))
+                                Ok(Self::#variant_ident(crate::parser::FromTreeSitter::from_node(ch, ctx)?))
                             }
                         });
                     }
@@ -49,6 +49,7 @@ pub fn generate_variant(input: &DeriveInput, vec: &[DerivedVariant]) -> proc_mac
         quote! {
             impl<'a> crate::parser::FromTreeSitter<'a> for #ident {
                 fn from_node(node: tree_sitter::Node<'a>, ctx: &mut crate::parser::ParseContext<'a>) -> crate::error::ParserResult<Self> {
+                    let ch = node;
                     match node.kind_id() {
                         #gen_variants
                         _ => Err(crate::error::ParseError::UnexpectedNode(node.kind().to_string()))
@@ -60,10 +61,10 @@ pub fn generate_variant(input: &DeriveInput, vec: &[DerivedVariant]) -> proc_mac
         quote! {
             impl<'a> crate::parser::FromTreeSitter<'a> for #ident {
                 fn from_node(node: tree_sitter::Node<'a>, ctx: &mut crate::parser::ParseContext<'a>) -> crate::error::ParserResult<Self> {
-                    for node in node.children(&mut node.walk()) {
-                        return match node.kind_id() {
+                    for ch in node.children(&mut node.walk()) {
+                        return match ch.kind_id() {
                             #gen_variants
-                            _ => Err(crate::error::ParseError::UnexpectedNode(node.kind().to_string()))
+                            _ => Err(crate::error::ParseError::UnexpectedNode(format!("parent: {}, got: {}", node.kind(), ch.kind())))
                         }
                     }
                     unreachable!()

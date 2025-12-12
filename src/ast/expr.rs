@@ -25,7 +25,7 @@ pub enum AndExpr {
 
 #[derive(Debug, Parser)]
 pub enum ShiftExpr {
-    AdditiveExpr(AddExpr),
+    AddExpr(AddExpr),
     LeftShiftExpr(Box<ShiftExpr>, AddExpr),
     RightShiftExpr(Box<ShiftExpr>, AddExpr),
 }

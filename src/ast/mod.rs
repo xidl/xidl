@@ -24,7 +24,7 @@ pub enum Definition {
 }
 
 #[derive(Debug, Parser)]
-pub struct TypeDcl(pub Vec<TypeDclInner>);
+pub struct TypeDcl(#[ts(transparent)] pub Vec<TypeDclInner>);
 
 #[derive(Debug, Parser)]
 #[ts(transparent)]

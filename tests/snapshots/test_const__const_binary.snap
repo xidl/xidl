@@ -1,0 +1,43 @@
+---
+source: tests/test-const.rs
+expression: ast
+---
+Specification(
+    [
+        ConstDcl(
+            ConstDcl {
+                ty: IntegerType(
+                    SignedInt(
+                        SignedLongInt,
+                    ),
+                ),
+                ident: Identifier(
+                    "a",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        BinNumber(
+                                                            "0b10",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+    ],
+)
