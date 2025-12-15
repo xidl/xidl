@@ -21,3 +21,17 @@ fn test_const_hex() {
     let ast = idl_rs::parser::parser_text("const int32 a = 0xff;").unwrap();
     insta::assert_debug_snapshot!(ast)
 }
+
+#[test]
+fn test_const_scoped_name() {
+    let ast = idl_rs::parser::parser_text(
+        r"
+            const A a = 0xff;
+            const ::A a = 0;
+            const A::B a = 0;
+            const ::A::B::C a = 0;
+        ",
+    )
+    .unwrap();
+    insta::assert_debug_snapshot!(ast)
+}
