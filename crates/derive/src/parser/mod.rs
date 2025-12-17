@@ -111,12 +111,10 @@ impl DeriveField {
             return LitStr::new(&ty, Span::call_site());
         }
         let mut id = self.id.clone().unwrap_or_else(|| {
-            self.id.clone().unwrap_or_else(|| {
-                self.inner_ty()
-                    .to_token_stream()
-                    .to_string()
-                    .to_case(Case::Snake)
-            })
+            self.inner_ty()
+                .to_token_stream()
+                .to_string()
+                .to_case(Case::Snake)
         });
         if self.transparent {
             id = "-".to_string();
@@ -146,7 +144,7 @@ impl DeriveField {
     }
 
     pub fn inner_ty(&self) -> syn::Type {
-        if !self.is_vec() {
+        if !self.is_vec() && !self.is_option() && !self.is_box() {
             return self.ty.clone();
         }
         match &self.ty {

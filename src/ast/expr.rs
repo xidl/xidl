@@ -97,7 +97,7 @@ pub struct ScopedName {
 #[derive(Debug, Parser)]
 pub enum Literal {
     IntegerLiteral(IntegerLiteral),
-    // FloatingPtLiteral,
+    FloatingPtLiteral(FloatingPtLiteral),
     // FixedPtLiteral,
     // CharLiteral(char),
     // WideCharacterLiteral,
@@ -113,3 +113,52 @@ pub enum IntegerLiteral {
     DecNumber(String),
     HexNumber(String),
 }
+
+#[derive(Debug)]
+pub struct FloatingPtLiteral {
+    pub sign: Option<IntegerSign>,
+    pub integer: DecNumber,
+    pub fraction: DecNumber,
+}
+
+impl<'a> crate::parser::FromTreeSitter<'a> for FloatingPtLiteral {
+    fn from_node(
+        node: tree_sitter::Node<'a>,
+        ctx: &mut crate::parser::ParseContext<'a>,
+    ) -> crate::error::ParserResult<Self> {
+        assert_eq!(node.kind_id(), derive::node_id!("floating_pt_literal"));
+        let mut sign = None;
+        let mut integer = None;
+        let mut fraction = None;
+        for ch in node.children(&mut node.walk()) {
+            match ch.kind_id() {
+                derive::node_id!("integer_sign") => {
+                    sign = Some(crate::parser::FromTreeSitter::from_node(ch, ctx)?);
+                }
+                derive::node_id!("dec_number") => {
+                    let inter = crate::parser::FromTreeSitter::from_node(ch, ctx)?;
+                    if integer.is_none() {
+                        integer = Some(inter);
+                    } else {
+                        fraction = Some(inter);
+                    }
+                }
+
+                _ => {}
+            }
+        }
+        Ok(Self {
+            sign,
+            integer: integer.unwrap(),
+            fraction: fraction.unwrap(),
+        })
+    }
+}
+
+#[derive(Debug, Parser)]
+#[ts(transparent)]
+pub struct IntegerSign(pub String);
+
+#[derive(Debug, Parser)]
+#[ts(transparent)]
+pub struct DecNumber(pub String);

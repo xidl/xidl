@@ -252,5 +252,44 @@ Specification(
                 ),
             },
         ),
+        ConstDcl(
+            ConstDcl {
+                ty: FloatingPtType(
+                    FloatingPtType,
+                ),
+                ident: Identifier(
+                    "f",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    FloatingPtLiteral(
+                                                        FloatingPtLiteral {
+                                                            sign: None,
+                                                            integer: DecNumber(
+                                                                "13",
+                                                            ),
+                                                            fraction: DecNumber(
+                                                                "1",
+                                                            ),
+                                                        },
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
     ],
 )
