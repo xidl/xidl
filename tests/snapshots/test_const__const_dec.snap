@@ -8,7 +8,9 @@ Specification(
             ConstDcl {
                 ty: IntegerType(
                     SignedInt(
-                        SignedLongInt,
+                        SignedLongInt(
+                            SignedLongInt,
+                        ),
                     ),
                 ),
                 ident: Identifier(

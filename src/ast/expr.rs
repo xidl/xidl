@@ -58,23 +58,47 @@ pub enum PrimaryExpr {
     ConstExpr(Box<ConstExpr>),
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug)]
 pub enum UnaryOperator {
     Add,
     Sub,
     Not,
 }
 
+impl<'a> crate::parser::FromTreeSitter<'a> for UnaryOperator {
+    fn from_node(
+        node: tree_sitter::Node<'a>,
+        ctx: &mut crate::parser::ParseContext<'a>,
+    ) -> crate::error::ParserResult<Self> {
+        #[allow(clippy::never_loop)]
+        for ch in node.children(&mut node.walk()) {
+            return match ctx.node_text(&ch)? {
+                "+" => Ok(Self::Add),
+                "-" => Ok(Self::Sub),
+                "~" => Ok(Self::Not),
+                _ => Err(crate::error::ParseError::UnexpectedNode(format!(
+                    "parent: {}, got: {}",
+                    node.kind(),
+                    ch.kind()
+                ))),
+            };
+        }
+        unreachable!()
+    }
+}
+
 #[derive(Debug, Parser)]
 pub struct ScopedName {
+    #[ts(id = "scoped_name")]
+    pub scoped_name: Option<Box<ScopedName>>,
     pub identifier: Vec<Identifier>,
 }
 
 #[derive(Debug, Parser)]
 pub enum Literal {
     IntegerLiteral(IntegerLiteral),
-    FloatingPtLiteral,
-    FixedPtLiteral,
+    // FloatingPtLiteral,
+    // FixedPtLiteral,
     // CharLiteral(char),
     // WideCharacterLiteral,
     // StringLiteral(String),

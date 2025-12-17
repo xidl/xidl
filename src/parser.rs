@@ -24,6 +24,12 @@ pub trait FromTreeSitter<'a>: Sized {
     fn from_node(node: Node<'a>, context: &mut ParseContext<'a>) -> ParserResult<Self>;
 }
 
+impl<'a> FromTreeSitter<'a> for String {
+    fn from_node(node: Node<'a>, context: &mut ParseContext<'a>) -> ParserResult<Self> {
+        Ok(context.node_text(&node)?.to_string())
+    }
+}
+
 impl<'a, T> FromTreeSitter<'a> for Box<T>
 where
     T: FromTreeSitter<'a>,

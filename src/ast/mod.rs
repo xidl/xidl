@@ -92,7 +92,7 @@ pub enum ConstType {
 }
 
 #[derive(Debug, Clone, PartialEq, Parser)]
-#[ts(text)]
+#[ts(transparent)]
 pub struct Identifier(String);
 
 #[derive(Debug, Parser)]

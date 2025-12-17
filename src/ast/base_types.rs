@@ -2,20 +2,19 @@ use derive::Parser;
 
 use super::*;
 
-pub enum SignedShortInt {
-    Short(Short),
-    Int16(Int16),
-}
+#[derive(Debug, Parser)]
+#[ts(mark)]
+pub struct SignedShortInt;
+
 #[derive(Parser)]
 pub struct Short;
 
 #[derive(Parser)]
 pub struct Int16;
 
-pub enum SignedLongInt {
-    Long(Long),
-    Int32(Int32),
-}
+#[derive(Debug, Parser)]
+#[ts(mark)]
+pub struct SignedLongInt;
 
 #[derive(Parser)]
 pub struct Long;
@@ -23,17 +22,8 @@ pub struct Long;
 #[derive(Parser)]
 pub struct Int32;
 
-pub enum SignedLongLongInt {
-    LongLong(LongLong),
-    Int64(Int64),
-}
-
-#[derive(Parser)]
-#[ts(name = "long long")]
-pub struct LongLong;
-
-#[derive(Parser)]
-pub struct Int64;
+#[derive(Debug, Parser)]
+pub struct SignedLongLongInt;
 
 pub struct UnsignedInt;
 #[derive(Parser)]
@@ -59,15 +49,16 @@ pub enum IntegerType {
 
 #[derive(Debug, Parser)]
 pub enum SignedInt {
-    SignedShortInt,
-    SignedLongInt,
-    SignedLongLongInt,
-    SignedTinyInt,
+    SignedShortInt(SignedShortInt),
+    SignedLongInt(SignedLongInt),
+    SignedLongLongInt(SignedLongLongInt),
+    SignedTinyInt(SignedTinyInt),
 }
 
-#[derive(Parser)]
+#[derive(Debug, Parser)]
 #[ts(name = "int8")]
 pub struct SignedTinyInt;
+
 pub enum UnsignedShortInt {
     UnsignedShort(UnsignedShort),
     UInt16(UInt16),
@@ -105,20 +96,8 @@ pub struct UnsignedLongLong;
 pub struct UInt64;
 
 #[derive(Debug, Parser)]
-pub enum FloatingPtType {
-    Float(Float),
-    Double(Double),
-    LongDouble(LongDouble),
-}
-
-#[derive(Debug, Parser)]
-pub struct Float;
-
-#[derive(Debug, Parser)]
-pub struct Double;
-
-#[derive(Debug, Parser)]
-pub struct LongDouble;
+#[ts(mark)]
+pub struct FloatingPtType;
 
 #[derive(Debug, Parser)]
 #[ts(name = "char")]

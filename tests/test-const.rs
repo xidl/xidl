@@ -30,6 +30,7 @@ fn test_const_scoped_name() {
             const ::A a = 0;
             const A::B a = 0;
             const ::A::B::C a = 0;
+            const M::Size MYSIZE = M::medium;
         ",
     )
     .unwrap();

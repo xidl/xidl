@@ -11,23 +11,10 @@ use proc_macro2::Span;
 use quote::ToTokens;
 use syn::{parse_macro_input, LitStr};
 
-use crate::parser::gen_variant::generate_variant;
-
 pub fn tree_sitter_parser(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as syn::DeriveInput);
     let input = DeriveInput::from_derive_input(&input).unwrap();
-    let ident_str = LitStr::new(
-        &input
-            .kind
-            .clone()
-            .unwrap_or_else(|| input.ident.to_string().to_case(Case::Snake)),
-        Span::call_site(),
-    );
-    match &input.data {
-        darling::ast::Data::Enum(vec) => generate_variant(&input, vec),
-        darling::ast::Data::Struct(fields) => gen_struct::generate_variant(&input, fields),
-    }
-    .into()
+    input.generate().into()
 }
 
 #[derive(FromDeriveInput)]
@@ -47,6 +34,23 @@ struct DeriveInput {
     /// enum
     #[darling(default)]
     transparent: bool,
+
+    #[darling(default)]
+    mark: bool,
+}
+
+impl DeriveInput {
+    pub fn ts_node_name(&self) -> LitStr {
+        let name = self.ident.to_string().to_case(Case::Snake);
+        LitStr::new(&name, self.ident.span())
+    }
+
+    pub fn generate(&self) -> proc_macro2::TokenStream {
+        match &self.data {
+            darling::ast::Data::Enum(fields) => self.generate_variant(fields),
+            darling::ast::Data::Struct(fields) => self.generate_struct(fields),
+        }
+    }
 }
 
 #[derive(FromVariant)]
@@ -54,8 +58,32 @@ struct DeriveInput {
 struct DerivedVariant {
     ident: syn::Ident,
     fields: darling::ast::Fields<DeriveField>,
+    /// enum A {
+    ///     #[text]
+    ///     field(String) => node_id!(field) =>  Ok(Self::A(field.node_text()))
+    /// }
+    ///
+    /// enum A {
+    ///     #[text]
+    ///     B => node => Ok(Self::B)
+    /// }
+    ///
     #[darling(default)]
     text: bool,
+    #[darling(default)]
+    id: Option<String>,
+}
+
+impl DerivedVariant {
+    #[inline(always)]
+    pub fn ts_node_name(&self) -> LitStr {
+        let id = self.id.clone().unwrap_or_else(|| {
+            // FIXME: fix field(Ty)
+            self.ident.to_string().to_case(Case::Snake)
+        });
+
+        LitStr::new(&id, Span::call_site())
+    }
 }
 
 #[derive(Debug, FromField)]
@@ -72,17 +100,23 @@ struct DeriveField {
 }
 
 impl DeriveField {
+    #[inline(always)]
     pub fn ts_node_name(&self) -> LitStr {
+        if self.is_vec() {
+            let ty = self
+                .inner_ty()
+                .to_token_stream()
+                .to_string()
+                .to_case(Case::Snake);
+            return LitStr::new(&ty, Span::call_site());
+        }
         let mut id = self.id.clone().unwrap_or_else(|| {
-            self.ident
-                .clone()
-                .map(|v| v.to_string())
-                .unwrap_or_else(|| {
-                    self.inner_ty()
-                        .to_token_stream()
-                        .to_string()
-                        .to_case(Case::Snake)
-                })
+            self.id.clone().unwrap_or_else(|| {
+                self.inner_ty()
+                    .to_token_stream()
+                    .to_string()
+                    .to_case(Case::Snake)
+            })
         });
         if self.transparent {
             id = "-".to_string();
@@ -179,9 +213,4 @@ impl DeriveField {
             _ => None,
         }
     }
-}
-
-fn query_id_by_name(name: &str) -> Option<u16> {
-    let ts = &tree_sitter_idl::language();
-    Some(ts.field_id_for_name(name)?.get())
 }

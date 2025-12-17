@@ -1,0 +1,256 @@
+---
+source: tests/test-const.rs
+expression: ast
+---
+Specification(
+    [
+        ConstDcl(
+            ConstDcl {
+                ty: ScopedName(
+                    ScopedName {
+                        scoped_name: None,
+                        identifier: [
+                            Identifier(
+                                "A",
+                            ),
+                        ],
+                    },
+                ),
+                ident: Identifier(
+                    "a",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        HexNumber(
+                                                            "0xff",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: ScopedName(
+                    ScopedName {
+                        scoped_name: None,
+                        identifier: [
+                            Identifier(
+                                "A",
+                            ),
+                        ],
+                    },
+                ),
+                ident: Identifier(
+                    "a",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        DecNumber(
+                                                            "0",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: ScopedName(
+                    ScopedName {
+                        scoped_name: Some(
+                            ScopedName {
+                                scoped_name: None,
+                                identifier: [
+                                    Identifier(
+                                        "A",
+                                    ),
+                                ],
+                            },
+                        ),
+                        identifier: [
+                            Identifier(
+                                "B",
+                            ),
+                        ],
+                    },
+                ),
+                ident: Identifier(
+                    "a",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        DecNumber(
+                                                            "0",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: ScopedName(
+                    ScopedName {
+                        scoped_name: Some(
+                            ScopedName {
+                                scoped_name: Some(
+                                    ScopedName {
+                                        scoped_name: None,
+                                        identifier: [
+                                            Identifier(
+                                                "A",
+                                            ),
+                                        ],
+                                    },
+                                ),
+                                identifier: [
+                                    Identifier(
+                                        "B",
+                                    ),
+                                ],
+                            },
+                        ),
+                        identifier: [
+                            Identifier(
+                                "C",
+                            ),
+                        ],
+                    },
+                ),
+                ident: Identifier(
+                    "a",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        DecNumber(
+                                                            "0",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: ScopedName(
+                    ScopedName {
+                        scoped_name: Some(
+                            ScopedName {
+                                scoped_name: None,
+                                identifier: [
+                                    Identifier(
+                                        "M",
+                                    ),
+                                ],
+                            },
+                        ),
+                        identifier: [
+                            Identifier(
+                                "Size",
+                            ),
+                        ],
+                    },
+                ),
+                ident: Identifier(
+                    "MYSIZE",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        scoped_name: Some(
+                                                            ScopedName {
+                                                                scoped_name: None,
+                                                                identifier: [
+                                                                    Identifier(
+                                                                        "M",
+                                                                    ),
+                                                                ],
+                                                            },
+                                                        ),
+                                                        identifier: [
+                                                            Identifier(
+                                                                "medium",
+                                                            ),
+                                                        ],
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+    ],
+)
