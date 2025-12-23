@@ -23,11 +23,20 @@ pub struct Long;
 pub struct Int32;
 
 #[derive(Debug, Parser)]
+#[ts(id = "signed_longlong_int")]
 pub struct SignedLongLongInt;
 
-pub struct UnsignedInt;
-#[derive(Parser)]
-#[ts(name = "uint8")]
+#[derive(Debug, Parser)]
+pub enum UnsignedInt {
+    UnsignedShortInt(UnsignedShortInt),
+    UnsignedLongInt(UnsignedLongInt),
+    #[ts(id = "unsigned_longlong_int")]
+    UnsignedLongLongInt(UnsignedLongLongInt),
+    UnsignedTinyInt(UnsignedTinyInt),
+}
+
+#[derive(Debug, Parser)]
+#[ts(mark)]
 pub struct UnsignedTinyInt;
 
 #[derive(Debug, Parser)]
@@ -45,12 +54,14 @@ pub struct OctetType;
 #[derive(Debug, Parser)]
 pub enum IntegerType {
     SignedInt(SignedInt),
+    UnsignedInt(UnsignedInt),
 }
 
 #[derive(Debug, Parser)]
 pub enum SignedInt {
     SignedShortInt(SignedShortInt),
     SignedLongInt(SignedLongInt),
+    #[ts(id = "signed_longlong_int")]
     SignedLongLongInt(SignedLongLongInt),
     SignedTinyInt(SignedTinyInt),
 }
@@ -59,10 +70,9 @@ pub enum SignedInt {
 #[ts(name = "int8")]
 pub struct SignedTinyInt;
 
-pub enum UnsignedShortInt {
-    UnsignedShort(UnsignedShort),
-    UInt16(UInt16),
-}
+#[derive(Debug, Parser)]
+#[ts(mark)]
+pub struct UnsignedShortInt;
 
 #[derive(Parser)]
 #[ts(name = "unsigned short")]
@@ -71,10 +81,9 @@ pub struct UnsignedShort;
 #[derive(Parser)]
 pub struct UInt16;
 
-pub enum UnsignedLongInt {
-    UnsignedLong(UnsignedLong),
-    UInt32(UInt32),
-}
+#[derive(Debug, Parser)]
+#[ts(mark)]
+pub struct UnsignedLongInt;
 
 #[derive(Parser)]
 #[ts(name = "unsigned long")]
@@ -83,10 +92,10 @@ pub struct UnsignedLong;
 #[derive(Parser)]
 pub struct UInt32;
 
-pub enum UnsignedLongLongInt {
-    UnsignedLongLong(UnsignedLongLong),
-    UInt64(UInt64),
-}
+#[derive(Debug, Parser)]
+#[ts(mark)]
+#[ts(id = "unsigned_longlong_int")]
+pub struct UnsignedLongLongInt;
 
 #[derive(Parser)]
 #[ts(name = "unsigned long long")]

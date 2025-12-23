@@ -1,9 +1,8 @@
 use crate::parser::{DeriveField, DeriveInput};
-use convert_case::{Case, Casing};
 use darling::ast::Fields;
 use proc_macro2::Span;
 use quote::quote;
-use syn::{Ident, LitStr};
+use syn::Ident;
 
 impl DeriveInput {
     fn generate_mark(&self, fields: &Fields<DeriveField>) -> proc_macro2::TokenStream {
@@ -71,13 +70,7 @@ impl DeriveInput {
         let mut gen_fields = quote! {};
         let mut gen_self = quote! {};
         let ident = self.ident.clone();
-        let ident_str = LitStr::new(
-            &self
-                .kind
-                .clone()
-                .unwrap_or_else(|| ident.to_string().to_case(Case::Snake)),
-            Span::call_site(),
-        );
+        let ts_node_name = self.ts_node_name();
 
         // Tuple strcut
         // struct A(i32, i32);
@@ -222,7 +215,7 @@ impl DeriveInput {
         quote! {
             impl<'a> crate::parser::FromTreeSitter<'a> for #ident {
                 fn from_node(node: tree_sitter::Node<'a>, ctx: &mut crate::parser::ParseContext<'a>) -> crate::error::ParserResult<Self> {
-                    assert_eq!(node.kind_id(), derive::node_id!(#ident_str));
+                    assert_eq!(node.kind_id(), derive::node_id!(#ts_node_name));
                     #gen_declare
                     for ch in node.children(&mut node.walk()) {
                         match ch.kind_id() {

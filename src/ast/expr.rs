@@ -99,11 +99,11 @@ pub enum Literal {
     IntegerLiteral(IntegerLiteral),
     FloatingPtLiteral(FloatingPtLiteral),
     // FixedPtLiteral,
-    // CharLiteral(char),
-    // WideCharacterLiteral,
-    // StringLiteral(String),
-    // WideStringLiteral,
-    // BooleanLiteral(bool),
+    CharLiteral(String),
+    WideCharacterLiteral(String),
+    StringLiteral(String),
+    WideStringLiteral(String),
+    BooleanLiteral(String),
 }
 
 #[derive(Debug, Parser)]

@@ -23,7 +23,7 @@ struct DeriveInput {
     ident: syn::Ident,
     data: darling::ast::Data<DerivedVariant, DeriveField>,
     #[darling(default)]
-    kind: Option<String>,
+    id: Option<String>,
 
     #[darling(default)]
     name: Option<String>,
@@ -41,7 +41,10 @@ struct DeriveInput {
 
 impl DeriveInput {
     pub fn ts_node_name(&self) -> LitStr {
-        let name = self.ident.to_string().to_case(Case::Snake);
+        let name = self
+            .id
+            .clone()
+            .unwrap_or_else(|| self.ident.to_string().to_case(Case::Snake));
         LitStr::new(&name, self.ident.span())
     }
 
