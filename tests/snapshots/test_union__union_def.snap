@@ -1,0 +1,50 @@
+---
+source: tests/test-union.rs
+expression: ast
+---
+Specification(
+    [
+        TypeDcl(
+            TypeDcl(
+                [
+                    ConstrTypeDcl(
+                        UnionDcl(
+                            UnionForwardDcl(
+                                UnionForwardDcl(
+                                    Identifier(
+                                        "A",
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ],
+            ),
+        ),
+        TypeDcl(
+            TypeDcl(
+                [
+                    ConstrTypeDcl(
+                        UnionDcl(
+                            UnionDef(
+                                UnionDef {
+                                    ident: Identifier(
+                                        "B",
+                                    ),
+                                    switch_type_spec: IntegerType(
+                                        SignedInt(
+                                            SignedLongInt(
+                                                SignedLongInt,
+                                            ),
+                                        ),
+                                    ),
+                                    case: [],
+                                },
+                            ),
+                        ),
+                    ),
+                ],
+            ),
+        ),
+    ],
+)

@@ -35,38 +35,38 @@
 
 use super::*;
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub struct BitsetDcl {
     pub ident: Identifier,
     pub parent: Option<ScopedName>,
     pub field: Vec<BitField>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub struct BitField {
     pub spec: BitfieldSpec,
     pub ident: Vec<Identifier>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub struct BitfieldSpec {
     pub pos: PositiveIntConst,
     pub dst_ty: Option<DestinationType>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub enum DestinationType {
     BooleanType(BooleanType),
     OctetType(OctetType),
     IntegerType(IntegerType),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub struct BitmaskDcl {
     pub ident: Identifier,
 
     pub value: Vec<BitValue>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub struct BitValue(pub Vec<Identifier>);

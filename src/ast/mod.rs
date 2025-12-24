@@ -35,10 +35,10 @@ pub enum TypeDclInner {
 #[derive(Debug, Parser)]
 pub enum ConstrTypeDcl {
     StructDcl(StructDcl),
-    // UnionDcl(UnionDcl),
+    UnionDcl(UnionDcl),
     EnumDcl(EnumDcl),
-    // BitsetDcl(BitsetDcl),
-    // BitmaskDcl(BitmaskDcl),
+    BitsetDcl(BitsetDcl),
+    BitmaskDcl(BitmaskDcl),
 }
 
 #[derive(Debug, Parser)]

@@ -1,0 +1,51 @@
+---
+source: tests/test-bitset.rs
+expression: ast
+---
+Specification(
+    [
+        TypeDcl(
+            TypeDcl(
+                [
+                    ConstrTypeDcl(
+                        BitsetDcl(
+                            BitsetDcl {
+                                ident: Identifier(
+                                    "A",
+                                ),
+                                parent: None,
+                                field: [],
+                            },
+                        ),
+                    ),
+                ],
+            ),
+        ),
+        TypeDcl(
+            TypeDcl(
+                [
+                    ConstrTypeDcl(
+                        BitsetDcl(
+                            BitsetDcl {
+                                ident: Identifier(
+                                    "A",
+                                ),
+                                parent: Some(
+                                    ScopedName {
+                                        scoped_name: None,
+                                        identifier: [
+                                            Identifier(
+                                                "B",
+                                            ),
+                                        ],
+                                    },
+                                ),
+                                field: [],
+                            },
+                        ),
+                    ),
+                ],
+            ),
+        ),
+    ],
+)
