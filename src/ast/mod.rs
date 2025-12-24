@@ -44,7 +44,7 @@ pub enum ConstrTypeDcl {
 #[derive(Debug, Parser)]
 pub enum StructDcl {
     StructForwardDcl(StructForwardDcl),
-    // StructDef(StructDef),
+    StructDef(StructDef),
 }
 
 #[derive(Debug, Parser)]
@@ -52,21 +52,21 @@ pub struct StructForwardDcl {
     pub ident: Identifier,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub struct StructDef {
     pub ident: Identifier,
     pub parent: Vec<ScopedName>,
     pub member: Vec<Member>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub struct Member {
     pub ty: TypeSpec,
     pub ident: Declarators,
     pub default: Option<Default>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub struct Default(pub ConstExpr);
 
 #[derive(Debug, Parser)]

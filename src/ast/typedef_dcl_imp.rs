@@ -47,23 +47,23 @@ pub enum AnyDeclarator {
     ArrayDeclarator(ArrayDeclarator),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub struct SimpleDeclarator(pub Identifier);
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub enum Declarator {
     SimpleDeclarator(SimpleDeclarator),
     ArrayDeclarator(ArrayDeclarator),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub struct Declarators(pub Vec<Declarator>);
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub struct ArrayDeclarator {
     pub ident: Identifier,
     pub len: Vec<FixedArraySize>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub struct FixedArraySize(pub PositiveIntConst);
