@@ -170,5 +170,377 @@ Specification(
                 ],
             ),
         ),
+        TypeDcl(
+            TypeDcl(
+                [
+                    ConstrTypeDcl(
+                        StructDcl(
+                            StructDef(
+                                StructDef {
+                                    ident: Identifier(
+                                        "_Custom",
+                                    ),
+                                    parent: [],
+                                    member: [
+                                        Member {
+                                            ty: SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        scoped_name: None,
+                                                        identifier: [
+                                                            Identifier(
+                                                                "Inner",
+                                                            ),
+                                                        ],
+                                                    },
+                                                ),
+                                            ),
+                                            ident: Declarators(
+                                                [
+                                                    SimpleDeclarator(
+                                                        SimpleDeclarator(
+                                                            Identifier(
+                                                                "var_inner",
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ],
+                                            ),
+                                            default: None,
+                                        },
+                                    ],
+                                },
+                            ),
+                        ),
+                    ),
+                ],
+            ),
+        ),
+        TypeDcl(
+            TypeDcl(
+                [
+                    ConstrTypeDcl(
+                        StructDcl(
+                            StructDef(
+                                StructDef {
+                                    ident: Identifier(
+                                        "HelloWorld",
+                                    ),
+                                    parent: [],
+                                    member: [
+                                        Member {
+                                            ty: SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        scoped_name: None,
+                                                        identifier: [
+                                                            Identifier(
+                                                                "u8",
+                                                            ),
+                                                        ],
+                                                    },
+                                                ),
+                                            ),
+                                            ident: Declarators(
+                                                [
+                                                    SimpleDeclarator(
+                                                        SimpleDeclarator(
+                                                            Identifier(
+                                                                "a",
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ],
+                                            ),
+                                            default: None,
+                                        },
+                                        Member {
+                                            ty: SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        scoped_name: None,
+                                                        identifier: [
+                                                            Identifier(
+                                                                "u16",
+                                                            ),
+                                                        ],
+                                                    },
+                                                ),
+                                            ),
+                                            ident: Declarators(
+                                                [
+                                                    ArrayDeclarator(
+                                                        ArrayDeclarator {
+                                                            ident: Identifier(
+                                                                "b",
+                                                            ),
+                                                            len: [
+                                                                FixedArraySize(
+                                                                    PositiveIntConst(
+                                                                        ConstExpr(
+                                                                            XorExpr(
+                                                                                AndExpr(
+                                                                                    ShiftExpr(
+                                                                                        AddExpr(
+                                                                                            MultExpr(
+                                                                                                UnaryExpr(
+                                                                                                    PrimaryExpr(
+                                                                                                        Literal(
+                                                                                                            IntegerLiteral(
+                                                                                                                DecNumber(
+                                                                                                                    "10",
+                                                                                                                ),
+                                                                                                            ),
+                                                                                                        ),
+                                                                                                    ),
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ],
+                                                        },
+                                                    ),
+                                                ],
+                                            ),
+                                            default: None,
+                                        },
+                                        Member {
+                                            ty: TemplateTypeSpec(
+                                                StringType(
+                                                    StringType {
+                                                        bound: None,
+                                                    },
+                                                ),
+                                            ),
+                                            ident: Declarators(
+                                                [
+                                                    ArrayDeclarator(
+                                                        ArrayDeclarator {
+                                                            ident: Identifier(
+                                                                "c",
+                                                            ),
+                                                            len: [
+                                                                FixedArraySize(
+                                                                    PositiveIntConst(
+                                                                        ConstExpr(
+                                                                            XorExpr(
+                                                                                AndExpr(
+                                                                                    ShiftExpr(
+                                                                                        AddExpr(
+                                                                                            MultExpr(
+                                                                                                UnaryExpr(
+                                                                                                    PrimaryExpr(
+                                                                                                        Literal(
+                                                                                                            IntegerLiteral(
+                                                                                                                DecNumber(
+                                                                                                                    "10",
+                                                                                                                ),
+                                                                                                            ),
+                                                                                                        ),
+                                                                                                    ),
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                                FixedArraySize(
+                                                                    PositiveIntConst(
+                                                                        ConstExpr(
+                                                                            XorExpr(
+                                                                                AndExpr(
+                                                                                    ShiftExpr(
+                                                                                        AddExpr(
+                                                                                            MultExpr(
+                                                                                                UnaryExpr(
+                                                                                                    PrimaryExpr(
+                                                                                                        Literal(
+                                                                                                            IntegerLiteral(
+                                                                                                                DecNumber(
+                                                                                                                    "20",
+                                                                                                                ),
+                                                                                                            ),
+                                                                                                        ),
+                                                                                                    ),
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ],
+                                                        },
+                                                    ),
+                                                ],
+                                            ),
+                                            default: None,
+                                        },
+                                        Member {
+                                            ty: TemplateTypeSpec(
+                                                SequenceType(
+                                                    SequenceType {
+                                                        ty: SimpleTypeSpec(
+                                                            ScopedName(
+                                                                ScopedName {
+                                                                    scoped_name: None,
+                                                                    identifier: [
+                                                                        Identifier(
+                                                                            "u8",
+                                                                        ),
+                                                                    ],
+                                                                },
+                                                            ),
+                                                        ),
+                                                        len: None,
+                                                    },
+                                                ),
+                                            ),
+                                            ident: Declarators(
+                                                [
+                                                    SimpleDeclarator(
+                                                        SimpleDeclarator(
+                                                            Identifier(
+                                                                "c",
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ],
+                                            ),
+                                            default: None,
+                                        },
+                                        Member {
+                                            ty: TemplateTypeSpec(
+                                                StringType(
+                                                    StringType {
+                                                        bound: Some(
+                                                            PositiveIntConst(
+                                                                ConstExpr(
+                                                                    XorExpr(
+                                                                        AndExpr(
+                                                                            ShiftExpr(
+                                                                                AddExpr(
+                                                                                    MultExpr(
+                                                                                        UnaryExpr(
+                                                                                            PrimaryExpr(
+                                                                                                Literal(
+                                                                                                    IntegerLiteral(
+                                                                                                        DecNumber(
+                                                                                                            "20",
+                                                                                                        ),
+                                                                                                    ),
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    },
+                                                ),
+                                            ),
+                                            ident: Declarators(
+                                                [
+                                                    SimpleDeclarator(
+                                                        SimpleDeclarator(
+                                                            Identifier(
+                                                                "d",
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ],
+                                            ),
+                                            default: None,
+                                        },
+                                        Member {
+                                            ty: TemplateTypeSpec(
+                                                WideStringType(
+                                                    WideStringType {
+                                                        bound: Some(
+                                                            PositiveIntConst(
+                                                                ConstExpr(
+                                                                    XorExpr(
+                                                                        AndExpr(
+                                                                            ShiftExpr(
+                                                                                AddExpr(
+                                                                                    MultExpr(
+                                                                                        UnaryExpr(
+                                                                                            PrimaryExpr(
+                                                                                                Literal(
+                                                                                                    IntegerLiteral(
+                                                                                                        DecNumber(
+                                                                                                            "20",
+                                                                                                        ),
+                                                                                                    ),
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    },
+                                                ),
+                                            ),
+                                            ident: Declarators(
+                                                [
+                                                    SimpleDeclarator(
+                                                        SimpleDeclarator(
+                                                            Identifier(
+                                                                "d",
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ],
+                                            ),
+                                            default: None,
+                                        },
+                                        Member {
+                                            ty: SimpleTypeSpec(
+                                                BaseTypeSpec(
+                                                    AnyType(
+                                                        AnyType,
+                                                    ),
+                                                ),
+                                            ),
+                                            ident: Declarators(
+                                                [
+                                                    SimpleDeclarator(
+                                                        SimpleDeclarator(
+                                                            Identifier(
+                                                                "d",
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ],
+                                            ),
+                                            default: None,
+                                        },
+                                    ],
+                                },
+                            ),
+                        ),
+                    ),
+                ],
+            ),
+        ),
     ],
 )

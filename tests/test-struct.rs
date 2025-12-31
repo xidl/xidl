@@ -24,6 +24,21 @@ fn test_struct_def() {
         struct A: B {};
 
         struct _A {};
+
+        struct _Custom {
+            Inner var_inner;
+        };
+
+        struct HelloWorld {
+            u8 a;
+            u16 b[10];
+            string c[10][20];
+            sequence<u8> c;
+            string<20> d;
+            wstring<20> d;
+            // fixed<1,2> d;
+            any d;
+        };
     "#,
     )
     .unwrap();
