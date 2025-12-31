@@ -1,0 +1,467 @@
+---
+source: tests/test-interface.rs
+expression: ast
+---
+Specification(
+    [
+        InterfaceDcl(
+            InterfaceForwardDcl(
+                InterfaceForwardDcl {
+                    kind: InterfaceKind,
+                    ident: Identifier(
+                        "HelloWorld",
+                    ),
+                },
+            ),
+        ),
+        InterfaceDcl(
+            InterfaceDef(
+                InterfaceDef {
+                    header: InterfaceHeader {
+                        kind: InterfaceKind,
+                        ident: Identifier(
+                            "HelloWorld",
+                        ),
+                        parent: None,
+                    },
+                    interface_body: None,
+                },
+            ),
+        ),
+        InterfaceDcl(
+            InterfaceDef(
+                InterfaceDef {
+                    header: InterfaceHeader {
+                        kind: InterfaceKind,
+                        ident: Identifier(
+                            "HelloWorld",
+                        ),
+                        parent: Some(
+                            InterfaceInheritanceSpec(
+                                [
+                                    InterfaceName(
+                                        ScopedName {
+                                            scoped_name: None,
+                                            identifier: [
+                                                Identifier(
+                                                    "Parent",
+                                                ),
+                                            ],
+                                        },
+                                    ),
+                                ],
+                            ),
+                        ),
+                    },
+                    interface_body: None,
+                },
+            ),
+        ),
+        InterfaceDcl(
+            InterfaceDef(
+                InterfaceDef {
+                    header: InterfaceHeader {
+                        kind: InterfaceKind,
+                        ident: Identifier(
+                            "HelloWorld",
+                        ),
+                        parent: Some(
+                            InterfaceInheritanceSpec(
+                                [
+                                    InterfaceName(
+                                        ScopedName {
+                                            scoped_name: None,
+                                            identifier: [
+                                                Identifier(
+                                                    "Parent1",
+                                                ),
+                                            ],
+                                        },
+                                    ),
+                                    InterfaceName(
+                                        ScopedName {
+                                            scoped_name: None,
+                                            identifier: [
+                                                Identifier(
+                                                    "Parent2",
+                                                ),
+                                            ],
+                                        },
+                                    ),
+                                    InterfaceName(
+                                        ScopedName {
+                                            scoped_name: None,
+                                            identifier: [
+                                                Identifier(
+                                                    "Parent3",
+                                                ),
+                                            ],
+                                        },
+                                    ),
+                                ],
+                            ),
+                        ),
+                    },
+                    interface_body: None,
+                },
+            ),
+        ),
+        InterfaceDcl(
+            InterfaceDef(
+                InterfaceDef {
+                    header: InterfaceHeader {
+                        kind: InterfaceKind,
+                        ident: Identifier(
+                            "A",
+                        ),
+                        parent: Some(
+                            InterfaceInheritanceSpec(
+                                [
+                                    InterfaceName(
+                                        ScopedName {
+                                            scoped_name: None,
+                                            identifier: [
+                                                Identifier(
+                                                    "B",
+                                                ),
+                                            ],
+                                        },
+                                    ),
+                                    InterfaceName(
+                                        ScopedName {
+                                            scoped_name: None,
+                                            identifier: [
+                                                Identifier(
+                                                    "C",
+                                                ),
+                                            ],
+                                        },
+                                    ),
+                                    InterfaceName(
+                                        ScopedName {
+                                            scoped_name: None,
+                                            identifier: [
+                                                Identifier(
+                                                    "D",
+                                                ),
+                                            ],
+                                        },
+                                    ),
+                                ],
+                            ),
+                        ),
+                    },
+                    interface_body: Some(
+                        InterfaceBody(
+                            [
+                                OpDcl(
+                                    OpDcl {
+                                        ty: Void,
+                                        ident: Identifier(
+                                            "func1",
+                                        ),
+                                        parameter: None,
+                                        raises: None,
+                                    },
+                                ),
+                                OpDcl(
+                                    OpDcl {
+                                        ty: Void,
+                                        ident: Identifier(
+                                            "func1",
+                                        ),
+                                        parameter: None,
+                                        raises: Some(
+                                            RaisesExpr(
+                                                [
+                                                    ScopedName {
+                                                        scoped_name: None,
+                                                        identifier: [
+                                                            Identifier(
+                                                                "A",
+                                                            ),
+                                                        ],
+                                                    },
+                                                ],
+                                            ),
+                                        ),
+                                    },
+                                ),
+                                OpDcl(
+                                    OpDcl {
+                                        ty: Void,
+                                        ident: Identifier(
+                                            "func1",
+                                        ),
+                                        parameter: None,
+                                        raises: Some(
+                                            RaisesExpr(
+                                                [
+                                                    ScopedName {
+                                                        scoped_name: None,
+                                                        identifier: [
+                                                            Identifier(
+                                                                "A",
+                                                            ),
+                                                        ],
+                                                    },
+                                                    ScopedName {
+                                                        scoped_name: None,
+                                                        identifier: [
+                                                            Identifier(
+                                                                "B",
+                                                            ),
+                                                        ],
+                                                    },
+                                                    ScopedName {
+                                                        scoped_name: None,
+                                                        identifier: [
+                                                            Identifier(
+                                                                "C",
+                                                            ),
+                                                        ],
+                                                    },
+                                                ],
+                                            ),
+                                        ),
+                                    },
+                                ),
+                                OpDcl(
+                                    OpDcl {
+                                        ty: Void,
+                                        ident: Identifier(
+                                            "func1",
+                                        ),
+                                        parameter: Some(
+                                            ParameterDcls(
+                                                [
+                                                    ParamDcl {
+                                                        attr: Some(
+                                                            ParamAttribute(
+                                                                "in",
+                                                            ),
+                                                        ),
+                                                        ty: SimpleTypeSpec(
+                                                            ScopedName(
+                                                                ScopedName {
+                                                                    scoped_name: None,
+                                                                    identifier: [
+                                                                        Identifier(
+                                                                            "u8",
+                                                                        ),
+                                                                    ],
+                                                                },
+                                                            ),
+                                                        ),
+                                                        declarator: SimpleDeclarator(
+                                                            Identifier(
+                                                                "attr",
+                                                            ),
+                                                        ),
+                                                    },
+                                                    ParamDcl {
+                                                        attr: Some(
+                                                            ParamAttribute(
+                                                                "out",
+                                                            ),
+                                                        ),
+                                                        ty: SimpleTypeSpec(
+                                                            ScopedName(
+                                                                ScopedName {
+                                                                    scoped_name: None,
+                                                                    identifier: [
+                                                                        Identifier(
+                                                                            "u16",
+                                                                        ),
+                                                                    ],
+                                                                },
+                                                            ),
+                                                        ),
+                                                        declarator: SimpleDeclarator(
+                                                            Identifier(
+                                                                "attr",
+                                                            ),
+                                                        ),
+                                                    },
+                                                ],
+                                            ),
+                                        ),
+                                        raises: None,
+                                    },
+                                ),
+                                OpDcl(
+                                    OpDcl {
+                                        ty: Void,
+                                        ident: Identifier(
+                                            "func1",
+                                        ),
+                                        parameter: Some(
+                                            ParameterDcls(
+                                                [
+                                                    ParamDcl {
+                                                        attr: Some(
+                                                            ParamAttribute(
+                                                                "in",
+                                                            ),
+                                                        ),
+                                                        ty: SimpleTypeSpec(
+                                                            ScopedName(
+                                                                ScopedName {
+                                                                    scoped_name: None,
+                                                                    identifier: [
+                                                                        Identifier(
+                                                                            "u8",
+                                                                        ),
+                                                                    ],
+                                                                },
+                                                            ),
+                                                        ),
+                                                        declarator: SimpleDeclarator(
+                                                            Identifier(
+                                                                "attr",
+                                                            ),
+                                                        ),
+                                                    },
+                                                    ParamDcl {
+                                                        attr: Some(
+                                                            ParamAttribute(
+                                                                "out",
+                                                            ),
+                                                        ),
+                                                        ty: SimpleTypeSpec(
+                                                            ScopedName(
+                                                                ScopedName {
+                                                                    scoped_name: None,
+                                                                    identifier: [
+                                                                        Identifier(
+                                                                            "u16",
+                                                                        ),
+                                                                    ],
+                                                                },
+                                                            ),
+                                                        ),
+                                                        declarator: SimpleDeclarator(
+                                                            Identifier(
+                                                                "attr",
+                                                            ),
+                                                        ),
+                                                    },
+                                                ],
+                                            ),
+                                        ),
+                                        raises: Some(
+                                            RaisesExpr(
+                                                [
+                                                    ScopedName {
+                                                        scoped_name: None,
+                                                        identifier: [
+                                                            Identifier(
+                                                                "A",
+                                                            ),
+                                                        ],
+                                                    },
+                                                ],
+                                            ),
+                                        ),
+                                    },
+                                ),
+                                OpDcl(
+                                    OpDcl {
+                                        ty: Void,
+                                        ident: Identifier(
+                                            "func1",
+                                        ),
+                                        parameter: Some(
+                                            ParameterDcls(
+                                                [
+                                                    ParamDcl {
+                                                        attr: Some(
+                                                            ParamAttribute(
+                                                                "in",
+                                                            ),
+                                                        ),
+                                                        ty: SimpleTypeSpec(
+                                                            ScopedName(
+                                                                ScopedName {
+                                                                    scoped_name: None,
+                                                                    identifier: [
+                                                                        Identifier(
+                                                                            "u8",
+                                                                        ),
+                                                                    ],
+                                                                },
+                                                            ),
+                                                        ),
+                                                        declarator: SimpleDeclarator(
+                                                            Identifier(
+                                                                "attr",
+                                                            ),
+                                                        ),
+                                                    },
+                                                    ParamDcl {
+                                                        attr: Some(
+                                                            ParamAttribute(
+                                                                "out",
+                                                            ),
+                                                        ),
+                                                        ty: SimpleTypeSpec(
+                                                            ScopedName(
+                                                                ScopedName {
+                                                                    scoped_name: None,
+                                                                    identifier: [
+                                                                        Identifier(
+                                                                            "u16",
+                                                                        ),
+                                                                    ],
+                                                                },
+                                                            ),
+                                                        ),
+                                                        declarator: SimpleDeclarator(
+                                                            Identifier(
+                                                                "attr",
+                                                            ),
+                                                        ),
+                                                    },
+                                                ],
+                                            ),
+                                        ),
+                                        raises: Some(
+                                            RaisesExpr(
+                                                [
+                                                    ScopedName {
+                                                        scoped_name: None,
+                                                        identifier: [
+                                                            Identifier(
+                                                                "A",
+                                                            ),
+                                                        ],
+                                                    },
+                                                    ScopedName {
+                                                        scoped_name: None,
+                                                        identifier: [
+                                                            Identifier(
+                                                                "B",
+                                                            ),
+                                                        ],
+                                                    },
+                                                    ScopedName {
+                                                        scoped_name: None,
+                                                        identifier: [
+                                                            Identifier(
+                                                                "C",
+                                                            ),
+                                                        ],
+                                                    },
+                                                ],
+                                            ),
+                                        ),
+                                    },
+                                ),
+                            ],
+                        ),
+                    ),
+                },
+            ),
+        ),
+    ],
+)

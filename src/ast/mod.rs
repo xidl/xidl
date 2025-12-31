@@ -8,6 +8,9 @@ pub use expr::*;
 mod bitmask;
 pub use bitmask::*;
 
+mod interface;
+pub use interface::*;
+
 mod union;
 pub use union::*;
 
@@ -21,6 +24,7 @@ pub struct Specification(pub Vec<Definition>);
 pub enum Definition {
     TypeDcl(TypeDcl),
     ConstDcl(ConstDcl),
+    InterfaceDcl(InterfaceDcl),
 }
 
 #[derive(Debug, Parser)]
