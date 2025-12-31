@@ -105,14 +105,6 @@ struct DeriveField {
 impl DeriveField {
     #[inline(always)]
     pub fn ts_node_name(&self) -> LitStr {
-        if self.is_vec() {
-            let ty = self
-                .inner_ty()
-                .to_token_stream()
-                .to_string()
-                .to_case(Case::Snake);
-            return LitStr::new(&ty, Span::call_site());
-        }
         let mut id = self.id.clone().unwrap_or_else(|| {
             self.inner_ty()
                 .to_token_stream()

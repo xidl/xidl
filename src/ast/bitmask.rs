@@ -39,10 +39,12 @@ use super::*;
 pub struct BitsetDcl {
     pub ident: Identifier,
     pub parent: Option<ScopedName>,
+    #[ts(id = "bitfield")]
     pub field: Vec<BitField>,
 }
 
 #[derive(Debug, Parser)]
+#[ts(id = "bitfield")]
 pub struct BitField {
     pub spec: BitfieldSpec,
     pub ident: Vec<Identifier>,

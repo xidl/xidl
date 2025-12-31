@@ -4,6 +4,10 @@ fn test_bitset_def() {
         r#"
         bitset A {};
         bitset A: B {};
+        bitset A: B {
+            bitfield<1> a;
+            bitfield<1> a b c;
+        };
     "#,
     )
     .unwrap();

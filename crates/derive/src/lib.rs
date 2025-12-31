@@ -16,6 +16,9 @@ pub fn node_id(input: TokenStream) -> TokenStream {
     let l = &tree_sitter_idl::language();
     let id = l.id_for_node_kind(&name, true);
     let id = id as usize;
+    if id == 0 {
+        eprintln!("unknown node kind: {name}");
+    }
     // if id == 0 {
     //     return syn::Error::new(Span::call_site(), format!("unknown node kind: {name}"))
     //         .into_compile_error()
