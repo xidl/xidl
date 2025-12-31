@@ -4,6 +4,12 @@ fn test_union_def() {
         r#"
         union A;
         union B switch (int32) {};
+        union C switch (int32) {
+            case 0:
+                int32 a;
+            case 1:
+                string b;
+        };
     "#,
     )
     .unwrap();

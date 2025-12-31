@@ -35,13 +35,40 @@ pub struct Case {
 #[derive(Debug, Parser)]
 pub struct CaseLabel(pub ConstExpr);
 
-#[derive(Debug, Parser)]
+#[derive(Debug)]
 pub struct ElementSpec {
     pub ty: ElementSpecTy,
     pub value: Declarator,
 }
 
+impl<'a> crate::parser::FromTreeSitter<'a> for ElementSpec {
+    fn from_node(
+        node: tree_sitter::Node<'a>,
+        ctx: &mut crate::parser::ParseContext<'a>,
+    ) -> crate::error::ParserResult<Self> {
+        assert_eq!(node.kind_id(), derive::node_id!("element_spec"));
+        let mut ty = None;
+        let mut value = None;
+        for ch in node.children(&mut node.walk()) {
+            match ch.kind_id() {
+                derive::node_id!("type_spec") | derive::node_id!("constr_type_dcl") => {
+                    ty = Some(crate::parser::FromTreeSitter::from_node(ch, ctx)?);
+                }
+                derive::node_id!("declarator") => {
+                    value = Some(crate::parser::FromTreeSitter::from_node(ch, ctx)?);
+                }
+                _ => {}
+            }
+        }
+        Ok(Self {
+            ty: ty.unwrap(),
+            value: value.unwrap(),
+        })
+    }
+}
+
 #[derive(Debug, Parser)]
+#[ts(transparent)]
 pub enum ElementSpecTy {
     TypeSpec(TypeSpec),
     ConstrTypeDcl(ConstrTypeDcl),
