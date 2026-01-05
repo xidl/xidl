@@ -1,6 +1,6 @@
 use derive::Parser;
 
-use crate::ast::Identifier;
+use crate::typed_ast::Identifier;
 
 #[derive(Debug, Parser)]
 pub struct ConstExpr(pub OrExpr);

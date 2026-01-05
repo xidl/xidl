@@ -1,4 +1,4 @@
-use crate::ast::ScopedName;
+use crate::typed_ast::ScopedName;
 
 use super::{Identifier, SimpleDeclarator, TypeSpec};
 use derive::Parser;

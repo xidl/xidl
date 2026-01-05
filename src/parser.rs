@@ -39,8 +39,8 @@ where
     }
 }
 
-pub fn parser_text(text: &str) -> ParserResult<crate::ast::Specification> {
-    use crate::ast::Specification;
+pub fn parser_text(text: &str) -> ParserResult<crate::typed_ast::Specification> {
+    use crate::typed_ast::Specification;
 
     let mut parser = tree_sitter::Parser::new();
     parser.set_language(&tree_sitter_idl::language()).unwrap();
