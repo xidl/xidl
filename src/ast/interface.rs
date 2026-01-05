@@ -44,6 +44,7 @@ pub struct InterfaceBody(pub Vec<Export>);
 #[derive(Debug, Parser)]
 pub enum Export {
     OpDcl(OpDcl),
+    AttrDcl(AttrDcl),
 }
 
 #[derive(Debug, Parser)]
@@ -111,3 +112,82 @@ impl<'a> crate::parser::FromTreeSitter<'a> for ParamAttribute {
 
 #[derive(Debug, Parser)]
 pub struct RaisesExpr(pub Vec<ScopedName>);
+
+#[derive(Debug, Parser)]
+pub enum AttrDcl {
+    ReadonlyAttrSpec(ReadonlyAttrSpec),
+    AttrSpec(AttrSpec),
+}
+
+#[derive(Debug, Parser)]
+pub struct ReadonlyAttrSpec {
+    pub ty: TypeSpec,
+    pub declarator: ReadonlyAttrDeclarator,
+}
+
+#[derive(Debug, Parser)]
+pub enum ReadonlyAttrDeclarator {
+    SimpleDeclarator(SimpleDeclarator),
+    RaisesExpr(RaisesExpr),
+}
+
+#[derive(Debug, Parser)]
+pub struct AttrSpec {
+    pub type_spec: TypeSpec,
+    pub declarator: AttrDeclarator,
+}
+
+#[derive(Debug)]
+pub enum AttrDeclarator {
+    SimpleDeclarator(Vec<SimpleDeclarator>),
+}
+
+impl<'a> crate::parser::FromTreeSitter<'a> for AttrDeclarator {
+    fn from_node(
+        node: tree_sitter::Node<'a>,
+        ctx: &mut crate::parser::ParseContext<'a>,
+    ) -> crate::error::ParserResult<Self> {
+        let mut declator = vec![];
+
+        for ch in node.children(&mut node.walk()) {
+            match ch.kind_id() {
+                derive::node_id!("simple_declarator") => {
+                    declator.push(SimpleDeclarator::from_node(ch, ctx)?);
+                }
+                _ => {
+                    return Err(crate::error::ParseError::UnexpectedNode(format!(
+                        "parent: {}, got: {}",
+                        node.kind(),
+                        ch.kind()
+                    )))
+                }
+            };
+        }
+        Ok(Self::SimpleDeclarator(declator))
+    }
+}
+
+#[derive(Debug, Parser)]
+pub struct AttrDeclaratorCase1 {
+    pub declarator: SimpleDeclarator,
+    pub raises: AttrRaisesExpr,
+}
+
+#[derive(Debug, Parser)]
+pub enum AttrRaisesExpr {
+    Case1(GetExcepExpr, Option<SetExcepExpr>),
+    SetExcepExpr(SetExcepExpr),
+}
+
+#[derive(Debug, Parser)]
+pub struct GetExcepExpr {
+    pub expr: ExceptionList,
+}
+
+#[derive(Debug, Parser)]
+pub struct SetExcepExpr {
+    pub expr: ExceptionList,
+}
+
+#[derive(Debug, Parser)]
+pub struct ExceptionList(pub Vec<ScopedName>);

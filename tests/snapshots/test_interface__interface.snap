@@ -168,7 +168,7 @@ Specification(
                                     OpDcl {
                                         ty: Void,
                                         ident: Identifier(
-                                            "func1",
+                                            "func2",
                                         ),
                                         parameter: None,
                                         raises: Some(
@@ -191,7 +191,7 @@ Specification(
                                     OpDcl {
                                         ty: Void,
                                         ident: Identifier(
-                                            "func1",
+                                            "func3",
                                         ),
                                         parameter: None,
                                         raises: Some(
@@ -230,7 +230,7 @@ Specification(
                                     OpDcl {
                                         ty: Void,
                                         ident: Identifier(
-                                            "func1",
+                                            "func4",
                                         ),
                                         parameter: Some(
                                             ParameterDcls(
@@ -293,7 +293,7 @@ Specification(
                                     OpDcl {
                                         ty: Void,
                                         ident: Identifier(
-                                            "func1",
+                                            "func5",
                                         ),
                                         parameter: Some(
                                             ParameterDcls(
@@ -369,7 +369,7 @@ Specification(
                                     OpDcl {
                                         ty: Void,
                                         ident: Identifier(
-                                            "func1",
+                                            "func6",
                                         ),
                                         parameter: Some(
                                             ParameterDcls(
@@ -380,6 +380,94 @@ Specification(
                                                                 "in",
                                                             ),
                                                         ),
+                                                        ty: SimpleTypeSpec(
+                                                            ScopedName(
+                                                                ScopedName {
+                                                                    scoped_name: None,
+                                                                    identifier: [
+                                                                        Identifier(
+                                                                            "u8",
+                                                                        ),
+                                                                    ],
+                                                                },
+                                                            ),
+                                                        ),
+                                                        declarator: SimpleDeclarator(
+                                                            Identifier(
+                                                                "attr",
+                                                            ),
+                                                        ),
+                                                    },
+                                                    ParamDcl {
+                                                        attr: Some(
+                                                            ParamAttribute(
+                                                                "out",
+                                                            ),
+                                                        ),
+                                                        ty: SimpleTypeSpec(
+                                                            ScopedName(
+                                                                ScopedName {
+                                                                    scoped_name: None,
+                                                                    identifier: [
+                                                                        Identifier(
+                                                                            "u16",
+                                                                        ),
+                                                                    ],
+                                                                },
+                                                            ),
+                                                        ),
+                                                        declarator: SimpleDeclarator(
+                                                            Identifier(
+                                                                "attr",
+                                                            ),
+                                                        ),
+                                                    },
+                                                ],
+                                            ),
+                                        ),
+                                        raises: Some(
+                                            RaisesExpr(
+                                                [
+                                                    ScopedName {
+                                                        scoped_name: None,
+                                                        identifier: [
+                                                            Identifier(
+                                                                "A",
+                                                            ),
+                                                        ],
+                                                    },
+                                                    ScopedName {
+                                                        scoped_name: None,
+                                                        identifier: [
+                                                            Identifier(
+                                                                "B",
+                                                            ),
+                                                        ],
+                                                    },
+                                                    ScopedName {
+                                                        scoped_name: None,
+                                                        identifier: [
+                                                            Identifier(
+                                                                "C",
+                                                            ),
+                                                        ],
+                                                    },
+                                                ],
+                                            ),
+                                        ),
+                                    },
+                                ),
+                                OpDcl(
+                                    OpDcl {
+                                        ty: Void,
+                                        ident: Identifier(
+                                            "func7",
+                                        ),
+                                        parameter: Some(
+                                            ParameterDcls(
+                                                [
+                                                    ParamDcl {
+                                                        attr: None,
                                                         ty: SimpleTypeSpec(
                                                             ScopedName(
                                                                 ScopedName {

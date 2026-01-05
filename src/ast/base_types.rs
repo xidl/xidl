@@ -6,21 +6,9 @@ use super::*;
 #[ts(mark)]
 pub struct SignedShortInt;
 
-#[derive(Parser)]
-pub struct Short;
-
-#[derive(Parser)]
-pub struct Int16;
-
 #[derive(Debug, Parser)]
 #[ts(mark)]
 pub struct SignedLongInt;
-
-#[derive(Parser)]
-pub struct Long;
-
-#[derive(Parser)]
-pub struct Int32;
 
 #[derive(Debug, Parser)]
 #[ts(id = "signed_longlong_int")]
@@ -74,35 +62,14 @@ pub struct SignedTinyInt;
 #[ts(mark)]
 pub struct UnsignedShortInt;
 
-#[derive(Parser)]
-#[ts(name = "unsigned short")]
-pub struct UnsignedShort;
-
-#[derive(Parser)]
-pub struct UInt16;
-
 #[derive(Debug, Parser)]
 #[ts(mark)]
 pub struct UnsignedLongInt;
-
-#[derive(Parser)]
-#[ts(name = "unsigned long")]
-pub struct UnsignedLong;
-
-#[derive(Parser)]
-pub struct UInt32;
 
 #[derive(Debug, Parser)]
 #[ts(mark)]
 #[ts(id = "unsigned_longlong_int")]
 pub struct UnsignedLongLongInt;
-
-#[derive(Parser)]
-#[ts(name = "unsigned long long")]
-pub struct UnsignedLongLong;
-
-#[derive(Parser)]
-pub struct UInt64;
 
 #[derive(Debug, Parser)]
 #[ts(mark)]

@@ -10,11 +10,12 @@ fn test_interface() {
 
         interface A: B, C, D {
             void func1();
-            void func1() raises(A);
-            void func1() raises(A,B,C);
-            void func1(in u8 attr, out u16 attr);
-            void func1(in u8 attr, out u16 attr) raises(A);
-            void func1(in u8 attr, out u16 attr) raises(A,B,C);
+            void func2() raises(A);
+            void func3() raises(A,B,C);
+            void func4(in u8 attr, out u16 attr);
+            void func5(in u8 attr, out u16 attr) raises(A);
+            void func6(in u8 attr, out u16 attr) raises(A,B,C);
+            void func7(u8 attr, out u16 attr) raises(A,B,C);
         };
 
 
