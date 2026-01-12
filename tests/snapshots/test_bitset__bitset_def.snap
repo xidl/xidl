@@ -33,11 +33,9 @@ Specification(
                                 parent: Some(
                                     ScopedName {
                                         scoped_name: None,
-                                        identifier: [
-                                            Identifier(
-                                                "B",
-                                            ),
-                                        ],
+                                        identifier: Identifier(
+                                            "B",
+                                        ),
                                     },
                                 ),
                                 field: [],
@@ -59,11 +57,9 @@ Specification(
                                 parent: Some(
                                     ScopedName {
                                         scoped_name: None,
-                                        identifier: [
-                                            Identifier(
-                                                "B",
-                                            ),
-                                        ],
+                                        identifier: Identifier(
+                                            "B",
+                                        ),
                                     },
                                 ),
                                 field: [

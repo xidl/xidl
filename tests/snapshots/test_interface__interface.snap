@@ -42,11 +42,9 @@ Specification(
                                     InterfaceName(
                                         ScopedName {
                                             scoped_name: None,
-                                            identifier: [
-                                                Identifier(
-                                                    "Parent",
-                                                ),
-                                            ],
+                                            identifier: Identifier(
+                                                "Parent",
+                                            ),
                                         },
                                     ),
                                 ],
@@ -71,31 +69,25 @@ Specification(
                                     InterfaceName(
                                         ScopedName {
                                             scoped_name: None,
-                                            identifier: [
-                                                Identifier(
-                                                    "Parent1",
-                                                ),
-                                            ],
+                                            identifier: Identifier(
+                                                "Parent1",
+                                            ),
                                         },
                                     ),
                                     InterfaceName(
                                         ScopedName {
                                             scoped_name: None,
-                                            identifier: [
-                                                Identifier(
-                                                    "Parent2",
-                                                ),
-                                            ],
+                                            identifier: Identifier(
+                                                "Parent2",
+                                            ),
                                         },
                                     ),
                                     InterfaceName(
                                         ScopedName {
                                             scoped_name: None,
-                                            identifier: [
-                                                Identifier(
-                                                    "Parent3",
-                                                ),
-                                            ],
+                                            identifier: Identifier(
+                                                "Parent3",
+                                            ),
                                         },
                                     ),
                                 ],
@@ -120,31 +112,25 @@ Specification(
                                     InterfaceName(
                                         ScopedName {
                                             scoped_name: None,
-                                            identifier: [
-                                                Identifier(
-                                                    "B",
-                                                ),
-                                            ],
+                                            identifier: Identifier(
+                                                "B",
+                                            ),
                                         },
                                     ),
                                     InterfaceName(
                                         ScopedName {
                                             scoped_name: None,
-                                            identifier: [
-                                                Identifier(
-                                                    "C",
-                                                ),
-                                            ],
+                                            identifier: Identifier(
+                                                "C",
+                                            ),
                                         },
                                     ),
                                     InterfaceName(
                                         ScopedName {
                                             scoped_name: None,
-                                            identifier: [
-                                                Identifier(
-                                                    "D",
-                                                ),
-                                            ],
+                                            identifier: Identifier(
+                                                "D",
+                                            ),
                                         },
                                     ),
                                 ],
@@ -176,11 +162,9 @@ Specification(
                                                 [
                                                     ScopedName {
                                                         scoped_name: None,
-                                                        identifier: [
-                                                            Identifier(
-                                                                "A",
-                                                            ),
-                                                        ],
+                                                        identifier: Identifier(
+                                                            "A",
+                                                        ),
                                                     },
                                                 ],
                                             ),
@@ -199,27 +183,21 @@ Specification(
                                                 [
                                                     ScopedName {
                                                         scoped_name: None,
-                                                        identifier: [
-                                                            Identifier(
-                                                                "A",
-                                                            ),
-                                                        ],
+                                                        identifier: Identifier(
+                                                            "A",
+                                                        ),
                                                     },
                                                     ScopedName {
                                                         scoped_name: None,
-                                                        identifier: [
-                                                            Identifier(
-                                                                "B",
-                                                            ),
-                                                        ],
+                                                        identifier: Identifier(
+                                                            "B",
+                                                        ),
                                                     },
                                                     ScopedName {
                                                         scoped_name: None,
-                                                        identifier: [
-                                                            Identifier(
-                                                                "C",
-                                                            ),
-                                                        ],
+                                                        identifier: Identifier(
+                                                            "C",
+                                                        ),
                                                     },
                                                 ],
                                             ),
@@ -245,11 +223,9 @@ Specification(
                                                             ScopedName(
                                                                 ScopedName {
                                                                     scoped_name: None,
-                                                                    identifier: [
-                                                                        Identifier(
-                                                                            "u8",
-                                                                        ),
-                                                                    ],
+                                                                    identifier: Identifier(
+                                                                        "u8",
+                                                                    ),
                                                                 },
                                                             ),
                                                         ),
@@ -269,11 +245,9 @@ Specification(
                                                             ScopedName(
                                                                 ScopedName {
                                                                     scoped_name: None,
-                                                                    identifier: [
-                                                                        Identifier(
-                                                                            "u16",
-                                                                        ),
-                                                                    ],
+                                                                    identifier: Identifier(
+                                                                        "u16",
+                                                                    ),
                                                                 },
                                                             ),
                                                         ),
@@ -308,11 +282,9 @@ Specification(
                                                             ScopedName(
                                                                 ScopedName {
                                                                     scoped_name: None,
-                                                                    identifier: [
-                                                                        Identifier(
-                                                                            "u8",
-                                                                        ),
-                                                                    ],
+                                                                    identifier: Identifier(
+                                                                        "u8",
+                                                                    ),
                                                                 },
                                                             ),
                                                         ),
@@ -332,11 +304,9 @@ Specification(
                                                             ScopedName(
                                                                 ScopedName {
                                                                     scoped_name: None,
-                                                                    identifier: [
-                                                                        Identifier(
-                                                                            "u16",
-                                                                        ),
-                                                                    ],
+                                                                    identifier: Identifier(
+                                                                        "u16",
+                                                                    ),
                                                                 },
                                                             ),
                                                         ),
@@ -354,11 +324,9 @@ Specification(
                                                 [
                                                     ScopedName {
                                                         scoped_name: None,
-                                                        identifier: [
-                                                            Identifier(
-                                                                "A",
-                                                            ),
-                                                        ],
+                                                        identifier: Identifier(
+                                                            "A",
+                                                        ),
                                                     },
                                                 ],
                                             ),
@@ -384,11 +352,9 @@ Specification(
                                                             ScopedName(
                                                                 ScopedName {
                                                                     scoped_name: None,
-                                                                    identifier: [
-                                                                        Identifier(
-                                                                            "u8",
-                                                                        ),
-                                                                    ],
+                                                                    identifier: Identifier(
+                                                                        "u8",
+                                                                    ),
                                                                 },
                                                             ),
                                                         ),
@@ -408,11 +374,9 @@ Specification(
                                                             ScopedName(
                                                                 ScopedName {
                                                                     scoped_name: None,
-                                                                    identifier: [
-                                                                        Identifier(
-                                                                            "u16",
-                                                                        ),
-                                                                    ],
+                                                                    identifier: Identifier(
+                                                                        "u16",
+                                                                    ),
                                                                 },
                                                             ),
                                                         ),
@@ -430,27 +394,21 @@ Specification(
                                                 [
                                                     ScopedName {
                                                         scoped_name: None,
-                                                        identifier: [
-                                                            Identifier(
-                                                                "A",
-                                                            ),
-                                                        ],
+                                                        identifier: Identifier(
+                                                            "A",
+                                                        ),
                                                     },
                                                     ScopedName {
                                                         scoped_name: None,
-                                                        identifier: [
-                                                            Identifier(
-                                                                "B",
-                                                            ),
-                                                        ],
+                                                        identifier: Identifier(
+                                                            "B",
+                                                        ),
                                                     },
                                                     ScopedName {
                                                         scoped_name: None,
-                                                        identifier: [
-                                                            Identifier(
-                                                                "C",
-                                                            ),
-                                                        ],
+                                                        identifier: Identifier(
+                                                            "C",
+                                                        ),
                                                     },
                                                 ],
                                             ),
@@ -472,11 +430,9 @@ Specification(
                                                             ScopedName(
                                                                 ScopedName {
                                                                     scoped_name: None,
-                                                                    identifier: [
-                                                                        Identifier(
-                                                                            "u8",
-                                                                        ),
-                                                                    ],
+                                                                    identifier: Identifier(
+                                                                        "u8",
+                                                                    ),
                                                                 },
                                                             ),
                                                         ),
@@ -496,11 +452,9 @@ Specification(
                                                             ScopedName(
                                                                 ScopedName {
                                                                     scoped_name: None,
-                                                                    identifier: [
-                                                                        Identifier(
-                                                                            "u16",
-                                                                        ),
-                                                                    ],
+                                                                    identifier: Identifier(
+                                                                        "u16",
+                                                                    ),
                                                                 },
                                                             ),
                                                         ),
@@ -518,27 +472,21 @@ Specification(
                                                 [
                                                     ScopedName {
                                                         scoped_name: None,
-                                                        identifier: [
-                                                            Identifier(
-                                                                "A",
-                                                            ),
-                                                        ],
+                                                        identifier: Identifier(
+                                                            "A",
+                                                        ),
                                                     },
                                                     ScopedName {
                                                         scoped_name: None,
-                                                        identifier: [
-                                                            Identifier(
-                                                                "B",
-                                                            ),
-                                                        ],
+                                                        identifier: Identifier(
+                                                            "B",
+                                                        ),
                                                     },
                                                     ScopedName {
                                                         scoped_name: None,
-                                                        identifier: [
-                                                            Identifier(
-                                                                "C",
-                                                            ),
-                                                        ],
+                                                        identifier: Identifier(
+                                                            "C",
+                                                        ),
                                                     },
                                                 ],
                                             ),

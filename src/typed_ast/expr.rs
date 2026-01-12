@@ -91,7 +91,7 @@ impl<'a> crate::parser::FromTreeSitter<'a> for UnaryOperator {
 pub struct ScopedName {
     #[ts(id = "scoped_name")]
     pub scoped_name: Option<Box<ScopedName>>,
-    pub identifier: Vec<Identifier>,
+    pub identifier: Identifier,
 }
 
 #[derive(Debug, Parser)]

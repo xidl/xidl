@@ -87,18 +87,14 @@ Specification(
                                                         scoped_name: Some(
                                                             ScopedName {
                                                                 scoped_name: None,
-                                                                identifier: [
-                                                                    Identifier(
-                                                                        "A",
-                                                                    ),
-                                                                ],
+                                                                identifier: Identifier(
+                                                                    "A",
+                                                                ),
                                                             },
                                                         ),
-                                                        identifier: [
-                                                            Identifier(
-                                                                "b",
-                                                            ),
-                                                        ],
+                                                        identifier: Identifier(
+                                                            "b",
+                                                        ),
                                                     },
                                                 ),
                                             ),
@@ -136,11 +132,9 @@ Specification(
                                     parent: [
                                         ScopedName {
                                             scoped_name: None,
-                                            identifier: [
-                                                Identifier(
-                                                    "B",
-                                                ),
-                                            ],
+                                            identifier: Identifier(
+                                                "B",
+                                            ),
                                         },
                                     ],
                                     member: [],
@@ -187,11 +181,9 @@ Specification(
                                                 ScopedName(
                                                     ScopedName {
                                                         scoped_name: None,
-                                                        identifier: [
-                                                            Identifier(
-                                                                "Inner",
-                                                            ),
-                                                        ],
+                                                        identifier: Identifier(
+                                                            "Inner",
+                                                        ),
                                                     },
                                                 ),
                                             ),
@@ -233,11 +225,9 @@ Specification(
                                                 ScopedName(
                                                     ScopedName {
                                                         scoped_name: None,
-                                                        identifier: [
-                                                            Identifier(
-                                                                "u8",
-                                                            ),
-                                                        ],
+                                                        identifier: Identifier(
+                                                            "u8",
+                                                        ),
                                                     },
                                                 ),
                                             ),
@@ -259,11 +249,9 @@ Specification(
                                                 ScopedName(
                                                     ScopedName {
                                                         scoped_name: None,
-                                                        identifier: [
-                                                            Identifier(
-                                                                "u16",
-                                                            ),
-                                                        ],
+                                                        identifier: Identifier(
+                                                            "u16",
+                                                        ),
                                                     },
                                                 ),
                                             ),
@@ -394,11 +382,9 @@ Specification(
                                                             ScopedName(
                                                                 ScopedName {
                                                                     scoped_name: None,
-                                                                    identifier: [
-                                                                        Identifier(
-                                                                            "u8",
-                                                                        ),
-                                                                    ],
+                                                                    identifier: Identifier(
+                                                                        "u8",
+                                                                    ),
                                                                 },
                                                             ),
                                                         ),
