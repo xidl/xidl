@@ -2,10 +2,14 @@ mod enum_dcl;
 pub use enum_dcl::*;
 
 mod struct_dcl;
+use serde::{Deserialize, Serialize};
 pub use struct_dcl::*;
 
 mod declarator;
 pub use declarator::*;
+
+mod types;
+pub use types::*;
 
 use crate::typed_ast::{ConstExpr, PositiveIntConst};
 
@@ -59,35 +63,6 @@ pub enum SwitchTypeSpec {
     OctetType,
 }
 
-pub enum TypeSpec {
-    SimpleTypeSpec(SimpleTypeSpec),
-    // TemplateTypeSpec(TemplateTypeSpec),
-}
-
-pub enum SimpleTypeSpec {
-    IntegerType(IntegerType),
-    FloatingPtType,
-    CharType,
-    WideCharType,
-    Boolean,
-    Octet,
-    AnyType,
-    ObjectType,
-    ValueBaseType,
-    ScopedName(ScopedName),
-}
-
-pub enum IntegerType {
-    U8,
-    U16,
-    U32,
-    U64,
-    I8,
-    I16,
-    I32,
-    I64,
-}
-
 pub struct BitsetDcl {
     pub ident: String,
     pub parent: Option<ScopedName>,
@@ -112,6 +87,7 @@ pub struct BitmaskDcl {
     pub value: Vec<String>,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ScopedName {
     pub name: Vec<String>,
     pub is_root: bool,
