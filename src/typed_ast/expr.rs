@@ -92,6 +92,8 @@ pub struct ScopedName {
     #[ts(id = "scoped_name")]
     pub scoped_name: Option<Box<ScopedName>>,
     pub identifier: Identifier,
+    #[ts(id = "-", text)]
+    pub node_text: String,
 }
 
 #[derive(Debug, Parser)]

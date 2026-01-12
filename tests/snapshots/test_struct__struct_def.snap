@@ -90,11 +90,13 @@ Specification(
                                                                 identifier: Identifier(
                                                                     "A",
                                                                 ),
+                                                                node_text: "::A",
                                                             },
                                                         ),
                                                         identifier: Identifier(
                                                             "b",
                                                         ),
+                                                        node_text: "::A::b",
                                                     },
                                                 ),
                                             ),
@@ -135,6 +137,7 @@ Specification(
                                             identifier: Identifier(
                                                 "B",
                                             ),
+                                            node_text: "B",
                                         },
                                     ],
                                     member: [],
@@ -184,6 +187,7 @@ Specification(
                                                         identifier: Identifier(
                                                             "Inner",
                                                         ),
+                                                        node_text: "Inner",
                                                     },
                                                 ),
                                             ),
@@ -228,6 +232,7 @@ Specification(
                                                         identifier: Identifier(
                                                             "u8",
                                                         ),
+                                                        node_text: "u8",
                                                     },
                                                 ),
                                             ),
@@ -252,6 +257,7 @@ Specification(
                                                         identifier: Identifier(
                                                             "u16",
                                                         ),
+                                                        node_text: "u16",
                                                     },
                                                 ),
                                             ),
@@ -385,6 +391,7 @@ Specification(
                                                                     identifier: Identifier(
                                                                         "u8",
                                                                     ),
+                                                                    node_text: "u8",
                                                                 },
                                                             ),
                                                         ),

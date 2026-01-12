@@ -36,6 +36,7 @@ Specification(
                                         identifier: Identifier(
                                             "B",
                                         ),
+                                        node_text: "B",
                                     },
                                 ),
                                 field: [],
@@ -60,6 +61,7 @@ Specification(
                                         identifier: Identifier(
                                             "B",
                                         ),
+                                        node_text: "B",
                                     },
                                 ),
                                 field: [

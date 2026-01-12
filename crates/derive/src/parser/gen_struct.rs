@@ -163,6 +163,18 @@ impl DeriveInput {
                 }
 
                 let ts_node_name = field.ts_node_name();
+
+                // Special handling for fields with id = "-" (node-level text capture)
+                if ts_node_name.value() == "-" && field.is_text() {
+                    gen_declare.extend(quote! {
+                        let #name = ctx.node_text(&node)?.to_string();
+                    });
+                    gen_self.extend(quote! {
+                        #name,
+                    });
+                    continue;
+                }
+
                 if field.is_vec() {
                     gen_declare.extend(quote! {
                         let mut #name = vec![];

@@ -45,6 +45,7 @@ Specification(
                                             identifier: Identifier(
                                                 "Parent",
                                             ),
+                                            node_text: "Parent",
                                         },
                                     ),
                                 ],
@@ -72,6 +73,7 @@ Specification(
                                             identifier: Identifier(
                                                 "Parent1",
                                             ),
+                                            node_text: "Parent1",
                                         },
                                     ),
                                     InterfaceName(
@@ -80,6 +82,7 @@ Specification(
                                             identifier: Identifier(
                                                 "Parent2",
                                             ),
+                                            node_text: "Parent2",
                                         },
                                     ),
                                     InterfaceName(
@@ -88,6 +91,7 @@ Specification(
                                             identifier: Identifier(
                                                 "Parent3",
                                             ),
+                                            node_text: "Parent3",
                                         },
                                     ),
                                 ],
@@ -115,6 +119,7 @@ Specification(
                                             identifier: Identifier(
                                                 "B",
                                             ),
+                                            node_text: "B",
                                         },
                                     ),
                                     InterfaceName(
@@ -123,6 +128,7 @@ Specification(
                                             identifier: Identifier(
                                                 "C",
                                             ),
+                                            node_text: "C",
                                         },
                                     ),
                                     InterfaceName(
@@ -131,6 +137,7 @@ Specification(
                                             identifier: Identifier(
                                                 "D",
                                             ),
+                                            node_text: "D",
                                         },
                                     ),
                                 ],
@@ -165,6 +172,7 @@ Specification(
                                                         identifier: Identifier(
                                                             "A",
                                                         ),
+                                                        node_text: "A",
                                                     },
                                                 ],
                                             ),
@@ -186,18 +194,21 @@ Specification(
                                                         identifier: Identifier(
                                                             "A",
                                                         ),
+                                                        node_text: "A",
                                                     },
                                                     ScopedName {
                                                         scoped_name: None,
                                                         identifier: Identifier(
                                                             "B",
                                                         ),
+                                                        node_text: "B",
                                                     },
                                                     ScopedName {
                                                         scoped_name: None,
                                                         identifier: Identifier(
                                                             "C",
                                                         ),
+                                                        node_text: "C",
                                                     },
                                                 ],
                                             ),
@@ -226,6 +237,7 @@ Specification(
                                                                     identifier: Identifier(
                                                                         "u8",
                                                                     ),
+                                                                    node_text: "u8",
                                                                 },
                                                             ),
                                                         ),
@@ -248,6 +260,7 @@ Specification(
                                                                     identifier: Identifier(
                                                                         "u16",
                                                                     ),
+                                                                    node_text: "u16",
                                                                 },
                                                             ),
                                                         ),
@@ -285,6 +298,7 @@ Specification(
                                                                     identifier: Identifier(
                                                                         "u8",
                                                                     ),
+                                                                    node_text: "u8",
                                                                 },
                                                             ),
                                                         ),
@@ -307,6 +321,7 @@ Specification(
                                                                     identifier: Identifier(
                                                                         "u16",
                                                                     ),
+                                                                    node_text: "u16",
                                                                 },
                                                             ),
                                                         ),
@@ -327,6 +342,7 @@ Specification(
                                                         identifier: Identifier(
                                                             "A",
                                                         ),
+                                                        node_text: "A",
                                                     },
                                                 ],
                                             ),
@@ -355,6 +371,7 @@ Specification(
                                                                     identifier: Identifier(
                                                                         "u8",
                                                                     ),
+                                                                    node_text: "u8",
                                                                 },
                                                             ),
                                                         ),
@@ -377,6 +394,7 @@ Specification(
                                                                     identifier: Identifier(
                                                                         "u16",
                                                                     ),
+                                                                    node_text: "u16",
                                                                 },
                                                             ),
                                                         ),
@@ -397,18 +415,21 @@ Specification(
                                                         identifier: Identifier(
                                                             "A",
                                                         ),
+                                                        node_text: "A",
                                                     },
                                                     ScopedName {
                                                         scoped_name: None,
                                                         identifier: Identifier(
                                                             "B",
                                                         ),
+                                                        node_text: "B",
                                                     },
                                                     ScopedName {
                                                         scoped_name: None,
                                                         identifier: Identifier(
                                                             "C",
                                                         ),
+                                                        node_text: "C",
                                                     },
                                                 ],
                                             ),
@@ -433,6 +454,7 @@ Specification(
                                                                     identifier: Identifier(
                                                                         "u8",
                                                                     ),
+                                                                    node_text: "u8",
                                                                 },
                                                             ),
                                                         ),
@@ -455,6 +477,7 @@ Specification(
                                                                     identifier: Identifier(
                                                                         "u16",
                                                                     ),
+                                                                    node_text: "u16",
                                                                 },
                                                             ),
                                                         ),
@@ -475,18 +498,21 @@ Specification(
                                                         identifier: Identifier(
                                                             "A",
                                                         ),
+                                                        node_text: "A",
                                                     },
                                                     ScopedName {
                                                         scoped_name: None,
                                                         identifier: Identifier(
                                                             "B",
                                                         ),
+                                                        node_text: "B",
                                                     },
                                                     ScopedName {
                                                         scoped_name: None,
                                                         identifier: Identifier(
                                                             "C",
                                                         ),
+                                                        node_text: "C",
                                                     },
                                                 ],
                                             ),

@@ -12,6 +12,7 @@ Specification(
                         identifier: Identifier(
                             "int",
                         ),
+                        node_text: "int",
                     },
                 ),
                 ident: Identifier(
@@ -346,6 +347,7 @@ Specification(
                         identifier: Identifier(
                             "char8",
                         ),
+                        node_text: "char8",
                     },
                 ),
                 ident: Identifier(
@@ -384,6 +386,7 @@ Specification(
                         identifier: Identifier(
                             "char16",
                         ),
+                        node_text: "char16",
                     },
                 ),
                 ident: Identifier(
@@ -550,6 +553,7 @@ Specification(
                         identifier: Identifier(
                             "bool",
                         ),
+                        node_text: "bool",
                     },
                 ),
                 ident: Identifier(
@@ -569,6 +573,7 @@ Specification(
                                                         identifier: Identifier(
                                                             "false",
                                                         ),
+                                                        node_text: "false",
                                                     },
                                                 ),
                                             ),
@@ -589,6 +594,7 @@ Specification(
                         identifier: Identifier(
                             "A",
                         ),
+                        node_text: "::A",
                     },
                 ),
                 ident: Identifier(
@@ -629,11 +635,13 @@ Specification(
                                 identifier: Identifier(
                                     "A",
                                 ),
+                                node_text: "A",
                             },
                         ),
                         identifier: Identifier(
                             "B",
                         ),
+                        node_text: "A::B",
                     },
                 ),
                 ident: Identifier(
@@ -676,16 +684,19 @@ Specification(
                                         identifier: Identifier(
                                             "A",
                                         ),
+                                        node_text: "A",
                                     },
                                 ),
                                 identifier: Identifier(
                                     "B",
                                 ),
+                                node_text: "A::B",
                             },
                         ),
                         identifier: Identifier(
                             "C",
                         ),
+                        node_text: "A::B::C",
                     },
                 ),
                 ident: Identifier(
@@ -734,31 +745,37 @@ Specification(
                                                                 identifier: Identifier(
                                                                     "A",
                                                                 ),
+                                                                node_text: "A",
                                                             },
                                                         ),
                                                         identifier: Identifier(
                                                             "B",
                                                         ),
+                                                        node_text: "A::B",
                                                     },
                                                 ),
                                                 identifier: Identifier(
                                                     "C",
                                                 ),
+                                                node_text: "A::B::C",
                                             },
                                         ),
                                         identifier: Identifier(
                                             "D",
                                         ),
+                                        node_text: "A::B::C::D",
                                     },
                                 ),
                                 identifier: Identifier(
                                     "E",
                                 ),
+                                node_text: "A::B::C::D::E",
                             },
                         ),
                         identifier: Identifier(
                             "F",
                         ),
+                        node_text: "A::B::C::D::E::F",
                     },
                 ),
                 ident: Identifier(
@@ -799,11 +816,13 @@ Specification(
                                 identifier: Identifier(
                                     "M",
                                 ),
+                                node_text: "M",
                             },
                         ),
                         identifier: Identifier(
                             "Size",
                         ),
+                        node_text: "M::Size",
                     },
                 ),
                 ident: Identifier(
@@ -825,11 +844,13 @@ Specification(
                                                                 identifier: Identifier(
                                                                     "M",
                                                                 ),
+                                                                node_text: "M",
                                                             },
                                                         ),
                                                         identifier: Identifier(
                                                             "medium",
                                                         ),
+                                                        node_text: "M::medium",
                                                     },
                                                 ),
                                             ),

@@ -119,7 +119,7 @@ pub struct ScopedName {
 
 impl From<crate::typed_ast::ScopedName> for ScopedName {
     fn from(typed_ast: crate::typed_ast::ScopedName) -> Self {
-        let is_root = false;
+        let is_root = typed_ast.node_text.starts_with("::");
         let mut v = vec![];
         get_scoped_name(&mut v, &typed_ast);
         let name = v.into_iter().map(ToOwned::to_owned).collect();
