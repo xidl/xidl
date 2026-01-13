@@ -140,6 +140,10 @@ pub struct AttrSpec {
 #[derive(Debug)]
 pub enum AttrDeclarator {
     SimpleDeclarator(Vec<SimpleDeclarator>),
+    WithRaises {
+        declarator: SimpleDeclarator,
+        raises: AttrRaisesExpr,
+    },
 }
 
 impl<'a> crate::parser::FromTreeSitter<'a> for AttrDeclarator {
@@ -147,12 +151,16 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AttrDeclarator {
         node: tree_sitter::Node<'a>,
         ctx: &mut crate::parser::ParseContext<'a>,
     ) -> crate::error::ParserResult<Self> {
-        let mut declator = vec![];
+        let mut declarator = vec![];
+        let mut raises = None;
 
         for ch in node.children(&mut node.walk()) {
             match ch.kind_id() {
                 derive::node_id!("simple_declarator") => {
-                    declator.push(SimpleDeclarator::from_node(ch, ctx)?);
+                    declarator.push(SimpleDeclarator::from_node(ch, ctx)?);
+                }
+                derive::node_id!("attr_raises_expr") => {
+                    raises = Some(AttrRaisesExpr::from_node(ch, ctx)?);
                 }
                 _ => {
                     return Err(crate::error::ParseError::UnexpectedNode(format!(
@@ -163,14 +171,25 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AttrDeclarator {
                 }
             };
         }
-        Ok(Self::SimpleDeclarator(declator))
+        if let Some(raises) = raises {
+            let mut iter = declarator.into_iter();
+            let declarator = iter.next().ok_or_else(|| {
+                crate::error::ParseError::UnexpectedNode(format!(
+                    "parent: {}, got: missing declarator",
+                    node.kind(),
+                ))
+            })?;
+            if iter.next().is_some() {
+                return Err(crate::error::ParseError::UnexpectedNode(format!(
+                    "parent: {}, got: extra declarator",
+                    node.kind()
+                )));
+            }
+            Ok(Self::WithRaises { declarator, raises })
+        } else {
+            Ok(Self::SimpleDeclarator(declarator))
+        }
     }
-}
-
-#[derive(Debug, Parser)]
-pub struct AttrDeclaratorCase1 {
-    pub declarator: SimpleDeclarator,
-    pub raises: AttrRaisesExpr,
 }
 
 #[derive(Debug, Parser)]
