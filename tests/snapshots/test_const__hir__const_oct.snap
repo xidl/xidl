@@ -1,0 +1,39 @@
+---
+source: tests/test-const.rs
+expression: hir
+---
+Specification(
+    [
+        ConstDcl(
+            ConstDcl {
+                ty: IntegerType(
+                    I32,
+                ),
+                ident: "a",
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        OctNumber(
+                                                            "0o10",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+    ],
+)

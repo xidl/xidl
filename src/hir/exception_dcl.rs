@@ -1,5 +1,6 @@
 use super::*;
 
+#[derive(Debug)]
 pub struct ExceptDcl {
     pub ident: String,
     pub member: Vec<Member>,

@@ -1,21 +1,25 @@
 use super::*;
 
+#[derive(Debug)]
 pub struct StructForwardDcl {
     pub ident: String,
 }
 
+#[derive(Debug)]
 pub struct StructDcl {
     pub ident: String,
     pub parent: Vec<ScopedName>,
     pub member: Vec<Member>,
 }
 
+#[derive(Debug)]
 pub struct Member {
     pub ty: TypeSpec,
     pub ident: Vec<Declarator>,
     pub default: Option<Default>,
 }
 
+#[derive(Debug)]
 pub struct Default(pub ConstExpr);
 
 impl From<crate::typed_ast::StructDef> for StructDcl {

@@ -1,46 +1,53 @@
-#[test]
-fn test_struct_empty() {
-    let ast = idl_rs::parser::parser_text("").unwrap();
-    insta::assert_debug_snapshot!(ast)
-}
-
-#[test]
-fn test_struct_simple() {
-    let ast = idl_rs::parser::parser_text("struct A;").unwrap();
-    insta::assert_debug_snapshot!(ast)
-}
-
-#[test]
-fn test_struct_def() {
-    let ast = idl_rs::parser::parser_text(
+const TEST_CASES: &[(&str, &str)] = &[
+    ("struct_empty", ""),
+    ("struct_simple", "struct A;"),
+    (
+        "struct_def",
         r#"
-        struct A {};
-        struct A {
-            int32 a;
-        };
-        struct A {
-            ::A::b a;
-        };
-        struct A: B {};
+            struct A {};
+            struct A {
+                int32 a;
+            };
+            struct A {
+                ::A::b a;
+            };
+            struct A: B {};
 
-        struct _A {};
+            struct _A {};
 
-        struct _Custom {
-            Inner var_inner;
-        };
+            struct _Custom {
+                Inner var_inner;
+            };
 
-        struct HelloWorld {
-            u8 a;
-            u16 b[10];
-            string c[10][20];
-            sequence<u8> c;
-            string<20> d;
-            wstring<20> d;
-            // fixed<1,2> d;
-            any d;
-        };
-    "#,
-    )
-    .unwrap();
-    insta::assert_debug_snapshot!(ast)
+            struct HelloWorld {
+                u8 a;
+                u16 b[10];
+                string c[10][20];
+                sequence<u8> c;
+                string<20> d;
+                wstring<20> d;
+                // fixed<1,2> d;
+                any d;
+            };
+        "#,
+    ),
+];
+
+#[test]
+fn test_typed_ast() {
+    for (name, text) in TEST_CASES {
+        let ast = idl_rs::parser::parser_text(text).unwrap();
+        let snapshot = format!("typed_ast__{name}");
+        insta::assert_debug_snapshot!(snapshot, ast);
+    }
+}
+
+#[test]
+fn test_hir() {
+    for (name, text) in TEST_CASES {
+        let typed = idl_rs::parser::parser_text(text).unwrap();
+        let hir = idl_rs::hir::Specification::from(typed);
+        let snapshot = format!("hir__{name}");
+        insta::assert_debug_snapshot!(snapshot, hir);
+    }
 }

@@ -1,11 +1,13 @@
 use super::*;
 
+#[derive(Debug)]
 pub struct ConstDcl {
     pub ty: ConstType,
     pub ident: String,
     pub value: ConstExpr,
 }
 
+#[derive(Debug)]
 pub enum ConstType {
     IntegerType(IntegerType),
     FloatingPtType,

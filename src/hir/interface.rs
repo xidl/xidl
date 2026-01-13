@@ -1,30 +1,38 @@
 use super::*;
 
+#[derive(Debug)]
 pub enum InterfaceDcl {
     InterfaceForwardDcl(InterfaceForwardDcl),
     InterfaceDef(InterfaceDef),
 }
 
+#[derive(Debug)]
 pub struct InterfaceForwardDcl {
     pub ident: String,
 }
 
+#[derive(Debug)]
 pub struct InterfaceDef {
     pub header: InterfaceHeader,
     pub interface_body: Option<InterfaceBody>,
 }
 
+#[derive(Debug)]
 pub struct InterfaceHeader {
     pub ident: String,
     pub parent: Option<InterfaceInheritanceSpec>,
 }
 
+#[derive(Debug)]
 pub struct InterfaceInheritanceSpec(pub Vec<InterfaceName>);
 
+#[derive(Debug)]
 pub struct InterfaceName(pub ScopedName);
 
+#[derive(Debug)]
 pub struct InterfaceBody(pub Vec<Export>);
 
+#[derive(Debug)]
 pub enum Export {
     OpDcl(OpDcl),
     AttrDcl(AttrDcl),
@@ -33,6 +41,7 @@ pub enum Export {
     ExceptDcl(ExceptDcl),
 }
 
+#[derive(Debug)]
 pub struct OpDcl {
     pub ty: OpTypeSpec,
     pub ident: String,
@@ -40,43 +49,53 @@ pub struct OpDcl {
     pub raises: Option<RaisesExpr>,
 }
 
+#[derive(Debug)]
 pub enum OpTypeSpec {
     Void,
     TypeSpec(TypeSpec),
 }
 
+#[derive(Debug)]
 pub struct ParameterDcls(pub Vec<ParamDcl>);
 
+#[derive(Debug)]
 pub struct ParamDcl {
     pub attr: Option<ParamAttribute>,
     pub ty: TypeSpec,
     pub declarator: SimpleDeclarator,
 }
 
+#[derive(Debug)]
 pub struct ParamAttribute(pub String);
 
+#[derive(Debug)]
 pub struct RaisesExpr(pub Vec<ScopedName>);
 
+#[derive(Debug)]
 pub enum AttrDcl {
     ReadonlyAttrSpec(ReadonlyAttrSpec),
     AttrSpec(AttrSpec),
 }
 
+#[derive(Debug)]
 pub struct ReadonlyAttrSpec {
     pub ty: TypeSpec,
     pub declarator: ReadonlyAttrDeclarator,
 }
 
+#[derive(Debug)]
 pub enum ReadonlyAttrDeclarator {
     SimpleDeclarator(SimpleDeclarator),
     RaisesExpr(RaisesExpr),
 }
 
+#[derive(Debug)]
 pub struct AttrSpec {
     pub ty: TypeSpec,
     pub declarator: AttrDeclarator,
 }
 
+#[derive(Debug)]
 pub enum AttrDeclarator {
     SimpleDeclarator(Vec<SimpleDeclarator>),
     WithRaises {
@@ -85,19 +104,23 @@ pub enum AttrDeclarator {
     },
 }
 
+#[derive(Debug)]
 pub enum AttrRaisesExpr {
     Case1(GetExcepExpr, Option<SetExcepExpr>),
     SetExcepExpr(SetExcepExpr),
 }
 
+#[derive(Debug)]
 pub struct GetExcepExpr {
     pub expr: ExceptionList,
 }
 
+#[derive(Debug)]
 pub struct SetExcepExpr {
     pub expr: ExceptionList,
 }
 
+#[derive(Debug)]
 pub struct ExceptionList(pub Vec<ScopedName>);
 
 impl From<crate::typed_ast::InterfaceDcl> for InterfaceDcl {

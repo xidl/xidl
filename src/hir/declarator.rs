@@ -1,15 +1,18 @@
 use super::*;
 
+#[derive(Debug)]
 pub enum Declarator {
     SimpleDeclarator(SimpleDeclarator),
     ArrayDeclarator(ArrayDeclarator),
 }
 
+#[derive(Debug)]
 pub struct ArrayDeclarator {
     pub ident: String,
     pub len: Vec<ConstExpr>,
 }
 
+#[derive(Debug)]
 pub struct SimpleDeclarator(pub String);
 
 impl From<crate::typed_ast::Declarator> for Declarator {

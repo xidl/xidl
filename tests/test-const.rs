@@ -1,30 +1,10 @@
-#[test]
-fn test_const_dec() {
-    let ast = idl_rs::parser::parser_text("const int32 a = 10;").unwrap();
-    insta::assert_debug_snapshot!(ast)
-}
-
-#[test]
-fn test_const_binary() {
-    let ast = idl_rs::parser::parser_text("const int32 a = 0b10;").unwrap();
-    insta::assert_debug_snapshot!(ast)
-}
-
-#[test]
-fn test_const_oct() {
-    let ast = idl_rs::parser::parser_text("const int32 a = 0o10;").unwrap();
-    insta::assert_debug_snapshot!(ast)
-}
-
-#[test]
-fn test_const_hex() {
-    let ast = idl_rs::parser::parser_text("const int32 a = 0xff;").unwrap();
-    insta::assert_debug_snapshot!(ast)
-}
-
-#[test]
-fn test_const_scoped_name() {
-    let ast = idl_rs::parser::parser_text(
+const TEST_CASES: &[(&str, &str)] = &[
+    ("const_dec", "const int32 a = 10;"),
+    ("const_binary", "const int32 a = 0b10;"),
+    ("const_oct", "const int32 a = 0o10;"),
+    ("const_hex", "const int32 a = 0xff;"),
+    (
+        "const_scoped_name",
         r#"
             const int a = 0;
             const uint8 a = 0;
@@ -57,7 +37,24 @@ fn test_const_scoped_name() {
             const double const_double = 84.1e;
             const long double const_longdouble = 46.1;
         "#,
-    )
-    .unwrap();
-    insta::assert_debug_snapshot!(ast)
+    ),
+];
+
+#[test]
+fn test_typed_ast() {
+    for (name, text) in TEST_CASES {
+        let ast = idl_rs::parser::parser_text(text).unwrap();
+        let snapshot = format!("typed_ast__{name}");
+        insta::assert_debug_snapshot!(snapshot, ast);
+    }
+}
+
+#[test]
+fn test_hir() {
+    for (name, text) in TEST_CASES {
+        let typed = idl_rs::parser::parser_text(text).unwrap();
+        let hir = idl_rs::hir::Specification::from(typed);
+        let snapshot = format!("hir__{name}");
+        insta::assert_debug_snapshot!(snapshot, hir);
+    }
 }

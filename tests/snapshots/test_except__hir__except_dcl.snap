@@ -1,0 +1,7 @@
+---
+source: tests/test-except.rs
+expression: hir
+---
+Specification(
+    [],
+)

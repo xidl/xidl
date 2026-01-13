@@ -1,0 +1,7 @@
+---
+source: tests/test-struct.rs
+expression: hir
+---
+Specification(
+    [],
+)

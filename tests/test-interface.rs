@@ -1,7 +1,6 @@
-#[test]
-fn test_interface() {
-    let ast = idl_rs::parser::parser_text(
-        r#"
+const TEST_CASES: &[(&str, &str)] = &[(
+    "interface_dcl",
+    r#"
         interface HelloWorld;
         interface HelloWorld {};
 
@@ -33,7 +32,23 @@ fn test_interface() {
             short opA(in L1 l_1);
         };
     "#,
-    )
-    .unwrap();
-    insta::assert_debug_snapshot!(ast)
+)];
+
+#[test]
+fn test_typed_ast() {
+    for (name, text) in TEST_CASES {
+        let ast = idl_rs::parser::parser_text(text).unwrap();
+        let snapshot = format!("typed_ast__{name}");
+        insta::assert_debug_snapshot!(snapshot, ast);
+    }
+}
+
+#[test]
+fn test_hir() {
+    for (name, text) in TEST_CASES {
+        let typed = idl_rs::parser::parser_text(text).unwrap();
+        let hir = idl_rs::hir::Specification::from(typed);
+        let snapshot = format!("hir__{name}");
+        insta::assert_debug_snapshot!(snapshot, hir);
+    }
 }

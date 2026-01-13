@@ -25,14 +25,17 @@ pub use exception_dcl::*;
 
 use crate::typed_ast::{ConstExpr, PositiveIntConst};
 
+#[derive(Debug)]
 pub struct Specification(pub Vec<Definition>);
 
+#[derive(Debug)]
 pub enum Definition {
     ConstrTypeDcl(ConstrTypeDcl),
     ConstDcl(ConstDcl),
     InterfaceDcl(InterfaceDcl),
 }
 
+#[derive(Debug)]
 pub enum ConstrTypeDcl {
     StructForwardDcl(StructForwardDcl),
     StructDcl(StructDcl),
@@ -43,31 +46,37 @@ pub enum ConstrTypeDcl {
     BitmaskDcl(BitmaskDcl),
 }
 
+#[derive(Debug)]
 pub struct UnionForwardDcl {
     pub ident: String,
 }
 
+#[derive(Debug)]
 pub struct UnionDef {
     pub ident: String,
     pub switch_type_spec: SwitchTypeSpec,
     pub case: Vec<Case>,
 }
 
+#[derive(Debug)]
 pub struct Case {
     pub label: Vec<ConstExpr>,
     pub element: ElementSpec,
 }
 
+#[derive(Debug)]
 pub struct ElementSpec {
     pub ty: ElementSpecTy,
     pub value: Declarator,
 }
 
+#[derive(Debug)]
 pub enum ElementSpecTy {
     TypeSpec(TypeSpec),
     ConstrTypeDcl(ConstrTypeDcl),
 }
 
+#[derive(Debug)]
 pub enum SwitchTypeSpec {
     IntegerType(IntegerType),
     CharType,
@@ -77,13 +86,14 @@ pub enum SwitchTypeSpec {
     OctetType,
 }
 
+#[derive(Debug)]
 pub struct BitsetDcl {
     pub ident: String,
     pub parent: Option<ScopedName>,
     pub field: Vec<BitField>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum BitFieldType {
     Bool,
     Octec,
@@ -91,12 +101,14 @@ pub enum BitFieldType {
     UnsignedInt,
 }
 
+#[derive(Debug)]
 pub struct BitField {
     pub ident: String,
     pub pos: PositiveIntConst,
     pub ty: Option<BitFieldType>,
 }
 
+#[derive(Debug)]
 pub struct BitmaskDcl {
     pub ident: String,
     pub value: Vec<String>,

@@ -1,23 +1,28 @@
 use super::*;
 
+#[derive(Debug)]
 pub struct TypeDcl(pub Vec<TypeDclInner>);
 
+#[derive(Debug)]
 pub enum TypeDclInner {
     ConstrTypeDcl(ConstrTypeDcl),
     TypedefDcl(TypedefDcl),
     NativeDcl(NativeDcl),
 }
 
+#[derive(Debug)]
 pub struct TypedefDcl {
     pub ty: TypedefType,
     pub decl: Vec<Declarator>,
 }
 
+#[derive(Debug)]
 pub enum TypedefType {
     TypeSpec(TypeSpec),
     ConstrTypeDcl(ConstrTypeDcl),
 }
 
+#[derive(Debug)]
 pub struct NativeDcl {
     pub decl: SimpleDeclarator,
 }

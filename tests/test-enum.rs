@@ -1,17 +1,24 @@
+const TEST_CASES: &[(&str, &str)] = &[
+    ("enum_empty", "enum A { };"),
+    ("enum_simple", "enum A { B, C };"),
+    ("enum_simple_comma", "enum A { B, C, };"),
+];
+
 #[test]
-fn test_enum_empty() {
-    let ast = idl_rs::parser::parser_text("enum A { };").unwrap();
-    insta::assert_debug_snapshot!(ast)
+fn test_typed_ast() {
+    for (name, text) in TEST_CASES {
+        let ast = idl_rs::parser::parser_text(text).unwrap();
+        let snapshot = format!("typed_ast__{name}");
+        insta::assert_debug_snapshot!(snapshot, ast);
+    }
 }
 
 #[test]
-fn test_enum_simple() {
-    let ast = idl_rs::parser::parser_text("enum A { B, C };").unwrap();
-    insta::assert_debug_snapshot!(ast)
-}
-
-#[test]
-fn test_enum_simple_comma() {
-    let ast = idl_rs::parser::parser_text("enum A { B, C, };").unwrap();
-    insta::assert_debug_snapshot!(ast)
+fn test_hir() {
+    for (name, text) in TEST_CASES {
+        let typed = idl_rs::parser::parser_text(text).unwrap();
+        let hir = idl_rs::hir::Specification::from(typed);
+        let snapshot = format!("hir__{name}");
+        insta::assert_debug_snapshot!(snapshot, hir);
+    }
 }

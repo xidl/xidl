@@ -1,7 +1,6 @@
-#[test]
-fn test_misc() {
-    let ast = idl_rs::parser::parser_text(
-        r#"
+const TEST_CASES: &[(&str, &str)] = &[(
+    "misc",
+    r#"
         enum Color { red, green, blue };
         const Color FAVORITE_COLOR = red;
 
@@ -97,7 +96,23 @@ fn test_misc() {
             attribute B::string_t City; // OK
         };
     "#,
-    )
-    .unwrap();
-    insta::assert_debug_snapshot!(ast)
+)];
+
+#[test]
+fn test_typed_ast() {
+    for (name, text) in TEST_CASES {
+        let ast = idl_rs::parser::parser_text(text).unwrap();
+        let snapshot = format!("typed_ast__{name}");
+        insta::assert_debug_snapshot!(snapshot, ast);
+    }
+}
+
+#[test]
+fn test_hir() {
+    for (name, text) in TEST_CASES {
+        let typed = idl_rs::parser::parser_text(text).unwrap();
+        let hir = idl_rs::hir::Specification::from(typed);
+        let snapshot = format!("hir__{name}");
+        insta::assert_debug_snapshot!(snapshot, hir);
+    }
 }
