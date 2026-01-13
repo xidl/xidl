@@ -147,9 +147,7 @@ impl From<crate::typed_ast::TemplateTypeSpec> for TemplateTypeSpec {
             crate::typed_ast::TemplateTypeSpec::FixedPtType(fixed_pt_type) => {
                 Self::FixedPtType(fixed_pt_type.into())
             }
-            crate::typed_ast::TemplateTypeSpec::MapType(map_type) => {
-                Self::MapType(map_type.into())
-            }
+            crate::typed_ast::TemplateTypeSpec::MapType(map_type) => Self::MapType(map_type.into()),
         }
     }
 }
@@ -158,7 +156,7 @@ impl From<crate::typed_ast::SequenceType> for SequenceType {
     fn from(value: crate::typed_ast::SequenceType) -> Self {
         Self {
             ty: Box::new((*value.ty).into()),
-            len: value.len,
+            len: value.len.map(Into::into),
         }
     }
 }
@@ -168,28 +166,32 @@ impl From<crate::typed_ast::MapType> for MapType {
         Self {
             key: Box::new((*value.key).into()),
             value: Box::new((*value.value).into()),
-            len: value.len,
+            len: value.len.map(Into::into),
         }
     }
 }
 
 impl From<crate::typed_ast::StringType> for StringType {
     fn from(value: crate::typed_ast::StringType) -> Self {
-        Self { bound: value.bound }
+        Self {
+            bound: value.bound.map(Into::into),
+        }
     }
 }
 
 impl From<crate::typed_ast::WideStringType> for WideStringType {
     fn from(value: crate::typed_ast::WideStringType) -> Self {
-        Self { bound: value.bound }
+        Self {
+            bound: value.bound.map(Into::into),
+        }
     }
 }
 
 impl From<crate::typed_ast::FixedPtType> for FixedPtType {
     fn from(value: crate::typed_ast::FixedPtType) -> Self {
         Self {
-            integer: value.integer,
-            fraction: value.fraction,
+            integer: value.integer.into(),
+            fraction: value.fraction.into(),
         }
     }
 }

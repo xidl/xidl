@@ -40,9 +40,7 @@ impl From<crate::typed_ast::TypeDclInner> for TypeDclInner {
             crate::typed_ast::TypeDclInner::ConstrTypeDcl(constr) => {
                 Self::ConstrTypeDcl(constr.into())
             }
-            crate::typed_ast::TypeDclInner::TypedefDcl(typedef) => {
-                Self::TypedefDcl(typedef.into())
-            }
+            crate::typed_ast::TypeDclInner::TypedefDcl(typedef) => Self::TypedefDcl(typedef.into()),
             crate::typed_ast::TypeDclInner::NativeDcl(native_dcl) => {
                 Self::NativeDcl(native_dcl.into())
             }

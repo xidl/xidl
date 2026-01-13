@@ -53,6 +53,6 @@ impl From<crate::typed_ast::StructForwardDcl> for StructForwardDcl {
 
 impl From<crate::typed_ast::Default> for Default {
     fn from(value: crate::typed_ast::Default) -> Self {
-        Self(value.0)
+        Self(value.0.into())
     }
 }

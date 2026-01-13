@@ -28,7 +28,7 @@ impl From<crate::typed_ast::ConstDcl> for ConstDcl {
         Self {
             ty: value.ty.into(),
             ident: value.ident.0,
-            value: value.value,
+            value: value.value.into(),
         }
     }
 }

@@ -3,7 +3,6 @@ pub use base_types::*;
 
 mod expr;
 use derive::Parser;
-use serde::{Deserialize, Serialize};
 pub use expr::*;
 
 mod preproc;
@@ -122,9 +121,9 @@ pub enum ConstType {
     SequenceType(SequenceType),
 }
 
-#[derive(Debug, Clone, PartialEq, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Parser)]
 #[ts(transparent)]
 pub struct Identifier(pub String);
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, Parser)]
 pub struct PositiveIntConst(pub ConstExpr);

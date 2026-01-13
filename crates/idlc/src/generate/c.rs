@@ -1,7 +1,6 @@
 use crate::error::{IdlcError, Result};
-use crate::generate::{render_const_expr, to_snake_case, typed_scoped_name_parts, GeneratedFile};
+use crate::generate::{render_const_expr, to_snake_case, GeneratedFile};
 use idl_rs::hir;
-use idl_rs::typed_ast;
 use minijinja::Environment;
 use serde::Serialize;
 use std::path::Path;
@@ -119,7 +118,12 @@ fn constr_to_def(constr: &hir::ConstrTypeDcl) -> CDef {
             let fields = def
                 .member
                 .iter()
-                .flat_map(|member| member.ident.iter().map(|decl| field_for_member(member, decl)))
+                .flat_map(|member| {
+                    member
+                        .ident
+                        .iter()
+                        .map(|decl| field_for_member(member, decl))
+                })
                 .collect();
             CDef {
                 kind: "struct",
@@ -203,7 +207,12 @@ fn field_for_member(member: &hir::Member, decl: &hir::Declarator) -> CField {
             let dims = value
                 .len
                 .iter()
-                .map(|len| format!("[{}]", render_const_expr(len, &c_scoped_name, &c_literal)))
+                .map(|len| {
+                    format!(
+                        "[{}]",
+                        render_const_expr(&len.0, &c_scoped_name, &c_literal)
+                    )
+                })
                 .collect();
             CField {
                 ty,
@@ -277,30 +286,30 @@ fn c_scoped_name_hir(value: &hir::ScopedName) -> String {
         .join("_")
 }
 
-fn c_scoped_name(value: &typed_ast::ScopedName) -> String {
-    typed_scoped_name_parts(value)
-        .into_iter()
-        .map(|part| to_snake_case(&part))
-        .collect::<Vec<_>>()
-        .join("_")
+fn c_scoped_name(value: &hir::ScopedName) -> String {
+    c_scoped_name_hir(value)
 }
 
-fn c_literal(value: &typed_ast::Literal) -> String {
+fn c_literal(value: &hir::Literal) -> String {
     match value {
-        typed_ast::Literal::IntegerLiteral(lit) => match lit {
-            typed_ast::IntegerLiteral::BinNumber(value) => value.clone(),
-            typed_ast::IntegerLiteral::OctNumber(value) => value.clone(),
-            typed_ast::IntegerLiteral::DecNumber(value) => value.clone(),
-            typed_ast::IntegerLiteral::HexNumber(value) => value.clone(),
+        hir::Literal::IntegerLiteral(lit) => match lit {
+            hir::IntegerLiteral::BinNumber(value) => value.clone(),
+            hir::IntegerLiteral::OctNumber(value) => value.clone(),
+            hir::IntegerLiteral::DecNumber(value) => value.clone(),
+            hir::IntegerLiteral::HexNumber(value) => value.clone(),
         },
-        typed_ast::Literal::FloatingPtLiteral(lit) => {
-            let sign = lit.sign.as_ref().map(|value| value.0.as_str()).unwrap_or("");
+        hir::Literal::FloatingPtLiteral(lit) => {
+            let sign = lit
+                .sign
+                .as_ref()
+                .map(|value| value.0.as_str())
+                .unwrap_or("");
             format!("{}{}.{}", sign, lit.integer.0, lit.fraction.0)
         }
-        typed_ast::Literal::CharLiteral(value) => value.clone(),
-        typed_ast::Literal::WideCharacterLiteral(value) => value.clone(),
-        typed_ast::Literal::StringLiteral(value) => value.clone(),
-        typed_ast::Literal::WideStringLiteral(value) => value.clone(),
-        typed_ast::Literal::BooleanLiteral(value) => value.to_ascii_lowercase(),
+        hir::Literal::CharLiteral(value) => value.clone(),
+        hir::Literal::WideCharacterLiteral(value) => value.clone(),
+        hir::Literal::StringLiteral(value) => value.clone(),
+        hir::Literal::WideStringLiteral(value) => value.clone(),
+        hir::Literal::BooleanLiteral(value) => value.to_ascii_lowercase(),
     }
 }

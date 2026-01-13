@@ -10,7 +10,7 @@ pub enum Declarator {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ArrayDeclarator {
     pub ident: String,
-    pub len: Vec<ConstExpr>,
+    pub len: Vec<PositiveIntConst>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -39,7 +39,7 @@ impl From<crate::typed_ast::ArrayDeclarator> for ArrayDeclarator {
     fn from(value: crate::typed_ast::ArrayDeclarator) -> Self {
         Self {
             ident: value.ident.0,
-            len: value.len.into_iter().map(|v| v.0 .0).collect(),
+            len: value.len.into_iter().map(Into::into).collect(),
         }
     }
 }

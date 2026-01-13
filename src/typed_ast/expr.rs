@@ -1,44 +1,43 @@
 use derive::Parser;
-use serde::{Deserialize, Serialize};
 
 use crate::typed_ast::Identifier;
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, Parser)]
 pub struct ConstExpr(pub OrExpr);
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, Parser)]
 pub enum OrExpr {
     XorExpr(XorExpr),
     OrExpr(Box<OrExpr>, XorExpr),
 }
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, Parser)]
 pub enum XorExpr {
     AndExpr(AndExpr),
     XorExpr(Box<XorExpr>, AndExpr),
 }
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, Parser)]
 pub enum AndExpr {
     ShiftExpr(ShiftExpr),
     AndExpr(Box<AndExpr>, ShiftExpr),
 }
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, Parser)]
 pub enum ShiftExpr {
     AddExpr(AddExpr),
     LeftShiftExpr(Box<ShiftExpr>, AddExpr),
     RightShiftExpr(Box<ShiftExpr>, AddExpr),
 }
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, Parser)]
 pub enum AddExpr {
     MultExpr(MultExpr),
     AddExpr(Box<AddExpr>, MultExpr),
     SubExpr(Box<AddExpr>, MultExpr),
 }
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, Parser)]
 pub enum MultExpr {
     UnaryExpr(UnaryExpr),
     MultExpr(Box<MultExpr>, UnaryExpr),
@@ -46,20 +45,20 @@ pub enum MultExpr {
     ModExpr(Box<MultExpr>, UnaryExpr),
 }
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, Parser)]
 pub enum UnaryExpr {
     UnaryExpr(UnaryOperator, PrimaryExpr),
     PrimaryExpr(PrimaryExpr),
 }
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, Parser)]
 pub enum PrimaryExpr {
     ScopedName(ScopedName),
     Literal(Literal),
     ConstExpr(Box<ConstExpr>),
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 pub enum UnaryOperator {
     Add,
     Sub,
@@ -88,7 +87,7 @@ impl<'a> crate::parser::FromTreeSitter<'a> for UnaryOperator {
     }
 }
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, Parser)]
 pub struct ScopedName {
     #[ts(id = "scoped_name")]
     pub scoped_name: Option<Box<ScopedName>>,
@@ -97,7 +96,7 @@ pub struct ScopedName {
     pub node_text: String,
 }
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, Parser)]
 pub enum Literal {
     IntegerLiteral(IntegerLiteral),
     FloatingPtLiteral(FloatingPtLiteral),
@@ -109,7 +108,7 @@ pub enum Literal {
     BooleanLiteral(String),
 }
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, Parser)]
 pub enum IntegerLiteral {
     BinNumber(String),
     OctNumber(String),
@@ -117,7 +116,7 @@ pub enum IntegerLiteral {
     HexNumber(String),
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 pub struct FloatingPtLiteral {
     pub sign: Option<IntegerSign>,
     pub integer: DecNumber,
@@ -158,10 +157,10 @@ impl<'a> crate::parser::FromTreeSitter<'a> for FloatingPtLiteral {
     }
 }
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, Parser)]
 #[ts(transparent)]
 pub struct IntegerSign(pub String);
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, Parser)]
 #[ts(transparent)]
 pub struct DecNumber(pub String);

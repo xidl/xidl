@@ -137,7 +137,9 @@ impl From<crate::typed_ast::InterfaceDcl> for InterfaceDcl {
 
 impl From<crate::typed_ast::InterfaceForwardDcl> for InterfaceForwardDcl {
     fn from(value: crate::typed_ast::InterfaceForwardDcl) -> Self {
-        Self { ident: value.ident.0 }
+        Self {
+            ident: value.ident.0,
+        }
     }
 }
 
@@ -301,9 +303,7 @@ impl From<crate::typed_ast::AttrRaisesExpr> for AttrRaisesExpr {
             crate::typed_ast::AttrRaisesExpr::Case1(get, set) => {
                 Self::Case1(get.into(), set.map(Into::into))
             }
-            crate::typed_ast::AttrRaisesExpr::SetExcepExpr(set) => {
-                Self::SetExcepExpr(set.into())
-            }
+            crate::typed_ast::AttrRaisesExpr::SetExcepExpr(set) => Self::SetExcepExpr(set.into()),
         }
     }
 }

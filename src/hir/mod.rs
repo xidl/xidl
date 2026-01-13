@@ -5,6 +5,9 @@ mod struct_dcl;
 use serde::{Deserialize, Serialize};
 pub use struct_dcl::*;
 
+mod expr;
+pub use expr::*;
+
 mod declarator;
 pub use declarator::*;
 
@@ -22,8 +25,6 @@ pub use type_dcl::*;
 
 mod exception_dcl;
 pub use exception_dcl::*;
-
-use crate::typed_ast::{ConstExpr, PositiveIntConst};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Specification(pub Vec<Definition>);
@@ -114,7 +115,7 @@ pub struct BitmaskDcl {
     pub value: Vec<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ScopedName {
     pub name: Vec<String>,
     pub is_root: bool,
@@ -227,7 +228,11 @@ impl From<crate::typed_ast::UnionDef> for UnionDef {
 impl From<crate::typed_ast::Case> for Case {
     fn from(value: crate::typed_ast::Case) -> Self {
         Self {
-            label: value.label.into_iter().map(|label| label.0).collect(),
+            label: value
+                .label
+                .into_iter()
+                .map(|label| label.0.into())
+                .collect(),
             element: value.element.into(),
         }
     }
@@ -279,7 +284,7 @@ impl From<crate::typed_ast::BitsetDcl> for BitsetDcl {
             for ident in bitfield.ident {
                 field.push(BitField {
                     ident: ident.0,
-                    pos: pos.clone(),
+                    pos: pos.clone().into(),
                     ty: ty.clone(),
                 });
             }
