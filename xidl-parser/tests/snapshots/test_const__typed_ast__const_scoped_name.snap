@@ -1,0 +1,984 @@
+---
+source: xidl-parser/tests/test-const.rs
+expression: ast
+---
+Specification(
+    [
+        ConstDcl(
+            ConstDcl {
+                ty: ScopedName(
+                    ScopedName {
+                        scoped_name: None,
+                        identifier: Identifier(
+                            "int",
+                        ),
+                        node_text: "int",
+                    },
+                ),
+                ident: Identifier(
+                    "a",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        DecNumber(
+                                                            "0",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: IntegerType(
+                    UnsignedInt(
+                        UnsignedTinyInt(
+                            UnsignedTinyInt,
+                        ),
+                    ),
+                ),
+                ident: Identifier(
+                    "a",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        DecNumber(
+                                                            "0",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: IntegerType(
+                    UnsignedInt(
+                        UnsignedShortInt(
+                            UnsignedShortInt,
+                        ),
+                    ),
+                ),
+                ident: Identifier(
+                    "a",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        DecNumber(
+                                                            "0",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: IntegerType(
+                    UnsignedInt(
+                        UnsignedLongInt(
+                            UnsignedLongInt,
+                        ),
+                    ),
+                ),
+                ident: Identifier(
+                    "a",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        DecNumber(
+                                                            "0",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: IntegerType(
+                    UnsignedInt(
+                        UnsignedLongLongInt(
+                            UnsignedLongLongInt,
+                        ),
+                    ),
+                ),
+                ident: Identifier(
+                    "a",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        DecNumber(
+                                                            "0",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: IntegerType(
+                    SignedInt(
+                        SignedTinyInt(
+                            SignedTinyInt,
+                        ),
+                    ),
+                ),
+                ident: Identifier(
+                    "a",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        DecNumber(
+                                                            "0",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: IntegerType(
+                    SignedInt(
+                        SignedShortInt(
+                            SignedShortInt,
+                        ),
+                    ),
+                ),
+                ident: Identifier(
+                    "a",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        DecNumber(
+                                                            "0",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: IntegerType(
+                    SignedInt(
+                        SignedLongInt(
+                            SignedLongInt,
+                        ),
+                    ),
+                ),
+                ident: Identifier(
+                    "a",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        DecNumber(
+                                                            "0",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: IntegerType(
+                    SignedInt(
+                        SignedLongLongInt(
+                            SignedLongLongInt,
+                        ),
+                    ),
+                ),
+                ident: Identifier(
+                    "a",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        DecNumber(
+                                                            "0",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: ScopedName(
+                    ScopedName {
+                        scoped_name: None,
+                        identifier: Identifier(
+                            "char8",
+                        ),
+                        node_text: "char8",
+                    },
+                ),
+                ident: Identifier(
+                    "a",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        DecNumber(
+                                                            "0",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: ScopedName(
+                    ScopedName {
+                        scoped_name: None,
+                        identifier: Identifier(
+                            "char16",
+                        ),
+                        node_text: "char16",
+                    },
+                ),
+                ident: Identifier(
+                    "a",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        DecNumber(
+                                                            "0",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: CharType(
+                    CharType,
+                ),
+                ident: Identifier(
+                    "C1",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    CharLiteral(
+                                                        "'X'",
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: WideCharType(
+                    WideCharType,
+                ),
+                ident: Identifier(
+                    "C2",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    WideCharacterLiteral(
+                                                        "L'X'",
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: StringType(
+                    StringType {
+                        bound: None,
+                    },
+                ),
+                ident: Identifier(
+                    "C3",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    StringLiteral(
+                                                        "\"aaa\"",
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: WideStringType(
+                    WideStringType {
+                        bound: None,
+                    },
+                ),
+                ident: Identifier(
+                    "C3",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    WideStringLiteral(
+                                                        "L\"aaa\"",
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: ScopedName(
+                    ScopedName {
+                        scoped_name: None,
+                        identifier: Identifier(
+                            "bool",
+                        ),
+                        node_text: "bool",
+                    },
+                ),
+                ident: Identifier(
+                    "C3",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        scoped_name: None,
+                                                        identifier: Identifier(
+                                                            "false",
+                                                        ),
+                                                        node_text: "false",
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: ScopedName(
+                    ScopedName {
+                        scoped_name: None,
+                        identifier: Identifier(
+                            "A",
+                        ),
+                        node_text: "::A",
+                    },
+                ),
+                ident: Identifier(
+                    "a",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        DecNumber(
+                                                            "0",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: ScopedName(
+                    ScopedName {
+                        scoped_name: Some(
+                            ScopedName {
+                                scoped_name: None,
+                                identifier: Identifier(
+                                    "A",
+                                ),
+                                node_text: "A",
+                            },
+                        ),
+                        identifier: Identifier(
+                            "B",
+                        ),
+                        node_text: "A::B",
+                    },
+                ),
+                ident: Identifier(
+                    "a",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        DecNumber(
+                                                            "0",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: ScopedName(
+                    ScopedName {
+                        scoped_name: Some(
+                            ScopedName {
+                                scoped_name: Some(
+                                    ScopedName {
+                                        scoped_name: None,
+                                        identifier: Identifier(
+                                            "A",
+                                        ),
+                                        node_text: "A",
+                                    },
+                                ),
+                                identifier: Identifier(
+                                    "B",
+                                ),
+                                node_text: "A::B",
+                            },
+                        ),
+                        identifier: Identifier(
+                            "C",
+                        ),
+                        node_text: "A::B::C",
+                    },
+                ),
+                ident: Identifier(
+                    "a",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        DecNumber(
+                                                            "0",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: ScopedName(
+                    ScopedName {
+                        scoped_name: Some(
+                            ScopedName {
+                                scoped_name: Some(
+                                    ScopedName {
+                                        scoped_name: Some(
+                                            ScopedName {
+                                                scoped_name: Some(
+                                                    ScopedName {
+                                                        scoped_name: Some(
+                                                            ScopedName {
+                                                                scoped_name: None,
+                                                                identifier: Identifier(
+                                                                    "A",
+                                                                ),
+                                                                node_text: "A",
+                                                            },
+                                                        ),
+                                                        identifier: Identifier(
+                                                            "B",
+                                                        ),
+                                                        node_text: "A::B",
+                                                    },
+                                                ),
+                                                identifier: Identifier(
+                                                    "C",
+                                                ),
+                                                node_text: "A::B::C",
+                                            },
+                                        ),
+                                        identifier: Identifier(
+                                            "D",
+                                        ),
+                                        node_text: "A::B::C::D",
+                                    },
+                                ),
+                                identifier: Identifier(
+                                    "E",
+                                ),
+                                node_text: "A::B::C::D::E",
+                            },
+                        ),
+                        identifier: Identifier(
+                            "F",
+                        ),
+                        node_text: "A::B::C::D::E::F",
+                    },
+                ),
+                ident: Identifier(
+                    "a",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        DecNumber(
+                                                            "0",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: ScopedName(
+                    ScopedName {
+                        scoped_name: Some(
+                            ScopedName {
+                                scoped_name: None,
+                                identifier: Identifier(
+                                    "M",
+                                ),
+                                node_text: "M",
+                            },
+                        ),
+                        identifier: Identifier(
+                            "Size",
+                        ),
+                        node_text: "M::Size",
+                    },
+                ),
+                ident: Identifier(
+                    "MYSIZE",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        scoped_name: Some(
+                                                            ScopedName {
+                                                                scoped_name: None,
+                                                                identifier: Identifier(
+                                                                    "M",
+                                                                ),
+                                                                node_text: "M",
+                                                            },
+                                                        ),
+                                                        identifier: Identifier(
+                                                            "medium",
+                                                        ),
+                                                        node_text: "M::medium",
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: FloatingPtType(
+                    FloatingPtType,
+                ),
+                ident: Identifier(
+                    "const_float",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    FloatingPtLiteral(
+                                                        FloatingPtLiteral {
+                                                            sign: None,
+                                                            integer: DecNumber(
+                                                                "13",
+                                                            ),
+                                                            fraction: DecNumber(
+                                                                "1",
+                                                            ),
+                                                        },
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: FloatingPtType(
+                    FloatingPtType,
+                ),
+                ident: Identifier(
+                    "const_double",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    FloatingPtLiteral(
+                                                        FloatingPtLiteral {
+                                                            sign: None,
+                                                            integer: DecNumber(
+                                                                "84",
+                                                            ),
+                                                            fraction: DecNumber(
+                                                                "1",
+                                                            ),
+                                                        },
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: FloatingPtType(
+                    FloatingPtType,
+                ),
+                ident: Identifier(
+                    "const_longdouble",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    FloatingPtLiteral(
+                                                        FloatingPtLiteral {
+                                                            sign: None,
+                                                            integer: DecNumber(
+                                                                "46",
+                                                            ),
+                                                            fraction: DecNumber(
+                                                                "1",
+                                                            ),
+                                                        },
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+    ],
+)

@@ -1,0 +1,7 @@
+---
+source: xidl-parser/tests/test-struct.rs
+expression: ast
+---
+Specification(
+    [],
+)

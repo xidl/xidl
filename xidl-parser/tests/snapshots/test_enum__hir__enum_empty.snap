@@ -1,0 +1,16 @@
+---
+source: xidl-parser/tests/test-enum.rs
+expression: hir
+---
+Specification(
+    [
+        ConstrTypeDcl(
+            EnumDcl(
+                EnumDcl {
+                    ident: "A",
+                    member: [],
+                },
+            ),
+        ),
+    ],
+)

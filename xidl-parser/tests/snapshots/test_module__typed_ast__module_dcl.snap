@@ -1,0 +1,81 @@
+---
+source: xidl-parser/tests/test-module.rs
+expression: ast
+---
+Specification(
+    [
+        ModuleDcl(
+            ModuleDcl {
+                ident: Identifier(
+                    "A",
+                ),
+                definition: [],
+            },
+        ),
+        ModuleDcl(
+            ModuleDcl {
+                ident: Identifier(
+                    "B",
+                ),
+                definition: [
+                    ConstDcl(
+                        ConstDcl {
+                            ty: ScopedName(
+                                ScopedName {
+                                    scoped_name: None,
+                                    identifier: Identifier(
+                                        "u8",
+                                    ),
+                                    node_text: "u8",
+                                },
+                            ),
+                            ident: Identifier(
+                                "a",
+                            ),
+                            value: ConstExpr(
+                                XorExpr(
+                                    AndExpr(
+                                        ShiftExpr(
+                                            AddExpr(
+                                                MultExpr(
+                                                    UnaryExpr(
+                                                        PrimaryExpr(
+                                                            Literal(
+                                                                IntegerLiteral(
+                                                                    DecNumber(
+                                                                        "10",
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        },
+                    ),
+                    TypeDcl(
+                        TypeDcl(
+                            [
+                                ConstrTypeDcl(
+                                    StructDcl(
+                                        StructForwardDcl(
+                                            StructForwardDcl {
+                                                ident: Identifier(
+                                                    "B",
+                                                ),
+                                            },
+                                        ),
+                                    ),
+                                ),
+                            ],
+                        ),
+                    ),
+                ],
+            },
+        ),
+    ],
+)

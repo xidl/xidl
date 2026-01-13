@@ -1,0 +1,7 @@
+---
+source: xidl-parser/tests/test-except.rs
+expression: hir
+---
+Specification(
+    [],
+)

@@ -1,0 +1,7 @@
+---
+source: xidl-parser/tests/test-typedef.rs
+expression: hir
+---
+Specification(
+    [],
+)

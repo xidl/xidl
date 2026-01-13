@@ -1,0 +1,40 @@
+---
+source: xidl-parser/tests/test-bitmask.rs
+expression: hir
+---
+Specification(
+    [
+        ConstrTypeDcl(
+            BitmaskDcl(
+                BitmaskDcl {
+                    ident: "A",
+                    value: [],
+                },
+            ),
+        ),
+        ConstrTypeDcl(
+            BitmaskDcl(
+                BitmaskDcl {
+                    ident: "A",
+                    value: [
+                        "A",
+                        "B",
+                        "C",
+                    ],
+                },
+            ),
+        ),
+        ConstrTypeDcl(
+            BitmaskDcl(
+                BitmaskDcl {
+                    ident: "A",
+                    value: [
+                        "A",
+                        "B",
+                        "C",
+                    ],
+                },
+            ),
+        ),
+    ],
+)

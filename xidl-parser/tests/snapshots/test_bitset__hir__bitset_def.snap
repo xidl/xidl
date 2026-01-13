@@ -1,0 +1,166 @@
+---
+source: xidl-parser/tests/test-bitset.rs
+expression: hir
+---
+Specification(
+    [
+        ConstrTypeDcl(
+            BitsetDcl(
+                BitsetDcl {
+                    ident: "A",
+                    parent: None,
+                    field: [],
+                },
+            ),
+        ),
+        ConstrTypeDcl(
+            BitsetDcl(
+                BitsetDcl {
+                    ident: "A",
+                    parent: Some(
+                        ScopedName {
+                            name: [
+                                "B",
+                            ],
+                            is_root: false,
+                        },
+                    ),
+                    field: [],
+                },
+            ),
+        ),
+        ConstrTypeDcl(
+            BitsetDcl(
+                BitsetDcl {
+                    ident: "A",
+                    parent: Some(
+                        ScopedName {
+                            name: [
+                                "B",
+                            ],
+                            is_root: false,
+                        },
+                    ),
+                    field: [
+                        BitField {
+                            ident: "a",
+                            pos: PositiveIntConst(
+                                ConstExpr(
+                                    XorExpr(
+                                        AndExpr(
+                                            ShiftExpr(
+                                                AddExpr(
+                                                    MultExpr(
+                                                        UnaryExpr(
+                                                            PrimaryExpr(
+                                                                Literal(
+                                                                    IntegerLiteral(
+                                                                        DecNumber(
+                                                                            "1",
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                            ty: None,
+                        },
+                        BitField {
+                            ident: "a",
+                            pos: PositiveIntConst(
+                                ConstExpr(
+                                    XorExpr(
+                                        AndExpr(
+                                            ShiftExpr(
+                                                AddExpr(
+                                                    MultExpr(
+                                                        UnaryExpr(
+                                                            PrimaryExpr(
+                                                                Literal(
+                                                                    IntegerLiteral(
+                                                                        DecNumber(
+                                                                            "1",
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                            ty: None,
+                        },
+                        BitField {
+                            ident: "b",
+                            pos: PositiveIntConst(
+                                ConstExpr(
+                                    XorExpr(
+                                        AndExpr(
+                                            ShiftExpr(
+                                                AddExpr(
+                                                    MultExpr(
+                                                        UnaryExpr(
+                                                            PrimaryExpr(
+                                                                Literal(
+                                                                    IntegerLiteral(
+                                                                        DecNumber(
+                                                                            "1",
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                            ty: None,
+                        },
+                        BitField {
+                            ident: "c",
+                            pos: PositiveIntConst(
+                                ConstExpr(
+                                    XorExpr(
+                                        AndExpr(
+                                            ShiftExpr(
+                                                AddExpr(
+                                                    MultExpr(
+                                                        UnaryExpr(
+                                                            PrimaryExpr(
+                                                                Literal(
+                                                                    IntegerLiteral(
+                                                                        DecNumber(
+                                                                            "1",
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                            ty: None,
+                        },
+                    ],
+                },
+            ),
+        ),
+    ],
+)

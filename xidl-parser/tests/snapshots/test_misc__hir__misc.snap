@@ -1,0 +1,1321 @@
+---
+source: xidl-parser/tests/test-misc.rs
+expression: hir
+---
+Specification(
+    [
+        ConstrTypeDcl(
+            EnumDcl(
+                EnumDcl {
+                    ident: "Color",
+                    member: [
+                        "red",
+                        "green",
+                        "blue",
+                    ],
+                },
+            ),
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: ScopedName(
+                    ScopedName {
+                        name: [
+                            "Color",
+                        ],
+                        is_root: false,
+                    },
+                ),
+                ident: "FAVORITE_COLOR",
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "red",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: ScopedName(
+                    ScopedName {
+                        name: [
+                            "M",
+                            "Size",
+                        ],
+                        is_root: false,
+                    },
+                ),
+                ident: "MYSIZE",
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "M",
+                                                            "medium",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: ScopedName(
+                    ScopedName {
+                        name: [
+                            "Color",
+                        ],
+                        is_root: false,
+                    },
+                ),
+                ident: "col",
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "red",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: ScopedName(
+                    ScopedName {
+                        name: [
+                            "Color",
+                        ],
+                        is_root: false,
+                    },
+                ),
+                ident: "another",
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "M",
+                                                            "medium",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstrTypeDcl(
+            StructForwardDcl(
+                StructForwardDcl {
+                    ident: "Foo",
+                },
+            ),
+        ),
+        ConstrTypeDcl(
+            StructDcl(
+                StructDcl {
+                    ident: "Foo",
+                    parent: [],
+                    member: [
+                        Member {
+                            ty: SimpleTypeSpec(
+                                IntegerType(
+                                    I32,
+                                ),
+                            ),
+                            ident: [
+                                SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "value",
+                                    ),
+                                ),
+                            ],
+                            default: None,
+                        },
+                        Member {
+                            ty: SimpleTypeSpec(
+                                ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "FooSeq",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                            ),
+                            ident: [
+                                SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "chain",
+                                    ),
+                                ),
+                            ],
+                            default: None,
+                        },
+                    ],
+                },
+            ),
+        ),
+        ConstrTypeDcl(
+            UnionForwardDcl(
+                UnionForwardDcl {
+                    ident: "Bar",
+                },
+            ),
+        ),
+        ConstrTypeDcl(
+            UnionDef(
+                UnionDef {
+                    ident: "Bar",
+                    switch_type_spec: IntegerType(
+                        I32,
+                    ),
+                    case: [
+                        Case {
+                            label: [
+                                ConstExpr(
+                                    XorExpr(
+                                        AndExpr(
+                                            ShiftExpr(
+                                                AddExpr(
+                                                    MultExpr(
+                                                        UnaryExpr(
+                                                            PrimaryExpr(
+                                                                Literal(
+                                                                    IntegerLiteral(
+                                                                        DecNumber(
+                                                                            "0",
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ],
+                            element: ElementSpec {
+                                ty: TypeSpec(
+                                    SimpleTypeSpec(
+                                        IntegerType(
+                                            I32,
+                                        ),
+                                    ),
+                                ),
+                                value: SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "l_mem",
+                                    ),
+                                ),
+                            },
+                        },
+                        Case {
+                            label: [
+                                ConstExpr(
+                                    XorExpr(
+                                        AndExpr(
+                                            ShiftExpr(
+                                                AddExpr(
+                                                    MultExpr(
+                                                        UnaryExpr(
+                                                            PrimaryExpr(
+                                                                Literal(
+                                                                    IntegerLiteral(
+                                                                        DecNumber(
+                                                                            "1",
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ],
+                            element: ElementSpec {
+                                ty: ConstrTypeDcl(
+                                    StructDcl(
+                                        StructDcl {
+                                            ident: "Foo",
+                                            parent: [],
+                                            member: [
+                                                Member {
+                                                    ty: SimpleTypeSpec(
+                                                        FloatingPtType,
+                                                    ),
+                                                    ident: [
+                                                        SimpleDeclarator(
+                                                            SimpleDeclarator(
+                                                                "d_mem",
+                                                            ),
+                                                        ),
+                                                    ],
+                                                    default: None,
+                                                },
+                                                Member {
+                                                    ty: SimpleTypeSpec(
+                                                        ScopedName(
+                                                            ScopedName {
+                                                                name: [
+                                                                    "BarSeq",
+                                                                ],
+                                                                is_root: false,
+                                                            },
+                                                        ),
+                                                    ),
+                                                    ident: [
+                                                        SimpleDeclarator(
+                                                            SimpleDeclarator(
+                                                                "nested",
+                                                            ),
+                                                        ),
+                                                    ],
+                                                    default: None,
+                                                },
+                                            ],
+                                        },
+                                    ),
+                                ),
+                                value: SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "s_mem",
+                                    ),
+                                ),
+                            },
+                        },
+                    ],
+                },
+            ),
+        ),
+        InterfaceDcl(
+            InterfaceDef(
+                InterfaceDef {
+                    header: InterfaceHeader {
+                        ident: "A",
+                        parent: None,
+                    },
+                    interface_body: None,
+                },
+            ),
+        ),
+        InterfaceDcl(
+            InterfaceDef(
+                InterfaceDef {
+                    header: InterfaceHeader {
+                        ident: "B",
+                        parent: Some(
+                            InterfaceInheritanceSpec(
+                                [
+                                    InterfaceName(
+                                        ScopedName {
+                                            name: [
+                                                "A",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                ],
+                            ),
+                        ),
+                    },
+                    interface_body: None,
+                },
+            ),
+        ),
+        InterfaceDcl(
+            InterfaceDef(
+                InterfaceDef {
+                    header: InterfaceHeader {
+                        ident: "C",
+                        parent: Some(
+                            InterfaceInheritanceSpec(
+                                [
+                                    InterfaceName(
+                                        ScopedName {
+                                            name: [
+                                                "A",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                ],
+                            ),
+                        ),
+                    },
+                    interface_body: None,
+                },
+            ),
+        ),
+        InterfaceDcl(
+            InterfaceDef(
+                InterfaceDef {
+                    header: InterfaceHeader {
+                        ident: "D",
+                        parent: Some(
+                            InterfaceInheritanceSpec(
+                                [
+                                    InterfaceName(
+                                        ScopedName {
+                                            name: [
+                                                "B",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                    InterfaceName(
+                                        ScopedName {
+                                            name: [
+                                                "C",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                ],
+                            ),
+                        ),
+                    },
+                    interface_body: None,
+                },
+            ),
+        ),
+        InterfaceDcl(
+            InterfaceDef(
+                InterfaceDef {
+                    header: InterfaceHeader {
+                        ident: "E",
+                        parent: Some(
+                            InterfaceInheritanceSpec(
+                                [
+                                    InterfaceName(
+                                        ScopedName {
+                                            name: [
+                                                "A",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                    InterfaceName(
+                                        ScopedName {
+                                            name: [
+                                                "B",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                ],
+                            ),
+                        ),
+                    },
+                    interface_body: None,
+                },
+            ),
+        ),
+        InterfaceDcl(
+            InterfaceDef(
+                InterfaceDef {
+                    header: InterfaceHeader {
+                        ident: "A",
+                        parent: None,
+                    },
+                    interface_body: Some(
+                        InterfaceBody(
+                            [
+                                OpDcl(
+                                    OpDcl {
+                                        ty: Void,
+                                        ident: "make_it_so",
+                                        parameter: None,
+                                        raises: None,
+                                    },
+                                ),
+                            ],
+                        ),
+                    ),
+                },
+            ),
+        ),
+        InterfaceDcl(
+            InterfaceDef(
+                InterfaceDef {
+                    header: InterfaceHeader {
+                        ident: "B",
+                        parent: Some(
+                            InterfaceInheritanceSpec(
+                                [
+                                    InterfaceName(
+                                        ScopedName {
+                                            name: [
+                                                "A",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                ],
+                            ),
+                        ),
+                    },
+                    interface_body: Some(
+                        InterfaceBody(
+                            [
+                                OpDcl(
+                                    OpDcl {
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                IntegerType(
+                                                    I16,
+                                                ),
+                                            ),
+                                        ),
+                                        ident: "make_it_so",
+                                        parameter: Some(
+                                            ParameterDcls(
+                                                [
+                                                    ParamDcl {
+                                                        attr: Some(
+                                                            ParamAttribute(
+                                                                "in",
+                                                            ),
+                                                        ),
+                                                        ty: SimpleTypeSpec(
+                                                            IntegerType(
+                                                                I32,
+                                                            ),
+                                                        ),
+                                                        declarator: SimpleDeclarator(
+                                                            "times",
+                                                        ),
+                                                    },
+                                                ],
+                                            ),
+                                        ),
+                                        raises: None,
+                                    },
+                                ),
+                            ],
+                        ),
+                    ),
+                },
+            ),
+        ),
+        InterfaceDcl(
+            InterfaceDef(
+                InterfaceDef {
+                    header: InterfaceHeader {
+                        ident: "A",
+                        parent: None,
+                    },
+                    interface_body: Some(
+                        InterfaceBody(
+                            [
+                                TypeDcl(
+                                    TypeDcl(
+                                        [
+                                            TypedefDcl(
+                                                TypedefDcl {
+                                                    ty: TypeSpec(
+                                                        SimpleTypeSpec(
+                                                            IntegerType(
+                                                                I32,
+                                                            ),
+                                                        ),
+                                                    ),
+                                                    decl: [
+                                                        SimpleDeclarator(
+                                                            SimpleDeclarator(
+                                                                "L1",
+                                                            ),
+                                                        ),
+                                                    ],
+                                                },
+                                            ),
+                                        ],
+                                    ),
+                                ),
+                                OpDcl(
+                                    OpDcl {
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                IntegerType(
+                                                    I16,
+                                                ),
+                                            ),
+                                        ),
+                                        ident: "opA",
+                                        parameter: Some(
+                                            ParameterDcls(
+                                                [
+                                                    ParamDcl {
+                                                        attr: Some(
+                                                            ParamAttribute(
+                                                                "in",
+                                                            ),
+                                                        ),
+                                                        ty: SimpleTypeSpec(
+                                                            ScopedName(
+                                                                ScopedName {
+                                                                    name: [
+                                                                        "L1",
+                                                                    ],
+                                                                    is_root: false,
+                                                                },
+                                                            ),
+                                                        ),
+                                                        declarator: SimpleDeclarator(
+                                                            "l_1",
+                                                        ),
+                                                    },
+                                                ],
+                                            ),
+                                        ),
+                                        raises: None,
+                                    },
+                                ),
+                            ],
+                        ),
+                    ),
+                },
+            ),
+        ),
+        InterfaceDcl(
+            InterfaceDef(
+                InterfaceDef {
+                    header: InterfaceHeader {
+                        ident: "B",
+                        parent: None,
+                    },
+                    interface_body: Some(
+                        InterfaceBody(
+                            [
+                                TypeDcl(
+                                    TypeDcl(
+                                        [
+                                            TypedefDcl(
+                                                TypedefDcl {
+                                                    ty: TypeSpec(
+                                                        SimpleTypeSpec(
+                                                            IntegerType(
+                                                                I16,
+                                                            ),
+                                                        ),
+                                                    ),
+                                                    decl: [
+                                                        SimpleDeclarator(
+                                                            SimpleDeclarator(
+                                                                "L1",
+                                                            ),
+                                                        ),
+                                                    ],
+                                                },
+                                            ),
+                                        ],
+                                    ),
+                                ),
+                                OpDcl(
+                                    OpDcl {
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "L1",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        ident: "opB",
+                                        parameter: Some(
+                                            ParameterDcls(
+                                                [
+                                                    ParamDcl {
+                                                        attr: Some(
+                                                            ParamAttribute(
+                                                                "in",
+                                                            ),
+                                                        ),
+                                                        ty: SimpleTypeSpec(
+                                                            IntegerType(
+                                                                I32,
+                                                            ),
+                                                        ),
+                                                        declarator: SimpleDeclarator(
+                                                            "l",
+                                                        ),
+                                                    },
+                                                ],
+                                            ),
+                                        ),
+                                        raises: None,
+                                    },
+                                ),
+                            ],
+                        ),
+                    ),
+                },
+            ),
+        ),
+        InterfaceDcl(
+            InterfaceDef(
+                InterfaceDef {
+                    header: InterfaceHeader {
+                        ident: "C",
+                        parent: Some(
+                            InterfaceInheritanceSpec(
+                                [
+                                    InterfaceName(
+                                        ScopedName {
+                                            name: [
+                                                "B",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                    InterfaceName(
+                                        ScopedName {
+                                            name: [
+                                                "A",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                ],
+                            ),
+                        ),
+                    },
+                    interface_body: Some(
+                        InterfaceBody(
+                            [
+                                TypeDcl(
+                                    TypeDcl(
+                                        [
+                                            TypedefDcl(
+                                                TypedefDcl {
+                                                    ty: TypeSpec(
+                                                        SimpleTypeSpec(
+                                                            ScopedName(
+                                                                ScopedName {
+                                                                    name: [
+                                                                        "L1",
+                                                                    ],
+                                                                    is_root: false,
+                                                                },
+                                                            ),
+                                                        ),
+                                                    ),
+                                                    decl: [
+                                                        SimpleDeclarator(
+                                                            SimpleDeclarator(
+                                                                "L2",
+                                                            ),
+                                                        ),
+                                                    ],
+                                                },
+                                            ),
+                                        ],
+                                    ),
+                                ),
+                                TypeDcl(
+                                    TypeDcl(
+                                        [
+                                            TypedefDcl(
+                                                TypedefDcl {
+                                                    ty: TypeSpec(
+                                                        SimpleTypeSpec(
+                                                            ScopedName(
+                                                                ScopedName {
+                                                                    name: [
+                                                                        "A",
+                                                                        "L1",
+                                                                    ],
+                                                                    is_root: false,
+                                                                },
+                                                            ),
+                                                        ),
+                                                    ),
+                                                    decl: [
+                                                        SimpleDeclarator(
+                                                            SimpleDeclarator(
+                                                                "L3",
+                                                            ),
+                                                        ),
+                                                    ],
+                                                },
+                                            ),
+                                        ],
+                                    ),
+                                ),
+                                OpDcl(
+                                    OpDcl {
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "B",
+                                                            "L1",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        ident: "opC",
+                                        parameter: Some(
+                                            ParameterDcls(
+                                                [
+                                                    ParamDcl {
+                                                        attr: Some(
+                                                            ParamAttribute(
+                                                                "in",
+                                                            ),
+                                                        ),
+                                                        ty: SimpleTypeSpec(
+                                                            ScopedName(
+                                                                ScopedName {
+                                                                    name: [
+                                                                        "L3",
+                                                                    ],
+                                                                    is_root: false,
+                                                                },
+                                                            ),
+                                                        ),
+                                                        declarator: SimpleDeclarator(
+                                                            "l_3",
+                                                        ),
+                                                    },
+                                                ],
+                                            ),
+                                        ),
+                                        raises: None,
+                                    },
+                                ),
+                            ],
+                        ),
+                    ),
+                },
+            ),
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: IntegerType(
+                    I32,
+                ),
+                ident: "L",
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        DecNumber(
+                                                            "3",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        InterfaceDcl(
+            InterfaceDef(
+                InterfaceDef {
+                    header: InterfaceHeader {
+                        ident: "A",
+                        parent: None,
+                    },
+                    interface_body: Some(
+                        InterfaceBody(
+                            [
+                                TypeDcl(
+                                    TypeDcl(
+                                        [
+                                            TypedefDcl(
+                                                TypedefDcl {
+                                                    ty: TypeSpec(
+                                                        SimpleTypeSpec(
+                                                            FloatingPtType,
+                                                        ),
+                                                    ),
+                                                    decl: [
+                                                        ArrayDeclarator(
+                                                            ArrayDeclarator {
+                                                                ident: "coord",
+                                                                len: [
+                                                                    PositiveIntConst(
+                                                                        ConstExpr(
+                                                                            XorExpr(
+                                                                                AndExpr(
+                                                                                    ShiftExpr(
+                                                                                        AddExpr(
+                                                                                            MultExpr(
+                                                                                                UnaryExpr(
+                                                                                                    PrimaryExpr(
+                                                                                                        Literal(
+                                                                                                            IntegerLiteral(
+                                                                                                                DecNumber(
+                                                                                                                    "1",
+                                                                                                                ),
+                                                                                                            ),
+                                                                                                        ),
+                                                                                                    ),
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ],
+                                                            },
+                                                        ),
+                                                    ],
+                                                },
+                                            ),
+                                        ],
+                                    ),
+                                ),
+                                OpDcl(
+                                    OpDcl {
+                                        ty: Void,
+                                        ident: "f",
+                                        parameter: Some(
+                                            ParameterDcls(
+                                                [
+                                                    ParamDcl {
+                                                        attr: Some(
+                                                            ParamAttribute(
+                                                                "in",
+                                                            ),
+                                                        ),
+                                                        ty: SimpleTypeSpec(
+                                                            ScopedName(
+                                                                ScopedName {
+                                                                    name: [
+                                                                        "coord",
+                                                                    ],
+                                                                    is_root: false,
+                                                                },
+                                                            ),
+                                                        ),
+                                                        declarator: SimpleDeclarator(
+                                                            "s",
+                                                        ),
+                                                    },
+                                                ],
+                                            ),
+                                        ),
+                                        raises: None,
+                                    },
+                                ),
+                            ],
+                        ),
+                    ),
+                },
+            ),
+        ),
+        InterfaceDcl(
+            InterfaceDef(
+                InterfaceDef {
+                    header: InterfaceHeader {
+                        ident: "B",
+                        parent: None,
+                    },
+                    interface_body: Some(
+                        InterfaceBody(
+                            [
+                                ConstDcl(
+                                    ConstDcl {
+                                        ty: IntegerType(
+                                            I32,
+                                        ),
+                                        ident: "L",
+                                        value: ConstExpr(
+                                            XorExpr(
+                                                AndExpr(
+                                                    ShiftExpr(
+                                                        AddExpr(
+                                                            MultExpr(
+                                                                UnaryExpr(
+                                                                    PrimaryExpr(
+                                                                        Literal(
+                                                                            IntegerLiteral(
+                                                                                DecNumber(
+                                                                                    "4",
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    },
+                                ),
+                            ],
+                        ),
+                    ),
+                },
+            ),
+        ),
+        InterfaceDcl(
+            InterfaceDef(
+                InterfaceDef {
+                    header: InterfaceHeader {
+                        ident: "C",
+                        parent: Some(
+                            InterfaceInheritanceSpec(
+                                [
+                                    InterfaceName(
+                                        ScopedName {
+                                            name: [
+                                                "B",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                    InterfaceName(
+                                        ScopedName {
+                                            name: [
+                                                "A",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                ],
+                            ),
+                        ),
+                    },
+                    interface_body: None,
+                },
+            ),
+        ),
+        InterfaceDcl(
+            InterfaceDef(
+                InterfaceDef {
+                    header: InterfaceHeader {
+                        ident: "A",
+                        parent: None,
+                    },
+                    interface_body: Some(
+                        InterfaceBody(
+                            [
+                                TypeDcl(
+                                    TypeDcl(
+                                        [
+                                            TypedefDcl(
+                                                TypedefDcl {
+                                                    ty: TypeSpec(
+                                                        TemplateTypeSpec(
+                                                            StringType(
+                                                                StringType {
+                                                                    bound: Some(
+                                                                        PositiveIntConst(
+                                                                            ConstExpr(
+                                                                                XorExpr(
+                                                                                    AndExpr(
+                                                                                        ShiftExpr(
+                                                                                            AddExpr(
+                                                                                                MultExpr(
+                                                                                                    UnaryExpr(
+                                                                                                        PrimaryExpr(
+                                                                                                            Literal(
+                                                                                                                IntegerLiteral(
+                                                                                                                    DecNumber(
+                                                                                                                        "128",
+                                                                                                                    ),
+                                                                                                                ),
+                                                                                                            ),
+                                                                                                        ),
+                                                                                                    ),
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                },
+                                                            ),
+                                                        ),
+                                                    ),
+                                                    decl: [
+                                                        SimpleDeclarator(
+                                                            SimpleDeclarator(
+                                                                "string_t",
+                                                            ),
+                                                        ),
+                                                    ],
+                                                },
+                                            ),
+                                        ],
+                                    ),
+                                ),
+                            ],
+                        ),
+                    ),
+                },
+            ),
+        ),
+        InterfaceDcl(
+            InterfaceDef(
+                InterfaceDef {
+                    header: InterfaceHeader {
+                        ident: "B",
+                        parent: None,
+                    },
+                    interface_body: Some(
+                        InterfaceBody(
+                            [
+                                TypeDcl(
+                                    TypeDcl(
+                                        [
+                                            TypedefDcl(
+                                                TypedefDcl {
+                                                    ty: TypeSpec(
+                                                        TemplateTypeSpec(
+                                                            StringType(
+                                                                StringType {
+                                                                    bound: Some(
+                                                                        PositiveIntConst(
+                                                                            ConstExpr(
+                                                                                XorExpr(
+                                                                                    AndExpr(
+                                                                                        ShiftExpr(
+                                                                                            AddExpr(
+                                                                                                MultExpr(
+                                                                                                    UnaryExpr(
+                                                                                                        PrimaryExpr(
+                                                                                                            Literal(
+                                                                                                                IntegerLiteral(
+                                                                                                                    DecNumber(
+                                                                                                                        "256",
+                                                                                                                    ),
+                                                                                                                ),
+                                                                                                            ),
+                                                                                                        ),
+                                                                                                    ),
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                },
+                                                            ),
+                                                        ),
+                                                    ),
+                                                    decl: [
+                                                        SimpleDeclarator(
+                                                            SimpleDeclarator(
+                                                                "string_t",
+                                                            ),
+                                                        ),
+                                                    ],
+                                                },
+                                            ),
+                                        ],
+                                    ),
+                                ),
+                            ],
+                        ),
+                    ),
+                },
+            ),
+        ),
+        InterfaceDcl(
+            InterfaceDef(
+                InterfaceDef {
+                    header: InterfaceHeader {
+                        ident: "C",
+                        parent: Some(
+                            InterfaceInheritanceSpec(
+                                [
+                                    InterfaceName(
+                                        ScopedName {
+                                            name: [
+                                                "A",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                    InterfaceName(
+                                        ScopedName {
+                                            name: [
+                                                "B",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                ],
+                            ),
+                        ),
+                    },
+                    interface_body: Some(
+                        InterfaceBody(
+                            [
+                                AttrDcl(
+                                    AttrSpec(
+                                        AttrSpec {
+                                            ty: SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "string_t",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                            declarator: SimpleDeclarator(
+                                                [
+                                                    SimpleDeclarator(
+                                                        "Title",
+                                                    ),
+                                                ],
+                                            ),
+                                        },
+                                    ),
+                                ),
+                                AttrDcl(
+                                    AttrSpec(
+                                        AttrSpec {
+                                            ty: SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "A",
+                                                            "string_t",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                            declarator: SimpleDeclarator(
+                                                [
+                                                    SimpleDeclarator(
+                                                        "Name",
+                                                    ),
+                                                ],
+                                            ),
+                                        },
+                                    ),
+                                ),
+                                AttrDcl(
+                                    AttrSpec(
+                                        AttrSpec {
+                                            ty: SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "B",
+                                                            "string_t",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                            declarator: SimpleDeclarator(
+                                                [
+                                                    SimpleDeclarator(
+                                                        "City",
+                                                    ),
+                                                ],
+                                            ),
+                                        },
+                                    ),
+                                ),
+                            ],
+                        ),
+                    ),
+                },
+            ),
+        ),
+    ],
+)

@@ -1,0 +1,100 @@
+---
+source: xidl-parser/tests/test-bitmask.rs
+expression: ast
+---
+Specification(
+    [
+        TypeDcl(
+            TypeDcl(
+                [
+                    ConstrTypeDcl(
+                        BitmaskDcl(
+                            BitmaskDcl {
+                                ident: Identifier(
+                                    "A",
+                                ),
+                                value: [],
+                            },
+                        ),
+                    ),
+                ],
+            ),
+        ),
+        TypeDcl(
+            TypeDcl(
+                [
+                    ConstrTypeDcl(
+                        BitmaskDcl(
+                            BitmaskDcl {
+                                ident: Identifier(
+                                    "A",
+                                ),
+                                value: [
+                                    BitValue(
+                                        [
+                                            Identifier(
+                                                "A",
+                                            ),
+                                        ],
+                                    ),
+                                    BitValue(
+                                        [
+                                            Identifier(
+                                                "B",
+                                            ),
+                                        ],
+                                    ),
+                                    BitValue(
+                                        [
+                                            Identifier(
+                                                "C",
+                                            ),
+                                        ],
+                                    ),
+                                ],
+                            },
+                        ),
+                    ),
+                ],
+            ),
+        ),
+        TypeDcl(
+            TypeDcl(
+                [
+                    ConstrTypeDcl(
+                        BitmaskDcl(
+                            BitmaskDcl {
+                                ident: Identifier(
+                                    "A",
+                                ),
+                                value: [
+                                    BitValue(
+                                        [
+                                            Identifier(
+                                                "A",
+                                            ),
+                                        ],
+                                    ),
+                                    BitValue(
+                                        [
+                                            Identifier(
+                                                "B",
+                                            ),
+                                        ],
+                                    ),
+                                    BitValue(
+                                        [
+                                            Identifier(
+                                                "C",
+                                            ),
+                                        ],
+                                    ),
+                                ],
+                            },
+                        ),
+                    ),
+                ],
+            ),
+        ),
+    ],
+)

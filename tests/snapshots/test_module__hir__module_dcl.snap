@@ -1,7 +1,0 @@
----
-source: tests/test-module.rs
-expression: hir
----
-Specification(
-    [],
-)
