@@ -1,5 +1,5 @@
 use crate::driver;
-use crate::error::Result;
+use crate::error::IdlcResult;
 use clap::Parser;
 use std::path::PathBuf;
 
@@ -14,7 +14,7 @@ pub struct CliArgs {
     pub inputs: Vec<PathBuf>,
 }
 
-pub fn run() -> Result<()> {
+pub fn run() -> IdlcResult<()> {
     let mut args = CliArgs::parse();
     args.lang = args.lang.to_ascii_lowercase();
     driver::run(args)

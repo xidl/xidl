@@ -1,4 +1,4 @@
-use crate::error::{IdlcError, Result};
+use crate::error::{IdlcError, IdlcResult};
 use crate::generate::GeneratedFile;
 use serde::{Deserialize, Serialize};
 use std::io::{BufRead, Write};
@@ -76,7 +76,7 @@ where
         &mut self,
         spec: &hir::Specification,
         input: Option<&str>,
-    ) -> Result<Vec<GeneratedFile>> {
+    ) -> IdlcResult<Vec<GeneratedFile>> {
         let id = self.next_id;
         self.next_id += 1;
 
@@ -87,9 +87,8 @@ where
             params: RpcParams { hir: spec, input },
         };
         let payload = serde_json::to_string(&request)?;
-        self.writer.write_all(payload.as_bytes())?;
-        self.writer.write_all(b"\n")?;
-        self.writer.flush()?;
+        self.writer.write_all(payload.as_bytes()).unwrap();
+        self.writer.write_all(b"\n").unwrap();
 
         let mut line = String::new();
         let bytes = self.reader.read_line(&mut line)?;
@@ -116,11 +115,11 @@ where
     }
 }
 
-pub fn serve_generate<R, W, F>(mut reader: R, mut writer: W, handler: F) -> Result<()>
+pub fn serve_generate<R, W, F>(mut reader: R, mut writer: W, handler: F) -> IdlcResult<()>
 where
     R: BufRead,
     W: Write,
-    F: FnOnce(&hir::Specification, Option<&str>) -> Result<Vec<GeneratedFile>>,
+    F: FnOnce(&hir::Specification, Option<&str>) -> IdlcResult<Vec<GeneratedFile>>,
 {
     let mut line = String::new();
     let bytes = reader.read_line(&mut line)?;
@@ -141,7 +140,7 @@ where
     }
 }
 
-fn write_result<W: Write>(writer: &mut W, id: u64, files: Vec<GeneratedFile>) -> Result<()> {
+fn write_result<W: Write>(writer: &mut W, id: u64, files: Vec<GeneratedFile>) -> IdlcResult<()> {
     let response = RpcResponse {
         jsonrpc: Some(JSONRPC_VERSION.to_string()),
         id: Some(id),
@@ -151,7 +150,7 @@ fn write_result<W: Write>(writer: &mut W, id: u64, files: Vec<GeneratedFile>) ->
     write_response(writer, response)
 }
 
-fn write_error<W: Write>(writer: &mut W, id: u64, message: &str) -> Result<()> {
+fn write_error<W: Write>(writer: &mut W, id: u64, message: &str) -> IdlcResult<()> {
     let response = RpcResponse {
         jsonrpc: Some(JSONRPC_VERSION.to_string()),
         id: Some(id),
@@ -165,10 +164,9 @@ fn write_error<W: Write>(writer: &mut W, id: u64, message: &str) -> Result<()> {
     write_response(writer, response)
 }
 
-fn write_response<W: Write>(writer: &mut W, response: RpcResponse) -> Result<()> {
+fn write_response<W: Write>(writer: &mut W, response: RpcResponse) -> IdlcResult<()> {
     let payload = serde_json::to_string(&response)?;
     writer.write_all(payload.as_bytes())?;
     writer.write_all(b"\n")?;
-    writer.flush()?;
     Ok(())
 }

@@ -1,4 +1,4 @@
-use crate::error::{IdlcError, Result};
+use crate::error::{IdlcError, IdlcResult};
 use crate::generate::{jsonrpc, render_const_expr, to_snake_case, GeneratedFile};
 use minijinja::{Environment, Error, ErrorKind};
 use rust_embed::RustEmbed;
@@ -34,7 +34,7 @@ struct CField {
     dims: Vec<String>,
 }
 
-pub fn generate(spec: &hir::Specification, input_path: &Path) -> Result<Vec<GeneratedFile>> {
+pub fn generate(spec: &hir::Specification, input_path: &Path) -> IdlcResult<Vec<GeneratedFile>> {
     let stem = input_path
         .file_stem()
         .and_then(|value| value.to_str())
@@ -95,7 +95,7 @@ fn load_template(name: &str) -> std::result::Result<String, Error> {
     Ok(content)
 }
 
-pub fn serve_jsonrpc<R: BufRead, W: Write>(reader: R, writer: W) -> Result<()> {
+pub fn serve_jsonrpc<R: BufRead, W: Write>(reader: R, writer: W) -> IdlcResult<()> {
     jsonrpc::serve_generate(reader, writer, |spec, input| {
         let input = input.ok_or_else(|| IdlcError::rpc("missing input path"))?;
         generate(spec, Path::new(input))

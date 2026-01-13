@@ -1,14 +1,14 @@
 use crate::cli::CliArgs;
-use crate::error::{IdlcError, Result};
+use crate::error::{IdlcError, IdlcResult};
 use crate::generate::jsonrpc::JsonRpcClient;
 use crate::generate::GeneratedFile;
 use std::fs;
 use std::io::BufReader;
-use std::net::{TcpListener, TcpStream};
 use std::path::Path;
-use std::thread;
+use std::process::Command;
+use std::thread::{self, JoinHandle};
 
-pub fn run(args: CliArgs) -> Result<()> {
+pub fn run(args: CliArgs) -> IdlcResult<()> {
     fs::create_dir_all(&args.out_dir)?;
 
     for input in args.inputs {
@@ -26,42 +26,58 @@ fn generate_for_lang(
     lang: &str,
     hir: &xidl_parser::hir::Specification,
     input: &Path,
-) -> Result<Vec<GeneratedFile>> {
+) -> IdlcResult<Vec<GeneratedFile>> {
     let input_str = input.to_string_lossy();
-    if lang == "c" {
-        generate_with_c_server(hir, &input_str)
-    } else {
-        crate::generate::ipc::spawn_jsonrpc(lang)?.generate(hir, &input_str)
-    }
-}
 
-fn generate_with_c_server(
-    hir: &xidl_parser::hir::Specification,
-    input: &str,
-) -> Result<Vec<GeneratedFile>> {
-    let listener = TcpListener::bind("127.0.0.1:0")?;
-    let addr = listener.local_addr()?;
-    let server = thread::spawn(move || {
-        let (stream, _) = listener.accept()?;
-        let reader = BufReader::new(stream.try_clone()?);
-        let writer = stream;
-        crate::generate::c::serve_jsonrpc(reader, writer)
-    });
+    let (stdout_tx, stdout_rx) = interprocess::unnamed_pipe::pipe()?;
+    let (stdin_tx, stdin_rx) = interprocess::unnamed_pipe::pipe()?;
 
-    let client_stream = TcpStream::connect(addr)?;
-    let reader = BufReader::new(client_stream.try_clone()?);
-    let writer = client_stream;
+    let server = spawn_codegen_server(lang, stdout_rx, stdin_tx)?;
+
+    let reader = BufReader::new(stdin_rx);
+    let writer = stdout_tx;
     let mut client = JsonRpcClient::new(reader, writer);
-    let files = client.generate(hir, Some(input))?;
+    let files = client.generate(hir, Some(&input_str))?;
 
     let server_result = server
         .join()
         .map_err(|_| IdlcError::rpc("c server thread panicked"))?;
+
     server_result?;
     Ok(files)
 }
 
-fn write_files(out_dir: &Path, files: Vec<GeneratedFile>) -> Result<()> {
+pub fn spawn_codegen_server(
+    lang: &str,
+    stdout_rx: interprocess::unnamed_pipe::Recver,
+    stdin_tx: interprocess::unnamed_pipe::Sender,
+) -> IdlcResult<JoinHandle<IdlcResult<()>>> {
+    match lang {
+        "c" => {
+            let server = thread::spawn(move || {
+                let reader = BufReader::new(stdout_rx);
+                crate::generate::c::serve_jsonrpc(reader, stdin_tx)
+            });
+
+            Ok(server)
+        }
+        _ => {
+            let exe = format!("xidl-{lang}");
+            let mut child = Command::new(&exe)
+                .stdin(std::os::fd::OwnedFd::from(stdin_tx))
+                .stdout(std::os::fd::OwnedFd::from(stdout_rx))
+                .spawn()?;
+
+            let server = std::thread::spawn(move || {
+                child.wait()?;
+                Ok(())
+            });
+            Ok(server)
+        }
+    }
+}
+
+fn write_files(out_dir: &Path, files: Vec<GeneratedFile>) -> IdlcResult<()> {
     for file in files {
         let path = out_dir.join(file.filename);
         fs::write(path, file.filecontent)?;

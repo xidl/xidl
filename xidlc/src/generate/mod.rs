@@ -1,5 +1,4 @@
 pub mod c;
-pub mod ipc;
 pub mod jsonrpc;
 
 use serde::{Deserialize, Serialize};

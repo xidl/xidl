@@ -14,7 +14,7 @@ pub enum IdlcError {
     Rpc(String),
 }
 
-pub type Result<T> = std::result::Result<T, IdlcError>;
+pub type IdlcResult<T> = std::result::Result<T, IdlcError>;
 
 impl IdlcError {
     pub fn template(message: impl Into<String>) -> Self {
