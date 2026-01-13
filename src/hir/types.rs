@@ -5,7 +5,7 @@ use super::*;
 #[derive(Debug, Serialize, Deserialize)]
 pub enum TypeSpec {
     SimpleTypeSpec(SimpleTypeSpec),
-    // TemplateTypeSpec(TemplateTypeSpec),
+    TemplateTypeSpec(TemplateTypeSpec),
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -19,6 +19,44 @@ pub enum SimpleTypeSpec {
     ObjectType,
     ValueBaseType,
     ScopedName(ScopedName),
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum TemplateTypeSpec {
+    SequenceType(SequenceType),
+    StringType(StringType),
+    WideStringType(WideStringType),
+    FixedPtType(FixedPtType),
+    MapType(MapType),
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SequenceType {
+    pub ty: Box<TypeSpec>,
+    pub len: Option<PositiveIntConst>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct MapType {
+    pub key: Box<TypeSpec>,
+    pub value: Box<TypeSpec>,
+    pub len: Option<PositiveIntConst>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct StringType {
+    pub bound: Option<PositiveIntConst>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct WideStringType {
+    pub bound: Option<PositiveIntConst>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct FixedPtType {
+    pub integer: PositiveIntConst,
+    pub fraction: PositiveIntConst,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -41,7 +79,9 @@ impl From<crate::typed_ast::TypeSpec> for TypeSpec {
             crate::typed_ast::TypeSpec::SimpleTypeSpec(simple_type_spec) => {
                 Self::SimpleTypeSpec(simple_type_spec.into())
             }
-            crate::typed_ast::TypeSpec::TemplateTypeSpec(_) => todo!(),
+            crate::typed_ast::TypeSpec::TemplateTypeSpec(template_type_spec) => {
+                Self::TemplateTypeSpec(template_type_spec.into())
+            }
         }
     }
 }
@@ -88,6 +128,68 @@ impl From<crate::typed_ast::IntegerType> for IntegerType {
                 crate::typed_ast::UnsignedInt::UnsignedLongLongInt(_) => Self::U64,
                 crate::typed_ast::UnsignedInt::UnsignedTinyInt(_) => Self::U8,
             },
+        }
+    }
+}
+
+impl From<crate::typed_ast::TemplateTypeSpec> for TemplateTypeSpec {
+    fn from(value: crate::typed_ast::TemplateTypeSpec) -> Self {
+        match value {
+            crate::typed_ast::TemplateTypeSpec::SequenceType(sequence_type) => {
+                Self::SequenceType(sequence_type.into())
+            }
+            crate::typed_ast::TemplateTypeSpec::StringType(string_type) => {
+                Self::StringType(string_type.into())
+            }
+            crate::typed_ast::TemplateTypeSpec::WideStringType(wide_string_type) => {
+                Self::WideStringType(wide_string_type.into())
+            }
+            crate::typed_ast::TemplateTypeSpec::FixedPtType(fixed_pt_type) => {
+                Self::FixedPtType(fixed_pt_type.into())
+            }
+            crate::typed_ast::TemplateTypeSpec::MapType(map_type) => {
+                Self::MapType(map_type.into())
+            }
+        }
+    }
+}
+
+impl From<crate::typed_ast::SequenceType> for SequenceType {
+    fn from(value: crate::typed_ast::SequenceType) -> Self {
+        Self {
+            ty: Box::new((*value.ty).into()),
+            len: value.len,
+        }
+    }
+}
+
+impl From<crate::typed_ast::MapType> for MapType {
+    fn from(value: crate::typed_ast::MapType) -> Self {
+        Self {
+            key: Box::new((*value.key).into()),
+            value: Box::new((*value.value).into()),
+            len: value.len,
+        }
+    }
+}
+
+impl From<crate::typed_ast::StringType> for StringType {
+    fn from(value: crate::typed_ast::StringType) -> Self {
+        Self { bound: value.bound }
+    }
+}
+
+impl From<crate::typed_ast::WideStringType> for WideStringType {
+    fn from(value: crate::typed_ast::WideStringType) -> Self {
+        Self { bound: value.bound }
+    }
+}
+
+impl From<crate::typed_ast::FixedPtType> for FixedPtType {
+    fn from(value: crate::typed_ast::FixedPtType) -> Self {
+        Self {
+            integer: value.integer,
+            fraction: value.fraction,
         }
     }
 }
