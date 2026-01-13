@@ -1,6 +1,7 @@
 use super::*;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ExceptDcl {
     pub ident: String,
     pub member: Vec<Member>,

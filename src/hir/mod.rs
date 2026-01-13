@@ -25,17 +25,17 @@ pub use exception_dcl::*;
 
 use crate::typed_ast::{ConstExpr, PositiveIntConst};
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Specification(pub Vec<Definition>);
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum Definition {
     ConstrTypeDcl(ConstrTypeDcl),
     ConstDcl(ConstDcl),
     InterfaceDcl(InterfaceDcl),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum ConstrTypeDcl {
     StructForwardDcl(StructForwardDcl),
     StructDcl(StructDcl),
@@ -46,37 +46,37 @@ pub enum ConstrTypeDcl {
     BitmaskDcl(BitmaskDcl),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct UnionForwardDcl {
     pub ident: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct UnionDef {
     pub ident: String,
     pub switch_type_spec: SwitchTypeSpec,
     pub case: Vec<Case>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Case {
     pub label: Vec<ConstExpr>,
     pub element: ElementSpec,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ElementSpec {
     pub ty: ElementSpecTy,
     pub value: Declarator,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum ElementSpecTy {
     TypeSpec(TypeSpec),
     ConstrTypeDcl(ConstrTypeDcl),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum SwitchTypeSpec {
     IntegerType(IntegerType),
     CharType,
@@ -86,14 +86,14 @@ pub enum SwitchTypeSpec {
     OctetType,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct BitsetDcl {
     pub ident: String,
     pub parent: Option<ScopedName>,
     pub field: Vec<BitField>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum BitFieldType {
     Bool,
     Octec,
@@ -101,14 +101,14 @@ pub enum BitFieldType {
     UnsignedInt,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct BitField {
     pub ident: String,
     pub pos: PositiveIntConst,
     pub ty: Option<BitFieldType>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct BitmaskDcl {
     pub ident: String,
     pub value: Vec<String>,

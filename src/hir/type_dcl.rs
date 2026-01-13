@@ -1,28 +1,29 @@
 use super::*;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct TypeDcl(pub Vec<TypeDclInner>);
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum TypeDclInner {
     ConstrTypeDcl(ConstrTypeDcl),
     TypedefDcl(TypedefDcl),
     NativeDcl(NativeDcl),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct TypedefDcl {
     pub ty: TypedefType,
     pub decl: Vec<Declarator>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum TypedefType {
     TypeSpec(TypeSpec),
     ConstrTypeDcl(ConstrTypeDcl),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct NativeDcl {
     pub decl: SimpleDeclarator,
 }
