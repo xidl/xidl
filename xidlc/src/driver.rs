@@ -1,13 +1,12 @@
 use crate::cli::CliArgs;
 use crate::error::{IdlcError, Result};
+use crate::generate::jsonrpc::JsonRpcClient;
 use crate::generate::GeneratedFile;
-use crate::ipc;
-use crate::jsonrpc::JsonRpcClient;
+use std::fs;
 use std::io::BufReader;
 use std::net::{TcpListener, TcpStream};
-use std::thread;
-use std::fs;
 use std::path::Path;
+use std::thread;
 
 pub fn run(args: CliArgs) -> Result<()> {
     fs::create_dir_all(&args.out_dir)?;
@@ -32,7 +31,7 @@ fn generate_for_lang(
     if lang == "c" {
         generate_with_c_server(hir, &input_str)
     } else {
-        ipc::spawn_jsonrpc(lang)?.generate(hir, &input_str)
+        crate::generate::ipc::spawn_jsonrpc(lang)?.generate(hir, &input_str)
     }
 }
 

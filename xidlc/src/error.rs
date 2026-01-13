@@ -2,8 +2,6 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum IdlcError {
-    #[error("{0}")]
-    Usage(String),
     #[error(transparent)]
     Io(#[from] std::io::Error),
     #[error(transparent)]
@@ -19,10 +17,6 @@ pub enum IdlcError {
 pub type Result<T> = std::result::Result<T, IdlcError>;
 
 impl IdlcError {
-    pub fn usage(message: impl Into<String>) -> Self {
-        Self::Usage(message.into())
-    }
-
     pub fn template(message: impl Into<String>) -> Self {
         Self::Template(message.into())
     }

@@ -1,6 +1,6 @@
 use crate::error::{IdlcError, Result};
+use crate::generate::jsonrpc::JsonRpcClient;
 use crate::generate::GeneratedFile;
-use crate::jsonrpc::JsonRpcClient;
 use std::io::BufReader;
 use std::net::TcpListener;
 use std::process::{Command, Stdio};
@@ -30,7 +30,7 @@ pub fn spawn_jsonrpc(lang: &str) -> Result<SpawnedJsonRpc> {
     let listener = TcpListener::bind("127.0.0.1:0")?;
     let addr = listener.local_addr()?.to_string();
     let exe = format!("xidl-{lang}");
-    let mut child = Command::new(&exe)
+    let child = Command::new(&exe)
         .arg("--jsonrpc-fd")
         .arg(&addr)
         .stderr(Stdio::inherit())

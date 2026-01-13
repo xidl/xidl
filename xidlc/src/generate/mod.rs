@@ -1,3 +1,7 @@
+pub mod c;
+pub mod ipc;
+pub mod jsonrpc;
+
 use serde::{Deserialize, Serialize};
 use xidl_parser::hir;
 
@@ -6,8 +10,6 @@ pub struct GeneratedFile {
     pub filename: String,
     pub filecontent: String,
 }
-
-pub mod c;
 
 pub fn to_snake_case(input: &str) -> String {
     let mut out = String::new();
@@ -28,31 +30,6 @@ pub fn to_snake_case(input: &str) -> String {
         }
     }
     out
-}
-
-pub fn to_pascal_case(input: &str) -> String {
-    if !input.contains('_') && !input.contains('-') {
-        return input.to_string();
-    }
-    let mut out = String::new();
-    for part in input.split(|ch| ch == '_' || ch == '-') {
-        if part.is_empty() {
-            continue;
-        }
-        let mut chars = part.chars();
-        if let Some(first) = chars.next() {
-            out.push(first.to_ascii_uppercase());
-            for ch in chars {
-                out.push(ch.to_ascii_lowercase());
-            }
-        }
-    }
-    out
-}
-
-pub fn to_upper_snake_case(input: &str) -> String {
-    let snake = to_snake_case(input);
-    snake.to_ascii_uppercase()
 }
 
 pub fn render_const_expr<FScoped, FLit>(

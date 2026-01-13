@@ -22,7 +22,6 @@ struct RpcParams<'a> {
 
 #[derive(Deserialize)]
 struct RpcRequestOwned {
-    jsonrpc: Option<String>,
     id: Option<u64>,
     method: Option<String>,
     params: RpcParamsOwned,
