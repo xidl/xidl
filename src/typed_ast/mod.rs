@@ -100,5 +100,5 @@ pub enum ConstType {
 #[ts(transparent)]
 pub struct Identifier(pub String);
 
-#[derive(Debug, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
 pub struct PositiveIntConst(pub ConstExpr);
