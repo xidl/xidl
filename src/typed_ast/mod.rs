@@ -6,6 +6,9 @@ use derive::Parser;
 use serde::{Deserialize, Serialize};
 pub use expr::*;
 
+mod preproc;
+pub use preproc::*;
+
 mod bitmask;
 pub use bitmask::*;
 
@@ -18,14 +21,30 @@ pub use union::*;
 mod typedef_dcl_imp;
 pub use typedef_dcl_imp::*;
 
+mod module_dcl;
+pub use module_dcl::*;
+
+mod exception_dcl;
+pub use exception_dcl::*;
+
+mod template_module;
+pub use template_module::*;
+
 #[derive(Debug, Parser)]
 pub struct Specification(pub Vec<Definition>);
 
 #[derive(Debug, Parser)]
 pub enum Definition {
+    ModuleDcl(ModuleDcl),
     TypeDcl(TypeDcl),
     ConstDcl(ConstDcl),
+    ExceptDcl(ExceptDcl),
     InterfaceDcl(InterfaceDcl),
+    TemplateModuleDcl(TemplateModuleDcl),
+    TemplateModuleInst(TemplateModuleInst),
+    PreprocInclude(PreprocInclude),
+    PreprocCall(PreprocCall),
+    PreprocDefine(PreprocDefine),
 }
 
 #[derive(Debug, Parser)]
@@ -35,6 +54,13 @@ pub struct TypeDcl(#[ts(transparent)] pub Vec<TypeDclInner>);
 #[ts(transparent)]
 pub enum TypeDclInner {
     ConstrTypeDcl(ConstrTypeDcl),
+    NativeDcl(NativeDcl),
+    TypedefDcl(TypedefDcl),
+}
+
+#[derive(Debug, Parser)]
+pub struct NativeDcl {
+    pub decl: SimpleDeclarator,
 }
 
 #[derive(Debug, Parser)]

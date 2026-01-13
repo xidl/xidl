@@ -1,0 +1,103 @@
+#[test]
+fn test_misc() {
+    let ast = idl_rs::parser::parser_text(
+        r#"
+        enum Color { red, green, blue };
+        const Color FAVORITE_COLOR = red;
+
+        module M {
+            enum Size { small, medium, large };
+        };
+
+        const M::Size MYSIZE = M::medium;
+        const Color col = red;
+        const Color another = M::medium;
+
+        // 7.4.1.4.4.4.4
+        struct Foo; // Forward declaration
+        typedef sequence<Foo> FooSeq;
+        typedef sequence<Foo, 12> FooSeq;
+        typedef sequence<Foo, red> FooSeq;
+
+        struct Foo {
+            long value;
+            FooSeq chain; // Recursive
+        };
+
+        union Bar; // Forward declaration
+        typedef sequence<Bar> BarSeq;
+
+        union Bar switch (long) { // Define incomplete union
+            case 0:
+                long l_mem;
+            case 1:
+                struct Foo {
+                    double d_mem;
+                    BarSeq nested; // OK, recurse on enclosing incomplete type
+                } s_mem;
+        };
+
+        // 7.4.3.4.3.2.1
+        interface A { };
+        interface B: A { };
+        interface C: A { };
+        interface D: B, C { }; // OK
+        interface E: A, B { }; // OK
+
+        interface A {
+            void make_it_so();
+        };
+        interface B: A {
+            short make_it_so(in long times); // Error: redefinition of make_it_so
+        };
+
+        module Example {
+            interface base; // Forward declaration
+            // ...
+            interface derived : base {}; // Error
+            interface base {}; // Define base
+            interface derived : base {}; // OK
+        };
+
+        // 7.4.4.4
+
+        interface A {
+            typedef long L1;
+            short opA (in L1 l_1);
+        };
+        interface B {
+            typedef short L1;
+            L1 opB (in long l);
+        };
+        interface C: B, A {
+            typedef L1 L2; // Error: L1 ambiguous
+            typedef A::L1 L3; // A::L1 is OK
+            B::L1 opC (in L3 l_3); // All OK no ambiguities
+        };
+
+        const long L = 3;
+        interface A {
+            typedef float coord[1];
+            void f (in coord s); // s has three floats
+        };
+        interface B {
+            const long L = 4;
+        };
+        interface C: B, A { }; // What is C::f()’s signature?
+
+        interface A {
+            typedef string<128> string_t;
+        };
+        interface B {
+            typedef string<256> string_t;
+        };
+        interface C: A, B {
+            attribute string_t Title; // Error: string_t ambiguous
+            attribute A::string_t Name; // OK
+            attribute B::string_t City; // OK
+        };
+    "#,
+    )
+    .unwrap();
+    insta::assert_debug_snapshot!(ast)
+}

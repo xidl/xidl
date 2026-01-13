@@ -1,6 +1,6 @@
 use crate::typed_ast::ScopedName;
 
-use super::{Identifier, SimpleDeclarator, TypeSpec};
+use super::{ConstDcl, ExceptDcl, Identifier, SimpleDeclarator, TypeDcl, TypeSpec};
 use derive::Parser;
 
 #[derive(Debug, Parser)]
@@ -45,6 +45,9 @@ pub struct InterfaceBody(pub Vec<Export>);
 pub enum Export {
     OpDcl(OpDcl),
     AttrDcl(AttrDcl),
+    TypeDcl(TypeDcl),
+    ConstDcl(ConstDcl),
+    ExceptDcl(ExceptDcl),
 }
 
 #[derive(Debug, Parser)]
@@ -162,13 +165,7 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AttrDeclarator {
                 derive::node_id!("attr_raises_expr") => {
                     raises = Some(AttrRaisesExpr::from_node(ch, ctx)?);
                 }
-                _ => {
-                    return Err(crate::error::ParseError::UnexpectedNode(format!(
-                        "parent: {}, got: {}",
-                        node.kind(),
-                        ch.kind()
-                    )))
-                }
+                _ => {}
             };
         }
         if let Some(raises) = raises {
@@ -192,7 +189,7 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AttrDeclarator {
     }
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug)]
 pub enum AttrRaisesExpr {
     Case1(GetExcepExpr, Option<SetExcepExpr>),
     SetExcepExpr(SetExcepExpr),
@@ -210,3 +207,35 @@ pub struct SetExcepExpr {
 
 #[derive(Debug, Parser)]
 pub struct ExceptionList(pub Vec<ScopedName>);
+
+impl<'a> crate::parser::FromTreeSitter<'a> for AttrRaisesExpr {
+    fn from_node(
+        node: tree_sitter::Node<'a>,
+        ctx: &mut crate::parser::ParseContext<'a>,
+    ) -> crate::error::ParserResult<Self> {
+        assert_eq!(node.kind_id(), derive::node_id!("attr_raises_expr"));
+        let mut get_excep = None;
+        let mut set_excep = None;
+        for ch in node.children(&mut node.walk()) {
+            match ch.kind_id() {
+                derive::node_id!("get_excep_expr") => {
+                    get_excep = Some(crate::parser::FromTreeSitter::from_node(ch, ctx)?);
+                }
+                derive::node_id!("set_excep_expr") => {
+                    set_excep = Some(crate::parser::FromTreeSitter::from_node(ch, ctx)?);
+                }
+                _ => {}
+            }
+        }
+        if let Some(get_excep) = get_excep {
+            Ok(Self::Case1(get_excep, set_excep))
+        } else if let Some(set_excep) = set_excep {
+            Ok(Self::SetExcepExpr(set_excep))
+        } else {
+            Err(crate::error::ParseError::UnexpectedNode(format!(
+                "parent: {}, got: missing raises",
+                node.kind()
+            )))
+        }
+    }
+}

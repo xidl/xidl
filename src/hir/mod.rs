@@ -17,6 +17,12 @@ pub use const_dcl::*;
 mod interface;
 pub use interface::*;
 
+mod type_dcl;
+pub use type_dcl::*;
+
+mod exception_dcl;
+pub use exception_dcl::*;
+
 use crate::typed_ast::{ConstExpr, PositiveIntConst};
 
 pub struct Specification(pub Vec<Definition>);
@@ -128,8 +134,9 @@ impl From<crate::typed_ast::Specification> for Specification {
             match def {
                 crate::typed_ast::Definition::TypeDcl(type_dcl) => {
                     for inner in type_dcl.0 {
-                        let crate::typed_ast::TypeDclInner::ConstrTypeDcl(constr) = inner;
-                        defs.push(Definition::ConstrTypeDcl(constr.into()));
+                        if let crate::typed_ast::TypeDclInner::ConstrTypeDcl(constr) = inner {
+                            defs.push(Definition::ConstrTypeDcl(constr.into()));
+                        }
                     }
                 }
                 crate::typed_ast::Definition::ConstDcl(const_dcl) => {
@@ -138,6 +145,13 @@ impl From<crate::typed_ast::Specification> for Specification {
                 crate::typed_ast::Definition::InterfaceDcl(interface_dcl) => {
                     defs.push(Definition::InterfaceDcl(interface_dcl.into()));
                 }
+                crate::typed_ast::Definition::ModuleDcl(_)
+                | crate::typed_ast::Definition::ExceptDcl(_)
+                | crate::typed_ast::Definition::TemplateModuleDcl(_)
+                | crate::typed_ast::Definition::TemplateModuleInst(_)
+                | crate::typed_ast::Definition::PreprocInclude(_)
+                | crate::typed_ast::Definition::PreprocCall(_)
+                | crate::typed_ast::Definition::PreprocDefine(_) => {}
             }
         }
         Self(defs)

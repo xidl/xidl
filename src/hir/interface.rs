@@ -28,6 +28,9 @@ pub struct InterfaceBody(pub Vec<Export>);
 pub enum Export {
     OpDcl(OpDcl),
     AttrDcl(AttrDcl),
+    TypeDcl(TypeDcl),
+    ConstDcl(ConstDcl),
+    ExceptDcl(ExceptDcl),
 }
 
 pub struct OpDcl {
@@ -155,6 +158,9 @@ impl From<crate::typed_ast::Export> for Export {
         match value {
             crate::typed_ast::Export::OpDcl(op_dcl) => Self::OpDcl(op_dcl.into()),
             crate::typed_ast::Export::AttrDcl(attr_dcl) => Self::AttrDcl(attr_dcl.into()),
+            crate::typed_ast::Export::TypeDcl(type_dcl) => Self::TypeDcl(type_dcl.into()),
+            crate::typed_ast::Export::ConstDcl(const_dcl) => Self::ConstDcl(const_dcl.into()),
+            crate::typed_ast::Export::ExceptDcl(except_dcl) => Self::ExceptDcl(except_dcl.into()),
         }
     }
 }

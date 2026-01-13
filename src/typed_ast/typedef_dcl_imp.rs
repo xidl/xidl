@@ -22,26 +22,30 @@
 //! ```
 
 use super::*;
+use derive::Parser;
 
+#[derive(Debug, Parser)]
 pub struct TypedefDcl {
     pub decl: TypeDeclarator,
 }
 
+#[derive(Debug)]
 pub struct TypeDeclarator {
     pub ty: TypeDeclaratorInner,
     pub decl: AnyDeclarators,
 }
 
+#[derive(Debug)]
 pub enum TypeDeclaratorInner {
     SimpleTypeSpec(SimpleTypeSpec),
     TemplateTypeSpec(TemplateTypeSpec),
     ConstrTypeDcl(ConstrTypeDcl),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub struct AnyDeclarators(pub Vec<AnyDeclarator>);
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
 pub enum AnyDeclarator {
     SimpleDeclarator(SimpleDeclarator),
     ArrayDeclarator(ArrayDeclarator),
@@ -67,3 +71,64 @@ pub struct ArrayDeclarator {
 
 #[derive(Debug, Parser)]
 pub struct FixedArraySize(pub PositiveIntConst);
+
+impl<'a> crate::parser::FromTreeSitter<'a> for TypeDeclarator {
+    fn from_node(
+        node: tree_sitter::Node<'a>,
+        ctx: &mut crate::parser::ParseContext<'a>,
+    ) -> crate::error::ParserResult<Self> {
+        assert_eq!(node.kind_id(), derive::node_id!("type_declarator"));
+        let mut ty = None;
+        let mut decl = None;
+        for ch in node.children(&mut node.walk()) {
+            match ch.kind_id() {
+                derive::node_id!("simple_type_spec")
+                | derive::node_id!("template_type_spec")
+                | derive::node_id!("constr_type_dcl") => {
+                    ty = Some(TypeDeclaratorInner::from_node(ch, ctx)?);
+                }
+                derive::node_id!("any_declarators") => {
+                    decl = Some(AnyDeclarators::from_node(ch, ctx)?);
+                }
+                _ => {}
+            }
+        }
+        Ok(Self {
+            ty: ty.ok_or_else(|| {
+                crate::error::ParseError::UnexpectedNode(format!(
+                    "parent: {}, got: missing type",
+                    node.kind()
+                ))
+            })?,
+            decl: decl.ok_or_else(|| {
+                crate::error::ParseError::UnexpectedNode(format!(
+                    "parent: {}, got: missing declarators",
+                    node.kind()
+                ))
+            })?,
+        })
+    }
+}
+
+impl<'a> crate::parser::FromTreeSitter<'a> for TypeDeclaratorInner {
+    fn from_node(
+        node: tree_sitter::Node<'a>,
+        ctx: &mut crate::parser::ParseContext<'a>,
+    ) -> crate::error::ParserResult<Self> {
+        match node.kind_id() {
+            derive::node_id!("simple_type_spec") => Ok(Self::SimpleTypeSpec(
+                crate::parser::FromTreeSitter::from_node(node, ctx)?,
+            )),
+            derive::node_id!("template_type_spec") => Ok(Self::TemplateTypeSpec(
+                crate::parser::FromTreeSitter::from_node(node, ctx)?,
+            )),
+            derive::node_id!("constr_type_dcl") => Ok(Self::ConstrTypeDcl(
+                crate::parser::FromTreeSitter::from_node(node, ctx)?,
+            )),
+            _ => Err(crate::error::ParseError::UnexpectedNode(format!(
+                "parent: type_declarator, got: {}",
+                node.kind()
+            ))),
+        }
+    }
+}

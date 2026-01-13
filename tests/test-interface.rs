@@ -10,15 +10,28 @@ fn test_interface() {
 
         interface A: B, C, D {
             void func1();
-            void func2() raises(A);
-            void func3() raises(A,B,C);
-            void func4(in u8 attr, out u16 attr);
-            void func5(in u8 attr, out u16 attr) raises(A);
-            void func6(in u8 attr, out u16 attr) raises(A,B,C);
-            void func7(u8 attr, out u16 attr) raises(A,B,C);
+            void func1() raises(A);
+            void func1() raises(A,B,C);
+            void func1(in u8 attr, out u16 attr);
+            void func1(in u8 attr, out u16 attr) raises(A);
+            void func1(in u8 attr, out u16 attr) raises(A,B,C);
+            readonly attribute u8 attr1, attr2, attr3;
+            readonly attribute u8 attr1 raises(A);
+            readonly attribute u8 attr1 raises(A, B, C);
+            attribute u8 attr1, attr2, attr3;
+            attribute u8 attr1 getraises(A);
+            attribute u8 attr1 getraises(A, B, C) setraises(A);
+            attribute u8 attr1 setraises(A);
         };
 
-
+        interface A {
+            typedef long L1; // idl 7.4.4
+            const int a = 10; // idl 7.4.4
+            exception A { // idl 7.4.4
+                int a;
+            };
+            short opA(in L1 l_1);
+        };
     "#,
     )
     .unwrap();
