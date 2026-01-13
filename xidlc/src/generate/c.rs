@@ -1,7 +1,9 @@
 use crate::error::{IdlcError, Result};
 use crate::generate::{render_const_expr, to_snake_case, GeneratedFile};
+use crate::jsonrpc;
 use minijinja::Environment;
 use serde::Serialize;
+use std::io::{BufRead, Write};
 use std::path::Path;
 use xidl_parser::hir;
 
@@ -101,6 +103,13 @@ pub fn generate(spec: &hir::Specification, input_path: &Path) -> Result<Vec<Gene
         filename,
         filecontent: content,
     }])
+}
+
+pub fn serve_jsonrpc<R: BufRead, W: Write>(reader: R, writer: W) -> Result<()> {
+    jsonrpc::serve_generate(reader, writer, |spec, input| {
+        let input = input.ok_or_else(|| IdlcError::rpc("missing input path"))?;
+        generate(spec, Path::new(input))
+    })
 }
 
 fn constr_to_def(constr: &hir::ConstrTypeDcl) -> CDef {
