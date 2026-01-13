@@ -11,12 +11,20 @@ pub use declarator::*;
 mod types;
 pub use types::*;
 
+mod const_dcl;
+pub use const_dcl::*;
+
+mod interface;
+pub use interface::*;
+
 use crate::typed_ast::{ConstExpr, PositiveIntConst};
 
 pub struct Specification(pub Vec<Definition>);
 
 pub enum Definition {
     ConstrTypeDcl(ConstrTypeDcl),
+    ConstDcl(ConstDcl),
+    InterfaceDcl(InterfaceDcl),
 }
 
 pub enum ConstrTypeDcl {
@@ -117,10 +125,18 @@ impl From<crate::typed_ast::Specification> for Specification {
     fn from(value: crate::typed_ast::Specification) -> Self {
         let mut defs = Vec::new();
         for def in value.0 {
-            if let crate::typed_ast::Definition::TypeDcl(type_dcl) = def {
-                for inner in type_dcl.0 {
-                    let crate::typed_ast::TypeDclInner::ConstrTypeDcl(constr) = inner;
-                    defs.push(Definition::ConstrTypeDcl(constr.into()));
+            match def {
+                crate::typed_ast::Definition::TypeDcl(type_dcl) => {
+                    for inner in type_dcl.0 {
+                        let crate::typed_ast::TypeDclInner::ConstrTypeDcl(constr) = inner;
+                        defs.push(Definition::ConstrTypeDcl(constr.into()));
+                    }
+                }
+                crate::typed_ast::Definition::ConstDcl(const_dcl) => {
+                    defs.push(Definition::ConstDcl(const_dcl.into()));
+                }
+                crate::typed_ast::Definition::InterfaceDcl(interface_dcl) => {
+                    defs.push(Definition::InterfaceDcl(interface_dcl.into()));
                 }
             }
         }
