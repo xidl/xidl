@@ -1,3 +1,5 @@
+mod bitmask_dcl;
+mod bitset_dcl;
 mod const_dcl;
 mod constr_type;
 mod definition;
@@ -5,6 +7,7 @@ mod enum_dcl;
 mod render;
 mod spec;
 mod struct_dcl;
+mod union_def;
 mod util;
 
 pub use render::{CRender, CRenderer};

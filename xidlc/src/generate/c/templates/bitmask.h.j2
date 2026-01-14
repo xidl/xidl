@@ -1,0 +1,5 @@
+typedef enum {{ ident }} {
+{% for value in values %}
+  {{ value }},
+{% endfor %}
+} {{ ident }};

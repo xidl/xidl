@@ -3,16 +3,13 @@ use crate::generate::c::{CRender, CRenderer};
 use serde_json::json;
 use xidl_parser::hir;
 
-impl CRender for hir::EnumDcl {
+impl CRender for hir::BitmaskDcl {
     fn render(&self, renderer: &CRenderer) -> IdlcResult<Vec<String>> {
         let ctx = json!({
             "ident": &self.ident,
-            "variants": self
-                .member
-                .iter()
-                .collect::<Vec<_>>(),
+            "values": self.value.clone(),
         });
-        let rendered = renderer.render_template("enum.h.j2", &ctx)?;
+        let rendered = renderer.render_template("bitmask.h.j2", &ctx)?;
         Ok(vec![rendered])
     }
 }

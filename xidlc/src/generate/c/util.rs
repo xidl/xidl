@@ -136,3 +136,72 @@ pub fn c_literal(value: &hir::Literal) -> String {
         hir::Literal::BooleanLiteral(value) => value.to_ascii_lowercase(),
     }
 }
+
+pub fn c_switch_type(value: &hir::SwitchTypeSpec) -> String {
+    match value {
+        hir::SwitchTypeSpec::IntegerType(ty) => c_integer_type(ty),
+        hir::SwitchTypeSpec::CharType => "char".to_string(),
+        hir::SwitchTypeSpec::WideCharType => "wchar_t".to_string(),
+        hir::SwitchTypeSpec::BooleanType => "bool".to_string(),
+        hir::SwitchTypeSpec::ScopedName(value) => c_scoped_name_hir(value),
+        hir::SwitchTypeSpec::OctetType => "uint8_t".to_string(),
+    }
+}
+
+pub fn c_element_type_name(value: &hir::ElementSpecTy) -> String {
+    match value {
+        hir::ElementSpecTy::TypeSpec(ty) => c_type(ty),
+        hir::ElementSpecTy::ConstrTypeDcl(constr) => match constr {
+            hir::ConstrTypeDcl::StructForwardDcl(def) => def.ident.clone(),
+            hir::ConstrTypeDcl::StructDcl(def) => def.ident.clone(),
+            hir::ConstrTypeDcl::EnumDcl(def) => def.ident.clone(),
+            hir::ConstrTypeDcl::UnionForwardDcl(def) => def.ident.clone(),
+            hir::ConstrTypeDcl::UnionDef(def) => def.ident.clone(),
+            hir::ConstrTypeDcl::BitsetDcl(def) => def.ident.clone(),
+            hir::ConstrTypeDcl::BitmaskDcl(def) => def.ident.clone(),
+        },
+    }
+}
+
+pub fn declarator_info(decl: &hir::Declarator) -> (String, Vec<String>) {
+    match decl {
+        hir::Declarator::SimpleDeclarator(value) => (value.0.clone(), Vec::new()),
+        hir::Declarator::ArrayDeclarator(value) => {
+            let dims = value
+                .len
+                .iter()
+                .map(|len| {
+                    format!(
+                        "[{}]",
+                        render_const_expr(&len.0, &c_scoped_name, &c_literal)
+                    )
+                })
+                .collect();
+            (value.ident.clone(), dims)
+        }
+    }
+}
+
+pub fn collect_inline_defs(
+    constr: &hir::ConstrTypeDcl,
+    renderer: &crate::generate::c::CRenderer,
+) -> crate::error::IdlcResult<Vec<String>> {
+    use crate::generate::c::CRender;
+    match constr {
+        hir::ConstrTypeDcl::StructDcl(def) => def.render(renderer),
+        hir::ConstrTypeDcl::EnumDcl(def) => def.render(renderer),
+        hir::ConstrTypeDcl::UnionDef(def) => def.render(renderer),
+        hir::ConstrTypeDcl::BitsetDcl(def) => def.render(renderer),
+        hir::ConstrTypeDcl::BitmaskDcl(def) => def.render(renderer),
+        _ => Ok(Vec::new()),
+    }
+}
+
+pub fn bitfield_type(value: &hir::BitFieldType) -> String {
+    match value {
+        hir::BitFieldType::Bool => "bool".to_string(),
+        hir::BitFieldType::Octec => "uint8_t".to_string(),
+        hir::BitFieldType::SignedInt => "int32_t".to_string(),
+        hir::BitFieldType::UnsignedInt => "uint32_t".to_string(),
+    }
+}

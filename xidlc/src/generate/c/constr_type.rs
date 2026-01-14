@@ -15,18 +15,9 @@ impl CRender for hir::ConstrTypeDcl {
                 "union {} skipped",
                 def.ident
             ))]),
-            hir::ConstrTypeDcl::UnionDef(def) => Ok(vec![comment_placeholder(&format!(
-                "union {} skipped",
-                def.ident
-            ))]),
-            hir::ConstrTypeDcl::BitsetDcl(def) => Ok(vec![comment_placeholder(&format!(
-                "bitset {} skipped",
-                def.ident
-            ))]),
-            hir::ConstrTypeDcl::BitmaskDcl(def) => Ok(vec![comment_placeholder(&format!(
-                "bitmask {} skipped",
-                def.ident
-            ))]),
+            hir::ConstrTypeDcl::UnionDef(def) => def.render(renderer),
+            hir::ConstrTypeDcl::BitsetDcl(def) => def.render(renderer),
+            hir::ConstrTypeDcl::BitmaskDcl(def) => def.render(renderer),
         }
     }
 }
