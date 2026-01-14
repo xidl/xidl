@@ -1,0 +1,4 @@
+/* Interface {{ ident }} */
+{% for op in operations %}
+{{ op.return_ty }} {{ ident }}_{{ op.name }}({% if op.params | length == 0 %}void{% else %}{% for param in op.params %}{{ param.ty }} {{ param.name }}{% if not loop.last %}, {% endif %}{% endfor %}{% endif %});
+{% endfor %}

@@ -4,6 +4,7 @@ mod const_dcl;
 mod constr_type;
 mod definition;
 mod enum_dcl;
+mod interface_dcl;
 mod render;
 mod spec;
 mod struct_dcl;

@@ -1,0 +1,9 @@
+{% for op in operations %}
+{{ op.return_ty }} {{ ident }}_{{ op.name }}({% if op.params | length == 0 %}void{% else %}{% for param in op.params %}{{ param.ty }} {{ param.name }}{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}) {
+{% if not op.returns_void %}
+  {{ op.return_ty }} result = {0};
+  return result;
+{% endif %}
+}
+
+{% endfor %}
