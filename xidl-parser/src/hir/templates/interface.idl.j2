@@ -1,0 +1,56 @@
+{%- for module in modules %}
+module {{ module }} {
+{%- endfor %}
+
+{%- for const in consts %}
+const long {{ const.name }} = {{ const.value }};
+{%- endfor %}
+
+{%- for op in operations %}
+struct {{ interface_name }}_{{ op.name }}_In {
+{%- for member in op.in_members %}
+  {{ member.ty }} {{ member.name }};
+{%- endfor %}
+};
+
+struct {{ interface_name }}_{{ op.name }}_Out {
+{%- for member in op.out_members %}
+  {{ member.ty }} {{ member.name }};
+{%- endfor %}
+};
+
+union {{ interface_name }}_{{ op.name }}_Result switch (long) {
+  case dds::RETCODE_OK: {{ interface_name }}_{{ op.name }}_Out result;
+{%- for ex in op.result_exceptions %}
+  case {{ ex.const_name }}: {{ ex.ty }} {{ ex.member_name }};
+{%- endfor %}
+};
+{%- endfor %}
+
+union {{ interface_name }}_Call switch (long) {
+  default: dds::rpc::UnknownOperation unknownOp;
+{%- for op in operations %}
+  case {{ interface_name }}_{{ op.name }}_Hash: {{ interface_name }}_{{ op.name }}_In {{ op.name }};
+{%- endfor %}
+};
+
+struct {{ interface_name }}_Request {
+  dds::rpc::RequestHeader header;
+  {{ interface_name }}_Call data;
+};
+
+union {{ interface_name }}_Return switch (long) {
+  default: dds::rpc::UnknownOperation unknownOp;
+{%- for op in operations %}
+  case {{ interface_name }}_{{ op.name }}_Hash: {{ interface_name }}_{{ op.name }}_Result {{ op.name }};
+{%- endfor %}
+};
+
+struct {{ interface_name }}_Reply {
+  dds::rpc::ReplyHeader header;
+  {{ interface_name }}_Return data;
+};
+
+{%- for module in modules | reverse %}
+};
+{%- endfor %}

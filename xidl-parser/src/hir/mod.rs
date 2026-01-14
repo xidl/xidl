@@ -26,6 +26,7 @@ pub use type_dcl::*;
 mod exception_dcl;
 pub use exception_dcl::*;
 
+mod interface_codegen;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Specification(pub Vec<Definition>);
 
@@ -142,32 +143,61 @@ fn get_scoped_name<'a>(pre: &mut Vec<&'a str>, value: &'a crate::typed_ast::Scop
 
 impl From<crate::typed_ast::Specification> for Specification {
     fn from(value: crate::typed_ast::Specification) -> Self {
-        let mut defs = Vec::new();
-        for def in value.0 {
-            match def {
-                crate::typed_ast::Definition::TypeDcl(type_dcl) => {
-                    for inner in type_dcl.0 {
-                        if let crate::typed_ast::TypeDclInner::ConstrTypeDcl(constr) = inner {
-                            defs.push(Definition::ConstrTypeDcl(constr.into()));
-                        }
+        spec_from_typed_ast(value, true)
+    }
+}
+
+pub(crate) fn spec_from_typed_ast(
+    value: crate::typed_ast::Specification,
+    expand_interfaces: bool,
+) -> Specification {
+    let mut defs = Vec::new();
+    let mut modules = Vec::new();
+    collect_defs(value.0, &mut modules, expand_interfaces, &mut defs);
+    Specification(defs)
+}
+
+fn collect_defs(
+    defs: Vec<crate::typed_ast::Definition>,
+    modules: &mut Vec<String>,
+    expand_interfaces: bool,
+    out: &mut Vec<Definition>,
+) {
+    for def in defs {
+        match def {
+            crate::typed_ast::Definition::ModuleDcl(module) => {
+                modules.push(module.ident.0);
+                collect_defs(module.definition, modules, expand_interfaces, out);
+                modules.pop();
+            }
+            crate::typed_ast::Definition::TypeDcl(type_dcl) => {
+                for inner in type_dcl.0 {
+                    if let crate::typed_ast::TypeDclInner::ConstrTypeDcl(constr) = inner {
+                        out.push(Definition::ConstrTypeDcl(constr.into()));
                     }
                 }
-                crate::typed_ast::Definition::ConstDcl(const_dcl) => {
-                    defs.push(Definition::ConstDcl(const_dcl.into()));
-                }
-                crate::typed_ast::Definition::InterfaceDcl(interface_dcl) => {
-                    defs.push(Definition::InterfaceDcl(interface_dcl.into()));
-                }
-                crate::typed_ast::Definition::ModuleDcl(_)
-                | crate::typed_ast::Definition::ExceptDcl(_)
-                | crate::typed_ast::Definition::TemplateModuleDcl(_)
-                | crate::typed_ast::Definition::TemplateModuleInst(_)
-                | crate::typed_ast::Definition::PreprocInclude(_)
-                | crate::typed_ast::Definition::PreprocCall(_)
-                | crate::typed_ast::Definition::PreprocDefine(_) => {}
             }
+            crate::typed_ast::Definition::ConstDcl(const_dcl) => {
+                out.push(Definition::ConstDcl(const_dcl.into()));
+            }
+            crate::typed_ast::Definition::InterfaceDcl(interface_dcl) => {
+                let interface: InterfaceDcl = interface_dcl.into();
+                if expand_interfaces {
+                    let extra = interface_codegen::expand_interface(&interface, modules)
+                        .unwrap_or_else(|err| {
+                            panic!("interface expansion failed: {err}");
+                        });
+                    out.extend(extra);
+                }
+                out.push(Definition::InterfaceDcl(interface));
+            }
+            crate::typed_ast::Definition::ExceptDcl(_)
+            | crate::typed_ast::Definition::TemplateModuleDcl(_)
+            | crate::typed_ast::Definition::TemplateModuleInst(_)
+            | crate::typed_ast::Definition::PreprocInclude(_)
+            | crate::typed_ast::Definition::PreprocCall(_)
+            | crate::typed_ast::Definition::PreprocDefine(_) => {}
         }
-        Self(defs)
     }
 }
 

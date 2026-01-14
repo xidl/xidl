@@ -9,6 +9,9 @@ tree-sitter-idl = "3.12.1"
 xidl-derive = { workspace = true }
 thiserror = "2.0"
 serde = { version = "1.0", features = ["derive"] }
+md5 = "0.7"
+minijinja = "1.0"
+rust-embed = "8.5"
 
 [dev-dependencies]
 insta = "1.44"

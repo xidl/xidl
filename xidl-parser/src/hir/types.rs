@@ -2,13 +2,13 @@ use serde::{Deserialize, Serialize};
 
 use super::*;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum TypeSpec {
     SimpleTypeSpec(SimpleTypeSpec),
     TemplateTypeSpec(TemplateTypeSpec),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum SimpleTypeSpec {
     IntegerType(IntegerType),
     FloatingPtType,
@@ -21,7 +21,7 @@ pub enum SimpleTypeSpec {
     ScopedName(ScopedName),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum TemplateTypeSpec {
     SequenceType(SequenceType),
     StringType(StringType),
@@ -30,36 +30,36 @@ pub enum TemplateTypeSpec {
     MapType(MapType),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SequenceType {
     pub ty: Box<TypeSpec>,
     pub len: Option<PositiveIntConst>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MapType {
     pub key: Box<TypeSpec>,
     pub value: Box<TypeSpec>,
     pub len: Option<PositiveIntConst>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct StringType {
     pub bound: Option<PositiveIntConst>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct WideStringType {
     pub bound: Option<PositiveIntConst>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct FixedPtType {
     pub integer: PositiveIntConst,
     pub fraction: PositiveIntConst,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum IntegerType {
     Char,
     UChar,
