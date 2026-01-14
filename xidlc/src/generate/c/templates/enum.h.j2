@@ -3,3 +3,13 @@ typedef enum {{ ident }} {
   {{ variant }},
 {% endfor %}
 } {{ ident }};
+
+inline {{ ident }} {{ ident }}_new(void) {
+  {{ ident }} value;
+  {{ ident }}_init(&value);
+  return value;
+}
+
+inline void {{ ident }}_init({{ ident }}* self) {
+  *self = ({{ ident }})0;
+}

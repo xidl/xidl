@@ -3,3 +3,13 @@ typedef struct {{ ident }} {
   {{ field.ty }} {{ field.name }}{{ field.dims | join }};
 {% endfor %}
 } {{ ident }};
+
+inline {{ ident }} {{ ident }}_new(void) {
+  {{ ident }} value;
+  {{ ident }}_init(&value);
+  return value;
+}
+
+inline void {{ ident }}_init({{ ident }}* self) {
+  *self = ({{ ident }}){0};
+}

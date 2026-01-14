@@ -21,7 +21,7 @@ impl CRender for hir::StructDcl {
             "ident": &self.ident,
             "members": fields,
         });
-        let rendered = renderer.render_template("struct.h.jinja", &ctx)?;
+        let rendered = renderer.render_template("struct.h.j2", &ctx)?;
         Ok(vec![rendered])
     }
 }

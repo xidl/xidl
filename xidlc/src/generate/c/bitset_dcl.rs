@@ -20,18 +20,31 @@ impl CRender for hir::BitsetDcl {
                     &crate::generate::c::util::c_scoped_name,
                     &crate::generate::c::util::c_literal,
                 );
+                let mask = format!("(1u << ({}))", pos);
                 json!({
                     "ident": &field.ident,
                     "ty": ty,
                     "pos": pos,
+                    "mask": mask,
                 })
             })
             .collect::<Vec<_>>();
+
+        let all_mask = if fields.is_empty() {
+            "0".to_string()
+        } else {
+            fields
+                .iter()
+                .map(|field| field["mask"].as_str().unwrap_or("0"))
+                .collect::<Vec<_>>()
+                .join(" | ")
+        };
 
         let ctx = json!({
             "ident": &self.ident,
             "parent": self.parent.as_ref().map(c_scoped_name_hir),
             "fields": fields,
+            "all_mask": all_mask,
         });
 
         let rendered = renderer.render_template("bitset.h.j2", &ctx)?;

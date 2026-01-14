@@ -3,3 +3,53 @@ typedef enum {{ ident }} {
   {{ value }},
 {% endfor %}
 } {{ ident }};
+
+inline {{ ident }} {{ ident }}_new(void) {
+  {{ ident }} value;
+  {{ ident }}_init(&value);
+  return value;
+}
+
+inline void {{ ident }}_init({{ ident }}* self) {
+  *self = ({{ ident }})0;
+}
+
+inline unsigned int {{ ident }}_bits({{ ident }} const* self) {
+  return (unsigned int)(*self);
+}
+
+inline bool {{ ident }}_is_empty({{ ident }} const* self) {
+  return {{ ident }}_bits(self) == 0u;
+}
+
+inline bool {{ ident }}_is_all({{ ident }} const* self) {
+  return ({{ ident }}_bits(self) & ({{ all_mask }})) == ({{ all_mask }});
+}
+
+inline bool {{ ident }}_contains({{ ident }} const* self, {{ ident }} other) {
+  return ({{ ident }}_bits(self) & (unsigned int)other) == (unsigned int)other;
+}
+
+inline bool {{ ident }}_intersects({{ ident }} const* self, {{ ident }} other) {
+  return ({{ ident }}_bits(self) & (unsigned int)other) != 0u;
+}
+
+inline void {{ ident }}_insert({{ ident }}* self, {{ ident }} other) {
+  *self = ({{ ident }})({{ ident }}_bits(self) | (unsigned int)other);
+}
+
+inline void {{ ident }}_remove({{ ident }}* self, {{ ident }} other) {
+  *self = ({{ ident }})( {{ ident }}_bits(self) & ~(unsigned int)other);
+}
+
+inline void {{ ident }}_toggle({{ ident }}* self, {{ ident }} other) {
+  *self = ({{ ident }})({{ ident }}_bits(self) ^ (unsigned int)other);
+}
+
+inline void {{ ident }}_set({{ ident }}* self, {{ ident }} other, bool value) {
+  if (value) {
+    {{ ident }}_insert(self, other);
+  } else {
+    {{ ident }}_remove(self, other);
+  }
+}
