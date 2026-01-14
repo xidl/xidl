@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["xidl-derive", "xidlc", "xidl-parser"]
+members = ["xidl-derive", "xidlc", "xidl-parser", "xidl-xcdr"]
 
 [workspace.dependencies]
 xidl-parser = { path = "xidl-parser" }
