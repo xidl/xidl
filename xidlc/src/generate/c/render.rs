@@ -11,8 +11,31 @@ pub struct CRenderer {
     env: Environment<'static>,
 }
 
+#[derive(Default)]
+pub struct CRenderOutput {
+    pub header: Vec<String>,
+    pub source: Vec<String>,
+}
+
+impl CRenderOutput {
+    pub fn push_header(mut self, value: String) -> Self {
+        self.header.push(value);
+        self
+    }
+
+    pub fn push_source(mut self, value: String) -> Self {
+        self.source.push(value);
+        self
+    }
+
+    pub fn extend(&mut self, other: CRenderOutput) {
+        self.header.extend(other.header);
+        self.source.extend(other.source);
+    }
+}
+
 pub trait CRender {
-    fn render(&self, renderer: &CRenderer) -> IdlcResult<Vec<String>>;
+    fn render(&self, renderer: &CRenderer) -> IdlcResult<CRenderOutput>;
 }
 
 impl CRenderer {

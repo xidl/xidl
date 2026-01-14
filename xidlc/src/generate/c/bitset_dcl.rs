@@ -1,11 +1,11 @@
 use crate::error::IdlcResult;
 use crate::generate::c::util::{bitfield_type, c_scoped_name_hir};
-use crate::generate::c::{CRender, CRenderer};
+use crate::generate::c::{CRender, CRenderOutput, CRenderer};
 use serde_json::json;
 use xidl_parser::hir;
 
 impl CRender for hir::BitsetDcl {
-    fn render(&self, renderer: &CRenderer) -> IdlcResult<Vec<String>> {
+    fn render(&self, renderer: &CRenderer) -> IdlcResult<CRenderOutput> {
         let fields = self
             .field
             .iter()
@@ -47,7 +47,10 @@ impl CRender for hir::BitsetDcl {
             "all_mask": all_mask,
         });
 
-        let rendered = renderer.render_template("bitset.h.j2", &ctx)?;
-        Ok(vec![rendered])
+        let header = renderer.render_template("bitset.h.j2", &ctx)?;
+        let source = renderer.render_template("bitset.c.j2", &ctx)?;
+        Ok(CRenderOutput::default()
+            .push_header(header)
+            .push_source(source))
     }
 }

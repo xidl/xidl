@@ -2,13 +2,13 @@ use crate::error::IdlcResult;
 use crate::generate::c::util::{
     c_element_type_name, c_switch_type, collect_inline_defs, declarator_info,
 };
-use crate::generate::c::{CRender, CRenderer};
+use crate::generate::c::{CRender, CRenderOutput, CRenderer};
 use serde_json::json;
 use xidl_parser::hir;
 
 impl CRender for hir::UnionDef {
-    fn render(&self, renderer: &CRenderer) -> IdlcResult<Vec<String>> {
-        let mut out = Vec::new();
+    fn render(&self, renderer: &CRenderer) -> IdlcResult<CRenderOutput> {
+        let mut out = CRenderOutput::default();
 
         for case in &self.case {
             if let hir::ElementSpecTy::ConstrTypeDcl(constr) = &case.element.ty {
@@ -48,8 +48,10 @@ impl CRender for hir::UnionDef {
             "cases": cases,
         });
 
-        let rendered = renderer.render_template("union.h.j2", &ctx)?;
-        out.push(rendered);
+        let header = renderer.render_template("union.h.j2", &ctx)?;
+        let source = renderer.render_template("union.c.j2", &ctx)?;
+        out.header.push(header);
+        out.source.push(source);
         Ok(out)
     }
 }

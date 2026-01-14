@@ -46,6 +46,10 @@ pub fn c_header() -> String {
     .join("\n")
 }
 
+pub fn c_source_header(header_name: &str) -> String {
+    format!("#include \"{header_name}\"")
+}
+
 pub fn c_const_type(ty: &hir::ConstType) -> String {
     match ty {
         hir::ConstType::IntegerType(value) => c_integer_type(value),
@@ -185,7 +189,7 @@ pub fn declarator_info(decl: &hir::Declarator) -> (String, Vec<String>) {
 pub fn collect_inline_defs(
     constr: &hir::ConstrTypeDcl,
     renderer: &crate::generate::c::CRenderer,
-) -> crate::error::IdlcResult<Vec<String>> {
+) -> crate::error::IdlcResult<crate::generate::c::CRenderOutput> {
     use crate::generate::c::CRender;
     match constr {
         hir::ConstrTypeDcl::StructDcl(def) => def.render(renderer),
@@ -193,7 +197,7 @@ pub fn collect_inline_defs(
         hir::ConstrTypeDcl::UnionDef(def) => def.render(renderer),
         hir::ConstrTypeDcl::BitsetDcl(def) => def.render(renderer),
         hir::ConstrTypeDcl::BitmaskDcl(def) => def.render(renderer),
-        _ => Ok(Vec::new()),
+        _ => Ok(crate::generate::c::CRenderOutput::default()),
     }
 }
 

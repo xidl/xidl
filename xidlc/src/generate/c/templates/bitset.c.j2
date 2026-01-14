@@ -1,0 +1,71 @@
+{{ ident }} {{ ident }}_new(void) {
+  {{ ident }} value;
+  {{ ident }}_init(&value);
+  return value;
+}
+
+void {{ ident }}_init({{ ident }}* self) {
+  *self = ({{ ident }}){0};
+}
+
+unsigned int {{ ident }}_bits({{ ident }} const* self) {
+  unsigned int bits = 0u;
+{% for field in fields %}
+  if (self->{{ field.ident }}) {
+    bits |= {{ field.mask }};
+  }
+{% endfor %}
+  return bits;
+}
+
+bool {{ ident }}_is_empty({{ ident }} const* self) {
+  return {{ ident }}_bits(self) == 0u;
+}
+
+bool {{ ident }}_is_all({{ ident }} const* self) {
+  return ({{ ident }}_bits(self) & ({{ all_mask }})) == ({{ all_mask }});
+}
+
+bool {{ ident }}_contains({{ ident }} const* self, {{ ident }} const* other) {
+  unsigned int other_bits = {{ ident }}_bits(other);
+  return ({{ ident }}_bits(self) & other_bits) == other_bits;
+}
+
+bool {{ ident }}_intersects({{ ident }} const* self, {{ ident }} const* other) {
+  return ({{ ident }}_bits(self) & {{ ident }}_bits(other)) != 0u;
+}
+
+void {{ ident }}_insert({{ ident }}* self, {{ ident }} const* other) {
+  unsigned int other_bits = {{ ident }}_bits(other);
+{% for field in fields %}
+  if (other_bits & {{ field.mask }}) {
+    self->{{ field.ident }} = 1;
+  }
+{% endfor %}
+}
+
+void {{ ident }}_remove({{ ident }}* self, {{ ident }} const* other) {
+  unsigned int other_bits = {{ ident }}_bits(other);
+{% for field in fields %}
+  if (other_bits & {{ field.mask }}) {
+    self->{{ field.ident }} = 0;
+  }
+{% endfor %}
+}
+
+void {{ ident }}_toggle({{ ident }}* self, {{ ident }} const* other) {
+  unsigned int other_bits = {{ ident }}_bits(other);
+{% for field in fields %}
+  if (other_bits & {{ field.mask }}) {
+    self->{{ field.ident }} = self->{{ field.ident }} ? 0 : 1;
+  }
+{% endfor %}
+}
+
+void {{ ident }}_set({{ ident }}* self, {{ ident }} const* other, bool value) {
+  if (value) {
+    {{ ident }}_insert(self, other);
+  } else {
+    {{ ident }}_remove(self, other);
+  }
+}

@@ -10,10 +10,10 @@ mod struct_dcl;
 mod union_def;
 mod util;
 
-pub use render::{CRender, CRenderer};
+pub use render::{CRender, CRenderOutput, CRenderer};
 
 use crate::error::IdlcResult;
-use crate::generate::c::util::c_header;
+use crate::generate::c::util::{c_header, c_source_header};
 use crate::generate::GeneratedFile;
 use std::path::Path;
 use xidl_parser::hir;
@@ -23,17 +23,30 @@ pub fn generate(spec: &hir::Specification, input_path: &Path) -> IdlcResult<Vec<
         .file_stem()
         .and_then(|value| value.to_str())
         .unwrap_or("output");
-    let filename = format!("{}.h", crate::generate::to_snake_case(stem));
+    let base = crate::generate::to_snake_case(stem);
+    let filename = format!("{base}.h");
 
     let renderer = CRenderer::new()?;
-    let mut chunks = Vec::new();
-    chunks.push(c_header());
-    chunks.extend(spec.render(&renderer)?);
+    let mut output = spec.render(&renderer)?;
 
-    Ok(vec![GeneratedFile {
-        filename,
-        filecontent: chunks.join("\n"),
-    }])
+    let mut header_chunks = Vec::new();
+    header_chunks.push(c_header());
+    header_chunks.append(&mut output.header);
+
+    let mut source_chunks = Vec::new();
+    source_chunks.push(c_source_header(&filename));
+    source_chunks.append(&mut output.source);
+
+    Ok(vec![
+        GeneratedFile {
+            filename: filename.clone(),
+            filecontent: header_chunks.join("\n"),
+        },
+        GeneratedFile {
+            filename: format!("{base}.c"),
+            filecontent: source_chunks.join("\n"),
+        },
+    ])
 }
 
 pub fn serve_jsonrpc<R: std::io::BufRead, W: std::io::Write>(
