@@ -10,6 +10,7 @@ mod spec;
 mod struct_dcl;
 mod union_def;
 mod util;
+mod xcdr;
 
 pub use render::{CRender, CRenderOutput, CRenderer};
 
@@ -26,6 +27,7 @@ pub fn generate(spec: &hir::Specification, input_path: &Path) -> IdlcResult<Vec<
         .unwrap_or("output");
     let base = crate::generate::to_snake_case(stem);
     let filename = format!("{base}.h");
+    let xcdr_header_name = format!("{base}_xcdr.h");
 
     let renderer = CRenderer::new()?;
     let mut output = spec.render(&renderer)?;
@@ -38,6 +40,14 @@ pub fn generate(spec: &hir::Specification, input_path: &Path) -> IdlcResult<Vec<
     source_chunks.push(c_source_header(&filename));
     source_chunks.append(&mut output.source);
 
+    let mut xcdr_header_chunks = Vec::new();
+    xcdr_header_chunks.push(xcdr::xcdr_header(&filename));
+    xcdr_header_chunks.append(&mut output.xcdr_header);
+
+    let mut xcdr_source_chunks = Vec::new();
+    xcdr_source_chunks.push(xcdr::xcdr_source_header(&xcdr_header_name));
+    xcdr_source_chunks.append(&mut output.xcdr_source);
+
     Ok(vec![
         GeneratedFile {
             filename: filename.clone(),
@@ -46,6 +56,14 @@ pub fn generate(spec: &hir::Specification, input_path: &Path) -> IdlcResult<Vec<
         GeneratedFile {
             filename: format!("{base}.c"),
             filecontent: source_chunks.join("\n"),
+        },
+        GeneratedFile {
+            filename: xcdr_header_name.clone(),
+            filecontent: xcdr_header_chunks.join("\n"),
+        },
+        GeneratedFile {
+            filename: format!("{base}_xcdr.c"),
+            filecontent: xcdr_source_chunks.join("\n"),
         },
     ])
 }

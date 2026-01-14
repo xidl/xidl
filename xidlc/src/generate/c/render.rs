@@ -15,6 +15,8 @@ pub struct CRenderer {
 pub struct CRenderOutput {
     pub header: Vec<String>,
     pub source: Vec<String>,
+    pub xcdr_header: Vec<String>,
+    pub xcdr_source: Vec<String>,
 }
 
 impl CRenderOutput {
@@ -28,9 +30,21 @@ impl CRenderOutput {
         self
     }
 
+    pub fn push_xcdr_header(mut self, value: String) -> Self {
+        self.xcdr_header.push(value);
+        self
+    }
+
+    pub fn push_xcdr_source(mut self, value: String) -> Self {
+        self.xcdr_source.push(value);
+        self
+    }
+
     pub fn extend(&mut self, other: CRenderOutput) {
         self.header.extend(other.header);
         self.source.extend(other.source);
+        self.xcdr_header.extend(other.xcdr_header);
+        self.xcdr_source.extend(other.xcdr_source);
     }
 }
 

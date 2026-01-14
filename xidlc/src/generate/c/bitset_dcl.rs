@@ -1,5 +1,6 @@
 use crate::error::IdlcResult;
 use crate::generate::c::util::{bitfield_type, c_scoped_name_hir};
+use crate::generate::c::xcdr::{kind_json, type_kind_from_c};
 use crate::generate::c::{CRender, CRenderOutput, CRenderer};
 use serde_json::json;
 use xidl_parser::hir;
@@ -30,6 +31,24 @@ impl CRender for hir::BitsetDcl {
             })
             .collect::<Vec<_>>();
 
+        let xcdr_fields = self
+            .field
+            .iter()
+            .map(|field| {
+                let ty = field
+                    .ty
+                    .as_ref()
+                    .map(bitfield_type)
+                    .unwrap_or_else(|| "uint32_t".to_string());
+                let kind = type_kind_from_c(&ty);
+                json!({
+                    "expr": format!("self->{}", field.ident),
+                    "dims": Vec::<String>::new(),
+                    "kind": kind_json(&kind),
+                })
+            })
+            .collect::<Vec<_>>();
+
         let all_mask = if fields.is_empty() {
             "0".to_string()
         } else {
@@ -45,12 +64,17 @@ impl CRender for hir::BitsetDcl {
             "parent": self.parent.as_ref().map(c_scoped_name_hir),
             "fields": fields,
             "all_mask": all_mask,
+            "xcdr_fields": xcdr_fields,
         });
 
         let header = renderer.render_template("bitset.h.j2", &ctx)?;
         let source = renderer.render_template("bitset.c.j2", &ctx)?;
+        let xcdr_header = renderer.render_template("bitset_xcdr.h.j2", &ctx)?;
+        let xcdr_source = renderer.render_template("bitset_xcdr.c.j2", &ctx)?;
         Ok(CRenderOutput::default()
             .push_header(header)
-            .push_source(source))
+            .push_source(source)
+            .push_xcdr_header(xcdr_header)
+            .push_xcdr_source(xcdr_source))
     }
 }
