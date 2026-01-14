@@ -4,8 +4,6 @@ use std::os::raw::c_char;
 #[repr(C)]
 pub enum XcdrFormat {
     Cdr = 0,
-    Plcdr = 1,
-    Cdr3 = 2,
 }
 
 pub struct XcdrSerializer {
@@ -29,8 +27,6 @@ struct XcdrDeserializerInner {
 fn map_format(format: XcdrFormat) -> crate::Format {
     match format {
         XcdrFormat::Cdr => crate::Format::Cdr,
-        XcdrFormat::Plcdr => crate::Format::Plcdr,
-        XcdrFormat::Cdr3 => crate::Format::Cdr3,
     }
 }
 

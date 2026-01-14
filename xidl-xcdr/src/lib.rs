@@ -1,84 +1,76 @@
 mod c_api;
-pub mod ffi;
+// pub mod ffi;
 mod formats;
-pub use ffi::*;
+// pub use ffi::*;
 mod types;
 
-pub use c_api::{c_header, C_HEADER};
-pub use formats::{
-    Cdr3Deserializer, Cdr3Serializer, CdrDeserializer, CdrSerializer, PlcdrDeserializer,
-    PlcdrSerializer,
-};
+pub use c_api::{C_HEADER, c_header};
+pub use formats::{CdrDeserializer, CdrSerializer};
 pub use types::{Field, TypeDef};
 
 use thiserror::Error;
 
 #[derive(Debug, Error)]
-pub enum SerializeError {
+pub enum XcdrError {
     #[error("{0}")]
     Message(String),
 }
 
-pub type Result<T> = std::result::Result<T, SerializeError>;
+pub type XcdrResult<T> = std::result::Result<T, XcdrError>;
 
 #[derive(Debug, Clone, Copy)]
 pub enum Format {
     Cdr,
-    Plcdr,
-    Cdr3,
 }
 
+macro_rules! declare_ser {
+    ($($id:ty)*) => {
+        paste::paste!{
+            $(
+                fn [<serialize_ $id>](&mut self, val: $id) -> XcdrResult<()>;
+            )*
+        }
+    }
+}
 pub trait SerializeVisitor {
-    fn serialize_u8(&mut self, name: &str) -> Result<()>;
-    fn serialize_i8(&mut self, name: &str) -> Result<()>;
-    fn serialize_u16(&mut self, name: &str) -> Result<()>;
-    fn serialize_i16(&mut self, name: &str) -> Result<()>;
-    fn serialize_u32(&mut self, name: &str) -> Result<()>;
-    fn serialize_i32(&mut self, name: &str) -> Result<()>;
-    fn serialize_u64(&mut self, name: &str) -> Result<()>;
-    fn serialize_i64(&mut self, name: &str) -> Result<()>;
-    fn serialize_bool(&mut self, name: &str) -> Result<()>;
-    fn serialize_f32(&mut self, name: &str) -> Result<()>;
-    fn serialize_f64(&mut self, name: &str) -> Result<()>;
-    fn serialize_parameter_id(&mut self, id: u32) -> Result<()>;
+    declare_ser! {
+        u8 i8 u16 i16 u32 i32 u64 i64 bool f32 f64
+    }
 
-    fn serialize_field(&mut self, field: &Field) -> Result<()>;
-    fn serialize_type(&mut self, ty: &TypeDef) -> Result<()>;
+    fn serialize_parameter_id(&mut self, id: u32) -> XcdrResult<()>;
+}
 
-    fn output(&self) -> &str;
+macro_rules! declare_deser {
+    ($($id:ty)*) => {
+        paste::paste!{
+            $(
+                fn [<deserialize_ $id _le>](&mut self) -> XcdrResult<$id>;
+                fn [<deserialize_ $id _be>](&mut self) -> XcdrResult<$id>;
+            )*
+        }
+    }
 }
 
 pub trait DeserializeVisitor {
-    fn deserialize_u8(&mut self, name: &str) -> Result<()>;
-    fn deserialize_i8(&mut self, name: &str) -> Result<()>;
-    fn deserialize_u16(&mut self, name: &str) -> Result<()>;
-    fn deserialize_i16(&mut self, name: &str) -> Result<()>;
-    fn deserialize_u32(&mut self, name: &str) -> Result<()>;
-    fn deserialize_i32(&mut self, name: &str) -> Result<()>;
-    fn deserialize_u64(&mut self, name: &str) -> Result<()>;
-    fn deserialize_i64(&mut self, name: &str) -> Result<()>;
-    fn deserialize_bool(&mut self, name: &str) -> Result<()>;
-    fn deserialize_f32(&mut self, name: &str) -> Result<()>;
-    fn deserialize_f64(&mut self, name: &str) -> Result<()>;
-
-    fn deserialize_field(&mut self, field: &Field) -> Result<()>;
-    fn deserialize_type(&mut self, ty: &TypeDef) -> Result<()>;
-
-    fn output(&self) -> &str;
-}
-
-pub fn new_serializer(format: Format) -> Box<dyn SerializeVisitor> {
-    match format {
-        Format::Cdr => Box::new(CdrSerializer::new()),
-        Format::Plcdr => Box::new(PlcdrSerializer::new()),
-        Format::Cdr3 => Box::new(Cdr3Serializer::new()),
+    declare_deser! {
+        u16 i16 u32 i32 u64 i64 f32 f64
     }
+
+    fn deserialize_u8(&mut self) -> XcdrResult<u8>;
+    fn deserialize_i8(&mut self) -> XcdrResult<i8>;
+    fn deserialize_bool(&mut self) -> XcdrResult<bool>;
+
+    fn serialize_parameter_id(&mut self) -> XcdrResult<u32>;
 }
 
-pub fn new_deserializer(format: Format) -> Box<dyn DeserializeVisitor> {
-    match format {
-        Format::Cdr => Box::new(CdrDeserializer::new()),
-        Format::Plcdr => Box::new(PlcdrDeserializer::new()),
-        Format::Cdr3 => Box::new(Cdr3Deserializer::new()),
-    }
-}
+// pub fn new_serializer(format: Format) -> Box<dyn SerializeVisitor> {
+//     match format {
+//         Format::Cdr => Box::new(CdrSerializer::new()),
+//     }
+// }
+
+// pub fn new_deserializer(format: Format) -> Box<dyn DeserializeVisitor> {
+//     match format {
+//         Format::Cdr => Box::new(CdrDeserializer::new()),
+//     }
+// }

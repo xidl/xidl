@@ -1,169 +1,114 @@
-use crate::{DeserializeVisitor, Field, Result, SerializeVisitor, TypeDef};
+use bytes::Buf;
 
-use super::{deserialize_field, deserialize_type, emit, serialize_field, serialize_type};
+use crate::{DeserializeVisitor, SerializeVisitor, XcdrResult};
 
-pub struct CdrSerializer {
-    output: String,
+pub struct CdrSerializer<'a> {
+    buf: &'a mut [u8],
+    pos: usize,
+    no_write: bool,
 }
 
-pub struct CdrDeserializer {
-    output: String,
+pub struct CdrDeserializer<'a> {
+    buf: &'a [u8],
 }
 
-impl CdrSerializer {
-    pub fn new() -> Self {
+impl CdrSerializer<'_> {
+    #[allow(clippy::not_unsafe_ptr_arg_deref)]
+    pub fn new(buf: *mut u8, len: usize) -> Self {
+        let no_write = buf.is_null() || len == 0;
+        let buf = unsafe { std::slice::from_raw_parts_mut(buf, len) };
+
         Self {
-            output: String::new(),
+            buf,
+            pos: 0,
+            no_write,
+        }
+    }
+
+    fn write<T>(&mut self, value: T) -> XcdrResult<()> {
+        let len = size_of::<T>();
+        let ptr = &value as *const T as *const u8;
+        let value = unsafe { std::slice::from_raw_parts(ptr, len) };
+        self.align::<T>();
+        let buf = &mut self.buf[self.pos..self.pos + len];
+        if !self.no_write {
+            buf.copy_from_slice(value);
+        }
+
+        self.pos += len;
+        Ok(())
+    }
+
+    fn align<T>(&mut self) {
+        let size = size_of::<T>();
+        let advance = match self.pos % size {
+            0 => 0,
+            1 => 3,
+            2 => 2,
+            3 => 3,
+            _ => 3,
+        };
+        self.pos += advance;
+    }
+}
+
+impl CdrDeserializer<'_> {}
+
+macro_rules! declare_ser {
+    ($($ty:ty)*) => {
+        paste::paste!{
+            $(
+                fn [<serialize_ $ty>](&mut self, val: $ty) -> XcdrResult<()> {
+                    self.write(val)?;
+                    Ok(())
+                }
+            )*
+        }
+    }
+}
+impl SerializeVisitor for CdrSerializer<'_> {
+    declare_ser! {
+        u8 i8 u16 i16 u32 i32 u64 i64 bool f32 f64
+    }
+
+    fn serialize_parameter_id(&mut self, _id: u32) -> XcdrResult<()> {
+        Ok(())
+    }
+}
+
+macro_rules! declare_deser {
+    ($($id:ty)*) => {
+        paste::paste!{
+            $(
+                fn [<deserialize_ $id _le>](&mut self) -> XcdrResult<$id> {
+                    Ok(self.buf.[<get_ $id _le>]())
+                }
+                fn [<deserialize_ $id _be>](&mut self) -> XcdrResult<$id> {
+                    Ok(self.buf.[<get_ $id>]())
+                }
+            )*
         }
     }
 }
 
-impl CdrDeserializer {
-    pub fn new() -> Self {
-        Self {
-            output: String::new(),
-        }
-    }
-}
-
-impl SerializeVisitor for CdrSerializer {
-    fn serialize_u8(&mut self, name: &str) -> Result<()> {
-        emit(&mut self.output, "cdr", "u8", name, "serialize");
-        Ok(())
+impl DeserializeVisitor for CdrDeserializer<'_> {
+    fn deserialize_u8(&mut self) -> XcdrResult<u8> {
+        Ok(self.buf.get_u8())
     }
 
-    fn serialize_i8(&mut self, name: &str) -> Result<()> {
-        emit(&mut self.output, "cdr", "i8", name, "serialize");
-        Ok(())
+    fn deserialize_i8(&mut self) -> XcdrResult<i8> {
+        Ok(self.buf.get_i8())
     }
 
-    fn serialize_u16(&mut self, name: &str) -> Result<()> {
-        emit(&mut self.output, "cdr", "u16", name, "serialize");
-        Ok(())
+    fn deserialize_bool(&mut self) -> XcdrResult<bool> {
+        Ok(self.buf.get_u8() != 0)
     }
 
-    fn serialize_i16(&mut self, name: &str) -> Result<()> {
-        emit(&mut self.output, "cdr", "i16", name, "serialize");
-        Ok(())
+    declare_deser! {
+        u16 i16 u32 i32 u64 i64 f32 f64
     }
 
-    fn serialize_u32(&mut self, name: &str) -> Result<()> {
-        emit(&mut self.output, "cdr", "u32", name, "serialize");
-        Ok(())
-    }
-
-    fn serialize_i32(&mut self, name: &str) -> Result<()> {
-        emit(&mut self.output, "cdr", "i32", name, "serialize");
-        Ok(())
-    }
-
-    fn serialize_u64(&mut self, name: &str) -> Result<()> {
-        emit(&mut self.output, "cdr", "u64", name, "serialize");
-        Ok(())
-    }
-
-    fn serialize_i64(&mut self, name: &str) -> Result<()> {
-        emit(&mut self.output, "cdr", "i64", name, "serialize");
-        Ok(())
-    }
-
-    fn serialize_bool(&mut self, name: &str) -> Result<()> {
-        emit(&mut self.output, "cdr", "bool", name, "serialize");
-        Ok(())
-    }
-
-    fn serialize_f32(&mut self, name: &str) -> Result<()> {
-        emit(&mut self.output, "cdr", "f32", name, "serialize");
-        Ok(())
-    }
-
-    fn serialize_f64(&mut self, name: &str) -> Result<()> {
-        emit(&mut self.output, "cdr", "f64", name, "serialize");
-        Ok(())
-    }
-
-    fn serialize_parameter_id(&mut self, _id: u32) -> Result<()> {
-        Ok(())
-    }
-
-    fn serialize_field(&mut self, field: &Field) -> Result<()> {
-        serialize_field(self, field)
-    }
-
-    fn serialize_type(&mut self, ty: &TypeDef) -> Result<()> {
-        serialize_type(self, ty)
-    }
-
-    fn output(&self) -> &str {
-        &self.output
-    }
-}
-
-impl DeserializeVisitor for CdrDeserializer {
-    fn deserialize_u8(&mut self, name: &str) -> Result<()> {
-        emit(&mut self.output, "cdr", "u8", name, "deserialize");
-        Ok(())
-    }
-
-    fn deserialize_i8(&mut self, name: &str) -> Result<()> {
-        emit(&mut self.output, "cdr", "i8", name, "deserialize");
-        Ok(())
-    }
-
-    fn deserialize_u16(&mut self, name: &str) -> Result<()> {
-        emit(&mut self.output, "cdr", "u16", name, "deserialize");
-        Ok(())
-    }
-
-    fn deserialize_i16(&mut self, name: &str) -> Result<()> {
-        emit(&mut self.output, "cdr", "i16", name, "deserialize");
-        Ok(())
-    }
-
-    fn deserialize_u32(&mut self, name: &str) -> Result<()> {
-        emit(&mut self.output, "cdr", "u32", name, "deserialize");
-        Ok(())
-    }
-
-    fn deserialize_i32(&mut self, name: &str) -> Result<()> {
-        emit(&mut self.output, "cdr", "i32", name, "deserialize");
-        Ok(())
-    }
-
-    fn deserialize_u64(&mut self, name: &str) -> Result<()> {
-        emit(&mut self.output, "cdr", "u64", name, "deserialize");
-        Ok(())
-    }
-
-    fn deserialize_i64(&mut self, name: &str) -> Result<()> {
-        emit(&mut self.output, "cdr", "i64", name, "deserialize");
-        Ok(())
-    }
-
-    fn deserialize_bool(&mut self, name: &str) -> Result<()> {
-        emit(&mut self.output, "cdr", "bool", name, "deserialize");
-        Ok(())
-    }
-
-    fn deserialize_f32(&mut self, name: &str) -> Result<()> {
-        emit(&mut self.output, "cdr", "f32", name, "deserialize");
-        Ok(())
-    }
-
-    fn deserialize_f64(&mut self, name: &str) -> Result<()> {
-        emit(&mut self.output, "cdr", "f64", name, "deserialize");
-        Ok(())
-    }
-
-    fn deserialize_field(&mut self, field: &Field) -> Result<()> {
-        deserialize_field(self, field)
-    }
-
-    fn deserialize_type(&mut self, ty: &TypeDef) -> Result<()> {
-        deserialize_type(self, ty)
-    }
-
-    fn output(&self) -> &str {
-        &self.output
+    fn serialize_parameter_id(&mut self) -> XcdrResult<u32> {
+        self.deserialize_u32_be()
     }
 }
