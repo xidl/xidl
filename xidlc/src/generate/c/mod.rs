@@ -1,314 +1,44 @@
-use crate::error::{IdlcError, IdlcResult};
-use crate::generate::{jsonrpc, render_const_expr, to_snake_case, GeneratedFile};
-use minijinja::{Environment, Error, ErrorKind};
-use rust_embed::RustEmbed;
-use serde::Serialize;
-use std::io::{BufRead, Write};
+mod const_dcl;
+mod constr_type;
+mod definition;
+mod enum_dcl;
+mod render;
+mod spec;
+mod struct_dcl;
+mod util;
+
+pub use render::{CRender, CRenderer};
+
+use crate::error::IdlcResult;
+use crate::generate::c::util::c_header;
+use crate::generate::GeneratedFile;
 use std::path::Path;
 use xidl_parser::hir;
-
-#[derive(RustEmbed)]
-#[folder = "src/generate/c/templates"]
-struct Templates;
-
-#[derive(Serialize)]
-struct CFileContext {
-    defs: Vec<CDef>,
-}
-
-#[derive(Serialize)]
-struct CDef {
-    kind: &'static str,
-    name: String,
-    fields: Vec<CField>,
-    variants: Vec<String>,
-    ty: Option<String>,
-    value: Option<String>,
-    note: Option<String>,
-}
-
-#[derive(Serialize)]
-struct CField {
-    ty: String,
-    name: String,
-    dims: Vec<String>,
-}
 
 pub fn generate(spec: &hir::Specification, input_path: &Path) -> IdlcResult<Vec<GeneratedFile>> {
     let stem = input_path
         .file_stem()
         .and_then(|value| value.to_str())
         .unwrap_or("output");
-    let filename = format!("{}.h", to_snake_case(stem));
+    let filename = format!("{}.h", crate::generate::to_snake_case(stem));
 
-    let mut defs = Vec::new();
-    for def in &spec.0 {
-        match def {
-            hir::Definition::ConstrTypeDcl(constr) => defs.push(constr_to_def(constr)),
-            hir::Definition::ConstDcl(const_dcl) => defs.push(const_to_def(const_dcl)),
-            hir::Definition::InterfaceDcl(interface) => {
-                let name = match interface {
-                    hir::InterfaceDcl::InterfaceForwardDcl(forward) => &forward.ident,
-                    hir::InterfaceDcl::InterfaceDef(def) => &def.header.ident,
-                };
-                defs.push(CDef {
-                    kind: "comment",
-                    name: String::new(),
-                    fields: Vec::new(),
-                    variants: Vec::new(),
-                    ty: None,
-                    value: None,
-                    note: Some(format!("interface {} skipped", to_snake_case(name))),
-                });
-            }
-        }
-    }
-
-    let mut env = Environment::new();
-    env.set_loader(|name| load_template(name).map(Some));
-    let content = env
-        .get_template("c.h.jinja")
-        .map_err(|err| IdlcError::template(err.to_string()))?
-        .render(CFileContext { defs })
-        .map_err(|err| IdlcError::template(err.to_string()))?;
+    let renderer = CRenderer::new()?;
+    let mut chunks = Vec::new();
+    chunks.push(c_header());
+    chunks.extend(spec.render(&renderer)?);
 
     Ok(vec![GeneratedFile {
         filename,
-        filecontent: content,
+        filecontent: chunks.join("\n"),
     }])
 }
 
-fn load_template(name: &str) -> std::result::Result<String, Error> {
-    let file = Templates::get(name).ok_or_else(|| {
-        Error::new(
-            ErrorKind::TemplateNotFound,
-            format!("missing template {name}"),
-        )
-    })?;
-    let data = file.data.as_ref();
-    let content = String::from_utf8(data.to_vec()).map_err(|err| {
-        Error::new(
-            ErrorKind::InvalidOperation,
-            format!("template {name} is not valid utf-8: {err}"),
-        )
-    })?;
-    Ok(content)
-}
-
-pub fn serve_jsonrpc<R: BufRead, W: Write>(reader: R, writer: W) -> IdlcResult<()> {
-    jsonrpc::serve_generate(reader, writer, |spec, input| {
-        let input = input.ok_or_else(|| IdlcError::rpc("missing input path"))?;
+pub fn serve_jsonrpc<R: std::io::BufRead, W: std::io::Write>(
+    reader: R,
+    writer: W,
+) -> IdlcResult<()> {
+    crate::generate::jsonrpc::serve_generate(reader, writer, |spec, input| {
+        let input = input.ok_or_else(|| crate::error::IdlcError::rpc("missing input path"))?;
         generate(spec, Path::new(input))
     })
-}
-
-fn constr_to_def(constr: &hir::ConstrTypeDcl) -> CDef {
-    match constr {
-        hir::ConstrTypeDcl::StructForwardDcl(forward) => CDef {
-            kind: "struct_forward",
-            name: to_snake_case(&forward.ident),
-            fields: Vec::new(),
-            variants: Vec::new(),
-            ty: None,
-            value: None,
-            note: None,
-        },
-        hir::ConstrTypeDcl::StructDcl(def) => {
-            let fields = def
-                .member
-                .iter()
-                .flat_map(|member| {
-                    member
-                        .ident
-                        .iter()
-                        .map(|decl| field_for_member(member, decl))
-                })
-                .collect();
-            CDef {
-                kind: "struct",
-                name: to_snake_case(&def.ident),
-                fields,
-                variants: Vec::new(),
-                ty: None,
-                value: None,
-                note: None,
-            }
-        }
-        hir::ConstrTypeDcl::EnumDcl(def) => CDef {
-            kind: "enum",
-            name: to_snake_case(&def.ident),
-            fields: Vec::new(),
-            variants: def.member.iter().map(|m| to_snake_case(m)).collect(),
-            ty: None,
-            value: None,
-            note: None,
-        },
-        hir::ConstrTypeDcl::UnionForwardDcl(def) => CDef {
-            kind: "comment",
-            name: String::new(),
-            fields: Vec::new(),
-            variants: Vec::new(),
-            ty: None,
-            value: None,
-            note: Some(format!("union {} skipped", to_snake_case(&def.ident))),
-        },
-        hir::ConstrTypeDcl::UnionDef(def) => CDef {
-            kind: "comment",
-            name: String::new(),
-            fields: Vec::new(),
-            variants: Vec::new(),
-            ty: None,
-            value: None,
-            note: Some(format!("union {} skipped", to_snake_case(&def.ident))),
-        },
-        hir::ConstrTypeDcl::BitsetDcl(def) => CDef {
-            kind: "comment",
-            name: String::new(),
-            fields: Vec::new(),
-            variants: Vec::new(),
-            ty: None,
-            value: None,
-            note: Some(format!("bitset {} skipped", to_snake_case(&def.ident))),
-        },
-        hir::ConstrTypeDcl::BitmaskDcl(def) => CDef {
-            kind: "comment",
-            name: String::new(),
-            fields: Vec::new(),
-            variants: Vec::new(),
-            ty: None,
-            value: None,
-            note: Some(format!("bitmask {} skipped", to_snake_case(&def.ident))),
-        },
-    }
-}
-
-fn const_to_def(def: &hir::ConstDcl) -> CDef {
-    CDef {
-        kind: "const",
-        name: to_snake_case(&def.ident),
-        fields: Vec::new(),
-        variants: Vec::new(),
-        ty: Some(c_const_type(&def.ty)),
-        value: Some(render_const_expr(&def.value, &c_scoped_name, &c_literal)),
-        note: None,
-    }
-}
-
-fn field_for_member(member: &hir::Member, decl: &hir::Declarator) -> CField {
-    let ty = c_type(&member.ty);
-    match decl {
-        hir::Declarator::SimpleDeclarator(value) => CField {
-            ty,
-            name: to_snake_case(&value.0),
-            dims: Vec::new(),
-        },
-        hir::Declarator::ArrayDeclarator(value) => {
-            let dims = value
-                .len
-                .iter()
-                .map(|len| {
-                    format!(
-                        "[{}]",
-                        render_const_expr(&len.0, &c_scoped_name, &c_literal)
-                    )
-                })
-                .collect();
-            CField {
-                ty,
-                name: to_snake_case(&value.ident),
-                dims,
-            }
-        }
-    }
-}
-
-fn c_const_type(ty: &hir::ConstType) -> String {
-    match ty {
-        hir::ConstType::IntegerType(value) => c_integer_type(value),
-        hir::ConstType::FloatingPtType => "double".to_string(),
-        hir::ConstType::FixedPtConstType => "double".to_string(),
-        hir::ConstType::CharType => "char".to_string(),
-        hir::ConstType::WideCharType => "wchar_t".to_string(),
-        hir::ConstType::BooleanType => "bool".to_string(),
-        hir::ConstType::OctetType => "uint8_t".to_string(),
-        hir::ConstType::StringType(_) => "const char *".to_string(),
-        hir::ConstType::WideStringType(_) => "const wchar_t *".to_string(),
-        hir::ConstType::ScopedName(value) => c_scoped_name_hir(value),
-        hir::ConstType::SequenceType(_) => "void *".to_string(),
-    }
-}
-
-fn c_type(ty: &hir::TypeSpec) -> String {
-    match ty {
-        hir::TypeSpec::SimpleTypeSpec(simple) => match simple {
-            hir::SimpleTypeSpec::IntegerType(value) => c_integer_type(value),
-            hir::SimpleTypeSpec::FloatingPtType => "double".to_string(),
-            hir::SimpleTypeSpec::CharType => "char".to_string(),
-            hir::SimpleTypeSpec::WideCharType => "wchar_t".to_string(),
-            hir::SimpleTypeSpec::Boolean => "bool".to_string(),
-            hir::SimpleTypeSpec::AnyType => "void *".to_string(),
-            hir::SimpleTypeSpec::ObjectType => "void *".to_string(),
-            hir::SimpleTypeSpec::ValueBaseType => "void *".to_string(),
-            hir::SimpleTypeSpec::ScopedName(value) => c_scoped_name_hir(value),
-        },
-        hir::TypeSpec::TemplateTypeSpec(template) => match template {
-            hir::TemplateTypeSpec::SequenceType(_) => "void *".to_string(),
-            hir::TemplateTypeSpec::StringType(_) => "char *".to_string(),
-            hir::TemplateTypeSpec::WideStringType(_) => "wchar_t *".to_string(),
-            hir::TemplateTypeSpec::FixedPtType(_) => "double".to_string(),
-            hir::TemplateTypeSpec::MapType(_) => "void *".to_string(),
-        },
-    }
-}
-
-fn c_integer_type(value: &hir::IntegerType) -> String {
-    match value {
-        hir::IntegerType::Char => "int8_t".to_string(),
-        hir::IntegerType::UChar => "uint8_t".to_string(),
-        hir::IntegerType::U8 => "uint8_t".to_string(),
-        hir::IntegerType::U16 => "uint16_t".to_string(),
-        hir::IntegerType::U32 => "uint32_t".to_string(),
-        hir::IntegerType::U64 => "uint64_t".to_string(),
-        hir::IntegerType::I8 => "int8_t".to_string(),
-        hir::IntegerType::I16 => "int16_t".to_string(),
-        hir::IntegerType::I32 => "int32_t".to_string(),
-        hir::IntegerType::I64 => "int64_t".to_string(),
-    }
-}
-
-fn c_scoped_name_hir(value: &hir::ScopedName) -> String {
-    value
-        .name
-        .iter()
-        .map(|part| to_snake_case(part))
-        .collect::<Vec<_>>()
-        .join("_")
-}
-
-fn c_scoped_name(value: &hir::ScopedName) -> String {
-    c_scoped_name_hir(value)
-}
-
-fn c_literal(value: &hir::Literal) -> String {
-    match value {
-        hir::Literal::IntegerLiteral(lit) => match lit {
-            hir::IntegerLiteral::BinNumber(value) => value.clone(),
-            hir::IntegerLiteral::OctNumber(value) => value.clone(),
-            hir::IntegerLiteral::DecNumber(value) => value.clone(),
-            hir::IntegerLiteral::HexNumber(value) => value.clone(),
-        },
-        hir::Literal::FloatingPtLiteral(lit) => {
-            let sign = lit
-                .sign
-                .as_ref()
-                .map(|value| value.0.as_str())
-                .unwrap_or("");
-            format!("{}{}.{}", sign, lit.integer.0, lit.fraction.0)
-        }
-        hir::Literal::CharLiteral(value) => value.clone(),
-        hir::Literal::WideCharacterLiteral(value) => value.clone(),
-        hir::Literal::StringLiteral(value) => value.clone(),
-        hir::Literal::WideStringLiteral(value) => value.clone(),
-        hir::Literal::BooleanLiteral(value) => value.to_ascii_lowercase(),
-    }
 }

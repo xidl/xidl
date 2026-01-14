@@ -1,0 +1,5 @@
+typedef struct {{ ident }} {
+{% for field in members %}
+  {{ field.ty }} {{ field.name }}{{ field.dims | join }};
+{% endfor %}
+} {{ ident }};
