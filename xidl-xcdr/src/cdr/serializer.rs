@@ -1,37 +1,47 @@
-use bytes::BufMut;
-
 use crate::{
     error::{XcdrError, XcdrResult},
     utils::ToNeBytes,
     XcdrSerialize,
 };
 
-pub struct CdrSerialize<'a> {
-    pub buf: &'a mut [u8],
+#[repr(C)]
+pub struct CdrSerialize {
+    pub buf: *mut u8,
+    pub len: usize,
     pub pos: usize,
     pub do_io: bool,
 }
 
-impl<'a> CdrSerialize<'a> {
-    pub fn new(buf: &'a mut [u8]) -> Self {
+impl CdrSerialize {
+    pub fn new(buf: *mut u8, len: usize) -> Self {
         Self {
             buf,
+            len,
             pos: 0,
-            do_io: false,
+            do_io: buf.is_null() || len == 0,
         }
     }
+
     fn write<T, const N: usize>(&mut self, val: T) -> XcdrResult<()>
     where
         T: ToNeBytes<N>,
     {
         let len = size_of::<T>();
-        if self.pos + len > self.buf.len() {
+        if self.pos + len > self.len {
             return Err(XcdrError::BufferOverflow);
         }
 
         self.align::<T>()?;
         if self.do_io {
-            self.buf.put_slice(&val.to_ne_bytes());
+            let src = &val.to_ne_bytes();
+
+            unsafe {
+                core::ptr::copy(
+                    core::ptr::addr_of!(*src) as *const u8,
+                    self.buf.add(self.pos),
+                    src.len(),
+                );
+            }
         }
 
         self.pos += len;
@@ -49,7 +59,7 @@ impl<'a> CdrSerialize<'a> {
     }
 }
 
-impl XcdrSerialize for CdrSerialize<'_> {
+impl XcdrSerialize for CdrSerialize {
     fn write_bool(&mut self, val: bool) -> XcdrResult<()> {
         self.write(val)
     }
@@ -84,12 +94,14 @@ impl XcdrSerialize for CdrSerialize<'_> {
         self.write(val)
     }
     fn write_bytes(&mut self, buf: &[u8]) -> XcdrResult<()> {
-        if self.pos + buf.len() > self.buf.len() {
+        if self.pos + buf.len() > self.len {
             return Err(XcdrError::BufferOverflow);
         }
 
         if self.do_io {
-            self.buf.put_slice(buf);
+            unsafe {
+                std::ptr::copy(buf.as_ptr(), self.buf.add(self.pos), buf.len());
+            }
         }
 
         self.pos += buf.len();

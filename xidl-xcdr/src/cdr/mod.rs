@@ -1,5 +1,5 @@
-mod serialize;
-pub use serialize::*;
+mod serializer;
+pub use serializer::*;
 
-mod deserialize;
-pub use deserialize::*;
+mod deserializer;
+pub use deserializer::*;

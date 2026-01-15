@@ -1,6 +1,7 @@
 pub mod error;
 
 pub mod cdr;
+pub mod ffi;
 
 mod utils;
 

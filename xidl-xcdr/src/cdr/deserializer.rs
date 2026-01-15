@@ -10,6 +10,14 @@ impl<'a> CdrDeserializer<'a> {
         Self { buf, pos: 0 }
     }
 
+    pub fn position(&self) -> usize {
+        self.pos
+    }
+
+    pub fn set_position(&mut self, pos: usize) {
+        self.pos = pos;
+    }
+
     fn read_aligned<const N: usize>(&mut self) -> crate::error::XcdrResult<[u8; N]> {
         let align = match N % 4 {
             0 => 0usize,

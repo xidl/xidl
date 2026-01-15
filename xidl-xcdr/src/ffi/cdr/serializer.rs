@@ -1,0 +1,40 @@
+use crate::XcdrSerialize;
+use crate::{
+    cdr::CdrSerialize,
+    ffi::{macros::impl_ffi_serialize_for, XcdrFfiError},
+};
+
+pub type FfiCdrSerializer = CdrSerialize;
+
+impl FfiCdrSerializer {
+    #[unsafe(no_mangle)]
+    pub extern "C" fn cdr_serializer_new(buf_ptr: *mut u8, buf_len: usize) -> Self {
+        let do_io = buf_ptr.is_null() || buf_len == 0;
+        Self {
+            buf: buf_ptr,
+            len: buf_len,
+            pos: 0,
+            do_io,
+        }
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn cdr_serializer_position(&self) -> usize {
+        self.pos
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn cdr_serializer_reset(&mut self) {
+        self.pos = 0;
+    }
+}
+
+impl_ffi_serialize_for!(cdr_serializer, FfiCdrSerializer, with_serializer);
+
+fn with_serializer<R>(
+    self_: &mut FfiCdrSerializer,
+    f: impl FnOnce(&mut CdrSerialize) -> crate::error::XcdrResult<R>,
+) -> Result<R, XcdrFfiError> {
+    let out = f(self_)?;
+    Ok(out)
+}
