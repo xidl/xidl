@@ -16,6 +16,8 @@ Specification(
                                 "1",
                             ),
                         ),
+                        is_extend: false,
+                        extra: [],
                     },
                 ],
                 decl: ConstrTypeDcl(
@@ -38,6 +40,8 @@ Specification(
                                                         "10",
                                                     ),
                                                 ),
+                                                is_extend: false,
+                                                extra: [],
                                             },
                                         ],
                                         ty: SimpleTypeSpec(
@@ -68,9 +72,36 @@ Specification(
                                         annotations: [
                                             AnnotationAppl {
                                                 name: Builtin(
+                                                    "id",
+                                                ),
+                                                params: Some(
+                                                    Raw(
+                                                        "11",
+                                                    ),
+                                                ),
+                                                is_extend: false,
+                                                extra: [
+                                                    AnnotationAppl {
+                                                        name: Builtin(
+                                                            "id",
+                                                        ),
+                                                        params: Some(
+                                                            Raw(
+                                                                "11",
+                                                            ),
+                                                        ),
+                                                        is_extend: true,
+                                                        extra: [],
+                                                    },
+                                                ],
+                                            },
+                                            AnnotationAppl {
+                                                name: Builtin(
                                                     "optional",
                                                 ),
                                                 params: None,
+                                                is_extend: false,
+                                                extra: [],
                                             },
                                         ],
                                         ty: SimpleTypeSpec(
@@ -161,6 +192,8 @@ Specification(
                                 ],
                             ),
                         ),
+                        is_extend: false,
+                        extra: [],
                     },
                 ],
                 decl: ConstrTypeDcl(
@@ -181,6 +214,8 @@ Specification(
                                                     "0",
                                                 ),
                                             ),
+                                            is_extend: false,
+                                            extra: [],
                                         },
                                     ],
                                     ident: Identifier(
@@ -198,6 +233,8 @@ Specification(
                                                     "1",
                                                 ),
                                             ),
+                                            is_extend: false,
+                                            extra: [],
                                         },
                                     ],
                                     ident: Identifier(
@@ -222,6 +259,8 @@ Specification(
                                 "2",
                             ),
                         ),
+                        is_extend: false,
+                        extra: [],
                     },
                 ],
                 decl: ConstrTypeDcl(
@@ -242,6 +281,8 @@ Specification(
                                                     "0",
                                                 ),
                                             ),
+                                            is_extend: false,
+                                            extra: [],
                                         },
                                     ],
                                     ident: Identifier(
@@ -259,6 +300,8 @@ Specification(
                                                     "1",
                                                 ),
                                             ),
+                                            is_extend: false,
+                                            extra: [],
                                         },
                                     ],
                                     ident: Identifier(
@@ -283,6 +326,8 @@ Specification(
                                 "3",
                             ),
                         ),
+                        is_extend: false,
+                        extra: [],
                     },
                 ],
                 decl: ConstrTypeDcl(
@@ -339,6 +384,8 @@ Specification(
                                                             "100",
                                                         ),
                                                     ),
+                                                    is_extend: false,
+                                                    extra: [],
                                                 },
                                             ],
                                             ty: TypeSpec(
@@ -410,6 +457,8 @@ Specification(
                                 "4",
                             ),
                         ),
+                        is_extend: false,
+                        extra: [],
                     },
                 ],
                 decl: InterfaceDef(
@@ -432,6 +481,8 @@ Specification(
                                                         "oneway",
                                                     ),
                                                     params: None,
+                                                    is_extend: false,
+                                                    extra: [],
                                                 },
                                             ],
                                             ty: Void,
@@ -450,6 +501,8 @@ Specification(
                                                         "key",
                                                     ),
                                                     params: None,
+                                                    is_extend: false,
+                                                    extra: [],
                                                 },
                                             ],
                                             decl: AttrSpec(

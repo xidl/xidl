@@ -3,7 +3,7 @@ const TEST_CASES: &[(&str, &str)] = &[(
     r#"
         @id(1)
         struct S {
-            @id(10) long a;
+            @id(10) long a; //@id(11)
             @optional short b;
         };
 

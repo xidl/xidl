@@ -26,7 +26,8 @@ impl<'a> crate::parser::FromTreeSitter<'a> for InterfaceDcl {
         let mut decl = None;
         for ch in node.children(&mut node.walk()) {
             match ch.kind_id() {
-                xidl_derive::node_id!("annotation_appl") => {
+                xidl_derive::node_id!("annotation_appl")
+                | xidl_derive::node_id!("extend_annotation_appl") => {
                     annotations.push(AnnotationAppl::from_node(ch, ctx)?);
                 }
                 xidl_derive::node_id!("interface_def")
@@ -89,13 +90,65 @@ pub enum Export {
     ExceptDcl(ExceptDcl),
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug)]
 pub struct OpDcl {
     pub annotations: Vec<AnnotationAppl>,
     pub ty: OpTypeSpec,
     pub ident: Identifier,
     pub parameter: Option<ParameterDcls>,
     pub raises: Option<RaisesExpr>,
+}
+
+impl<'a> crate::parser::FromTreeSitter<'a> for OpDcl {
+    fn from_node(
+        node: tree_sitter::Node<'a>,
+        ctx: &mut crate::parser::ParseContext<'a>,
+    ) -> crate::error::ParserResult<Self> {
+        assert_eq!(node.kind_id(), xidl_derive::node_id!("op_dcl"));
+        let mut annotations = Vec::new();
+        let mut ty = None;
+        let mut ident = None;
+        let mut parameter = None;
+        let mut raises = None;
+        for ch in node.children(&mut node.walk()) {
+            match ch.kind_id() {
+                xidl_derive::node_id!("annotation_appl")
+                | xidl_derive::node_id!("extend_annotation_appl") => {
+                    annotations.push(AnnotationAppl::from_node(ch, ctx)?);
+                }
+                xidl_derive::node_id!("op_type_spec") => {
+                    ty = Some(OpTypeSpec::from_node(ch, ctx)?);
+                }
+                xidl_derive::node_id!("identifier") => {
+                    ident = Some(Identifier::from_node(ch, ctx)?);
+                }
+                xidl_derive::node_id!("parameter_dcls") => {
+                    parameter = Some(ParameterDcls::from_node(ch, ctx)?);
+                }
+                xidl_derive::node_id!("raises_expr") => {
+                    raises = Some(RaisesExpr::from_node(ch, ctx)?);
+                }
+                _ => {}
+            }
+        }
+        Ok(Self {
+            annotations,
+            ty: ty.ok_or_else(|| {
+                crate::error::ParseError::UnexpectedNode(format!(
+                    "parent: {}, got: missing op type",
+                    node.kind()
+                ))
+            })?,
+            ident: ident.ok_or_else(|| {
+                crate::error::ParseError::UnexpectedNode(format!(
+                    "parent: {}, got: missing identifier",
+                    node.kind()
+                ))
+            })?,
+            parameter,
+            raises,
+        })
+    }
 }
 #[derive(Debug)]
 pub enum OpTypeSpec {
@@ -179,7 +232,8 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AttrDcl {
         let mut decl = None;
         for ch in node.children(&mut node.walk()) {
             match ch.kind_id() {
-                xidl_derive::node_id!("annotation_appl") => {
+                xidl_derive::node_id!("annotation_appl")
+                | xidl_derive::node_id!("extend_annotation_appl") => {
                     annotations.push(AnnotationAppl::from_node(ch, ctx)?);
                 }
                 xidl_derive::node_id!("readonly_attr_spec")

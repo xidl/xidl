@@ -30,6 +30,22 @@ pub struct AnnotationParam {
     pub value: Option<ConstExpr>,
 }
 
+pub fn expand_annotations(values: Vec<crate::typed_ast::AnnotationAppl>) -> Vec<Annotation> {
+    let mut out = Vec::new();
+    for value in values {
+        push_annotation(&mut out, value);
+    }
+    out
+}
+
+fn push_annotation(out: &mut Vec<Annotation>, mut value: crate::typed_ast::AnnotationAppl) {
+    let extra = std::mem::take(&mut value.extra);
+    out.push(Annotation::from(value));
+    for item in extra {
+        push_annotation(out, item);
+    }
+}
+
 impl From<crate::typed_ast::AnnotationAppl> for Annotation {
     fn from(value: crate::typed_ast::AnnotationAppl) -> Self {
         let params = value.params.map(Into::into);

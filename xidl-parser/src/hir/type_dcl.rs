@@ -34,7 +34,7 @@ pub struct NativeDcl {
 impl From<crate::typed_ast::TypeDcl> for TypeDcl {
     fn from(value: crate::typed_ast::TypeDcl) -> Self {
         Self {
-            annotations: value.annotations.into_iter().map(Into::into).collect(),
+            annotations: expand_annotations(value.annotations),
             decl: value.decl.into(),
         }
     }

@@ -73,7 +73,8 @@ impl<'a> crate::parser::FromTreeSitter<'a> for TypeDcl {
         let mut decl = None;
         for ch in node.children(&mut node.walk()) {
             match ch.kind_id() {
-                xidl_derive::node_id!("annotation_appl") => {
+                xidl_derive::node_id!("annotation_appl")
+                | xidl_derive::node_id!("extend_annotation_appl") => {
                     annotations.push(AnnotationAppl::from_node(ch, ctx)?);
                 }
                 xidl_derive::node_id!("constr_type_dcl")
@@ -128,12 +129,59 @@ pub struct StructDef {
     pub member: Vec<Member>,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug)]
 pub struct Member {
     pub annotations: Vec<AnnotationAppl>,
     pub ty: TypeSpec,
     pub ident: Declarators,
     pub default: Option<Default>,
+}
+
+impl<'a> crate::parser::FromTreeSitter<'a> for Member {
+    fn from_node(
+        node: tree_sitter::Node<'a>,
+        ctx: &mut crate::parser::ParseContext<'a>,
+    ) -> crate::error::ParserResult<Self> {
+        assert_eq!(node.kind_id(), xidl_derive::node_id!("member"));
+        let mut annotations = Vec::new();
+        let mut ty = None;
+        let mut ident = None;
+        let mut default = None;
+        for ch in node.children(&mut node.walk()) {
+            match ch.kind_id() {
+                xidl_derive::node_id!("annotation_appl")
+                | xidl_derive::node_id!("extend_annotation_appl") => {
+                    annotations.push(AnnotationAppl::from_node(ch, ctx)?);
+                }
+                xidl_derive::node_id!("type_spec") => {
+                    ty = Some(TypeSpec::from_node(ch, ctx)?);
+                }
+                xidl_derive::node_id!("declarators") => {
+                    ident = Some(Declarators::from_node(ch, ctx)?);
+                }
+                xidl_derive::node_id!("default") => {
+                    default = Some(Default::from_node(ch, ctx)?);
+                }
+                _ => {}
+            }
+        }
+        Ok(Self {
+            annotations,
+            ty: ty.ok_or_else(|| {
+                crate::error::ParseError::UnexpectedNode(format!(
+                    "parent: {}, got: missing type",
+                    node.kind()
+                ))
+            })?,
+            ident: ident.ok_or_else(|| {
+                crate::error::ParseError::UnexpectedNode(format!(
+                    "parent: {}, got: missing declarators",
+                    node.kind()
+                ))
+            })?,
+            default,
+        })
+    }
 }
 
 #[derive(Debug, Parser)]

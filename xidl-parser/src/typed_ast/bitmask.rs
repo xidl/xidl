@@ -70,8 +70,40 @@ pub struct BitmaskDcl {
     pub value: Vec<BitValue>,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug)]
 pub struct BitValue {
     pub annotations: Vec<AnnotationAppl>,
     pub ident: Identifier,
+}
+
+impl<'a> crate::parser::FromTreeSitter<'a> for BitValue {
+    fn from_node(
+        node: tree_sitter::Node<'a>,
+        ctx: &mut crate::parser::ParseContext<'a>,
+    ) -> crate::error::ParserResult<Self> {
+        assert_eq!(node.kind_id(), xidl_derive::node_id!("bit_value"));
+        let mut annotations = Vec::new();
+        let mut ident = None;
+        for ch in node.children(&mut node.walk()) {
+            match ch.kind_id() {
+                xidl_derive::node_id!("annotation_appl")
+                | xidl_derive::node_id!("extend_annotation_appl") => {
+                    annotations.push(AnnotationAppl::from_node(ch, ctx)?);
+                }
+                xidl_derive::node_id!("identifier") => {
+                    ident = Some(Identifier::from_node(ch, ctx)?);
+                }
+                _ => {}
+            }
+        }
+        Ok(Self {
+            annotations,
+            ident: ident.ok_or_else(|| {
+                crate::error::ParseError::UnexpectedNode(format!(
+                    "parent: {}, got: missing identifier",
+                    node.kind()
+                ))
+            })?,
+        })
+    }
 }

@@ -27,7 +27,7 @@ impl From<crate::typed_ast::EnumDcl> for EnumDcl {
 impl From<crate::typed_ast::Enumerator> for Enumerator {
     fn from(value: crate::typed_ast::Enumerator) -> Self {
         Self {
-            annotations: value.annotations.into_iter().map(Into::into).collect(),
+            annotations: expand_annotations(value.annotations),
             ident: value.ident.0,
         }
     }

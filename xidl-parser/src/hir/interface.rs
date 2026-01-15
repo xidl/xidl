@@ -140,7 +140,7 @@ pub struct ExceptionList(pub Vec<ScopedName>);
 impl From<crate::typed_ast::InterfaceDcl> for InterfaceDcl {
     fn from(value: crate::typed_ast::InterfaceDcl) -> Self {
         Self {
-            annotations: value.annotations.into_iter().map(Into::into).collect(),
+            annotations: expand_annotations(value.annotations),
             decl: value.decl.into(),
         }
     }
@@ -218,7 +218,7 @@ impl From<crate::typed_ast::Export> for Export {
 impl From<crate::typed_ast::OpDcl> for OpDcl {
     fn from(value: crate::typed_ast::OpDcl) -> Self {
         Self {
-            annotations: value.annotations.into_iter().map(Into::into).collect(),
+            annotations: expand_annotations(value.annotations),
             ty: value.ty.into(),
             ident: value.ident.0,
             parameter: value.parameter.map(Into::into),
@@ -267,7 +267,7 @@ impl From<crate::typed_ast::RaisesExpr> for RaisesExpr {
 impl From<crate::typed_ast::AttrDcl> for AttrDcl {
     fn from(value: crate::typed_ast::AttrDcl) -> Self {
         Self {
-            annotations: value.annotations.into_iter().map(Into::into).collect(),
+            annotations: expand_annotations(value.annotations),
             decl: value.decl.into(),
         }
     }

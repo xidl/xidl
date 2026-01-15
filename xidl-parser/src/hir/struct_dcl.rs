@@ -40,7 +40,7 @@ impl From<crate::typed_ast::StructDef> for StructDcl {
 impl From<crate::typed_ast::Member> for Member {
     fn from(value: crate::typed_ast::Member) -> Self {
         Self {
-            annotations: value.annotations.into_iter().map(Into::into).collect(),
+            annotations: expand_annotations(value.annotations),
             ty: value.ty.into(),
             ident: value.ident.0.into_iter().map(Into::into).collect(),
             default: value.default.map(Into::into),

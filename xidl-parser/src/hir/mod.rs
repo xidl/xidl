@@ -193,7 +193,7 @@ fn collect_defs(
             crate::typed_ast::Definition::TypeDcl(type_dcl) => {
                 if let crate::typed_ast::TypeDclInner::ConstrTypeDcl(constr) = type_dcl.decl {
                     let mut constr: ConstrTypeDcl = constr.into();
-                    let annotations = type_dcl.annotations.into_iter().map(Into::into).collect();
+                    let annotations = expand_annotations(type_dcl.annotations);
                     apply_constr_annotations(&mut constr, annotations);
                     out.push(Definition::ConstrTypeDcl(constr));
                 }
@@ -313,7 +313,7 @@ impl From<crate::typed_ast::CaseLabel> for CaseLabel {
 impl From<crate::typed_ast::ElementSpec> for ElementSpec {
     fn from(value: crate::typed_ast::ElementSpec) -> Self {
         Self {
-            annotations: value.annotations.into_iter().map(Into::into).collect(),
+            annotations: expand_annotations(value.annotations),
             ty: value.ty.into(),
             value: value.value.into(),
         }
@@ -401,7 +401,7 @@ impl From<crate::typed_ast::BitmaskDcl> for BitmaskDcl {
 impl From<crate::typed_ast::BitValue> for BitValue {
     fn from(value: crate::typed_ast::BitValue) -> Self {
         Self {
-            annotations: value.annotations.into_iter().map(Into::into).collect(),
+            annotations: expand_annotations(value.annotations),
             ident: value.ident.0,
         }
     }

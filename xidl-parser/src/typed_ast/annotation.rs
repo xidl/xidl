@@ -5,6 +5,8 @@ use xidl_derive::Parser;
 pub struct AnnotationAppl {
     pub name: AnnotationName,
     pub params: Option<AnnotationParams>,
+    pub is_extend: bool,
+    pub extra: Vec<AnnotationAppl>,
 }
 
 #[derive(Debug, Clone)]
@@ -31,16 +33,16 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AnnotationAppl {
         node: tree_sitter::Node<'a>,
         ctx: &mut crate::parser::ParseContext<'a>,
     ) -> crate::error::ParserResult<Self> {
-        assert_eq!(node.kind_id(), xidl_derive::node_id!("annotation_appl"));
-        let raw = ctx.node_text(&node)?.trim();
-        if raw.starts_with("//@") {
-            return Err(crate::error::ParseError::UnexpectedNode(
-                "extend annotation is not supported".to_string(),
-            ));
+        let kind_id = node.kind_id();
+        let is_extend = kind_id == xidl_derive::node_id!("extend_annotation_appl");
+        if !is_extend {
+            assert_eq!(kind_id, xidl_derive::node_id!("annotation_appl"));
         }
+        let raw = ctx.node_text(&node)?.to_string();
 
         let mut custom_body = None;
         let mut builtin_body = None;
+        let mut extra = Vec::new();
         for ch in node.children(&mut node.walk()) {
             match ch.kind_id() {
                 xidl_derive::node_id!("annotation_appl_custom_body") => {
@@ -49,10 +51,9 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AnnotationAppl {
                 xidl_derive::node_id!("annotation_appl_builtin_body") => {
                     builtin_body = Some(ch);
                 }
-                xidl_derive::node_id!("extend_annotation_appl") => {
-                    return Err(crate::error::ParseError::UnexpectedNode(
-                        "extend annotation is not supported".to_string(),
-                    ));
+                xidl_derive::node_id!("annotation_appl")
+                | xidl_derive::node_id!("extend_annotation_appl") => {
+                    extra.push(AnnotationAppl::from_node(ch, ctx)?);
                 }
                 _ => {}
             }
@@ -80,13 +81,16 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AnnotationAppl {
             return Ok(Self {
                 name: AnnotationName::ScopedName(scoped_name),
                 params,
+                is_extend,
+                extra,
             });
         }
 
         let source = builtin_body
             .map(|node| ctx.node_text(&node))
             .transpose()?
-            .unwrap_or(raw);
+            .unwrap_or(raw.as_str());
+        let source = source.trim().strip_prefix("//@").unwrap_or(source);
         let raw = source.trim().strip_prefix('@').unwrap_or(source).trim();
         let (name, args) = match raw.split_once('(') {
             Some((name, rest)) => {
@@ -99,6 +103,8 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AnnotationAppl {
         Ok(Self {
             name: AnnotationName::Builtin(name.to_string()),
             params: args.map(|value| AnnotationParams::Raw(value.to_string())),
+            is_extend,
+            extra,
         })
     }
 }
