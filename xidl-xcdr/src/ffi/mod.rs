@@ -1,6 +1,7 @@
 mod cdr;
 mod macros;
 mod plcdr;
+mod xcdr_plcdr;
 
 use crate::error::{XcdrError, XcdrResult};
 

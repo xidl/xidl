@@ -4,6 +4,7 @@ pub mod cdr;
 pub mod ffi;
 pub mod plain_cdr;
 pub mod plcdr;
+pub mod xcdr_plcdr;
 
 mod utils;
 
