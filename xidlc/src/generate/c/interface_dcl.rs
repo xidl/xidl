@@ -34,9 +34,7 @@ impl CRender for hir::InterfaceDcl {
             }
         };
 
-        let operations = body
-            .map(|body| collect_operations(body))
-            .unwrap_or_default();
+        let operations = body.map(collect_operations).unwrap_or_default();
         let ctx = InterfaceContext { ident, operations };
 
         let header = renderer.render_template("interface.h.j2", &ctx)?;
@@ -78,7 +76,7 @@ fn operation_from_op(op: &hir::OpDcl) -> InterfaceOperation {
         .parameter
         .as_ref()
         .map(|params| params.0.iter().map(param_from_dcl).collect())
-        .unwrap_or_else(Vec::new);
+        .unwrap_or_default();
 
     InterfaceOperation {
         name: op.ident.clone(),

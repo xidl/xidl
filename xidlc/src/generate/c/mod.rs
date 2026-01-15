@@ -15,8 +15,8 @@ mod xcdr;
 pub use render::{CRender, CRenderOutput, CRenderer};
 
 use crate::error::IdlcResult;
-use crate::generate::c::util::{c_header, c_source_header};
 use crate::generate::GeneratedFile;
+use crate::generate::c::util::{c_header, c_source_header};
 use std::path::Path;
 use xidl_parser::hir;
 

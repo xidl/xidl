@@ -1,0 +1,4939 @@
+---
+source: xidlc/src/driver/tests/mod.rs
+expression: output
+---
+===============
+misc.c
+===============
+#include "misc.h"
+Color Color_new(void) {
+  Color value;
+  Color_init(&value);
+  return value;
+}
+
+void Color_init(Color* self) {
+  *self = (Color)0;
+}
+Size Size_new(void) {
+  Size value;
+  Size_init(&value);
+  return value;
+}
+
+void Size_init(Size* self) {
+  *self = (Size)0;
+}
+Foo Foo_new(void) {
+  Foo value;
+  Foo_init(&value);
+  return value;
+}
+
+void Foo_init(Foo* self) {
+  *self = (Foo){0};
+}
+Foo Foo_new(void) {
+  Foo value;
+  Foo_init(&value);
+  return value;
+}
+
+void Foo_init(Foo* self) {
+  *self = (Foo){0};
+}
+Bar Bar_new(void) {
+  Bar value;
+  Bar_init(&value);
+  return value;
+}
+
+void Bar_init(Bar* self) {
+  *self = (Bar){0};
+}
+
+
+
+
+
+A_make_it_so_In A_make_it_so_In_new(void) {
+  A_make_it_so_In value;
+  A_make_it_so_In_init(&value);
+  return value;
+}
+
+void A_make_it_so_In_init(A_make_it_so_In* self) {
+  *self = (A_make_it_so_In){0};
+}
+A_make_it_so_Out A_make_it_so_Out_new(void) {
+  A_make_it_so_Out value;
+  A_make_it_so_Out_init(&value);
+  return value;
+}
+
+void A_make_it_so_Out_init(A_make_it_so_Out* self) {
+  *self = (A_make_it_so_Out){0};
+}
+A_make_it_so_Result A_make_it_so_Result_new(void) {
+  A_make_it_so_Result value;
+  A_make_it_so_Result_init(&value);
+  return value;
+}
+
+void A_make_it_so_Result_init(A_make_it_so_Result* self) {
+  *self = (A_make_it_so_Result){0};
+}
+A_Call A_Call_new(void) {
+  A_Call value;
+  A_Call_init(&value);
+  return value;
+}
+
+void A_Call_init(A_Call* self) {
+  *self = (A_Call){0};
+}
+A_Request A_Request_new(void) {
+  A_Request value;
+  A_Request_init(&value);
+  return value;
+}
+
+void A_Request_init(A_Request* self) {
+  *self = (A_Request){0};
+}
+A_Return A_Return_new(void) {
+  A_Return value;
+  A_Return_init(&value);
+  return value;
+}
+
+void A_Return_init(A_Return* self) {
+  *self = (A_Return){0};
+}
+A_Reply A_Reply_new(void) {
+  A_Reply value;
+  A_Reply_init(&value);
+  return value;
+}
+
+void A_Reply_init(A_Reply* self) {
+  *self = (A_Reply){0};
+}
+
+void A_make_it_so(void) {
+
+}
+
+
+B_make_it_so_In B_make_it_so_In_new(void) {
+  B_make_it_so_In value;
+  B_make_it_so_In_init(&value);
+  return value;
+}
+
+void B_make_it_so_In_init(B_make_it_so_In* self) {
+  *self = (B_make_it_so_In){0};
+}
+B_make_it_so_Out B_make_it_so_Out_new(void) {
+  B_make_it_so_Out value;
+  B_make_it_so_Out_init(&value);
+  return value;
+}
+
+void B_make_it_so_Out_init(B_make_it_so_Out* self) {
+  *self = (B_make_it_so_Out){0};
+}
+B_make_it_so_Result B_make_it_so_Result_new(void) {
+  B_make_it_so_Result value;
+  B_make_it_so_Result_init(&value);
+  return value;
+}
+
+void B_make_it_so_Result_init(B_make_it_so_Result* self) {
+  *self = (B_make_it_so_Result){0};
+}
+B_Call B_Call_new(void) {
+  B_Call value;
+  B_Call_init(&value);
+  return value;
+}
+
+void B_Call_init(B_Call* self) {
+  *self = (B_Call){0};
+}
+B_Request B_Request_new(void) {
+  B_Request value;
+  B_Request_init(&value);
+  return value;
+}
+
+void B_Request_init(B_Request* self) {
+  *self = (B_Request){0};
+}
+B_Return B_Return_new(void) {
+  B_Return value;
+  B_Return_init(&value);
+  return value;
+}
+
+void B_Return_init(B_Return* self) {
+  *self = (B_Return){0};
+}
+B_Reply B_Reply_new(void) {
+  B_Reply value;
+  B_Reply_init(&value);
+  return value;
+}
+
+void B_Reply_init(B_Reply* self) {
+  *self = (B_Reply){0};
+}
+
+int16_t B_make_it_so(int32_t times) {
+
+  int16_t result = {0};
+  return result;
+
+}
+
+
+
+
+
+
+A_opA_In A_opA_In_new(void) {
+  A_opA_In value;
+  A_opA_In_init(&value);
+  return value;
+}
+
+void A_opA_In_init(A_opA_In* self) {
+  *self = (A_opA_In){0};
+}
+A_opA_Out A_opA_Out_new(void) {
+  A_opA_Out value;
+  A_opA_Out_init(&value);
+  return value;
+}
+
+void A_opA_Out_init(A_opA_Out* self) {
+  *self = (A_opA_Out){0};
+}
+A_opA_Result A_opA_Result_new(void) {
+  A_opA_Result value;
+  A_opA_Result_init(&value);
+  return value;
+}
+
+void A_opA_Result_init(A_opA_Result* self) {
+  *self = (A_opA_Result){0};
+}
+A_Call A_Call_new(void) {
+  A_Call value;
+  A_Call_init(&value);
+  return value;
+}
+
+void A_Call_init(A_Call* self) {
+  *self = (A_Call){0};
+}
+A_Request A_Request_new(void) {
+  A_Request value;
+  A_Request_init(&value);
+  return value;
+}
+
+void A_Request_init(A_Request* self) {
+  *self = (A_Request){0};
+}
+A_Return A_Return_new(void) {
+  A_Return value;
+  A_Return_init(&value);
+  return value;
+}
+
+void A_Return_init(A_Return* self) {
+  *self = (A_Return){0};
+}
+A_Reply A_Reply_new(void) {
+  A_Reply value;
+  A_Reply_init(&value);
+  return value;
+}
+
+void A_Reply_init(A_Reply* self) {
+  *self = (A_Reply){0};
+}
+
+int16_t A_opA(L1 l_1) {
+
+  int16_t result = {0};
+  return result;
+
+}
+
+
+B_opB_In B_opB_In_new(void) {
+  B_opB_In value;
+  B_opB_In_init(&value);
+  return value;
+}
+
+void B_opB_In_init(B_opB_In* self) {
+  *self = (B_opB_In){0};
+}
+B_opB_Out B_opB_Out_new(void) {
+  B_opB_Out value;
+  B_opB_Out_init(&value);
+  return value;
+}
+
+void B_opB_Out_init(B_opB_Out* self) {
+  *self = (B_opB_Out){0};
+}
+B_opB_Result B_opB_Result_new(void) {
+  B_opB_Result value;
+  B_opB_Result_init(&value);
+  return value;
+}
+
+void B_opB_Result_init(B_opB_Result* self) {
+  *self = (B_opB_Result){0};
+}
+B_Call B_Call_new(void) {
+  B_Call value;
+  B_Call_init(&value);
+  return value;
+}
+
+void B_Call_init(B_Call* self) {
+  *self = (B_Call){0};
+}
+B_Request B_Request_new(void) {
+  B_Request value;
+  B_Request_init(&value);
+  return value;
+}
+
+void B_Request_init(B_Request* self) {
+  *self = (B_Request){0};
+}
+B_Return B_Return_new(void) {
+  B_Return value;
+  B_Return_init(&value);
+  return value;
+}
+
+void B_Return_init(B_Return* self) {
+  *self = (B_Return){0};
+}
+B_Reply B_Reply_new(void) {
+  B_Reply value;
+  B_Reply_init(&value);
+  return value;
+}
+
+void B_Reply_init(B_Reply* self) {
+  *self = (B_Reply){0};
+}
+
+L1 B_opB(int32_t l) {
+
+  L1 result = {0};
+  return result;
+
+}
+
+
+C_opC_In C_opC_In_new(void) {
+  C_opC_In value;
+  C_opC_In_init(&value);
+  return value;
+}
+
+void C_opC_In_init(C_opC_In* self) {
+  *self = (C_opC_In){0};
+}
+C_opC_Out C_opC_Out_new(void) {
+  C_opC_Out value;
+  C_opC_Out_init(&value);
+  return value;
+}
+
+void C_opC_Out_init(C_opC_Out* self) {
+  *self = (C_opC_Out){0};
+}
+C_opC_Result C_opC_Result_new(void) {
+  C_opC_Result value;
+  C_opC_Result_init(&value);
+  return value;
+}
+
+void C_opC_Result_init(C_opC_Result* self) {
+  *self = (C_opC_Result){0};
+}
+C_Call C_Call_new(void) {
+  C_Call value;
+  C_Call_init(&value);
+  return value;
+}
+
+void C_Call_init(C_Call* self) {
+  *self = (C_Call){0};
+}
+C_Request C_Request_new(void) {
+  C_Request value;
+  C_Request_init(&value);
+  return value;
+}
+
+void C_Request_init(C_Request* self) {
+  *self = (C_Request){0};
+}
+C_Return C_Return_new(void) {
+  C_Return value;
+  C_Return_init(&value);
+  return value;
+}
+
+void C_Return_init(C_Return* self) {
+  *self = (C_Return){0};
+}
+C_Reply C_Reply_new(void) {
+  C_Reply value;
+  C_Reply_init(&value);
+  return value;
+}
+
+void C_Reply_init(C_Reply* self) {
+  *self = (C_Reply){0};
+}
+
+B_L1 C_opC(L3 l_3) {
+
+  B_L1 result = {0};
+  return result;
+
+}
+
+
+A_f_In A_f_In_new(void) {
+  A_f_In value;
+  A_f_In_init(&value);
+  return value;
+}
+
+void A_f_In_init(A_f_In* self) {
+  *self = (A_f_In){0};
+}
+A_f_Out A_f_Out_new(void) {
+  A_f_Out value;
+  A_f_Out_init(&value);
+  return value;
+}
+
+void A_f_Out_init(A_f_Out* self) {
+  *self = (A_f_Out){0};
+}
+A_f_Result A_f_Result_new(void) {
+  A_f_Result value;
+  A_f_Result_init(&value);
+  return value;
+}
+
+void A_f_Result_init(A_f_Result* self) {
+  *self = (A_f_Result){0};
+}
+A_Call A_Call_new(void) {
+  A_Call value;
+  A_Call_init(&value);
+  return value;
+}
+
+void A_Call_init(A_Call* self) {
+  *self = (A_Call){0};
+}
+A_Request A_Request_new(void) {
+  A_Request value;
+  A_Request_init(&value);
+  return value;
+}
+
+void A_Request_init(A_Request* self) {
+  *self = (A_Request){0};
+}
+A_Return A_Return_new(void) {
+  A_Return value;
+  A_Return_init(&value);
+  return value;
+}
+
+void A_Return_init(A_Return* self) {
+  *self = (A_Return){0};
+}
+A_Reply A_Reply_new(void) {
+  A_Reply value;
+  A_Reply_init(&value);
+  return value;
+}
+
+void A_Reply_init(A_Reply* self) {
+  *self = (A_Reply){0};
+}
+
+void A_f(coord s) {
+
+}
+
+
+
+
+
+
+C_get_attribute_Title_In C_get_attribute_Title_In_new(void) {
+  C_get_attribute_Title_In value;
+  C_get_attribute_Title_In_init(&value);
+  return value;
+}
+
+void C_get_attribute_Title_In_init(C_get_attribute_Title_In* self) {
+  *self = (C_get_attribute_Title_In){0};
+}
+C_get_attribute_Title_Out C_get_attribute_Title_Out_new(void) {
+  C_get_attribute_Title_Out value;
+  C_get_attribute_Title_Out_init(&value);
+  return value;
+}
+
+void C_get_attribute_Title_Out_init(C_get_attribute_Title_Out* self) {
+  *self = (C_get_attribute_Title_Out){0};
+}
+C_get_attribute_Title_Result C_get_attribute_Title_Result_new(void) {
+  C_get_attribute_Title_Result value;
+  C_get_attribute_Title_Result_init(&value);
+  return value;
+}
+
+void C_get_attribute_Title_Result_init(C_get_attribute_Title_Result* self) {
+  *self = (C_get_attribute_Title_Result){0};
+}
+C_set_attribute_Title_In C_set_attribute_Title_In_new(void) {
+  C_set_attribute_Title_In value;
+  C_set_attribute_Title_In_init(&value);
+  return value;
+}
+
+void C_set_attribute_Title_In_init(C_set_attribute_Title_In* self) {
+  *self = (C_set_attribute_Title_In){0};
+}
+C_set_attribute_Title_Out C_set_attribute_Title_Out_new(void) {
+  C_set_attribute_Title_Out value;
+  C_set_attribute_Title_Out_init(&value);
+  return value;
+}
+
+void C_set_attribute_Title_Out_init(C_set_attribute_Title_Out* self) {
+  *self = (C_set_attribute_Title_Out){0};
+}
+C_set_attribute_Title_Result C_set_attribute_Title_Result_new(void) {
+  C_set_attribute_Title_Result value;
+  C_set_attribute_Title_Result_init(&value);
+  return value;
+}
+
+void C_set_attribute_Title_Result_init(C_set_attribute_Title_Result* self) {
+  *self = (C_set_attribute_Title_Result){0};
+}
+C_get_attribute_Name_In C_get_attribute_Name_In_new(void) {
+  C_get_attribute_Name_In value;
+  C_get_attribute_Name_In_init(&value);
+  return value;
+}
+
+void C_get_attribute_Name_In_init(C_get_attribute_Name_In* self) {
+  *self = (C_get_attribute_Name_In){0};
+}
+C_get_attribute_Name_Out C_get_attribute_Name_Out_new(void) {
+  C_get_attribute_Name_Out value;
+  C_get_attribute_Name_Out_init(&value);
+  return value;
+}
+
+void C_get_attribute_Name_Out_init(C_get_attribute_Name_Out* self) {
+  *self = (C_get_attribute_Name_Out){0};
+}
+C_get_attribute_Name_Result C_get_attribute_Name_Result_new(void) {
+  C_get_attribute_Name_Result value;
+  C_get_attribute_Name_Result_init(&value);
+  return value;
+}
+
+void C_get_attribute_Name_Result_init(C_get_attribute_Name_Result* self) {
+  *self = (C_get_attribute_Name_Result){0};
+}
+C_set_attribute_Name_In C_set_attribute_Name_In_new(void) {
+  C_set_attribute_Name_In value;
+  C_set_attribute_Name_In_init(&value);
+  return value;
+}
+
+void C_set_attribute_Name_In_init(C_set_attribute_Name_In* self) {
+  *self = (C_set_attribute_Name_In){0};
+}
+C_set_attribute_Name_Out C_set_attribute_Name_Out_new(void) {
+  C_set_attribute_Name_Out value;
+  C_set_attribute_Name_Out_init(&value);
+  return value;
+}
+
+void C_set_attribute_Name_Out_init(C_set_attribute_Name_Out* self) {
+  *self = (C_set_attribute_Name_Out){0};
+}
+C_set_attribute_Name_Result C_set_attribute_Name_Result_new(void) {
+  C_set_attribute_Name_Result value;
+  C_set_attribute_Name_Result_init(&value);
+  return value;
+}
+
+void C_set_attribute_Name_Result_init(C_set_attribute_Name_Result* self) {
+  *self = (C_set_attribute_Name_Result){0};
+}
+C_get_attribute_City_In C_get_attribute_City_In_new(void) {
+  C_get_attribute_City_In value;
+  C_get_attribute_City_In_init(&value);
+  return value;
+}
+
+void C_get_attribute_City_In_init(C_get_attribute_City_In* self) {
+  *self = (C_get_attribute_City_In){0};
+}
+C_get_attribute_City_Out C_get_attribute_City_Out_new(void) {
+  C_get_attribute_City_Out value;
+  C_get_attribute_City_Out_init(&value);
+  return value;
+}
+
+void C_get_attribute_City_Out_init(C_get_attribute_City_Out* self) {
+  *self = (C_get_attribute_City_Out){0};
+}
+C_get_attribute_City_Result C_get_attribute_City_Result_new(void) {
+  C_get_attribute_City_Result value;
+  C_get_attribute_City_Result_init(&value);
+  return value;
+}
+
+void C_get_attribute_City_Result_init(C_get_attribute_City_Result* self) {
+  *self = (C_get_attribute_City_Result){0};
+}
+C_set_attribute_City_In C_set_attribute_City_In_new(void) {
+  C_set_attribute_City_In value;
+  C_set_attribute_City_In_init(&value);
+  return value;
+}
+
+void C_set_attribute_City_In_init(C_set_attribute_City_In* self) {
+  *self = (C_set_attribute_City_In){0};
+}
+C_set_attribute_City_Out C_set_attribute_City_Out_new(void) {
+  C_set_attribute_City_Out value;
+  C_set_attribute_City_Out_init(&value);
+  return value;
+}
+
+void C_set_attribute_City_Out_init(C_set_attribute_City_Out* self) {
+  *self = (C_set_attribute_City_Out){0};
+}
+C_set_attribute_City_Result C_set_attribute_City_Result_new(void) {
+  C_set_attribute_City_Result value;
+  C_set_attribute_City_Result_init(&value);
+  return value;
+}
+
+void C_set_attribute_City_Result_init(C_set_attribute_City_Result* self) {
+  *self = (C_set_attribute_City_Result){0};
+}
+C_Call C_Call_new(void) {
+  C_Call value;
+  C_Call_init(&value);
+  return value;
+}
+
+void C_Call_init(C_Call* self) {
+  *self = (C_Call){0};
+}
+C_Request C_Request_new(void) {
+  C_Request value;
+  C_Request_init(&value);
+  return value;
+}
+
+void C_Request_init(C_Request* self) {
+  *self = (C_Request){0};
+}
+C_Return C_Return_new(void) {
+  C_Return value;
+  C_Return_init(&value);
+  return value;
+}
+
+void C_Return_init(C_Return* self) {
+  *self = (C_Return){0};
+}
+C_Reply C_Reply_new(void) {
+  C_Reply value;
+  C_Reply_init(&value);
+  return value;
+}
+
+void C_Reply_init(C_Reply* self) {
+  *self = (C_Reply){0};
+}
+
+string_t C_get_attribute_Title(void) {
+
+  string_t result = {0};
+  return result;
+
+}
+
+
+void C_set_attribute_Title(string_t Title) {
+
+}
+
+
+A_string_t C_get_attribute_Name(void) {
+
+  A_string_t result = {0};
+  return result;
+
+}
+
+
+void C_set_attribute_Name(A_string_t Name) {
+
+}
+
+
+B_string_t C_get_attribute_City(void) {
+
+  B_string_t result = {0};
+  return result;
+
+}
+
+
+void C_set_attribute_City(B_string_t City) {
+
+}
+
+===============
+misc.h
+===============
+// Generated by idlc
+#pragma once
+#include <stdbool.h>
+#include <stdint.h>
+#include <wchar.h>
+typedef enum Color {
+
+  red,
+
+  green,
+
+  blue,
+
+} Color;
+
+Color Color_new(void);
+void Color_init(Color* self);
+static const Color FAVORITE_COLOR = red;
+typedef enum Size {
+
+  small,
+
+  medium,
+
+  large,
+
+} Size;
+
+Size Size_new(void);
+void Size_init(Size* self);
+static const M_Size MYSIZE = M_medium;
+static const Color col = red;
+static const Color another = M_medium;
+/* struct Foo forward skipped */
+typedef struct Foo {
+
+  int32_t value;
+
+  FooSeq chain;
+
+} Foo;
+
+Foo Foo_new(void);
+void Foo_init(Foo* self);
+/* union Bar skipped */
+typedef struct Foo {
+
+  double d_mem;
+
+  BarSeq nested;
+
+} Foo;
+
+Foo Foo_new(void);
+void Foo_init(Foo* self);
+typedef struct Bar {
+  int32_t _d;
+  union {
+
+    int32_t l_mem;
+
+    Foo s_mem;
+
+  } _u;
+} Bar;
+
+Bar Bar_new(void);
+void Bar_init(Bar* self);
+/* Interface A */
+
+/* Interface B */
+
+/* Interface C */
+
+/* Interface D */
+
+/* Interface E */
+
+static const int32_t A_make_it_so_Hash = 4027367364;
+typedef struct A_make_it_so_In {
+
+  dds_rpc_UnusedMember dummy;
+
+} A_make_it_so_In;
+
+A_make_it_so_In A_make_it_so_In_new(void);
+void A_make_it_so_In_init(A_make_it_so_In* self);
+typedef struct A_make_it_so_Out {
+
+  dds_rpc_UnusedMember dummy;
+
+} A_make_it_so_Out;
+
+A_make_it_so_Out A_make_it_so_Out_new(void);
+void A_make_it_so_Out_init(A_make_it_so_Out* self);
+typedef struct A_make_it_so_Result {
+  int32_t _d;
+  union {
+
+    A_make_it_so_Out result;
+
+  } _u;
+} A_make_it_so_Result;
+
+A_make_it_so_Result A_make_it_so_Result_new(void);
+void A_make_it_so_Result_init(A_make_it_so_Result* self);
+typedef struct A_Call {
+  int32_t _d;
+  union {
+
+    dds_rpc_UnknownOperation unknownOp;
+
+    A_make_it_so_In make_it_so;
+
+  } _u;
+} A_Call;
+
+A_Call A_Call_new(void);
+void A_Call_init(A_Call* self);
+typedef struct A_Request {
+
+  dds_rpc_RequestHeader header;
+
+  A_Call data;
+
+} A_Request;
+
+A_Request A_Request_new(void);
+void A_Request_init(A_Request* self);
+typedef struct A_Return {
+  int32_t _d;
+  union {
+
+    dds_rpc_UnknownOperation unknownOp;
+
+    A_make_it_so_Result make_it_so;
+
+  } _u;
+} A_Return;
+
+A_Return A_Return_new(void);
+void A_Return_init(A_Return* self);
+typedef struct A_Reply {
+
+  dds_rpc_ReplyHeader header;
+
+  A_Return data;
+
+} A_Reply;
+
+A_Reply A_Reply_new(void);
+void A_Reply_init(A_Reply* self);
+/* Interface A */
+
+void A_make_it_so(void);
+
+static const int32_t B_make_it_so_Hash = 4027367364;
+typedef struct B_make_it_so_In {
+
+  int32_t times;
+
+} B_make_it_so_In;
+
+B_make_it_so_In B_make_it_so_In_new(void);
+void B_make_it_so_In_init(B_make_it_so_In* self);
+typedef struct B_make_it_so_Out {
+
+  int16_t return_;
+
+} B_make_it_so_Out;
+
+B_make_it_so_Out B_make_it_so_Out_new(void);
+void B_make_it_so_Out_init(B_make_it_so_Out* self);
+typedef struct B_make_it_so_Result {
+  int32_t _d;
+  union {
+
+    B_make_it_so_Out result;
+
+  } _u;
+} B_make_it_so_Result;
+
+B_make_it_so_Result B_make_it_so_Result_new(void);
+void B_make_it_so_Result_init(B_make_it_so_Result* self);
+typedef struct B_Call {
+  int32_t _d;
+  union {
+
+    dds_rpc_UnknownOperation unknownOp;
+
+    B_make_it_so_In make_it_so;
+
+  } _u;
+} B_Call;
+
+B_Call B_Call_new(void);
+void B_Call_init(B_Call* self);
+typedef struct B_Request {
+
+  dds_rpc_RequestHeader header;
+
+  B_Call data;
+
+} B_Request;
+
+B_Request B_Request_new(void);
+void B_Request_init(B_Request* self);
+typedef struct B_Return {
+  int32_t _d;
+  union {
+
+    dds_rpc_UnknownOperation unknownOp;
+
+    B_make_it_so_Result make_it_so;
+
+  } _u;
+} B_Return;
+
+B_Return B_Return_new(void);
+void B_Return_init(B_Return* self);
+typedef struct B_Reply {
+
+  dds_rpc_ReplyHeader header;
+
+  B_Return data;
+
+} B_Reply;
+
+B_Reply B_Reply_new(void);
+void B_Reply_init(B_Reply* self);
+/* Interface B */
+
+int16_t B_make_it_so(int32_t times);
+
+/* Interface base */
+
+/* Interface derived */
+
+/* Interface base */
+
+/* Interface derived */
+
+static const int32_t A_opA_Hash = 3927698569;
+typedef struct A_opA_In {
+
+  L1 l_1;
+
+} A_opA_In;
+
+A_opA_In A_opA_In_new(void);
+void A_opA_In_init(A_opA_In* self);
+typedef struct A_opA_Out {
+
+  int16_t return_;
+
+} A_opA_Out;
+
+A_opA_Out A_opA_Out_new(void);
+void A_opA_Out_init(A_opA_Out* self);
+typedef struct A_opA_Result {
+  int32_t _d;
+  union {
+
+    A_opA_Out result;
+
+  } _u;
+} A_opA_Result;
+
+A_opA_Result A_opA_Result_new(void);
+void A_opA_Result_init(A_opA_Result* self);
+typedef struct A_Call {
+  int32_t _d;
+  union {
+
+    dds_rpc_UnknownOperation unknownOp;
+
+    A_opA_In opA;
+
+  } _u;
+} A_Call;
+
+A_Call A_Call_new(void);
+void A_Call_init(A_Call* self);
+typedef struct A_Request {
+
+  dds_rpc_RequestHeader header;
+
+  A_Call data;
+
+} A_Request;
+
+A_Request A_Request_new(void);
+void A_Request_init(A_Request* self);
+typedef struct A_Return {
+  int32_t _d;
+  union {
+
+    dds_rpc_UnknownOperation unknownOp;
+
+    A_opA_Result opA;
+
+  } _u;
+} A_Return;
+
+A_Return A_Return_new(void);
+void A_Return_init(A_Return* self);
+typedef struct A_Reply {
+
+  dds_rpc_ReplyHeader header;
+
+  A_Return data;
+
+} A_Reply;
+
+A_Reply A_Reply_new(void);
+void A_Reply_init(A_Reply* self);
+/* Interface A */
+
+int16_t A_opA(L1 l_1);
+
+static const int32_t B_opB_Hash = 772252025;
+typedef struct B_opB_In {
+
+  int32_t l;
+
+} B_opB_In;
+
+B_opB_In B_opB_In_new(void);
+void B_opB_In_init(B_opB_In* self);
+typedef struct B_opB_Out {
+
+  L1 return_;
+
+} B_opB_Out;
+
+B_opB_Out B_opB_Out_new(void);
+void B_opB_Out_init(B_opB_Out* self);
+typedef struct B_opB_Result {
+  int32_t _d;
+  union {
+
+    B_opB_Out result;
+
+  } _u;
+} B_opB_Result;
+
+B_opB_Result B_opB_Result_new(void);
+void B_opB_Result_init(B_opB_Result* self);
+typedef struct B_Call {
+  int32_t _d;
+  union {
+
+    dds_rpc_UnknownOperation unknownOp;
+
+    B_opB_In opB;
+
+  } _u;
+} B_Call;
+
+B_Call B_Call_new(void);
+void B_Call_init(B_Call* self);
+typedef struct B_Request {
+
+  dds_rpc_RequestHeader header;
+
+  B_Call data;
+
+} B_Request;
+
+B_Request B_Request_new(void);
+void B_Request_init(B_Request* self);
+typedef struct B_Return {
+  int32_t _d;
+  union {
+
+    dds_rpc_UnknownOperation unknownOp;
+
+    B_opB_Result opB;
+
+  } _u;
+} B_Return;
+
+B_Return B_Return_new(void);
+void B_Return_init(B_Return* self);
+typedef struct B_Reply {
+
+  dds_rpc_ReplyHeader header;
+
+  B_Return data;
+
+} B_Reply;
+
+B_Reply B_Reply_new(void);
+void B_Reply_init(B_Reply* self);
+/* Interface B */
+
+L1 B_opB(int32_t l);
+
+static const int32_t C_opC_Hash = 1200187224;
+typedef struct C_opC_In {
+
+  L3 l_3;
+
+} C_opC_In;
+
+C_opC_In C_opC_In_new(void);
+void C_opC_In_init(C_opC_In* self);
+typedef struct C_opC_Out {
+
+  B_L1 return_;
+
+} C_opC_Out;
+
+C_opC_Out C_opC_Out_new(void);
+void C_opC_Out_init(C_opC_Out* self);
+typedef struct C_opC_Result {
+  int32_t _d;
+  union {
+
+    C_opC_Out result;
+
+  } _u;
+} C_opC_Result;
+
+C_opC_Result C_opC_Result_new(void);
+void C_opC_Result_init(C_opC_Result* self);
+typedef struct C_Call {
+  int32_t _d;
+  union {
+
+    dds_rpc_UnknownOperation unknownOp;
+
+    C_opC_In opC;
+
+  } _u;
+} C_Call;
+
+C_Call C_Call_new(void);
+void C_Call_init(C_Call* self);
+typedef struct C_Request {
+
+  dds_rpc_RequestHeader header;
+
+  C_Call data;
+
+} C_Request;
+
+C_Request C_Request_new(void);
+void C_Request_init(C_Request* self);
+typedef struct C_Return {
+  int32_t _d;
+  union {
+
+    dds_rpc_UnknownOperation unknownOp;
+
+    C_opC_Result opC;
+
+  } _u;
+} C_Return;
+
+C_Return C_Return_new(void);
+void C_Return_init(C_Return* self);
+typedef struct C_Reply {
+
+  dds_rpc_ReplyHeader header;
+
+  C_Return data;
+
+} C_Reply;
+
+C_Reply C_Reply_new(void);
+void C_Reply_init(C_Reply* self);
+/* Interface C */
+
+B_L1 C_opC(L3 l_3);
+
+static const int32_t L = 3;
+static const int32_t A_f_Hash = 3712786831;
+typedef struct A_f_In {
+
+  coord s;
+
+} A_f_In;
+
+A_f_In A_f_In_new(void);
+void A_f_In_init(A_f_In* self);
+typedef struct A_f_Out {
+
+  dds_rpc_UnusedMember dummy;
+
+} A_f_Out;
+
+A_f_Out A_f_Out_new(void);
+void A_f_Out_init(A_f_Out* self);
+typedef struct A_f_Result {
+  int32_t _d;
+  union {
+
+    A_f_Out result;
+
+  } _u;
+} A_f_Result;
+
+A_f_Result A_f_Result_new(void);
+void A_f_Result_init(A_f_Result* self);
+typedef struct A_Call {
+  int32_t _d;
+  union {
+
+    dds_rpc_UnknownOperation unknownOp;
+
+    A_f_In f;
+
+  } _u;
+} A_Call;
+
+A_Call A_Call_new(void);
+void A_Call_init(A_Call* self);
+typedef struct A_Request {
+
+  dds_rpc_RequestHeader header;
+
+  A_Call data;
+
+} A_Request;
+
+A_Request A_Request_new(void);
+void A_Request_init(A_Request* self);
+typedef struct A_Return {
+  int32_t _d;
+  union {
+
+    dds_rpc_UnknownOperation unknownOp;
+
+    A_f_Result f;
+
+  } _u;
+} A_Return;
+
+A_Return A_Return_new(void);
+void A_Return_init(A_Return* self);
+typedef struct A_Reply {
+
+  dds_rpc_ReplyHeader header;
+
+  A_Return data;
+
+} A_Reply;
+
+A_Reply A_Reply_new(void);
+void A_Reply_init(A_Reply* self);
+/* Interface A */
+
+void A_f(coord s);
+
+/* Interface B */
+
+/* Interface C */
+
+/* Interface A */
+
+/* Interface B */
+
+static const int32_t C_get_attribute_Title_Hash = 2561239307;
+static const int32_t C_set_attribute_Title_Hash = 601397578;
+static const int32_t C_get_attribute_Name_Hash = 1786101153;
+static const int32_t C_set_attribute_Name_Hash = 2852545551;
+static const int32_t C_get_attribute_City_Hash = 3564363613;
+static const int32_t C_set_attribute_City_Hash = 1017480313;
+typedef struct C_get_attribute_Title_In {
+
+  dds_rpc_UnusedMember dummy;
+
+} C_get_attribute_Title_In;
+
+C_get_attribute_Title_In C_get_attribute_Title_In_new(void);
+void C_get_attribute_Title_In_init(C_get_attribute_Title_In* self);
+typedef struct C_get_attribute_Title_Out {
+
+  string_t return_;
+
+} C_get_attribute_Title_Out;
+
+C_get_attribute_Title_Out C_get_attribute_Title_Out_new(void);
+void C_get_attribute_Title_Out_init(C_get_attribute_Title_Out* self);
+typedef struct C_get_attribute_Title_Result {
+  int32_t _d;
+  union {
+
+    C_get_attribute_Title_Out result;
+
+  } _u;
+} C_get_attribute_Title_Result;
+
+C_get_attribute_Title_Result C_get_attribute_Title_Result_new(void);
+void C_get_attribute_Title_Result_init(C_get_attribute_Title_Result* self);
+typedef struct C_set_attribute_Title_In {
+
+  string_t Title;
+
+} C_set_attribute_Title_In;
+
+C_set_attribute_Title_In C_set_attribute_Title_In_new(void);
+void C_set_attribute_Title_In_init(C_set_attribute_Title_In* self);
+typedef struct C_set_attribute_Title_Out {
+
+  dds_rpc_UnusedMember dummy;
+
+} C_set_attribute_Title_Out;
+
+C_set_attribute_Title_Out C_set_attribute_Title_Out_new(void);
+void C_set_attribute_Title_Out_init(C_set_attribute_Title_Out* self);
+typedef struct C_set_attribute_Title_Result {
+  int32_t _d;
+  union {
+
+    C_set_attribute_Title_Out result;
+
+  } _u;
+} C_set_attribute_Title_Result;
+
+C_set_attribute_Title_Result C_set_attribute_Title_Result_new(void);
+void C_set_attribute_Title_Result_init(C_set_attribute_Title_Result* self);
+typedef struct C_get_attribute_Name_In {
+
+  dds_rpc_UnusedMember dummy;
+
+} C_get_attribute_Name_In;
+
+C_get_attribute_Name_In C_get_attribute_Name_In_new(void);
+void C_get_attribute_Name_In_init(C_get_attribute_Name_In* self);
+typedef struct C_get_attribute_Name_Out {
+
+  A_string_t return_;
+
+} C_get_attribute_Name_Out;
+
+C_get_attribute_Name_Out C_get_attribute_Name_Out_new(void);
+void C_get_attribute_Name_Out_init(C_get_attribute_Name_Out* self);
+typedef struct C_get_attribute_Name_Result {
+  int32_t _d;
+  union {
+
+    C_get_attribute_Name_Out result;
+
+  } _u;
+} C_get_attribute_Name_Result;
+
+C_get_attribute_Name_Result C_get_attribute_Name_Result_new(void);
+void C_get_attribute_Name_Result_init(C_get_attribute_Name_Result* self);
+typedef struct C_set_attribute_Name_In {
+
+  A_string_t Name;
+
+} C_set_attribute_Name_In;
+
+C_set_attribute_Name_In C_set_attribute_Name_In_new(void);
+void C_set_attribute_Name_In_init(C_set_attribute_Name_In* self);
+typedef struct C_set_attribute_Name_Out {
+
+  dds_rpc_UnusedMember dummy;
+
+} C_set_attribute_Name_Out;
+
+C_set_attribute_Name_Out C_set_attribute_Name_Out_new(void);
+void C_set_attribute_Name_Out_init(C_set_attribute_Name_Out* self);
+typedef struct C_set_attribute_Name_Result {
+  int32_t _d;
+  union {
+
+    C_set_attribute_Name_Out result;
+
+  } _u;
+} C_set_attribute_Name_Result;
+
+C_set_attribute_Name_Result C_set_attribute_Name_Result_new(void);
+void C_set_attribute_Name_Result_init(C_set_attribute_Name_Result* self);
+typedef struct C_get_attribute_City_In {
+
+  dds_rpc_UnusedMember dummy;
+
+} C_get_attribute_City_In;
+
+C_get_attribute_City_In C_get_attribute_City_In_new(void);
+void C_get_attribute_City_In_init(C_get_attribute_City_In* self);
+typedef struct C_get_attribute_City_Out {
+
+  B_string_t return_;
+
+} C_get_attribute_City_Out;
+
+C_get_attribute_City_Out C_get_attribute_City_Out_new(void);
+void C_get_attribute_City_Out_init(C_get_attribute_City_Out* self);
+typedef struct C_get_attribute_City_Result {
+  int32_t _d;
+  union {
+
+    C_get_attribute_City_Out result;
+
+  } _u;
+} C_get_attribute_City_Result;
+
+C_get_attribute_City_Result C_get_attribute_City_Result_new(void);
+void C_get_attribute_City_Result_init(C_get_attribute_City_Result* self);
+typedef struct C_set_attribute_City_In {
+
+  B_string_t City;
+
+} C_set_attribute_City_In;
+
+C_set_attribute_City_In C_set_attribute_City_In_new(void);
+void C_set_attribute_City_In_init(C_set_attribute_City_In* self);
+typedef struct C_set_attribute_City_Out {
+
+  dds_rpc_UnusedMember dummy;
+
+} C_set_attribute_City_Out;
+
+C_set_attribute_City_Out C_set_attribute_City_Out_new(void);
+void C_set_attribute_City_Out_init(C_set_attribute_City_Out* self);
+typedef struct C_set_attribute_City_Result {
+  int32_t _d;
+  union {
+
+    C_set_attribute_City_Out result;
+
+  } _u;
+} C_set_attribute_City_Result;
+
+C_set_attribute_City_Result C_set_attribute_City_Result_new(void);
+void C_set_attribute_City_Result_init(C_set_attribute_City_Result* self);
+typedef struct C_Call {
+  int32_t _d;
+  union {
+
+    dds_rpc_UnknownOperation unknownOp;
+
+    C_get_attribute_Title_In get_attribute_Title;
+
+    C_set_attribute_Title_In set_attribute_Title;
+
+    C_get_attribute_Name_In get_attribute_Name;
+
+    C_set_attribute_Name_In set_attribute_Name;
+
+    C_get_attribute_City_In get_attribute_City;
+
+    C_set_attribute_City_In set_attribute_City;
+
+  } _u;
+} C_Call;
+
+C_Call C_Call_new(void);
+void C_Call_init(C_Call* self);
+typedef struct C_Request {
+
+  dds_rpc_RequestHeader header;
+
+  C_Call data;
+
+} C_Request;
+
+C_Request C_Request_new(void);
+void C_Request_init(C_Request* self);
+typedef struct C_Return {
+  int32_t _d;
+  union {
+
+    dds_rpc_UnknownOperation unknownOp;
+
+    C_get_attribute_Title_Result get_attribute_Title;
+
+    C_set_attribute_Title_Result set_attribute_Title;
+
+    C_get_attribute_Name_Result get_attribute_Name;
+
+    C_set_attribute_Name_Result set_attribute_Name;
+
+    C_get_attribute_City_Result get_attribute_City;
+
+    C_set_attribute_City_Result set_attribute_City;
+
+  } _u;
+} C_Return;
+
+C_Return C_Return_new(void);
+void C_Return_init(C_Return* self);
+typedef struct C_Reply {
+
+  dds_rpc_ReplyHeader header;
+
+  C_Return data;
+
+} C_Reply;
+
+C_Reply C_Reply_new(void);
+void C_Reply_init(C_Reply* self);
+/* Interface C */
+
+string_t C_get_attribute_Title(void);
+
+void C_set_attribute_Title(string_t Title);
+
+A_string_t C_get_attribute_Name(void);
+
+void C_set_attribute_Name(A_string_t Name);
+
+B_string_t C_get_attribute_City(void);
+
+void C_set_attribute_City(B_string_t City);
+===============
+misc_xcdr.c
+===============
+#include "misc_xcdr.h"
+void Color_serialize(Color const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "(*self)");
+  
+  
+  
+  
+}
+
+void Color_deserialize(Color* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "(*self)");
+  
+  
+  
+  
+}
+void Size_serialize(Size const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "(*self)");
+  
+  
+  
+  
+}
+
+void Size_deserialize(Size* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "(*self)");
+  
+  
+  
+  
+}
+void Foo_serialize(Foo const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->value");
+  
+  
+  
+  
+  
+  
+  FooSeq_serialize(&self->chain, serializer);
+  
+  
+  
+  
+}
+
+void Foo_deserialize(Foo* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->value");
+  
+  
+  
+  
+  
+  
+  FooSeq_deserialize(&self->chain, deserializer);
+  
+  
+  
+  
+}
+void Foo_serialize(Foo const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  cdr_serializer_write_f64(serializer, "self->d_mem");
+  
+  
+  
+  
+  
+  
+  BarSeq_serialize(&self->nested, serializer);
+  
+  
+  
+  
+}
+
+void Foo_deserialize(Foo* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  cdr_deserializer_read_f64_le(deserializer, "self->d_mem");
+  
+  
+  
+  
+  
+  
+  BarSeq_deserialize(&self->nested, deserializer);
+  
+  
+  
+  
+}
+void Bar_serialize(Bar const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  case 0:
+  
+  
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->_u.l_mem");
+  
+  
+    break;
+  
+  
+  
+  case 1:
+  
+  
+  
+  
+  
+  Foo_serialize(&self->_u.s_mem, serializer);
+  
+  
+    break;
+  
+  }
+}
+
+void Bar_deserialize(Bar* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  case 0:
+  
+  
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->_u.l_mem");
+  
+  
+    break;
+  
+  
+  
+  case 1:
+  
+  
+  
+  
+  
+  Foo_deserialize(&self->_u.s_mem, deserializer);
+  
+  
+    break;
+  
+  }
+}
+void A_make_it_so_In_serialize(A_make_it_so_In const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  dds_rpc_UnusedMember_serialize(&self->dummy, serializer);
+  
+  
+  
+  
+}
+
+void A_make_it_so_In_deserialize(A_make_it_so_In* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  dds_rpc_UnusedMember_deserialize(&self->dummy, deserializer);
+  
+  
+  
+  
+}
+void A_make_it_so_Out_serialize(A_make_it_so_Out const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  dds_rpc_UnusedMember_serialize(&self->dummy, serializer);
+  
+  
+  
+  
+}
+
+void A_make_it_so_Out_deserialize(A_make_it_so_Out* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  dds_rpc_UnusedMember_deserialize(&self->dummy, deserializer);
+  
+  
+  
+  
+}
+void A_make_it_so_Result_serialize(A_make_it_so_Result const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  case dds_RETCODE_OK:
+  
+  
+  
+  
+  
+  A_make_it_so_Out_serialize(&self->_u.result, serializer);
+  
+  
+    break;
+  
+  }
+}
+
+void A_make_it_so_Result_deserialize(A_make_it_so_Result* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  case dds_RETCODE_OK:
+  
+  
+  
+  
+  
+  A_make_it_so_Out_deserialize(&self->_u.result, deserializer);
+  
+  
+    break;
+  
+  }
+}
+void A_Call_serialize(A_Call const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  default:
+  
+  
+  
+  
+  
+  dds_rpc_UnknownOperation_serialize(&self->_u.unknownOp, serializer);
+  
+  
+    break;
+  
+  
+  
+  case A_make_it_so_Hash:
+  
+  
+  
+  
+  
+  A_make_it_so_In_serialize(&self->_u.make_it_so, serializer);
+  
+  
+    break;
+  
+  }
+}
+
+void A_Call_deserialize(A_Call* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  default:
+  
+  
+  
+  
+  
+  dds_rpc_UnknownOperation_deserialize(&self->_u.unknownOp, deserializer);
+  
+  
+    break;
+  
+  
+  
+  case A_make_it_so_Hash:
+  
+  
+  
+  
+  
+  A_make_it_so_In_deserialize(&self->_u.make_it_so, deserializer);
+  
+  
+    break;
+  
+  }
+}
+void A_Request_serialize(A_Request const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  dds_rpc_RequestHeader_serialize(&self->header, serializer);
+  
+  
+  
+  
+  
+  
+  A_Call_serialize(&self->data, serializer);
+  
+  
+  
+  
+}
+
+void A_Request_deserialize(A_Request* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  dds_rpc_RequestHeader_deserialize(&self->header, deserializer);
+  
+  
+  
+  
+  
+  
+  A_Call_deserialize(&self->data, deserializer);
+  
+  
+  
+  
+}
+void A_Return_serialize(A_Return const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  default:
+  
+  
+  
+  
+  
+  dds_rpc_UnknownOperation_serialize(&self->_u.unknownOp, serializer);
+  
+  
+    break;
+  
+  
+  
+  case A_make_it_so_Hash:
+  
+  
+  
+  
+  
+  A_make_it_so_Result_serialize(&self->_u.make_it_so, serializer);
+  
+  
+    break;
+  
+  }
+}
+
+void A_Return_deserialize(A_Return* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  default:
+  
+  
+  
+  
+  
+  dds_rpc_UnknownOperation_deserialize(&self->_u.unknownOp, deserializer);
+  
+  
+    break;
+  
+  
+  
+  case A_make_it_so_Hash:
+  
+  
+  
+  
+  
+  A_make_it_so_Result_deserialize(&self->_u.make_it_so, deserializer);
+  
+  
+    break;
+  
+  }
+}
+void A_Reply_serialize(A_Reply const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  dds_rpc_ReplyHeader_serialize(&self->header, serializer);
+  
+  
+  
+  
+  
+  
+  A_Return_serialize(&self->data, serializer);
+  
+  
+  
+  
+}
+
+void A_Reply_deserialize(A_Reply* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  dds_rpc_ReplyHeader_deserialize(&self->header, deserializer);
+  
+  
+  
+  
+  
+  
+  A_Return_deserialize(&self->data, deserializer);
+  
+  
+  
+  
+}
+void B_make_it_so_In_serialize(B_make_it_so_In const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->times");
+  
+  
+  
+  
+}
+
+void B_make_it_so_In_deserialize(B_make_it_so_In* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->times");
+  
+  
+  
+  
+}
+void B_make_it_so_Out_serialize(B_make_it_so_Out const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  cdr_serializer_write_i16(serializer, "self->return_");
+  
+  
+  
+  
+}
+
+void B_make_it_so_Out_deserialize(B_make_it_so_Out* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  cdr_deserializer_read_i16_le(deserializer, "self->return_");
+  
+  
+  
+  
+}
+void B_make_it_so_Result_serialize(B_make_it_so_Result const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  case dds_RETCODE_OK:
+  
+  
+  
+  
+  
+  B_make_it_so_Out_serialize(&self->_u.result, serializer);
+  
+  
+    break;
+  
+  }
+}
+
+void B_make_it_so_Result_deserialize(B_make_it_so_Result* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  case dds_RETCODE_OK:
+  
+  
+  
+  
+  
+  B_make_it_so_Out_deserialize(&self->_u.result, deserializer);
+  
+  
+    break;
+  
+  }
+}
+void B_Call_serialize(B_Call const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  default:
+  
+  
+  
+  
+  
+  dds_rpc_UnknownOperation_serialize(&self->_u.unknownOp, serializer);
+  
+  
+    break;
+  
+  
+  
+  case B_make_it_so_Hash:
+  
+  
+  
+  
+  
+  B_make_it_so_In_serialize(&self->_u.make_it_so, serializer);
+  
+  
+    break;
+  
+  }
+}
+
+void B_Call_deserialize(B_Call* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  default:
+  
+  
+  
+  
+  
+  dds_rpc_UnknownOperation_deserialize(&self->_u.unknownOp, deserializer);
+  
+  
+    break;
+  
+  
+  
+  case B_make_it_so_Hash:
+  
+  
+  
+  
+  
+  B_make_it_so_In_deserialize(&self->_u.make_it_so, deserializer);
+  
+  
+    break;
+  
+  }
+}
+void B_Request_serialize(B_Request const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  dds_rpc_RequestHeader_serialize(&self->header, serializer);
+  
+  
+  
+  
+  
+  
+  B_Call_serialize(&self->data, serializer);
+  
+  
+  
+  
+}
+
+void B_Request_deserialize(B_Request* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  dds_rpc_RequestHeader_deserialize(&self->header, deserializer);
+  
+  
+  
+  
+  
+  
+  B_Call_deserialize(&self->data, deserializer);
+  
+  
+  
+  
+}
+void B_Return_serialize(B_Return const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  default:
+  
+  
+  
+  
+  
+  dds_rpc_UnknownOperation_serialize(&self->_u.unknownOp, serializer);
+  
+  
+    break;
+  
+  
+  
+  case B_make_it_so_Hash:
+  
+  
+  
+  
+  
+  B_make_it_so_Result_serialize(&self->_u.make_it_so, serializer);
+  
+  
+    break;
+  
+  }
+}
+
+void B_Return_deserialize(B_Return* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  default:
+  
+  
+  
+  
+  
+  dds_rpc_UnknownOperation_deserialize(&self->_u.unknownOp, deserializer);
+  
+  
+    break;
+  
+  
+  
+  case B_make_it_so_Hash:
+  
+  
+  
+  
+  
+  B_make_it_so_Result_deserialize(&self->_u.make_it_so, deserializer);
+  
+  
+    break;
+  
+  }
+}
+void B_Reply_serialize(B_Reply const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  dds_rpc_ReplyHeader_serialize(&self->header, serializer);
+  
+  
+  
+  
+  
+  
+  B_Return_serialize(&self->data, serializer);
+  
+  
+  
+  
+}
+
+void B_Reply_deserialize(B_Reply* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  dds_rpc_ReplyHeader_deserialize(&self->header, deserializer);
+  
+  
+  
+  
+  
+  
+  B_Return_deserialize(&self->data, deserializer);
+  
+  
+  
+  
+}
+void A_opA_In_serialize(A_opA_In const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  L1_serialize(&self->l_1, serializer);
+  
+  
+  
+  
+}
+
+void A_opA_In_deserialize(A_opA_In* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  L1_deserialize(&self->l_1, deserializer);
+  
+  
+  
+  
+}
+void A_opA_Out_serialize(A_opA_Out const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  cdr_serializer_write_i16(serializer, "self->return_");
+  
+  
+  
+  
+}
+
+void A_opA_Out_deserialize(A_opA_Out* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  cdr_deserializer_read_i16_le(deserializer, "self->return_");
+  
+  
+  
+  
+}
+void A_opA_Result_serialize(A_opA_Result const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  case dds_RETCODE_OK:
+  
+  
+  
+  
+  
+  A_opA_Out_serialize(&self->_u.result, serializer);
+  
+  
+    break;
+  
+  }
+}
+
+void A_opA_Result_deserialize(A_opA_Result* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  case dds_RETCODE_OK:
+  
+  
+  
+  
+  
+  A_opA_Out_deserialize(&self->_u.result, deserializer);
+  
+  
+    break;
+  
+  }
+}
+void A_Call_serialize(A_Call const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  default:
+  
+  
+  
+  
+  
+  dds_rpc_UnknownOperation_serialize(&self->_u.unknownOp, serializer);
+  
+  
+    break;
+  
+  
+  
+  case A_opA_Hash:
+  
+  
+  
+  
+  
+  A_opA_In_serialize(&self->_u.opA, serializer);
+  
+  
+    break;
+  
+  }
+}
+
+void A_Call_deserialize(A_Call* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  default:
+  
+  
+  
+  
+  
+  dds_rpc_UnknownOperation_deserialize(&self->_u.unknownOp, deserializer);
+  
+  
+    break;
+  
+  
+  
+  case A_opA_Hash:
+  
+  
+  
+  
+  
+  A_opA_In_deserialize(&self->_u.opA, deserializer);
+  
+  
+    break;
+  
+  }
+}
+void A_Request_serialize(A_Request const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  dds_rpc_RequestHeader_serialize(&self->header, serializer);
+  
+  
+  
+  
+  
+  
+  A_Call_serialize(&self->data, serializer);
+  
+  
+  
+  
+}
+
+void A_Request_deserialize(A_Request* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  dds_rpc_RequestHeader_deserialize(&self->header, deserializer);
+  
+  
+  
+  
+  
+  
+  A_Call_deserialize(&self->data, deserializer);
+  
+  
+  
+  
+}
+void A_Return_serialize(A_Return const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  default:
+  
+  
+  
+  
+  
+  dds_rpc_UnknownOperation_serialize(&self->_u.unknownOp, serializer);
+  
+  
+    break;
+  
+  
+  
+  case A_opA_Hash:
+  
+  
+  
+  
+  
+  A_opA_Result_serialize(&self->_u.opA, serializer);
+  
+  
+    break;
+  
+  }
+}
+
+void A_Return_deserialize(A_Return* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  default:
+  
+  
+  
+  
+  
+  dds_rpc_UnknownOperation_deserialize(&self->_u.unknownOp, deserializer);
+  
+  
+    break;
+  
+  
+  
+  case A_opA_Hash:
+  
+  
+  
+  
+  
+  A_opA_Result_deserialize(&self->_u.opA, deserializer);
+  
+  
+    break;
+  
+  }
+}
+void A_Reply_serialize(A_Reply const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  dds_rpc_ReplyHeader_serialize(&self->header, serializer);
+  
+  
+  
+  
+  
+  
+  A_Return_serialize(&self->data, serializer);
+  
+  
+  
+  
+}
+
+void A_Reply_deserialize(A_Reply* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  dds_rpc_ReplyHeader_deserialize(&self->header, deserializer);
+  
+  
+  
+  
+  
+  
+  A_Return_deserialize(&self->data, deserializer);
+  
+  
+  
+  
+}
+void B_opB_In_serialize(B_opB_In const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->l");
+  
+  
+  
+  
+}
+
+void B_opB_In_deserialize(B_opB_In* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->l");
+  
+  
+  
+  
+}
+void B_opB_Out_serialize(B_opB_Out const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  L1_serialize(&self->return_, serializer);
+  
+  
+  
+  
+}
+
+void B_opB_Out_deserialize(B_opB_Out* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  L1_deserialize(&self->return_, deserializer);
+  
+  
+  
+  
+}
+void B_opB_Result_serialize(B_opB_Result const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  case dds_RETCODE_OK:
+  
+  
+  
+  
+  
+  B_opB_Out_serialize(&self->_u.result, serializer);
+  
+  
+    break;
+  
+  }
+}
+
+void B_opB_Result_deserialize(B_opB_Result* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  case dds_RETCODE_OK:
+  
+  
+  
+  
+  
+  B_opB_Out_deserialize(&self->_u.result, deserializer);
+  
+  
+    break;
+  
+  }
+}
+void B_Call_serialize(B_Call const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  default:
+  
+  
+  
+  
+  
+  dds_rpc_UnknownOperation_serialize(&self->_u.unknownOp, serializer);
+  
+  
+    break;
+  
+  
+  
+  case B_opB_Hash:
+  
+  
+  
+  
+  
+  B_opB_In_serialize(&self->_u.opB, serializer);
+  
+  
+    break;
+  
+  }
+}
+
+void B_Call_deserialize(B_Call* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  default:
+  
+  
+  
+  
+  
+  dds_rpc_UnknownOperation_deserialize(&self->_u.unknownOp, deserializer);
+  
+  
+    break;
+  
+  
+  
+  case B_opB_Hash:
+  
+  
+  
+  
+  
+  B_opB_In_deserialize(&self->_u.opB, deserializer);
+  
+  
+    break;
+  
+  }
+}
+void B_Request_serialize(B_Request const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  dds_rpc_RequestHeader_serialize(&self->header, serializer);
+  
+  
+  
+  
+  
+  
+  B_Call_serialize(&self->data, serializer);
+  
+  
+  
+  
+}
+
+void B_Request_deserialize(B_Request* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  dds_rpc_RequestHeader_deserialize(&self->header, deserializer);
+  
+  
+  
+  
+  
+  
+  B_Call_deserialize(&self->data, deserializer);
+  
+  
+  
+  
+}
+void B_Return_serialize(B_Return const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  default:
+  
+  
+  
+  
+  
+  dds_rpc_UnknownOperation_serialize(&self->_u.unknownOp, serializer);
+  
+  
+    break;
+  
+  
+  
+  case B_opB_Hash:
+  
+  
+  
+  
+  
+  B_opB_Result_serialize(&self->_u.opB, serializer);
+  
+  
+    break;
+  
+  }
+}
+
+void B_Return_deserialize(B_Return* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  default:
+  
+  
+  
+  
+  
+  dds_rpc_UnknownOperation_deserialize(&self->_u.unknownOp, deserializer);
+  
+  
+    break;
+  
+  
+  
+  case B_opB_Hash:
+  
+  
+  
+  
+  
+  B_opB_Result_deserialize(&self->_u.opB, deserializer);
+  
+  
+    break;
+  
+  }
+}
+void B_Reply_serialize(B_Reply const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  dds_rpc_ReplyHeader_serialize(&self->header, serializer);
+  
+  
+  
+  
+  
+  
+  B_Return_serialize(&self->data, serializer);
+  
+  
+  
+  
+}
+
+void B_Reply_deserialize(B_Reply* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  dds_rpc_ReplyHeader_deserialize(&self->header, deserializer);
+  
+  
+  
+  
+  
+  
+  B_Return_deserialize(&self->data, deserializer);
+  
+  
+  
+  
+}
+void C_opC_In_serialize(C_opC_In const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  L3_serialize(&self->l_3, serializer);
+  
+  
+  
+  
+}
+
+void C_opC_In_deserialize(C_opC_In* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  L3_deserialize(&self->l_3, deserializer);
+  
+  
+  
+  
+}
+void C_opC_Out_serialize(C_opC_Out const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  B_L1_serialize(&self->return_, serializer);
+  
+  
+  
+  
+}
+
+void C_opC_Out_deserialize(C_opC_Out* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  B_L1_deserialize(&self->return_, deserializer);
+  
+  
+  
+  
+}
+void C_opC_Result_serialize(C_opC_Result const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  case dds_RETCODE_OK:
+  
+  
+  
+  
+  
+  C_opC_Out_serialize(&self->_u.result, serializer);
+  
+  
+    break;
+  
+  }
+}
+
+void C_opC_Result_deserialize(C_opC_Result* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  case dds_RETCODE_OK:
+  
+  
+  
+  
+  
+  C_opC_Out_deserialize(&self->_u.result, deserializer);
+  
+  
+    break;
+  
+  }
+}
+void C_Call_serialize(C_Call const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  default:
+  
+  
+  
+  
+  
+  dds_rpc_UnknownOperation_serialize(&self->_u.unknownOp, serializer);
+  
+  
+    break;
+  
+  
+  
+  case C_opC_Hash:
+  
+  
+  
+  
+  
+  C_opC_In_serialize(&self->_u.opC, serializer);
+  
+  
+    break;
+  
+  }
+}
+
+void C_Call_deserialize(C_Call* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  default:
+  
+  
+  
+  
+  
+  dds_rpc_UnknownOperation_deserialize(&self->_u.unknownOp, deserializer);
+  
+  
+    break;
+  
+  
+  
+  case C_opC_Hash:
+  
+  
+  
+  
+  
+  C_opC_In_deserialize(&self->_u.opC, deserializer);
+  
+  
+    break;
+  
+  }
+}
+void C_Request_serialize(C_Request const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  dds_rpc_RequestHeader_serialize(&self->header, serializer);
+  
+  
+  
+  
+  
+  
+  C_Call_serialize(&self->data, serializer);
+  
+  
+  
+  
+}
+
+void C_Request_deserialize(C_Request* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  dds_rpc_RequestHeader_deserialize(&self->header, deserializer);
+  
+  
+  
+  
+  
+  
+  C_Call_deserialize(&self->data, deserializer);
+  
+  
+  
+  
+}
+void C_Return_serialize(C_Return const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  default:
+  
+  
+  
+  
+  
+  dds_rpc_UnknownOperation_serialize(&self->_u.unknownOp, serializer);
+  
+  
+    break;
+  
+  
+  
+  case C_opC_Hash:
+  
+  
+  
+  
+  
+  C_opC_Result_serialize(&self->_u.opC, serializer);
+  
+  
+    break;
+  
+  }
+}
+
+void C_Return_deserialize(C_Return* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  default:
+  
+  
+  
+  
+  
+  dds_rpc_UnknownOperation_deserialize(&self->_u.unknownOp, deserializer);
+  
+  
+    break;
+  
+  
+  
+  case C_opC_Hash:
+  
+  
+  
+  
+  
+  C_opC_Result_deserialize(&self->_u.opC, deserializer);
+  
+  
+    break;
+  
+  }
+}
+void C_Reply_serialize(C_Reply const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  dds_rpc_ReplyHeader_serialize(&self->header, serializer);
+  
+  
+  
+  
+  
+  
+  C_Return_serialize(&self->data, serializer);
+  
+  
+  
+  
+}
+
+void C_Reply_deserialize(C_Reply* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  dds_rpc_ReplyHeader_deserialize(&self->header, deserializer);
+  
+  
+  
+  
+  
+  
+  C_Return_deserialize(&self->data, deserializer);
+  
+  
+  
+  
+}
+void A_f_In_serialize(A_f_In const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  coord_serialize(&self->s, serializer);
+  
+  
+  
+  
+}
+
+void A_f_In_deserialize(A_f_In* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  coord_deserialize(&self->s, deserializer);
+  
+  
+  
+  
+}
+void A_f_Out_serialize(A_f_Out const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  dds_rpc_UnusedMember_serialize(&self->dummy, serializer);
+  
+  
+  
+  
+}
+
+void A_f_Out_deserialize(A_f_Out* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  dds_rpc_UnusedMember_deserialize(&self->dummy, deserializer);
+  
+  
+  
+  
+}
+void A_f_Result_serialize(A_f_Result const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  case dds_RETCODE_OK:
+  
+  
+  
+  
+  
+  A_f_Out_serialize(&self->_u.result, serializer);
+  
+  
+    break;
+  
+  }
+}
+
+void A_f_Result_deserialize(A_f_Result* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  case dds_RETCODE_OK:
+  
+  
+  
+  
+  
+  A_f_Out_deserialize(&self->_u.result, deserializer);
+  
+  
+    break;
+  
+  }
+}
+void A_Call_serialize(A_Call const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  default:
+  
+  
+  
+  
+  
+  dds_rpc_UnknownOperation_serialize(&self->_u.unknownOp, serializer);
+  
+  
+    break;
+  
+  
+  
+  case A_f_Hash:
+  
+  
+  
+  
+  
+  A_f_In_serialize(&self->_u.f, serializer);
+  
+  
+    break;
+  
+  }
+}
+
+void A_Call_deserialize(A_Call* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  default:
+  
+  
+  
+  
+  
+  dds_rpc_UnknownOperation_deserialize(&self->_u.unknownOp, deserializer);
+  
+  
+    break;
+  
+  
+  
+  case A_f_Hash:
+  
+  
+  
+  
+  
+  A_f_In_deserialize(&self->_u.f, deserializer);
+  
+  
+    break;
+  
+  }
+}
+void A_Request_serialize(A_Request const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  dds_rpc_RequestHeader_serialize(&self->header, serializer);
+  
+  
+  
+  
+  
+  
+  A_Call_serialize(&self->data, serializer);
+  
+  
+  
+  
+}
+
+void A_Request_deserialize(A_Request* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  dds_rpc_RequestHeader_deserialize(&self->header, deserializer);
+  
+  
+  
+  
+  
+  
+  A_Call_deserialize(&self->data, deserializer);
+  
+  
+  
+  
+}
+void A_Return_serialize(A_Return const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  default:
+  
+  
+  
+  
+  
+  dds_rpc_UnknownOperation_serialize(&self->_u.unknownOp, serializer);
+  
+  
+    break;
+  
+  
+  
+  case A_f_Hash:
+  
+  
+  
+  
+  
+  A_f_Result_serialize(&self->_u.f, serializer);
+  
+  
+    break;
+  
+  }
+}
+
+void A_Return_deserialize(A_Return* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  default:
+  
+  
+  
+  
+  
+  dds_rpc_UnknownOperation_deserialize(&self->_u.unknownOp, deserializer);
+  
+  
+    break;
+  
+  
+  
+  case A_f_Hash:
+  
+  
+  
+  
+  
+  A_f_Result_deserialize(&self->_u.f, deserializer);
+  
+  
+    break;
+  
+  }
+}
+void A_Reply_serialize(A_Reply const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  dds_rpc_ReplyHeader_serialize(&self->header, serializer);
+  
+  
+  
+  
+  
+  
+  A_Return_serialize(&self->data, serializer);
+  
+  
+  
+  
+}
+
+void A_Reply_deserialize(A_Reply* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  dds_rpc_ReplyHeader_deserialize(&self->header, deserializer);
+  
+  
+  
+  
+  
+  
+  A_Return_deserialize(&self->data, deserializer);
+  
+  
+  
+  
+}
+void C_get_attribute_Title_In_serialize(C_get_attribute_Title_In const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  dds_rpc_UnusedMember_serialize(&self->dummy, serializer);
+  
+  
+  
+  
+}
+
+void C_get_attribute_Title_In_deserialize(C_get_attribute_Title_In* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  dds_rpc_UnusedMember_deserialize(&self->dummy, deserializer);
+  
+  
+  
+  
+}
+void C_get_attribute_Title_Out_serialize(C_get_attribute_Title_Out const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  string_t_serialize(&self->return_, serializer);
+  
+  
+  
+  
+}
+
+void C_get_attribute_Title_Out_deserialize(C_get_attribute_Title_Out* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  string_t_deserialize(&self->return_, deserializer);
+  
+  
+  
+  
+}
+void C_get_attribute_Title_Result_serialize(C_get_attribute_Title_Result const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  case dds_RETCODE_OK:
+  
+  
+  
+  
+  
+  C_get_attribute_Title_Out_serialize(&self->_u.result, serializer);
+  
+  
+    break;
+  
+  }
+}
+
+void C_get_attribute_Title_Result_deserialize(C_get_attribute_Title_Result* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  case dds_RETCODE_OK:
+  
+  
+  
+  
+  
+  C_get_attribute_Title_Out_deserialize(&self->_u.result, deserializer);
+  
+  
+    break;
+  
+  }
+}
+void C_set_attribute_Title_In_serialize(C_set_attribute_Title_In const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  string_t_serialize(&self->Title, serializer);
+  
+  
+  
+  
+}
+
+void C_set_attribute_Title_In_deserialize(C_set_attribute_Title_In* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  string_t_deserialize(&self->Title, deserializer);
+  
+  
+  
+  
+}
+void C_set_attribute_Title_Out_serialize(C_set_attribute_Title_Out const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  dds_rpc_UnusedMember_serialize(&self->dummy, serializer);
+  
+  
+  
+  
+}
+
+void C_set_attribute_Title_Out_deserialize(C_set_attribute_Title_Out* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  dds_rpc_UnusedMember_deserialize(&self->dummy, deserializer);
+  
+  
+  
+  
+}
+void C_set_attribute_Title_Result_serialize(C_set_attribute_Title_Result const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  case dds_RETCODE_OK:
+  
+  
+  
+  
+  
+  C_set_attribute_Title_Out_serialize(&self->_u.result, serializer);
+  
+  
+    break;
+  
+  }
+}
+
+void C_set_attribute_Title_Result_deserialize(C_set_attribute_Title_Result* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  case dds_RETCODE_OK:
+  
+  
+  
+  
+  
+  C_set_attribute_Title_Out_deserialize(&self->_u.result, deserializer);
+  
+  
+    break;
+  
+  }
+}
+void C_get_attribute_Name_In_serialize(C_get_attribute_Name_In const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  dds_rpc_UnusedMember_serialize(&self->dummy, serializer);
+  
+  
+  
+  
+}
+
+void C_get_attribute_Name_In_deserialize(C_get_attribute_Name_In* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  dds_rpc_UnusedMember_deserialize(&self->dummy, deserializer);
+  
+  
+  
+  
+}
+void C_get_attribute_Name_Out_serialize(C_get_attribute_Name_Out const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  A_string_t_serialize(&self->return_, serializer);
+  
+  
+  
+  
+}
+
+void C_get_attribute_Name_Out_deserialize(C_get_attribute_Name_Out* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  A_string_t_deserialize(&self->return_, deserializer);
+  
+  
+  
+  
+}
+void C_get_attribute_Name_Result_serialize(C_get_attribute_Name_Result const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  case dds_RETCODE_OK:
+  
+  
+  
+  
+  
+  C_get_attribute_Name_Out_serialize(&self->_u.result, serializer);
+  
+  
+    break;
+  
+  }
+}
+
+void C_get_attribute_Name_Result_deserialize(C_get_attribute_Name_Result* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  case dds_RETCODE_OK:
+  
+  
+  
+  
+  
+  C_get_attribute_Name_Out_deserialize(&self->_u.result, deserializer);
+  
+  
+    break;
+  
+  }
+}
+void C_set_attribute_Name_In_serialize(C_set_attribute_Name_In const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  A_string_t_serialize(&self->Name, serializer);
+  
+  
+  
+  
+}
+
+void C_set_attribute_Name_In_deserialize(C_set_attribute_Name_In* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  A_string_t_deserialize(&self->Name, deserializer);
+  
+  
+  
+  
+}
+void C_set_attribute_Name_Out_serialize(C_set_attribute_Name_Out const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  dds_rpc_UnusedMember_serialize(&self->dummy, serializer);
+  
+  
+  
+  
+}
+
+void C_set_attribute_Name_Out_deserialize(C_set_attribute_Name_Out* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  dds_rpc_UnusedMember_deserialize(&self->dummy, deserializer);
+  
+  
+  
+  
+}
+void C_set_attribute_Name_Result_serialize(C_set_attribute_Name_Result const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  case dds_RETCODE_OK:
+  
+  
+  
+  
+  
+  C_set_attribute_Name_Out_serialize(&self->_u.result, serializer);
+  
+  
+    break;
+  
+  }
+}
+
+void C_set_attribute_Name_Result_deserialize(C_set_attribute_Name_Result* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  case dds_RETCODE_OK:
+  
+  
+  
+  
+  
+  C_set_attribute_Name_Out_deserialize(&self->_u.result, deserializer);
+  
+  
+    break;
+  
+  }
+}
+void C_get_attribute_City_In_serialize(C_get_attribute_City_In const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  dds_rpc_UnusedMember_serialize(&self->dummy, serializer);
+  
+  
+  
+  
+}
+
+void C_get_attribute_City_In_deserialize(C_get_attribute_City_In* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  dds_rpc_UnusedMember_deserialize(&self->dummy, deserializer);
+  
+  
+  
+  
+}
+void C_get_attribute_City_Out_serialize(C_get_attribute_City_Out const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  B_string_t_serialize(&self->return_, serializer);
+  
+  
+  
+  
+}
+
+void C_get_attribute_City_Out_deserialize(C_get_attribute_City_Out* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  B_string_t_deserialize(&self->return_, deserializer);
+  
+  
+  
+  
+}
+void C_get_attribute_City_Result_serialize(C_get_attribute_City_Result const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  case dds_RETCODE_OK:
+  
+  
+  
+  
+  
+  C_get_attribute_City_Out_serialize(&self->_u.result, serializer);
+  
+  
+    break;
+  
+  }
+}
+
+void C_get_attribute_City_Result_deserialize(C_get_attribute_City_Result* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  case dds_RETCODE_OK:
+  
+  
+  
+  
+  
+  C_get_attribute_City_Out_deserialize(&self->_u.result, deserializer);
+  
+  
+    break;
+  
+  }
+}
+void C_set_attribute_City_In_serialize(C_set_attribute_City_In const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  B_string_t_serialize(&self->City, serializer);
+  
+  
+  
+  
+}
+
+void C_set_attribute_City_In_deserialize(C_set_attribute_City_In* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  B_string_t_deserialize(&self->City, deserializer);
+  
+  
+  
+  
+}
+void C_set_attribute_City_Out_serialize(C_set_attribute_City_Out const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  dds_rpc_UnusedMember_serialize(&self->dummy, serializer);
+  
+  
+  
+  
+}
+
+void C_set_attribute_City_Out_deserialize(C_set_attribute_City_Out* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  dds_rpc_UnusedMember_deserialize(&self->dummy, deserializer);
+  
+  
+  
+  
+}
+void C_set_attribute_City_Result_serialize(C_set_attribute_City_Result const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  case dds_RETCODE_OK:
+  
+  
+  
+  
+  
+  C_set_attribute_City_Out_serialize(&self->_u.result, serializer);
+  
+  
+    break;
+  
+  }
+}
+
+void C_set_attribute_City_Result_deserialize(C_set_attribute_City_Result* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  case dds_RETCODE_OK:
+  
+  
+  
+  
+  
+  C_set_attribute_City_Out_deserialize(&self->_u.result, deserializer);
+  
+  
+    break;
+  
+  }
+}
+void C_Call_serialize(C_Call const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  default:
+  
+  
+  
+  
+  
+  dds_rpc_UnknownOperation_serialize(&self->_u.unknownOp, serializer);
+  
+  
+    break;
+  
+  
+  
+  case C_get_attribute_Title_Hash:
+  
+  
+  
+  
+  
+  C_get_attribute_Title_In_serialize(&self->_u.get_attribute_Title, serializer);
+  
+  
+    break;
+  
+  
+  
+  case C_set_attribute_Title_Hash:
+  
+  
+  
+  
+  
+  C_set_attribute_Title_In_serialize(&self->_u.set_attribute_Title, serializer);
+  
+  
+    break;
+  
+  
+  
+  case C_get_attribute_Name_Hash:
+  
+  
+  
+  
+  
+  C_get_attribute_Name_In_serialize(&self->_u.get_attribute_Name, serializer);
+  
+  
+    break;
+  
+  
+  
+  case C_set_attribute_Name_Hash:
+  
+  
+  
+  
+  
+  C_set_attribute_Name_In_serialize(&self->_u.set_attribute_Name, serializer);
+  
+  
+    break;
+  
+  
+  
+  case C_get_attribute_City_Hash:
+  
+  
+  
+  
+  
+  C_get_attribute_City_In_serialize(&self->_u.get_attribute_City, serializer);
+  
+  
+    break;
+  
+  
+  
+  case C_set_attribute_City_Hash:
+  
+  
+  
+  
+  
+  C_set_attribute_City_In_serialize(&self->_u.set_attribute_City, serializer);
+  
+  
+    break;
+  
+  }
+}
+
+void C_Call_deserialize(C_Call* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  default:
+  
+  
+  
+  
+  
+  dds_rpc_UnknownOperation_deserialize(&self->_u.unknownOp, deserializer);
+  
+  
+    break;
+  
+  
+  
+  case C_get_attribute_Title_Hash:
+  
+  
+  
+  
+  
+  C_get_attribute_Title_In_deserialize(&self->_u.get_attribute_Title, deserializer);
+  
+  
+    break;
+  
+  
+  
+  case C_set_attribute_Title_Hash:
+  
+  
+  
+  
+  
+  C_set_attribute_Title_In_deserialize(&self->_u.set_attribute_Title, deserializer);
+  
+  
+    break;
+  
+  
+  
+  case C_get_attribute_Name_Hash:
+  
+  
+  
+  
+  
+  C_get_attribute_Name_In_deserialize(&self->_u.get_attribute_Name, deserializer);
+  
+  
+    break;
+  
+  
+  
+  case C_set_attribute_Name_Hash:
+  
+  
+  
+  
+  
+  C_set_attribute_Name_In_deserialize(&self->_u.set_attribute_Name, deserializer);
+  
+  
+    break;
+  
+  
+  
+  case C_get_attribute_City_Hash:
+  
+  
+  
+  
+  
+  C_get_attribute_City_In_deserialize(&self->_u.get_attribute_City, deserializer);
+  
+  
+    break;
+  
+  
+  
+  case C_set_attribute_City_Hash:
+  
+  
+  
+  
+  
+  C_set_attribute_City_In_deserialize(&self->_u.set_attribute_City, deserializer);
+  
+  
+    break;
+  
+  }
+}
+void C_Request_serialize(C_Request const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  dds_rpc_RequestHeader_serialize(&self->header, serializer);
+  
+  
+  
+  
+  
+  
+  C_Call_serialize(&self->data, serializer);
+  
+  
+  
+  
+}
+
+void C_Request_deserialize(C_Request* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  dds_rpc_RequestHeader_deserialize(&self->header, deserializer);
+  
+  
+  
+  
+  
+  
+  C_Call_deserialize(&self->data, deserializer);
+  
+  
+  
+  
+}
+void C_Return_serialize(C_Return const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  cdr_serializer_write_i32(serializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  default:
+  
+  
+  
+  
+  
+  dds_rpc_UnknownOperation_serialize(&self->_u.unknownOp, serializer);
+  
+  
+    break;
+  
+  
+  
+  case C_get_attribute_Title_Hash:
+  
+  
+  
+  
+  
+  C_get_attribute_Title_Result_serialize(&self->_u.get_attribute_Title, serializer);
+  
+  
+    break;
+  
+  
+  
+  case C_set_attribute_Title_Hash:
+  
+  
+  
+  
+  
+  C_set_attribute_Title_Result_serialize(&self->_u.set_attribute_Title, serializer);
+  
+  
+    break;
+  
+  
+  
+  case C_get_attribute_Name_Hash:
+  
+  
+  
+  
+  
+  C_get_attribute_Name_Result_serialize(&self->_u.get_attribute_Name, serializer);
+  
+  
+    break;
+  
+  
+  
+  case C_set_attribute_Name_Hash:
+  
+  
+  
+  
+  
+  C_set_attribute_Name_Result_serialize(&self->_u.set_attribute_Name, serializer);
+  
+  
+    break;
+  
+  
+  
+  case C_get_attribute_City_Hash:
+  
+  
+  
+  
+  
+  C_get_attribute_City_Result_serialize(&self->_u.get_attribute_City, serializer);
+  
+  
+    break;
+  
+  
+  
+  case C_set_attribute_City_Hash:
+  
+  
+  
+  
+  
+  C_set_attribute_City_Result_serialize(&self->_u.set_attribute_City, serializer);
+  
+  
+    break;
+  
+  }
+}
+
+void C_Return_deserialize(C_Return* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  
+  
+  switch (self->_d) {
+  
+  
+  
+  default:
+  
+  
+  
+  
+  
+  dds_rpc_UnknownOperation_deserialize(&self->_u.unknownOp, deserializer);
+  
+  
+    break;
+  
+  
+  
+  case C_get_attribute_Title_Hash:
+  
+  
+  
+  
+  
+  C_get_attribute_Title_Result_deserialize(&self->_u.get_attribute_Title, deserializer);
+  
+  
+    break;
+  
+  
+  
+  case C_set_attribute_Title_Hash:
+  
+  
+  
+  
+  
+  C_set_attribute_Title_Result_deserialize(&self->_u.set_attribute_Title, deserializer);
+  
+  
+    break;
+  
+  
+  
+  case C_get_attribute_Name_Hash:
+  
+  
+  
+  
+  
+  C_get_attribute_Name_Result_deserialize(&self->_u.get_attribute_Name, deserializer);
+  
+  
+    break;
+  
+  
+  
+  case C_set_attribute_Name_Hash:
+  
+  
+  
+  
+  
+  C_set_attribute_Name_Result_deserialize(&self->_u.set_attribute_Name, deserializer);
+  
+  
+    break;
+  
+  
+  
+  case C_get_attribute_City_Hash:
+  
+  
+  
+  
+  
+  C_get_attribute_City_Result_deserialize(&self->_u.get_attribute_City, deserializer);
+  
+  
+    break;
+  
+  
+  
+  case C_set_attribute_City_Hash:
+  
+  
+  
+  
+  
+  C_set_attribute_City_Result_deserialize(&self->_u.set_attribute_City, deserializer);
+  
+  
+    break;
+  
+  }
+}
+void C_Reply_serialize(C_Reply const* self, FfiCdrSerializer* serializer) {
+  
+  
+  
+  
+  
+  dds_rpc_ReplyHeader_serialize(&self->header, serializer);
+  
+  
+  
+  
+  
+  
+  C_Return_serialize(&self->data, serializer);
+  
+  
+  
+  
+}
+
+void C_Reply_deserialize(C_Reply* self, FfiCdrDeserializer* deserializer) {
+  
+  
+  
+  
+  
+  dds_rpc_ReplyHeader_deserialize(&self->header, deserializer);
+  
+  
+  
+  
+  
+  
+  C_Return_deserialize(&self->data, deserializer);
+  
+  
+  
+  
+}
+===============
+misc_xcdr.h
+===============
+// Generated by idlc
+#pragma once
+#include "misc.h"
+#include "xidl_xcdr.h"
+#include <stddef.h>
+void Color_serialize(Color const* self, FfiCdrSerializer* serializer);
+void Color_deserialize(Color* self, FfiCdrDeserializer* deserializer);
+void Size_serialize(Size const* self, FfiCdrSerializer* serializer);
+void Size_deserialize(Size* self, FfiCdrDeserializer* deserializer);
+void Foo_serialize(Foo const* self, FfiCdrSerializer* serializer);
+void Foo_deserialize(Foo* self, FfiCdrDeserializer* deserializer);
+void Foo_serialize(Foo const* self, FfiCdrSerializer* serializer);
+void Foo_deserialize(Foo* self, FfiCdrDeserializer* deserializer);
+void Bar_serialize(Bar const* self, FfiCdrSerializer* serializer);
+void Bar_deserialize(Bar* self, FfiCdrDeserializer* deserializer);
+void A_make_it_so_In_serialize(A_make_it_so_In const* self, FfiCdrSerializer* serializer);
+void A_make_it_so_In_deserialize(A_make_it_so_In* self, FfiCdrDeserializer* deserializer);
+void A_make_it_so_Out_serialize(A_make_it_so_Out const* self, FfiCdrSerializer* serializer);
+void A_make_it_so_Out_deserialize(A_make_it_so_Out* self, FfiCdrDeserializer* deserializer);
+void A_make_it_so_Result_serialize(A_make_it_so_Result const* self, FfiCdrSerializer* serializer);
+void A_make_it_so_Result_deserialize(A_make_it_so_Result* self, FfiCdrDeserializer* deserializer);
+void A_Call_serialize(A_Call const* self, FfiCdrSerializer* serializer);
+void A_Call_deserialize(A_Call* self, FfiCdrDeserializer* deserializer);
+void A_Request_serialize(A_Request const* self, FfiCdrSerializer* serializer);
+void A_Request_deserialize(A_Request* self, FfiCdrDeserializer* deserializer);
+void A_Return_serialize(A_Return const* self, FfiCdrSerializer* serializer);
+void A_Return_deserialize(A_Return* self, FfiCdrDeserializer* deserializer);
+void A_Reply_serialize(A_Reply const* self, FfiCdrSerializer* serializer);
+void A_Reply_deserialize(A_Reply* self, FfiCdrDeserializer* deserializer);
+void B_make_it_so_In_serialize(B_make_it_so_In const* self, FfiCdrSerializer* serializer);
+void B_make_it_so_In_deserialize(B_make_it_so_In* self, FfiCdrDeserializer* deserializer);
+void B_make_it_so_Out_serialize(B_make_it_so_Out const* self, FfiCdrSerializer* serializer);
+void B_make_it_so_Out_deserialize(B_make_it_so_Out* self, FfiCdrDeserializer* deserializer);
+void B_make_it_so_Result_serialize(B_make_it_so_Result const* self, FfiCdrSerializer* serializer);
+void B_make_it_so_Result_deserialize(B_make_it_so_Result* self, FfiCdrDeserializer* deserializer);
+void B_Call_serialize(B_Call const* self, FfiCdrSerializer* serializer);
+void B_Call_deserialize(B_Call* self, FfiCdrDeserializer* deserializer);
+void B_Request_serialize(B_Request const* self, FfiCdrSerializer* serializer);
+void B_Request_deserialize(B_Request* self, FfiCdrDeserializer* deserializer);
+void B_Return_serialize(B_Return const* self, FfiCdrSerializer* serializer);
+void B_Return_deserialize(B_Return* self, FfiCdrDeserializer* deserializer);
+void B_Reply_serialize(B_Reply const* self, FfiCdrSerializer* serializer);
+void B_Reply_deserialize(B_Reply* self, FfiCdrDeserializer* deserializer);
+void A_opA_In_serialize(A_opA_In const* self, FfiCdrSerializer* serializer);
+void A_opA_In_deserialize(A_opA_In* self, FfiCdrDeserializer* deserializer);
+void A_opA_Out_serialize(A_opA_Out const* self, FfiCdrSerializer* serializer);
+void A_opA_Out_deserialize(A_opA_Out* self, FfiCdrDeserializer* deserializer);
+void A_opA_Result_serialize(A_opA_Result const* self, FfiCdrSerializer* serializer);
+void A_opA_Result_deserialize(A_opA_Result* self, FfiCdrDeserializer* deserializer);
+void A_Call_serialize(A_Call const* self, FfiCdrSerializer* serializer);
+void A_Call_deserialize(A_Call* self, FfiCdrDeserializer* deserializer);
+void A_Request_serialize(A_Request const* self, FfiCdrSerializer* serializer);
+void A_Request_deserialize(A_Request* self, FfiCdrDeserializer* deserializer);
+void A_Return_serialize(A_Return const* self, FfiCdrSerializer* serializer);
+void A_Return_deserialize(A_Return* self, FfiCdrDeserializer* deserializer);
+void A_Reply_serialize(A_Reply const* self, FfiCdrSerializer* serializer);
+void A_Reply_deserialize(A_Reply* self, FfiCdrDeserializer* deserializer);
+void B_opB_In_serialize(B_opB_In const* self, FfiCdrSerializer* serializer);
+void B_opB_In_deserialize(B_opB_In* self, FfiCdrDeserializer* deserializer);
+void B_opB_Out_serialize(B_opB_Out const* self, FfiCdrSerializer* serializer);
+void B_opB_Out_deserialize(B_opB_Out* self, FfiCdrDeserializer* deserializer);
+void B_opB_Result_serialize(B_opB_Result const* self, FfiCdrSerializer* serializer);
+void B_opB_Result_deserialize(B_opB_Result* self, FfiCdrDeserializer* deserializer);
+void B_Call_serialize(B_Call const* self, FfiCdrSerializer* serializer);
+void B_Call_deserialize(B_Call* self, FfiCdrDeserializer* deserializer);
+void B_Request_serialize(B_Request const* self, FfiCdrSerializer* serializer);
+void B_Request_deserialize(B_Request* self, FfiCdrDeserializer* deserializer);
+void B_Return_serialize(B_Return const* self, FfiCdrSerializer* serializer);
+void B_Return_deserialize(B_Return* self, FfiCdrDeserializer* deserializer);
+void B_Reply_serialize(B_Reply const* self, FfiCdrSerializer* serializer);
+void B_Reply_deserialize(B_Reply* self, FfiCdrDeserializer* deserializer);
+void C_opC_In_serialize(C_opC_In const* self, FfiCdrSerializer* serializer);
+void C_opC_In_deserialize(C_opC_In* self, FfiCdrDeserializer* deserializer);
+void C_opC_Out_serialize(C_opC_Out const* self, FfiCdrSerializer* serializer);
+void C_opC_Out_deserialize(C_opC_Out* self, FfiCdrDeserializer* deserializer);
+void C_opC_Result_serialize(C_opC_Result const* self, FfiCdrSerializer* serializer);
+void C_opC_Result_deserialize(C_opC_Result* self, FfiCdrDeserializer* deserializer);
+void C_Call_serialize(C_Call const* self, FfiCdrSerializer* serializer);
+void C_Call_deserialize(C_Call* self, FfiCdrDeserializer* deserializer);
+void C_Request_serialize(C_Request const* self, FfiCdrSerializer* serializer);
+void C_Request_deserialize(C_Request* self, FfiCdrDeserializer* deserializer);
+void C_Return_serialize(C_Return const* self, FfiCdrSerializer* serializer);
+void C_Return_deserialize(C_Return* self, FfiCdrDeserializer* deserializer);
+void C_Reply_serialize(C_Reply const* self, FfiCdrSerializer* serializer);
+void C_Reply_deserialize(C_Reply* self, FfiCdrDeserializer* deserializer);
+void A_f_In_serialize(A_f_In const* self, FfiCdrSerializer* serializer);
+void A_f_In_deserialize(A_f_In* self, FfiCdrDeserializer* deserializer);
+void A_f_Out_serialize(A_f_Out const* self, FfiCdrSerializer* serializer);
+void A_f_Out_deserialize(A_f_Out* self, FfiCdrDeserializer* deserializer);
+void A_f_Result_serialize(A_f_Result const* self, FfiCdrSerializer* serializer);
+void A_f_Result_deserialize(A_f_Result* self, FfiCdrDeserializer* deserializer);
+void A_Call_serialize(A_Call const* self, FfiCdrSerializer* serializer);
+void A_Call_deserialize(A_Call* self, FfiCdrDeserializer* deserializer);
+void A_Request_serialize(A_Request const* self, FfiCdrSerializer* serializer);
+void A_Request_deserialize(A_Request* self, FfiCdrDeserializer* deserializer);
+void A_Return_serialize(A_Return const* self, FfiCdrSerializer* serializer);
+void A_Return_deserialize(A_Return* self, FfiCdrDeserializer* deserializer);
+void A_Reply_serialize(A_Reply const* self, FfiCdrSerializer* serializer);
+void A_Reply_deserialize(A_Reply* self, FfiCdrDeserializer* deserializer);
+void C_get_attribute_Title_In_serialize(C_get_attribute_Title_In const* self, FfiCdrSerializer* serializer);
+void C_get_attribute_Title_In_deserialize(C_get_attribute_Title_In* self, FfiCdrDeserializer* deserializer);
+void C_get_attribute_Title_Out_serialize(C_get_attribute_Title_Out const* self, FfiCdrSerializer* serializer);
+void C_get_attribute_Title_Out_deserialize(C_get_attribute_Title_Out* self, FfiCdrDeserializer* deserializer);
+void C_get_attribute_Title_Result_serialize(C_get_attribute_Title_Result const* self, FfiCdrSerializer* serializer);
+void C_get_attribute_Title_Result_deserialize(C_get_attribute_Title_Result* self, FfiCdrDeserializer* deserializer);
+void C_set_attribute_Title_In_serialize(C_set_attribute_Title_In const* self, FfiCdrSerializer* serializer);
+void C_set_attribute_Title_In_deserialize(C_set_attribute_Title_In* self, FfiCdrDeserializer* deserializer);
+void C_set_attribute_Title_Out_serialize(C_set_attribute_Title_Out const* self, FfiCdrSerializer* serializer);
+void C_set_attribute_Title_Out_deserialize(C_set_attribute_Title_Out* self, FfiCdrDeserializer* deserializer);
+void C_set_attribute_Title_Result_serialize(C_set_attribute_Title_Result const* self, FfiCdrSerializer* serializer);
+void C_set_attribute_Title_Result_deserialize(C_set_attribute_Title_Result* self, FfiCdrDeserializer* deserializer);
+void C_get_attribute_Name_In_serialize(C_get_attribute_Name_In const* self, FfiCdrSerializer* serializer);
+void C_get_attribute_Name_In_deserialize(C_get_attribute_Name_In* self, FfiCdrDeserializer* deserializer);
+void C_get_attribute_Name_Out_serialize(C_get_attribute_Name_Out const* self, FfiCdrSerializer* serializer);
+void C_get_attribute_Name_Out_deserialize(C_get_attribute_Name_Out* self, FfiCdrDeserializer* deserializer);
+void C_get_attribute_Name_Result_serialize(C_get_attribute_Name_Result const* self, FfiCdrSerializer* serializer);
+void C_get_attribute_Name_Result_deserialize(C_get_attribute_Name_Result* self, FfiCdrDeserializer* deserializer);
+void C_set_attribute_Name_In_serialize(C_set_attribute_Name_In const* self, FfiCdrSerializer* serializer);
+void C_set_attribute_Name_In_deserialize(C_set_attribute_Name_In* self, FfiCdrDeserializer* deserializer);
+void C_set_attribute_Name_Out_serialize(C_set_attribute_Name_Out const* self, FfiCdrSerializer* serializer);
+void C_set_attribute_Name_Out_deserialize(C_set_attribute_Name_Out* self, FfiCdrDeserializer* deserializer);
+void C_set_attribute_Name_Result_serialize(C_set_attribute_Name_Result const* self, FfiCdrSerializer* serializer);
+void C_set_attribute_Name_Result_deserialize(C_set_attribute_Name_Result* self, FfiCdrDeserializer* deserializer);
+void C_get_attribute_City_In_serialize(C_get_attribute_City_In const* self, FfiCdrSerializer* serializer);
+void C_get_attribute_City_In_deserialize(C_get_attribute_City_In* self, FfiCdrDeserializer* deserializer);
+void C_get_attribute_City_Out_serialize(C_get_attribute_City_Out const* self, FfiCdrSerializer* serializer);
+void C_get_attribute_City_Out_deserialize(C_get_attribute_City_Out* self, FfiCdrDeserializer* deserializer);
+void C_get_attribute_City_Result_serialize(C_get_attribute_City_Result const* self, FfiCdrSerializer* serializer);
+void C_get_attribute_City_Result_deserialize(C_get_attribute_City_Result* self, FfiCdrDeserializer* deserializer);
+void C_set_attribute_City_In_serialize(C_set_attribute_City_In const* self, FfiCdrSerializer* serializer);
+void C_set_attribute_City_In_deserialize(C_set_attribute_City_In* self, FfiCdrDeserializer* deserializer);
+void C_set_attribute_City_Out_serialize(C_set_attribute_City_Out const* self, FfiCdrSerializer* serializer);
+void C_set_attribute_City_Out_deserialize(C_set_attribute_City_Out* self, FfiCdrDeserializer* deserializer);
+void C_set_attribute_City_Result_serialize(C_set_attribute_City_Result const* self, FfiCdrSerializer* serializer);
+void C_set_attribute_City_Result_deserialize(C_set_attribute_City_Result* self, FfiCdrDeserializer* deserializer);
+void C_Call_serialize(C_Call const* self, FfiCdrSerializer* serializer);
+void C_Call_deserialize(C_Call* self, FfiCdrDeserializer* deserializer);
+void C_Request_serialize(C_Request const* self, FfiCdrSerializer* serializer);
+void C_Request_deserialize(C_Request* self, FfiCdrDeserializer* deserializer);
+void C_Return_serialize(C_Return const* self, FfiCdrSerializer* serializer);
+void C_Return_deserialize(C_Return* self, FfiCdrDeserializer* deserializer);
+void C_Reply_serialize(C_Reply const* self, FfiCdrSerializer* serializer);
+void C_Reply_deserialize(C_Reply* self, FfiCdrDeserializer* deserializer);
