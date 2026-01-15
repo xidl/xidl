@@ -5,6 +5,7 @@ pub mod delimited_cdr;
 pub mod ffi;
 pub mod plain_cdr;
 pub mod plain_cdr2;
+pub mod plcdr2;
 pub mod plcdr;
 pub mod xcdr_plcdr;
 
