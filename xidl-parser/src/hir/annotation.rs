@@ -1,0 +1,78 @@
+use super::*;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum Annotation {
+    Id {
+        value: ConstExpr,
+    },
+    Key,
+    Builtin {
+        name: String,
+        params: Option<AnnotationParams>,
+    },
+    ScopedName {
+        name: ScopedName,
+        params: Option<AnnotationParams>,
+    },
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum AnnotationParams {
+    ConstExpr(ConstExpr),
+    Params(Vec<AnnotationParam>),
+    Raw(String),
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct AnnotationParam {
+    pub ident: String,
+    pub value: Option<ConstExpr>,
+}
+
+impl From<crate::typed_ast::AnnotationAppl> for Annotation {
+    fn from(value: crate::typed_ast::AnnotationAppl) -> Self {
+        let params = value.params.map(Into::into);
+        match value.name {
+            crate::typed_ast::AnnotationName::ScopedName(name) => Self::ScopedName {
+                name: name.into(),
+                params,
+            },
+            crate::typed_ast::AnnotationName::Builtin(name) => {
+                if name.eq_ignore_ascii_case("id") {
+                    if let Some(AnnotationParams::ConstExpr(expr)) = &params {
+                        return Self::Id {
+                            value: expr.clone(),
+                        };
+                    }
+                } else if name.eq_ignore_ascii_case("key") {
+                    if params.is_none() {
+                        return Self::Key;
+                    }
+                }
+                Self::Builtin { name, params }
+            }
+        }
+    }
+}
+
+impl From<crate::typed_ast::AnnotationParams> for AnnotationParams {
+    fn from(value: crate::typed_ast::AnnotationParams) -> Self {
+        match value {
+            crate::typed_ast::AnnotationParams::ConstExpr(expr) => Self::ConstExpr(expr.into()),
+            crate::typed_ast::AnnotationParams::Params(params) => {
+                Self::Params(params.into_iter().map(Into::into).collect())
+            }
+            crate::typed_ast::AnnotationParams::Raw(value) => Self::Raw(value),
+        }
+    }
+}
+
+impl From<crate::typed_ast::AnnotationApplParam> for AnnotationParam {
+    fn from(value: crate::typed_ast::AnnotationApplParam) -> Self {
+        Self {
+            ident: value.ident.0,
+            value: value.value.map(Into::into),
+        }
+    }
+}

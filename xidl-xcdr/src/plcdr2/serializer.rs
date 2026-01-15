@@ -124,7 +124,12 @@ impl Plcdr2Serialize {
 }
 
 impl XcdrSerialize for Plcdr2Serialize {
-    fn begin_field(&mut self, id: crate::FieldId, must_understand: bool, length_code: u8) -> XcdrResult<()> {
+    fn begin_field(
+        &mut self,
+        id: crate::FieldId,
+        must_understand: bool,
+        length_code: u8,
+    ) -> XcdrResult<()> {
         self.begin_field(id.0, must_understand, length_code)
     }
 

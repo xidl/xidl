@@ -7,6 +7,7 @@ Specification(
         ConstrTypeDcl(
             BitmaskDcl(
                 BitmaskDcl {
+                    annotations: [],
                     ident: "A",
                     value: [],
                 },
@@ -15,11 +16,21 @@ Specification(
         ConstrTypeDcl(
             BitmaskDcl(
                 BitmaskDcl {
+                    annotations: [],
                     ident: "A",
                     value: [
-                        "A",
-                        "B",
-                        "C",
+                        BitValue {
+                            annotations: [],
+                            ident: "A",
+                        },
+                        BitValue {
+                            annotations: [],
+                            ident: "B",
+                        },
+                        BitValue {
+                            annotations: [],
+                            ident: "C",
+                        },
                     ],
                 },
             ),
@@ -27,11 +38,21 @@ Specification(
         ConstrTypeDcl(
             BitmaskDcl(
                 BitmaskDcl {
+                    annotations: [],
                     ident: "A",
                     value: [
-                        "A",
-                        "B",
-                        "C",
+                        BitValue {
+                            annotations: [],
+                            ident: "A",
+                        },
+                        BitValue {
+                            annotations: [],
+                            ident: "B",
+                        },
+                        BitValue {
+                            annotations: [],
+                            ident: "C",
+                        },
                     ],
                 },
             ),

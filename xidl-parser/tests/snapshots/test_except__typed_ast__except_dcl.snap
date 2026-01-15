@@ -11,6 +11,7 @@ Specification(
                 ),
                 member: [
                     Member {
+                        annotations: [],
                         ty: SimpleTypeSpec(
                             ScopedName(
                                 ScopedName {
@@ -36,6 +37,7 @@ Specification(
                         default: None,
                     },
                     Member {
+                        annotations: [],
                         ty: SimpleTypeSpec(
                             ScopedName(
                                 ScopedName {
@@ -90,6 +92,7 @@ Specification(
                         default: None,
                     },
                     Member {
+                        annotations: [],
                         ty: TemplateTypeSpec(
                             StringType(
                                 StringType {
@@ -167,6 +170,7 @@ Specification(
                         default: None,
                     },
                     Member {
+                        annotations: [],
                         ty: TemplateTypeSpec(
                             SequenceType(
                                 SequenceType {
@@ -199,6 +203,7 @@ Specification(
                         default: None,
                     },
                     Member {
+                        annotations: [],
                         ty: TemplateTypeSpec(
                             StringType(
                                 StringType {
@@ -246,6 +251,7 @@ Specification(
                         default: None,
                     },
                     Member {
+                        annotations: [],
                         ty: TemplateTypeSpec(
                             WideStringType(
                                 WideStringType {
@@ -293,6 +299,7 @@ Specification(
                         default: None,
                     },
                     Member {
+                        annotations: [],
                         ty: TemplateTypeSpec(
                             FixedPtType(
                                 FixedPtType {

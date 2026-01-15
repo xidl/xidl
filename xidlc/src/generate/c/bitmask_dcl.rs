@@ -6,10 +6,11 @@ use xidl_parser::hir;
 
 impl CRender for hir::BitmaskDcl {
     fn render(&self, renderer: &CRenderer) -> IdlcResult<CRenderOutput> {
-        let all_mask = if self.value.is_empty() {
+        let values: Vec<String> = self.value.iter().map(|value| value.ident.clone()).collect();
+        let all_mask = if values.is_empty() {
             "0".to_string()
         } else {
-            self.value.join(" | ")
+            values.join(" | ")
         };
         let kind = type_kind_from_c("uint32_t");
         let xcdr_fields = vec![json!({
@@ -19,7 +20,7 @@ impl CRender for hir::BitmaskDcl {
         })];
         let ctx = json!({
             "ident": &self.ident,
-            "values": self.value.clone(),
+            "values": values,
             "all_mask": all_mask,
             "xcdr_fields": xcdr_fields,
         });

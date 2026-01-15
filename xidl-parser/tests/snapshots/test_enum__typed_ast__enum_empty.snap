@@ -5,20 +5,19 @@ expression: ast
 Specification(
     [
         TypeDcl(
-            TypeDcl(
-                [
-                    ConstrTypeDcl(
-                        EnumDcl(
-                            EnumDcl {
-                                ident: Identifier(
-                                    "A",
-                                ),
-                                member: [],
-                            },
-                        ),
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    EnumDcl(
+                        EnumDcl {
+                            ident: Identifier(
+                                "A",
+                            ),
+                            member: [],
+                        },
                     ),
-                ],
-            ),
+                ),
+            },
         ),
     ],
 )

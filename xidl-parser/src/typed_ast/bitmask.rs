@@ -71,4 +71,7 @@ pub struct BitmaskDcl {
 }
 
 #[derive(Debug, Parser)]
-pub struct BitValue(pub Vec<Identifier>);
+pub struct BitValue {
+    pub annotations: Vec<AnnotationAppl>,
+    pub ident: Identifier,
+}

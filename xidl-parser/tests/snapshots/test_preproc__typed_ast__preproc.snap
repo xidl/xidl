@@ -25,6 +25,7 @@ Specification(
         ),
         ModuleDcl(
             ModuleDcl {
+                annotations: [],
                 ident: Identifier(
                     "A",
                 ),
@@ -45,6 +46,7 @@ Specification(
         ),
         ModuleDcl(
             ModuleDcl {
+                annotations: [],
                 ident: Identifier(
                     "A",
                 ),

@@ -38,7 +38,11 @@ impl FfiDelimitedCdrSerializer {
     }
 }
 
-impl_ffi_serialize_for!(delimited_cdr_serializer, FfiDelimitedCdrSerializer, with_serializer);
+impl_ffi_serialize_for!(
+    delimited_cdr_serializer,
+    FfiDelimitedCdrSerializer,
+    with_serializer
+);
 
 fn with_serializer<R>(
     self_: &mut FfiDelimitedCdrSerializer,

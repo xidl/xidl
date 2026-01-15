@@ -5,96 +5,87 @@ expression: ast
 Specification(
     [
         TypeDcl(
-            TypeDcl(
-                [
-                    ConstrTypeDcl(
-                        BitmaskDcl(
-                            BitmaskDcl {
-                                ident: Identifier(
-                                    "A",
-                                ),
-                                value: [],
-                            },
-                        ),
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    BitmaskDcl(
+                        BitmaskDcl {
+                            ident: Identifier(
+                                "A",
+                            ),
+                            value: [],
+                        },
                     ),
-                ],
-            ),
+                ),
+            },
         ),
         TypeDcl(
-            TypeDcl(
-                [
-                    ConstrTypeDcl(
-                        BitmaskDcl(
-                            BitmaskDcl {
-                                ident: Identifier(
-                                    "A",
-                                ),
-                                value: [
-                                    BitValue(
-                                        [
-                                            Identifier(
-                                                "A",
-                                            ),
-                                        ],
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    BitmaskDcl(
+                        BitmaskDcl {
+                            ident: Identifier(
+                                "A",
+                            ),
+                            value: [
+                                BitValue {
+                                    annotations: [],
+                                    ident: Identifier(
+                                        "A",
                                     ),
-                                    BitValue(
-                                        [
-                                            Identifier(
-                                                "B",
-                                            ),
-                                        ],
+                                },
+                                BitValue {
+                                    annotations: [],
+                                    ident: Identifier(
+                                        "B",
                                     ),
-                                    BitValue(
-                                        [
-                                            Identifier(
-                                                "C",
-                                            ),
-                                        ],
+                                },
+                                BitValue {
+                                    annotations: [],
+                                    ident: Identifier(
+                                        "C",
                                     ),
-                                ],
-                            },
-                        ),
+                                },
+                            ],
+                        },
                     ),
-                ],
-            ),
+                ),
+            },
         ),
         TypeDcl(
-            TypeDcl(
-                [
-                    ConstrTypeDcl(
-                        BitmaskDcl(
-                            BitmaskDcl {
-                                ident: Identifier(
-                                    "A",
-                                ),
-                                value: [
-                                    BitValue(
-                                        [
-                                            Identifier(
-                                                "A",
-                                            ),
-                                        ],
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    BitmaskDcl(
+                        BitmaskDcl {
+                            ident: Identifier(
+                                "A",
+                            ),
+                            value: [
+                                BitValue {
+                                    annotations: [],
+                                    ident: Identifier(
+                                        "A",
                                     ),
-                                    BitValue(
-                                        [
-                                            Identifier(
-                                                "B",
-                                            ),
-                                        ],
+                                },
+                                BitValue {
+                                    annotations: [],
+                                    ident: Identifier(
+                                        "B",
                                     ),
-                                    BitValue(
-                                        [
-                                            Identifier(
-                                                "C",
-                                            ),
-                                        ],
+                                },
+                                BitValue {
+                                    annotations: [],
+                                    ident: Identifier(
+                                        "C",
                                     ),
-                                ],
-                            },
-                        ),
+                                },
+                            ],
+                        },
                     ),
-                ],
-            ),
+                ),
+            },
         ),
     ],
 )

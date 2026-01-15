@@ -7,6 +7,7 @@ Specification(
         ConstrTypeDcl(
             StructForwardDcl(
                 StructForwardDcl {
+                    annotations: [],
                     ident: "A",
                 },
             ),

@@ -5,8 +5,8 @@ pub mod delimited_cdr;
 pub mod ffi;
 pub mod plain_cdr;
 pub mod plain_cdr2;
-pub mod plcdr2;
 pub mod plcdr;
+pub mod plcdr2;
 pub mod xcdr_plcdr;
 
 mod utils;
@@ -24,7 +24,12 @@ pub trait XcdrSerialize {
         Ok(())
     }
 
-    fn begin_field(&mut self, id: FieldId, must_understand: bool, length_code: u8) -> XcdrResult<()> {
+    fn begin_field(
+        &mut self,
+        id: FieldId,
+        must_understand: bool,
+        length_code: u8,
+    ) -> XcdrResult<()> {
         Ok(())
     }
     fn end_field(&mut self) -> XcdrResult<()> {

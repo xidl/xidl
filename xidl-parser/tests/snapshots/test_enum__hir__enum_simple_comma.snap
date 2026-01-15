@@ -7,10 +7,17 @@ Specification(
         ConstrTypeDcl(
             EnumDcl(
                 EnumDcl {
+                    annotations: [],
                     ident: "A",
                     member: [
-                        "B",
-                        "C",
+                        Enumerator {
+                            annotations: [],
+                            ident: "B",
+                        },
+                        Enumerator {
+                            annotations: [],
+                            ident: "C",
+                        },
                     ],
                 },
             ),

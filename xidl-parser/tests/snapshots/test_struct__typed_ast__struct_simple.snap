@@ -5,21 +5,20 @@ expression: ast
 Specification(
     [
         TypeDcl(
-            TypeDcl(
-                [
-                    ConstrTypeDcl(
-                        StructDcl(
-                            StructForwardDcl(
-                                StructForwardDcl {
-                                    ident: Identifier(
-                                        "A",
-                                    ),
-                                },
-                            ),
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructForwardDcl(
+                            StructForwardDcl {
+                                ident: Identifier(
+                                    "A",
+                                ),
+                            },
                         ),
                     ),
-                ],
-            ),
+                ),
+            },
         ),
     ],
 )

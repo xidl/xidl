@@ -1,5 +1,5 @@
-use crate::{error::XcdrError, XcdrDeserialize};
 use crate::utils::FromBytes;
+use crate::{error::XcdrError, XcdrDeserialize};
 
 const ENDIAN_FLAG: u32 = 1 << 31;
 const LEN_MASK: u32 = !ENDIAN_FLAG;

@@ -2,7 +2,10 @@ use super::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct TypeDcl(pub Vec<TypeDclInner>);
+pub struct TypeDcl {
+    pub annotations: Vec<Annotation>,
+    pub decl: TypeDclInner,
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum TypeDclInner {
@@ -30,7 +33,10 @@ pub struct NativeDcl {
 
 impl From<crate::typed_ast::TypeDcl> for TypeDcl {
     fn from(value: crate::typed_ast::TypeDcl) -> Self {
-        Self(value.0.into_iter().map(Into::into).collect())
+        Self {
+            annotations: value.annotations.into_iter().map(Into::into).collect(),
+            decl: value.decl.into(),
+        }
     }
 }
 

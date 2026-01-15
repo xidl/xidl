@@ -5,6 +5,9 @@ mod expr;
 pub use expr::*;
 use xidl_derive::Parser;
 
+mod annotation;
+pub use annotation::*;
+
 mod preproc;
 pub use preproc::*;
 
@@ -46,8 +49,11 @@ pub enum Definition {
     PreprocDefine(PreprocDefine),
 }
 
-#[derive(Debug, Parser)]
-pub struct TypeDcl(#[ts(transparent)] pub Vec<TypeDclInner>);
+#[derive(Debug)]
+pub struct TypeDcl {
+    pub annotations: Vec<AnnotationAppl>,
+    pub decl: TypeDclInner,
+}
 
 #[derive(Debug, Parser)]
 #[ts(transparent)]
@@ -55,6 +61,39 @@ pub enum TypeDclInner {
     ConstrTypeDcl(ConstrTypeDcl),
     NativeDcl(NativeDcl),
     TypedefDcl(TypedefDcl),
+}
+
+impl<'a> crate::parser::FromTreeSitter<'a> for TypeDcl {
+    fn from_node(
+        node: tree_sitter::Node<'a>,
+        ctx: &mut crate::parser::ParseContext<'a>,
+    ) -> crate::error::ParserResult<Self> {
+        assert_eq!(node.kind_id(), xidl_derive::node_id!("type_dcl"));
+        let mut annotations = Vec::new();
+        let mut decl = None;
+        for ch in node.children(&mut node.walk()) {
+            match ch.kind_id() {
+                xidl_derive::node_id!("annotation_appl") => {
+                    annotations.push(AnnotationAppl::from_node(ch, ctx)?);
+                }
+                xidl_derive::node_id!("constr_type_dcl")
+                | xidl_derive::node_id!("native_dcl")
+                | xidl_derive::node_id!("typedef_dcl") => {
+                    decl = Some(TypeDclInner::from_node(ch, ctx)?);
+                }
+                _ => {}
+            }
+        }
+        Ok(Self {
+            annotations,
+            decl: decl.ok_or_else(|| {
+                crate::error::ParseError::UnexpectedNode(format!(
+                    "parent: {}, got: missing type decl",
+                    node.kind()
+                ))
+            })?,
+        })
+    }
 }
 
 #[derive(Debug, Parser)]
@@ -91,6 +130,7 @@ pub struct StructDef {
 
 #[derive(Debug, Parser)]
 pub struct Member {
+    pub annotations: Vec<AnnotationAppl>,
     pub ty: TypeSpec,
     pub ident: Declarators,
     pub default: Option<Default>,

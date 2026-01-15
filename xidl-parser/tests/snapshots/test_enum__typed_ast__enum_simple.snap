@@ -5,31 +5,32 @@ expression: ast
 Specification(
     [
         TypeDcl(
-            TypeDcl(
-                [
-                    ConstrTypeDcl(
-                        EnumDcl(
-                            EnumDcl {
-                                ident: Identifier(
-                                    "A",
-                                ),
-                                member: [
-                                    Enumerator {
-                                        ident: Identifier(
-                                            "B",
-                                        ),
-                                    },
-                                    Enumerator {
-                                        ident: Identifier(
-                                            "C",
-                                        ),
-                                    },
-                                ],
-                            },
-                        ),
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    EnumDcl(
+                        EnumDcl {
+                            ident: Identifier(
+                                "A",
+                            ),
+                            member: [
+                                Enumerator {
+                                    annotations: [],
+                                    ident: Identifier(
+                                        "B",
+                                    ),
+                                },
+                                Enumerator {
+                                    annotations: [],
+                                    ident: Identifier(
+                                        "C",
+                                    ),
+                                },
+                            ],
+                        },
                     ),
-                ],
-            ),
+                ),
+            },
         ),
     ],
 )

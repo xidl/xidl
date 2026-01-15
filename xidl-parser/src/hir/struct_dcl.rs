@@ -3,11 +3,13 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct StructForwardDcl {
+    pub annotations: Vec<Annotation>,
     pub ident: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct StructDcl {
+    pub annotations: Vec<Annotation>,
     pub ident: String,
     pub parent: Vec<ScopedName>,
     pub member: Vec<Member>,
@@ -15,6 +17,7 @@ pub struct StructDcl {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Member {
+    pub annotations: Vec<Annotation>,
     pub ty: TypeSpec,
     pub ident: Vec<Declarator>,
     pub default: Option<Default>,
@@ -26,6 +29,7 @@ pub struct Default(pub ConstExpr);
 impl From<crate::typed_ast::StructDef> for StructDcl {
     fn from(value: crate::typed_ast::StructDef) -> Self {
         Self {
+            annotations: vec![],
             ident: value.ident.0,
             parent: value.parent.into_iter().map(Into::into).collect(),
             member: value.member.into_iter().map(|x| x.into()).collect(),
@@ -36,6 +40,7 @@ impl From<crate::typed_ast::StructDef> for StructDcl {
 impl From<crate::typed_ast::Member> for Member {
     fn from(value: crate::typed_ast::Member) -> Self {
         Self {
+            annotations: value.annotations.into_iter().map(Into::into).collect(),
             ty: value.ty.into(),
             ident: value.ident.0.into_iter().map(Into::into).collect(),
             default: value.default.map(Into::into),
@@ -46,6 +51,7 @@ impl From<crate::typed_ast::Member> for Member {
 impl From<crate::typed_ast::StructForwardDcl> for StructForwardDcl {
     fn from(typed_ast: crate::typed_ast::StructForwardDcl) -> Self {
         Self {
+            annotations: vec![],
             ident: typed_ast.ident.0,
         }
     }

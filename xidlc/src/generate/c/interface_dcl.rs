@@ -27,9 +27,9 @@ struct InterfaceParam {
 
 impl CRender for hir::InterfaceDcl {
     fn render(&self, renderer: &CRenderer) -> IdlcResult<CRenderOutput> {
-        let (ident, body) = match self {
-            hir::InterfaceDcl::InterfaceForwardDcl(forward) => (forward.ident.clone(), None),
-            hir::InterfaceDcl::InterfaceDef(def) => {
+        let (ident, body) = match &self.decl {
+            hir::InterfaceDclInner::InterfaceForwardDcl(forward) => (forward.ident.clone(), None),
+            hir::InterfaceDclInner::InterfaceDef(def) => {
                 (def.header.ident.clone(), def.interface_body.as_ref())
             }
         };
@@ -109,9 +109,9 @@ fn operations_from_attr(
     attr: &hir::AttrDcl,
     existing: &HashSet<String>,
 ) -> Vec<InterfaceOperation> {
-    let attrs = match attr {
-        hir::AttrDcl::ReadonlyAttrSpec(spec) => readonly_attrs(spec),
-        hir::AttrDcl::AttrSpec(spec) => attrs_with_set(spec),
+    let attrs = match &attr.decl {
+        hir::AttrDclInner::ReadonlyAttrSpec(spec) => readonly_attrs(spec),
+        hir::AttrDclInner::AttrSpec(spec) => attrs_with_set(spec),
     };
 
     let mut ops = Vec::new();

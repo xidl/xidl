@@ -17,7 +17,11 @@ void {{ ident }}_serialize({{ ident }} const* self, FfiCdrSerializer* serializer
   switch (self->_d) {
   {% for case in xcdr_cases %}
   {% for label in case.labels %}
+  {% if label == "default" %}
+  default:
+  {% else %}
   case {{ label }}:
+  {% endif %}
   {% endfor %}
   {% set ns = namespace(expr=case.field.expr) %}
   {% for dim in case.field.dims %}
@@ -58,7 +62,11 @@ void {{ ident }}_deserialize({{ ident }}* self, FfiCdrDeserializer* deserializer
   switch (self->_d) {
   {% for case in xcdr_cases %}
   {% for label in case.labels %}
+  {% if label == "default" %}
+  default:
+  {% else %}
   case {{ label }}:
+  {% endif %}
   {% endfor %}
   {% set ns = namespace(expr=case.field.expr) %}
   {% for dim in case.field.dims %}

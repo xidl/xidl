@@ -1,12 +1,51 @@
 use crate::typed_ast::ScopedName;
 
-use super::{ConstDcl, ExceptDcl, Identifier, SimpleDeclarator, TypeDcl, TypeSpec};
+use super::{AnnotationAppl, ConstDcl, ExceptDcl, Identifier, SimpleDeclarator, TypeDcl, TypeSpec};
 use xidl_derive::Parser;
 
+#[derive(Debug)]
+pub struct InterfaceDcl {
+    pub annotations: Vec<AnnotationAppl>,
+    pub decl: InterfaceDclInner,
+}
+
 #[derive(Debug, Parser)]
-pub enum InterfaceDcl {
+#[ts(transparent)]
+pub enum InterfaceDclInner {
     InterfaceForwardDcl(InterfaceForwardDcl),
     InterfaceDef(InterfaceDef),
+}
+
+impl<'a> crate::parser::FromTreeSitter<'a> for InterfaceDcl {
+    fn from_node(
+        node: tree_sitter::Node<'a>,
+        ctx: &mut crate::parser::ParseContext<'a>,
+    ) -> crate::error::ParserResult<Self> {
+        assert_eq!(node.kind_id(), xidl_derive::node_id!("interface_dcl"));
+        let mut annotations = vec![];
+        let mut decl = None;
+        for ch in node.children(&mut node.walk()) {
+            match ch.kind_id() {
+                xidl_derive::node_id!("annotation_appl") => {
+                    annotations.push(AnnotationAppl::from_node(ch, ctx)?);
+                }
+                xidl_derive::node_id!("interface_def")
+                | xidl_derive::node_id!("interface_forward_dcl") => {
+                    decl = Some(InterfaceDclInner::from_node(ch, ctx)?);
+                }
+                _ => {}
+            }
+        }
+        Ok(Self {
+            annotations,
+            decl: decl.ok_or_else(|| {
+                crate::error::ParseError::UnexpectedNode(format!(
+                    "parent: {}, got: missing interface decl",
+                    node.kind()
+                ))
+            })?,
+        })
+    }
 }
 
 #[derive(Debug, Parser)]
@@ -52,6 +91,7 @@ pub enum Export {
 
 #[derive(Debug, Parser)]
 pub struct OpDcl {
+    pub annotations: Vec<AnnotationAppl>,
     pub ty: OpTypeSpec,
     pub ident: Identifier,
     pub parameter: Option<ParameterDcls>,
@@ -116,10 +156,49 @@ impl<'a> crate::parser::FromTreeSitter<'a> for ParamAttribute {
 #[derive(Debug, Parser)]
 pub struct RaisesExpr(pub Vec<ScopedName>);
 
+#[derive(Debug)]
+pub struct AttrDcl {
+    pub annotations: Vec<AnnotationAppl>,
+    pub decl: AttrDclInner,
+}
+
 #[derive(Debug, Parser)]
-pub enum AttrDcl {
+#[ts(transparent)]
+pub enum AttrDclInner {
     ReadonlyAttrSpec(ReadonlyAttrSpec),
     AttrSpec(AttrSpec),
+}
+
+impl<'a> crate::parser::FromTreeSitter<'a> for AttrDcl {
+    fn from_node(
+        node: tree_sitter::Node<'a>,
+        ctx: &mut crate::parser::ParseContext<'a>,
+    ) -> crate::error::ParserResult<Self> {
+        assert_eq!(node.kind_id(), xidl_derive::node_id!("attr_dcl"));
+        let mut annotations = vec![];
+        let mut decl = None;
+        for ch in node.children(&mut node.walk()) {
+            match ch.kind_id() {
+                xidl_derive::node_id!("annotation_appl") => {
+                    annotations.push(AnnotationAppl::from_node(ch, ctx)?);
+                }
+                xidl_derive::node_id!("readonly_attr_spec")
+                | xidl_derive::node_id!("attr_spec") => {
+                    decl = Some(AttrDclInner::from_node(ch, ctx)?);
+                }
+                _ => {}
+            }
+        }
+        Ok(Self {
+            annotations,
+            decl: decl.ok_or_else(|| {
+                crate::error::ParseError::UnexpectedNode(format!(
+                    "parent: {}, got: missing attr decl",
+                    node.kind()
+                ))
+            })?,
+        })
+    }
 }
 
 #[derive(Debug, Parser)]

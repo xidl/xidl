@@ -1,0 +1,489 @@
+---
+source: xidl-parser/tests/test-annotation.rs
+expression: ast
+---
+Specification(
+    [
+        TypeDcl(
+            TypeDcl {
+                annotations: [
+                    AnnotationAppl {
+                        name: Builtin(
+                            "id",
+                        ),
+                        params: Some(
+                            Raw(
+                                "1",
+                            ),
+                        ),
+                    },
+                ],
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDef(
+                            StructDef {
+                                ident: Identifier(
+                                    "S",
+                                ),
+                                parent: [],
+                                member: [
+                                    Member {
+                                        annotations: [
+                                            AnnotationAppl {
+                                                name: Builtin(
+                                                    "id",
+                                                ),
+                                                params: Some(
+                                                    Raw(
+                                                        "10",
+                                                    ),
+                                                ),
+                                            },
+                                        ],
+                                        ty: SimpleTypeSpec(
+                                            BaseTypeSpec(
+                                                IntegerType(
+                                                    SignedInt(
+                                                        SignedLongInt(
+                                                            SignedLongInt,
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                        ident: Declarators(
+                                            [
+                                                SimpleDeclarator(
+                                                    SimpleDeclarator(
+                                                        Identifier(
+                                                            "a",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ],
+                                        ),
+                                        default: None,
+                                    },
+                                    Member {
+                                        annotations: [
+                                            AnnotationAppl {
+                                                name: Builtin(
+                                                    "optional",
+                                                ),
+                                                params: None,
+                                            },
+                                        ],
+                                        ty: SimpleTypeSpec(
+                                            BaseTypeSpec(
+                                                IntegerType(
+                                                    SignedInt(
+                                                        SignedShortInt(
+                                                            SignedShortInt,
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                        ident: Declarators(
+                                            [
+                                                SimpleDeclarator(
+                                                    SimpleDeclarator(
+                                                        Identifier(
+                                                            "b",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ],
+                                        ),
+                                        default: None,
+                                    },
+                                ],
+                            },
+                        ),
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                annotations: [
+                    AnnotationAppl {
+                        name: ScopedName(
+                            ScopedName {
+                                scoped_name: Some(
+                                    ScopedName {
+                                        scoped_name: None,
+                                        identifier: Identifier(
+                                            "my",
+                                        ),
+                                        node_text: "my",
+                                    },
+                                ),
+                                identifier: Identifier(
+                                    "anno",
+                                ),
+                                node_text: "my::anno",
+                            },
+                        ),
+                        params: Some(
+                            Params(
+                                [
+                                    AnnotationApplParam {
+                                        ident: Identifier(
+                                            "abc",
+                                        ),
+                                        value: Some(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            Literal(
+                                                                                IntegerLiteral(
+                                                                                    DecNumber(
+                                                                                        "1",
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    },
+                                ],
+                            ),
+                        ),
+                    },
+                ],
+                decl: ConstrTypeDcl(
+                    EnumDcl(
+                        EnumDcl {
+                            ident: Identifier(
+                                "E",
+                            ),
+                            member: [
+                                Enumerator {
+                                    annotations: [
+                                        AnnotationAppl {
+                                            name: Builtin(
+                                                "id",
+                                            ),
+                                            params: Some(
+                                                Raw(
+                                                    "0",
+                                                ),
+                                            ),
+                                        },
+                                    ],
+                                    ident: Identifier(
+                                        "A",
+                                    ),
+                                },
+                                Enumerator {
+                                    annotations: [
+                                        AnnotationAppl {
+                                            name: Builtin(
+                                                "id",
+                                            ),
+                                            params: Some(
+                                                Raw(
+                                                    "1",
+                                                ),
+                                            ),
+                                        },
+                                    ],
+                                    ident: Identifier(
+                                        "B",
+                                    ),
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                annotations: [
+                    AnnotationAppl {
+                        name: Builtin(
+                            "id",
+                        ),
+                        params: Some(
+                            Raw(
+                                "2",
+                            ),
+                        ),
+                    },
+                ],
+                decl: ConstrTypeDcl(
+                    BitmaskDcl(
+                        BitmaskDcl {
+                            ident: Identifier(
+                                "BM",
+                            ),
+                            value: [
+                                BitValue {
+                                    annotations: [
+                                        AnnotationAppl {
+                                            name: Builtin(
+                                                "id",
+                                            ),
+                                            params: Some(
+                                                Raw(
+                                                    "0",
+                                                ),
+                                            ),
+                                        },
+                                    ],
+                                    ident: Identifier(
+                                        "A",
+                                    ),
+                                },
+                                BitValue {
+                                    annotations: [
+                                        AnnotationAppl {
+                                            name: Builtin(
+                                                "id",
+                                            ),
+                                            params: Some(
+                                                Raw(
+                                                    "1",
+                                                ),
+                                            ),
+                                        },
+                                    ],
+                                    ident: Identifier(
+                                        "B",
+                                    ),
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                annotations: [
+                    AnnotationAppl {
+                        name: Builtin(
+                            "id",
+                        ),
+                        params: Some(
+                            Raw(
+                                "3",
+                            ),
+                        ),
+                    },
+                ],
+                decl: ConstrTypeDcl(
+                    UnionDcl(
+                        UnionDef(
+                            UnionDef {
+                                ident: Identifier(
+                                    "U",
+                                ),
+                                switch_type_spec: IntegerType(
+                                    SignedInt(
+                                        SignedLongInt(
+                                            SignedLongInt,
+                                        ),
+                                    ),
+                                ),
+                                case: [
+                                    Case {
+                                        label: [
+                                            Case(
+                                                ConstExpr(
+                                                    XorExpr(
+                                                        AndExpr(
+                                                            ShiftExpr(
+                                                                AddExpr(
+                                                                    MultExpr(
+                                                                        UnaryExpr(
+                                                                            PrimaryExpr(
+                                                                                Literal(
+                                                                                    IntegerLiteral(
+                                                                                        DecNumber(
+                                                                                            "0",
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ],
+                                        element: ElementSpec {
+                                            annotations: [
+                                                AnnotationAppl {
+                                                    name: Builtin(
+                                                        "id",
+                                                    ),
+                                                    params: Some(
+                                                        Raw(
+                                                            "100",
+                                                        ),
+                                                    ),
+                                                },
+                                            ],
+                                            ty: TypeSpec(
+                                                SimpleTypeSpec(
+                                                    BaseTypeSpec(
+                                                        IntegerType(
+                                                            SignedInt(
+                                                                SignedLongInt(
+                                                                    SignedLongInt,
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                            value: SimpleDeclarator(
+                                                SimpleDeclarator(
+                                                    Identifier(
+                                                        "a",
+                                                    ),
+                                                ),
+                                            ),
+                                        },
+                                    },
+                                    Case {
+                                        label: [
+                                            Default,
+                                        ],
+                                        element: ElementSpec {
+                                            annotations: [],
+                                            ty: TypeSpec(
+                                                SimpleTypeSpec(
+                                                    BaseTypeSpec(
+                                                        IntegerType(
+                                                            SignedInt(
+                                                                SignedLongInt(
+                                                                    SignedLongInt,
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                            value: SimpleDeclarator(
+                                                SimpleDeclarator(
+                                                    Identifier(
+                                                        "b",
+                                                    ),
+                                                ),
+                                            ),
+                                        },
+                                    },
+                                ],
+                            },
+                        ),
+                    ),
+                ),
+            },
+        ),
+        InterfaceDcl(
+            InterfaceDcl {
+                annotations: [
+                    AnnotationAppl {
+                        name: Builtin(
+                            "id",
+                        ),
+                        params: Some(
+                            Raw(
+                                "4",
+                            ),
+                        ),
+                    },
+                ],
+                decl: InterfaceDef(
+                    InterfaceDef {
+                        header: InterfaceHeader {
+                            kind: InterfaceKind,
+                            ident: Identifier(
+                                "I",
+                            ),
+                            parent: None,
+                        },
+                        interface_body: Some(
+                            InterfaceBody(
+                                [
+                                    OpDcl(
+                                        OpDcl {
+                                            annotations: [
+                                                AnnotationAppl {
+                                                    name: Builtin(
+                                                        "oneway",
+                                                    ),
+                                                    params: None,
+                                                },
+                                            ],
+                                            ty: Void,
+                                            ident: Identifier(
+                                                "ping",
+                                            ),
+                                            parameter: None,
+                                            raises: None,
+                                        },
+                                    ),
+                                    AttrDcl(
+                                        AttrDcl {
+                                            annotations: [
+                                                AnnotationAppl {
+                                                    name: Builtin(
+                                                        "key",
+                                                    ),
+                                                    params: None,
+                                                },
+                                            ],
+                                            decl: AttrSpec(
+                                                AttrSpec {
+                                                    type_spec: SimpleTypeSpec(
+                                                        BaseTypeSpec(
+                                                            IntegerType(
+                                                                SignedInt(
+                                                                    SignedLongInt(
+                                                                        SignedLongInt,
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                    declarator: SimpleDeclarator(
+                                                        [
+                                                            SimpleDeclarator(
+                                                                Identifier(
+                                                                    "value",
+                                                                ),
+                                                            ),
+                                                        ],
+                                                    ),
+                                                },
+                                            ),
+                                        },
+                                    ),
+                                ],
+                            ),
+                        ),
+                    },
+                ),
+            },
+        ),
+    ],
+)

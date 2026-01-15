@@ -7,6 +7,7 @@ Specification(
         ConstrTypeDcl(
             UnionForwardDcl(
                 UnionForwardDcl {
+                    annotations: [],
                     ident: "A",
                 },
             ),
@@ -14,6 +15,7 @@ Specification(
         ConstrTypeDcl(
             UnionDef(
                 UnionDef {
+                    annotations: [],
                     ident: "B",
                     switch_type_spec: IntegerType(
                         I32,
@@ -25,6 +27,7 @@ Specification(
         ConstrTypeDcl(
             UnionDef(
                 UnionDef {
+                    annotations: [],
                     ident: "C",
                     switch_type_spec: IntegerType(
                         I32,
@@ -32,18 +35,20 @@ Specification(
                     case: [
                         Case {
                             label: [
-                                ConstExpr(
-                                    XorExpr(
-                                        AndExpr(
-                                            ShiftExpr(
-                                                AddExpr(
-                                                    MultExpr(
-                                                        UnaryExpr(
-                                                            PrimaryExpr(
-                                                                Literal(
-                                                                    IntegerLiteral(
-                                                                        DecNumber(
-                                                                            "0",
+                                Value(
+                                    ConstExpr(
+                                        XorExpr(
+                                            AndExpr(
+                                                ShiftExpr(
+                                                    AddExpr(
+                                                        MultExpr(
+                                                            UnaryExpr(
+                                                                PrimaryExpr(
+                                                                    Literal(
+                                                                        IntegerLiteral(
+                                                                            DecNumber(
+                                                                                "0",
+                                                                            ),
                                                                         ),
                                                                     ),
                                                                 ),
@@ -57,6 +62,7 @@ Specification(
                                 ),
                             ],
                             element: ElementSpec {
+                                annotations: [],
                                 ty: TypeSpec(
                                     SimpleTypeSpec(
                                         IntegerType(
@@ -73,18 +79,20 @@ Specification(
                         },
                         Case {
                             label: [
-                                ConstExpr(
-                                    XorExpr(
-                                        AndExpr(
-                                            ShiftExpr(
-                                                AddExpr(
-                                                    MultExpr(
-                                                        UnaryExpr(
-                                                            PrimaryExpr(
-                                                                Literal(
-                                                                    IntegerLiteral(
-                                                                        DecNumber(
-                                                                            "1",
+                                Value(
+                                    ConstExpr(
+                                        XorExpr(
+                                            AndExpr(
+                                                ShiftExpr(
+                                                    AddExpr(
+                                                        MultExpr(
+                                                            UnaryExpr(
+                                                                PrimaryExpr(
+                                                                    Literal(
+                                                                        IntegerLiteral(
+                                                                            DecNumber(
+                                                                                "1",
+                                                                            ),
                                                                         ),
                                                                     ),
                                                                 ),
@@ -98,6 +106,7 @@ Specification(
                                 ),
                             ],
                             element: ElementSpec {
+                                annotations: [],
                                 ty: TypeSpec(
                                     TemplateTypeSpec(
                                         StringType(

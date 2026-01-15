@@ -1,0 +1,1324 @@
+---
+source: xidl-parser/tests/test-annotation.rs
+expression: hir
+---
+Specification(
+    [
+        ConstrTypeDcl(
+            StructDcl(
+                StructDcl {
+                    annotations: [
+                        Builtin {
+                            name: "id",
+                            params: Some(
+                                Raw(
+                                    "1",
+                                ),
+                            ),
+                        },
+                    ],
+                    ident: "S",
+                    parent: [],
+                    member: [
+                        Member {
+                            annotations: [
+                                Builtin {
+                                    name: "id",
+                                    params: Some(
+                                        Raw(
+                                            "10",
+                                        ),
+                                    ),
+                                },
+                            ],
+                            ty: SimpleTypeSpec(
+                                IntegerType(
+                                    I32,
+                                ),
+                            ),
+                            ident: [
+                                SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "a",
+                                    ),
+                                ),
+                            ],
+                            default: None,
+                        },
+                        Member {
+                            annotations: [
+                                Builtin {
+                                    name: "optional",
+                                    params: None,
+                                },
+                            ],
+                            ty: SimpleTypeSpec(
+                                IntegerType(
+                                    I16,
+                                ),
+                            ),
+                            ident: [
+                                SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "b",
+                                    ),
+                                ),
+                            ],
+                            default: None,
+                        },
+                    ],
+                },
+            ),
+        ),
+        ConstrTypeDcl(
+            EnumDcl(
+                EnumDcl {
+                    annotations: [
+                        ScopedName {
+                            name: ScopedName {
+                                name: [
+                                    "my",
+                                    "anno",
+                                ],
+                                is_root: false,
+                            },
+                            params: Some(
+                                Params(
+                                    [
+                                        AnnotationParam {
+                                            ident: "abc",
+                                            value: Some(
+                                                ConstExpr(
+                                                    XorExpr(
+                                                        AndExpr(
+                                                            ShiftExpr(
+                                                                AddExpr(
+                                                                    MultExpr(
+                                                                        UnaryExpr(
+                                                                            PrimaryExpr(
+                                                                                Literal(
+                                                                                    IntegerLiteral(
+                                                                                        DecNumber(
+                                                                                            "1",
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        },
+                                    ],
+                                ),
+                            ),
+                        },
+                    ],
+                    ident: "E",
+                    member: [
+                        Enumerator {
+                            annotations: [
+                                Builtin {
+                                    name: "id",
+                                    params: Some(
+                                        Raw(
+                                            "0",
+                                        ),
+                                    ),
+                                },
+                            ],
+                            ident: "A",
+                        },
+                        Enumerator {
+                            annotations: [
+                                Builtin {
+                                    name: "id",
+                                    params: Some(
+                                        Raw(
+                                            "1",
+                                        ),
+                                    ),
+                                },
+                            ],
+                            ident: "B",
+                        },
+                    ],
+                },
+            ),
+        ),
+        ConstrTypeDcl(
+            BitmaskDcl(
+                BitmaskDcl {
+                    annotations: [
+                        Builtin {
+                            name: "id",
+                            params: Some(
+                                Raw(
+                                    "2",
+                                ),
+                            ),
+                        },
+                    ],
+                    ident: "BM",
+                    value: [
+                        BitValue {
+                            annotations: [
+                                Builtin {
+                                    name: "id",
+                                    params: Some(
+                                        Raw(
+                                            "0",
+                                        ),
+                                    ),
+                                },
+                            ],
+                            ident: "A",
+                        },
+                        BitValue {
+                            annotations: [
+                                Builtin {
+                                    name: "id",
+                                    params: Some(
+                                        Raw(
+                                            "1",
+                                        ),
+                                    ),
+                                },
+                            ],
+                            ident: "B",
+                        },
+                    ],
+                },
+            ),
+        ),
+        ConstrTypeDcl(
+            UnionDef(
+                UnionDef {
+                    annotations: [
+                        Builtin {
+                            name: "id",
+                            params: Some(
+                                Raw(
+                                    "3",
+                                ),
+                            ),
+                        },
+                    ],
+                    ident: "U",
+                    switch_type_spec: IntegerType(
+                        I32,
+                    ),
+                    case: [
+                        Case {
+                            label: [
+                                Value(
+                                    ConstExpr(
+                                        XorExpr(
+                                            AndExpr(
+                                                ShiftExpr(
+                                                    AddExpr(
+                                                        MultExpr(
+                                                            UnaryExpr(
+                                                                PrimaryExpr(
+                                                                    Literal(
+                                                                        IntegerLiteral(
+                                                                            DecNumber(
+                                                                                "0",
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ],
+                            element: ElementSpec {
+                                annotations: [
+                                    Builtin {
+                                        name: "id",
+                                        params: Some(
+                                            Raw(
+                                                "100",
+                                            ),
+                                        ),
+                                    },
+                                ],
+                                ty: TypeSpec(
+                                    SimpleTypeSpec(
+                                        IntegerType(
+                                            I32,
+                                        ),
+                                    ),
+                                ),
+                                value: SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "a",
+                                    ),
+                                ),
+                            },
+                        },
+                        Case {
+                            label: [
+                                Default,
+                            ],
+                            element: ElementSpec {
+                                annotations: [],
+                                ty: TypeSpec(
+                                    SimpleTypeSpec(
+                                        IntegerType(
+                                            I32,
+                                        ),
+                                    ),
+                                ),
+                                value: SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "b",
+                                    ),
+                                ),
+                            },
+                        },
+                    ],
+                },
+            ),
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: IntegerType(
+                    I32,
+                ),
+                ident: "I_ping_Hash",
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        DecNumber(
+                                                            "18846175",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: IntegerType(
+                    I32,
+                ),
+                ident: "I_get_attribute_value_Hash",
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        DecNumber(
+                                                            "3881857402",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: IntegerType(
+                    I32,
+                ),
+                ident: "I_set_attribute_value_Hash",
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        DecNumber(
+                                                            "1976821110",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstrTypeDcl(
+            StructDcl(
+                StructDcl {
+                    annotations: [],
+                    ident: "I_ping_In",
+                    parent: [],
+                    member: [
+                        Member {
+                            annotations: [],
+                            ty: SimpleTypeSpec(
+                                ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "UnusedMember",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                            ),
+                            ident: [
+                                SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "dummy",
+                                    ),
+                                ),
+                            ],
+                            default: None,
+                        },
+                    ],
+                },
+            ),
+        ),
+        ConstrTypeDcl(
+            StructDcl(
+                StructDcl {
+                    annotations: [],
+                    ident: "I_ping_Out",
+                    parent: [],
+                    member: [
+                        Member {
+                            annotations: [],
+                            ty: SimpleTypeSpec(
+                                ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "UnusedMember",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                            ),
+                            ident: [
+                                SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "dummy",
+                                    ),
+                                ),
+                            ],
+                            default: None,
+                        },
+                    ],
+                },
+            ),
+        ),
+        ConstrTypeDcl(
+            UnionDef(
+                UnionDef {
+                    annotations: [],
+                    ident: "I_ping_Result",
+                    switch_type_spec: IntegerType(
+                        I32,
+                    ),
+                    case: [
+                        Case {
+                            label: [
+                                Value(
+                                    ConstExpr(
+                                        XorExpr(
+                                            AndExpr(
+                                                ShiftExpr(
+                                                    AddExpr(
+                                                        MultExpr(
+                                                            UnaryExpr(
+                                                                PrimaryExpr(
+                                                                    ScopedName(
+                                                                        ScopedName {
+                                                                            name: [
+                                                                                "dds",
+                                                                                "RETCODE_OK",
+                                                                            ],
+                                                                            is_root: false,
+                                                                        },
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ],
+                            element: ElementSpec {
+                                annotations: [],
+                                ty: TypeSpec(
+                                    SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "I_ping_Out",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ),
+                                value: SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "result",
+                                    ),
+                                ),
+                            },
+                        },
+                    ],
+                },
+            ),
+        ),
+        ConstrTypeDcl(
+            StructDcl(
+                StructDcl {
+                    annotations: [],
+                    ident: "I_get_attribute_value_In",
+                    parent: [],
+                    member: [
+                        Member {
+                            annotations: [],
+                            ty: SimpleTypeSpec(
+                                ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "UnusedMember",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                            ),
+                            ident: [
+                                SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "dummy",
+                                    ),
+                                ),
+                            ],
+                            default: None,
+                        },
+                    ],
+                },
+            ),
+        ),
+        ConstrTypeDcl(
+            StructDcl(
+                StructDcl {
+                    annotations: [],
+                    ident: "I_get_attribute_value_Out",
+                    parent: [],
+                    member: [
+                        Member {
+                            annotations: [],
+                            ty: SimpleTypeSpec(
+                                IntegerType(
+                                    I32,
+                                ),
+                            ),
+                            ident: [
+                                SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "return_",
+                                    ),
+                                ),
+                            ],
+                            default: None,
+                        },
+                    ],
+                },
+            ),
+        ),
+        ConstrTypeDcl(
+            UnionDef(
+                UnionDef {
+                    annotations: [],
+                    ident: "I_get_attribute_value_Result",
+                    switch_type_spec: IntegerType(
+                        I32,
+                    ),
+                    case: [
+                        Case {
+                            label: [
+                                Value(
+                                    ConstExpr(
+                                        XorExpr(
+                                            AndExpr(
+                                                ShiftExpr(
+                                                    AddExpr(
+                                                        MultExpr(
+                                                            UnaryExpr(
+                                                                PrimaryExpr(
+                                                                    ScopedName(
+                                                                        ScopedName {
+                                                                            name: [
+                                                                                "dds",
+                                                                                "RETCODE_OK",
+                                                                            ],
+                                                                            is_root: false,
+                                                                        },
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ],
+                            element: ElementSpec {
+                                annotations: [],
+                                ty: TypeSpec(
+                                    SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "I_get_attribute_value_Out",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ),
+                                value: SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "result",
+                                    ),
+                                ),
+                            },
+                        },
+                    ],
+                },
+            ),
+        ),
+        ConstrTypeDcl(
+            StructDcl(
+                StructDcl {
+                    annotations: [],
+                    ident: "I_set_attribute_value_In",
+                    parent: [],
+                    member: [
+                        Member {
+                            annotations: [],
+                            ty: SimpleTypeSpec(
+                                IntegerType(
+                                    I32,
+                                ),
+                            ),
+                            ident: [
+                                SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "value",
+                                    ),
+                                ),
+                            ],
+                            default: None,
+                        },
+                    ],
+                },
+            ),
+        ),
+        ConstrTypeDcl(
+            StructDcl(
+                StructDcl {
+                    annotations: [],
+                    ident: "I_set_attribute_value_Out",
+                    parent: [],
+                    member: [
+                        Member {
+                            annotations: [],
+                            ty: SimpleTypeSpec(
+                                ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "UnusedMember",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                            ),
+                            ident: [
+                                SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "dummy",
+                                    ),
+                                ),
+                            ],
+                            default: None,
+                        },
+                    ],
+                },
+            ),
+        ),
+        ConstrTypeDcl(
+            UnionDef(
+                UnionDef {
+                    annotations: [],
+                    ident: "I_set_attribute_value_Result",
+                    switch_type_spec: IntegerType(
+                        I32,
+                    ),
+                    case: [
+                        Case {
+                            label: [
+                                Value(
+                                    ConstExpr(
+                                        XorExpr(
+                                            AndExpr(
+                                                ShiftExpr(
+                                                    AddExpr(
+                                                        MultExpr(
+                                                            UnaryExpr(
+                                                                PrimaryExpr(
+                                                                    ScopedName(
+                                                                        ScopedName {
+                                                                            name: [
+                                                                                "dds",
+                                                                                "RETCODE_OK",
+                                                                            ],
+                                                                            is_root: false,
+                                                                        },
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ],
+                            element: ElementSpec {
+                                annotations: [],
+                                ty: TypeSpec(
+                                    SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "I_set_attribute_value_Out",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ),
+                                value: SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "result",
+                                    ),
+                                ),
+                            },
+                        },
+                    ],
+                },
+            ),
+        ),
+        ConstrTypeDcl(
+            UnionDef(
+                UnionDef {
+                    annotations: [],
+                    ident: "I_Call",
+                    switch_type_spec: IntegerType(
+                        I32,
+                    ),
+                    case: [
+                        Case {
+                            label: [
+                                Default,
+                            ],
+                            element: ElementSpec {
+                                annotations: [],
+                                ty: TypeSpec(
+                                    SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "rpc",
+                                                    "UnknownOperation",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ),
+                                value: SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "unknownOp",
+                                    ),
+                                ),
+                            },
+                        },
+                        Case {
+                            label: [
+                                Value(
+                                    ConstExpr(
+                                        XorExpr(
+                                            AndExpr(
+                                                ShiftExpr(
+                                                    AddExpr(
+                                                        MultExpr(
+                                                            UnaryExpr(
+                                                                PrimaryExpr(
+                                                                    ScopedName(
+                                                                        ScopedName {
+                                                                            name: [
+                                                                                "I_ping_Hash",
+                                                                            ],
+                                                                            is_root: false,
+                                                                        },
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ],
+                            element: ElementSpec {
+                                annotations: [],
+                                ty: TypeSpec(
+                                    SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "I_ping_In",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ),
+                                value: SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "ping",
+                                    ),
+                                ),
+                            },
+                        },
+                        Case {
+                            label: [
+                                Value(
+                                    ConstExpr(
+                                        XorExpr(
+                                            AndExpr(
+                                                ShiftExpr(
+                                                    AddExpr(
+                                                        MultExpr(
+                                                            UnaryExpr(
+                                                                PrimaryExpr(
+                                                                    ScopedName(
+                                                                        ScopedName {
+                                                                            name: [
+                                                                                "I_get_attribute_value_Hash",
+                                                                            ],
+                                                                            is_root: false,
+                                                                        },
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ],
+                            element: ElementSpec {
+                                annotations: [],
+                                ty: TypeSpec(
+                                    SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "I_get_attribute_value_In",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ),
+                                value: SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "get_attribute_value",
+                                    ),
+                                ),
+                            },
+                        },
+                        Case {
+                            label: [
+                                Value(
+                                    ConstExpr(
+                                        XorExpr(
+                                            AndExpr(
+                                                ShiftExpr(
+                                                    AddExpr(
+                                                        MultExpr(
+                                                            UnaryExpr(
+                                                                PrimaryExpr(
+                                                                    ScopedName(
+                                                                        ScopedName {
+                                                                            name: [
+                                                                                "I_set_attribute_value_Hash",
+                                                                            ],
+                                                                            is_root: false,
+                                                                        },
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ],
+                            element: ElementSpec {
+                                annotations: [],
+                                ty: TypeSpec(
+                                    SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "I_set_attribute_value_In",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ),
+                                value: SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "set_attribute_value",
+                                    ),
+                                ),
+                            },
+                        },
+                    ],
+                },
+            ),
+        ),
+        ConstrTypeDcl(
+            StructDcl(
+                StructDcl {
+                    annotations: [],
+                    ident: "I_Request",
+                    parent: [],
+                    member: [
+                        Member {
+                            annotations: [],
+                            ty: SimpleTypeSpec(
+                                ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "RequestHeader",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                            ),
+                            ident: [
+                                SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "header",
+                                    ),
+                                ),
+                            ],
+                            default: None,
+                        },
+                        Member {
+                            annotations: [],
+                            ty: SimpleTypeSpec(
+                                ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "I_Call",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                            ),
+                            ident: [
+                                SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "data",
+                                    ),
+                                ),
+                            ],
+                            default: None,
+                        },
+                    ],
+                },
+            ),
+        ),
+        ConstrTypeDcl(
+            UnionDef(
+                UnionDef {
+                    annotations: [],
+                    ident: "I_Return",
+                    switch_type_spec: IntegerType(
+                        I32,
+                    ),
+                    case: [
+                        Case {
+                            label: [
+                                Default,
+                            ],
+                            element: ElementSpec {
+                                annotations: [],
+                                ty: TypeSpec(
+                                    SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "rpc",
+                                                    "UnknownOperation",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ),
+                                value: SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "unknownOp",
+                                    ),
+                                ),
+                            },
+                        },
+                        Case {
+                            label: [
+                                Value(
+                                    ConstExpr(
+                                        XorExpr(
+                                            AndExpr(
+                                                ShiftExpr(
+                                                    AddExpr(
+                                                        MultExpr(
+                                                            UnaryExpr(
+                                                                PrimaryExpr(
+                                                                    ScopedName(
+                                                                        ScopedName {
+                                                                            name: [
+                                                                                "I_ping_Hash",
+                                                                            ],
+                                                                            is_root: false,
+                                                                        },
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ],
+                            element: ElementSpec {
+                                annotations: [],
+                                ty: TypeSpec(
+                                    SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "I_ping_Result",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ),
+                                value: SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "ping",
+                                    ),
+                                ),
+                            },
+                        },
+                        Case {
+                            label: [
+                                Value(
+                                    ConstExpr(
+                                        XorExpr(
+                                            AndExpr(
+                                                ShiftExpr(
+                                                    AddExpr(
+                                                        MultExpr(
+                                                            UnaryExpr(
+                                                                PrimaryExpr(
+                                                                    ScopedName(
+                                                                        ScopedName {
+                                                                            name: [
+                                                                                "I_get_attribute_value_Hash",
+                                                                            ],
+                                                                            is_root: false,
+                                                                        },
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ],
+                            element: ElementSpec {
+                                annotations: [],
+                                ty: TypeSpec(
+                                    SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "I_get_attribute_value_Result",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ),
+                                value: SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "get_attribute_value",
+                                    ),
+                                ),
+                            },
+                        },
+                        Case {
+                            label: [
+                                Value(
+                                    ConstExpr(
+                                        XorExpr(
+                                            AndExpr(
+                                                ShiftExpr(
+                                                    AddExpr(
+                                                        MultExpr(
+                                                            UnaryExpr(
+                                                                PrimaryExpr(
+                                                                    ScopedName(
+                                                                        ScopedName {
+                                                                            name: [
+                                                                                "I_set_attribute_value_Hash",
+                                                                            ],
+                                                                            is_root: false,
+                                                                        },
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ],
+                            element: ElementSpec {
+                                annotations: [],
+                                ty: TypeSpec(
+                                    SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "I_set_attribute_value_Result",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ),
+                                value: SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "set_attribute_value",
+                                    ),
+                                ),
+                            },
+                        },
+                    ],
+                },
+            ),
+        ),
+        ConstrTypeDcl(
+            StructDcl(
+                StructDcl {
+                    annotations: [],
+                    ident: "I_Reply",
+                    parent: [],
+                    member: [
+                        Member {
+                            annotations: [],
+                            ty: SimpleTypeSpec(
+                                ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "ReplyHeader",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                            ),
+                            ident: [
+                                SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "header",
+                                    ),
+                                ),
+                            ],
+                            default: None,
+                        },
+                        Member {
+                            annotations: [],
+                            ty: SimpleTypeSpec(
+                                ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "I_Return",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                            ),
+                            ident: [
+                                SimpleDeclarator(
+                                    SimpleDeclarator(
+                                        "data",
+                                    ),
+                                ),
+                            ],
+                            default: None,
+                        },
+                    ],
+                },
+            ),
+        ),
+        InterfaceDcl(
+            InterfaceDcl {
+                annotations: [
+                    Builtin {
+                        name: "id",
+                        params: Some(
+                            Raw(
+                                "4",
+                            ),
+                        ),
+                    },
+                ],
+                decl: InterfaceDef(
+                    InterfaceDef {
+                        header: InterfaceHeader {
+                            ident: "I",
+                            parent: None,
+                        },
+                        interface_body: Some(
+                            InterfaceBody(
+                                [
+                                    OpDcl(
+                                        OpDcl {
+                                            annotations: [
+                                                Builtin {
+                                                    name: "oneway",
+                                                    params: None,
+                                                },
+                                            ],
+                                            ty: Void,
+                                            ident: "ping",
+                                            parameter: None,
+                                            raises: None,
+                                        },
+                                    ),
+                                    AttrDcl(
+                                        AttrDcl {
+                                            annotations: [
+                                                Key,
+                                            ],
+                                            decl: AttrSpec(
+                                                AttrSpec {
+                                                    ty: SimpleTypeSpec(
+                                                        IntegerType(
+                                                            I32,
+                                                        ),
+                                                    ),
+                                                    declarator: SimpleDeclarator(
+                                                        [
+                                                            SimpleDeclarator(
+                                                                "value",
+                                                            ),
+                                                        ],
+                                                    ),
+                                                },
+                                            ),
+                                        },
+                                    ),
+                                ],
+                            ),
+                        ),
+                    },
+                ),
+            },
+        ),
+    ],
+)

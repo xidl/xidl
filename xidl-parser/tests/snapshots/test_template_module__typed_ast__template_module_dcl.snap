@@ -175,40 +175,43 @@ Specification(
                     ),
                     Definition(
                         InterfaceDcl(
-                            InterfaceDef(
-                                InterfaceDef {
-                                    header: InterfaceHeader {
-                                        kind: InterfaceKind,
-                                        ident: Identifier(
-                                            "Bar",
-                                        ),
-                                        parent: Some(
-                                            InterfaceInheritanceSpec(
-                                                [
-                                                    InterfaceName(
-                                                        ScopedName {
-                                                            scoped_name: Some(
-                                                                ScopedName {
-                                                                    scoped_name: None,
-                                                                    identifier: Identifier(
-                                                                        "A",
-                                                                    ),
-                                                                    node_text: "A",
-                                                                },
-                                                            ),
-                                                            identifier: Identifier(
-                                                                "Foo",
-                                                            ),
-                                                            node_text: "A::Foo",
-                                                        },
-                                                    ),
-                                                ],
+                            InterfaceDcl {
+                                annotations: [],
+                                decl: InterfaceDef(
+                                    InterfaceDef {
+                                        header: InterfaceHeader {
+                                            kind: InterfaceKind,
+                                            ident: Identifier(
+                                                "Bar",
                                             ),
-                                        ),
+                                            parent: Some(
+                                                InterfaceInheritanceSpec(
+                                                    [
+                                                        InterfaceName(
+                                                            ScopedName {
+                                                                scoped_name: Some(
+                                                                    ScopedName {
+                                                                        scoped_name: None,
+                                                                        identifier: Identifier(
+                                                                            "A",
+                                                                        ),
+                                                                        node_text: "A",
+                                                                    },
+                                                                ),
+                                                                identifier: Identifier(
+                                                                    "Foo",
+                                                                ),
+                                                                node_text: "A::Foo",
+                                                            },
+                                                        ),
+                                                    ],
+                                                ),
+                                            ),
+                                        },
+                                        interface_body: None,
                                     },
-                                    interface_body: None,
-                                },
-                            ),
+                                ),
+                            },
                         ),
                     ),
                 ],

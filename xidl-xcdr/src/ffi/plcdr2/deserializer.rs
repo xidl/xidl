@@ -40,10 +40,7 @@ impl FfiPlcdr2Deserializer {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn plcdr2_deserializer_read_dheader(
-        &mut self,
-        out: *mut u32,
-    ) -> XcdrFfiError {
+    pub extern "C" fn plcdr2_deserializer_read_dheader(&mut self, out: *mut u32) -> XcdrFfiError {
         if out.is_null() {
             return XcdrFfiError::NullPointer;
         }
@@ -57,10 +54,7 @@ impl FfiPlcdr2Deserializer {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn plcdr2_deserializer_read_emheader(
-        &mut self,
-        out: *mut u32,
-    ) -> XcdrFfiError {
+    pub extern "C" fn plcdr2_deserializer_read_emheader(&mut self, out: *mut u32) -> XcdrFfiError {
         if out.is_null() {
             return XcdrFfiError::NullPointer;
         }
@@ -74,7 +68,11 @@ impl FfiPlcdr2Deserializer {
     }
 }
 
-impl_ffi_deserialize_for!(plcdr2_deserializer, FfiPlcdr2Deserializer, with_deserializer);
+impl_ffi_deserialize_for!(
+    plcdr2_deserializer,
+    FfiPlcdr2Deserializer,
+    with_deserializer
+);
 
 fn with_deserializer<R>(
     self_: &mut FfiPlcdr2Deserializer,

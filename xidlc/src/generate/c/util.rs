@@ -25,9 +25,9 @@ pub fn field_for_member(member: &hir::Member, decl: &hir::Declarator) -> serde_j
 }
 
 pub fn interface_name(interface: &hir::InterfaceDcl) -> String {
-    match interface {
-        hir::InterfaceDcl::InterfaceForwardDcl(forward) => forward.ident.clone(),
-        hir::InterfaceDcl::InterfaceDef(def) => def.header.ident.clone(),
+    match &interface.decl {
+        hir::InterfaceDclInner::InterfaceForwardDcl(forward) => forward.ident.clone(),
+        hir::InterfaceDclInner::InterfaceDef(def) => def.header.ident.clone(),
     }
 }
 

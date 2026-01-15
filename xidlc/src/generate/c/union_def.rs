@@ -27,12 +27,13 @@ impl CRender for hir::UnionDef {
                 let labels = case
                     .label
                     .iter()
-                    .map(|label| {
-                        crate::generate::render_const_expr(
-                            label,
+                    .map(|label| match label {
+                        hir::CaseLabel::Value(expr) => crate::generate::render_const_expr(
+                            expr,
                             &crate::generate::c::util::c_scoped_name,
                             &crate::generate::c::util::c_literal,
-                        )
+                        ),
+                        hir::CaseLabel::Default => "default".to_string(),
                     })
                     .collect::<Vec<_>>();
                 let element_type = c_element_type_name(&case.element.ty);
@@ -59,12 +60,13 @@ impl CRender for hir::UnionDef {
                 let labels = case
                     .label
                     .iter()
-                    .map(|label| {
-                        render_const_expr(
-                            label,
+                    .map(|label| match label {
+                        hir::CaseLabel::Value(expr) => render_const_expr(
+                            expr,
                             &crate::generate::c::util::c_scoped_name,
                             &crate::generate::c::util::c_literal,
-                        )
+                        ),
+                        hir::CaseLabel::Default => "default".to_string(),
                     })
                     .collect::<Vec<_>>();
                 let kind = element_kind(&case.element.ty);

@@ -47,7 +47,12 @@ impl FfiPlcdr2Serializer {
         must_understand: bool,
         length_code: u8,
     ) -> XcdrFfiError {
-        let out = XcdrSerialize::begin_field(self, crate::FieldId(member_id), must_understand, length_code);
+        let out = XcdrSerialize::begin_field(
+            self,
+            crate::FieldId(member_id),
+            must_understand,
+            length_code,
+        );
         out.into()
     }
 

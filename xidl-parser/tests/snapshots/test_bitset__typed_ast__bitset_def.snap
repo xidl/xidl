@@ -5,82 +5,79 @@ expression: ast
 Specification(
     [
         TypeDcl(
-            TypeDcl(
-                [
-                    ConstrTypeDcl(
-                        BitsetDcl(
-                            BitsetDcl {
-                                ident: Identifier(
-                                    "A",
-                                ),
-                                parent: None,
-                                field: [],
-                            },
-                        ),
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    BitsetDcl(
+                        BitsetDcl {
+                            ident: Identifier(
+                                "A",
+                            ),
+                            parent: None,
+                            field: [],
+                        },
                     ),
-                ],
-            ),
+                ),
+            },
         ),
         TypeDcl(
-            TypeDcl(
-                [
-                    ConstrTypeDcl(
-                        BitsetDcl(
-                            BitsetDcl {
-                                ident: Identifier(
-                                    "A",
-                                ),
-                                parent: Some(
-                                    ScopedName {
-                                        scoped_name: None,
-                                        identifier: Identifier(
-                                            "B",
-                                        ),
-                                        node_text: "B",
-                                    },
-                                ),
-                                field: [],
-                            },
-                        ),
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    BitsetDcl(
+                        BitsetDcl {
+                            ident: Identifier(
+                                "A",
+                            ),
+                            parent: Some(
+                                ScopedName {
+                                    scoped_name: None,
+                                    identifier: Identifier(
+                                        "B",
+                                    ),
+                                    node_text: "B",
+                                },
+                            ),
+                            field: [],
+                        },
                     ),
-                ],
-            ),
+                ),
+            },
         ),
         TypeDcl(
-            TypeDcl(
-                [
-                    ConstrTypeDcl(
-                        BitsetDcl(
-                            BitsetDcl {
-                                ident: Identifier(
-                                    "A",
-                                ),
-                                parent: Some(
-                                    ScopedName {
-                                        scoped_name: None,
-                                        identifier: Identifier(
-                                            "B",
-                                        ),
-                                        node_text: "B",
-                                    },
-                                ),
-                                field: [
-                                    BitField {
-                                        spec: BitfieldSpec {
-                                            pos: PositiveIntConst(
-                                                ConstExpr(
-                                                    XorExpr(
-                                                        AndExpr(
-                                                            ShiftExpr(
-                                                                AddExpr(
-                                                                    MultExpr(
-                                                                        UnaryExpr(
-                                                                            PrimaryExpr(
-                                                                                Literal(
-                                                                                    IntegerLiteral(
-                                                                                        DecNumber(
-                                                                                            "1",
-                                                                                        ),
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    BitsetDcl(
+                        BitsetDcl {
+                            ident: Identifier(
+                                "A",
+                            ),
+                            parent: Some(
+                                ScopedName {
+                                    scoped_name: None,
+                                    identifier: Identifier(
+                                        "B",
+                                    ),
+                                    node_text: "B",
+                                },
+                            ),
+                            field: [
+                                BitField {
+                                    spec: BitfieldSpec {
+                                        pos: PositiveIntConst(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            Literal(
+                                                                                IntegerLiteral(
+                                                                                    DecNumber(
+                                                                                        "1",
                                                                                     ),
                                                                                 ),
                                                                             ),
@@ -92,30 +89,30 @@ Specification(
                                                     ),
                                                 ),
                                             ),
-                                            dst_ty: None,
-                                        },
-                                        ident: [
-                                            Identifier(
-                                                "a",
-                                            ),
-                                        ],
+                                        ),
+                                        dst_ty: None,
                                     },
-                                    BitField {
-                                        spec: BitfieldSpec {
-                                            pos: PositiveIntConst(
-                                                ConstExpr(
-                                                    XorExpr(
-                                                        AndExpr(
-                                                            ShiftExpr(
-                                                                AddExpr(
-                                                                    MultExpr(
-                                                                        UnaryExpr(
-                                                                            PrimaryExpr(
-                                                                                Literal(
-                                                                                    IntegerLiteral(
-                                                                                        DecNumber(
-                                                                                            "1",
-                                                                                        ),
+                                    ident: [
+                                        Identifier(
+                                            "a",
+                                        ),
+                                    ],
+                                },
+                                BitField {
+                                    spec: BitfieldSpec {
+                                        pos: PositiveIntConst(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            Literal(
+                                                                                IntegerLiteral(
+                                                                                    DecNumber(
+                                                                                        "1",
                                                                                     ),
                                                                                 ),
                                                                             ),
@@ -127,26 +124,26 @@ Specification(
                                                     ),
                                                 ),
                                             ),
-                                            dst_ty: None,
-                                        },
-                                        ident: [
-                                            Identifier(
-                                                "a",
-                                            ),
-                                            Identifier(
-                                                "b",
-                                            ),
-                                            Identifier(
-                                                "c",
-                                            ),
-                                        ],
+                                        ),
+                                        dst_ty: None,
                                     },
-                                ],
-                            },
-                        ),
+                                    ident: [
+                                        Identifier(
+                                            "a",
+                                        ),
+                                        Identifier(
+                                            "b",
+                                        ),
+                                        Identifier(
+                                            "c",
+                                        ),
+                                    ],
+                                },
+                            ],
+                        },
                     ),
-                ],
-            ),
+                ),
+            },
         ),
     ],
 )

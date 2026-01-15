@@ -2,7 +2,13 @@ use super::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
-pub enum InterfaceDcl {
+pub struct InterfaceDcl {
+    pub annotations: Vec<Annotation>,
+    pub decl: InterfaceDclInner,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum InterfaceDclInner {
     InterfaceForwardDcl(InterfaceForwardDcl),
     InterfaceDef(InterfaceDef),
 }
@@ -44,6 +50,7 @@ pub enum Export {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct OpDcl {
+    pub annotations: Vec<Annotation>,
     pub ty: OpTypeSpec,
     pub ident: String,
     pub parameter: Option<ParameterDcls>,
@@ -73,7 +80,13 @@ pub struct ParamAttribute(pub String);
 pub struct RaisesExpr(pub Vec<ScopedName>);
 
 #[derive(Debug, Serialize, Deserialize)]
-pub enum AttrDcl {
+pub struct AttrDcl {
+    pub annotations: Vec<Annotation>,
+    pub decl: AttrDclInner,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum AttrDclInner {
     ReadonlyAttrSpec(ReadonlyAttrSpec),
     AttrSpec(AttrSpec),
 }
@@ -126,11 +139,22 @@ pub struct ExceptionList(pub Vec<ScopedName>);
 
 impl From<crate::typed_ast::InterfaceDcl> for InterfaceDcl {
     fn from(value: crate::typed_ast::InterfaceDcl) -> Self {
+        Self {
+            annotations: value.annotations.into_iter().map(Into::into).collect(),
+            decl: value.decl.into(),
+        }
+    }
+}
+
+impl From<crate::typed_ast::InterfaceDclInner> for InterfaceDclInner {
+    fn from(value: crate::typed_ast::InterfaceDclInner) -> Self {
         match value {
-            crate::typed_ast::InterfaceDcl::InterfaceForwardDcl(forward) => {
+            crate::typed_ast::InterfaceDclInner::InterfaceForwardDcl(forward) => {
                 Self::InterfaceForwardDcl(forward.into())
             }
-            crate::typed_ast::InterfaceDcl::InterfaceDef(def) => Self::InterfaceDef(def.into()),
+            crate::typed_ast::InterfaceDclInner::InterfaceDef(def) => {
+                Self::InterfaceDef(def.into())
+            }
         }
     }
 }
@@ -194,6 +218,7 @@ impl From<crate::typed_ast::Export> for Export {
 impl From<crate::typed_ast::OpDcl> for OpDcl {
     fn from(value: crate::typed_ast::OpDcl) -> Self {
         Self {
+            annotations: value.annotations.into_iter().map(Into::into).collect(),
             ty: value.ty.into(),
             ident: value.ident.0,
             parameter: value.parameter.map(Into::into),
@@ -241,11 +266,20 @@ impl From<crate::typed_ast::RaisesExpr> for RaisesExpr {
 
 impl From<crate::typed_ast::AttrDcl> for AttrDcl {
     fn from(value: crate::typed_ast::AttrDcl) -> Self {
+        Self {
+            annotations: value.annotations.into_iter().map(Into::into).collect(),
+            decl: value.decl.into(),
+        }
+    }
+}
+
+impl From<crate::typed_ast::AttrDclInner> for AttrDclInner {
+    fn from(value: crate::typed_ast::AttrDclInner) -> Self {
         match value {
-            crate::typed_ast::AttrDcl::ReadonlyAttrSpec(spec) => {
+            crate::typed_ast::AttrDclInner::ReadonlyAttrSpec(spec) => {
                 Self::ReadonlyAttrSpec(spec.into())
             }
-            crate::typed_ast::AttrDcl::AttrSpec(spec) => Self::AttrSpec(spec.into()),
+            crate::typed_ast::AttrDclInner::AttrSpec(spec) => Self::AttrSpec(spec.into()),
         }
     }
 }

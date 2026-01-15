@@ -5,6 +5,9 @@ mod struct_dcl;
 use serde::{Deserialize, Serialize};
 pub use struct_dcl::*;
 
+mod annotation;
+pub use annotation::*;
+
 mod expr;
 pub use expr::*;
 
@@ -50,11 +53,13 @@ pub enum ConstrTypeDcl {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UnionForwardDcl {
+    pub annotations: Vec<Annotation>,
     pub ident: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UnionDef {
+    pub annotations: Vec<Annotation>,
     pub ident: String,
     pub switch_type_spec: SwitchTypeSpec,
     pub case: Vec<Case>,
@@ -62,12 +67,19 @@ pub struct UnionDef {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Case {
-    pub label: Vec<ConstExpr>,
+    pub label: Vec<CaseLabel>,
     pub element: ElementSpec,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+pub enum CaseLabel {
+    Value(ConstExpr),
+    Default,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ElementSpec {
+    pub annotations: Vec<Annotation>,
     pub ty: ElementSpecTy,
     pub value: Declarator,
 }
@@ -90,6 +102,7 @@ pub enum SwitchTypeSpec {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct BitsetDcl {
+    pub annotations: Vec<Annotation>,
     pub ident: String,
     pub parent: Option<ScopedName>,
     pub field: Vec<BitField>,
@@ -112,8 +125,15 @@ pub struct BitField {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct BitmaskDcl {
+    pub annotations: Vec<Annotation>,
     pub ident: String,
-    pub value: Vec<String>,
+    pub value: Vec<BitValue>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct BitValue {
+    pub annotations: Vec<Annotation>,
+    pub ident: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -171,10 +191,11 @@ fn collect_defs(
                 modules.pop();
             }
             crate::typed_ast::Definition::TypeDcl(type_dcl) => {
-                for inner in type_dcl.0 {
-                    if let crate::typed_ast::TypeDclInner::ConstrTypeDcl(constr) = inner {
-                        out.push(Definition::ConstrTypeDcl(constr.into()));
-                    }
+                if let crate::typed_ast::TypeDclInner::ConstrTypeDcl(constr) = type_dcl.decl {
+                    let mut constr: ConstrTypeDcl = constr.into();
+                    let annotations = type_dcl.annotations.into_iter().map(Into::into).collect();
+                    apply_constr_annotations(&mut constr, annotations);
+                    out.push(Definition::ConstrTypeDcl(constr));
                 }
             }
             crate::typed_ast::Definition::ConstDcl(const_dcl) => {
@@ -198,6 +219,18 @@ fn collect_defs(
             | crate::typed_ast::Definition::PreprocCall(_)
             | crate::typed_ast::Definition::PreprocDefine(_) => {}
         }
+    }
+}
+
+fn apply_constr_annotations(constr: &mut ConstrTypeDcl, annotations: Vec<Annotation>) {
+    match constr {
+        ConstrTypeDcl::StructForwardDcl(def) => def.annotations = annotations,
+        ConstrTypeDcl::StructDcl(def) => def.annotations = annotations,
+        ConstrTypeDcl::EnumDcl(def) => def.annotations = annotations,
+        ConstrTypeDcl::UnionForwardDcl(def) => def.annotations = annotations,
+        ConstrTypeDcl::UnionDef(def) => def.annotations = annotations,
+        ConstrTypeDcl::BitsetDcl(def) => def.annotations = annotations,
+        ConstrTypeDcl::BitmaskDcl(def) => def.annotations = annotations,
     }
 }
 
@@ -241,13 +274,17 @@ impl From<crate::typed_ast::UnionDcl> for ConstrTypeDcl {
 
 impl From<crate::typed_ast::UnionForwardDcl> for UnionForwardDcl {
     fn from(value: crate::typed_ast::UnionForwardDcl) -> Self {
-        Self { ident: value.0 .0 }
+        Self {
+            annotations: vec![],
+            ident: value.0 .0,
+        }
     }
 }
 
 impl From<crate::typed_ast::UnionDef> for UnionDef {
     fn from(value: crate::typed_ast::UnionDef) -> Self {
         Self {
+            annotations: vec![],
             ident: value.ident.0,
             switch_type_spec: value.switch_type_spec.into(),
             case: value.case.into_iter().map(Into::into).collect(),
@@ -258,12 +295,17 @@ impl From<crate::typed_ast::UnionDef> for UnionDef {
 impl From<crate::typed_ast::Case> for Case {
     fn from(value: crate::typed_ast::Case) -> Self {
         Self {
-            label: value
-                .label
-                .into_iter()
-                .map(|label| label.0.into())
-                .collect(),
+            label: value.label.into_iter().map(Into::into).collect(),
             element: value.element.into(),
+        }
+    }
+}
+
+impl From<crate::typed_ast::CaseLabel> for CaseLabel {
+    fn from(value: crate::typed_ast::CaseLabel) -> Self {
+        match value {
+            crate::typed_ast::CaseLabel::Case(expr) => Self::Value(expr.into()),
+            crate::typed_ast::CaseLabel::Default => Self::Default,
         }
     }
 }
@@ -271,6 +313,7 @@ impl From<crate::typed_ast::Case> for Case {
 impl From<crate::typed_ast::ElementSpec> for ElementSpec {
     fn from(value: crate::typed_ast::ElementSpec) -> Self {
         Self {
+            annotations: value.annotations.into_iter().map(Into::into).collect(),
             ty: value.ty.into(),
             value: value.value.into(),
         }
@@ -321,6 +364,7 @@ impl From<crate::typed_ast::BitsetDcl> for BitsetDcl {
         }
 
         Self {
+            annotations: vec![],
             ident: value.ident.0,
             parent: value.parent.map(Into::into),
             field,
@@ -346,15 +390,19 @@ impl From<crate::typed_ast::DestinationType> for BitFieldType {
 
 impl From<crate::typed_ast::BitmaskDcl> for BitmaskDcl {
     fn from(value: crate::typed_ast::BitmaskDcl) -> Self {
-        let mut entries = Vec::new();
-        for bit_value in value.value {
-            for ident in bit_value.0 {
-                entries.push(ident.0);
-            }
-        }
         Self {
+            annotations: vec![],
             ident: value.ident.0,
-            value: entries,
+            value: value.value.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+impl From<crate::typed_ast::BitValue> for BitValue {
+    fn from(value: crate::typed_ast::BitValue) -> Self {
+        Self {
+            annotations: value.annotations.into_iter().map(Into::into).collect(),
+            ident: value.ident.0,
         }
     }
 }

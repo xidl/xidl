@@ -5,81 +5,78 @@ expression: ast
 Specification(
     [
         TypeDcl(
-            TypeDcl(
-                [
-                    ConstrTypeDcl(
-                        UnionDcl(
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    UnionDcl(
+                        UnionForwardDcl(
                             UnionForwardDcl(
-                                UnionForwardDcl(
-                                    Identifier(
-                                        "A",
-                                    ),
+                                Identifier(
+                                    "A",
                                 ),
                             ),
                         ),
                     ),
-                ],
-            ),
+                ),
+            },
         ),
         TypeDcl(
-            TypeDcl(
-                [
-                    ConstrTypeDcl(
-                        UnionDcl(
-                            UnionDef(
-                                UnionDef {
-                                    ident: Identifier(
-                                        "B",
-                                    ),
-                                    switch_type_spec: IntegerType(
-                                        SignedInt(
-                                            SignedLongInt(
-                                                SignedLongInt,
-                                            ),
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    UnionDcl(
+                        UnionDef(
+                            UnionDef {
+                                ident: Identifier(
+                                    "B",
+                                ),
+                                switch_type_spec: IntegerType(
+                                    SignedInt(
+                                        SignedLongInt(
+                                            SignedLongInt,
                                         ),
                                     ),
-                                    case: [],
-                                },
-                            ),
+                                ),
+                                case: [],
+                            },
                         ),
                     ),
-                ],
-            ),
+                ),
+            },
         ),
         TypeDcl(
-            TypeDcl(
-                [
-                    ConstrTypeDcl(
-                        UnionDcl(
-                            UnionDef(
-                                UnionDef {
-                                    ident: Identifier(
-                                        "C",
-                                    ),
-                                    switch_type_spec: IntegerType(
-                                        SignedInt(
-                                            SignedLongInt(
-                                                SignedLongInt,
-                                            ),
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    UnionDcl(
+                        UnionDef(
+                            UnionDef {
+                                ident: Identifier(
+                                    "C",
+                                ),
+                                switch_type_spec: IntegerType(
+                                    SignedInt(
+                                        SignedLongInt(
+                                            SignedLongInt,
                                         ),
                                     ),
-                                    case: [
-                                        Case {
-                                            label: [
-                                                CaseLabel(
-                                                    ConstExpr(
-                                                        XorExpr(
-                                                            AndExpr(
-                                                                ShiftExpr(
-                                                                    AddExpr(
-                                                                        MultExpr(
-                                                                            UnaryExpr(
-                                                                                PrimaryExpr(
-                                                                                    Literal(
-                                                                                        IntegerLiteral(
-                                                                                            DecNumber(
-                                                                                                "0",
-                                                                                            ),
+                                ),
+                                case: [
+                                    Case {
+                                        label: [
+                                            Case(
+                                                ConstExpr(
+                                                    XorExpr(
+                                                        AndExpr(
+                                                            ShiftExpr(
+                                                                AddExpr(
+                                                                    MultExpr(
+                                                                        UnaryExpr(
+                                                                            PrimaryExpr(
+                                                                                Literal(
+                                                                                    IntegerLiteral(
+                                                                                        DecNumber(
+                                                                                            "0",
                                                                                         ),
                                                                                     ),
                                                                                 ),
@@ -91,46 +88,47 @@ Specification(
                                                         ),
                                                     ),
                                                 ),
-                                            ],
-                                            element: ElementSpec {
-                                                ty: TypeSpec(
-                                                    SimpleTypeSpec(
-                                                        BaseTypeSpec(
-                                                            IntegerType(
-                                                                SignedInt(
-                                                                    SignedLongInt(
-                                                                        SignedLongInt,
-                                                                    ),
+                                            ),
+                                        ],
+                                        element: ElementSpec {
+                                            annotations: [],
+                                            ty: TypeSpec(
+                                                SimpleTypeSpec(
+                                                    BaseTypeSpec(
+                                                        IntegerType(
+                                                            SignedInt(
+                                                                SignedLongInt(
+                                                                    SignedLongInt,
                                                                 ),
                                                             ),
                                                         ),
                                                     ),
                                                 ),
-                                                value: SimpleDeclarator(
-                                                    SimpleDeclarator(
-                                                        Identifier(
-                                                            "a",
-                                                        ),
+                                            ),
+                                            value: SimpleDeclarator(
+                                                SimpleDeclarator(
+                                                    Identifier(
+                                                        "a",
                                                     ),
                                                 ),
-                                            },
+                                            ),
                                         },
-                                        Case {
-                                            label: [
-                                                CaseLabel(
-                                                    ConstExpr(
-                                                        XorExpr(
-                                                            AndExpr(
-                                                                ShiftExpr(
-                                                                    AddExpr(
-                                                                        MultExpr(
-                                                                            UnaryExpr(
-                                                                                PrimaryExpr(
-                                                                                    Literal(
-                                                                                        IntegerLiteral(
-                                                                                            DecNumber(
-                                                                                                "1",
-                                                                                            ),
+                                    },
+                                    Case {
+                                        label: [
+                                            Case(
+                                                ConstExpr(
+                                                    XorExpr(
+                                                        AndExpr(
+                                                            ShiftExpr(
+                                                                AddExpr(
+                                                                    MultExpr(
+                                                                        UnaryExpr(
+                                                                            PrimaryExpr(
+                                                                                Literal(
+                                                                                    IntegerLiteral(
+                                                                                        DecNumber(
+                                                                                            "1",
                                                                                         ),
                                                                                     ),
                                                                                 ),
@@ -142,33 +140,34 @@ Specification(
                                                         ),
                                                     ),
                                                 ),
-                                            ],
-                                            element: ElementSpec {
-                                                ty: TypeSpec(
-                                                    TemplateTypeSpec(
-                                                        StringType(
-                                                            StringType {
-                                                                bound: None,
-                                                            },
-                                                        ),
+                                            ),
+                                        ],
+                                        element: ElementSpec {
+                                            annotations: [],
+                                            ty: TypeSpec(
+                                                TemplateTypeSpec(
+                                                    StringType(
+                                                        StringType {
+                                                            bound: None,
+                                                        },
                                                     ),
                                                 ),
-                                                value: SimpleDeclarator(
-                                                    SimpleDeclarator(
-                                                        Identifier(
-                                                            "b",
-                                                        ),
+                                            ),
+                                            value: SimpleDeclarator(
+                                                SimpleDeclarator(
+                                                    Identifier(
+                                                        "b",
                                                     ),
                                                 ),
-                                            },
+                                            ),
                                         },
-                                    ],
-                                },
-                            ),
+                                    },
+                                ],
+                            },
                         ),
                     ),
-                ],
-            ),
+                ),
+            },
         ),
     ],
 )

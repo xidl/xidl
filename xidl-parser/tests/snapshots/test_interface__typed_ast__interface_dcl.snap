@@ -5,715 +5,759 @@ expression: ast
 Specification(
     [
         InterfaceDcl(
-            InterfaceForwardDcl(
-                InterfaceForwardDcl {
-                    kind: InterfaceKind,
-                    ident: Identifier(
-                        "HelloWorld",
-                    ),
-                },
-            ),
-        ),
-        InterfaceDcl(
-            InterfaceDef(
-                InterfaceDef {
-                    header: InterfaceHeader {
+            InterfaceDcl {
+                annotations: [],
+                decl: InterfaceForwardDcl(
+                    InterfaceForwardDcl {
                         kind: InterfaceKind,
                         ident: Identifier(
                             "HelloWorld",
                         ),
-                        parent: None,
                     },
-                    interface_body: None,
-                },
-            ),
+                ),
+            },
         ),
         InterfaceDcl(
-            InterfaceDef(
-                InterfaceDef {
-                    header: InterfaceHeader {
-                        kind: InterfaceKind,
-                        ident: Identifier(
-                            "HelloWorld",
-                        ),
-                        parent: Some(
-                            InterfaceInheritanceSpec(
-                                [
-                                    InterfaceName(
-                                        ScopedName {
-                                            scoped_name: None,
-                                            identifier: Identifier(
-                                                "Parent",
-                                            ),
-                                            node_text: "Parent",
-                                        },
-                                    ),
-                                ],
+            InterfaceDcl {
+                annotations: [],
+                decl: InterfaceDef(
+                    InterfaceDef {
+                        header: InterfaceHeader {
+                            kind: InterfaceKind,
+                            ident: Identifier(
+                                "HelloWorld",
                             ),
-                        ),
+                            parent: None,
+                        },
+                        interface_body: None,
                     },
-                    interface_body: None,
-                },
-            ),
+                ),
+            },
         ),
         InterfaceDcl(
-            InterfaceDef(
-                InterfaceDef {
-                    header: InterfaceHeader {
-                        kind: InterfaceKind,
-                        ident: Identifier(
-                            "HelloWorld",
-                        ),
-                        parent: Some(
-                            InterfaceInheritanceSpec(
-                                [
-                                    InterfaceName(
-                                        ScopedName {
-                                            scoped_name: None,
-                                            identifier: Identifier(
-                                                "Parent1",
-                                            ),
-                                            node_text: "Parent1",
-                                        },
-                                    ),
-                                    InterfaceName(
-                                        ScopedName {
-                                            scoped_name: None,
-                                            identifier: Identifier(
-                                                "Parent2",
-                                            ),
-                                            node_text: "Parent2",
-                                        },
-                                    ),
-                                    InterfaceName(
-                                        ScopedName {
-                                            scoped_name: None,
-                                            identifier: Identifier(
-                                                "Parent3",
-                                            ),
-                                            node_text: "Parent3",
-                                        },
-                                    ),
-                                ],
+            InterfaceDcl {
+                annotations: [],
+                decl: InterfaceDef(
+                    InterfaceDef {
+                        header: InterfaceHeader {
+                            kind: InterfaceKind,
+                            ident: Identifier(
+                                "HelloWorld",
                             ),
-                        ),
-                    },
-                    interface_body: None,
-                },
-            ),
-        ),
-        InterfaceDcl(
-            InterfaceDef(
-                InterfaceDef {
-                    header: InterfaceHeader {
-                        kind: InterfaceKind,
-                        ident: Identifier(
-                            "A",
-                        ),
-                        parent: Some(
-                            InterfaceInheritanceSpec(
-                                [
-                                    InterfaceName(
-                                        ScopedName {
-                                            scoped_name: None,
-                                            identifier: Identifier(
-                                                "B",
-                                            ),
-                                            node_text: "B",
-                                        },
-                                    ),
-                                    InterfaceName(
-                                        ScopedName {
-                                            scoped_name: None,
-                                            identifier: Identifier(
-                                                "C",
-                                            ),
-                                            node_text: "C",
-                                        },
-                                    ),
-                                    InterfaceName(
-                                        ScopedName {
-                                            scoped_name: None,
-                                            identifier: Identifier(
-                                                "D",
-                                            ),
-                                            node_text: "D",
-                                        },
-                                    ),
-                                ],
-                            ),
-                        ),
-                    },
-                    interface_body: Some(
-                        InterfaceBody(
-                            [
-                                OpDcl(
-                                    OpDcl {
-                                        ty: Void,
-                                        ident: Identifier(
-                                            "func1",
-                                        ),
-                                        parameter: None,
-                                        raises: None,
-                                    },
-                                ),
-                                OpDcl(
-                                    OpDcl {
-                                        ty: Void,
-                                        ident: Identifier(
-                                            "func1",
-                                        ),
-                                        parameter: None,
-                                        raises: Some(
-                                            RaisesExpr(
-                                                [
-                                                    ScopedName {
-                                                        scoped_name: None,
-                                                        identifier: Identifier(
-                                                            "A",
-                                                        ),
-                                                        node_text: "A",
-                                                    },
-                                                ],
-                                            ),
-                                        ),
-                                    },
-                                ),
-                                OpDcl(
-                                    OpDcl {
-                                        ty: Void,
-                                        ident: Identifier(
-                                            "func1",
-                                        ),
-                                        parameter: None,
-                                        raises: Some(
-                                            RaisesExpr(
-                                                [
-                                                    ScopedName {
-                                                        scoped_name: None,
-                                                        identifier: Identifier(
-                                                            "A",
-                                                        ),
-                                                        node_text: "A",
-                                                    },
-                                                    ScopedName {
-                                                        scoped_name: None,
-                                                        identifier: Identifier(
-                                                            "B",
-                                                        ),
-                                                        node_text: "B",
-                                                    },
-                                                    ScopedName {
-                                                        scoped_name: None,
-                                                        identifier: Identifier(
-                                                            "C",
-                                                        ),
-                                                        node_text: "C",
-                                                    },
-                                                ],
-                                            ),
-                                        ),
-                                    },
-                                ),
-                                OpDcl(
-                                    OpDcl {
-                                        ty: Void,
-                                        ident: Identifier(
-                                            "func1",
-                                        ),
-                                        parameter: Some(
-                                            ParameterDcls(
-                                                [
-                                                    ParamDcl {
-                                                        attr: Some(
-                                                            ParamAttribute(
-                                                                "in",
-                                                            ),
-                                                        ),
-                                                        ty: SimpleTypeSpec(
-                                                            ScopedName(
-                                                                ScopedName {
-                                                                    scoped_name: None,
-                                                                    identifier: Identifier(
-                                                                        "u8",
-                                                                    ),
-                                                                    node_text: "u8",
-                                                                },
-                                                            ),
-                                                        ),
-                                                        declarator: SimpleDeclarator(
-                                                            Identifier(
-                                                                "attr",
-                                                            ),
-                                                        ),
-                                                    },
-                                                    ParamDcl {
-                                                        attr: Some(
-                                                            ParamAttribute(
-                                                                "out",
-                                                            ),
-                                                        ),
-                                                        ty: SimpleTypeSpec(
-                                                            ScopedName(
-                                                                ScopedName {
-                                                                    scoped_name: None,
-                                                                    identifier: Identifier(
-                                                                        "u16",
-                                                                    ),
-                                                                    node_text: "u16",
-                                                                },
-                                                            ),
-                                                        ),
-                                                        declarator: SimpleDeclarator(
-                                                            Identifier(
-                                                                "attr",
-                                                            ),
-                                                        ),
-                                                    },
-                                                ],
-                                            ),
-                                        ),
-                                        raises: None,
-                                    },
-                                ),
-                                OpDcl(
-                                    OpDcl {
-                                        ty: Void,
-                                        ident: Identifier(
-                                            "func1",
-                                        ),
-                                        parameter: Some(
-                                            ParameterDcls(
-                                                [
-                                                    ParamDcl {
-                                                        attr: Some(
-                                                            ParamAttribute(
-                                                                "in",
-                                                            ),
-                                                        ),
-                                                        ty: SimpleTypeSpec(
-                                                            ScopedName(
-                                                                ScopedName {
-                                                                    scoped_name: None,
-                                                                    identifier: Identifier(
-                                                                        "u8",
-                                                                    ),
-                                                                    node_text: "u8",
-                                                                },
-                                                            ),
-                                                        ),
-                                                        declarator: SimpleDeclarator(
-                                                            Identifier(
-                                                                "attr",
-                                                            ),
-                                                        ),
-                                                    },
-                                                    ParamDcl {
-                                                        attr: Some(
-                                                            ParamAttribute(
-                                                                "out",
-                                                            ),
-                                                        ),
-                                                        ty: SimpleTypeSpec(
-                                                            ScopedName(
-                                                                ScopedName {
-                                                                    scoped_name: None,
-                                                                    identifier: Identifier(
-                                                                        "u16",
-                                                                    ),
-                                                                    node_text: "u16",
-                                                                },
-                                                            ),
-                                                        ),
-                                                        declarator: SimpleDeclarator(
-                                                            Identifier(
-                                                                "attr",
-                                                            ),
-                                                        ),
-                                                    },
-                                                ],
-                                            ),
-                                        ),
-                                        raises: Some(
-                                            RaisesExpr(
-                                                [
-                                                    ScopedName {
-                                                        scoped_name: None,
-                                                        identifier: Identifier(
-                                                            "A",
-                                                        ),
-                                                        node_text: "A",
-                                                    },
-                                                ],
-                                            ),
-                                        ),
-                                    },
-                                ),
-                                OpDcl(
-                                    OpDcl {
-                                        ty: Void,
-                                        ident: Identifier(
-                                            "func1",
-                                        ),
-                                        parameter: Some(
-                                            ParameterDcls(
-                                                [
-                                                    ParamDcl {
-                                                        attr: Some(
-                                                            ParamAttribute(
-                                                                "in",
-                                                            ),
-                                                        ),
-                                                        ty: SimpleTypeSpec(
-                                                            ScopedName(
-                                                                ScopedName {
-                                                                    scoped_name: None,
-                                                                    identifier: Identifier(
-                                                                        "u8",
-                                                                    ),
-                                                                    node_text: "u8",
-                                                                },
-                                                            ),
-                                                        ),
-                                                        declarator: SimpleDeclarator(
-                                                            Identifier(
-                                                                "attr",
-                                                            ),
-                                                        ),
-                                                    },
-                                                    ParamDcl {
-                                                        attr: Some(
-                                                            ParamAttribute(
-                                                                "out",
-                                                            ),
-                                                        ),
-                                                        ty: SimpleTypeSpec(
-                                                            ScopedName(
-                                                                ScopedName {
-                                                                    scoped_name: None,
-                                                                    identifier: Identifier(
-                                                                        "u16",
-                                                                    ),
-                                                                    node_text: "u16",
-                                                                },
-                                                            ),
-                                                        ),
-                                                        declarator: SimpleDeclarator(
-                                                            Identifier(
-                                                                "attr",
-                                                            ),
-                                                        ),
-                                                    },
-                                                ],
-                                            ),
-                                        ),
-                                        raises: Some(
-                                            RaisesExpr(
-                                                [
-                                                    ScopedName {
-                                                        scoped_name: None,
-                                                        identifier: Identifier(
-                                                            "A",
-                                                        ),
-                                                        node_text: "A",
-                                                    },
-                                                    ScopedName {
-                                                        scoped_name: None,
-                                                        identifier: Identifier(
-                                                            "B",
-                                                        ),
-                                                        node_text: "B",
-                                                    },
-                                                    ScopedName {
-                                                        scoped_name: None,
-                                                        identifier: Identifier(
-                                                            "C",
-                                                        ),
-                                                        node_text: "C",
-                                                    },
-                                                ],
-                                            ),
-                                        ),
-                                    },
-                                ),
-                                AttrDcl(
-                                    ReadonlyAttrSpec(
-                                        ReadonlyAttrSpec {
-                                            ty: SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        scoped_name: None,
-                                                        identifier: Identifier(
-                                                            "u8",
-                                                        ),
-                                                        node_text: "u8",
-                                                    },
+                            parent: Some(
+                                InterfaceInheritanceSpec(
+                                    [
+                                        InterfaceName(
+                                            ScopedName {
+                                                scoped_name: None,
+                                                identifier: Identifier(
+                                                    "Parent",
                                                 ),
-                                            ),
-                                            declarator: SimpleDeclarator(
-                                                SimpleDeclarator(
-                                                    Identifier(
-                                                        "attr1",
-                                                    ),
-                                                ),
-                                            ),
-                                        },
-                                    ),
-                                ),
-                                AttrDcl(
-                                    ReadonlyAttrSpec(
-                                        ReadonlyAttrSpec {
-                                            ty: SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        scoped_name: None,
-                                                        identifier: Identifier(
-                                                            "u8",
-                                                        ),
-                                                        node_text: "u8",
-                                                    },
-                                                ),
-                                            ),
-                                            declarator: SimpleDeclarator(
-                                                SimpleDeclarator(
-                                                    Identifier(
-                                                        "attr1",
-                                                    ),
-                                                ),
-                                            ),
-                                        },
-                                    ),
-                                ),
-                                AttrDcl(
-                                    ReadonlyAttrSpec(
-                                        ReadonlyAttrSpec {
-                                            ty: SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        scoped_name: None,
-                                                        identifier: Identifier(
-                                                            "u8",
-                                                        ),
-                                                        node_text: "u8",
-                                                    },
-                                                ),
-                                            ),
-                                            declarator: SimpleDeclarator(
-                                                SimpleDeclarator(
-                                                    Identifier(
-                                                        "attr1",
-                                                    ),
-                                                ),
-                                            ),
-                                        },
-                                    ),
-                                ),
-                                AttrDcl(
-                                    AttrSpec(
-                                        AttrSpec {
-                                            type_spec: SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        scoped_name: None,
-                                                        identifier: Identifier(
-                                                            "u8",
-                                                        ),
-                                                        node_text: "u8",
-                                                    },
-                                                ),
-                                            ),
-                                            declarator: SimpleDeclarator(
-                                                [
-                                                    SimpleDeclarator(
-                                                        Identifier(
-                                                            "attr1",
-                                                        ),
-                                                    ),
-                                                    SimpleDeclarator(
-                                                        Identifier(
-                                                            "attr2",
-                                                        ),
-                                                    ),
-                                                    SimpleDeclarator(
-                                                        Identifier(
-                                                            "attr3",
-                                                        ),
-                                                    ),
-                                                ],
-                                            ),
-                                        },
-                                    ),
-                                ),
-                                AttrDcl(
-                                    AttrSpec(
-                                        AttrSpec {
-                                            type_spec: SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        scoped_name: None,
-                                                        identifier: Identifier(
-                                                            "u8",
-                                                        ),
-                                                        node_text: "u8",
-                                                    },
-                                                ),
-                                            ),
-                                            declarator: WithRaises {
-                                                declarator: SimpleDeclarator(
-                                                    Identifier(
-                                                        "attr1",
-                                                    ),
-                                                ),
-                                                raises: Case1(
-                                                    GetExcepExpr {
-                                                        expr: ExceptionList(
-                                                            [
-                                                                ScopedName {
-                                                                    scoped_name: None,
-                                                                    identifier: Identifier(
-                                                                        "A",
-                                                                    ),
-                                                                    node_text: "A",
-                                                                },
-                                                            ],
-                                                        ),
-                                                    },
-                                                    None,
-                                                ),
+                                                node_text: "Parent",
                                             },
+                                        ),
+                                    ],
+                                ),
+                            ),
+                        },
+                        interface_body: None,
+                    },
+                ),
+            },
+        ),
+        InterfaceDcl(
+            InterfaceDcl {
+                annotations: [],
+                decl: InterfaceDef(
+                    InterfaceDef {
+                        header: InterfaceHeader {
+                            kind: InterfaceKind,
+                            ident: Identifier(
+                                "HelloWorld",
+                            ),
+                            parent: Some(
+                                InterfaceInheritanceSpec(
+                                    [
+                                        InterfaceName(
+                                            ScopedName {
+                                                scoped_name: None,
+                                                identifier: Identifier(
+                                                    "Parent1",
+                                                ),
+                                                node_text: "Parent1",
+                                            },
+                                        ),
+                                        InterfaceName(
+                                            ScopedName {
+                                                scoped_name: None,
+                                                identifier: Identifier(
+                                                    "Parent2",
+                                                ),
+                                                node_text: "Parent2",
+                                            },
+                                        ),
+                                        InterfaceName(
+                                            ScopedName {
+                                                scoped_name: None,
+                                                identifier: Identifier(
+                                                    "Parent3",
+                                                ),
+                                                node_text: "Parent3",
+                                            },
+                                        ),
+                                    ],
+                                ),
+                            ),
+                        },
+                        interface_body: None,
+                    },
+                ),
+            },
+        ),
+        InterfaceDcl(
+            InterfaceDcl {
+                annotations: [],
+                decl: InterfaceDef(
+                    InterfaceDef {
+                        header: InterfaceHeader {
+                            kind: InterfaceKind,
+                            ident: Identifier(
+                                "A",
+                            ),
+                            parent: Some(
+                                InterfaceInheritanceSpec(
+                                    [
+                                        InterfaceName(
+                                            ScopedName {
+                                                scoped_name: None,
+                                                identifier: Identifier(
+                                                    "B",
+                                                ),
+                                                node_text: "B",
+                                            },
+                                        ),
+                                        InterfaceName(
+                                            ScopedName {
+                                                scoped_name: None,
+                                                identifier: Identifier(
+                                                    "C",
+                                                ),
+                                                node_text: "C",
+                                            },
+                                        ),
+                                        InterfaceName(
+                                            ScopedName {
+                                                scoped_name: None,
+                                                identifier: Identifier(
+                                                    "D",
+                                                ),
+                                                node_text: "D",
+                                            },
+                                        ),
+                                    ],
+                                ),
+                            ),
+                        },
+                        interface_body: Some(
+                            InterfaceBody(
+                                [
+                                    OpDcl(
+                                        OpDcl {
+                                            annotations: [],
+                                            ty: Void,
+                                            ident: Identifier(
+                                                "func1",
+                                            ),
+                                            parameter: None,
+                                            raises: None,
                                         },
                                     ),
-                                ),
-                                AttrDcl(
-                                    AttrSpec(
-                                        AttrSpec {
-                                            type_spec: SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        scoped_name: None,
-                                                        identifier: Identifier(
-                                                            "u8",
-                                                        ),
-                                                        node_text: "u8",
-                                                    },
+                                    OpDcl(
+                                        OpDcl {
+                                            annotations: [],
+                                            ty: Void,
+                                            ident: Identifier(
+                                                "func1",
+                                            ),
+                                            parameter: None,
+                                            raises: Some(
+                                                RaisesExpr(
+                                                    [
+                                                        ScopedName {
+                                                            scoped_name: None,
+                                                            identifier: Identifier(
+                                                                "A",
+                                                            ),
+                                                            node_text: "A",
+                                                        },
+                                                    ],
                                                 ),
                                             ),
-                                            declarator: WithRaises {
-                                                declarator: SimpleDeclarator(
-                                                    Identifier(
-                                                        "attr1",
-                                                    ),
+                                        },
+                                    ),
+                                    OpDcl(
+                                        OpDcl {
+                                            annotations: [],
+                                            ty: Void,
+                                            ident: Identifier(
+                                                "func1",
+                                            ),
+                                            parameter: None,
+                                            raises: Some(
+                                                RaisesExpr(
+                                                    [
+                                                        ScopedName {
+                                                            scoped_name: None,
+                                                            identifier: Identifier(
+                                                                "A",
+                                                            ),
+                                                            node_text: "A",
+                                                        },
+                                                        ScopedName {
+                                                            scoped_name: None,
+                                                            identifier: Identifier(
+                                                                "B",
+                                                            ),
+                                                            node_text: "B",
+                                                        },
+                                                        ScopedName {
+                                                            scoped_name: None,
+                                                            identifier: Identifier(
+                                                                "C",
+                                                            ),
+                                                            node_text: "C",
+                                                        },
+                                                    ],
                                                 ),
-                                                raises: Case1(
-                                                    GetExcepExpr {
-                                                        expr: ExceptionList(
-                                                            [
-                                                                ScopedName {
-                                                                    scoped_name: None,
-                                                                    identifier: Identifier(
-                                                                        "A",
-                                                                    ),
-                                                                    node_text: "A",
-                                                                },
-                                                                ScopedName {
-                                                                    scoped_name: None,
-                                                                    identifier: Identifier(
-                                                                        "B",
-                                                                    ),
-                                                                    node_text: "B",
-                                                                },
-                                                                ScopedName {
-                                                                    scoped_name: None,
-                                                                    identifier: Identifier(
-                                                                        "C",
-                                                                    ),
-                                                                    node_text: "C",
-                                                                },
-                                                            ],
-                                                        ),
-                                                    },
-                                                    Some(
-                                                        SetExcepExpr {
-                                                            expr: ExceptionList(
-                                                                [
+                                            ),
+                                        },
+                                    ),
+                                    OpDcl(
+                                        OpDcl {
+                                            annotations: [],
+                                            ty: Void,
+                                            ident: Identifier(
+                                                "func1",
+                                            ),
+                                            parameter: Some(
+                                                ParameterDcls(
+                                                    [
+                                                        ParamDcl {
+                                                            attr: Some(
+                                                                ParamAttribute(
+                                                                    "in",
+                                                                ),
+                                                            ),
+                                                            ty: SimpleTypeSpec(
+                                                                ScopedName(
                                                                     ScopedName {
                                                                         scoped_name: None,
                                                                         identifier: Identifier(
-                                                                            "A",
+                                                                            "u8",
                                                                         ),
-                                                                        node_text: "A",
+                                                                        node_text: "u8",
                                                                     },
-                                                                ],
+                                                                ),
+                                                            ),
+                                                            declarator: SimpleDeclarator(
+                                                                Identifier(
+                                                                    "attr",
+                                                                ),
                                                             ),
                                                         },
-                                                    ),
-                                                ),
-                                            },
-                                        },
-                                    ),
-                                ),
-                                AttrDcl(
-                                    AttrSpec(
-                                        AttrSpec {
-                                            type_spec: SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        scoped_name: None,
-                                                        identifier: Identifier(
-                                                            "u8",
-                                                        ),
-                                                        node_text: "u8",
-                                                    },
+                                                        ParamDcl {
+                                                            attr: Some(
+                                                                ParamAttribute(
+                                                                    "out",
+                                                                ),
+                                                            ),
+                                                            ty: SimpleTypeSpec(
+                                                                ScopedName(
+                                                                    ScopedName {
+                                                                        scoped_name: None,
+                                                                        identifier: Identifier(
+                                                                            "u16",
+                                                                        ),
+                                                                        node_text: "u16",
+                                                                    },
+                                                                ),
+                                                            ),
+                                                            declarator: SimpleDeclarator(
+                                                                Identifier(
+                                                                    "attr",
+                                                                ),
+                                                            ),
+                                                        },
+                                                    ],
                                                 ),
                                             ),
-                                            declarator: WithRaises {
-                                                declarator: SimpleDeclarator(
-                                                    Identifier(
-                                                        "attr1",
-                                                    ),
-                                                ),
-                                                raises: SetExcepExpr(
-                                                    SetExcepExpr {
-                                                        expr: ExceptionList(
-                                                            [
-                                                                ScopedName {
-                                                                    scoped_name: None,
-                                                                    identifier: Identifier(
-                                                                        "A",
-                                                                    ),
-                                                                    node_text: "A",
-                                                                },
-                                                            ],
-                                                        ),
-                                                    },
-                                                ),
-                                            },
+                                            raises: None,
                                         },
                                     ),
-                                ),
-                            ],
+                                    OpDcl(
+                                        OpDcl {
+                                            annotations: [],
+                                            ty: Void,
+                                            ident: Identifier(
+                                                "func1",
+                                            ),
+                                            parameter: Some(
+                                                ParameterDcls(
+                                                    [
+                                                        ParamDcl {
+                                                            attr: Some(
+                                                                ParamAttribute(
+                                                                    "in",
+                                                                ),
+                                                            ),
+                                                            ty: SimpleTypeSpec(
+                                                                ScopedName(
+                                                                    ScopedName {
+                                                                        scoped_name: None,
+                                                                        identifier: Identifier(
+                                                                            "u8",
+                                                                        ),
+                                                                        node_text: "u8",
+                                                                    },
+                                                                ),
+                                                            ),
+                                                            declarator: SimpleDeclarator(
+                                                                Identifier(
+                                                                    "attr",
+                                                                ),
+                                                            ),
+                                                        },
+                                                        ParamDcl {
+                                                            attr: Some(
+                                                                ParamAttribute(
+                                                                    "out",
+                                                                ),
+                                                            ),
+                                                            ty: SimpleTypeSpec(
+                                                                ScopedName(
+                                                                    ScopedName {
+                                                                        scoped_name: None,
+                                                                        identifier: Identifier(
+                                                                            "u16",
+                                                                        ),
+                                                                        node_text: "u16",
+                                                                    },
+                                                                ),
+                                                            ),
+                                                            declarator: SimpleDeclarator(
+                                                                Identifier(
+                                                                    "attr",
+                                                                ),
+                                                            ),
+                                                        },
+                                                    ],
+                                                ),
+                                            ),
+                                            raises: Some(
+                                                RaisesExpr(
+                                                    [
+                                                        ScopedName {
+                                                            scoped_name: None,
+                                                            identifier: Identifier(
+                                                                "A",
+                                                            ),
+                                                            node_text: "A",
+                                                        },
+                                                    ],
+                                                ),
+                                            ),
+                                        },
+                                    ),
+                                    OpDcl(
+                                        OpDcl {
+                                            annotations: [],
+                                            ty: Void,
+                                            ident: Identifier(
+                                                "func1",
+                                            ),
+                                            parameter: Some(
+                                                ParameterDcls(
+                                                    [
+                                                        ParamDcl {
+                                                            attr: Some(
+                                                                ParamAttribute(
+                                                                    "in",
+                                                                ),
+                                                            ),
+                                                            ty: SimpleTypeSpec(
+                                                                ScopedName(
+                                                                    ScopedName {
+                                                                        scoped_name: None,
+                                                                        identifier: Identifier(
+                                                                            "u8",
+                                                                        ),
+                                                                        node_text: "u8",
+                                                                    },
+                                                                ),
+                                                            ),
+                                                            declarator: SimpleDeclarator(
+                                                                Identifier(
+                                                                    "attr",
+                                                                ),
+                                                            ),
+                                                        },
+                                                        ParamDcl {
+                                                            attr: Some(
+                                                                ParamAttribute(
+                                                                    "out",
+                                                                ),
+                                                            ),
+                                                            ty: SimpleTypeSpec(
+                                                                ScopedName(
+                                                                    ScopedName {
+                                                                        scoped_name: None,
+                                                                        identifier: Identifier(
+                                                                            "u16",
+                                                                        ),
+                                                                        node_text: "u16",
+                                                                    },
+                                                                ),
+                                                            ),
+                                                            declarator: SimpleDeclarator(
+                                                                Identifier(
+                                                                    "attr",
+                                                                ),
+                                                            ),
+                                                        },
+                                                    ],
+                                                ),
+                                            ),
+                                            raises: Some(
+                                                RaisesExpr(
+                                                    [
+                                                        ScopedName {
+                                                            scoped_name: None,
+                                                            identifier: Identifier(
+                                                                "A",
+                                                            ),
+                                                            node_text: "A",
+                                                        },
+                                                        ScopedName {
+                                                            scoped_name: None,
+                                                            identifier: Identifier(
+                                                                "B",
+                                                            ),
+                                                            node_text: "B",
+                                                        },
+                                                        ScopedName {
+                                                            scoped_name: None,
+                                                            identifier: Identifier(
+                                                                "C",
+                                                            ),
+                                                            node_text: "C",
+                                                        },
+                                                    ],
+                                                ),
+                                            ),
+                                        },
+                                    ),
+                                    AttrDcl(
+                                        AttrDcl {
+                                            annotations: [],
+                                            decl: ReadonlyAttrSpec(
+                                                ReadonlyAttrSpec {
+                                                    ty: SimpleTypeSpec(
+                                                        ScopedName(
+                                                            ScopedName {
+                                                                scoped_name: None,
+                                                                identifier: Identifier(
+                                                                    "u8",
+                                                                ),
+                                                                node_text: "u8",
+                                                            },
+                                                        ),
+                                                    ),
+                                                    declarator: SimpleDeclarator(
+                                                        SimpleDeclarator(
+                                                            Identifier(
+                                                                "attr1",
+                                                            ),
+                                                        ),
+                                                    ),
+                                                },
+                                            ),
+                                        },
+                                    ),
+                                    AttrDcl(
+                                        AttrDcl {
+                                            annotations: [],
+                                            decl: ReadonlyAttrSpec(
+                                                ReadonlyAttrSpec {
+                                                    ty: SimpleTypeSpec(
+                                                        ScopedName(
+                                                            ScopedName {
+                                                                scoped_name: None,
+                                                                identifier: Identifier(
+                                                                    "u8",
+                                                                ),
+                                                                node_text: "u8",
+                                                            },
+                                                        ),
+                                                    ),
+                                                    declarator: SimpleDeclarator(
+                                                        SimpleDeclarator(
+                                                            Identifier(
+                                                                "attr1",
+                                                            ),
+                                                        ),
+                                                    ),
+                                                },
+                                            ),
+                                        },
+                                    ),
+                                    AttrDcl(
+                                        AttrDcl {
+                                            annotations: [],
+                                            decl: ReadonlyAttrSpec(
+                                                ReadonlyAttrSpec {
+                                                    ty: SimpleTypeSpec(
+                                                        ScopedName(
+                                                            ScopedName {
+                                                                scoped_name: None,
+                                                                identifier: Identifier(
+                                                                    "u8",
+                                                                ),
+                                                                node_text: "u8",
+                                                            },
+                                                        ),
+                                                    ),
+                                                    declarator: SimpleDeclarator(
+                                                        SimpleDeclarator(
+                                                            Identifier(
+                                                                "attr1",
+                                                            ),
+                                                        ),
+                                                    ),
+                                                },
+                                            ),
+                                        },
+                                    ),
+                                    AttrDcl(
+                                        AttrDcl {
+                                            annotations: [],
+                                            decl: AttrSpec(
+                                                AttrSpec {
+                                                    type_spec: SimpleTypeSpec(
+                                                        ScopedName(
+                                                            ScopedName {
+                                                                scoped_name: None,
+                                                                identifier: Identifier(
+                                                                    "u8",
+                                                                ),
+                                                                node_text: "u8",
+                                                            },
+                                                        ),
+                                                    ),
+                                                    declarator: SimpleDeclarator(
+                                                        [
+                                                            SimpleDeclarator(
+                                                                Identifier(
+                                                                    "attr1",
+                                                                ),
+                                                            ),
+                                                            SimpleDeclarator(
+                                                                Identifier(
+                                                                    "attr2",
+                                                                ),
+                                                            ),
+                                                            SimpleDeclarator(
+                                                                Identifier(
+                                                                    "attr3",
+                                                                ),
+                                                            ),
+                                                        ],
+                                                    ),
+                                                },
+                                            ),
+                                        },
+                                    ),
+                                    AttrDcl(
+                                        AttrDcl {
+                                            annotations: [],
+                                            decl: AttrSpec(
+                                                AttrSpec {
+                                                    type_spec: SimpleTypeSpec(
+                                                        ScopedName(
+                                                            ScopedName {
+                                                                scoped_name: None,
+                                                                identifier: Identifier(
+                                                                    "u8",
+                                                                ),
+                                                                node_text: "u8",
+                                                            },
+                                                        ),
+                                                    ),
+                                                    declarator: WithRaises {
+                                                        declarator: SimpleDeclarator(
+                                                            Identifier(
+                                                                "attr1",
+                                                            ),
+                                                        ),
+                                                        raises: Case1(
+                                                            GetExcepExpr {
+                                                                expr: ExceptionList(
+                                                                    [
+                                                                        ScopedName {
+                                                                            scoped_name: None,
+                                                                            identifier: Identifier(
+                                                                                "A",
+                                                                            ),
+                                                                            node_text: "A",
+                                                                        },
+                                                                    ],
+                                                                ),
+                                                            },
+                                                            None,
+                                                        ),
+                                                    },
+                                                },
+                                            ),
+                                        },
+                                    ),
+                                    AttrDcl(
+                                        AttrDcl {
+                                            annotations: [],
+                                            decl: AttrSpec(
+                                                AttrSpec {
+                                                    type_spec: SimpleTypeSpec(
+                                                        ScopedName(
+                                                            ScopedName {
+                                                                scoped_name: None,
+                                                                identifier: Identifier(
+                                                                    "u8",
+                                                                ),
+                                                                node_text: "u8",
+                                                            },
+                                                        ),
+                                                    ),
+                                                    declarator: WithRaises {
+                                                        declarator: SimpleDeclarator(
+                                                            Identifier(
+                                                                "attr1",
+                                                            ),
+                                                        ),
+                                                        raises: Case1(
+                                                            GetExcepExpr {
+                                                                expr: ExceptionList(
+                                                                    [
+                                                                        ScopedName {
+                                                                            scoped_name: None,
+                                                                            identifier: Identifier(
+                                                                                "A",
+                                                                            ),
+                                                                            node_text: "A",
+                                                                        },
+                                                                        ScopedName {
+                                                                            scoped_name: None,
+                                                                            identifier: Identifier(
+                                                                                "B",
+                                                                            ),
+                                                                            node_text: "B",
+                                                                        },
+                                                                        ScopedName {
+                                                                            scoped_name: None,
+                                                                            identifier: Identifier(
+                                                                                "C",
+                                                                            ),
+                                                                            node_text: "C",
+                                                                        },
+                                                                    ],
+                                                                ),
+                                                            },
+                                                            Some(
+                                                                SetExcepExpr {
+                                                                    expr: ExceptionList(
+                                                                        [
+                                                                            ScopedName {
+                                                                                scoped_name: None,
+                                                                                identifier: Identifier(
+                                                                                    "A",
+                                                                                ),
+                                                                                node_text: "A",
+                                                                            },
+                                                                        ],
+                                                                    ),
+                                                                },
+                                                            ),
+                                                        ),
+                                                    },
+                                                },
+                                            ),
+                                        },
+                                    ),
+                                    AttrDcl(
+                                        AttrDcl {
+                                            annotations: [],
+                                            decl: AttrSpec(
+                                                AttrSpec {
+                                                    type_spec: SimpleTypeSpec(
+                                                        ScopedName(
+                                                            ScopedName {
+                                                                scoped_name: None,
+                                                                identifier: Identifier(
+                                                                    "u8",
+                                                                ),
+                                                                node_text: "u8",
+                                                            },
+                                                        ),
+                                                    ),
+                                                    declarator: WithRaises {
+                                                        declarator: SimpleDeclarator(
+                                                            Identifier(
+                                                                "attr1",
+                                                            ),
+                                                        ),
+                                                        raises: SetExcepExpr(
+                                                            SetExcepExpr {
+                                                                expr: ExceptionList(
+                                                                    [
+                                                                        ScopedName {
+                                                                            scoped_name: None,
+                                                                            identifier: Identifier(
+                                                                                "A",
+                                                                            ),
+                                                                            node_text: "A",
+                                                                        },
+                                                                    ],
+                                                                ),
+                                                            },
+                                                        ),
+                                                    },
+                                                },
+                                            ),
+                                        },
+                                    ),
+                                ],
+                            ),
                         ),
-                    ),
-                },
-            ),
+                    },
+                ),
+            },
         ),
         InterfaceDcl(
-            InterfaceDef(
-                InterfaceDef {
-                    header: InterfaceHeader {
-                        kind: InterfaceKind,
-                        ident: Identifier(
-                            "A",
-                        ),
-                        parent: None,
-                    },
-                    interface_body: Some(
-                        InterfaceBody(
-                            [
-                                TypeDcl(
+            InterfaceDcl {
+                annotations: [],
+                decl: InterfaceDef(
+                    InterfaceDef {
+                        header: InterfaceHeader {
+                            kind: InterfaceKind,
+                            ident: Identifier(
+                                "A",
+                            ),
+                            parent: None,
+                        },
+                        interface_body: Some(
+                            InterfaceBody(
+                                [
                                     TypeDcl(
-                                        [
-                                            TypedefDcl(
+                                        TypeDcl {
+                                            annotations: [],
+                                            decl: TypedefDcl(
                                                 TypedefDcl {
                                                     decl: TypeDeclarator {
                                                         ty: SimpleTypeSpec(
@@ -741,35 +785,35 @@ Specification(
                                                     },
                                                 },
                                             ),
-                                        ],
+                                        },
                                     ),
-                                ),
-                                ConstDcl(
-                                    ConstDcl {
-                                        ty: ScopedName(
-                                            ScopedName {
-                                                scoped_name: None,
-                                                identifier: Identifier(
-                                                    "int",
-                                                ),
-                                                node_text: "int",
-                                            },
-                                        ),
-                                        ident: Identifier(
-                                            "a",
-                                        ),
-                                        value: ConstExpr(
-                                            XorExpr(
-                                                AndExpr(
-                                                    ShiftExpr(
-                                                        AddExpr(
-                                                            MultExpr(
-                                                                UnaryExpr(
-                                                                    PrimaryExpr(
-                                                                        Literal(
-                                                                            IntegerLiteral(
-                                                                                DecNumber(
-                                                                                    "10",
+                                    ConstDcl(
+                                        ConstDcl {
+                                            ty: ScopedName(
+                                                ScopedName {
+                                                    scoped_name: None,
+                                                    identifier: Identifier(
+                                                        "int",
+                                                    ),
+                                                    node_text: "int",
+                                                },
+                                            ),
+                                            ident: Identifier(
+                                                "a",
+                                            ),
+                                            value: ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            Literal(
+                                                                                IntegerLiteral(
+                                                                                    DecNumber(
+                                                                                        "10",
+                                                                                    ),
                                                                                 ),
                                                                             ),
                                                                         ),
@@ -780,98 +824,100 @@ Specification(
                                                     ),
                                                 ),
                                             ),
-                                        ),
-                                    },
-                                ),
-                                ExceptDcl(
-                                    ExceptDcl {
-                                        ident: Identifier(
-                                            "A",
-                                        ),
-                                        member: [
-                                            Member {
-                                                ty: SimpleTypeSpec(
-                                                    ScopedName(
-                                                        ScopedName {
-                                                            scoped_name: None,
-                                                            identifier: Identifier(
-                                                                "int",
-                                                            ),
-                                                            node_text: "int",
-                                                        },
+                                        },
+                                    ),
+                                    ExceptDcl(
+                                        ExceptDcl {
+                                            ident: Identifier(
+                                                "A",
+                                            ),
+                                            member: [
+                                                Member {
+                                                    annotations: [],
+                                                    ty: SimpleTypeSpec(
+                                                        ScopedName(
+                                                            ScopedName {
+                                                                scoped_name: None,
+                                                                identifier: Identifier(
+                                                                    "int",
+                                                                ),
+                                                                node_text: "int",
+                                                            },
+                                                        ),
                                                     ),
-                                                ),
-                                                ident: Declarators(
-                                                    [
-                                                        SimpleDeclarator(
+                                                    ident: Declarators(
+                                                        [
                                                             SimpleDeclarator(
-                                                                Identifier(
-                                                                    "a",
+                                                                SimpleDeclarator(
+                                                                    Identifier(
+                                                                        "a",
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ],
+                                                    ),
+                                                    default: None,
+                                                },
+                                            ],
+                                        },
+                                    ),
+                                    OpDcl(
+                                        OpDcl {
+                                            annotations: [],
+                                            ty: TypeSpec(
+                                                SimpleTypeSpec(
+                                                    BaseTypeSpec(
+                                                        IntegerType(
+                                                            SignedInt(
+                                                                SignedShortInt(
+                                                                    SignedShortInt,
                                                                 ),
                                                             ),
                                                         ),
-                                                    ],
-                                                ),
-                                                default: None,
-                                            },
-                                        ],
-                                    },
-                                ),
-                                OpDcl(
-                                    OpDcl {
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                BaseTypeSpec(
-                                                    IntegerType(
-                                                        SignedInt(
-                                                            SignedShortInt(
-                                                                SignedShortInt,
-                                                            ),
-                                                        ),
                                                     ),
                                                 ),
                                             ),
-                                        ),
-                                        ident: Identifier(
-                                            "opA",
-                                        ),
-                                        parameter: Some(
-                                            ParameterDcls(
-                                                [
-                                                    ParamDcl {
-                                                        attr: Some(
-                                                            ParamAttribute(
-                                                                "in",
-                                                            ),
-                                                        ),
-                                                        ty: SimpleTypeSpec(
-                                                            ScopedName(
-                                                                ScopedName {
-                                                                    scoped_name: None,
-                                                                    identifier: Identifier(
-                                                                        "L1",
-                                                                    ),
-                                                                    node_text: "L1",
-                                                                },
-                                                            ),
-                                                        ),
-                                                        declarator: SimpleDeclarator(
-                                                            Identifier(
-                                                                "l_1",
-                                                            ),
-                                                        ),
-                                                    },
-                                                ],
+                                            ident: Identifier(
+                                                "opA",
                                             ),
-                                        ),
-                                        raises: None,
-                                    },
-                                ),
-                            ],
+                                            parameter: Some(
+                                                ParameterDcls(
+                                                    [
+                                                        ParamDcl {
+                                                            attr: Some(
+                                                                ParamAttribute(
+                                                                    "in",
+                                                                ),
+                                                            ),
+                                                            ty: SimpleTypeSpec(
+                                                                ScopedName(
+                                                                    ScopedName {
+                                                                        scoped_name: None,
+                                                                        identifier: Identifier(
+                                                                            "L1",
+                                                                        ),
+                                                                        node_text: "L1",
+                                                                    },
+                                                                ),
+                                                            ),
+                                                            declarator: SimpleDeclarator(
+                                                                Identifier(
+                                                                    "l_1",
+                                                                ),
+                                                            ),
+                                                        },
+                                                    ],
+                                                ),
+                                            ),
+                                            raises: None,
+                                        },
+                                    ),
+                                ],
+                            ),
                         ),
-                    ),
-                },
-            ),
+                    },
+                ),
+            },
         ),
     ],
 )

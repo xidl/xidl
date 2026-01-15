@@ -17,6 +17,7 @@ impl CRender for hir::EnumDcl {
             "variants": self
                 .member
                 .iter()
+                .map(|member| member.ident.clone())
                 .collect::<Vec<_>>(),
             "xcdr_fields": xcdr_fields,
         });

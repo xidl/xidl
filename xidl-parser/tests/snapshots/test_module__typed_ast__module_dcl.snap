@@ -6,6 +6,7 @@ Specification(
     [
         ModuleDcl(
             ModuleDcl {
+                annotations: [],
                 ident: Identifier(
                     "A",
                 ),
@@ -14,6 +15,7 @@ Specification(
         ),
         ModuleDcl(
             ModuleDcl {
+                annotations: [],
                 ident: Identifier(
                     "B",
                 ),
@@ -58,21 +60,20 @@ Specification(
                         },
                     ),
                     TypeDcl(
-                        TypeDcl(
-                            [
-                                ConstrTypeDcl(
-                                    StructDcl(
-                                        StructForwardDcl(
-                                            StructForwardDcl {
-                                                ident: Identifier(
-                                                    "B",
-                                                ),
-                                            },
-                                        ),
+                        TypeDcl {
+                            annotations: [],
+                            decl: ConstrTypeDcl(
+                                StructDcl(
+                                    StructForwardDcl(
+                                        StructForwardDcl {
+                                            ident: Identifier(
+                                                "B",
+                                            ),
+                                        },
                                     ),
                                 ),
-                            ],
-                        ),
+                            ),
+                        },
                     ),
                 ],
             },

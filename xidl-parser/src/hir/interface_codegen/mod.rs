@@ -18,7 +18,7 @@ pub trait ToTemplateContext {
 
 impl ToTemplateContext for InterfaceDcl {
     fn to_template_context(&self, modules: &[String]) -> ParserResult<Option<TemplateContext>> {
-        let InterfaceDcl::InterfaceDef(def) = self else {
+        let InterfaceDclInner::InterfaceDef(def) = &self.decl else {
             return Ok(None);
         };
         let body = match def.interface_body.as_ref() {
@@ -32,10 +32,7 @@ impl ToTemplateContext for InterfaceDcl {
         }
 
         let consts = collect_consts(&def.header.ident, modules, &ops);
-        let operations = ops
-            .iter()
-            .map(|op| op.to_context())
-            .collect::<Vec<_>>();
+        let operations = ops.iter().map(|op| op.to_context()).collect::<Vec<_>>();
 
         Ok(Some(TemplateContext {
             modules: modules.to_vec(),
@@ -46,7 +43,10 @@ impl ToTemplateContext for InterfaceDcl {
     }
 }
 
-pub fn expand_interface(interface: &InterfaceDcl, modules: &[String]) -> ParserResult<Vec<Definition>> {
+pub fn expand_interface(
+    interface: &InterfaceDcl,
+    modules: &[String],
+) -> ParserResult<Vec<Definition>> {
     let Some(ctx) = interface.to_template_context(modules)? else {
         return Ok(Vec::new());
     };

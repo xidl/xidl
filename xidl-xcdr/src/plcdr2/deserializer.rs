@@ -1,5 +1,5 @@
-use crate::{error::XcdrError, XcdrDeserialize};
 use crate::utils::FromBytes;
+use crate::{error::XcdrError, XcdrDeserialize};
 
 pub struct Plcdr2Deserializer<'a> {
     buf: &'a [u8],

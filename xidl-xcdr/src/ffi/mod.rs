@@ -2,8 +2,8 @@ mod cdr;
 mod delimited_cdr;
 mod macros;
 mod plain_cdr2;
-mod plcdr2;
 mod plcdr;
+mod plcdr2;
 mod xcdr_plcdr;
 
 use crate::error::{XcdrError, XcdrResult};

@@ -1,10 +1,13 @@
 use super::ops::{OperationInfo, ParamInfo, ParamMode, ReturnType};
 use super::*;
 
-pub fn operations_from_attr(attr: &AttrDcl, existing: &std::collections::HashSet<String>) -> Vec<OperationInfo> {
-    let attrs = match attr {
-        AttrDcl::ReadonlyAttrSpec(spec) => readonly_attrs(spec),
-        AttrDcl::AttrSpec(spec) => attrs_with_set(spec),
+pub fn operations_from_attr(
+    attr: &AttrDcl,
+    existing: &std::collections::HashSet<String>,
+) -> Vec<OperationInfo> {
+    let attrs = match &attr.decl {
+        AttrDclInner::ReadonlyAttrSpec(spec) => readonly_attrs(spec),
+        AttrDclInner::AttrSpec(spec) => attrs_with_set(spec),
     };
 
     let mut ops = Vec::new();
@@ -79,7 +82,9 @@ fn attrs_with_set(spec: &AttrSpec) -> Vec<AttrInfo> {
             let (get_raises, set_raises) = match raises {
                 AttrRaisesExpr::Case1(get, set) => (
                     get.expr.0.clone(),
-                    set.as_ref().map(|value| value.expr.0.clone()).unwrap_or_default(),
+                    set.as_ref()
+                        .map(|value| value.expr.0.clone())
+                        .unwrap_or_default(),
                 ),
                 AttrRaisesExpr::SetExcepExpr(set) => (Vec::new(), set.expr.0.clone()),
             };
