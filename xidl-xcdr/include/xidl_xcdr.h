@@ -28,6 +28,21 @@ typedef struct CdrSerialize {
 
 typedef struct CdrSerialize FfiCdrSerializer;
 
+typedef struct PlcdrSerialize {
+  uint8_t *buf;
+  uintptr_t len;
+  uintptr_t pos;
+  bool do_io;
+} PlcdrSerialize;
+
+typedef struct PlcdrSerialize FfiPlcdrSerializer;
+
+typedef struct FfiPlcdrDeserializer {
+  const uint8_t *buf_ptr;
+  uintptr_t buf_len;
+  uintptr_t pos;
+} FfiPlcdrDeserializer;
+
 struct FfiCdrDeserializer cdr_deserializer_new(const uint8_t *buf_ptr, uintptr_t buf_len);
 
 uintptr_t cdr_deserializer_position(const struct FfiCdrDeserializer *self);
@@ -107,5 +122,85 @@ enum XcdrFfiError cdr_serializer_write_f64(FfiCdrSerializer *self, double val);
 enum XcdrFfiError cdr_serializer_write_bytes(FfiCdrSerializer *self,
                                              const uint8_t *buf_ptr,
                                              uintptr_t buf_len);
+
+FfiPlcdrSerializer plcdr_serializer_new(uint8_t *buf_ptr, uintptr_t buf_len);
+
+uintptr_t plcdr_serializer_position(const FfiPlcdrSerializer *self);
+
+void plcdr_serializer_reset(FfiPlcdrSerializer *self);
+
+enum XcdrFfiError plcdr_serializer_write_u8(FfiPlcdrSerializer *self, uint8_t val);
+
+enum XcdrFfiError plcdr_serializer_write_i8(FfiPlcdrSerializer *self, int8_t val);
+
+enum XcdrFfiError plcdr_serializer_write_bool(FfiPlcdrSerializer *self, bool val);
+
+enum XcdrFfiError plcdr_serializer_write_u16(FfiPlcdrSerializer *self, uint16_t val);
+
+enum XcdrFfiError plcdr_serializer_write_i16(FfiPlcdrSerializer *self, int16_t val);
+
+enum XcdrFfiError plcdr_serializer_write_u32(FfiPlcdrSerializer *self, uint32_t val);
+
+enum XcdrFfiError plcdr_serializer_write_i32(FfiPlcdrSerializer *self, int32_t val);
+
+enum XcdrFfiError plcdr_serializer_write_u64(FfiPlcdrSerializer *self, uint64_t val);
+
+enum XcdrFfiError plcdr_serializer_write_i64(FfiPlcdrSerializer *self, int64_t val);
+
+enum XcdrFfiError plcdr_serializer_write_f32(FfiPlcdrSerializer *self, float val);
+
+enum XcdrFfiError plcdr_serializer_write_f64(FfiPlcdrSerializer *self, double val);
+
+enum XcdrFfiError plcdr_serializer_write_bytes(FfiPlcdrSerializer *self,
+                                               const uint8_t *buf_ptr,
+                                               uintptr_t buf_len);
+
+struct FfiPlcdrDeserializer plcdr_deserializer_new(const uint8_t *buf_ptr, uintptr_t buf_len);
+
+uintptr_t plcdr_deserializer_position(const struct FfiPlcdrDeserializer *self);
+
+void plcdr_deserializer_reset(struct FfiPlcdrDeserializer *self);
+
+enum XcdrFfiError plcdr_deserializer_read_u8(struct FfiPlcdrDeserializer *self, uint8_t *out);
+
+enum XcdrFfiError plcdr_deserializer_read_i8(struct FfiPlcdrDeserializer *self, int8_t *out);
+
+enum XcdrFfiError plcdr_deserializer_read_bool(struct FfiPlcdrDeserializer *self, bool *out);
+
+enum XcdrFfiError plcdr_deserializer_read_u16_le(struct FfiPlcdrDeserializer *self, uint16_t *out);
+
+enum XcdrFfiError plcdr_deserializer_read_u16_be(struct FfiPlcdrDeserializer *self, uint16_t *out);
+
+enum XcdrFfiError plcdr_deserializer_read_i16_le(struct FfiPlcdrDeserializer *self, int16_t *out);
+
+enum XcdrFfiError plcdr_deserializer_read_i16_be(struct FfiPlcdrDeserializer *self, int16_t *out);
+
+enum XcdrFfiError plcdr_deserializer_read_u32_le(struct FfiPlcdrDeserializer *self, uint32_t *out);
+
+enum XcdrFfiError plcdr_deserializer_read_u32_be(struct FfiPlcdrDeserializer *self, uint32_t *out);
+
+enum XcdrFfiError plcdr_deserializer_read_i32_le(struct FfiPlcdrDeserializer *self, int32_t *out);
+
+enum XcdrFfiError plcdr_deserializer_read_i32_be(struct FfiPlcdrDeserializer *self, int32_t *out);
+
+enum XcdrFfiError plcdr_deserializer_read_u64_le(struct FfiPlcdrDeserializer *self, uint64_t *out);
+
+enum XcdrFfiError plcdr_deserializer_read_u64_be(struct FfiPlcdrDeserializer *self, uint64_t *out);
+
+enum XcdrFfiError plcdr_deserializer_read_i64_le(struct FfiPlcdrDeserializer *self, int64_t *out);
+
+enum XcdrFfiError plcdr_deserializer_read_i64_be(struct FfiPlcdrDeserializer *self, int64_t *out);
+
+enum XcdrFfiError plcdr_deserializer_read_f32_le(struct FfiPlcdrDeserializer *self, float *out);
+
+enum XcdrFfiError plcdr_deserializer_read_f32_be(struct FfiPlcdrDeserializer *self, float *out);
+
+enum XcdrFfiError plcdr_deserializer_read_f64_le(struct FfiPlcdrDeserializer *self, double *out);
+
+enum XcdrFfiError plcdr_deserializer_read_f64_be(struct FfiPlcdrDeserializer *self, double *out);
+
+enum XcdrFfiError plcdr_deserializer_read_bytes(struct FfiPlcdrDeserializer *self,
+                                                uint8_t *out_ptr,
+                                                uintptr_t out_len);
 
 #endif  /* XIDL_XCDR_H */

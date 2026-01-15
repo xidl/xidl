@@ -1,2 +1,2 @@
 generate:
-	cargo run --features headers --bin generate-headers
+	cargo +nightly build -F bindgen
