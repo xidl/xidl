@@ -1,4 +1,5 @@
 mod cdr;
+mod delimited_cdr;
 mod macros;
 mod plain_cdr2;
 mod plcdr;

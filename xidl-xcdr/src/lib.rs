@@ -1,6 +1,7 @@
 pub mod error;
 
 pub mod cdr;
+pub mod delimited_cdr;
 pub mod ffi;
 pub mod plain_cdr;
 pub mod plain_cdr2;

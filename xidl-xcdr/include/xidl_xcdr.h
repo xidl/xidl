@@ -28,6 +28,33 @@ typedef struct CdrSerialize {
 
 typedef struct CdrSerialize FfiCdrSerializer;
 
+typedef struct DelimitedCdrSerialize {
+  uint8_t *buf;
+  uintptr_t len;
+  uintptr_t pos;
+  bool do_io;
+  uintptr_t header_pos;
+  uintptr_t content_start;
+  bool struct_open;
+} DelimitedCdrSerialize;
+
+typedef struct DelimitedCdrSerialize FfiDelimitedCdrSerializer;
+
+typedef struct FfiDelimitedCdrDeserializer {
+  const uint8_t *buf_ptr;
+  uintptr_t buf_len;
+  uintptr_t pos;
+  uintptr_t end_pos;
+  bool end_pos_valid;
+  bool header_little_endian;
+} FfiDelimitedCdrDeserializer;
+
+typedef struct FfiPlainCdr2Deserializer {
+  const uint8_t *buf_ptr;
+  uintptr_t buf_len;
+  uintptr_t pos;
+} FfiPlainCdr2Deserializer;
+
 typedef struct PlainCdr2Serialize {
   uint8_t *buf;
   uintptr_t len;
@@ -36,12 +63,6 @@ typedef struct PlainCdr2Serialize {
 } PlainCdr2Serialize;
 
 typedef struct PlainCdr2Serialize FfiPlainCdr2Serializer;
-
-typedef struct FfiPlainCdr2Deserializer {
-  const uint8_t *buf_ptr;
-  uintptr_t buf_len;
-  uintptr_t pos;
-} FfiPlainCdr2Deserializer;
 
 typedef struct FfiPlcdrDeserializer {
   const uint8_t *buf_ptr;
@@ -159,37 +180,115 @@ enum XcdrFfiError cdr_serializer_write_bytes(FfiCdrSerializer *self,
                                              const uint8_t *buf_ptr,
                                              uintptr_t buf_len);
 
-FfiPlainCdr2Serializer plain_cdr2_serializer_new(uint8_t *buf_ptr, uintptr_t buf_len);
+FfiDelimitedCdrSerializer delimited_cdr_serializer_new(uint8_t *buf_ptr, uintptr_t buf_len);
 
-uintptr_t plain_cdr2_serializer_position(const FfiPlainCdr2Serializer *self);
+uintptr_t delimited_cdr_serializer_position(const FfiDelimitedCdrSerializer *self);
 
-void plain_cdr2_serializer_reset(FfiPlainCdr2Serializer *self);
+void delimited_cdr_serializer_reset(FfiDelimitedCdrSerializer *self);
 
-enum XcdrFfiError plain_cdr2_serializer_write_u8(FfiPlainCdr2Serializer *self, uint8_t val);
+enum XcdrFfiError delimited_cdr_serializer_begin_struct(FfiDelimitedCdrSerializer *self);
 
-enum XcdrFfiError plain_cdr2_serializer_write_i8(FfiPlainCdr2Serializer *self, int8_t val);
+enum XcdrFfiError delimited_cdr_serializer_end_struct(FfiDelimitedCdrSerializer *self);
 
-enum XcdrFfiError plain_cdr2_serializer_write_bool(FfiPlainCdr2Serializer *self, bool val);
+enum XcdrFfiError delimited_cdr_serializer_write_u8(FfiDelimitedCdrSerializer *self, uint8_t val);
 
-enum XcdrFfiError plain_cdr2_serializer_write_u16(FfiPlainCdr2Serializer *self, uint16_t val);
+enum XcdrFfiError delimited_cdr_serializer_write_i8(FfiDelimitedCdrSerializer *self, int8_t val);
 
-enum XcdrFfiError plain_cdr2_serializer_write_i16(FfiPlainCdr2Serializer *self, int16_t val);
+enum XcdrFfiError delimited_cdr_serializer_write_bool(FfiDelimitedCdrSerializer *self, bool val);
 
-enum XcdrFfiError plain_cdr2_serializer_write_u32(FfiPlainCdr2Serializer *self, uint32_t val);
+enum XcdrFfiError delimited_cdr_serializer_write_u16(FfiDelimitedCdrSerializer *self, uint16_t val);
 
-enum XcdrFfiError plain_cdr2_serializer_write_i32(FfiPlainCdr2Serializer *self, int32_t val);
+enum XcdrFfiError delimited_cdr_serializer_write_i16(FfiDelimitedCdrSerializer *self, int16_t val);
 
-enum XcdrFfiError plain_cdr2_serializer_write_u64(FfiPlainCdr2Serializer *self, uint64_t val);
+enum XcdrFfiError delimited_cdr_serializer_write_u32(FfiDelimitedCdrSerializer *self, uint32_t val);
 
-enum XcdrFfiError plain_cdr2_serializer_write_i64(FfiPlainCdr2Serializer *self, int64_t val);
+enum XcdrFfiError delimited_cdr_serializer_write_i32(FfiDelimitedCdrSerializer *self, int32_t val);
 
-enum XcdrFfiError plain_cdr2_serializer_write_f32(FfiPlainCdr2Serializer *self, float val);
+enum XcdrFfiError delimited_cdr_serializer_write_u64(FfiDelimitedCdrSerializer *self, uint64_t val);
 
-enum XcdrFfiError plain_cdr2_serializer_write_f64(FfiPlainCdr2Serializer *self, double val);
+enum XcdrFfiError delimited_cdr_serializer_write_i64(FfiDelimitedCdrSerializer *self, int64_t val);
 
-enum XcdrFfiError plain_cdr2_serializer_write_bytes(FfiPlainCdr2Serializer *self,
-                                                    const uint8_t *buf_ptr,
-                                                    uintptr_t buf_len);
+enum XcdrFfiError delimited_cdr_serializer_write_f32(FfiDelimitedCdrSerializer *self, float val);
+
+enum XcdrFfiError delimited_cdr_serializer_write_f64(FfiDelimitedCdrSerializer *self, double val);
+
+enum XcdrFfiError delimited_cdr_serializer_write_bytes(FfiDelimitedCdrSerializer *self,
+                                                       const uint8_t *buf_ptr,
+                                                       uintptr_t buf_len);
+
+struct FfiDelimitedCdrDeserializer delimited_cdr_deserializer_new(const uint8_t *buf_ptr,
+                                                                  uintptr_t buf_len);
+
+uintptr_t delimited_cdr_deserializer_position(const struct FfiDelimitedCdrDeserializer *self);
+
+void delimited_cdr_deserializer_reset(struct FfiDelimitedCdrDeserializer *self);
+
+enum XcdrFfiError delimited_cdr_deserializer_enter_struct(struct FfiDelimitedCdrDeserializer *self);
+
+enum XcdrFfiError delimited_cdr_deserializer_exit_struct(struct FfiDelimitedCdrDeserializer *self);
+
+bool delimited_cdr_deserializer_header_little_endian(const struct FfiDelimitedCdrDeserializer *self);
+
+enum XcdrFfiError delimited_cdr_deserializer_read_u8(struct FfiDelimitedCdrDeserializer *self,
+                                                     uint8_t *out);
+
+enum XcdrFfiError delimited_cdr_deserializer_read_i8(struct FfiDelimitedCdrDeserializer *self,
+                                                     int8_t *out);
+
+enum XcdrFfiError delimited_cdr_deserializer_read_bool(struct FfiDelimitedCdrDeserializer *self,
+                                                       bool *out);
+
+enum XcdrFfiError delimited_cdr_deserializer_read_u16_le(struct FfiDelimitedCdrDeserializer *self,
+                                                         uint16_t *out);
+
+enum XcdrFfiError delimited_cdr_deserializer_read_u16_be(struct FfiDelimitedCdrDeserializer *self,
+                                                         uint16_t *out);
+
+enum XcdrFfiError delimited_cdr_deserializer_read_i16_le(struct FfiDelimitedCdrDeserializer *self,
+                                                         int16_t *out);
+
+enum XcdrFfiError delimited_cdr_deserializer_read_i16_be(struct FfiDelimitedCdrDeserializer *self,
+                                                         int16_t *out);
+
+enum XcdrFfiError delimited_cdr_deserializer_read_u32_le(struct FfiDelimitedCdrDeserializer *self,
+                                                         uint32_t *out);
+
+enum XcdrFfiError delimited_cdr_deserializer_read_u32_be(struct FfiDelimitedCdrDeserializer *self,
+                                                         uint32_t *out);
+
+enum XcdrFfiError delimited_cdr_deserializer_read_i32_le(struct FfiDelimitedCdrDeserializer *self,
+                                                         int32_t *out);
+
+enum XcdrFfiError delimited_cdr_deserializer_read_i32_be(struct FfiDelimitedCdrDeserializer *self,
+                                                         int32_t *out);
+
+enum XcdrFfiError delimited_cdr_deserializer_read_u64_le(struct FfiDelimitedCdrDeserializer *self,
+                                                         uint64_t *out);
+
+enum XcdrFfiError delimited_cdr_deserializer_read_u64_be(struct FfiDelimitedCdrDeserializer *self,
+                                                         uint64_t *out);
+
+enum XcdrFfiError delimited_cdr_deserializer_read_i64_le(struct FfiDelimitedCdrDeserializer *self,
+                                                         int64_t *out);
+
+enum XcdrFfiError delimited_cdr_deserializer_read_i64_be(struct FfiDelimitedCdrDeserializer *self,
+                                                         int64_t *out);
+
+enum XcdrFfiError delimited_cdr_deserializer_read_f32_le(struct FfiDelimitedCdrDeserializer *self,
+                                                         float *out);
+
+enum XcdrFfiError delimited_cdr_deserializer_read_f32_be(struct FfiDelimitedCdrDeserializer *self,
+                                                         float *out);
+
+enum XcdrFfiError delimited_cdr_deserializer_read_f64_le(struct FfiDelimitedCdrDeserializer *self,
+                                                         double *out);
+
+enum XcdrFfiError delimited_cdr_deserializer_read_f64_be(struct FfiDelimitedCdrDeserializer *self,
+                                                         double *out);
+
+enum XcdrFfiError delimited_cdr_deserializer_read_bytes(struct FfiDelimitedCdrDeserializer *self,
+                                                        uint8_t *out_ptr,
+                                                        uintptr_t out_len);
 
 struct FfiPlainCdr2Deserializer plain_cdr2_deserializer_new(const uint8_t *buf_ptr,
                                                             uintptr_t buf_len);
@@ -258,6 +357,38 @@ enum XcdrFfiError plain_cdr2_deserializer_read_f64_be(struct FfiPlainCdr2Deseria
 enum XcdrFfiError plain_cdr2_deserializer_read_bytes(struct FfiPlainCdr2Deserializer *self,
                                                      uint8_t *out_ptr,
                                                      uintptr_t out_len);
+
+FfiPlainCdr2Serializer plain_cdr2_serializer_new(uint8_t *buf_ptr, uintptr_t buf_len);
+
+uintptr_t plain_cdr2_serializer_position(const FfiPlainCdr2Serializer *self);
+
+void plain_cdr2_serializer_reset(FfiPlainCdr2Serializer *self);
+
+enum XcdrFfiError plain_cdr2_serializer_write_u8(FfiPlainCdr2Serializer *self, uint8_t val);
+
+enum XcdrFfiError plain_cdr2_serializer_write_i8(FfiPlainCdr2Serializer *self, int8_t val);
+
+enum XcdrFfiError plain_cdr2_serializer_write_bool(FfiPlainCdr2Serializer *self, bool val);
+
+enum XcdrFfiError plain_cdr2_serializer_write_u16(FfiPlainCdr2Serializer *self, uint16_t val);
+
+enum XcdrFfiError plain_cdr2_serializer_write_i16(FfiPlainCdr2Serializer *self, int16_t val);
+
+enum XcdrFfiError plain_cdr2_serializer_write_u32(FfiPlainCdr2Serializer *self, uint32_t val);
+
+enum XcdrFfiError plain_cdr2_serializer_write_i32(FfiPlainCdr2Serializer *self, int32_t val);
+
+enum XcdrFfiError plain_cdr2_serializer_write_u64(FfiPlainCdr2Serializer *self, uint64_t val);
+
+enum XcdrFfiError plain_cdr2_serializer_write_i64(FfiPlainCdr2Serializer *self, int64_t val);
+
+enum XcdrFfiError plain_cdr2_serializer_write_f32(FfiPlainCdr2Serializer *self, float val);
+
+enum XcdrFfiError plain_cdr2_serializer_write_f64(FfiPlainCdr2Serializer *self, double val);
+
+enum XcdrFfiError plain_cdr2_serializer_write_bytes(FfiPlainCdr2Serializer *self,
+                                                    const uint8_t *buf_ptr,
+                                                    uintptr_t buf_len);
 
 struct FfiPlcdrDeserializer plcdr_deserializer_new(const uint8_t *buf_ptr, uintptr_t buf_len);
 
