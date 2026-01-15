@@ -1,47 +1,49 @@
-{% macro emit_field(field, mode) %}
-{% set ns = namespace(expr=field.expr) %}
-{% for dim in field.dims %}
-  for (size_t i{{ loop.index0 }} = 0; i{{ loop.index0 }} < {{ dim }}; ++i{{ loop.index0 }}) {
-{% set ns.expr = ns.expr ~ "[i" ~ loop.index0 ~ "]" %}
-{% endfor %}
-{% if field.kind.kind == "primitive" %}
-{% if mode == "serialize" %}
-  {{ field.kind.serialize_fn }}(serializer, "{{ ns.expr }}");
-{% else %}
-  {{ field.kind.deserialize_fn }}(deserializer, "{{ ns.expr }}");
-{% endif %}
-{% elif field.kind.kind == "custom" %}
-{% if mode == "serialize" %}
-  {{ field.kind.type_name }}_serialize(&{{ ns.expr }}, serializer);
-{% else %}
-  {{ field.kind.type_name }}_deserialize(&{{ ns.expr }}, deserializer);
-{% endif %}
-{% else %}
-  /* {{ field.kind.reason }} */
-{% endif %}
-{% for dim in field.dims | reverse %}
-  }
-{% endfor %}
-{% endmacro %}
-
-void {{ ident }}_serialize({{ ident }} const* self, struct XcdrSerializer* serializer) {
-{% if xcdr_fields | length == 0 %}
+void {{ ident }}_serialize({{ ident }} const* self, FfiCdrSerializer* serializer) {
+  {% if xcdr_fields | length == 0 %}
   (void)serializer;
   (void)self;
-{% else %}
-{% for field in xcdr_fields %}
-{{ emit_field(field, "serialize") }}
-{% endfor %}
-{% endif %}
+  {% else %}
+  {% for field in xcdr_fields %}
+  {% set ns = namespace(expr=field.expr) %}
+  {% for dim in field.dims %}
+  for (size_t i{{ loop.index0 }} = 0; i{{ loop.index0 }} < {{ dim }}; ++i{{ loop.index0 }}) {{ "{" }}
+  {% set ns.expr = ns.expr ~ "[i" ~ loop.index0 ~ "]" %}
+  {% endfor %}
+  {% if field.kind.kind == "primitive" %}
+  {{ field.kind.serialize_fn }}(serializer, "{{ ns.expr }}");
+  {% elif field.kind.kind == "custom" %}
+  {{ field.kind.type_name }}_serialize(&{{ ns.expr }}, serializer);
+  {% else %}
+  /* {{ field.kind.reason }} */
+  {% endif %}
+  {% for dim in field.dims | reverse %}
+  }
+  {% endfor %}
+  {% endfor %}
+  {% endif %}
 }
 
-void {{ ident }}_deserialize({{ ident }}* self, struct XcdrDeserializer* deserializer) {
-{% if xcdr_fields | length == 0 %}
+void {{ ident }}_deserialize({{ ident }}* self, FfiCdrDeserializer* deserializer) {
+  {% if xcdr_fields | length == 0 %}
   (void)deserializer;
   (void)self;
-{% else %}
-{% for field in xcdr_fields %}
-{{ emit_field(field, "deserialize") }}
-{% endfor %}
-{% endif %}
+  {% else %}
+  {% for field in xcdr_fields %}
+  {% set ns = namespace(expr=field.expr) %}
+  {% for dim in field.dims %}
+  for (size_t i{{ loop.index0 }} = 0; i{{ loop.index0 }} < {{ dim }}; ++i{{ loop.index0 }}) {{ "{" }}
+  {% set ns.expr = ns.expr ~ "[i" ~ loop.index0 ~ "]" %}
+  {% endfor %}
+  {% if field.kind.kind == "primitive" %}
+  {{ field.kind.deserialize_fn }}(deserializer, "{{ ns.expr }}");
+  {% elif field.kind.kind == "custom" %}
+  {{ field.kind.type_name }}_deserialize(&{{ ns.expr }}, deserializer);
+  {% else %}
+  /* {{ field.kind.reason }} */
+  {% endif %}
+  {% for dim in field.dims | reverse %}
+  }
+  {% endfor %}
+  {% endfor %}
+  {% endif %}
 }

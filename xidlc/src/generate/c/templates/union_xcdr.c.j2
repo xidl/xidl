@@ -1,51 +1,81 @@
-{% macro emit_field(field, mode) %}
-{% set ns = namespace(expr=field.expr) %}
-{% for dim in field.dims %}
-  for (size_t i{{ loop.index0 }} = 0; i{{ loop.index0 }} < {{ dim }}; ++i{{ loop.index0 }}) {
-{% set ns.expr = ns.expr ~ "[i" ~ loop.index0 ~ "]" %}
-{% endfor %}
-{% if field.kind.kind == "primitive" %}
-{% if mode == "serialize" %}
-  {{ field.kind.serialize_fn }}(serializer, "{{ ns.expr }}");
-{% else %}
-  {{ field.kind.deserialize_fn }}(deserializer, "{{ ns.expr }}");
-{% endif %}
-{% elif field.kind.kind == "custom" %}
-{% if mode == "serialize" %}
-  {{ field.kind.type_name }}_serialize(&{{ ns.expr }}, serializer);
-{% else %}
-  {{ field.kind.type_name }}_deserialize(&{{ ns.expr }}, deserializer);
-{% endif %}
-{% else %}
-  /* {{ field.kind.reason }} */
-{% endif %}
-{% for dim in field.dims | reverse %}
+void {{ ident }}_serialize({{ ident }} const* self, FfiCdrSerializer* serializer) {
+  {% set ns = namespace(expr=xcdr_switch_field.expr) %}
+  {% for dim in xcdr_switch_field.dims %}
+  for (size_t i{{ loop.index0 }} = 0; i{{ loop.index0 }} < {{ dim }}; ++i{{ loop.index0 }}) {{ "{" }}
+  {% set ns.expr = ns.expr ~ "[i" ~ loop.index0 ~ "]" %}
+  {% endfor %}
+  {% if xcdr_switch_field.kind.kind == "primitive" %}
+  {{ xcdr_switch_field.kind.serialize_fn }}(serializer, "{{ ns.expr }}");
+  {% elif xcdr_switch_field.kind.kind == "custom" %}
+  {{ xcdr_switch_field.kind.type_name }}_serialize(&{{ ns.expr }}, serializer);
+  {% else %}
+  /* {{ xcdr_switch_field.kind.reason }} */
+  {% endif %}
+  {% for dim in xcdr_switch_field.dims | reverse %}
   }
-{% endfor %}
-{% endmacro %}
-
-void {{ ident }}_serialize({{ ident }} const* self, struct XcdrSerializer* serializer) {
-{{ emit_field(xcdr_switch_field, "serialize") }}
+  {% endfor %}
   switch (self->_d) {
-{% for case in xcdr_cases %}
-{% for label in case.labels %}
+  {% for case in xcdr_cases %}
+  {% for label in case.labels %}
   case {{ label }}:
-{% endfor %}
-{{ emit_field(case.field, "serialize") }}
+  {% endfor %}
+  {% set ns = namespace(expr=case.field.expr) %}
+  {% for dim in case.field.dims %}
+  for (size_t i{{ loop.index0 }} = 0; i{{ loop.index0 }} < {{ dim }}; ++i{{ loop.index0 }}) {{ "{" }}
+  {% set ns.expr = ns.expr ~ "[i" ~ loop.index0 ~ "]" %}
+  {% endfor %}
+  {% if case.field.kind.kind == "primitive" %}
+  {{ case.field.kind.serialize_fn }}(serializer, "{{ ns.expr }}");
+  {% elif case.field.kind.kind == "custom" %}
+  {{ case.field.kind.type_name }}_serialize(&{{ ns.expr }}, serializer);
+  {% else %}
+  /* {{ case.field.kind.reason }} */
+  {% endif %}
+  {% for dim in case.field.dims | reverse %}
+  }
+  {% endfor %}
     break;
-{% endfor %}
+  {% endfor %}
   }
 }
 
-void {{ ident }}_deserialize({{ ident }}* self, struct XcdrDeserializer* deserializer) {
-{{ emit_field(xcdr_switch_field, "deserialize") }}
+void {{ ident }}_deserialize({{ ident }}* self, FfiCdrDeserializer* deserializer) {
+  {% set ns = namespace(expr=xcdr_switch_field.expr) %}
+  {% for dim in xcdr_switch_field.dims %}
+  for (size_t i{{ loop.index0 }} = 0; i{{ loop.index0 }} < {{ dim }}; ++i{{ loop.index0 }}) {{ "{" }}
+  {% set ns.expr = ns.expr ~ "[i" ~ loop.index0 ~ "]" %}
+  {% endfor %}
+  {% if xcdr_switch_field.kind.kind == "primitive" %}
+  {{ xcdr_switch_field.kind.deserialize_fn }}(deserializer, "{{ ns.expr }}");
+  {% elif xcdr_switch_field.kind.kind == "custom" %}
+  {{ xcdr_switch_field.kind.type_name }}_deserialize(&{{ ns.expr }}, deserializer);
+  {% else %}
+  /* {{ xcdr_switch_field.kind.reason }} */
+  {% endif %}
+  {% for dim in xcdr_switch_field.dims | reverse %}
+  }
+  {% endfor %}
   switch (self->_d) {
-{% for case in xcdr_cases %}
-{% for label in case.labels %}
+  {% for case in xcdr_cases %}
+  {% for label in case.labels %}
   case {{ label }}:
-{% endfor %}
-{{ emit_field(case.field, "deserialize") }}
+  {% endfor %}
+  {% set ns = namespace(expr=case.field.expr) %}
+  {% for dim in case.field.dims %}
+  for (size_t i{{ loop.index0 }} = 0; i{{ loop.index0 }} < {{ dim }}; ++i{{ loop.index0 }}) {{ "{" }}
+  {% set ns.expr = ns.expr ~ "[i" ~ loop.index0 ~ "]" %}
+  {% endfor %}
+  {% if case.field.kind.kind == "primitive" %}
+  {{ case.field.kind.deserialize_fn }}(deserializer, "{{ ns.expr }}");
+  {% elif case.field.kind.kind == "custom" %}
+  {{ case.field.kind.type_name }}_deserialize(&{{ ns.expr }}, deserializer);
+  {% else %}
+  /* {{ case.field.kind.reason }} */
+  {% endif %}
+  {% for dim in case.field.dims | reverse %}
+  }
+  {% endfor %}
     break;
-{% endfor %}
+  {% endfor %}
   }
 }

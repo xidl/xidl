@@ -37,53 +37,53 @@ pub(crate) fn type_kind(ty: &hir::TypeSpec) -> FieldKind {
         hir::TypeSpec::SimpleTypeSpec(simple) => match simple {
             hir::SimpleTypeSpec::IntegerType(value) => match value {
                 hir::IntegerType::Char | hir::IntegerType::I8 => FieldKind::Primitive {
-                    serialize_fn: "xcdr_serialize_i8",
-                    deserialize_fn: "xcdr_deserialize_i8",
+                    serialize_fn: "cdr_serializer_write_i8",
+                    deserialize_fn: "cdr_deserializer_read_i8",
                 },
                 hir::IntegerType::UChar | hir::IntegerType::U8 => FieldKind::Primitive {
-                    serialize_fn: "xcdr_serialize_u8",
-                    deserialize_fn: "xcdr_deserialize_u8",
+                    serialize_fn: "cdr_serializer_write_u8",
+                    deserialize_fn: "cdr_deserializer_read_u8",
                 },
                 hir::IntegerType::U16 => FieldKind::Primitive {
-                    serialize_fn: "xcdr_serialize_u16",
-                    deserialize_fn: "xcdr_deserialize_u16",
+                    serialize_fn: "cdr_serializer_write_u16",
+                    deserialize_fn: "cdr_deserializer_read_u16_le",
                 },
                 hir::IntegerType::U32 => FieldKind::Primitive {
-                    serialize_fn: "xcdr_serialize_u32",
-                    deserialize_fn: "xcdr_deserialize_u32",
+                    serialize_fn: "cdr_serializer_write_u32",
+                    deserialize_fn: "cdr_deserializer_read_u32_le",
                 },
                 hir::IntegerType::U64 => FieldKind::Primitive {
-                    serialize_fn: "xcdr_serialize_u64",
-                    deserialize_fn: "xcdr_deserialize_u64",
+                    serialize_fn: "cdr_serializer_write_u64",
+                    deserialize_fn: "cdr_deserializer_read_u64_le",
                 },
                 hir::IntegerType::I16 => FieldKind::Primitive {
-                    serialize_fn: "xcdr_serialize_i16",
-                    deserialize_fn: "xcdr_deserialize_i16",
+                    serialize_fn: "cdr_serializer_write_i16",
+                    deserialize_fn: "cdr_deserializer_read_i16_le",
                 },
                 hir::IntegerType::I32 => FieldKind::Primitive {
-                    serialize_fn: "xcdr_serialize_i32",
-                    deserialize_fn: "xcdr_deserialize_i32",
+                    serialize_fn: "cdr_serializer_write_i32",
+                    deserialize_fn: "cdr_deserializer_read_i32_le",
                 },
                 hir::IntegerType::I64 => FieldKind::Primitive {
-                    serialize_fn: "xcdr_serialize_i64",
-                    deserialize_fn: "xcdr_deserialize_i64",
+                    serialize_fn: "cdr_serializer_write_i64",
+                    deserialize_fn: "cdr_deserializer_read_i64_le",
                 },
             },
             hir::SimpleTypeSpec::FloatingPtType => FieldKind::Primitive {
-                serialize_fn: "xcdr_serialize_f64",
-                deserialize_fn: "xcdr_deserialize_f64",
+                serialize_fn: "cdr_serializer_write_f64",
+                deserialize_fn: "cdr_deserializer_read_f64_le",
             },
             hir::SimpleTypeSpec::CharType => FieldKind::Primitive {
-                serialize_fn: "xcdr_serialize_i8",
-                deserialize_fn: "xcdr_deserialize_i8",
+                serialize_fn: "cdr_serializer_write_i8",
+                deserialize_fn: "cdr_deserializer_read_i8",
             },
             hir::SimpleTypeSpec::WideCharType => FieldKind::Primitive {
-                serialize_fn: "xcdr_serialize_u32",
-                deserialize_fn: "xcdr_deserialize_u32",
+                serialize_fn: "cdr_serializer_write_u32",
+                deserialize_fn: "cdr_deserializer_read_u32_le",
             },
             hir::SimpleTypeSpec::Boolean => FieldKind::Primitive {
-                serialize_fn: "xcdr_serialize_bool",
-                deserialize_fn: "xcdr_deserialize_bool",
+                serialize_fn: "cdr_serializer_write_bool",
+                deserialize_fn: "cdr_deserializer_read_bool",
             },
             hir::SimpleTypeSpec::ScopedName(value) => FieldKind::Custom {
                 type_name: c_scoped_name_hir(value),
@@ -104,20 +104,20 @@ pub(crate) fn switch_kind(ty: &hir::SwitchTypeSpec) -> FieldKind {
             hir::SimpleTypeSpec::IntegerType(value.clone()),
         )),
         hir::SwitchTypeSpec::CharType => FieldKind::Primitive {
-            serialize_fn: "xcdr_serialize_i8",
-            deserialize_fn: "xcdr_deserialize_i8",
+            serialize_fn: "cdr_serializer_write_i8",
+            deserialize_fn: "cdr_deserializer_read_i8",
         },
         hir::SwitchTypeSpec::WideCharType => FieldKind::Primitive {
-            serialize_fn: "xcdr_serialize_u32",
-            deserialize_fn: "xcdr_deserialize_u32",
+            serialize_fn: "cdr_serializer_write_u32",
+            deserialize_fn: "cdr_deserializer_read_u32_le",
         },
         hir::SwitchTypeSpec::BooleanType => FieldKind::Primitive {
-            serialize_fn: "xcdr_serialize_bool",
-            deserialize_fn: "xcdr_deserialize_bool",
+            serialize_fn: "cdr_serializer_write_bool",
+            deserialize_fn: "cdr_deserializer_read_bool",
         },
         hir::SwitchTypeSpec::OctetType => FieldKind::Primitive {
-            serialize_fn: "xcdr_serialize_u8",
-            deserialize_fn: "xcdr_deserialize_u8",
+            serialize_fn: "cdr_serializer_write_u8",
+            deserialize_fn: "cdr_deserializer_read_u8",
         },
         hir::SwitchTypeSpec::ScopedName(value) => FieldKind::Custom {
             type_name: c_scoped_name_hir(value),
@@ -149,40 +149,40 @@ pub(crate) fn constr_type_name(constr: &hir::ConstrTypeDcl) -> String {
 pub(crate) fn type_kind_from_c(ty: &str) -> FieldKind {
     match ty {
         "uint8_t" => FieldKind::Primitive {
-            serialize_fn: "xcdr_serialize_u8",
-            deserialize_fn: "xcdr_deserialize_u8",
+            serialize_fn: "cdr_serializer_write_u8",
+            deserialize_fn: "cdr_deserializer_read_u8",
         },
         "int8_t" => FieldKind::Primitive {
-            serialize_fn: "xcdr_serialize_i8",
-            deserialize_fn: "xcdr_deserialize_i8",
+            serialize_fn: "cdr_serializer_write_i8",
+            deserialize_fn: "cdr_deserializer_read_i8",
         },
         "uint16_t" => FieldKind::Primitive {
-            serialize_fn: "xcdr_serialize_u16",
-            deserialize_fn: "xcdr_deserialize_u16",
+            serialize_fn: "cdr_serializer_write_u16",
+            deserialize_fn: "cdr_deserializer_read_u16_le",
         },
         "int16_t" => FieldKind::Primitive {
-            serialize_fn: "xcdr_serialize_i16",
-            deserialize_fn: "xcdr_deserialize_i16",
+            serialize_fn: "cdr_serializer_write_i16",
+            deserialize_fn: "cdr_deserializer_read_i16_le",
         },
         "uint32_t" => FieldKind::Primitive {
-            serialize_fn: "xcdr_serialize_u32",
-            deserialize_fn: "xcdr_deserialize_u32",
+            serialize_fn: "cdr_serializer_write_u32",
+            deserialize_fn: "cdr_deserializer_read_u32_le",
         },
         "int32_t" => FieldKind::Primitive {
-            serialize_fn: "xcdr_serialize_i32",
-            deserialize_fn: "xcdr_deserialize_i32",
+            serialize_fn: "cdr_serializer_write_i32",
+            deserialize_fn: "cdr_deserializer_read_i32_le",
         },
         "uint64_t" => FieldKind::Primitive {
-            serialize_fn: "xcdr_serialize_u64",
-            deserialize_fn: "xcdr_deserialize_u64",
+            serialize_fn: "cdr_serializer_write_u64",
+            deserialize_fn: "cdr_deserializer_read_u64_le",
         },
         "int64_t" => FieldKind::Primitive {
-            serialize_fn: "xcdr_serialize_i64",
-            deserialize_fn: "xcdr_deserialize_i64",
+            serialize_fn: "cdr_serializer_write_i64",
+            deserialize_fn: "cdr_deserializer_read_i64_le",
         },
         "bool" => FieldKind::Primitive {
-            serialize_fn: "xcdr_serialize_bool",
-            deserialize_fn: "xcdr_deserialize_bool",
+            serialize_fn: "cdr_serializer_write_bool",
+            deserialize_fn: "cdr_deserializer_read_bool",
         },
         _ => FieldKind::Unsupported {
             reason: format!("unsupported bitfield type: {}", ty),
