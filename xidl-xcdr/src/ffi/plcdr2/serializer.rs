@@ -20,6 +20,12 @@ impl FfiPlcdr2Serializer {
     #[unsafe(no_mangle)]
     pub extern "C" fn plcdr2_serializer_reset(&mut self) {
         self.pos = 0;
+        self.emheader_pos = 0;
+        self.field_start = 0;
+        self.field_open = false;
+        self.pending_member_id = 0;
+        self.pending_must_understand = false;
+        self.pending_length_code = 0;
     }
 
     #[unsafe(no_mangle)]
@@ -31,6 +37,23 @@ impl FfiPlcdr2Serializer {
     #[unsafe(no_mangle)]
     pub extern "C" fn plcdr2_serializer_write_emheader(&mut self, header: u32) -> XcdrFfiError {
         let out = self.write_emheader(header);
+        out.into()
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn plcdr2_serializer_begin_field(
+        &mut self,
+        member_id: u32,
+        must_understand: bool,
+        length_code: u8,
+    ) -> XcdrFfiError {
+        let out = XcdrSerialize::begin_field(self, crate::FieldId(member_id), must_understand, length_code);
+        out.into()
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn plcdr2_serializer_end_field(&mut self) -> XcdrFfiError {
+        let out = XcdrSerialize::end_field(self);
         out.into()
     }
 }

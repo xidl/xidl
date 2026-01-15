@@ -24,7 +24,7 @@ pub trait XcdrSerialize {
         Ok(())
     }
 
-    fn begin_field(&mut self, id: FieldId) -> XcdrResult<()> {
+    fn begin_field(&mut self, id: FieldId, must_understand: bool, length_code: u8) -> XcdrResult<()> {
         Ok(())
     }
     fn end_field(&mut self) -> XcdrResult<()> {

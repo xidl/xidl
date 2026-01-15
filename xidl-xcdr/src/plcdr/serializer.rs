@@ -60,7 +60,7 @@ impl PlcdrSerialize {
 }
 
 impl XcdrSerialize for PlcdrSerialize {
-    fn begin_field(&mut self, id: FieldId) -> XcdrResult<()> {
+    fn begin_field(&mut self, id: FieldId, _must_understand: bool, _length_code: u8) -> XcdrResult<()> {
         self.write_u32(id.0)
     }
 

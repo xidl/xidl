@@ -28,7 +28,7 @@ impl FfiXcdrPlcdrSerializer {
 
     #[unsafe(no_mangle)]
     pub extern "C" fn xcdr_plcdr_serializer_begin_field(&mut self, pid: u16) -> XcdrFfiError {
-        let out = XcdrSerialize::begin_field(self, FieldId(pid as u32));
+        let out = XcdrSerialize::begin_field(self, FieldId(pid as u32), false, 0);
         out.into()
     }
 

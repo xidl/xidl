@@ -89,7 +89,7 @@ impl XcdrPlcdrSerialize {
 }
 
 impl XcdrSerialize for XcdrPlcdrSerialize {
-    fn begin_field(&mut self, id: FieldId) -> XcdrResult<()> {
+    fn begin_field(&mut self, id: FieldId, _must_understand: bool, _length_code: u8) -> XcdrResult<()> {
         if self.field_open {
             return Err(XcdrError::Message("Field already open".into()));
         }
