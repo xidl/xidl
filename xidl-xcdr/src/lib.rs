@@ -3,6 +3,7 @@ pub mod error;
 pub mod cdr;
 pub mod ffi;
 pub mod plain_cdr;
+pub mod plain_cdr2;
 pub mod plcdr;
 pub mod xcdr_plcdr;
 
