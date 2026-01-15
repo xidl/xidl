@@ -2,6 +2,7 @@ pub mod error;
 
 pub mod cdr;
 pub mod ffi;
+pub mod plain_cdr;
 pub mod plcdr;
 
 mod utils;
