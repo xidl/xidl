@@ -15,3 +15,6 @@ rust-embed = "8.5"
 
 [dev-dependencies]
 insta = "1.44"
+
+[lints.clippy]
+collapsible_if = "allow"
