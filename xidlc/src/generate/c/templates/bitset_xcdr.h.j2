@@ -1,2 +1,2 @@
-void {{ ident }}_serialize({{ ident }} const* self, FfiCdrSerializer* serializer);
-void {{ ident }}_deserialize({{ ident }}* self, FfiCdrDeserializer* deserializer);
+XcdrBufferResult {{ ident }}_serialize({{ ident }} const* self, XcdrBuffer buf);
+XcdrBufferResult {{ ident }}_deserialize({{ ident }}* self, XcdrConstBuffer buf);

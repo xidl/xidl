@@ -16,6 +16,26 @@ pub enum XcdrFfiError {
     NullPointer = 3,
 }
 
+#[repr(C)]
+pub struct XcdrBuffer {
+    pub ptr: *mut u8,
+    pub len: usize,
+    pub pos: usize,
+}
+
+#[repr(C)]
+pub struct XcdrConstBuffer {
+    pub ptr: *const u8,
+    pub len: usize,
+    pub pos: usize,
+}
+
+#[repr(C)]
+pub struct XcdrBufferResult {
+    pub err: XcdrFfiError,
+    pub used: usize,
+}
+
 impl From<XcdrError> for XcdrFfiError {
     fn from(err: XcdrError) -> Self {
         match err {

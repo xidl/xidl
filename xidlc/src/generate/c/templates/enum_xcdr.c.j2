@@ -1,6 +1,9 @@
-void {{ ident }}_serialize({{ ident }} const* self, FfiCdrSerializer* serializer) {
+XcdrBufferResult {{ ident }}_serialize({{ ident }} const* self, XcdrBuffer buf) {
+  uint8_t *ptr = buf.ptr;
+  size_t len = buf.len;
+  FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
+  XcdrFfiError err = Ok;
   {% if xcdr_fields | length == 0 %}
-  (void)serializer;
   (void)self;
   {% else %}
   {% for field in xcdr_fields %}
@@ -10,9 +13,21 @@ void {{ ident }}_serialize({{ ident }} const* self, FfiCdrSerializer* serializer
   {% set ns.expr = ns.expr ~ "[i" ~ loop.index0 ~ "]" %}
   {% endfor %}
   {% if field.kind.kind == "primitive" %}
-  {{ field.kind.serialize_fn }}(serializer, "{{ ns.expr }}");
+  err = {{ field.kind.serialize_fn }}(&serializer, "{{ ns.expr }}");
+  if (err != Ok) {
+    return (XcdrBufferResult){ err, cdr_serializer_position(&serializer) };
+  }
   {% elif field.kind.kind == "custom" %}
-  {{ field.kind.type_name }}_serialize(&{{ ns.expr }}, serializer);
+  {
+    size_t before = cdr_serializer_position(&serializer);
+    XcdrBufferResult child = {{ field.kind.type_name }}_serialize(
+        &{{ ns.expr }},
+        (XcdrBuffer){ .ptr = ptr + before, .len = len - before, .pos = 0 });
+    if (child.err != Ok) {
+      return (XcdrBufferResult){ child.err, before + child.used };
+    }
+    serializer.pos = before + child.used;
+  }
   {% else %}
   /* {{ field.kind.reason }} */
   {% endif %}
@@ -21,11 +36,15 @@ void {{ ident }}_serialize({{ ident }} const* self, FfiCdrSerializer* serializer
   {% endfor %}
   {% endfor %}
   {% endif %}
+  return (XcdrBufferResult){ Ok, cdr_serializer_position(&serializer) };
 }
 
-void {{ ident }}_deserialize({{ ident }}* self, FfiCdrDeserializer* deserializer) {
+XcdrBufferResult {{ ident }}_deserialize({{ ident }}* self, XcdrConstBuffer buf) {
+  const uint8_t *ptr = buf.ptr;
+  size_t len = buf.len;
+  FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
+  XcdrFfiError err = Ok;
   {% if xcdr_fields | length == 0 %}
-  (void)deserializer;
   (void)self;
   {% else %}
   {% for field in xcdr_fields %}
@@ -35,9 +54,21 @@ void {{ ident }}_deserialize({{ ident }}* self, FfiCdrDeserializer* deserializer
   {% set ns.expr = ns.expr ~ "[i" ~ loop.index0 ~ "]" %}
   {% endfor %}
   {% if field.kind.kind == "primitive" %}
-  {{ field.kind.deserialize_fn }}(deserializer, "{{ ns.expr }}");
+  err = {{ field.kind.deserialize_fn }}(&deserializer, "{{ ns.expr }}");
+  if (err != Ok) {
+    return (XcdrBufferResult){ err, cdr_deserializer_position(&deserializer) };
+  }
   {% elif field.kind.kind == "custom" %}
-  {{ field.kind.type_name }}_deserialize(&{{ ns.expr }}, deserializer);
+  {
+    size_t before = cdr_deserializer_position(&deserializer);
+    XcdrBufferResult child = {{ field.kind.type_name }}_deserialize(
+        &{{ ns.expr }},
+        (XcdrConstBuffer){ .ptr = ptr + before, .len = len - before, .pos = 0 });
+    if (child.err != Ok) {
+      return (XcdrBufferResult){ child.err, before + child.used };
+    }
+    deserializer.pos = before + child.used;
+  }
   {% else %}
   /* {{ field.kind.reason }} */
   {% endif %}
@@ -46,4 +77,5 @@ void {{ ident }}_deserialize({{ ident }}* self, FfiCdrDeserializer* deserializer
   {% endfor %}
   {% endfor %}
   {% endif %}
+  return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }

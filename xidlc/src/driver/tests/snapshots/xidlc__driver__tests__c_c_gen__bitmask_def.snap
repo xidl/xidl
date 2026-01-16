@@ -222,80 +222,128 @@ void A_set(A* self, A other, bool value);
 bitmask_def_xcdr.c
 ===============
 #include "bitmask_def_xcdr.h"
-void A_serialize(A const* self, FfiCdrSerializer* serializer) {
+XcdrBufferResult A_serialize(A const* self, XcdrBuffer buf) {
+  uint8_t *ptr = buf.ptr;
+  size_t len = buf.len;
+  FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
+  XcdrFfiError err = Ok;
   
   
   
   
   
-  cdr_serializer_write_u32(serializer, "(*self)");
+  err = cdr_serializer_write_u32(&serializer, "(*self)");
+  if (err != Ok) {
+    return (XcdrBufferResult){ err, cdr_serializer_position(&serializer) };
+  }
   
   
   
   
+  return (XcdrBufferResult){ Ok, cdr_serializer_position(&serializer) };
 }
 
-void A_deserialize(A* self, FfiCdrDeserializer* deserializer) {
+XcdrBufferResult A_deserialize(A* self, XcdrConstBuffer buf) {
+  const uint8_t *ptr = buf.ptr;
+  size_t len = buf.len;
+  FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
+  XcdrFfiError err = Ok;
   
   
   
   
   
-  cdr_deserializer_read_u32_le(deserializer, "(*self)");
+  err = cdr_deserializer_read_u32_le(&deserializer, "(*self)");
+  if (err != Ok) {
+    return (XcdrBufferResult){ err, cdr_deserializer_position(&deserializer) };
+  }
   
   
   
   
+  return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
-void A_serialize(A const* self, FfiCdrSerializer* serializer) {
+XcdrBufferResult A_serialize(A const* self, XcdrBuffer buf) {
+  uint8_t *ptr = buf.ptr;
+  size_t len = buf.len;
+  FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
+  XcdrFfiError err = Ok;
   
   
   
   
   
-  cdr_serializer_write_u32(serializer, "(*self)");
+  err = cdr_serializer_write_u32(&serializer, "(*self)");
+  if (err != Ok) {
+    return (XcdrBufferResult){ err, cdr_serializer_position(&serializer) };
+  }
   
   
   
   
-}
-
-void A_deserialize(A* self, FfiCdrDeserializer* deserializer) {
-  
-  
-  
-  
-  
-  cdr_deserializer_read_u32_le(deserializer, "(*self)");
-  
-  
-  
-  
-}
-void A_serialize(A const* self, FfiCdrSerializer* serializer) {
-  
-  
-  
-  
-  
-  cdr_serializer_write_u32(serializer, "(*self)");
-  
-  
-  
-  
+  return (XcdrBufferResult){ Ok, cdr_serializer_position(&serializer) };
 }
 
-void A_deserialize(A* self, FfiCdrDeserializer* deserializer) {
+XcdrBufferResult A_deserialize(A* self, XcdrConstBuffer buf) {
+  const uint8_t *ptr = buf.ptr;
+  size_t len = buf.len;
+  FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
+  XcdrFfiError err = Ok;
   
   
   
   
   
-  cdr_deserializer_read_u32_le(deserializer, "(*self)");
+  err = cdr_deserializer_read_u32_le(&deserializer, "(*self)");
+  if (err != Ok) {
+    return (XcdrBufferResult){ err, cdr_deserializer_position(&deserializer) };
+  }
   
   
   
   
+  return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
+}
+XcdrBufferResult A_serialize(A const* self, XcdrBuffer buf) {
+  uint8_t *ptr = buf.ptr;
+  size_t len = buf.len;
+  FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
+  XcdrFfiError err = Ok;
+  
+  
+  
+  
+  
+  err = cdr_serializer_write_u32(&serializer, "(*self)");
+  if (err != Ok) {
+    return (XcdrBufferResult){ err, cdr_serializer_position(&serializer) };
+  }
+  
+  
+  
+  
+  return (XcdrBufferResult){ Ok, cdr_serializer_position(&serializer) };
+}
+
+XcdrBufferResult A_deserialize(A* self, XcdrConstBuffer buf) {
+  const uint8_t *ptr = buf.ptr;
+  size_t len = buf.len;
+  FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
+  XcdrFfiError err = Ok;
+  
+  
+  
+  
+  
+  err = cdr_deserializer_read_u32_le(&deserializer, "(*self)");
+  if (err != Ok) {
+    return (XcdrBufferResult){ err, cdr_deserializer_position(&deserializer) };
+  }
+  
+  
+  
+  
+  return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
 ===============
 bitmask_def_xcdr.h
@@ -305,9 +353,9 @@ bitmask_def_xcdr.h
 #include "bitmask_def.h"
 #include "xidl_xcdr.h"
 #include <stddef.h>
-void A_serialize(A const* self, FfiCdrSerializer* serializer);
-void A_deserialize(A* self, FfiCdrDeserializer* deserializer);
-void A_serialize(A const* self, FfiCdrSerializer* serializer);
-void A_deserialize(A* self, FfiCdrDeserializer* deserializer);
-void A_serialize(A const* self, FfiCdrSerializer* serializer);
-void A_deserialize(A* self, FfiCdrDeserializer* deserializer);
+XcdrBufferResult A_serialize(A const* self, XcdrBuffer buf);
+XcdrBufferResult A_deserialize(A* self, XcdrConstBuffer buf);
+XcdrBufferResult A_serialize(A const* self, XcdrBuffer buf);
+XcdrBufferResult A_deserialize(A* self, XcdrConstBuffer buf);
+XcdrBufferResult A_serialize(A const* self, XcdrBuffer buf);
+XcdrBufferResult A_deserialize(A* self, XcdrConstBuffer buf);

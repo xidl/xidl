@@ -59,34 +59,57 @@ void C_init(C* self);
 union_dcl_xcdr.c
 ===============
 #include "union_dcl_xcdr.h"
-void B_serialize(B const* self, FfiCdrSerializer* serializer) {
+XcdrBufferResult B_serialize(B const* self, XcdrBuffer buf) {
+  uint8_t *ptr = buf.ptr;
+  size_t len = buf.len;
+  FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
+  XcdrFfiError err = Ok;
   
   
   
-  cdr_serializer_write_i32(serializer, "self->_d");
+  err = cdr_serializer_write_i32(&serializer, "self->_d");
+  if (err != Ok) {
+    return (XcdrBufferResult){ err, cdr_serializer_position(&serializer) };
+  }
   
   
   switch (self->_d) {
   
   }
+  return (XcdrBufferResult){ Ok, cdr_serializer_position(&serializer) };
 }
 
-void B_deserialize(B* self, FfiCdrDeserializer* deserializer) {
+XcdrBufferResult B_deserialize(B* self, XcdrConstBuffer buf) {
+  const uint8_t *ptr = buf.ptr;
+  size_t len = buf.len;
+  FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
+  XcdrFfiError err = Ok;
   
   
   
-  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  err = cdr_deserializer_read_i32_le(&deserializer, "self->_d");
+  if (err != Ok) {
+    return (XcdrBufferResult){ err, cdr_deserializer_position(&deserializer) };
+  }
   
   
   switch (self->_d) {
   
   }
+  return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
-void C_serialize(C const* self, FfiCdrSerializer* serializer) {
+XcdrBufferResult C_serialize(C const* self, XcdrBuffer buf) {
+  uint8_t *ptr = buf.ptr;
+  size_t len = buf.len;
+  FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
+  XcdrFfiError err = Ok;
   
   
   
-  cdr_serializer_write_i32(serializer, "self->_d");
+  err = cdr_serializer_write_i32(&serializer, "self->_d");
+  if (err != Ok) {
+    return (XcdrBufferResult){ err, cdr_serializer_position(&serializer) };
+  }
   
   
   switch (self->_d) {
@@ -99,7 +122,10 @@ void C_serialize(C const* self, FfiCdrSerializer* serializer) {
   
   
   
-  cdr_serializer_write_i32(serializer, "self->_u.a");
+  err = cdr_serializer_write_i32(&serializer, "self->_u.a");
+  if (err != Ok) {
+    return (XcdrBufferResult){ err, cdr_serializer_position(&serializer) };
+  }
   
   
     break;
@@ -118,13 +144,21 @@ void C_serialize(C const* self, FfiCdrSerializer* serializer) {
     break;
   
   }
+  return (XcdrBufferResult){ Ok, cdr_serializer_position(&serializer) };
 }
 
-void C_deserialize(C* self, FfiCdrDeserializer* deserializer) {
+XcdrBufferResult C_deserialize(C* self, XcdrConstBuffer buf) {
+  const uint8_t *ptr = buf.ptr;
+  size_t len = buf.len;
+  FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
+  XcdrFfiError err = Ok;
   
   
   
-  cdr_deserializer_read_i32_le(deserializer, "self->_d");
+  err = cdr_deserializer_read_i32_le(&deserializer, "self->_d");
+  if (err != Ok) {
+    return (XcdrBufferResult){ err, cdr_deserializer_position(&deserializer) };
+  }
   
   
   switch (self->_d) {
@@ -137,7 +171,10 @@ void C_deserialize(C* self, FfiCdrDeserializer* deserializer) {
   
   
   
-  cdr_deserializer_read_i32_le(deserializer, "self->_u.a");
+  err = cdr_deserializer_read_i32_le(&deserializer, "self->_u.a");
+  if (err != Ok) {
+    return (XcdrBufferResult){ err, cdr_deserializer_position(&deserializer) };
+  }
   
   
     break;
@@ -156,6 +193,7 @@ void C_deserialize(C* self, FfiCdrDeserializer* deserializer) {
     break;
   
   }
+  return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
 ===============
 union_dcl_xcdr.h
@@ -165,7 +203,7 @@ union_dcl_xcdr.h
 #include "union_dcl.h"
 #include "xidl_xcdr.h"
 #include <stddef.h>
-void B_serialize(B const* self, FfiCdrSerializer* serializer);
-void B_deserialize(B* self, FfiCdrDeserializer* deserializer);
-void C_serialize(C const* self, FfiCdrSerializer* serializer);
-void C_deserialize(C* self, FfiCdrDeserializer* deserializer);
+XcdrBufferResult B_serialize(B const* self, XcdrBuffer buf);
+XcdrBufferResult B_deserialize(B* self, XcdrConstBuffer buf);
+XcdrBufferResult C_serialize(C const* self, XcdrBuffer buf);
+XcdrBufferResult C_deserialize(C* self, XcdrConstBuffer buf);
