@@ -1,0 +1,5 @@
+enum class {{ ident }} {
+{% for member in members %}
+    {{ member }}{% if not loop.last %},{% endif %}
+{% endfor %}
+};

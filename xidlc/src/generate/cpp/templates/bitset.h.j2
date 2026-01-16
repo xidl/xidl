@@ -1,0 +1,5 @@
+struct {{ ident }}{% if parent %} : public {{ parent }}{% endif %} {
+{% for field in fields %}
+    {{ field.ty }}{% if field.name %} {{ field.name }}{% endif %} : {{ field.width }};
+{% endfor %}
+};

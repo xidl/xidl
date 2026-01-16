@@ -1,0 +1,7 @@
+class {{ ident }} {
+public:
+    {{ switch_ty }} _d{};
+{% for member in members %}
+    {{ member.ty }} {{ member.name }};
+{% endfor %}
+};

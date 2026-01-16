@@ -1,0 +1,8 @@
+class {{ ident }} : public std::exception {
+public:
+    {{ ident }}() = default;
+    const char* what() const noexcept override { return ""; }
+{% for member in members %}
+    {{ member.ty }} {{ member.name }};
+{% endfor %}
+};

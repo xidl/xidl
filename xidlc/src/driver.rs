@@ -3,8 +3,8 @@ mod tests;
 
 use crate::cli::CliArgs;
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::GeneratedFile;
 use crate::generate::jsonrpc::JsonRpcClient;
+use crate::generate::GeneratedFile;
 use std::fs;
 use std::io::BufReader;
 use std::path::Path;
@@ -60,6 +60,14 @@ pub fn spawn_codegen_server(
             let server = thread::spawn(move || {
                 let reader = BufReader::new(stdout_rx);
                 crate::generate::c::serve_jsonrpc(reader, stdin_tx)
+            });
+
+            Ok(server)
+        }
+        "cpp" => {
+            let server = thread::spawn(move || {
+                let reader = BufReader::new(stdout_rx);
+                crate::generate::cpp::serve_jsonrpc(reader, stdin_tx)
             });
 
             Ok(server)

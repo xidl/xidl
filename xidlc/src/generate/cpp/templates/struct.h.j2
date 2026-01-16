@@ -1,0 +1,5 @@
+struct {{ ident }}{% if parent %} : public {{ parent }}{% endif %} {
+{% for member in members %}
+    {{ member.ty }} {{ member.name }};
+{% endfor %}
+};

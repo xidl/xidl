@@ -13,6 +13,23 @@ typedef enum XcdrFfiError {
   NullPointer = 3,
 } XcdrFfiError;
 
+typedef struct XcdrBuffer {
+  uint8_t *ptr;
+  uintptr_t len;
+  uintptr_t pos;
+} XcdrBuffer;
+
+typedef struct XcdrConstBuffer {
+  const uint8_t *ptr;
+  uintptr_t len;
+  uintptr_t pos;
+} XcdrConstBuffer;
+
+typedef struct XcdrBufferResult {
+  XcdrFfiError err;
+  uintptr_t used;
+} XcdrBufferResult;
+
 typedef struct FfiCdrDeserializer {
   const uint8_t *buf_ptr;
   uintptr_t buf_len;
