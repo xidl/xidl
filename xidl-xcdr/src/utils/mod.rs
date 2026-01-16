@@ -7,6 +7,8 @@ pub(crate) trait FromBytes<const N: usize>: Sized {
     fn from_be_bytes(bytes: [u8; N]) -> Self;
 }
 
+pub(crate) mod align;
+
 macro_rules! impl_to_ne_bytes {
     ($($ty:ty, $len:literal)*) => {
         $(

@@ -1,4 +1,7 @@
-use crate::utils::FromBytes;
+use crate::utils::{
+    align::{read_aligned, Align4},
+    FromBytes,
+};
 use crate::{error::XcdrError, FieldId, XcdrDeserialize};
 
 pub struct XcdrPlcdrDeserializer<'a> {
@@ -43,19 +46,7 @@ impl<'a> XcdrPlcdrDeserializer<'a> {
     }
 
     fn read_aligned<const N: usize>(&mut self) -> crate::error::XcdrResult<[u8; N]> {
-        let align = match N % 4 {
-            0 => 0usize,
-            v => 4 - v,
-        };
-        if self.pos + align + N > self.buf.len() {
-            return Err(XcdrError::BufferOverflow);
-        }
-
-        self.pos += align;
-        let mut out = [0u8; N];
-        out.copy_from_slice(&self.buf[self.pos..self.pos + N]);
-        self.pos += N;
-        Ok(out)
+        read_aligned::<Align4, N>(self.buf, &mut self.pos)
     }
 
     fn read_num_le<T, const N: usize>(&mut self) -> crate::error::XcdrResult<T>

@@ -1,6 +1,9 @@
 use crate::{
     error::{XcdrError, XcdrResult},
-    utils::ToNeBytes,
+    utils::{
+        align::{write_aligned, Align4},
+        ToNeBytes,
+    },
     FieldId, XcdrSerialize,
 };
 
@@ -26,36 +29,7 @@ impl PlcdrSerialize {
     where
         T: ToNeBytes<N>,
     {
-        let len = size_of::<T>();
-        if self.pos + len > self.len {
-            return Err(XcdrError::BufferOverflow);
-        }
-
-        self.align::<T>()?;
-        if self.do_io {
-            let src = &val.to_ne_bytes();
-
-            unsafe {
-                core::ptr::copy(
-                    core::ptr::addr_of!(*src) as *const u8,
-                    self.buf.add(self.pos),
-                    src.len(),
-                );
-            }
-        }
-
-        self.pos += len;
-        Ok(())
-    }
-
-    fn align<T>(&mut self) -> XcdrResult<()> {
-        let len = size_of::<T>();
-        let align = match len % 4 {
-            0 => 0usize,
-            v => 4 - v,
-        };
-        self.pos += align;
-        Ok(())
+        write_aligned::<Align4, T, N>(self.buf, self.len, &mut self.pos, self.do_io, val, false)
     }
 }
 

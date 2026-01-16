@@ -1,6 +1,9 @@
 use crate::{
     error::{XcdrError, XcdrResult},
-    utils::ToNeBytes,
+    utils::{
+        align::{align_pos, write_aligned, AlignCdr2},
+        ToNeBytes,
+    },
     XcdrSerialize,
 };
 
@@ -31,25 +34,9 @@ impl DelimitedCdrSerialize {
         }
     }
 
-    fn align_for_len(&mut self, len: usize) -> XcdrResult<()> {
-        let align_to = match len {
-            8 | 16 => 4usize,
-            _ => 8usize,
-        };
-        let align = match len % align_to {
-            0 => 0usize,
-            v => align_to - v,
-        };
-        if self.pos + align > self.len {
-            return Err(XcdrError::BufferOverflow);
-        }
-        self.pos += align;
-        Ok(())
-    }
-
     fn write_u32_raw(&mut self, val: u32) -> XcdrResult<usize> {
         let len = size_of::<u32>();
-        self.align_for_len(len)?;
+        align_pos::<AlignCdr2>(&mut self.pos, len, self.len, true)?;
         if self.pos + len > self.len {
             return Err(XcdrError::BufferOverflow);
         }
@@ -72,25 +59,7 @@ impl DelimitedCdrSerialize {
     where
         T: ToNeBytes<N>,
     {
-        let len = size_of::<T>();
-        if self.pos + len > self.len {
-            return Err(XcdrError::BufferOverflow);
-        }
-
-        self.align_for_len(len)?;
-        if self.do_io {
-            let src = &val.to_ne_bytes();
-            unsafe {
-                core::ptr::copy(
-                    core::ptr::addr_of!(*src) as *const u8,
-                    self.buf.add(self.pos),
-                    src.len(),
-                );
-            }
-        }
-
-        self.pos += len;
-        Ok(())
+        write_aligned::<AlignCdr2, T, N>(self.buf, self.len, &mut self.pos, self.do_io, val, true)
     }
 }
 
