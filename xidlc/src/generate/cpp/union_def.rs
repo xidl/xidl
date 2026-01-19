@@ -1,7 +1,7 @@
 use crate::error::IdlcResult;
 use crate::generate::cpp::util::{
     apply_declarator, collect_inline_defs, cpp_scoped_name, cpp_switch_type, declarator_name,
-    type_with_decl,
+    render_const, type_with_decl,
 };
 use crate::generate::cpp::{CppRender, CppRenderOutput, CppRenderer};
 use serde_json::json;
@@ -49,10 +49,30 @@ impl CppRender for hir::UnionDef {
             })
             .collect::<Vec<_>>();
 
+        let cases = self
+            .case
+            .iter()
+            .map(|case| {
+                let labels = case
+                    .label
+                    .iter()
+                    .map(|label| match label {
+                        hir::CaseLabel::Value(expr) => render_const(expr),
+                        hir::CaseLabel::Default => "default".to_string(),
+                    })
+                    .collect::<Vec<_>>();
+                json!({
+                    "labels": labels,
+                    "member": declarator_name(&case.element.value),
+                })
+            })
+            .collect::<Vec<_>>();
+
         let ctx = json!({
             "ident": &self.ident,
             "switch_ty": cpp_switch_type(&self.switch_type_spec),
             "members": members,
+            "cases": cases,
         });
         let rendered = renderer.render_template("union.h.j2", &ctx)?;
         out.header.push(rendered);

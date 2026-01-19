@@ -3,3 +3,22 @@ enum class {{ ident }} {
     {{ member }}{% if not loop.last %},{% endif %}
 {% endfor %}
 };
+
+template <>
+struct xidl::xcdr::Traits<{{ ident }}> {
+  template <typename Codec>
+  static inline xidl::xcdr::BufferResult serialize(xidl::xcdr::Serializer<Codec>& ser, {{ ident }} value) {
+    uint32_t raw = static_cast<uint32_t>(value);
+    return ser.write(raw);
+  }
+
+  template <typename Codec>
+  static inline xidl::xcdr::BufferResult deserialize(xidl::xcdr::Deserializer<Codec>& de, {{ ident }}& value) {
+    uint32_t raw = 0;
+    xidl::xcdr::BufferResult res = de.read(raw);
+    if (res.ok()) {
+      value = static_cast<{{ ident }}>(raw);
+    }
+    return res;
+  }
+};

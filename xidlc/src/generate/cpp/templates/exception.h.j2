@@ -6,3 +6,30 @@ public:
     {{ member.ty }} {{ member.name }};
 {% endfor %}
 };
+
+template <>
+struct xidl::xcdr::Traits<{{ ident }}> {
+  template <typename Codec>
+  static inline xidl::xcdr::BufferResult serialize(xidl::xcdr::Serializer<Codec>& ser, const {{ ident }}& value) {
+    xidl::xcdr::BufferResult res{XcdrFfiError::Ok, 0};
+{% for member in members %}
+    res = ser.write(value.{{ member.name }});
+    if (!res.ok()) {
+      return res;
+    }
+{% endfor %}
+    return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
+  }
+
+  template <typename Codec>
+  static inline xidl::xcdr::BufferResult deserialize(xidl::xcdr::Deserializer<Codec>& de, {{ ident }}& value) {
+    xidl::xcdr::BufferResult res{XcdrFfiError::Ok, 0};
+{% for member in members %}
+    res = de.read(value.{{ member.name }});
+    if (!res.ok()) {
+      return res;
+    }
+{% endfor %}
+    return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
+  }
+};

@@ -14,3 +14,21 @@ struct {{ ident }} {
     {{ ident }}& operator&=(uint32_t other) { _value &= other; return *this; }
     {{ ident }}& operator^=(uint32_t other) { _value ^= other; return *this; }
 };
+
+template <>
+struct xidl::xcdr::Traits<{{ ident }}> {
+  template <typename Codec>
+  static inline xidl::xcdr::BufferResult serialize(xidl::xcdr::Serializer<Codec>& ser, const {{ ident }}& value) {
+    return ser.write(value._value);
+  }
+
+  template <typename Codec>
+  static inline xidl::xcdr::BufferResult deserialize(xidl::xcdr::Deserializer<Codec>& de, {{ ident }}& value) {
+    uint32_t raw = 0;
+    xidl::xcdr::BufferResult res = de.read(raw);
+    if (res.ok()) {
+      value._value = raw;
+    }
+    return res;
+  }
+};

@@ -13,6 +13,7 @@ impl CppRender for hir::TypeDcl {
                 let ctx = json!({
                     "name": &native.decl.0,
                     "ty": "void*",
+                    "emit_traits": false,
                 });
                 let rendered = renderer.render_template("typedef.h.j2", &ctx)?;
                 Ok(CppRenderOutput::default().push_header(rendered))
@@ -28,7 +29,8 @@ impl CppRender for hir::TypedefDcl {
             hir::TypedefType::TypeSpec(ty) => {
                 for decl in &self.decl {
                     let base = cpp_type(ty);
-                    let ctx = typedef_json(&base, decl);
+                    let mut ctx = typedef_json(&base, decl);
+                    ctx["emit_traits"] = json!(true);
                     let rendered = renderer.render_template("typedef.h.j2", &ctx)?;
                     out.header.push(rendered);
                 }
@@ -57,7 +59,8 @@ impl CppRender for hir::TypedefDcl {
                         }
                         _ => unreachable!(),
                     };
-                    let ctx = typedef_json(&base, decl);
+                    let mut ctx = typedef_json(&base, decl);
+                    ctx["emit_traits"] = json!(true);
                     let rendered = renderer.render_template("typedef.h.j2", &ctx)?;
                     out.header.push(rendered);
                 }
