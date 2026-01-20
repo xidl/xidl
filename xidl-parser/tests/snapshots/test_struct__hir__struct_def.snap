@@ -4,328 +4,363 @@ expression: hir
 ---
 Specification(
     [
-        ConstrTypeDcl(
-            StructDcl(
-                StructDcl {
-                    annotations: [],
-                    ident: "A",
-                    parent: [],
-                    member: [],
-                },
-            ),
-        ),
-        ConstrTypeDcl(
-            StructDcl(
-                StructDcl {
-                    annotations: [],
-                    ident: "A",
-                    parent: [],
-                    member: [
-                        Member {
+        TypeDcl(
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
                             annotations: [],
-                            ty: SimpleTypeSpec(
-                                IntegerType(
-                                    I32,
-                                ),
-                            ),
-                            ident: [
-                                SimpleDeclarator(
-                                    SimpleDeclarator(
-                                        "a",
+                            ident: "A",
+                            parent: [],
+                            member: [],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
+                            annotations: [],
+                            ident: "A",
+                            parent: [],
+                            member: [
+                                Member {
+                                    annotations: [],
+                                    ty: SimpleTypeSpec(
+                                        IntegerType(
+                                            I32,
+                                        ),
                                     ),
-                                ),
-                            ],
-                            default: None,
-                        },
-                    ],
-                },
-            ),
-        ),
-        ConstrTypeDcl(
-            StructDcl(
-                StructDcl {
-                    annotations: [],
-                    ident: "A",
-                    parent: [],
-                    member: [
-                        Member {
-                            annotations: [],
-                            ty: SimpleTypeSpec(
-                                ScopedName(
-                                    ScopedName {
-                                        name: [
-                                            "A",
-                                            "b",
-                                        ],
-                                        is_root: true,
-                                    },
-                                ),
-                            ),
-                            ident: [
-                                SimpleDeclarator(
-                                    SimpleDeclarator(
-                                        "a",
-                                    ),
-                                ),
-                            ],
-                            default: None,
-                        },
-                    ],
-                },
-            ),
-        ),
-        ConstrTypeDcl(
-            StructDcl(
-                StructDcl {
-                    annotations: [],
-                    ident: "A",
-                    parent: [
-                        ScopedName {
-                            name: [
-                                "B",
-                            ],
-                            is_root: false,
-                        },
-                    ],
-                    member: [],
-                },
-            ),
-        ),
-        ConstrTypeDcl(
-            StructDcl(
-                StructDcl {
-                    annotations: [],
-                    ident: "_A",
-                    parent: [],
-                    member: [],
-                },
-            ),
-        ),
-        ConstrTypeDcl(
-            StructDcl(
-                StructDcl {
-                    annotations: [],
-                    ident: "_Custom",
-                    parent: [],
-                    member: [
-                        Member {
-                            annotations: [],
-                            ty: SimpleTypeSpec(
-                                ScopedName(
-                                    ScopedName {
-                                        name: [
-                                            "Inner",
-                                        ],
-                                        is_root: false,
-                                    },
-                                ),
-                            ),
-                            ident: [
-                                SimpleDeclarator(
-                                    SimpleDeclarator(
-                                        "var_inner",
-                                    ),
-                                ),
-                            ],
-                            default: None,
-                        },
-                    ],
-                },
-            ),
-        ),
-        ConstrTypeDcl(
-            StructDcl(
-                StructDcl {
-                    annotations: [],
-                    ident: "HelloWorld",
-                    parent: [],
-                    member: [
-                        Member {
-                            annotations: [],
-                            ty: SimpleTypeSpec(
-                                ScopedName(
-                                    ScopedName {
-                                        name: [
-                                            "u8",
-                                        ],
-                                        is_root: false,
-                                    },
-                                ),
-                            ),
-                            ident: [
-                                SimpleDeclarator(
-                                    SimpleDeclarator(
-                                        "a",
-                                    ),
-                                ),
-                            ],
-                            default: None,
-                        },
-                        Member {
-                            annotations: [],
-                            ty: SimpleTypeSpec(
-                                ScopedName(
-                                    ScopedName {
-                                        name: [
-                                            "u16",
-                                        ],
-                                        is_root: false,
-                                    },
-                                ),
-                            ),
-                            ident: [
-                                ArrayDeclarator(
-                                    ArrayDeclarator {
-                                        ident: "b",
-                                        len: [
-                                            PositiveIntConst(
-                                                ConstExpr(
-                                                    XorExpr(
-                                                        AndExpr(
-                                                            ShiftExpr(
-                                                                AddExpr(
-                                                                    MultExpr(
-                                                                        UnaryExpr(
-                                                                            PrimaryExpr(
-                                                                                Literal(
-                                                                                    IntegerLiteral(
-                                                                                        DecNumber(
-                                                                                            "10",
-                                                                                        ),
-                                                                                    ),
-                                                                                ),
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ],
-                                    },
-                                ),
-                            ],
-                            default: None,
-                        },
-                        Member {
-                            annotations: [],
-                            ty: TemplateTypeSpec(
-                                StringType(
-                                    StringType {
-                                        bound: None,
-                                    },
-                                ),
-                            ),
-                            ident: [
-                                ArrayDeclarator(
-                                    ArrayDeclarator {
-                                        ident: "c",
-                                        len: [
-                                            PositiveIntConst(
-                                                ConstExpr(
-                                                    XorExpr(
-                                                        AndExpr(
-                                                            ShiftExpr(
-                                                                AddExpr(
-                                                                    MultExpr(
-                                                                        UnaryExpr(
-                                                                            PrimaryExpr(
-                                                                                Literal(
-                                                                                    IntegerLiteral(
-                                                                                        DecNumber(
-                                                                                            "10",
-                                                                                        ),
-                                                                                    ),
-                                                                                ),
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                            PositiveIntConst(
-                                                ConstExpr(
-                                                    XorExpr(
-                                                        AndExpr(
-                                                            ShiftExpr(
-                                                                AddExpr(
-                                                                    MultExpr(
-                                                                        UnaryExpr(
-                                                                            PrimaryExpr(
-                                                                                Literal(
-                                                                                    IntegerLiteral(
-                                                                                        DecNumber(
-                                                                                            "20",
-                                                                                        ),
-                                                                                    ),
-                                                                                ),
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ],
-                                    },
-                                ),
-                            ],
-                            default: None,
-                        },
-                        Member {
-                            annotations: [],
-                            ty: TemplateTypeSpec(
-                                SequenceType(
-                                    SequenceType {
-                                        ty: SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "u8",
-                                                    ],
-                                                    is_root: false,
-                                                },
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "a",
                                             ),
                                         ),
-                                        len: None,
-                                    },
-                                ),
-                            ),
-                            ident: [
-                                SimpleDeclarator(
-                                    SimpleDeclarator(
-                                        "c",
-                                    ),
-                                ),
+                                    ],
+                                    default: None,
+                                },
                             ],
-                            default: None,
                         },
-                        Member {
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
                             annotations: [],
-                            ty: TemplateTypeSpec(
-                                StringType(
-                                    StringType {
-                                        bound: Some(
-                                            PositiveIntConst(
-                                                ConstExpr(
-                                                    XorExpr(
-                                                        AndExpr(
-                                                            ShiftExpr(
-                                                                AddExpr(
-                                                                    MultExpr(
-                                                                        UnaryExpr(
-                                                                            PrimaryExpr(
-                                                                                Literal(
-                                                                                    IntegerLiteral(
-                                                                                        DecNumber(
-                                                                                            "20",
+                            ident: "A",
+                            parent: [],
+                            member: [
+                                Member {
+                                    annotations: [],
+                                    ty: SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A",
+                                                    "b",
+                                                ],
+                                                is_root: true,
+                                            },
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "a",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
+                            annotations: [],
+                            ident: "A",
+                            parent: [
+                                ScopedName {
+                                    name: [
+                                        "B",
+                                    ],
+                                    is_root: false,
+                                },
+                            ],
+                            member: [],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
+                            annotations: [],
+                            ident: "_A",
+                            parent: [],
+                            member: [],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
+                            annotations: [],
+                            ident: "_Custom",
+                            parent: [],
+                            member: [
+                                Member {
+                                    annotations: [],
+                                    ty: SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "Inner",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "var_inner",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
+                            annotations: [],
+                            ident: "HelloWorld",
+                            parent: [],
+                            member: [
+                                Member {
+                                    annotations: [],
+                                    ty: SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "u8",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "a",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                },
+                                Member {
+                                    annotations: [],
+                                    ty: SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "u16",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    ident: [
+                                        ArrayDeclarator(
+                                            ArrayDeclarator {
+                                                ident: "b",
+                                                len: [
+                                                    PositiveIntConst(
+                                                        ConstExpr(
+                                                            XorExpr(
+                                                                AndExpr(
+                                                                    ShiftExpr(
+                                                                        AddExpr(
+                                                                            MultExpr(
+                                                                                UnaryExpr(
+                                                                                    PrimaryExpr(
+                                                                                        Literal(
+                                                                                            IntegerLiteral(
+                                                                                                DecNumber(
+                                                                                                    "10",
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ],
+                                            },
+                                        ),
+                                    ],
+                                    default: None,
+                                },
+                                Member {
+                                    annotations: [],
+                                    ty: TemplateTypeSpec(
+                                        StringType(
+                                            StringType {
+                                                bound: None,
+                                            },
+                                        ),
+                                    ),
+                                    ident: [
+                                        ArrayDeclarator(
+                                            ArrayDeclarator {
+                                                ident: "c",
+                                                len: [
+                                                    PositiveIntConst(
+                                                        ConstExpr(
+                                                            XorExpr(
+                                                                AndExpr(
+                                                                    ShiftExpr(
+                                                                        AddExpr(
+                                                                            MultExpr(
+                                                                                UnaryExpr(
+                                                                                    PrimaryExpr(
+                                                                                        Literal(
+                                                                                            IntegerLiteral(
+                                                                                                DecNumber(
+                                                                                                    "10",
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                    PositiveIntConst(
+                                                        ConstExpr(
+                                                            XorExpr(
+                                                                AndExpr(
+                                                                    ShiftExpr(
+                                                                        AddExpr(
+                                                                            MultExpr(
+                                                                                UnaryExpr(
+                                                                                    PrimaryExpr(
+                                                                                        Literal(
+                                                                                            IntegerLiteral(
+                                                                                                DecNumber(
+                                                                                                    "20",
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ],
+                                            },
+                                        ),
+                                    ],
+                                    default: None,
+                                },
+                                Member {
+                                    annotations: [],
+                                    ty: TemplateTypeSpec(
+                                        SequenceType(
+                                            SequenceType {
+                                                ty: SimpleTypeSpec(
+                                                    ScopedName(
+                                                        ScopedName {
+                                                            name: [
+                                                                "u8",
+                                                            ],
+                                                            is_root: false,
+                                                        },
+                                                    ),
+                                                ),
+                                                len: None,
+                                            },
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "c",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                },
+                                Member {
+                                    annotations: [],
+                                    ty: TemplateTypeSpec(
+                                        StringType(
+                                            StringType {
+                                                bound: Some(
+                                                    PositiveIntConst(
+                                                        ConstExpr(
+                                                            XorExpr(
+                                                                AndExpr(
+                                                                    ShiftExpr(
+                                                                        AddExpr(
+                                                                            MultExpr(
+                                                                                UnaryExpr(
+                                                                                    PrimaryExpr(
+                                                                                        Literal(
+                                                                                            IntegerLiteral(
+                                                                                                DecNumber(
+                                                                                                    "20",
+                                                                                                ),
+                                                                                            ),
                                                                                         ),
                                                                                     ),
                                                                                 ),
@@ -337,39 +372,39 @@ Specification(
                                                         ),
                                                     ),
                                                 ),
+                                            },
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "d",
                                             ),
                                         ),
-                                    },
-                                ),
-                            ),
-                            ident: [
-                                SimpleDeclarator(
-                                    SimpleDeclarator(
-                                        "d",
-                                    ),
-                                ),
-                            ],
-                            default: None,
-                        },
-                        Member {
-                            annotations: [],
-                            ty: TemplateTypeSpec(
-                                WideStringType(
-                                    WideStringType {
-                                        bound: Some(
-                                            PositiveIntConst(
-                                                ConstExpr(
-                                                    XorExpr(
-                                                        AndExpr(
-                                                            ShiftExpr(
-                                                                AddExpr(
-                                                                    MultExpr(
-                                                                        UnaryExpr(
-                                                                            PrimaryExpr(
-                                                                                Literal(
-                                                                                    IntegerLiteral(
-                                                                                        DecNumber(
-                                                                                            "20",
+                                    ],
+                                    default: None,
+                                },
+                                Member {
+                                    annotations: [],
+                                    ty: TemplateTypeSpec(
+                                        WideStringType(
+                                            WideStringType {
+                                                bound: Some(
+                                                    PositiveIntConst(
+                                                        ConstExpr(
+                                                            XorExpr(
+                                                                AndExpr(
+                                                                    ShiftExpr(
+                                                                        AddExpr(
+                                                                            MultExpr(
+                                                                                UnaryExpr(
+                                                                                    PrimaryExpr(
+                                                                                        Literal(
+                                                                                            IntegerLiteral(
+                                                                                                DecNumber(
+                                                                                                    "20",
+                                                                                                ),
+                                                                                            ),
                                                                                         ),
                                                                                     ),
                                                                                 ),
@@ -381,37 +416,37 @@ Specification(
                                                         ),
                                                     ),
                                                 ),
+                                            },
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "d",
                                             ),
                                         ),
-                                    },
-                                ),
-                            ),
-                            ident: [
-                                SimpleDeclarator(
-                                    SimpleDeclarator(
-                                        "d",
+                                    ],
+                                    default: None,
+                                },
+                                Member {
+                                    annotations: [],
+                                    ty: SimpleTypeSpec(
+                                        AnyType,
                                     ),
-                                ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "d",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                },
                             ],
-                            default: None,
                         },
-                        Member {
-                            annotations: [],
-                            ty: SimpleTypeSpec(
-                                AnyType,
-                            ),
-                            ident: [
-                                SimpleDeclarator(
-                                    SimpleDeclarator(
-                                        "d",
-                                    ),
-                                ),
-                            ],
-                            default: None,
-                        },
-                    ],
-                },
-            ),
+                    ),
+                ),
+            },
         ),
     ],
 )

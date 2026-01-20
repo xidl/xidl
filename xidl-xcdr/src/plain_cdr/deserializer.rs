@@ -2,7 +2,7 @@ use crate::utils::{
     align::{read_aligned, Align8},
     FromBytes,
 };
-use crate::{error::XcdrError, XcdrDeserialize};
+use crate::{error::XcdrError, XcdrDeserializer};
 
 pub struct PlainCdrDeserializer<'a> {
     buf: &'a [u8],
@@ -50,7 +50,7 @@ impl<'a> PlainCdrDeserializer<'a> {
     }
 }
 
-impl XcdrDeserialize for PlainCdrDeserializer<'_> {
+impl XcdrDeserializer for PlainCdrDeserializer<'_> {
     fn read_u8(&mut self) -> crate::error::XcdrResult<u8> {
         self.read_num_be()
     }

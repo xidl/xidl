@@ -2,7 +2,7 @@ use crate::utils::{
     align::{read_aligned_with_limit, AlignCdr2},
     FromBytes,
 };
-use crate::{error::XcdrError, XcdrDeserialize};
+use crate::{error::XcdrError, XcdrDeserializer};
 
 const ENDIAN_FLAG: u32 = 1 << 31;
 const LEN_MASK: u32 = !ENDIAN_FLAG;
@@ -78,7 +78,7 @@ impl<'a> DelimitedCdrDeserializer<'a> {
     }
 }
 
-impl XcdrDeserialize for DelimitedCdrDeserializer<'_> {
+impl XcdrDeserializer for DelimitedCdrDeserializer<'_> {
     fn enter_struct(&mut self) -> crate::error::XcdrResult<()> {
         if let Some(end) = self.end_pos {
             if self.pos < end {

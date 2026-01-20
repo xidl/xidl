@@ -49,7 +49,7 @@ impl<'a> CdrDeserializer<'a> {
     }
 }
 
-impl crate::XcdrDeserialize for CdrDeserializer<'_> {
+impl crate::XcdrDeserializer for CdrDeserializer<'_> {
     fn read_u8(&mut self) -> crate::error::XcdrResult<u8> {
         self.read_num_be()
     }

@@ -6,6 +6,8 @@ expression: output
 misc.c
 ===============
 #include "misc.h"
+
+
 Color Color_new(void) {
   Color value;
   Color_init(&value);
@@ -15,6 +17,7 @@ Color Color_new(void) {
 void Color_init(Color* self) {
   *self = (Color)0;
 }
+
 Size Size_new(void) {
   Size value;
   Size_init(&value);
@@ -24,6 +27,7 @@ Size Size_new(void) {
 void Size_init(Size* self) {
   *self = (Size)0;
 }
+
 Foo Foo_new(void) {
   Foo value;
   Foo_init(&value);
@@ -33,6 +37,7 @@ Foo Foo_new(void) {
 void Foo_init(Foo* self) {
   *self = (Foo){0};
 }
+
 Foo Foo_new(void) {
   Foo value;
   Foo_init(&value);
@@ -42,6 +47,7 @@ Foo Foo_new(void) {
 void Foo_init(Foo* self) {
   *self = (Foo){0};
 }
+
 Bar Bar_new(void) {
   Bar value;
   Bar_init(&value);
@@ -56,6 +62,12 @@ void Bar_init(Bar* self) {
 
 
 
+
+
+
+
+
+
 A_make_it_so_In A_make_it_so_In_new(void) {
   A_make_it_so_In value;
   A_make_it_so_In_init(&value);
@@ -65,6 +77,7 @@ A_make_it_so_In A_make_it_so_In_new(void) {
 void A_make_it_so_In_init(A_make_it_so_In* self) {
   *self = (A_make_it_so_In){0};
 }
+
 A_make_it_so_Out A_make_it_so_Out_new(void) {
   A_make_it_so_Out value;
   A_make_it_so_Out_init(&value);
@@ -74,6 +87,7 @@ A_make_it_so_Out A_make_it_so_Out_new(void) {
 void A_make_it_so_Out_init(A_make_it_so_Out* self) {
   *self = (A_make_it_so_Out){0};
 }
+
 A_make_it_so_Result A_make_it_so_Result_new(void) {
   A_make_it_so_Result value;
   A_make_it_so_Result_init(&value);
@@ -83,6 +97,7 @@ A_make_it_so_Result A_make_it_so_Result_new(void) {
 void A_make_it_so_Result_init(A_make_it_so_Result* self) {
   *self = (A_make_it_so_Result){0};
 }
+
 A_Call A_Call_new(void) {
   A_Call value;
   A_Call_init(&value);
@@ -92,6 +107,7 @@ A_Call A_Call_new(void) {
 void A_Call_init(A_Call* self) {
   *self = (A_Call){0};
 }
+
 A_Request A_Request_new(void) {
   A_Request value;
   A_Request_init(&value);
@@ -101,6 +117,7 @@ A_Request A_Request_new(void) {
 void A_Request_init(A_Request* self) {
   *self = (A_Request){0};
 }
+
 A_Return A_Return_new(void) {
   A_Return value;
   A_Return_init(&value);
@@ -110,6 +127,7 @@ A_Return A_Return_new(void) {
 void A_Return_init(A_Return* self) {
   *self = (A_Return){0};
 }
+
 A_Reply A_Reply_new(void) {
   A_Reply value;
   A_Reply_init(&value);
@@ -120,9 +138,11 @@ void A_Reply_init(A_Reply* self) {
   *self = (A_Reply){0};
 }
 
+
 void A_make_it_so(void) {
 
 }
+
 
 
 B_make_it_so_In B_make_it_so_In_new(void) {
@@ -134,6 +154,7 @@ B_make_it_so_In B_make_it_so_In_new(void) {
 void B_make_it_so_In_init(B_make_it_so_In* self) {
   *self = (B_make_it_so_In){0};
 }
+
 B_make_it_so_Out B_make_it_so_Out_new(void) {
   B_make_it_so_Out value;
   B_make_it_so_Out_init(&value);
@@ -143,6 +164,7 @@ B_make_it_so_Out B_make_it_so_Out_new(void) {
 void B_make_it_so_Out_init(B_make_it_so_Out* self) {
   *self = (B_make_it_so_Out){0};
 }
+
 B_make_it_so_Result B_make_it_so_Result_new(void) {
   B_make_it_so_Result value;
   B_make_it_so_Result_init(&value);
@@ -152,6 +174,7 @@ B_make_it_so_Result B_make_it_so_Result_new(void) {
 void B_make_it_so_Result_init(B_make_it_so_Result* self) {
   *self = (B_make_it_so_Result){0};
 }
+
 B_Call B_Call_new(void) {
   B_Call value;
   B_Call_init(&value);
@@ -161,6 +184,7 @@ B_Call B_Call_new(void) {
 void B_Call_init(B_Call* self) {
   *self = (B_Call){0};
 }
+
 B_Request B_Request_new(void) {
   B_Request value;
   B_Request_init(&value);
@@ -170,6 +194,7 @@ B_Request B_Request_new(void) {
 void B_Request_init(B_Request* self) {
   *self = (B_Request){0};
 }
+
 B_Return B_Return_new(void) {
   B_Return value;
   B_Return_init(&value);
@@ -179,6 +204,7 @@ B_Return B_Return_new(void) {
 void B_Return_init(B_Return* self) {
   *self = (B_Return){0};
 }
+
 B_Reply B_Reply_new(void) {
   B_Reply value;
   B_Reply_init(&value);
@@ -189,12 +215,18 @@ void B_Reply_init(B_Reply* self) {
   *self = (B_Reply){0};
 }
 
+
 int16_t B_make_it_so(int32_t times) {
 
   int16_t result = {0};
   return result;
 
 }
+
+
+
+
+
 
 
 
@@ -210,6 +242,7 @@ A_opA_In A_opA_In_new(void) {
 void A_opA_In_init(A_opA_In* self) {
   *self = (A_opA_In){0};
 }
+
 A_opA_Out A_opA_Out_new(void) {
   A_opA_Out value;
   A_opA_Out_init(&value);
@@ -219,6 +252,7 @@ A_opA_Out A_opA_Out_new(void) {
 void A_opA_Out_init(A_opA_Out* self) {
   *self = (A_opA_Out){0};
 }
+
 A_opA_Result A_opA_Result_new(void) {
   A_opA_Result value;
   A_opA_Result_init(&value);
@@ -228,6 +262,7 @@ A_opA_Result A_opA_Result_new(void) {
 void A_opA_Result_init(A_opA_Result* self) {
   *self = (A_opA_Result){0};
 }
+
 A_Call A_Call_new(void) {
   A_Call value;
   A_Call_init(&value);
@@ -237,6 +272,7 @@ A_Call A_Call_new(void) {
 void A_Call_init(A_Call* self) {
   *self = (A_Call){0};
 }
+
 A_Request A_Request_new(void) {
   A_Request value;
   A_Request_init(&value);
@@ -246,6 +282,7 @@ A_Request A_Request_new(void) {
 void A_Request_init(A_Request* self) {
   *self = (A_Request){0};
 }
+
 A_Return A_Return_new(void) {
   A_Return value;
   A_Return_init(&value);
@@ -255,6 +292,7 @@ A_Return A_Return_new(void) {
 void A_Return_init(A_Return* self) {
   *self = (A_Return){0};
 }
+
 A_Reply A_Reply_new(void) {
   A_Reply value;
   A_Reply_init(&value);
@@ -265,12 +303,14 @@ void A_Reply_init(A_Reply* self) {
   *self = (A_Reply){0};
 }
 
+
 int16_t A_opA(L1 l_1) {
 
   int16_t result = {0};
   return result;
 
 }
+
 
 
 B_opB_In B_opB_In_new(void) {
@@ -282,6 +322,7 @@ B_opB_In B_opB_In_new(void) {
 void B_opB_In_init(B_opB_In* self) {
   *self = (B_opB_In){0};
 }
+
 B_opB_Out B_opB_Out_new(void) {
   B_opB_Out value;
   B_opB_Out_init(&value);
@@ -291,6 +332,7 @@ B_opB_Out B_opB_Out_new(void) {
 void B_opB_Out_init(B_opB_Out* self) {
   *self = (B_opB_Out){0};
 }
+
 B_opB_Result B_opB_Result_new(void) {
   B_opB_Result value;
   B_opB_Result_init(&value);
@@ -300,6 +342,7 @@ B_opB_Result B_opB_Result_new(void) {
 void B_opB_Result_init(B_opB_Result* self) {
   *self = (B_opB_Result){0};
 }
+
 B_Call B_Call_new(void) {
   B_Call value;
   B_Call_init(&value);
@@ -309,6 +352,7 @@ B_Call B_Call_new(void) {
 void B_Call_init(B_Call* self) {
   *self = (B_Call){0};
 }
+
 B_Request B_Request_new(void) {
   B_Request value;
   B_Request_init(&value);
@@ -318,6 +362,7 @@ B_Request B_Request_new(void) {
 void B_Request_init(B_Request* self) {
   *self = (B_Request){0};
 }
+
 B_Return B_Return_new(void) {
   B_Return value;
   B_Return_init(&value);
@@ -327,6 +372,7 @@ B_Return B_Return_new(void) {
 void B_Return_init(B_Return* self) {
   *self = (B_Return){0};
 }
+
 B_Reply B_Reply_new(void) {
   B_Reply value;
   B_Reply_init(&value);
@@ -337,12 +383,14 @@ void B_Reply_init(B_Reply* self) {
   *self = (B_Reply){0};
 }
 
+
 L1 B_opB(int32_t l) {
 
   L1 result = {0};
   return result;
 
 }
+
 
 
 C_opC_In C_opC_In_new(void) {
@@ -354,6 +402,7 @@ C_opC_In C_opC_In_new(void) {
 void C_opC_In_init(C_opC_In* self) {
   *self = (C_opC_In){0};
 }
+
 C_opC_Out C_opC_Out_new(void) {
   C_opC_Out value;
   C_opC_Out_init(&value);
@@ -363,6 +412,7 @@ C_opC_Out C_opC_Out_new(void) {
 void C_opC_Out_init(C_opC_Out* self) {
   *self = (C_opC_Out){0};
 }
+
 C_opC_Result C_opC_Result_new(void) {
   C_opC_Result value;
   C_opC_Result_init(&value);
@@ -372,6 +422,7 @@ C_opC_Result C_opC_Result_new(void) {
 void C_opC_Result_init(C_opC_Result* self) {
   *self = (C_opC_Result){0};
 }
+
 C_Call C_Call_new(void) {
   C_Call value;
   C_Call_init(&value);
@@ -381,6 +432,7 @@ C_Call C_Call_new(void) {
 void C_Call_init(C_Call* self) {
   *self = (C_Call){0};
 }
+
 C_Request C_Request_new(void) {
   C_Request value;
   C_Request_init(&value);
@@ -390,6 +442,7 @@ C_Request C_Request_new(void) {
 void C_Request_init(C_Request* self) {
   *self = (C_Request){0};
 }
+
 C_Return C_Return_new(void) {
   C_Return value;
   C_Return_init(&value);
@@ -399,6 +452,7 @@ C_Return C_Return_new(void) {
 void C_Return_init(C_Return* self) {
   *self = (C_Return){0};
 }
+
 C_Reply C_Reply_new(void) {
   C_Reply value;
   C_Reply_init(&value);
@@ -409,12 +463,14 @@ void C_Reply_init(C_Reply* self) {
   *self = (C_Reply){0};
 }
 
+
 B_L1 C_opC(L3 l_3) {
 
   B_L1 result = {0};
   return result;
 
 }
+
 
 
 A_f_In A_f_In_new(void) {
@@ -426,6 +482,7 @@ A_f_In A_f_In_new(void) {
 void A_f_In_init(A_f_In* self) {
   *self = (A_f_In){0};
 }
+
 A_f_Out A_f_Out_new(void) {
   A_f_Out value;
   A_f_Out_init(&value);
@@ -435,6 +492,7 @@ A_f_Out A_f_Out_new(void) {
 void A_f_Out_init(A_f_Out* self) {
   *self = (A_f_Out){0};
 }
+
 A_f_Result A_f_Result_new(void) {
   A_f_Result value;
   A_f_Result_init(&value);
@@ -444,6 +502,7 @@ A_f_Result A_f_Result_new(void) {
 void A_f_Result_init(A_f_Result* self) {
   *self = (A_f_Result){0};
 }
+
 A_Call A_Call_new(void) {
   A_Call value;
   A_Call_init(&value);
@@ -453,6 +512,7 @@ A_Call A_Call_new(void) {
 void A_Call_init(A_Call* self) {
   *self = (A_Call){0};
 }
+
 A_Request A_Request_new(void) {
   A_Request value;
   A_Request_init(&value);
@@ -462,6 +522,7 @@ A_Request A_Request_new(void) {
 void A_Request_init(A_Request* self) {
   *self = (A_Request){0};
 }
+
 A_Return A_Return_new(void) {
   A_Return value;
   A_Return_init(&value);
@@ -471,6 +532,7 @@ A_Return A_Return_new(void) {
 void A_Return_init(A_Return* self) {
   *self = (A_Return){0};
 }
+
 A_Reply A_Reply_new(void) {
   A_Reply value;
   A_Reply_init(&value);
@@ -481,9 +543,15 @@ void A_Reply_init(A_Reply* self) {
   *self = (A_Reply){0};
 }
 
+
 void A_f(coord s) {
 
 }
+
+
+
+
+
 
 
 
@@ -499,6 +567,7 @@ C_get_attribute_Title_In C_get_attribute_Title_In_new(void) {
 void C_get_attribute_Title_In_init(C_get_attribute_Title_In* self) {
   *self = (C_get_attribute_Title_In){0};
 }
+
 C_get_attribute_Title_Out C_get_attribute_Title_Out_new(void) {
   C_get_attribute_Title_Out value;
   C_get_attribute_Title_Out_init(&value);
@@ -508,6 +577,7 @@ C_get_attribute_Title_Out C_get_attribute_Title_Out_new(void) {
 void C_get_attribute_Title_Out_init(C_get_attribute_Title_Out* self) {
   *self = (C_get_attribute_Title_Out){0};
 }
+
 C_get_attribute_Title_Result C_get_attribute_Title_Result_new(void) {
   C_get_attribute_Title_Result value;
   C_get_attribute_Title_Result_init(&value);
@@ -517,6 +587,7 @@ C_get_attribute_Title_Result C_get_attribute_Title_Result_new(void) {
 void C_get_attribute_Title_Result_init(C_get_attribute_Title_Result* self) {
   *self = (C_get_attribute_Title_Result){0};
 }
+
 C_set_attribute_Title_In C_set_attribute_Title_In_new(void) {
   C_set_attribute_Title_In value;
   C_set_attribute_Title_In_init(&value);
@@ -526,6 +597,7 @@ C_set_attribute_Title_In C_set_attribute_Title_In_new(void) {
 void C_set_attribute_Title_In_init(C_set_attribute_Title_In* self) {
   *self = (C_set_attribute_Title_In){0};
 }
+
 C_set_attribute_Title_Out C_set_attribute_Title_Out_new(void) {
   C_set_attribute_Title_Out value;
   C_set_attribute_Title_Out_init(&value);
@@ -535,6 +607,7 @@ C_set_attribute_Title_Out C_set_attribute_Title_Out_new(void) {
 void C_set_attribute_Title_Out_init(C_set_attribute_Title_Out* self) {
   *self = (C_set_attribute_Title_Out){0};
 }
+
 C_set_attribute_Title_Result C_set_attribute_Title_Result_new(void) {
   C_set_attribute_Title_Result value;
   C_set_attribute_Title_Result_init(&value);
@@ -544,6 +617,7 @@ C_set_attribute_Title_Result C_set_attribute_Title_Result_new(void) {
 void C_set_attribute_Title_Result_init(C_set_attribute_Title_Result* self) {
   *self = (C_set_attribute_Title_Result){0};
 }
+
 C_get_attribute_Name_In C_get_attribute_Name_In_new(void) {
   C_get_attribute_Name_In value;
   C_get_attribute_Name_In_init(&value);
@@ -553,6 +627,7 @@ C_get_attribute_Name_In C_get_attribute_Name_In_new(void) {
 void C_get_attribute_Name_In_init(C_get_attribute_Name_In* self) {
   *self = (C_get_attribute_Name_In){0};
 }
+
 C_get_attribute_Name_Out C_get_attribute_Name_Out_new(void) {
   C_get_attribute_Name_Out value;
   C_get_attribute_Name_Out_init(&value);
@@ -562,6 +637,7 @@ C_get_attribute_Name_Out C_get_attribute_Name_Out_new(void) {
 void C_get_attribute_Name_Out_init(C_get_attribute_Name_Out* self) {
   *self = (C_get_attribute_Name_Out){0};
 }
+
 C_get_attribute_Name_Result C_get_attribute_Name_Result_new(void) {
   C_get_attribute_Name_Result value;
   C_get_attribute_Name_Result_init(&value);
@@ -571,6 +647,7 @@ C_get_attribute_Name_Result C_get_attribute_Name_Result_new(void) {
 void C_get_attribute_Name_Result_init(C_get_attribute_Name_Result* self) {
   *self = (C_get_attribute_Name_Result){0};
 }
+
 C_set_attribute_Name_In C_set_attribute_Name_In_new(void) {
   C_set_attribute_Name_In value;
   C_set_attribute_Name_In_init(&value);
@@ -580,6 +657,7 @@ C_set_attribute_Name_In C_set_attribute_Name_In_new(void) {
 void C_set_attribute_Name_In_init(C_set_attribute_Name_In* self) {
   *self = (C_set_attribute_Name_In){0};
 }
+
 C_set_attribute_Name_Out C_set_attribute_Name_Out_new(void) {
   C_set_attribute_Name_Out value;
   C_set_attribute_Name_Out_init(&value);
@@ -589,6 +667,7 @@ C_set_attribute_Name_Out C_set_attribute_Name_Out_new(void) {
 void C_set_attribute_Name_Out_init(C_set_attribute_Name_Out* self) {
   *self = (C_set_attribute_Name_Out){0};
 }
+
 C_set_attribute_Name_Result C_set_attribute_Name_Result_new(void) {
   C_set_attribute_Name_Result value;
   C_set_attribute_Name_Result_init(&value);
@@ -598,6 +677,7 @@ C_set_attribute_Name_Result C_set_attribute_Name_Result_new(void) {
 void C_set_attribute_Name_Result_init(C_set_attribute_Name_Result* self) {
   *self = (C_set_attribute_Name_Result){0};
 }
+
 C_get_attribute_City_In C_get_attribute_City_In_new(void) {
   C_get_attribute_City_In value;
   C_get_attribute_City_In_init(&value);
@@ -607,6 +687,7 @@ C_get_attribute_City_In C_get_attribute_City_In_new(void) {
 void C_get_attribute_City_In_init(C_get_attribute_City_In* self) {
   *self = (C_get_attribute_City_In){0};
 }
+
 C_get_attribute_City_Out C_get_attribute_City_Out_new(void) {
   C_get_attribute_City_Out value;
   C_get_attribute_City_Out_init(&value);
@@ -616,6 +697,7 @@ C_get_attribute_City_Out C_get_attribute_City_Out_new(void) {
 void C_get_attribute_City_Out_init(C_get_attribute_City_Out* self) {
   *self = (C_get_attribute_City_Out){0};
 }
+
 C_get_attribute_City_Result C_get_attribute_City_Result_new(void) {
   C_get_attribute_City_Result value;
   C_get_attribute_City_Result_init(&value);
@@ -625,6 +707,7 @@ C_get_attribute_City_Result C_get_attribute_City_Result_new(void) {
 void C_get_attribute_City_Result_init(C_get_attribute_City_Result* self) {
   *self = (C_get_attribute_City_Result){0};
 }
+
 C_set_attribute_City_In C_set_attribute_City_In_new(void) {
   C_set_attribute_City_In value;
   C_set_attribute_City_In_init(&value);
@@ -634,6 +717,7 @@ C_set_attribute_City_In C_set_attribute_City_In_new(void) {
 void C_set_attribute_City_In_init(C_set_attribute_City_In* self) {
   *self = (C_set_attribute_City_In){0};
 }
+
 C_set_attribute_City_Out C_set_attribute_City_Out_new(void) {
   C_set_attribute_City_Out value;
   C_set_attribute_City_Out_init(&value);
@@ -643,6 +727,7 @@ C_set_attribute_City_Out C_set_attribute_City_Out_new(void) {
 void C_set_attribute_City_Out_init(C_set_attribute_City_Out* self) {
   *self = (C_set_attribute_City_Out){0};
 }
+
 C_set_attribute_City_Result C_set_attribute_City_Result_new(void) {
   C_set_attribute_City_Result value;
   C_set_attribute_City_Result_init(&value);
@@ -652,6 +737,7 @@ C_set_attribute_City_Result C_set_attribute_City_Result_new(void) {
 void C_set_attribute_City_Result_init(C_set_attribute_City_Result* self) {
   *self = (C_set_attribute_City_Result){0};
 }
+
 C_Call C_Call_new(void) {
   C_Call value;
   C_Call_init(&value);
@@ -661,6 +747,7 @@ C_Call C_Call_new(void) {
 void C_Call_init(C_Call* self) {
   *self = (C_Call){0};
 }
+
 C_Request C_Request_new(void) {
   C_Request value;
   C_Request_init(&value);
@@ -670,6 +757,7 @@ C_Request C_Request_new(void) {
 void C_Request_init(C_Request* self) {
   *self = (C_Request){0};
 }
+
 C_Return C_Return_new(void) {
   C_Return value;
   C_Return_init(&value);
@@ -679,6 +767,7 @@ C_Return C_Return_new(void) {
 void C_Return_init(C_Return* self) {
   *self = (C_Return){0};
 }
+
 C_Reply C_Reply_new(void) {
   C_Reply value;
   C_Reply_init(&value);
@@ -688,6 +777,7 @@ C_Reply C_Reply_new(void) {
 void C_Reply_init(C_Reply* self) {
   *self = (C_Reply){0};
 }
+
 
 string_t C_get_attribute_Title(void) {
 
@@ -727,14 +817,17 @@ void C_set_attribute_City(B_string_t City) {
 
 }
 
+
 ===============
 misc.h
 ===============
 // Generated by idlc
-#pragma once
+#ifndef MISC.H
+#define MISC.H
 #include <stdbool.h>
 #include <stdint.h>
 #include <wchar.h>
+
 typedef enum Color {
 
   red,
@@ -747,7 +840,9 @@ typedef enum Color {
 
 Color Color_new(void);
 void Color_init(Color* self);
+
 static const Color FAVORITE_COLOR = red;
+
 typedef enum Size {
 
   small,
@@ -760,10 +855,15 @@ typedef enum Size {
 
 Size Size_new(void);
 void Size_init(Size* self);
+
 static const M_Size MYSIZE = M_medium;
+
 static const Color col = red;
+
 static const Color another = M_medium;
+
 /* struct Foo forward skipped */
+
 typedef struct Foo {
 
   int32_t value;
@@ -774,7 +874,9 @@ typedef struct Foo {
 
 Foo Foo_new(void);
 void Foo_init(Foo* self);
+
 /* union Bar skipped */
+
 typedef struct Foo {
 
   double d_mem;
@@ -785,6 +887,7 @@ typedef struct Foo {
 
 Foo Foo_new(void);
 void Foo_init(Foo* self);
+
 typedef struct Bar {
   int32_t _d;
   union {
@@ -798,17 +901,24 @@ typedef struct Bar {
 
 Bar Bar_new(void);
 void Bar_init(Bar* self);
+
 /* Interface A */
+
 
 /* Interface B */
 
+
 /* Interface C */
+
 
 /* Interface D */
 
+
 /* Interface E */
 
+
 static const int32_t A_make_it_so_Hash = 4027367364;
+
 typedef struct A_make_it_so_In {
 
   dds_rpc_UnusedMember dummy;
@@ -817,6 +927,7 @@ typedef struct A_make_it_so_In {
 
 A_make_it_so_In A_make_it_so_In_new(void);
 void A_make_it_so_In_init(A_make_it_so_In* self);
+
 typedef struct A_make_it_so_Out {
 
   dds_rpc_UnusedMember dummy;
@@ -825,6 +936,7 @@ typedef struct A_make_it_so_Out {
 
 A_make_it_so_Out A_make_it_so_Out_new(void);
 void A_make_it_so_Out_init(A_make_it_so_Out* self);
+
 typedef struct A_make_it_so_Result {
   int32_t _d;
   union {
@@ -836,6 +948,7 @@ typedef struct A_make_it_so_Result {
 
 A_make_it_so_Result A_make_it_so_Result_new(void);
 void A_make_it_so_Result_init(A_make_it_so_Result* self);
+
 typedef struct A_Call {
   int32_t _d;
   union {
@@ -849,6 +962,7 @@ typedef struct A_Call {
 
 A_Call A_Call_new(void);
 void A_Call_init(A_Call* self);
+
 typedef struct A_Request {
 
   dds_rpc_RequestHeader header;
@@ -859,6 +973,7 @@ typedef struct A_Request {
 
 A_Request A_Request_new(void);
 void A_Request_init(A_Request* self);
+
 typedef struct A_Return {
   int32_t _d;
   union {
@@ -872,6 +987,7 @@ typedef struct A_Return {
 
 A_Return A_Return_new(void);
 void A_Return_init(A_Return* self);
+
 typedef struct A_Reply {
 
   dds_rpc_ReplyHeader header;
@@ -882,11 +998,14 @@ typedef struct A_Reply {
 
 A_Reply A_Reply_new(void);
 void A_Reply_init(A_Reply* self);
+
 /* Interface A */
 
 void A_make_it_so(void);
 
+
 static const int32_t B_make_it_so_Hash = 4027367364;
+
 typedef struct B_make_it_so_In {
 
   int32_t times;
@@ -895,6 +1014,7 @@ typedef struct B_make_it_so_In {
 
 B_make_it_so_In B_make_it_so_In_new(void);
 void B_make_it_so_In_init(B_make_it_so_In* self);
+
 typedef struct B_make_it_so_Out {
 
   int16_t return_;
@@ -903,6 +1023,7 @@ typedef struct B_make_it_so_Out {
 
 B_make_it_so_Out B_make_it_so_Out_new(void);
 void B_make_it_so_Out_init(B_make_it_so_Out* self);
+
 typedef struct B_make_it_so_Result {
   int32_t _d;
   union {
@@ -914,6 +1035,7 @@ typedef struct B_make_it_so_Result {
 
 B_make_it_so_Result B_make_it_so_Result_new(void);
 void B_make_it_so_Result_init(B_make_it_so_Result* self);
+
 typedef struct B_Call {
   int32_t _d;
   union {
@@ -927,6 +1049,7 @@ typedef struct B_Call {
 
 B_Call B_Call_new(void);
 void B_Call_init(B_Call* self);
+
 typedef struct B_Request {
 
   dds_rpc_RequestHeader header;
@@ -937,6 +1060,7 @@ typedef struct B_Request {
 
 B_Request B_Request_new(void);
 void B_Request_init(B_Request* self);
+
 typedef struct B_Return {
   int32_t _d;
   union {
@@ -950,6 +1074,7 @@ typedef struct B_Return {
 
 B_Return B_Return_new(void);
 void B_Return_init(B_Return* self);
+
 typedef struct B_Reply {
 
   dds_rpc_ReplyHeader header;
@@ -960,19 +1085,26 @@ typedef struct B_Reply {
 
 B_Reply B_Reply_new(void);
 void B_Reply_init(B_Reply* self);
+
 /* Interface B */
 
 int16_t B_make_it_so(int32_t times);
 
-/* Interface base */
-
-/* Interface derived */
 
 /* Interface base */
 
+
 /* Interface derived */
+
+
+/* Interface base */
+
+
+/* Interface derived */
+
 
 static const int32_t A_opA_Hash = 3927698569;
+
 typedef struct A_opA_In {
 
   L1 l_1;
@@ -981,6 +1113,7 @@ typedef struct A_opA_In {
 
 A_opA_In A_opA_In_new(void);
 void A_opA_In_init(A_opA_In* self);
+
 typedef struct A_opA_Out {
 
   int16_t return_;
@@ -989,6 +1122,7 @@ typedef struct A_opA_Out {
 
 A_opA_Out A_opA_Out_new(void);
 void A_opA_Out_init(A_opA_Out* self);
+
 typedef struct A_opA_Result {
   int32_t _d;
   union {
@@ -1000,6 +1134,7 @@ typedef struct A_opA_Result {
 
 A_opA_Result A_opA_Result_new(void);
 void A_opA_Result_init(A_opA_Result* self);
+
 typedef struct A_Call {
   int32_t _d;
   union {
@@ -1013,6 +1148,7 @@ typedef struct A_Call {
 
 A_Call A_Call_new(void);
 void A_Call_init(A_Call* self);
+
 typedef struct A_Request {
 
   dds_rpc_RequestHeader header;
@@ -1023,6 +1159,7 @@ typedef struct A_Request {
 
 A_Request A_Request_new(void);
 void A_Request_init(A_Request* self);
+
 typedef struct A_Return {
   int32_t _d;
   union {
@@ -1036,6 +1173,7 @@ typedef struct A_Return {
 
 A_Return A_Return_new(void);
 void A_Return_init(A_Return* self);
+
 typedef struct A_Reply {
 
   dds_rpc_ReplyHeader header;
@@ -1046,11 +1184,14 @@ typedef struct A_Reply {
 
 A_Reply A_Reply_new(void);
 void A_Reply_init(A_Reply* self);
+
 /* Interface A */
 
 int16_t A_opA(L1 l_1);
 
+
 static const int32_t B_opB_Hash = 772252025;
+
 typedef struct B_opB_In {
 
   int32_t l;
@@ -1059,6 +1200,7 @@ typedef struct B_opB_In {
 
 B_opB_In B_opB_In_new(void);
 void B_opB_In_init(B_opB_In* self);
+
 typedef struct B_opB_Out {
 
   L1 return_;
@@ -1067,6 +1209,7 @@ typedef struct B_opB_Out {
 
 B_opB_Out B_opB_Out_new(void);
 void B_opB_Out_init(B_opB_Out* self);
+
 typedef struct B_opB_Result {
   int32_t _d;
   union {
@@ -1078,6 +1221,7 @@ typedef struct B_opB_Result {
 
 B_opB_Result B_opB_Result_new(void);
 void B_opB_Result_init(B_opB_Result* self);
+
 typedef struct B_Call {
   int32_t _d;
   union {
@@ -1091,6 +1235,7 @@ typedef struct B_Call {
 
 B_Call B_Call_new(void);
 void B_Call_init(B_Call* self);
+
 typedef struct B_Request {
 
   dds_rpc_RequestHeader header;
@@ -1101,6 +1246,7 @@ typedef struct B_Request {
 
 B_Request B_Request_new(void);
 void B_Request_init(B_Request* self);
+
 typedef struct B_Return {
   int32_t _d;
   union {
@@ -1114,6 +1260,7 @@ typedef struct B_Return {
 
 B_Return B_Return_new(void);
 void B_Return_init(B_Return* self);
+
 typedef struct B_Reply {
 
   dds_rpc_ReplyHeader header;
@@ -1124,11 +1271,14 @@ typedef struct B_Reply {
 
 B_Reply B_Reply_new(void);
 void B_Reply_init(B_Reply* self);
+
 /* Interface B */
 
 L1 B_opB(int32_t l);
 
+
 static const int32_t C_opC_Hash = 1200187224;
+
 typedef struct C_opC_In {
 
   L3 l_3;
@@ -1137,6 +1287,7 @@ typedef struct C_opC_In {
 
 C_opC_In C_opC_In_new(void);
 void C_opC_In_init(C_opC_In* self);
+
 typedef struct C_opC_Out {
 
   B_L1 return_;
@@ -1145,6 +1296,7 @@ typedef struct C_opC_Out {
 
 C_opC_Out C_opC_Out_new(void);
 void C_opC_Out_init(C_opC_Out* self);
+
 typedef struct C_opC_Result {
   int32_t _d;
   union {
@@ -1156,6 +1308,7 @@ typedef struct C_opC_Result {
 
 C_opC_Result C_opC_Result_new(void);
 void C_opC_Result_init(C_opC_Result* self);
+
 typedef struct C_Call {
   int32_t _d;
   union {
@@ -1169,6 +1322,7 @@ typedef struct C_Call {
 
 C_Call C_Call_new(void);
 void C_Call_init(C_Call* self);
+
 typedef struct C_Request {
 
   dds_rpc_RequestHeader header;
@@ -1179,6 +1333,7 @@ typedef struct C_Request {
 
 C_Request C_Request_new(void);
 void C_Request_init(C_Request* self);
+
 typedef struct C_Return {
   int32_t _d;
   union {
@@ -1192,6 +1347,7 @@ typedef struct C_Return {
 
 C_Return C_Return_new(void);
 void C_Return_init(C_Return* self);
+
 typedef struct C_Reply {
 
   dds_rpc_ReplyHeader header;
@@ -1202,12 +1358,16 @@ typedef struct C_Reply {
 
 C_Reply C_Reply_new(void);
 void C_Reply_init(C_Reply* self);
+
 /* Interface C */
 
 B_L1 C_opC(L3 l_3);
 
+
 static const int32_t L = 3;
+
 static const int32_t A_f_Hash = 3712786831;
+
 typedef struct A_f_In {
 
   coord s;
@@ -1216,6 +1376,7 @@ typedef struct A_f_In {
 
 A_f_In A_f_In_new(void);
 void A_f_In_init(A_f_In* self);
+
 typedef struct A_f_Out {
 
   dds_rpc_UnusedMember dummy;
@@ -1224,6 +1385,7 @@ typedef struct A_f_Out {
 
 A_f_Out A_f_Out_new(void);
 void A_f_Out_init(A_f_Out* self);
+
 typedef struct A_f_Result {
   int32_t _d;
   union {
@@ -1235,6 +1397,7 @@ typedef struct A_f_Result {
 
 A_f_Result A_f_Result_new(void);
 void A_f_Result_init(A_f_Result* self);
+
 typedef struct A_Call {
   int32_t _d;
   union {
@@ -1248,6 +1411,7 @@ typedef struct A_Call {
 
 A_Call A_Call_new(void);
 void A_Call_init(A_Call* self);
+
 typedef struct A_Request {
 
   dds_rpc_RequestHeader header;
@@ -1258,6 +1422,7 @@ typedef struct A_Request {
 
 A_Request A_Request_new(void);
 void A_Request_init(A_Request* self);
+
 typedef struct A_Return {
   int32_t _d;
   union {
@@ -1271,6 +1436,7 @@ typedef struct A_Return {
 
 A_Return A_Return_new(void);
 void A_Return_init(A_Return* self);
+
 typedef struct A_Reply {
 
   dds_rpc_ReplyHeader header;
@@ -1281,24 +1447,36 @@ typedef struct A_Reply {
 
 A_Reply A_Reply_new(void);
 void A_Reply_init(A_Reply* self);
+
 /* Interface A */
 
 void A_f(coord s);
 
+
 /* Interface B */
+
 
 /* Interface C */
 
+
 /* Interface A */
+
 
 /* Interface B */
 
+
 static const int32_t C_get_attribute_Title_Hash = 2561239307;
+
 static const int32_t C_set_attribute_Title_Hash = 601397578;
+
 static const int32_t C_get_attribute_Name_Hash = 1786101153;
+
 static const int32_t C_set_attribute_Name_Hash = 2852545551;
+
 static const int32_t C_get_attribute_City_Hash = 3564363613;
+
 static const int32_t C_set_attribute_City_Hash = 1017480313;
+
 typedef struct C_get_attribute_Title_In {
 
   dds_rpc_UnusedMember dummy;
@@ -1307,6 +1485,7 @@ typedef struct C_get_attribute_Title_In {
 
 C_get_attribute_Title_In C_get_attribute_Title_In_new(void);
 void C_get_attribute_Title_In_init(C_get_attribute_Title_In* self);
+
 typedef struct C_get_attribute_Title_Out {
 
   string_t return_;
@@ -1315,6 +1494,7 @@ typedef struct C_get_attribute_Title_Out {
 
 C_get_attribute_Title_Out C_get_attribute_Title_Out_new(void);
 void C_get_attribute_Title_Out_init(C_get_attribute_Title_Out* self);
+
 typedef struct C_get_attribute_Title_Result {
   int32_t _d;
   union {
@@ -1326,6 +1506,7 @@ typedef struct C_get_attribute_Title_Result {
 
 C_get_attribute_Title_Result C_get_attribute_Title_Result_new(void);
 void C_get_attribute_Title_Result_init(C_get_attribute_Title_Result* self);
+
 typedef struct C_set_attribute_Title_In {
 
   string_t Title;
@@ -1334,6 +1515,7 @@ typedef struct C_set_attribute_Title_In {
 
 C_set_attribute_Title_In C_set_attribute_Title_In_new(void);
 void C_set_attribute_Title_In_init(C_set_attribute_Title_In* self);
+
 typedef struct C_set_attribute_Title_Out {
 
   dds_rpc_UnusedMember dummy;
@@ -1342,6 +1524,7 @@ typedef struct C_set_attribute_Title_Out {
 
 C_set_attribute_Title_Out C_set_attribute_Title_Out_new(void);
 void C_set_attribute_Title_Out_init(C_set_attribute_Title_Out* self);
+
 typedef struct C_set_attribute_Title_Result {
   int32_t _d;
   union {
@@ -1353,6 +1536,7 @@ typedef struct C_set_attribute_Title_Result {
 
 C_set_attribute_Title_Result C_set_attribute_Title_Result_new(void);
 void C_set_attribute_Title_Result_init(C_set_attribute_Title_Result* self);
+
 typedef struct C_get_attribute_Name_In {
 
   dds_rpc_UnusedMember dummy;
@@ -1361,6 +1545,7 @@ typedef struct C_get_attribute_Name_In {
 
 C_get_attribute_Name_In C_get_attribute_Name_In_new(void);
 void C_get_attribute_Name_In_init(C_get_attribute_Name_In* self);
+
 typedef struct C_get_attribute_Name_Out {
 
   A_string_t return_;
@@ -1369,6 +1554,7 @@ typedef struct C_get_attribute_Name_Out {
 
 C_get_attribute_Name_Out C_get_attribute_Name_Out_new(void);
 void C_get_attribute_Name_Out_init(C_get_attribute_Name_Out* self);
+
 typedef struct C_get_attribute_Name_Result {
   int32_t _d;
   union {
@@ -1380,6 +1566,7 @@ typedef struct C_get_attribute_Name_Result {
 
 C_get_attribute_Name_Result C_get_attribute_Name_Result_new(void);
 void C_get_attribute_Name_Result_init(C_get_attribute_Name_Result* self);
+
 typedef struct C_set_attribute_Name_In {
 
   A_string_t Name;
@@ -1388,6 +1575,7 @@ typedef struct C_set_attribute_Name_In {
 
 C_set_attribute_Name_In C_set_attribute_Name_In_new(void);
 void C_set_attribute_Name_In_init(C_set_attribute_Name_In* self);
+
 typedef struct C_set_attribute_Name_Out {
 
   dds_rpc_UnusedMember dummy;
@@ -1396,6 +1584,7 @@ typedef struct C_set_attribute_Name_Out {
 
 C_set_attribute_Name_Out C_set_attribute_Name_Out_new(void);
 void C_set_attribute_Name_Out_init(C_set_attribute_Name_Out* self);
+
 typedef struct C_set_attribute_Name_Result {
   int32_t _d;
   union {
@@ -1407,6 +1596,7 @@ typedef struct C_set_attribute_Name_Result {
 
 C_set_attribute_Name_Result C_set_attribute_Name_Result_new(void);
 void C_set_attribute_Name_Result_init(C_set_attribute_Name_Result* self);
+
 typedef struct C_get_attribute_City_In {
 
   dds_rpc_UnusedMember dummy;
@@ -1415,6 +1605,7 @@ typedef struct C_get_attribute_City_In {
 
 C_get_attribute_City_In C_get_attribute_City_In_new(void);
 void C_get_attribute_City_In_init(C_get_attribute_City_In* self);
+
 typedef struct C_get_attribute_City_Out {
 
   B_string_t return_;
@@ -1423,6 +1614,7 @@ typedef struct C_get_attribute_City_Out {
 
 C_get_attribute_City_Out C_get_attribute_City_Out_new(void);
 void C_get_attribute_City_Out_init(C_get_attribute_City_Out* self);
+
 typedef struct C_get_attribute_City_Result {
   int32_t _d;
   union {
@@ -1434,6 +1626,7 @@ typedef struct C_get_attribute_City_Result {
 
 C_get_attribute_City_Result C_get_attribute_City_Result_new(void);
 void C_get_attribute_City_Result_init(C_get_attribute_City_Result* self);
+
 typedef struct C_set_attribute_City_In {
 
   B_string_t City;
@@ -1442,6 +1635,7 @@ typedef struct C_set_attribute_City_In {
 
 C_set_attribute_City_In C_set_attribute_City_In_new(void);
 void C_set_attribute_City_In_init(C_set_attribute_City_In* self);
+
 typedef struct C_set_attribute_City_Out {
 
   dds_rpc_UnusedMember dummy;
@@ -1450,6 +1644,7 @@ typedef struct C_set_attribute_City_Out {
 
 C_set_attribute_City_Out C_set_attribute_City_Out_new(void);
 void C_set_attribute_City_Out_init(C_set_attribute_City_Out* self);
+
 typedef struct C_set_attribute_City_Result {
   int32_t _d;
   union {
@@ -1461,6 +1656,7 @@ typedef struct C_set_attribute_City_Result {
 
 C_set_attribute_City_Result C_set_attribute_City_Result_new(void);
 void C_set_attribute_City_Result_init(C_set_attribute_City_Result* self);
+
 typedef struct C_Call {
   int32_t _d;
   union {
@@ -1484,6 +1680,7 @@ typedef struct C_Call {
 
 C_Call C_Call_new(void);
 void C_Call_init(C_Call* self);
+
 typedef struct C_Request {
 
   dds_rpc_RequestHeader header;
@@ -1494,6 +1691,7 @@ typedef struct C_Request {
 
 C_Request C_Request_new(void);
 void C_Request_init(C_Request* self);
+
 typedef struct C_Return {
   int32_t _d;
   union {
@@ -1517,6 +1715,7 @@ typedef struct C_Return {
 
 C_Return C_Return_new(void);
 void C_Return_init(C_Return* self);
+
 typedef struct C_Reply {
 
   dds_rpc_ReplyHeader header;
@@ -1527,6 +1726,7 @@ typedef struct C_Reply {
 
 C_Reply C_Reply_new(void);
 void C_Reply_init(C_Reply* self);
+
 /* Interface C */
 
 string_t C_get_attribute_Title(void);
@@ -1540,10 +1740,15 @@ void C_set_attribute_Name(A_string_t Name);
 B_string_t C_get_attribute_City(void);
 
 void C_set_attribute_City(B_string_t City);
+
+
+#endif
 ===============
 misc_xcdr.c
 ===============
 #include "misc_xcdr.h"
+
+
 XcdrBufferResult Color_serialize(Color const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -1585,6 +1790,7 @@ XcdrBufferResult Color_deserialize(Color* self, XcdrConstBuffer buf) {
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult Size_serialize(Size const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -1626,6 +1832,7 @@ XcdrBufferResult Size_deserialize(Size* self, XcdrConstBuffer buf) {
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult Foo_serialize(Foo const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -1699,6 +1906,7 @@ XcdrBufferResult Foo_deserialize(Foo* self, XcdrConstBuffer buf) {
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult Foo_serialize(Foo const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -1772,6 +1980,7 @@ XcdrBufferResult Foo_deserialize(Foo* self, XcdrConstBuffer buf) {
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult Bar_serialize(Bar const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -1887,6 +2096,7 @@ XcdrBufferResult Bar_deserialize(Bar* self, XcdrConstBuffer buf) {
   }
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult A_make_it_so_In_serialize(A_make_it_so_In const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -1940,6 +2150,7 @@ XcdrBufferResult A_make_it_so_In_deserialize(A_make_it_so_In* self, XcdrConstBuf
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult A_make_it_so_Out_serialize(A_make_it_so_Out const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -1993,6 +2204,7 @@ XcdrBufferResult A_make_it_so_Out_deserialize(A_make_it_so_Out* self, XcdrConstB
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult A_make_it_so_Result_serialize(A_make_it_so_Result const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -2076,6 +2288,7 @@ XcdrBufferResult A_make_it_so_Result_deserialize(A_make_it_so_Result* self, Xcdr
   }
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult A_Call_serialize(A_Call const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -2203,6 +2416,7 @@ XcdrBufferResult A_Call_deserialize(A_Call* self, XcdrConstBuffer buf) {
   }
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult A_Request_serialize(A_Request const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -2288,6 +2502,7 @@ XcdrBufferResult A_Request_deserialize(A_Request* self, XcdrConstBuffer buf) {
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult A_Return_serialize(A_Return const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -2415,6 +2630,7 @@ XcdrBufferResult A_Return_deserialize(A_Return* self, XcdrConstBuffer buf) {
   }
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult A_Reply_serialize(A_Reply const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -2500,6 +2716,7 @@ XcdrBufferResult A_Reply_deserialize(A_Reply* self, XcdrConstBuffer buf) {
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult B_make_it_so_In_serialize(B_make_it_so_In const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -2541,6 +2758,7 @@ XcdrBufferResult B_make_it_so_In_deserialize(B_make_it_so_In* self, XcdrConstBuf
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult B_make_it_so_Out_serialize(B_make_it_so_Out const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -2582,6 +2800,7 @@ XcdrBufferResult B_make_it_so_Out_deserialize(B_make_it_so_Out* self, XcdrConstB
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult B_make_it_so_Result_serialize(B_make_it_so_Result const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -2665,6 +2884,7 @@ XcdrBufferResult B_make_it_so_Result_deserialize(B_make_it_so_Result* self, Xcdr
   }
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult B_Call_serialize(B_Call const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -2792,6 +3012,7 @@ XcdrBufferResult B_Call_deserialize(B_Call* self, XcdrConstBuffer buf) {
   }
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult B_Request_serialize(B_Request const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -2877,6 +3098,7 @@ XcdrBufferResult B_Request_deserialize(B_Request* self, XcdrConstBuffer buf) {
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult B_Return_serialize(B_Return const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -3004,6 +3226,7 @@ XcdrBufferResult B_Return_deserialize(B_Return* self, XcdrConstBuffer buf) {
   }
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult B_Reply_serialize(B_Reply const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -3089,6 +3312,7 @@ XcdrBufferResult B_Reply_deserialize(B_Reply* self, XcdrConstBuffer buf) {
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult A_opA_In_serialize(A_opA_In const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -3142,6 +3366,7 @@ XcdrBufferResult A_opA_In_deserialize(A_opA_In* self, XcdrConstBuffer buf) {
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult A_opA_Out_serialize(A_opA_Out const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -3183,6 +3408,7 @@ XcdrBufferResult A_opA_Out_deserialize(A_opA_Out* self, XcdrConstBuffer buf) {
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult A_opA_Result_serialize(A_opA_Result const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -3266,6 +3492,7 @@ XcdrBufferResult A_opA_Result_deserialize(A_opA_Result* self, XcdrConstBuffer bu
   }
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult A_Call_serialize(A_Call const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -3393,6 +3620,7 @@ XcdrBufferResult A_Call_deserialize(A_Call* self, XcdrConstBuffer buf) {
   }
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult A_Request_serialize(A_Request const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -3478,6 +3706,7 @@ XcdrBufferResult A_Request_deserialize(A_Request* self, XcdrConstBuffer buf) {
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult A_Return_serialize(A_Return const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -3605,6 +3834,7 @@ XcdrBufferResult A_Return_deserialize(A_Return* self, XcdrConstBuffer buf) {
   }
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult A_Reply_serialize(A_Reply const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -3690,6 +3920,7 @@ XcdrBufferResult A_Reply_deserialize(A_Reply* self, XcdrConstBuffer buf) {
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult B_opB_In_serialize(B_opB_In const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -3731,6 +3962,7 @@ XcdrBufferResult B_opB_In_deserialize(B_opB_In* self, XcdrConstBuffer buf) {
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult B_opB_Out_serialize(B_opB_Out const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -3784,6 +4016,7 @@ XcdrBufferResult B_opB_Out_deserialize(B_opB_Out* self, XcdrConstBuffer buf) {
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult B_opB_Result_serialize(B_opB_Result const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -3867,6 +4100,7 @@ XcdrBufferResult B_opB_Result_deserialize(B_opB_Result* self, XcdrConstBuffer bu
   }
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult B_Call_serialize(B_Call const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -3994,6 +4228,7 @@ XcdrBufferResult B_Call_deserialize(B_Call* self, XcdrConstBuffer buf) {
   }
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult B_Request_serialize(B_Request const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -4079,6 +4314,7 @@ XcdrBufferResult B_Request_deserialize(B_Request* self, XcdrConstBuffer buf) {
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult B_Return_serialize(B_Return const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -4206,6 +4442,7 @@ XcdrBufferResult B_Return_deserialize(B_Return* self, XcdrConstBuffer buf) {
   }
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult B_Reply_serialize(B_Reply const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -4291,6 +4528,7 @@ XcdrBufferResult B_Reply_deserialize(B_Reply* self, XcdrConstBuffer buf) {
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_opC_In_serialize(C_opC_In const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -4344,6 +4582,7 @@ XcdrBufferResult C_opC_In_deserialize(C_opC_In* self, XcdrConstBuffer buf) {
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_opC_Out_serialize(C_opC_Out const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -4397,6 +4636,7 @@ XcdrBufferResult C_opC_Out_deserialize(C_opC_Out* self, XcdrConstBuffer buf) {
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_opC_Result_serialize(C_opC_Result const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -4480,6 +4720,7 @@ XcdrBufferResult C_opC_Result_deserialize(C_opC_Result* self, XcdrConstBuffer bu
   }
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_Call_serialize(C_Call const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -4607,6 +4848,7 @@ XcdrBufferResult C_Call_deserialize(C_Call* self, XcdrConstBuffer buf) {
   }
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_Request_serialize(C_Request const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -4692,6 +4934,7 @@ XcdrBufferResult C_Request_deserialize(C_Request* self, XcdrConstBuffer buf) {
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_Return_serialize(C_Return const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -4819,6 +5062,7 @@ XcdrBufferResult C_Return_deserialize(C_Return* self, XcdrConstBuffer buf) {
   }
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_Reply_serialize(C_Reply const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -4904,6 +5148,7 @@ XcdrBufferResult C_Reply_deserialize(C_Reply* self, XcdrConstBuffer buf) {
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult A_f_In_serialize(A_f_In const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -4957,6 +5202,7 @@ XcdrBufferResult A_f_In_deserialize(A_f_In* self, XcdrConstBuffer buf) {
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult A_f_Out_serialize(A_f_Out const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -5010,6 +5256,7 @@ XcdrBufferResult A_f_Out_deserialize(A_f_Out* self, XcdrConstBuffer buf) {
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult A_f_Result_serialize(A_f_Result const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -5093,6 +5340,7 @@ XcdrBufferResult A_f_Result_deserialize(A_f_Result* self, XcdrConstBuffer buf) {
   }
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult A_Call_serialize(A_Call const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -5220,6 +5468,7 @@ XcdrBufferResult A_Call_deserialize(A_Call* self, XcdrConstBuffer buf) {
   }
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult A_Request_serialize(A_Request const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -5305,6 +5554,7 @@ XcdrBufferResult A_Request_deserialize(A_Request* self, XcdrConstBuffer buf) {
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult A_Return_serialize(A_Return const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -5432,6 +5682,7 @@ XcdrBufferResult A_Return_deserialize(A_Return* self, XcdrConstBuffer buf) {
   }
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult A_Reply_serialize(A_Reply const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -5517,6 +5768,7 @@ XcdrBufferResult A_Reply_deserialize(A_Reply* self, XcdrConstBuffer buf) {
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_get_attribute_Title_In_serialize(C_get_attribute_Title_In const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -5570,6 +5822,7 @@ XcdrBufferResult C_get_attribute_Title_In_deserialize(C_get_attribute_Title_In* 
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_get_attribute_Title_Out_serialize(C_get_attribute_Title_Out const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -5623,6 +5876,7 @@ XcdrBufferResult C_get_attribute_Title_Out_deserialize(C_get_attribute_Title_Out
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_get_attribute_Title_Result_serialize(C_get_attribute_Title_Result const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -5706,6 +5960,7 @@ XcdrBufferResult C_get_attribute_Title_Result_deserialize(C_get_attribute_Title_
   }
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_set_attribute_Title_In_serialize(C_set_attribute_Title_In const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -5759,6 +6014,7 @@ XcdrBufferResult C_set_attribute_Title_In_deserialize(C_set_attribute_Title_In* 
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_set_attribute_Title_Out_serialize(C_set_attribute_Title_Out const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -5812,6 +6068,7 @@ XcdrBufferResult C_set_attribute_Title_Out_deserialize(C_set_attribute_Title_Out
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_set_attribute_Title_Result_serialize(C_set_attribute_Title_Result const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -5895,6 +6152,7 @@ XcdrBufferResult C_set_attribute_Title_Result_deserialize(C_set_attribute_Title_
   }
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_get_attribute_Name_In_serialize(C_get_attribute_Name_In const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -5948,6 +6206,7 @@ XcdrBufferResult C_get_attribute_Name_In_deserialize(C_get_attribute_Name_In* se
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_get_attribute_Name_Out_serialize(C_get_attribute_Name_Out const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -6001,6 +6260,7 @@ XcdrBufferResult C_get_attribute_Name_Out_deserialize(C_get_attribute_Name_Out* 
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_get_attribute_Name_Result_serialize(C_get_attribute_Name_Result const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -6084,6 +6344,7 @@ XcdrBufferResult C_get_attribute_Name_Result_deserialize(C_get_attribute_Name_Re
   }
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_set_attribute_Name_In_serialize(C_set_attribute_Name_In const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -6137,6 +6398,7 @@ XcdrBufferResult C_set_attribute_Name_In_deserialize(C_set_attribute_Name_In* se
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_set_attribute_Name_Out_serialize(C_set_attribute_Name_Out const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -6190,6 +6452,7 @@ XcdrBufferResult C_set_attribute_Name_Out_deserialize(C_set_attribute_Name_Out* 
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_set_attribute_Name_Result_serialize(C_set_attribute_Name_Result const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -6273,6 +6536,7 @@ XcdrBufferResult C_set_attribute_Name_Result_deserialize(C_set_attribute_Name_Re
   }
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_get_attribute_City_In_serialize(C_get_attribute_City_In const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -6326,6 +6590,7 @@ XcdrBufferResult C_get_attribute_City_In_deserialize(C_get_attribute_City_In* se
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_get_attribute_City_Out_serialize(C_get_attribute_City_Out const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -6379,6 +6644,7 @@ XcdrBufferResult C_get_attribute_City_Out_deserialize(C_get_attribute_City_Out* 
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_get_attribute_City_Result_serialize(C_get_attribute_City_Result const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -6462,6 +6728,7 @@ XcdrBufferResult C_get_attribute_City_Result_deserialize(C_get_attribute_City_Re
   }
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_set_attribute_City_In_serialize(C_set_attribute_City_In const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -6515,6 +6782,7 @@ XcdrBufferResult C_set_attribute_City_In_deserialize(C_set_attribute_City_In* se
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_set_attribute_City_Out_serialize(C_set_attribute_City_Out const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -6568,6 +6836,7 @@ XcdrBufferResult C_set_attribute_City_Out_deserialize(C_set_attribute_City_Out* 
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_set_attribute_City_Result_serialize(C_set_attribute_City_Result const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -6651,6 +6920,7 @@ XcdrBufferResult C_set_attribute_City_Result_deserialize(C_set_attribute_City_Re
   }
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_Call_serialize(C_Call const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -6998,6 +7268,7 @@ XcdrBufferResult C_Call_deserialize(C_Call* self, XcdrConstBuffer buf) {
   }
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_Request_serialize(C_Request const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -7083,6 +7354,7 @@ XcdrBufferResult C_Request_deserialize(C_Request* self, XcdrConstBuffer buf) {
   
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_Return_serialize(C_Return const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -7430,6 +7702,7 @@ XcdrBufferResult C_Return_deserialize(C_Return* self, XcdrConstBuffer buf) {
   }
   return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
 }
+
 XcdrBufferResult C_Reply_serialize(C_Reply const* self, XcdrBuffer buf) {
   uint8_t *ptr = buf.ptr;
   size_t len = buf.len;
@@ -7519,145 +7792,217 @@ XcdrBufferResult C_Reply_deserialize(C_Reply* self, XcdrConstBuffer buf) {
 misc_xcdr.h
 ===============
 // Generated by idlc
-#pragma once
-#include "misc.h"
-#include "xidl_xcdr.h"
-#include <stddef.h>
+#ifndef MISC_XCDR.H
+#define MISC_XCDR.H
+#include <stdbool.h>
+#include <stdint.h>
+#include <wchar.h>
+
 XcdrBufferResult Color_serialize(Color const* self, XcdrBuffer buf);
 XcdrBufferResult Color_deserialize(Color* self, XcdrConstBuffer buf);
+
 XcdrBufferResult Size_serialize(Size const* self, XcdrBuffer buf);
 XcdrBufferResult Size_deserialize(Size* self, XcdrConstBuffer buf);
+
 XcdrBufferResult Foo_serialize(Foo const* self, XcdrBuffer buf);
 XcdrBufferResult Foo_deserialize(Foo* self, XcdrConstBuffer buf);
+
 XcdrBufferResult Foo_serialize(Foo const* self, XcdrBuffer buf);
 XcdrBufferResult Foo_deserialize(Foo* self, XcdrConstBuffer buf);
+
 XcdrBufferResult Bar_serialize(Bar const* self, XcdrBuffer buf);
 XcdrBufferResult Bar_deserialize(Bar* self, XcdrConstBuffer buf);
+
 XcdrBufferResult A_make_it_so_In_serialize(A_make_it_so_In const* self, XcdrBuffer buf);
 XcdrBufferResult A_make_it_so_In_deserialize(A_make_it_so_In* self, XcdrConstBuffer buf);
+
 XcdrBufferResult A_make_it_so_Out_serialize(A_make_it_so_Out const* self, XcdrBuffer buf);
 XcdrBufferResult A_make_it_so_Out_deserialize(A_make_it_so_Out* self, XcdrConstBuffer buf);
+
 XcdrBufferResult A_make_it_so_Result_serialize(A_make_it_so_Result const* self, XcdrBuffer buf);
 XcdrBufferResult A_make_it_so_Result_deserialize(A_make_it_so_Result* self, XcdrConstBuffer buf);
+
 XcdrBufferResult A_Call_serialize(A_Call const* self, XcdrBuffer buf);
 XcdrBufferResult A_Call_deserialize(A_Call* self, XcdrConstBuffer buf);
+
 XcdrBufferResult A_Request_serialize(A_Request const* self, XcdrBuffer buf);
 XcdrBufferResult A_Request_deserialize(A_Request* self, XcdrConstBuffer buf);
+
 XcdrBufferResult A_Return_serialize(A_Return const* self, XcdrBuffer buf);
 XcdrBufferResult A_Return_deserialize(A_Return* self, XcdrConstBuffer buf);
+
 XcdrBufferResult A_Reply_serialize(A_Reply const* self, XcdrBuffer buf);
 XcdrBufferResult A_Reply_deserialize(A_Reply* self, XcdrConstBuffer buf);
+
 XcdrBufferResult B_make_it_so_In_serialize(B_make_it_so_In const* self, XcdrBuffer buf);
 XcdrBufferResult B_make_it_so_In_deserialize(B_make_it_so_In* self, XcdrConstBuffer buf);
+
 XcdrBufferResult B_make_it_so_Out_serialize(B_make_it_so_Out const* self, XcdrBuffer buf);
 XcdrBufferResult B_make_it_so_Out_deserialize(B_make_it_so_Out* self, XcdrConstBuffer buf);
+
 XcdrBufferResult B_make_it_so_Result_serialize(B_make_it_so_Result const* self, XcdrBuffer buf);
 XcdrBufferResult B_make_it_so_Result_deserialize(B_make_it_so_Result* self, XcdrConstBuffer buf);
+
 XcdrBufferResult B_Call_serialize(B_Call const* self, XcdrBuffer buf);
 XcdrBufferResult B_Call_deserialize(B_Call* self, XcdrConstBuffer buf);
+
 XcdrBufferResult B_Request_serialize(B_Request const* self, XcdrBuffer buf);
 XcdrBufferResult B_Request_deserialize(B_Request* self, XcdrConstBuffer buf);
+
 XcdrBufferResult B_Return_serialize(B_Return const* self, XcdrBuffer buf);
 XcdrBufferResult B_Return_deserialize(B_Return* self, XcdrConstBuffer buf);
+
 XcdrBufferResult B_Reply_serialize(B_Reply const* self, XcdrBuffer buf);
 XcdrBufferResult B_Reply_deserialize(B_Reply* self, XcdrConstBuffer buf);
+
 XcdrBufferResult A_opA_In_serialize(A_opA_In const* self, XcdrBuffer buf);
 XcdrBufferResult A_opA_In_deserialize(A_opA_In* self, XcdrConstBuffer buf);
+
 XcdrBufferResult A_opA_Out_serialize(A_opA_Out const* self, XcdrBuffer buf);
 XcdrBufferResult A_opA_Out_deserialize(A_opA_Out* self, XcdrConstBuffer buf);
+
 XcdrBufferResult A_opA_Result_serialize(A_opA_Result const* self, XcdrBuffer buf);
 XcdrBufferResult A_opA_Result_deserialize(A_opA_Result* self, XcdrConstBuffer buf);
+
 XcdrBufferResult A_Call_serialize(A_Call const* self, XcdrBuffer buf);
 XcdrBufferResult A_Call_deserialize(A_Call* self, XcdrConstBuffer buf);
+
 XcdrBufferResult A_Request_serialize(A_Request const* self, XcdrBuffer buf);
 XcdrBufferResult A_Request_deserialize(A_Request* self, XcdrConstBuffer buf);
+
 XcdrBufferResult A_Return_serialize(A_Return const* self, XcdrBuffer buf);
 XcdrBufferResult A_Return_deserialize(A_Return* self, XcdrConstBuffer buf);
+
 XcdrBufferResult A_Reply_serialize(A_Reply const* self, XcdrBuffer buf);
 XcdrBufferResult A_Reply_deserialize(A_Reply* self, XcdrConstBuffer buf);
+
 XcdrBufferResult B_opB_In_serialize(B_opB_In const* self, XcdrBuffer buf);
 XcdrBufferResult B_opB_In_deserialize(B_opB_In* self, XcdrConstBuffer buf);
+
 XcdrBufferResult B_opB_Out_serialize(B_opB_Out const* self, XcdrBuffer buf);
 XcdrBufferResult B_opB_Out_deserialize(B_opB_Out* self, XcdrConstBuffer buf);
+
 XcdrBufferResult B_opB_Result_serialize(B_opB_Result const* self, XcdrBuffer buf);
 XcdrBufferResult B_opB_Result_deserialize(B_opB_Result* self, XcdrConstBuffer buf);
+
 XcdrBufferResult B_Call_serialize(B_Call const* self, XcdrBuffer buf);
 XcdrBufferResult B_Call_deserialize(B_Call* self, XcdrConstBuffer buf);
+
 XcdrBufferResult B_Request_serialize(B_Request const* self, XcdrBuffer buf);
 XcdrBufferResult B_Request_deserialize(B_Request* self, XcdrConstBuffer buf);
+
 XcdrBufferResult B_Return_serialize(B_Return const* self, XcdrBuffer buf);
 XcdrBufferResult B_Return_deserialize(B_Return* self, XcdrConstBuffer buf);
+
 XcdrBufferResult B_Reply_serialize(B_Reply const* self, XcdrBuffer buf);
 XcdrBufferResult B_Reply_deserialize(B_Reply* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_opC_In_serialize(C_opC_In const* self, XcdrBuffer buf);
 XcdrBufferResult C_opC_In_deserialize(C_opC_In* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_opC_Out_serialize(C_opC_Out const* self, XcdrBuffer buf);
 XcdrBufferResult C_opC_Out_deserialize(C_opC_Out* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_opC_Result_serialize(C_opC_Result const* self, XcdrBuffer buf);
 XcdrBufferResult C_opC_Result_deserialize(C_opC_Result* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_Call_serialize(C_Call const* self, XcdrBuffer buf);
 XcdrBufferResult C_Call_deserialize(C_Call* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_Request_serialize(C_Request const* self, XcdrBuffer buf);
 XcdrBufferResult C_Request_deserialize(C_Request* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_Return_serialize(C_Return const* self, XcdrBuffer buf);
 XcdrBufferResult C_Return_deserialize(C_Return* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_Reply_serialize(C_Reply const* self, XcdrBuffer buf);
 XcdrBufferResult C_Reply_deserialize(C_Reply* self, XcdrConstBuffer buf);
+
 XcdrBufferResult A_f_In_serialize(A_f_In const* self, XcdrBuffer buf);
 XcdrBufferResult A_f_In_deserialize(A_f_In* self, XcdrConstBuffer buf);
+
 XcdrBufferResult A_f_Out_serialize(A_f_Out const* self, XcdrBuffer buf);
 XcdrBufferResult A_f_Out_deserialize(A_f_Out* self, XcdrConstBuffer buf);
+
 XcdrBufferResult A_f_Result_serialize(A_f_Result const* self, XcdrBuffer buf);
 XcdrBufferResult A_f_Result_deserialize(A_f_Result* self, XcdrConstBuffer buf);
+
 XcdrBufferResult A_Call_serialize(A_Call const* self, XcdrBuffer buf);
 XcdrBufferResult A_Call_deserialize(A_Call* self, XcdrConstBuffer buf);
+
 XcdrBufferResult A_Request_serialize(A_Request const* self, XcdrBuffer buf);
 XcdrBufferResult A_Request_deserialize(A_Request* self, XcdrConstBuffer buf);
+
 XcdrBufferResult A_Return_serialize(A_Return const* self, XcdrBuffer buf);
 XcdrBufferResult A_Return_deserialize(A_Return* self, XcdrConstBuffer buf);
+
 XcdrBufferResult A_Reply_serialize(A_Reply const* self, XcdrBuffer buf);
 XcdrBufferResult A_Reply_deserialize(A_Reply* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_get_attribute_Title_In_serialize(C_get_attribute_Title_In const* self, XcdrBuffer buf);
 XcdrBufferResult C_get_attribute_Title_In_deserialize(C_get_attribute_Title_In* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_get_attribute_Title_Out_serialize(C_get_attribute_Title_Out const* self, XcdrBuffer buf);
 XcdrBufferResult C_get_attribute_Title_Out_deserialize(C_get_attribute_Title_Out* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_get_attribute_Title_Result_serialize(C_get_attribute_Title_Result const* self, XcdrBuffer buf);
 XcdrBufferResult C_get_attribute_Title_Result_deserialize(C_get_attribute_Title_Result* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_set_attribute_Title_In_serialize(C_set_attribute_Title_In const* self, XcdrBuffer buf);
 XcdrBufferResult C_set_attribute_Title_In_deserialize(C_set_attribute_Title_In* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_set_attribute_Title_Out_serialize(C_set_attribute_Title_Out const* self, XcdrBuffer buf);
 XcdrBufferResult C_set_attribute_Title_Out_deserialize(C_set_attribute_Title_Out* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_set_attribute_Title_Result_serialize(C_set_attribute_Title_Result const* self, XcdrBuffer buf);
 XcdrBufferResult C_set_attribute_Title_Result_deserialize(C_set_attribute_Title_Result* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_get_attribute_Name_In_serialize(C_get_attribute_Name_In const* self, XcdrBuffer buf);
 XcdrBufferResult C_get_attribute_Name_In_deserialize(C_get_attribute_Name_In* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_get_attribute_Name_Out_serialize(C_get_attribute_Name_Out const* self, XcdrBuffer buf);
 XcdrBufferResult C_get_attribute_Name_Out_deserialize(C_get_attribute_Name_Out* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_get_attribute_Name_Result_serialize(C_get_attribute_Name_Result const* self, XcdrBuffer buf);
 XcdrBufferResult C_get_attribute_Name_Result_deserialize(C_get_attribute_Name_Result* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_set_attribute_Name_In_serialize(C_set_attribute_Name_In const* self, XcdrBuffer buf);
 XcdrBufferResult C_set_attribute_Name_In_deserialize(C_set_attribute_Name_In* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_set_attribute_Name_Out_serialize(C_set_attribute_Name_Out const* self, XcdrBuffer buf);
 XcdrBufferResult C_set_attribute_Name_Out_deserialize(C_set_attribute_Name_Out* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_set_attribute_Name_Result_serialize(C_set_attribute_Name_Result const* self, XcdrBuffer buf);
 XcdrBufferResult C_set_attribute_Name_Result_deserialize(C_set_attribute_Name_Result* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_get_attribute_City_In_serialize(C_get_attribute_City_In const* self, XcdrBuffer buf);
 XcdrBufferResult C_get_attribute_City_In_deserialize(C_get_attribute_City_In* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_get_attribute_City_Out_serialize(C_get_attribute_City_Out const* self, XcdrBuffer buf);
 XcdrBufferResult C_get_attribute_City_Out_deserialize(C_get_attribute_City_Out* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_get_attribute_City_Result_serialize(C_get_attribute_City_Result const* self, XcdrBuffer buf);
 XcdrBufferResult C_get_attribute_City_Result_deserialize(C_get_attribute_City_Result* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_set_attribute_City_In_serialize(C_set_attribute_City_In const* self, XcdrBuffer buf);
 XcdrBufferResult C_set_attribute_City_In_deserialize(C_set_attribute_City_In* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_set_attribute_City_Out_serialize(C_set_attribute_City_Out const* self, XcdrBuffer buf);
 XcdrBufferResult C_set_attribute_City_Out_deserialize(C_set_attribute_City_Out* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_set_attribute_City_Result_serialize(C_set_attribute_City_Result const* self, XcdrBuffer buf);
 XcdrBufferResult C_set_attribute_City_Result_deserialize(C_set_attribute_City_Result* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_Call_serialize(C_Call const* self, XcdrBuffer buf);
 XcdrBufferResult C_Call_deserialize(C_Call* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_Request_serialize(C_Request const* self, XcdrBuffer buf);
 XcdrBufferResult C_Request_deserialize(C_Request* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_Return_serialize(C_Return const* self, XcdrBuffer buf);
 XcdrBufferResult C_Return_deserialize(C_Return* self, XcdrConstBuffer buf);
+
 XcdrBufferResult C_Reply_serialize(C_Reply const* self, XcdrBuffer buf);
 XcdrBufferResult C_Reply_deserialize(C_Reply* self, XcdrConstBuffer buf);
+
+#endif

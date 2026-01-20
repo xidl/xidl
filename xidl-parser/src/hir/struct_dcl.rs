@@ -26,6 +26,12 @@ pub struct Member {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Default(pub ConstExpr);
 
+impl StructDcl {
+    pub fn serialize_kind(&self, config: &SerializeConfig) -> SerializeKind {
+        config.resolve_for_annotations(&self.annotations)
+    }
+}
+
 impl From<crate::typed_ast::StructDef> for StructDcl {
     fn from(value: crate::typed_ast::StructDef) -> Self {
         Self {

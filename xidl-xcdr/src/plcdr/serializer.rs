@@ -4,7 +4,7 @@ use crate::{
         align::{write_aligned, Align4},
         ToNeBytes,
     },
-    FieldId, XcdrSerialize,
+    FieldId, XcdrSerializer,
 };
 
 #[repr(C)]
@@ -33,7 +33,7 @@ impl PlcdrSerialize {
     }
 }
 
-impl XcdrSerialize for PlcdrSerialize {
+impl XcdrSerializer for PlcdrSerialize {
     fn begin_field(
         &mut self,
         id: FieldId,

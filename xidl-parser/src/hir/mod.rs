@@ -36,6 +36,7 @@ pub struct Specification(pub Vec<Definition>);
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Definition {
     ModuleDcl(ModuleDcl),
+    Pragma(Pragma),
     ConstrTypeDcl(ConstrTypeDcl),
     TypeDcl(TypeDcl),
     ConstDcl(ConstDcl),
@@ -48,6 +49,108 @@ pub struct ModuleDcl {
     pub annotations: Vec<Annotation>,
     pub ident: String,
     pub definition: Vec<Definition>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
+pub enum SerializeKind {
+    Cdr,
+    PlainCdr,
+    PlCdr,
+    PlainCdr2,
+    DelimitedCdr,
+    PlCdr2,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
+pub enum SerializeVersion {
+    Xcdr1,
+    Xcdr2,
+}
+
+#[derive(Debug, Default, Serialize, Deserialize, Clone, Copy)]
+pub struct SerializeConfig {
+    pub explicit_kind: Option<SerializeKind>,
+    pub version: Option<SerializeVersion>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
+pub enum Pragma {
+    XidlcSerialize(SerializeKind),
+    XidlcVersion(SerializeVersion),
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
+pub enum Extensibility {
+    Final,
+    Appendable,
+    Mutable,
+    None,
+}
+
+impl SerializeConfig {
+    pub fn apply_pragma(&mut self, pragma: Pragma) {
+        match pragma {
+            Pragma::XidlcSerialize(kind) => {
+                self.explicit_kind = Some(kind);
+            }
+            Pragma::XidlcVersion(version) => {
+                self.version = Some(version);
+                self.explicit_kind = None;
+            }
+        }
+    }
+
+    pub fn resolve(&self, extensibility: Extensibility) -> SerializeKind {
+        if let Some(kind) = self.explicit_kind {
+            return kind;
+        }
+
+        match self.version {
+            None => SerializeKind::Cdr,
+            Some(SerializeVersion::Xcdr1) => match extensibility {
+                Extensibility::Mutable => SerializeKind::PlCdr,
+                Extensibility::Final | Extensibility::Appendable => SerializeKind::Cdr,
+                Extensibility::None => SerializeKind::PlainCdr,
+            },
+            Some(SerializeVersion::Xcdr2) => match extensibility {
+                Extensibility::Final => SerializeKind::PlainCdr2,
+                Extensibility::Appendable => SerializeKind::DelimitedCdr,
+                Extensibility::Mutable => SerializeKind::PlCdr2,
+                Extensibility::None => SerializeKind::Cdr,
+            },
+        }
+    }
+
+    pub fn resolve_for_annotations(&self, annotations: &[Annotation]) -> SerializeKind {
+        self.resolve(extensibility_from_annotations(annotations))
+    }
+}
+
+pub fn extensibility_from_annotations(annotations: &[Annotation]) -> Extensibility {
+    let mut final_flag = false;
+    let mut appendable = false;
+    let mut mutable = false;
+    for anno in annotations {
+        if let Annotation::Builtin { name, .. } = anno {
+            if name.eq_ignore_ascii_case("final") {
+                final_flag = true;
+            } else if name.eq_ignore_ascii_case("appendable") {
+                appendable = true;
+            } else if name.eq_ignore_ascii_case("mutable") {
+                mutable = true;
+            }
+        }
+    }
+
+    if mutable {
+        Extensibility::Mutable
+    } else if appendable {
+        Extensibility::Appendable
+    } else if final_flag {
+        Extensibility::Final
+    } else {
+        Extensibility::None
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -73,6 +176,12 @@ pub struct UnionDef {
     pub ident: String,
     pub switch_type_spec: SwitchTypeSpec,
     pub case: Vec<Case>,
+}
+
+impl UnionDef {
+    pub fn serialize_kind(&self, config: &SerializeConfig) -> SerializeKind {
+        config.resolve_for_annotations(&self.annotations)
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -118,6 +227,12 @@ pub struct BitsetDcl {
     pub field: Vec<BitField>,
 }
 
+impl BitsetDcl {
+    pub fn serialize_kind(&self, config: &SerializeConfig) -> SerializeKind {
+        config.resolve_for_annotations(&self.annotations)
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum BitFieldType {
     Bool,
@@ -138,6 +253,12 @@ pub struct BitmaskDcl {
     pub annotations: Vec<Annotation>,
     pub ident: String,
     pub value: Vec<BitValue>,
+}
+
+impl BitmaskDcl {
+    pub fn serialize_kind(&self, config: &SerializeConfig) -> SerializeKind {
+        config.resolve_for_annotations(&self.annotations)
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -208,6 +329,11 @@ fn collect_defs(
                     definition: inner,
                 }));
             }
+            crate::typed_ast::Definition::PreprocCall(call) => {
+                if let Some(pragma) = parse_xidlc_pragma(&call) {
+                    out.push(Definition::Pragma(pragma));
+                }
+            }
             crate::typed_ast::Definition::TypeDcl(type_dcl) => {
                 let type_dcl: TypeDcl = type_dcl.into();
                 out.push(Definition::TypeDcl(type_dcl));
@@ -232,9 +358,66 @@ fn collect_defs(
             crate::typed_ast::Definition::TemplateModuleDcl(_)
             | crate::typed_ast::Definition::TemplateModuleInst(_)
             | crate::typed_ast::Definition::PreprocInclude(_)
-            | crate::typed_ast::Definition::PreprocCall(_)
             | crate::typed_ast::Definition::PreprocDefine(_) => {}
         }
+    }
+}
+
+fn parse_xidlc_pragma(call: &crate::typed_ast::PreprocCall) -> Option<Pragma> {
+    let directive = call.directive.0.as_str();
+    if !directive.eq_ignore_ascii_case("#pragma") && !directive.eq_ignore_ascii_case("#progma") {
+        return None;
+    }
+    let arg = call.argument.as_ref()?.0.as_str();
+    let mut parts = arg.split_whitespace();
+    let namespace = parts.next()?;
+    if !namespace.eq_ignore_ascii_case("xidlc") {
+        return None;
+    }
+    let token = parts.next()?;
+
+    if token.eq_ignore_ascii_case("XCDR1") {
+        return Some(Pragma::XidlcVersion(SerializeVersion::Xcdr1));
+    }
+    if token.eq_ignore_ascii_case("XCDR2") {
+        return Some(Pragma::XidlcVersion(SerializeVersion::Xcdr2));
+    }
+
+    if let Some(inner) = token
+        .strip_prefix("serialize(")
+        .and_then(|value| value.strip_suffix(')'))
+    {
+        let inner = inner.trim();
+        if inner.eq_ignore_ascii_case("XCDR1") {
+            return Some(Pragma::XidlcVersion(SerializeVersion::Xcdr1));
+        }
+        if inner.eq_ignore_ascii_case("XCDR2") {
+            return Some(Pragma::XidlcVersion(SerializeVersion::Xcdr2));
+        }
+        if let Some(kind) = parse_serialize_kind(inner) {
+            return Some(Pragma::XidlcSerialize(kind));
+        }
+    }
+
+    None
+}
+
+fn parse_serialize_kind(value: &str) -> Option<SerializeKind> {
+    let value = value.trim();
+    if value.eq_ignore_ascii_case("CDR") {
+        Some(SerializeKind::Cdr)
+    } else if value.eq_ignore_ascii_case("PLAIN_CDR") {
+        Some(SerializeKind::PlainCdr)
+    } else if value.eq_ignore_ascii_case("PL_CDR") {
+        Some(SerializeKind::PlCdr)
+    } else if value.eq_ignore_ascii_case("PLAIN_CDR2") {
+        Some(SerializeKind::PlainCdr2)
+    } else if value.eq_ignore_ascii_case("DELIMITED_CDR") {
+        Some(SerializeKind::DelimitedCdr)
+    } else if value.eq_ignore_ascii_case("PL_CDR2") {
+        Some(SerializeKind::PlCdr2)
+    } else {
+        None
     }
 }
 

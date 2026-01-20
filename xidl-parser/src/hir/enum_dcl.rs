@@ -14,6 +14,12 @@ pub struct Enumerator {
     pub ident: String,
 }
 
+impl EnumDcl {
+    pub fn serialize_kind(&self, config: &SerializeConfig) -> SerializeKind {
+        config.resolve_for_annotations(&self.annotations)
+    }
+}
+
 impl From<crate::typed_ast::EnumDcl> for EnumDcl {
     fn from(typed_ast: crate::typed_ast::EnumDcl) -> Self {
         Self {

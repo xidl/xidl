@@ -4,50 +4,65 @@ expression: hir
 ---
 Specification(
     [
-        ConstrTypeDcl(
-            UnionForwardDcl(
-                UnionForwardDcl {
-                    annotations: [],
-                    ident: "A",
-                },
-            ),
-        ),
-        ConstrTypeDcl(
-            UnionDef(
-                UnionDef {
-                    annotations: [],
-                    ident: "B",
-                    switch_type_spec: IntegerType(
-                        I32,
+        TypeDcl(
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    UnionForwardDcl(
+                        UnionForwardDcl {
+                            annotations: [],
+                            ident: "A",
+                        },
                     ),
-                    case: [],
-                },
-            ),
+                ),
+            },
         ),
-        ConstrTypeDcl(
-            UnionDef(
-                UnionDef {
-                    annotations: [],
-                    ident: "C",
-                    switch_type_spec: IntegerType(
-                        I32,
+        TypeDcl(
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    UnionDef(
+                        UnionDef {
+                            annotations: [],
+                            ident: "B",
+                            switch_type_spec: IntegerType(
+                                I32,
+                            ),
+                            case: [],
+                        },
                     ),
-                    case: [
-                        Case {
-                            label: [
-                                Value(
-                                    ConstExpr(
-                                        XorExpr(
-                                            AndExpr(
-                                                ShiftExpr(
-                                                    AddExpr(
-                                                        MultExpr(
-                                                            UnaryExpr(
-                                                                PrimaryExpr(
-                                                                    Literal(
-                                                                        IntegerLiteral(
-                                                                            DecNumber(
-                                                                                "0",
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    UnionDef(
+                        UnionDef {
+                            annotations: [],
+                            ident: "C",
+                            switch_type_spec: IntegerType(
+                                I32,
+                            ),
+                            case: [
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            Literal(
+                                                                                IntegerLiteral(
+                                                                                    DecNumber(
+                                                                                        "0",
+                                                                                    ),
+                                                                                ),
                                                                             ),
                                                                         ),
                                                                     ),
@@ -58,40 +73,40 @@ Specification(
                                                 ),
                                             ),
                                         ),
-                                    ),
-                                ),
-                            ],
-                            element: ElementSpec {
-                                annotations: [],
-                                ty: TypeSpec(
-                                    SimpleTypeSpec(
-                                        IntegerType(
-                                            I32,
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                IntegerType(
+                                                    I32,
+                                                ),
+                                            ),
                                         ),
-                                    ),
-                                ),
-                                value: SimpleDeclarator(
-                                    SimpleDeclarator(
-                                        "a",
-                                    ),
-                                ),
-                            },
-                        },
-                        Case {
-                            label: [
-                                Value(
-                                    ConstExpr(
-                                        XorExpr(
-                                            AndExpr(
-                                                ShiftExpr(
-                                                    AddExpr(
-                                                        MultExpr(
-                                                            UnaryExpr(
-                                                                PrimaryExpr(
-                                                                    Literal(
-                                                                        IntegerLiteral(
-                                                                            DecNumber(
-                                                                                "1",
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "a",
+                                            ),
+                                        ),
+                                    },
+                                },
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            Literal(
+                                                                                IntegerLiteral(
+                                                                                    DecNumber(
+                                                                                        "1",
+                                                                                    ),
+                                                                                ),
                                                                             ),
                                                                         ),
                                                                     ),
@@ -102,30 +117,30 @@ Specification(
                                                 ),
                                             ),
                                         ),
-                                    ),
-                                ),
-                            ],
-                            element: ElementSpec {
-                                annotations: [],
-                                ty: TypeSpec(
-                                    TemplateTypeSpec(
-                                        StringType(
-                                            StringType {
-                                                bound: None,
-                                            },
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            TemplateTypeSpec(
+                                                StringType(
+                                                    StringType {
+                                                        bound: None,
+                                                    },
+                                                ),
+                                            ),
                                         ),
-                                    ),
-                                ),
-                                value: SimpleDeclarator(
-                                    SimpleDeclarator(
-                                        "b",
-                                    ),
-                                ),
-                            },
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "b",
+                                            ),
+                                        ),
+                                    },
+                                },
+                            ],
                         },
-                    ],
-                },
-            ),
+                    ),
+                ),
+            },
         ),
     ],
 )

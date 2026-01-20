@@ -4,29 +4,44 @@ expression: hir
 ---
 Specification(
     [
-        ConstDcl(
-            ConstDcl {
-                ty: ScopedName(
-                    ScopedName {
-                        name: [
-                            "u8",
-                        ],
-                        is_root: false,
-                    },
-                ),
-                ident: "a",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    IntegerLiteral(
-                                                        DecNumber(
-                                                            "10",
+        ModuleDcl(
+            ModuleDcl {
+                annotations: [],
+                ident: "A",
+                definition: [],
+            },
+        ),
+        ModuleDcl(
+            ModuleDcl {
+                annotations: [],
+                ident: "B",
+                definition: [
+                    ConstDcl(
+                        ConstDcl {
+                            ty: ScopedName(
+                                ScopedName {
+                                    name: [
+                                        "u8",
+                                    ],
+                                    is_root: false,
+                                },
+                            ),
+                            ident: "a",
+                            value: ConstExpr(
+                                XorExpr(
+                                    AndExpr(
+                                        ShiftExpr(
+                                            AddExpr(
+                                                MultExpr(
+                                                    UnaryExpr(
+                                                        PrimaryExpr(
+                                                            Literal(
+                                                                IntegerLiteral(
+                                                                    DecNumber(
+                                                                        "10",
+                                                                    ),
+                                                                ),
+                                                            ),
                                                         ),
                                                     ),
                                                 ),
@@ -35,18 +50,23 @@ Specification(
                                     ),
                                 ),
                             ),
-                        ),
+                        },
                     ),
-                ),
+                    TypeDcl(
+                        TypeDcl {
+                            annotations: [],
+                            decl: ConstrTypeDcl(
+                                StructForwardDcl(
+                                    StructForwardDcl {
+                                        annotations: [],
+                                        ident: "B",
+                                    },
+                                ),
+                            ),
+                        },
+                    ),
+                ],
             },
-        ),
-        ConstrTypeDcl(
-            StructForwardDcl(
-                StructForwardDcl {
-                    annotations: [],
-                    ident: "B",
-                },
-            ),
         ),
     ],
 )

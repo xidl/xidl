@@ -3,10 +3,10 @@
 #![allow(unused_imports)]
 #![allow(non_upper_case_globals)]
 #![allow(non_snake_case)]
+#![allow(unused_variables)]
 
 use std::collections::BTreeMap;
 use std::ffi::c_void;
-
 
 pub mod DDS {
     pub mod XTypes {
@@ -68,30 +68,90 @@ pub mod DDS {
         pub const INVALID_SBOUND: SBound = 0;
         pub struct TypeObjectHashId {
             pub _d: u8,
-        
+
             pub hash: Option<Box<EquivalenceHash>>,
-        
+        }
+
+        impl xidl_xcdr::XcdrSerialize for TypeObjectHashId {
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+                serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self._d, serializer)?;
+                serializer.end_field()?;
+                match self._d {
+                    EK_COMPLETE | EK_MINIMAL => {
+                        let value = self.hash.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    _ => {}
+                }
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for TypeObjectHashId {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let _d = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+                let mut out = Self { _d, hash: None };
+                match out._d {
+                    EK_COMPLETE | EK_MINIMAL => {
+                        out.hash = Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    _ => {}
+                }
+                Ok(out)
+            }
         }
         pub struct MemberFlag {
             pub value: u32,
         }
-        
+
         impl MemberFlag {
-        
             pub const TRY_CONSTRUCT1: u32 = 1u32 << 0;
-        
+
             pub const TRY_CONSTRUCT2: u32 = 1u32 << 1;
-        
+
             pub const IS_EXTERNAL: u32 = 1u32 << 2;
-        
+
             pub const IS_OPTIONAL: u32 = 1u32 << 3;
-        
+
             pub const IS_MUST_UNDERSTAND: u32 = 1u32 << 4;
-        
+
             pub const IS_KEY: u32 = 1u32 << 5;
-        
+
             pub const IS_DEFAULT: u32 = 1u32 << 6;
-        
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MemberFlag {
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.value, serializer)
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MemberFlag {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let value = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+                Ok(Self { value })
+            }
         }
         pub type CollectionElementFlag = MemberFlag;
         pub type StructMemberFlag = MemberFlag;
@@ -106,19 +166,35 @@ pub mod DDS {
         pub struct TypeFlag {
             pub value: u32,
         }
-        
+
         impl TypeFlag {
-        
             pub const IS_FINAL: u32 = 1u32 << 0;
-        
+
             pub const IS_APPENDABLE: u32 = 1u32 << 1;
-        
+
             pub const IS_MUTABLE: u32 = 1u32 << 2;
-        
+
             pub const IS_NESTED: u32 = 1u32 << 3;
-        
+
             pub const IS_AUTOID_HASH: u32 = 1u32 << 4;
-        
+        }
+
+        impl xidl_xcdr::XcdrSerialize for TypeFlag {
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.value, serializer)
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for TypeFlag {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let value = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+                Ok(Self { value })
+            }
         }
         pub type StructTypeFlag = TypeFlag;
         pub type UnionTypeFlag = TypeFlag;
@@ -130,954 +206,5971 @@ pub mod DDS {
         pub type BitsetTypeFlag = TypeFlag;
         pub const TypeFlagMinimalMask: u16 = 0x0007;
         pub struct StringSTypeDefn {
-        
-        
             pub bound: Box<SBound>,
-        
+        }
+
+        impl StringSTypeDefn {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for StringSTypeDefn {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.bound, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for StringSTypeDefn {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let bound = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { bound })
+            }
         }
         pub struct StringLTypeDefn {
-        
-        
             pub bound: Box<LBound>,
-        
+        }
+
+        impl StringLTypeDefn {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for StringLTypeDefn {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.bound, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for StringLTypeDefn {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let bound = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { bound })
+            }
         }
         pub struct PlainCollectionHeader {
-        
-        
             pub equiv_kind: Box<EquivalenceKind>,
-        
+
             pub element_flags: Box<CollectionElementFlag>,
-        
+        }
+
+        impl PlainCollectionHeader {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for PlainCollectionHeader {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.equiv_kind, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.element_flags, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for PlainCollectionHeader {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let equiv_kind = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let element_flags = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    equiv_kind,
+
+                    element_flags,
+                })
+            }
         }
         pub struct PlainSequenceSElemDefn {
-        
-        
             pub header: Box<PlainCollectionHeader>,
-        
+
             pub bound: Box<SBound>,
-        
+
             pub element_identifier: Box<TypeIdentifier>,
-        
+        }
+
+        impl PlainSequenceSElemDefn {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for PlainSequenceSElemDefn {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.bound, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.element_identifier, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for PlainSequenceSElemDefn {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let bound = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let element_identifier = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    header,
+
+                    bound,
+
+                    element_identifier,
+                })
+            }
         }
         pub struct PlainSequenceLElemDefn {
-        
-        
             pub header: Box<PlainCollectionHeader>,
-        
+
             pub bound: Box<LBound>,
-        
+
             pub element_identifier: Box<TypeIdentifier>,
-        
+        }
+
+        impl PlainSequenceLElemDefn {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for PlainSequenceLElemDefn {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.bound, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.element_identifier, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for PlainSequenceLElemDefn {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let bound = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let element_identifier = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    header,
+
+                    bound,
+
+                    element_identifier,
+                })
+            }
         }
         pub struct PlainArraySElemDefn {
-        
-        
             pub header: Box<PlainCollectionHeader>,
-        
+
             pub array_bound_seq: Box<SBoundSeq>,
-        
+
             pub element_identifier: Box<TypeIdentifier>,
-        
+        }
+
+        impl PlainArraySElemDefn {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for PlainArraySElemDefn {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.array_bound_seq, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.element_identifier, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for PlainArraySElemDefn {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let array_bound_seq = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let element_identifier = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    header,
+
+                    array_bound_seq,
+
+                    element_identifier,
+                })
+            }
         }
         pub struct PlainArrayLElemDefn {
-        
-        
             pub header: Box<PlainCollectionHeader>,
-        
+
             pub array_bound_seq: Box<LBoundSeq>,
-        
+
             pub element_identifier: Box<TypeIdentifier>,
-        
+        }
+
+        impl PlainArrayLElemDefn {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for PlainArrayLElemDefn {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.array_bound_seq, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.element_identifier, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for PlainArrayLElemDefn {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let array_bound_seq = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let element_identifier = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    header,
+
+                    array_bound_seq,
+
+                    element_identifier,
+                })
+            }
         }
         pub struct PlainMapSTypeDefn {
-        
-        
             pub header: Box<PlainCollectionHeader>,
-        
+
             pub bound: Box<SBound>,
-        
+
             pub element_identifier: Box<TypeIdentifier>,
-        
+
             pub key_flags: Box<CollectionElementFlag>,
-        
+
             pub key_identifier: Box<TypeIdentifier>,
-        
+        }
+
+        impl PlainMapSTypeDefn {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for PlainMapSTypeDefn {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.bound, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.element_identifier, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.key_flags, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(5u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.key_identifier, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for PlainMapSTypeDefn {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let bound = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let element_identifier = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let key_flags = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let key_identifier = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    header,
+
+                    bound,
+
+                    element_identifier,
+
+                    key_flags,
+
+                    key_identifier,
+                })
+            }
         }
         pub struct PlainMapLTypeDefn {
-        
-        
             pub header: Box<PlainCollectionHeader>,
-        
+
             pub bound: Box<LBound>,
-        
+
             pub element_identifier: Box<TypeIdentifier>,
-        
+
             pub key_flags: Box<CollectionElementFlag>,
-        
+
             pub key_identifier: Box<TypeIdentifier>,
-        
+        }
+
+        impl PlainMapLTypeDefn {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for PlainMapLTypeDefn {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.bound, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.element_identifier, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.key_flags, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(5u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.key_identifier, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for PlainMapLTypeDefn {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let bound = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let element_identifier = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let key_flags = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let key_identifier = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    header,
+
+                    bound,
+
+                    element_identifier,
+
+                    key_flags,
+
+                    key_identifier,
+                })
+            }
         }
         pub struct StronglyConnectedComponentId {
-        
-        
             pub sc_component_id: Box<TypeObjectHashId>,
-        
+
             pub scc_length: i32,
-        
+
             pub scc_index: i32,
-        
         }
-        pub struct ExtendedTypeDefn {
-        
-        
+
+        impl StronglyConnectedComponentId {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for StronglyConnectedComponentId {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.sc_component_id, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.scc_length, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.scc_index, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for StronglyConnectedComponentId {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let sc_component_id = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let scc_length = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let scc_index = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    sc_component_id,
+
+                    scc_length,
+
+                    scc_index,
+                })
+            }
+        }
+        pub struct ExtendedTypeDefn {}
+
+        impl ExtendedTypeDefn {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for ExtendedTypeDefn {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for ExtendedTypeDefn {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                Ok(Self {})
+            }
         }
         pub struct TypeIdentifier {
             pub _d: u8,
-        
+
             pub string_sdefn: Option<Box<StringSTypeDefn>>,
-        
+
             pub string_ldefn: Option<Box<StringLTypeDefn>>,
-        
+
             pub seq_sdefn: Option<Box<PlainSequenceSElemDefn>>,
-        
+
             pub seq_ldefn: Option<Box<PlainSequenceLElemDefn>>,
-        
+
             pub array_sdefn: Option<Box<PlainArraySElemDefn>>,
-        
+
             pub array_ldefn: Option<Box<PlainArrayLElemDefn>>,
-        
+
             pub map_sdefn: Option<Box<PlainMapSTypeDefn>>,
-        
+
             pub map_ldefn: Option<Box<PlainMapLTypeDefn>>,
-        
+
             pub sc_component_id: Option<Box<StronglyConnectedComponentId>>,
-        
+
             pub equivalence_hash: Option<Box<EquivalenceHash>>,
-        
+
             pub extended_defn: Option<Box<ExtendedTypeDefn>>,
-        
+        }
+
+        impl xidl_xcdr::XcdrSerialize for TypeIdentifier {
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+                serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self._d, serializer)?;
+                serializer.end_field()?;
+                match self._d {
+                    TI_STRING8_SMALL | TI_STRING16_SMALL => {
+                        let value = self.string_sdefn.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TI_STRING8_LARGE | TI_STRING16_LARGE => {
+                        let value = self.string_ldefn.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TI_PLAIN_SEQUENCE_SMALL => {
+                        let value = self.seq_sdefn.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TI_PLAIN_SEQUENCE_LARGE => {
+                        let value = self.seq_ldefn.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TI_PLAIN_ARRAY_SMALL => {
+                        let value = self.array_sdefn.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TI_PLAIN_ARRAY_LARGE => {
+                        let value = self.array_ldefn.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TI_PLAIN_MAP_SMALL => {
+                        let value = self.map_sdefn.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TI_PLAIN_MAP_LARGE => {
+                        let value = self.map_ldefn.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TI_STRONGLY_CONNECTED_COMPONENT => {
+                        let value = self.sc_component_id.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    EK_COMPLETE | EK_MINIMAL => {
+                        let value = self.equivalence_hash.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    _ => {
+                        let value = self.extended_defn.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+                }
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for TypeIdentifier {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let _d = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+                let mut out = Self {
+                    _d,
+
+                    string_sdefn: None,
+
+                    string_ldefn: None,
+
+                    seq_sdefn: None,
+
+                    seq_ldefn: None,
+
+                    array_sdefn: None,
+
+                    array_ldefn: None,
+
+                    map_sdefn: None,
+
+                    map_ldefn: None,
+
+                    sc_component_id: None,
+
+                    equivalence_hash: None,
+
+                    extended_defn: None,
+                };
+                match out._d {
+                    TI_STRING8_SMALL | TI_STRING16_SMALL => {
+                        out.string_sdefn =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TI_STRING8_LARGE | TI_STRING16_LARGE => {
+                        out.string_ldefn =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TI_PLAIN_SEQUENCE_SMALL => {
+                        out.seq_sdefn =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TI_PLAIN_SEQUENCE_LARGE => {
+                        out.seq_ldefn =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TI_PLAIN_ARRAY_SMALL => {
+                        out.array_sdefn =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TI_PLAIN_ARRAY_LARGE => {
+                        out.array_ldefn =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TI_PLAIN_MAP_SMALL => {
+                        out.map_sdefn =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TI_PLAIN_MAP_LARGE => {
+                        out.map_ldefn =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TI_STRONGLY_CONNECTED_COMPONENT => {
+                        out.sc_component_id =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    EK_COMPLETE | EK_MINIMAL => {
+                        out.equivalence_hash =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    _ => {
+                        out.extended_defn =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+                }
+                Ok(out)
+            }
         }
         pub type TypeIdentifierSeq = Vec<TypeIdentifier>;
         pub type MemberId = u32;
         pub const ANNOTATION_STR_VALUE_MAX_LEN: u32 = 128;
         pub const ANNOTATION_OCTETSEC_VALUE_MAX_LEN: u32 = 128;
-        pub struct ExtendedAnnotationParameterValue {
-        
-        
+        pub struct ExtendedAnnotationParameterValue {}
+
+        impl ExtendedAnnotationParameterValue {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for ExtendedAnnotationParameterValue {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for ExtendedAnnotationParameterValue {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                Ok(Self {})
+            }
         }
         pub struct AnnotationParameterValue {
             pub _d: u8,
-        
+
             pub boolean_value: Option<bool>,
-        
+
             pub byte_value: Option<u8>,
-        
+
             pub int16_value: Option<i16>,
-        
+
             pub uint_16_value: Option<u16>,
-        
+
             pub int32_value: Option<i32>,
-        
+
             pub uint32_value: Option<u32>,
-        
+
             pub int64_value: Option<i64>,
-        
+
             pub uint64_value: Option<u64>,
-        
+
             pub float32_value: Option<f64>,
-        
+
             pub float64_value: Option<f64>,
-        
+
             pub float128_value: Option<f64>,
-        
+
             pub char_value: Option<char>,
-        
+
             pub wchar_value: Option<char>,
-        
+
             pub enumerated_value: Option<i32>,
-        
+
             pub string8_value: Option<String>,
-        
+
             pub string16_value: Option<String>,
-        
+
             pub extended_value: Option<Box<ExtendedAnnotationParameterValue>>,
-        
+        }
+
+        impl xidl_xcdr::XcdrSerialize for AnnotationParameterValue {
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+                serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self._d, serializer)?;
+                serializer.end_field()?;
+                match self._d {
+                    TK_BOOLEAN => {
+                        let value = self.boolean_value.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_BYTE => {
+                        let value = self.byte_value.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_INT16 => {
+                        let value = self.int16_value.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_UINT16 => {
+                        let value = self.uint_16_value.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_INT32 => {
+                        let value = self.int32_value.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_UINT32 => {
+                        let value = self.uint32_value.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_INT64 => {
+                        let value = self.int64_value.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_UINT64 => {
+                        let value = self.uint64_value.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_FLOAT32 => {
+                        let value = self.float32_value.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_FLOAT64 => {
+                        let value = self.float64_value.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_FLOAT128 => {
+                        let value = self.float128_value.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_CHAR8 => {
+                        let value = self.char_value.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_CHAR16 => {
+                        let value = self.wchar_value.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_ENUM => {
+                        let value = self.enumerated_value.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_STRING8 => {
+                        let value = self.string8_value.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_STRING16 => {
+                        let value = self.string16_value.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    _ => {
+                        let value = self.extended_value.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+                }
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for AnnotationParameterValue {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let _d = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+                let mut out = Self {
+                    _d,
+
+                    boolean_value: None,
+
+                    byte_value: None,
+
+                    int16_value: None,
+
+                    uint_16_value: None,
+
+                    int32_value: None,
+
+                    uint32_value: None,
+
+                    int64_value: None,
+
+                    uint64_value: None,
+
+                    float32_value: None,
+
+                    float64_value: None,
+
+                    float128_value: None,
+
+                    char_value: None,
+
+                    wchar_value: None,
+
+                    enumerated_value: None,
+
+                    string8_value: None,
+
+                    string16_value: None,
+
+                    extended_value: None,
+                };
+                match out._d {
+                    TK_BOOLEAN => {
+                        out.boolean_value =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_BYTE => {
+                        out.byte_value =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_INT16 => {
+                        out.int16_value =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_UINT16 => {
+                        out.uint_16_value =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_INT32 => {
+                        out.int32_value =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_UINT32 => {
+                        out.uint32_value =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_INT64 => {
+                        out.int64_value =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_UINT64 => {
+                        out.uint64_value =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_FLOAT32 => {
+                        out.float32_value =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_FLOAT64 => {
+                        out.float64_value =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_FLOAT128 => {
+                        out.float128_value =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_CHAR8 => {
+                        out.char_value =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_CHAR16 => {
+                        out.wchar_value =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_ENUM => {
+                        out.enumerated_value =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_STRING8 => {
+                        out.string8_value =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_STRING16 => {
+                        out.string16_value =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    _ => {
+                        out.extended_value =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+                }
+                Ok(out)
+            }
         }
         pub struct AppliedAnnotationParameter {
-        
-        
             pub paramname_hash: Box<NameHash>,
-        
+
             pub value: Box<AnnotationParameterValue>,
-        
+        }
+
+        impl AppliedAnnotationParameter {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for AppliedAnnotationParameter {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.paramname_hash, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.value, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for AppliedAnnotationParameter {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let paramname_hash = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let value = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    paramname_hash,
+
+                    value,
+                })
+            }
         }
         pub type AppliedAnnotationParameterSeq = Vec<AppliedAnnotationParameter>;
         pub struct AppliedAnnotation {
-        
-        
             pub annotation_typeid: Box<TypeIdentifier>,
-        
+
             pub param_seq: Box<AppliedAnnotationParameterSeq>,
-        
+        }
+
+        impl AppliedAnnotation {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for AppliedAnnotation {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.annotation_typeid, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.param_seq, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for AppliedAnnotation {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let annotation_typeid = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let param_seq = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    annotation_typeid,
+
+                    param_seq,
+                })
+            }
         }
         pub type AppliedAnnotationSeq = Vec<AppliedAnnotation>;
         pub struct AppliedVerbatimAnnotation {
-        
-        
             pub placement: String,
-        
+
             pub language: String,
-        
+
             pub text: String,
-        
+        }
+
+        impl AppliedVerbatimAnnotation {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for AppliedVerbatimAnnotation {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.placement, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.language, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.text, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for AppliedVerbatimAnnotation {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let placement = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let language = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let text = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    placement,
+
+                    language,
+
+                    text,
+                })
+            }
         }
         pub struct AppliedBuiltinMemberAnnotations {
-        
-        
             pub unit: String,
-        
+
             pub min: Box<AnnotationParameterValue>,
-        
+
             pub max: Box<AnnotationParameterValue>,
-        
+
             pub hash_id: String,
-        
+        }
+
+        impl AppliedBuiltinMemberAnnotations {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for AppliedBuiltinMemberAnnotations {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.unit, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.min, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.max, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.hash_id, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for AppliedBuiltinMemberAnnotations {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let unit = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let min = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let max = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let hash_id = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    unit,
+
+                    min,
+
+                    max,
+
+                    hash_id,
+                })
+            }
         }
         pub struct CommonStructMember {
-        
-        
             pub member_id: Box<MemberId>,
-        
+
             pub member_flags: Box<StructMemberFlag>,
-        
+
             pub member_type_id: Box<TypeIdentifier>,
-        
+        }
+
+        impl CommonStructMember {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CommonStructMember {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.member_id, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.member_flags, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.member_type_id, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CommonStructMember {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let member_id = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let member_flags = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let member_type_id = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    member_id,
+
+                    member_flags,
+
+                    member_type_id,
+                })
+            }
         }
         pub struct CompleteMemberDetail {
-        
-        
             pub name: Box<MemberName>,
-        
+
             pub ann_builtin: Box<AppliedBuiltinMemberAnnotations>,
-        
+
             pub ann_custom: Box<AppliedAnnotationSeq>,
-        
+        }
+
+        impl CompleteMemberDetail {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteMemberDetail {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.name, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.ann_builtin, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.ann_custom, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteMemberDetail {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let name = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let ann_builtin = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let ann_custom = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    name,
+
+                    ann_builtin,
+
+                    ann_custom,
+                })
+            }
         }
         pub struct MinimalMemberDetail {
-        
-        
             pub name_hash: Box<NameHash>,
-        
+        }
+
+        impl MinimalMemberDetail {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalMemberDetail {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.name_hash, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalMemberDetail {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let name_hash = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { name_hash })
+            }
         }
         pub struct CompleteStructMember {
-        
-        
             pub common: Box<CommonStructMember>,
-        
+
             pub detail: Box<CompleteMemberDetail>,
-        
+        }
+
+        impl CompleteStructMember {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteStructMember {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteStructMember {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let common = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let detail = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { common, detail })
+            }
         }
         pub type CompleteStructMemberSeq = Vec<CompleteStructMember>;
         pub struct MinimalStructMember {
-        
-        
             pub common: Box<CommonStructMember>,
-        
+
             pub detail: Box<MinimalMemberDetail>,
-        
+        }
+
+        impl MinimalStructMember {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalStructMember {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalStructMember {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let common = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let detail = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { common, detail })
+            }
         }
         pub type MinimalStructMemberSeq = Vec<MinimalStructMember>;
         pub struct AppliedBuiltinTypeAnnotations {
-        
-        
             pub verbatim: Box<AppliedVerbatimAnnotation>,
-        
         }
-        pub struct MinimalTypeDetail {
-        
-        
+
+        impl AppliedBuiltinTypeAnnotations {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for AppliedBuiltinTypeAnnotations {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.verbatim, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for AppliedBuiltinTypeAnnotations {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let verbatim = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { verbatim })
+            }
+        }
+        pub struct MinimalTypeDetail {}
+
+        impl MinimalTypeDetail {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalTypeDetail {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalTypeDetail {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                Ok(Self {})
+            }
         }
         pub struct CompleteTypeDetail {
-        
-        
             pub ann_builtin: Box<AppliedBuiltinTypeAnnotations>,
-        
+
             pub ann_custom: Box<AppliedAnnotationSeq>,
-        
+
             pub type_name: Box<QualifiedTypeName>,
-        
+        }
+
+        impl CompleteTypeDetail {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteTypeDetail {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.ann_builtin, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.ann_custom, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.type_name, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteTypeDetail {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let ann_builtin = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let ann_custom = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let type_name = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    ann_builtin,
+
+                    ann_custom,
+
+                    type_name,
+                })
+            }
         }
         pub struct CompleteStructHeader {
-        
-        
             pub base_type: Box<TypeIdentifier>,
-        
+
             pub detail: Box<CompleteTypeDetail>,
-        
+        }
+
+        impl CompleteStructHeader {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteStructHeader {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.base_type, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteStructHeader {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let base_type = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let detail = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { base_type, detail })
+            }
         }
         pub struct MinimalStructHeader {
-        
-        
             pub base_type: Box<TypeIdentifier>,
-        
+
             pub detail: Box<MinimalTypeDetail>,
-        
+        }
+
+        impl MinimalStructHeader {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalStructHeader {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.base_type, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalStructHeader {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let base_type = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let detail = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { base_type, detail })
+            }
         }
         pub struct CompleteStructType {
-        
-        
             pub struct_flags: Box<StructTypeFlag>,
-        
+
             pub header: Box<CompleteStructHeader>,
-        
+
             pub member_seq: Box<CompleteStructMemberSeq>,
-        
+        }
+
+        impl CompleteStructType {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteStructType {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.struct_flags, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.member_seq, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteStructType {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let struct_flags = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let member_seq = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    struct_flags,
+
+                    header,
+
+                    member_seq,
+                })
+            }
         }
         pub struct MinimalStructType {
-        
-        
             pub struct_flags: Box<StructTypeFlag>,
-        
+
             pub header: Box<MinimalStructHeader>,
-        
+
             pub member_seq: Box<MinimalStructMemberSeq>,
-        
+        }
+
+        impl MinimalStructType {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalStructType {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.struct_flags, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.member_seq, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalStructType {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let struct_flags = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let member_seq = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    struct_flags,
+
+                    header,
+
+                    member_seq,
+                })
+            }
         }
         pub type UnionCaseLabelSeq = Vec<i32>;
         pub struct CommonUnionMember {
-        
-        
             pub member_id: Box<MemberId>,
-        
+
             pub member_flags: Box<UnionMemberFlag>,
-        
+
             pub type_id: Box<TypeIdentifier>,
-        
+
             pub label_seq: Box<UnionCaseLabelSeq>,
-        
+        }
+
+        impl CommonUnionMember {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CommonUnionMember {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.member_id, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.member_flags, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.type_id, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.label_seq, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CommonUnionMember {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let member_id = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let member_flags = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let type_id = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let label_seq = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    member_id,
+
+                    member_flags,
+
+                    type_id,
+
+                    label_seq,
+                })
+            }
         }
         pub struct CompleteUnionMember {
-        
-        
             pub common: Box<CommonUnionMember>,
-        
+
             pub detail: Box<CompleteMemberDetail>,
-        
+        }
+
+        impl CompleteUnionMember {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteUnionMember {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteUnionMember {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let common = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let detail = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { common, detail })
+            }
         }
         pub type CompleteUnionMemberSeq = Vec<CompleteUnionMember>;
         pub struct MinimalUnionMember {
-        
-        
             pub common: Box<CommonUnionMember>,
-        
+
             pub detail: Box<MinimalMemberDetail>,
-        
+        }
+
+        impl MinimalUnionMember {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalUnionMember {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalUnionMember {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let common = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let detail = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { common, detail })
+            }
         }
         pub type MinimalUnionMemberSeq = Vec<MinimalUnionMember>;
         pub struct CommonDiscriminatorMember {
-        
-        
             pub member_flags: Box<UnionDiscriminatorFlag>,
-        
+
             pub type_id: Box<TypeIdentifier>,
-        
+        }
+
+        impl CommonDiscriminatorMember {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CommonDiscriminatorMember {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.member_flags, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.type_id, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CommonDiscriminatorMember {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let member_flags = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let type_id = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    member_flags,
+
+                    type_id,
+                })
+            }
         }
         pub struct CompleteDiscriminatorMember {
-        
-        
             pub common: Box<CommonDiscriminatorMember>,
-        
+
             pub ann_builtin: Box<AppliedBuiltinTypeAnnotations>,
-        
+
             pub ann_custom: Box<AppliedAnnotationSeq>,
-        
+        }
+
+        impl CompleteDiscriminatorMember {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteDiscriminatorMember {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.ann_builtin, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.ann_custom, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteDiscriminatorMember {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let common = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let ann_builtin = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let ann_custom = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    common,
+
+                    ann_builtin,
+
+                    ann_custom,
+                })
+            }
         }
         pub struct MinimalDiscriminatorMember {
-        
-        
             pub common: Box<CommonDiscriminatorMember>,
-        
+        }
+
+        impl MinimalDiscriminatorMember {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalDiscriminatorMember {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalDiscriminatorMember {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let common = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { common })
+            }
         }
         pub struct CompleteUnionHeader {
-        
-        
             pub detail: Box<CompleteTypeDetail>,
-        
+        }
+
+        impl CompleteUnionHeader {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteUnionHeader {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteUnionHeader {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let detail = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { detail })
+            }
         }
         pub struct MinimalUnionHeader {
-        
-        
             pub detail: Box<MinimalTypeDetail>,
-        
+        }
+
+        impl MinimalUnionHeader {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalUnionHeader {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalUnionHeader {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let detail = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { detail })
+            }
         }
         pub struct CompleteUnionType {
-        
-        
             pub union_flags: Box<UnionTypeFlag>,
-        
+
             pub header: Box<CompleteUnionHeader>,
-        
+
             pub discriminator: Box<CompleteDiscriminatorMember>,
-        
+
             pub member_seq: Box<CompleteUnionMemberSeq>,
-        
+        }
+
+        impl CompleteUnionType {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteUnionType {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.union_flags, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.discriminator, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.member_seq, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteUnionType {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let union_flags = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let discriminator = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let member_seq = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    union_flags,
+
+                    header,
+
+                    discriminator,
+
+                    member_seq,
+                })
+            }
         }
         pub struct MinimalUnionType {
-        
-        
             pub union_flags: Box<UnionTypeFlag>,
-        
+
             pub header: Box<MinimalUnionHeader>,
-        
+
             pub discriminator: Box<MinimalDiscriminatorMember>,
-        
+
             pub member_seq: Box<MinimalUnionMemberSeq>,
-        
+        }
+
+        impl MinimalUnionType {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalUnionType {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.union_flags, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.discriminator, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.member_seq, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalUnionType {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let union_flags = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let discriminator = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let member_seq = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    union_flags,
+
+                    header,
+
+                    discriminator,
+
+                    member_seq,
+                })
+            }
         }
         pub struct CommonAnnotationParameter {
-        
-        
             pub member_flags: Box<AnnotationParameterFlag>,
-        
+
             pub member_type_id: Box<TypeIdentifier>,
-        
+        }
+
+        impl CommonAnnotationParameter {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CommonAnnotationParameter {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.member_flags, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.member_type_id, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CommonAnnotationParameter {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let member_flags = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let member_type_id = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    member_flags,
+
+                    member_type_id,
+                })
+            }
         }
         pub struct CompleteAnnotationParameter {
-        
-        
             pub common: Box<CommonAnnotationParameter>,
-        
+
             pub name: Box<MemberName>,
-        
+
             pub default_value: Box<AnnotationParameterValue>,
-        
+        }
+
+        impl CompleteAnnotationParameter {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteAnnotationParameter {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.name, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.default_value, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteAnnotationParameter {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let common = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let name = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let default_value = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    common,
+
+                    name,
+
+                    default_value,
+                })
+            }
         }
         pub type CompleteAnnotationParameterSeq = Vec<CompleteAnnotationParameter>;
         pub struct MinimalAnnotationParameter {
-        
-        
             pub common: Box<CommonAnnotationParameter>,
-        
+
             pub name_hash: Box<NameHash>,
-        
+
             pub default_value: Box<AnnotationParameterValue>,
-        
+        }
+
+        impl MinimalAnnotationParameter {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalAnnotationParameter {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.name_hash, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.default_value, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalAnnotationParameter {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let common = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let name_hash = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let default_value = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    common,
+
+                    name_hash,
+
+                    default_value,
+                })
+            }
         }
         pub type MinimalAnnotationParameterSeq = Vec<MinimalAnnotationParameter>;
         pub struct CompleteAnnotationHeader {
-        
-        
             pub annotation_name: Box<QualifiedTypeName>,
-        
         }
-        pub struct MinimalAnnotationHeader {
-        
-        
+
+        impl CompleteAnnotationHeader {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteAnnotationHeader {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.annotation_name, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteAnnotationHeader {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let annotation_name = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { annotation_name })
+            }
+        }
+        pub struct MinimalAnnotationHeader {}
+
+        impl MinimalAnnotationHeader {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalAnnotationHeader {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalAnnotationHeader {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                Ok(Self {})
+            }
         }
         pub struct CompleteAnnotationType {
-        
-        
             pub annotation_flag: Box<AnnotationTypeFlag>,
-        
+
             pub header: Box<CompleteAnnotationHeader>,
-        
+
             pub member_seq: Box<CompleteAnnotationParameterSeq>,
-        
+        }
+
+        impl CompleteAnnotationType {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteAnnotationType {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.annotation_flag, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.member_seq, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteAnnotationType {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let annotation_flag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let member_seq = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    annotation_flag,
+
+                    header,
+
+                    member_seq,
+                })
+            }
         }
         pub struct MinimalAnnotationType {
-        
-        
             pub annotation_flag: Box<AnnotationTypeFlag>,
-        
+
             pub header: Box<MinimalAnnotationHeader>,
-        
+
             pub member_seq: Box<MinimalAnnotationParameterSeq>,
-        
+        }
+
+        impl MinimalAnnotationType {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalAnnotationType {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.annotation_flag, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.member_seq, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalAnnotationType {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let annotation_flag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let member_seq = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    annotation_flag,
+
+                    header,
+
+                    member_seq,
+                })
+            }
         }
         pub struct CommonAliasBody {
-        
-        
             pub related_flags: Box<AliasMemberFlag>,
-        
+
             pub related_type: Box<TypeIdentifier>,
-        
+        }
+
+        impl CommonAliasBody {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CommonAliasBody {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.related_flags, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.related_type, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CommonAliasBody {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let related_flags = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let related_type = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    related_flags,
+
+                    related_type,
+                })
+            }
         }
         pub struct CompleteAliasBody {
-        
-        
             pub common: Box<CommonAliasBody>,
-        
+
             pub ann_builtin: Box<AppliedBuiltinMemberAnnotations>,
-        
+
             pub ann_custom: Box<AppliedAnnotationSeq>,
-        
+        }
+
+        impl CompleteAliasBody {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteAliasBody {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.ann_builtin, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.ann_custom, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteAliasBody {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let common = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let ann_builtin = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let ann_custom = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    common,
+
+                    ann_builtin,
+
+                    ann_custom,
+                })
+            }
         }
         pub struct MinimalAliasBody {
-        
-        
             pub common: Box<CommonAliasBody>,
-        
+        }
+
+        impl MinimalAliasBody {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalAliasBody {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalAliasBody {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let common = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { common })
+            }
         }
         pub struct CompleteAliasHeader {
-        
-        
             pub detail: Box<CompleteTypeDetail>,
-        
         }
-        pub struct MinimalAliasHeader {
-        
-        
+
+        impl CompleteAliasHeader {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteAliasHeader {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteAliasHeader {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let detail = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { detail })
+            }
+        }
+        pub struct MinimalAliasHeader {}
+
+        impl MinimalAliasHeader {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalAliasHeader {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalAliasHeader {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                Ok(Self {})
+            }
         }
         pub struct CompleteAliasType {
-        
-        
             pub alias_flags: Box<AliasTypeFlag>,
-        
+
             pub header: Box<CompleteAliasHeader>,
-        
+
             pub body: Box<CompleteAliasBody>,
-        
+        }
+
+        impl CompleteAliasType {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteAliasType {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.alias_flags, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.body, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteAliasType {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let alias_flags = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let body = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    alias_flags,
+
+                    header,
+
+                    body,
+                })
+            }
         }
         pub struct MinimalAliasType {
-        
-        
             pub alias_flags: Box<AliasTypeFlag>,
-        
+
             pub header: Box<MinimalAliasHeader>,
-        
+
             pub body: Box<MinimalAliasBody>,
-        
+        }
+
+        impl MinimalAliasType {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalAliasType {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.alias_flags, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.body, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalAliasType {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let alias_flags = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let body = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    alias_flags,
+
+                    header,
+
+                    body,
+                })
+            }
         }
         pub struct CompleteElementDetail {
-        
-        
             pub ann_builtin: Box<AppliedBuiltinMemberAnnotations>,
-        
+
             pub ann_custom: Box<AppliedAnnotationSeq>,
-        
+        }
+
+        impl CompleteElementDetail {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteElementDetail {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.ann_builtin, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.ann_custom, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteElementDetail {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let ann_builtin = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let ann_custom = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    ann_builtin,
+
+                    ann_custom,
+                })
+            }
         }
         pub struct CommonCollectionElement {
-        
-        
             pub element_flags: Box<CollectionElementFlag>,
-        
+
             pub r#type: Box<TypeIdentifier>,
-        
+        }
+
+        impl CommonCollectionElement {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CommonCollectionElement {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.element_flags, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.r#type, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CommonCollectionElement {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let element_flags = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let r#type = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    element_flags,
+
+                    r#type,
+                })
+            }
         }
         pub struct CompleteCollectionElement {
-        
-        
             pub common: Box<CommonCollectionElement>,
-        
+
             pub detail: Box<CompleteElementDetail>,
-        
+        }
+
+        impl CompleteCollectionElement {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteCollectionElement {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteCollectionElement {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let common = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let detail = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { common, detail })
+            }
         }
         pub struct MinimalCollectionElement {
-        
-        
             pub common: Box<CommonCollectionElement>,
-        
+        }
+
+        impl MinimalCollectionElement {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalCollectionElement {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalCollectionElement {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let common = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { common })
+            }
         }
         pub struct CommonCollectionHeader {
-        
-        
             pub bound: Box<LBound>,
-        
+        }
+
+        impl CommonCollectionHeader {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CommonCollectionHeader {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.bound, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CommonCollectionHeader {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let bound = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { bound })
+            }
         }
         pub struct CompleteCollectionHeader {
-        
-        
             pub common: Box<CommonCollectionHeader>,
-        
+
             pub detail: Box<CompleteTypeDetail>,
-        
+        }
+
+        impl CompleteCollectionHeader {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteCollectionHeader {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteCollectionHeader {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let common = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let detail = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { common, detail })
+            }
         }
         pub struct MinimalCollectionHeader {
-        
-        
             pub common: Box<CommonCollectionHeader>,
-        
+        }
+
+        impl MinimalCollectionHeader {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalCollectionHeader {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalCollectionHeader {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let common = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { common })
+            }
         }
         pub struct CompleteSequenceType {
-        
-        
             pub collection_flag: Box<CollectionTypeFlag>,
-        
+
             pub header: Box<CompleteCollectionHeader>,
-        
+
             pub element: Box<CompleteCollectionElement>,
-        
+        }
+
+        impl CompleteSequenceType {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteSequenceType {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.collection_flag, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.element, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteSequenceType {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let collection_flag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let element = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    collection_flag,
+
+                    header,
+
+                    element,
+                })
+            }
         }
         pub struct MinimalSequenceType {
-        
-        
             pub collection_flag: Box<CollectionTypeFlag>,
-        
+
             pub header: Box<MinimalCollectionHeader>,
-        
+
             pub element: Box<MinimalCollectionElement>,
-        
+        }
+
+        impl MinimalSequenceType {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalSequenceType {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.collection_flag, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.element, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalSequenceType {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let collection_flag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let element = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    collection_flag,
+
+                    header,
+
+                    element,
+                })
+            }
         }
         pub struct CommonArrayHeader {
-        
-        
             pub bound_seq: Box<LBoundSeq>,
-        
+        }
+
+        impl CommonArrayHeader {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CommonArrayHeader {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.bound_seq, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CommonArrayHeader {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let bound_seq = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { bound_seq })
+            }
         }
         pub struct CompleteArrayHeader {
-        
-        
             pub common: Box<CommonArrayHeader>,
-        
+
             pub detail: Box<CompleteTypeDetail>,
-        
+        }
+
+        impl CompleteArrayHeader {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteArrayHeader {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteArrayHeader {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let common = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let detail = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { common, detail })
+            }
         }
         pub struct MinimalArrayHeader {
-        
-        
             pub common: Box<CommonArrayHeader>,
-        
+        }
+
+        impl MinimalArrayHeader {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalArrayHeader {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalArrayHeader {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let common = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { common })
+            }
         }
         pub struct CompleteArrayType {
-        
-        
             pub collection_flag: Box<CollectionTypeFlag>,
-        
+
             pub header: Box<CompleteArrayHeader>,
-        
+
             pub element: Box<CompleteCollectionElement>,
-        
+        }
+
+        impl CompleteArrayType {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteArrayType {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.collection_flag, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.element, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteArrayType {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let collection_flag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let element = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    collection_flag,
+
+                    header,
+
+                    element,
+                })
+            }
         }
         pub struct MinimalArrayType {
-        
-        
             pub collection_flag: Box<CollectionTypeFlag>,
-        
+
             pub header: Box<MinimalArrayHeader>,
-        
+
             pub element: Box<MinimalCollectionElement>,
-        
+        }
+
+        impl MinimalArrayType {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalArrayType {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.collection_flag, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.element, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalArrayType {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let collection_flag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let element = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    collection_flag,
+
+                    header,
+
+                    element,
+                })
+            }
         }
         pub struct CompleteMapType {
-        
-        
             pub collection_flag: Box<CollectionTypeFlag>,
-        
+
             pub header: Box<CompleteCollectionHeader>,
-        
+
             pub key: Box<CompleteCollectionElement>,
-        
+
             pub element: Box<CompleteCollectionElement>,
-        
+        }
+
+        impl CompleteMapType {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteMapType {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.collection_flag, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.key, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.element, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteMapType {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let collection_flag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let key = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let element = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    collection_flag,
+
+                    header,
+
+                    key,
+
+                    element,
+                })
+            }
         }
         pub struct MinimalMapType {
-        
-        
             pub collection_flag: Box<CollectionTypeFlag>,
-        
+
             pub header: Box<MinimalCollectionHeader>,
-        
+
             pub key: Box<MinimalCollectionElement>,
-        
+
             pub element: Box<MinimalCollectionElement>,
-        
+        }
+
+        impl MinimalMapType {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalMapType {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.collection_flag, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.key, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.element, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalMapType {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let collection_flag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let key = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let element = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    collection_flag,
+
+                    header,
+
+                    key,
+
+                    element,
+                })
+            }
         }
         pub type BitBound = u16;
         pub struct CommonEnumeratedLiteral {
-        
-        
             pub value: i32,
-        
+
             pub flags: Box<EnumeratedLiteralFlag>,
-        
+        }
+
+        impl CommonEnumeratedLiteral {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CommonEnumeratedLiteral {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.value, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.flags, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CommonEnumeratedLiteral {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let value = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let flags = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { value, flags })
+            }
         }
         pub struct CompleteEnumeratedLiteral {
-        
-        
             pub common: Box<CommonEnumeratedLiteral>,
-        
+
             pub detail: Box<CompleteMemberDetail>,
-        
+        }
+
+        impl CompleteEnumeratedLiteral {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteEnumeratedLiteral {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteEnumeratedLiteral {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let common = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let detail = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { common, detail })
+            }
         }
         pub type CompleteEnumeratedLiteralSeq = Vec<CompleteEnumeratedLiteral>;
         pub struct MinimalEnumeratedLiteral {
-        
-        
             pub common: Box<CommonEnumeratedLiteral>,
-        
+
             pub detail: Box<MinimalMemberDetail>,
-        
+        }
+
+        impl MinimalEnumeratedLiteral {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalEnumeratedLiteral {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalEnumeratedLiteral {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let common = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let detail = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { common, detail })
+            }
         }
         pub type MinimalEnumeratedLiteralSeq = Vec<MinimalEnumeratedLiteral>;
         pub struct CommonEnumeratedHeader {
-        
-        
             pub bit_bound: Box<BitBound>,
-        
+        }
+
+        impl CommonEnumeratedHeader {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CommonEnumeratedHeader {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.bit_bound, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CommonEnumeratedHeader {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let bit_bound = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { bit_bound })
+            }
         }
         pub struct CompleteEnumeratedHeader {
-        
-        
             pub common: Box<CommonEnumeratedHeader>,
-        
+
             pub detail: Box<CompleteTypeDetail>,
-        
+        }
+
+        impl CompleteEnumeratedHeader {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteEnumeratedHeader {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteEnumeratedHeader {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let common = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let detail = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { common, detail })
+            }
         }
         pub struct MinimalEnumeratedHeader {
-        
-        
             pub common: Box<CommonEnumeratedHeader>,
-        
+        }
+
+        impl MinimalEnumeratedHeader {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalEnumeratedHeader {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalEnumeratedHeader {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let common = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { common })
+            }
         }
         pub struct CompleteEnumeratedType {
-        
-        
             pub enum_flags: Box<EnumTypeFlag>,
-        
+
             pub header: Box<CompleteEnumeratedHeader>,
-        
+
             pub literal_seq: Box<CompleteEnumeratedLiteralSeq>,
-        
+        }
+
+        impl CompleteEnumeratedType {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteEnumeratedType {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.enum_flags, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.literal_seq, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteEnumeratedType {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let enum_flags = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let literal_seq = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    enum_flags,
+
+                    header,
+
+                    literal_seq,
+                })
+            }
         }
         pub struct MinimalEnumeratedType {
-        
-        
             pub enum_flags: Box<EnumTypeFlag>,
-        
+
             pub header: Box<MinimalEnumeratedHeader>,
-        
+
             pub literal_seq: Box<MinimalEnumeratedLiteralSeq>,
-        
+        }
+
+        impl MinimalEnumeratedType {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalEnumeratedType {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.enum_flags, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.literal_seq, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalEnumeratedType {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let enum_flags = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let literal_seq = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    enum_flags,
+
+                    header,
+
+                    literal_seq,
+                })
+            }
         }
         pub struct CommonBitflag {
-        
-        
             pub position: u16,
-        
+
             pub flags: Box<BitflagFlag>,
-        
+        }
+
+        impl CommonBitflag {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CommonBitflag {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.position, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.flags, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CommonBitflag {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let position = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let flags = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { position, flags })
+            }
         }
         pub struct CompleteBitflag {
-        
-        
             pub common: Box<CommonBitflag>,
-        
+
             pub detail: Box<CompleteMemberDetail>,
-        
+        }
+
+        impl CompleteBitflag {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteBitflag {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteBitflag {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let common = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let detail = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { common, detail })
+            }
         }
         pub type CompleteBitflagSeq = Vec<CompleteBitflag>;
         pub struct MinimalBitflag {
-        
-        
             pub common: Box<CommonBitflag>,
-        
+
             pub detail: Box<MinimalMemberDetail>,
-        
+        }
+
+        impl MinimalBitflag {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalBitflag {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalBitflag {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let common = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let detail = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { common, detail })
+            }
         }
         pub type MinimalBitflagSeq = Vec<MinimalBitflag>;
         pub struct CommonBitmaskHeader {
-        
-        
             pub bit_bound: Box<BitBound>,
-        
+        }
+
+        impl CommonBitmaskHeader {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CommonBitmaskHeader {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.bit_bound, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CommonBitmaskHeader {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let bit_bound = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { bit_bound })
+            }
         }
         pub type CompleteBitmaskHeader = CompleteEnumeratedHeader;
         pub type MinimalBitmaskHeader = MinimalEnumeratedHeader;
         pub struct CompleteBitmaskType {
-        
-        
             pub bitmask_flags: Box<BitmaskTypeFlag>,
-        
+
             pub header: Box<CompleteBitmaskHeader>,
-        
+
             pub flag_seq: Box<CompleteBitflagSeq>,
-        
+        }
+
+        impl CompleteBitmaskType {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteBitmaskType {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.bitmask_flags, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.flag_seq, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteBitmaskType {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let bitmask_flags = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let flag_seq = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    bitmask_flags,
+
+                    header,
+
+                    flag_seq,
+                })
+            }
         }
         pub struct MinimalBitmaskType {
-        
-        
             pub bitmask_flags: Box<BitmaskTypeFlag>,
-        
+
             pub header: Box<MinimalBitmaskHeader>,
-        
+
             pub flag_seq: Box<MinimalBitflagSeq>,
-        
+        }
+
+        impl MinimalBitmaskType {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalBitmaskType {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.bitmask_flags, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.flag_seq, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalBitmaskType {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let bitmask_flags = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let flag_seq = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    bitmask_flags,
+
+                    header,
+
+                    flag_seq,
+                })
+            }
         }
         pub struct CommonBitfield {
-        
-        
             pub position: u16,
-        
+
             pub flags: Box<BitsetMemberFlag>,
-        
+
             pub bitcount: u8,
-        
+
             pub holder_type: Box<TypeKind>,
-        
+        }
+
+        impl CommonBitfield {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CommonBitfield {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.position, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.flags, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.bitcount, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.holder_type, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CommonBitfield {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let position = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let flags = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let bitcount = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let holder_type = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    position,
+
+                    flags,
+
+                    bitcount,
+
+                    holder_type,
+                })
+            }
         }
         pub struct CompleteBitfield {
-        
-        
             pub common: Box<CommonBitfield>,
-        
+
             pub detail: Box<CompleteMemberDetail>,
-        
+        }
+
+        impl CompleteBitfield {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteBitfield {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteBitfield {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let common = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let detail = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { common, detail })
+            }
         }
         pub type CompleteBitfieldSeq = Vec<CompleteBitfield>;
         pub struct MinimalBitfield {
-        
-        
             pub common: Box<CommonBitfield>,
-        
+
             pub name_hash: Box<NameHash>,
-        
+        }
+
+        impl MinimalBitfield {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalBitfield {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.name_hash, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalBitfield {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let common = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let name_hash = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { common, name_hash })
+            }
         }
         pub type MinimalBitfieldSeq = Vec<MinimalBitfield>;
         pub struct CompleteBitsetHeader {
-        
-        
             pub detail: Box<CompleteTypeDetail>,
-        
         }
-        pub struct MinimalBitsetHeader {
-        
-        
+
+        impl CompleteBitsetHeader {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteBitsetHeader {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteBitsetHeader {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let detail = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { detail })
+            }
+        }
+        pub struct MinimalBitsetHeader {}
+
+        impl MinimalBitsetHeader {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalBitsetHeader {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalBitsetHeader {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                Ok(Self {})
+            }
         }
         pub struct CompleteBitsetType {
-        
-        
             pub bitset_flags: Box<BitsetTypeFlag>,
-        
+
             pub header: Box<CompleteBitsetHeader>,
-        
+
             pub field_seq: Box<CompleteBitfieldSeq>,
-        
+        }
+
+        impl CompleteBitsetType {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteBitsetType {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.bitset_flags, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.field_seq, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteBitsetType {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let bitset_flags = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let field_seq = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    bitset_flags,
+
+                    header,
+
+                    field_seq,
+                })
+            }
         }
         pub struct MinimalBitsetType {
-        
-        
             pub bitset_flags: Box<BitsetTypeFlag>,
-        
+
             pub header: Box<MinimalBitsetHeader>,
-        
+
             pub field_seq: Box<MinimalBitfieldSeq>,
-        
         }
-        pub struct CompleteExtendedType {
-        
-        
+
+        impl MinimalBitsetType {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalBitsetType {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.bitset_flags, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.field_seq, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalBitsetType {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let bitset_flags = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let field_seq = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    bitset_flags,
+
+                    header,
+
+                    field_seq,
+                })
+            }
+        }
+        pub struct CompleteExtendedType {}
+
+        impl CompleteExtendedType {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for CompleteExtendedType {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteExtendedType {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                Ok(Self {})
+            }
         }
         pub struct CompleteTypeObject {
             pub _d: u8,
-        
+
             pub alias_type: Option<Box<CompleteAliasType>>,
-        
+
             pub annotation_type: Option<Box<CompleteAnnotationType>>,
-        
+
             pub struct_type: Option<Box<CompleteStructType>>,
-        
+
             pub union_type: Option<Box<CompleteUnionType>>,
-        
+
             pub bitset_type: Option<Box<CompleteBitsetType>>,
-        
+
             pub sequence_type: Option<Box<CompleteSequenceType>>,
-        
+
             pub array_type: Option<Box<CompleteArrayType>>,
-        
+
             pub map_type: Option<Box<CompleteMapType>>,
-        
+
             pub enumerated_type: Option<Box<CompleteEnumeratedType>>,
-        
+
             pub bitmask_type: Option<Box<CompleteBitmaskType>>,
-        
+
             pub extended_type: Option<Box<CompleteExtendedType>>,
-        
         }
-        pub struct MinimalExtendedType {
-        
-        
+
+        impl xidl_xcdr::XcdrSerialize for CompleteTypeObject {
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+                serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self._d, serializer)?;
+                serializer.end_field()?;
+                match self._d {
+                    TK_ALIAS => {
+                        let value = self.alias_type.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_ANNOTATION => {
+                        let value = self.annotation_type.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_STRUCTURE => {
+                        let value = self.struct_type.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_UNION => {
+                        let value = self.union_type.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_BITSET => {
+                        let value = self.bitset_type.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_SEQUENCE => {
+                        let value = self.sequence_type.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_ARRAY => {
+                        let value = self.array_type.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_MAP => {
+                        let value = self.map_type.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_ENUM => {
+                        let value = self.enumerated_type.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_BITMASK => {
+                        let value = self.bitmask_type.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    _ => {
+                        let value = self.extended_type.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+                }
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for CompleteTypeObject {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let _d = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+                let mut out = Self {
+                    _d,
+
+                    alias_type: None,
+
+                    annotation_type: None,
+
+                    struct_type: None,
+
+                    union_type: None,
+
+                    bitset_type: None,
+
+                    sequence_type: None,
+
+                    array_type: None,
+
+                    map_type: None,
+
+                    enumerated_type: None,
+
+                    bitmask_type: None,
+
+                    extended_type: None,
+                };
+                match out._d {
+                    TK_ALIAS => {
+                        out.alias_type =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_ANNOTATION => {
+                        out.annotation_type =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_STRUCTURE => {
+                        out.struct_type =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_UNION => {
+                        out.union_type =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_BITSET => {
+                        out.bitset_type =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_SEQUENCE => {
+                        out.sequence_type =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_ARRAY => {
+                        out.array_type =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_MAP => {
+                        out.map_type = Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_ENUM => {
+                        out.enumerated_type =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_BITMASK => {
+                        out.bitmask_type =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    _ => {
+                        out.extended_type =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+                }
+                Ok(out)
+            }
+        }
+        pub struct MinimalExtendedType {}
+
+        impl MinimalExtendedType {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalExtendedType {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalExtendedType {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                Ok(Self {})
+            }
         }
         pub struct MinimalTypeObject {
             pub _d: u8,
-        
+
             pub alias_type: Option<Box<MinimalAliasType>>,
-        
+
             pub annotation_type: Option<Box<MinimalAnnotationType>>,
-        
+
             pub struct_type: Option<Box<MinimalStructType>>,
-        
+
             pub union_type: Option<Box<MinimalUnionType>>,
-        
+
             pub bitset_type: Option<Box<MinimalBitsetType>>,
-        
+
             pub sequence_type: Option<Box<MinimalSequenceType>>,
-        
+
             pub array_type: Option<Box<MinimalArrayType>>,
-        
+
             pub map_type: Option<Box<MinimalMapType>>,
-        
+
             pub enumerated_type: Option<Box<MinimalEnumeratedType>>,
-        
+
             pub bitmask_type: Option<Box<MinimalBitmaskType>>,
-        
+
             pub extended_type: Option<Box<MinimalExtendedType>>,
-        
+        }
+
+        impl xidl_xcdr::XcdrSerialize for MinimalTypeObject {
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+                serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self._d, serializer)?;
+                serializer.end_field()?;
+                match self._d {
+                    TK_ALIAS => {
+                        let value = self.alias_type.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_ANNOTATION => {
+                        let value = self.annotation_type.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_STRUCTURE => {
+                        let value = self.struct_type.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_UNION => {
+                        let value = self.union_type.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_BITSET => {
+                        let value = self.bitset_type.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_SEQUENCE => {
+                        let value = self.sequence_type.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_ARRAY => {
+                        let value = self.array_type.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_MAP => {
+                        let value = self.map_type.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_ENUM => {
+                        let value = self.enumerated_type.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    TK_BITMASK => {
+                        let value = self.bitmask_type.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    _ => {
+                        let value = self.extended_type.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+                }
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for MinimalTypeObject {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let _d = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+                let mut out = Self {
+                    _d,
+
+                    alias_type: None,
+
+                    annotation_type: None,
+
+                    struct_type: None,
+
+                    union_type: None,
+
+                    bitset_type: None,
+
+                    sequence_type: None,
+
+                    array_type: None,
+
+                    map_type: None,
+
+                    enumerated_type: None,
+
+                    bitmask_type: None,
+
+                    extended_type: None,
+                };
+                match out._d {
+                    TK_ALIAS => {
+                        out.alias_type =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_ANNOTATION => {
+                        out.annotation_type =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_STRUCTURE => {
+                        out.struct_type =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_UNION => {
+                        out.union_type =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_BITSET => {
+                        out.bitset_type =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_SEQUENCE => {
+                        out.sequence_type =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_ARRAY => {
+                        out.array_type =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_MAP => {
+                        out.map_type = Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_ENUM => {
+                        out.enumerated_type =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    TK_BITMASK => {
+                        out.bitmask_type =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    _ => {
+                        out.extended_type =
+                            Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+                }
+                Ok(out)
+            }
         }
         pub struct TypeObject {
             pub _d: u8,
-        
+
             pub complete: Option<Box<CompleteTypeObject>>,
-        
+
             pub minimal: Option<Box<MinimalTypeObject>>,
-        
+        }
+
+        impl xidl_xcdr::XcdrSerialize for TypeObject {
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+                serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self._d, serializer)?;
+                serializer.end_field()?;
+                match self._d {
+                    EK_COMPLETE => {
+                        let value = self.complete.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    EK_MINIMAL => {
+                        let value = self.minimal.as_ref().ok_or_else(|| {
+                            xidl_xcdr::error::XcdrError::Message(
+                                "union member is not set for discriminator".to_string(),
+                            )
+                        })?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
+
+                    _ => {}
+                }
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for TypeObject {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let _d = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+                let mut out = Self {
+                    _d,
+
+                    complete: None,
+
+                    minimal: None,
+                };
+                match out._d {
+                    EK_COMPLETE => {
+                        out.complete = Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    EK_MINIMAL => {
+                        out.minimal = Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                    }
+
+                    _ => {}
+                }
+                Ok(out)
+            }
         }
         pub type TypeObjectSeq = Vec<TypeObject>;
         pub type StronglyConnectedComponent = TypeObjectSeq;
         pub struct TypeIdentifierTypeObjectPair {
-        
-        
             pub type_identifier: Box<TypeIdentifier>,
-        
+
             pub type_object: Box<TypeObject>,
-        
+        }
+
+        impl TypeIdentifierTypeObjectPair {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for TypeIdentifierTypeObjectPair {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.type_identifier, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.type_object, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for TypeIdentifierTypeObjectPair {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let type_identifier = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let type_object = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    type_identifier,
+
+                    type_object,
+                })
+            }
         }
         pub type TypeIdentifierTypeObjectPairSeq = Vec<TypeIdentifierTypeObjectPair>;
         pub struct TypeIdentifierPair {
-        
-        
             pub type_identifier1: Box<TypeIdentifier>,
-        
+
             pub type_identifier2: Box<TypeIdentifier>,
-        
+        }
+
+        impl TypeIdentifierPair {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for TypeIdentifierPair {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.type_identifier1, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.type_identifier2, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for TypeIdentifierPair {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let type_identifier1 = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let type_identifier2 = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    type_identifier1,
+
+                    type_identifier2,
+                })
+            }
         }
         pub type TypeIdentifierPairSeq = Vec<TypeIdentifierPair>;
         pub struct TypeIdentifierWithSize {
-        
-        
             pub type_id: Box<TypeIdentifier>,
-        
+
             pub typeobject_serialized_size: u32,
-        
+        }
+
+        impl TypeIdentifierWithSize {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for TypeIdentifierWithSize {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.type_id, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(
+                    &self.typeobject_serialized_size,
+                    serializer,
+                )?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for TypeIdentifierWithSize {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let type_id = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let typeobject_serialized_size =
+                    xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    type_id,
+
+                    typeobject_serialized_size,
+                })
+            }
         }
         pub type TypeIdentifierWithSizeSeq = Vec<TypeIdentifierWithSize>;
         pub struct TypeIdentifierWithDependencies {
-        
-        
             pub typeid_with_size: Box<TypeIdentifierWithSize>,
-        
+
             pub dependent_typeid_count: i32,
-        
+
             pub dependent_typeids: Vec<TypeIdentifierWithSize>,
-        
+        }
+
+        impl TypeIdentifierWithDependencies {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for TypeIdentifierWithDependencies {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.typeid_with_size, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.dependent_typeid_count, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.dependent_typeids, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for TypeIdentifierWithDependencies {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let typeid_with_size = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let dependent_typeid_count = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let dependent_typeids = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self {
+                    typeid_with_size,
+
+                    dependent_typeid_count,
+
+                    dependent_typeids,
+                })
+            }
         }
         pub type TypeIdentifierWithDependenciesSeq = Vec<TypeIdentifierWithDependencies>;
         pub struct TypeInformation {
-        
-        
             pub minimal: Box<TypeIdentifierWithDependencies>,
-        
+
             pub complete: Box<TypeIdentifierWithDependencies>,
-        
+        }
+
+        impl TypeInformation {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+        }
+
+        impl xidl_xcdr::XcdrSerialize for TypeInformation {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
+            fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+            ) -> xidl_xcdr::error::XcdrResult<()> {
+                serializer.begin_struct()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.minimal, serializer)?;
+                serializer.end_field()?;
+
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(&self.complete, serializer)?;
+                serializer.end_field()?;
+
+                serializer.end_struct()?;
+                Ok(())
+            }
+        }
+
+        impl xidl_xcdr::XcdrDeserialize for TypeInformation {
+            fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+            ) -> xidl_xcdr::error::XcdrResult<Self> {
+                let minimal = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                let complete = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+
+                Ok(Self { minimal, complete })
+            }
         }
         pub type TypeInformationSeq = Vec<TypeInformation>;
     }

@@ -1,4 +1,4 @@
-use crate::XcdrSerialize;
+use crate::XcdrSerializer;
 use crate::{
     ffi::{macros::impl_ffi_serialize_for, XcdrFfiError},
     plain_cdr2::PlainCdr2Serialize,

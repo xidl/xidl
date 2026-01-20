@@ -21,6 +21,7 @@ impl CppRender for hir::Definition {
             hir::Definition::ConstDcl(const_dcl) => const_dcl.render(renderer),
             hir::Definition::ExceptDcl(except_dcl) => except_dcl.render(renderer),
             hir::Definition::InterfaceDcl(interface) => interface.render(renderer),
+            hir::Definition::Pragma(_) => Ok(CppRenderOutput::default()),
         }
     }
 }

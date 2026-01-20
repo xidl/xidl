@@ -1,4 +1,4 @@
-use crate::XcdrSerialize;
+use crate::XcdrSerializer;
 use crate::{
     delimited_cdr::DelimitedCdrSerialize,
     ffi::{macros::impl_ffi_serialize_for, XcdrFfiError},
@@ -27,13 +27,13 @@ impl FfiDelimitedCdrSerializer {
 
     #[unsafe(no_mangle)]
     pub extern "C" fn delimited_cdr_serializer_begin_struct(&mut self) -> XcdrFfiError {
-        let out = XcdrSerialize::begin_struct(self);
+        let out = XcdrSerializer::begin_struct(self);
         out.into()
     }
 
     #[unsafe(no_mangle)]
     pub extern "C" fn delimited_cdr_serializer_end_struct(&mut self) -> XcdrFfiError {
-        let out = XcdrSerialize::end_struct(self);
+        let out = XcdrSerializer::end_struct(self);
         out.into()
     }
 }

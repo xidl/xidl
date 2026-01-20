@@ -1,5 +1,5 @@
 # See https://pre-commit.com/hooks.html for more hooks
-exclude: ^(tests/snapshots)|(xidl-xcdr/include/xidl_xcdr.h)|(.*.snap)|(xidl-typeobject/src/dds_xtypes_typeobject.rs)$
+exclude: ^(tests/snapshots)|(xidl-xcdr/include/xidl_xcdr.h)|(.*.snap)$
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v3.2.0

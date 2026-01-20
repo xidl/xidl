@@ -4,58 +4,73 @@ expression: hir
 ---
 Specification(
     [
-        ConstrTypeDcl(
-            BitmaskDcl(
-                BitmaskDcl {
-                    annotations: [],
-                    ident: "A",
-                    value: [],
-                },
-            ),
-        ),
-        ConstrTypeDcl(
-            BitmaskDcl(
-                BitmaskDcl {
-                    annotations: [],
-                    ident: "A",
-                    value: [
-                        BitValue {
+        TypeDcl(
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    BitmaskDcl(
+                        BitmaskDcl {
                             annotations: [],
                             ident: "A",
+                            value: [],
                         },
-                        BitValue {
-                            annotations: [],
-                            ident: "B",
-                        },
-                        BitValue {
-                            annotations: [],
-                            ident: "C",
-                        },
-                    ],
-                },
-            ),
+                    ),
+                ),
+            },
         ),
-        ConstrTypeDcl(
-            BitmaskDcl(
-                BitmaskDcl {
-                    annotations: [],
-                    ident: "A",
-                    value: [
-                        BitValue {
+        TypeDcl(
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    BitmaskDcl(
+                        BitmaskDcl {
                             annotations: [],
                             ident: "A",
+                            value: [
+                                BitValue {
+                                    annotations: [],
+                                    ident: "A",
+                                },
+                                BitValue {
+                                    annotations: [],
+                                    ident: "B",
+                                },
+                                BitValue {
+                                    annotations: [],
+                                    ident: "C",
+                                },
+                            ],
                         },
-                        BitValue {
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    BitmaskDcl(
+                        BitmaskDcl {
                             annotations: [],
-                            ident: "B",
+                            ident: "A",
+                            value: [
+                                BitValue {
+                                    annotations: [],
+                                    ident: "A",
+                                },
+                                BitValue {
+                                    annotations: [],
+                                    ident: "B",
+                                },
+                                BitValue {
+                                    annotations: [],
+                                    ident: "C",
+                                },
+                            ],
                         },
-                        BitValue {
-                            annotations: [],
-                            ident: "C",
-                        },
-                    ],
-                },
-            ),
+                    ),
+                ),
+            },
         ),
     ],
 )

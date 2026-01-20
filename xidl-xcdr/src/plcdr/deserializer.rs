@@ -2,7 +2,7 @@ use crate::utils::{
     align::{read_aligned, Align4},
     FromBytes,
 };
-use crate::{error::XcdrError, FieldId, XcdrDeserialize};
+use crate::{error::XcdrError, FieldId, XcdrDeserializer};
 
 pub struct PlcdrDeserializer<'a> {
     buf: &'a [u8],
@@ -50,7 +50,7 @@ impl<'a> PlcdrDeserializer<'a> {
     }
 }
 
-impl XcdrDeserialize for PlcdrDeserializer<'_> {
+impl XcdrDeserializer for PlcdrDeserializer<'_> {
     fn next_field(&mut self) -> crate::error::XcdrResult<Option<FieldId>> {
         if self.pos >= self.buf.len() {
             return Ok(None);

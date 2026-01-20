@@ -6,3 +6,52 @@ pub struct {{ ident }} {
     pub {{ member.name }}: {{ member.ty }},
 {% endfor %}
 }
+
+impl {{ ident }} {
+    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
+        xidl_xcdr::SerializeKind::{{ serialize_kind }};
+}
+
+impl xidl_xcdr::XcdrSerialize for {{ ident }} {
+    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+        Self::SERIALIZE_KIND
+    }
+
+    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+        &self,
+        serializer: &mut S,
+    ) -> xidl_xcdr::error::XcdrResult<()> {
+        serializer.begin_struct()?;
+{% if parent %}
+        xidl_xcdr::XcdrSerialize::serialize_with(&self.base, serializer)?;
+{% endif %}
+{% for member in members %}
+        serializer.begin_field(xidl_xcdr::FieldId({{ loop.index }}u32), false, 0)?;
+        xidl_xcdr::XcdrSerialize::serialize_with(&self.{{ member.name }}, serializer)?;
+        serializer.end_field()?;
+{% endfor %}
+        serializer.end_struct()?;
+        Ok(())
+    }
+}
+
+impl xidl_xcdr::XcdrDeserialize for {{ ident }} {
+    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+        deserializer: &mut D,
+    ) -> xidl_xcdr::error::XcdrResult<Self> {
+{% if parent %}
+        let base = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+{% endif %}
+{% for member in members %}
+        let {{ member.name }} = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+{% endfor %}
+        Ok(Self {
+{% if parent %}
+            base,
+{% endif %}
+{% for member in members %}
+            {{ member.name }},
+{% endfor %}
+        })
+    }
+}

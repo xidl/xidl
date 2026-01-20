@@ -4,7 +4,7 @@ use crate::{
         align::{write_aligned, AlignCdr2},
         ToNeBytes,
     },
-    XcdrSerialize,
+    XcdrSerializer,
 };
 
 #[repr(C)]
@@ -91,7 +91,7 @@ impl Plcdr2Serialize {
     }
 }
 
-impl XcdrSerialize for Plcdr2Serialize {
+impl XcdrSerializer for Plcdr2Serialize {
     fn begin_field(
         &mut self,
         id: crate::FieldId,

@@ -3,5 +3,119 @@ source: xidl-parser/tests/test-typedef.rs
 expression: hir
 ---
 Specification(
-    [],
+    [
+        TypeDcl(
+            TypeDcl {
+                annotations: [],
+                decl: TypedefDcl(
+                    TypedefDcl {
+                        ty: TypeSpec(
+                            TemplateTypeSpec(
+                                SequenceType(
+                                    SequenceType {
+                                        ty: SimpleTypeSpec(
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "Foo",
+                                                    ],
+                                                    is_root: false,
+                                                },
+                                            ),
+                                        ),
+                                        len: None,
+                                    },
+                                ),
+                            ),
+                        ),
+                        decl: [
+                            SimpleDeclarator(
+                                SimpleDeclarator(
+                                    "FooSeq",
+                                ),
+                            ),
+                        ],
+                    },
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                annotations: [],
+                decl: TypedefDcl(
+                    TypedefDcl {
+                        ty: TypeSpec(
+                            SimpleTypeSpec(
+                                ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "u8",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                            ),
+                        ),
+                        decl: [
+                            SimpleDeclarator(
+                                SimpleDeclarator(
+                                    "uint8_t",
+                                ),
+                            ),
+                        ],
+                    },
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                annotations: [],
+                decl: TypedefDcl(
+                    TypedefDcl {
+                        ty: TypeSpec(
+                            TemplateTypeSpec(
+                                StringType(
+                                    StringType {
+                                        bound: None,
+                                    },
+                                ),
+                            ),
+                        ),
+                        decl: [
+                            SimpleDeclarator(
+                                SimpleDeclarator(
+                                    "u8string",
+                                ),
+                            ),
+                        ],
+                    },
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                annotations: [],
+                decl: TypedefDcl(
+                    TypedefDcl {
+                        ty: TypeSpec(
+                            TemplateTypeSpec(
+                                WideStringType(
+                                    WideStringType {
+                                        bound: None,
+                                    },
+                                ),
+                            ),
+                        ),
+                        decl: [
+                            SimpleDeclarator(
+                                SimpleDeclarator(
+                                    "u16string",
+                                ),
+                            ),
+                        ],
+                    },
+                ),
+            },
+        ),
+    ],
 )

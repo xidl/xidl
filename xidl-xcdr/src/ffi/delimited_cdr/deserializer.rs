@@ -1,4 +1,4 @@
-use crate::XcdrDeserialize;
+use crate::XcdrDeserializer;
 
 use crate::{
     delimited_cdr::DelimitedCdrDeserializer,

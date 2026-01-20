@@ -4,7 +4,7 @@ use crate::{
         align::{write_aligned, Align8},
         ToNeBytes,
     },
-    XcdrSerialize,
+    XcdrSerializer,
 };
 
 #[repr(C)]
@@ -33,7 +33,7 @@ impl PlainCdrSerialize {
     }
 }
 
-impl XcdrSerialize for PlainCdrSerialize {
+impl XcdrSerializer for PlainCdrSerialize {
     fn write_bool(&mut self, val: bool) -> XcdrResult<()> {
         self.write(val)
     }

@@ -1,7 +1,7 @@
 use crate::{
     error::{XcdrError, XcdrResult},
     utils::ToNeBytes,
-    FieldId, XcdrSerialize,
+    FieldId, XcdrSerializer,
 };
 
 #[repr(C)]
@@ -88,7 +88,7 @@ impl XcdrPlcdrSerialize {
     }
 }
 
-impl XcdrSerialize for XcdrPlcdrSerialize {
+impl XcdrSerializer for XcdrPlcdrSerialize {
     fn begin_field(
         &mut self,
         id: FieldId,

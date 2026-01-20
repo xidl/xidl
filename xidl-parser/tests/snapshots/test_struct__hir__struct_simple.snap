@@ -4,13 +4,18 @@ expression: hir
 ---
 Specification(
     [
-        ConstrTypeDcl(
-            StructForwardDcl(
-                StructForwardDcl {
-                    annotations: [],
-                    ident: "A",
-                },
-            ),
+        TypeDcl(
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    StructForwardDcl(
+                        StructForwardDcl {
+                            annotations: [],
+                            ident: "A",
+                        },
+                    ),
+                ),
+            },
         ),
     ],
 )

@@ -121,6 +121,17 @@ pub fn rust_literal(value: &hir::Literal) -> String {
     }
 }
 
+pub fn serialize_kind_name(kind: hir::SerializeKind) -> &'static str {
+    match kind {
+        hir::SerializeKind::Cdr => "Cdr",
+        hir::SerializeKind::PlainCdr => "PlainCdr",
+        hir::SerializeKind::PlCdr => "PlCdr",
+        hir::SerializeKind::PlainCdr2 => "PlainCdr2",
+        hir::SerializeKind::DelimitedCdr => "DelimitedCdr",
+        hir::SerializeKind::PlCdr2 => "PlCdr2",
+    }
+}
+
 pub fn render_const(expr: &hir::ConstExpr) -> String {
     render_const_expr(expr, &rust_scoped_name, &rust_literal)
 }

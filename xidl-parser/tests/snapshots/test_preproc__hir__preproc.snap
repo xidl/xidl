@@ -3,5 +3,20 @@ source: xidl-parser/tests/test-preproc.rs
 expression: hir
 ---
 Specification(
-    [],
+    [
+        ModuleDcl(
+            ModuleDcl {
+                annotations: [],
+                ident: "A",
+                definition: [],
+            },
+        ),
+        ModuleDcl(
+            ModuleDcl {
+                annotations: [],
+                ident: "A",
+                definition: [],
+            },
+        ),
+    ],
 )

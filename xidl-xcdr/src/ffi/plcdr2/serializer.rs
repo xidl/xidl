@@ -1,4 +1,4 @@
-use crate::XcdrSerialize;
+use crate::XcdrSerializer;
 use crate::{
     ffi::{macros::impl_ffi_serialize_for, XcdrFfiError},
     plcdr2::Plcdr2Serialize,
@@ -47,7 +47,7 @@ impl FfiPlcdr2Serializer {
         must_understand: bool,
         length_code: u8,
     ) -> XcdrFfiError {
-        let out = XcdrSerialize::begin_field(
+        let out = XcdrSerializer::begin_field(
             self,
             crate::FieldId(member_id),
             must_understand,
@@ -58,7 +58,7 @@ impl FfiPlcdr2Serializer {
 
     #[unsafe(no_mangle)]
     pub extern "C" fn plcdr2_serializer_end_field(&mut self) -> XcdrFfiError {
-        let out = XcdrSerialize::end_field(self);
+        let out = XcdrSerializer::end_field(self);
         out.into()
     }
 }

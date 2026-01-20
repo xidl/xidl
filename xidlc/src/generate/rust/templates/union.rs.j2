@@ -4,3 +4,59 @@ pub struct {{ ident }} {
     pub {{ member.name }}: Option<{{ member.ty }}>,
 {% endfor %}
 }
+
+impl xidl_xcdr::XcdrSerialize for {{ ident }} {
+    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+        &self,
+        serializer: &mut S,
+    ) -> xidl_xcdr::error::XcdrResult<()> {
+        serializer.begin_struct()?;
+        serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
+        xidl_xcdr::XcdrSerialize::serialize_with(&self._d, serializer)?;
+        serializer.end_field()?;
+        match self._d {
+{% for case in cases %}
+            {{ case.pattern }} => {
+                let value = self.{{ case.member }}.as_ref().ok_or_else(|| {
+                    xidl_xcdr::error::XcdrError::Message(
+                        "union member is not set for discriminator".to_string(),
+                    )
+                })?;
+                serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                serializer.end_field()?;
+            }
+{% endfor %}
+{% if not has_default %}
+            _ => {}
+{% endif %}
+        }
+        serializer.end_struct()?;
+        Ok(())
+    }
+}
+
+impl xidl_xcdr::XcdrDeserialize for {{ ident }} {
+    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+        deserializer: &mut D,
+    ) -> xidl_xcdr::error::XcdrResult<Self> {
+        let _d = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+        let mut out = Self {
+            _d,
+{% for member in members %}
+            {{ member.name }}: None,
+{% endfor %}
+        };
+        match out._d {
+{% for case in cases %}
+            {{ case.pattern }} => {
+                out.{{ case.member }} = Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+            }
+{% endfor %}
+{% if not has_default %}
+            _ => {}
+{% endif %}
+        }
+        Ok(out)
+    }
+}

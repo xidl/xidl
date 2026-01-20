@@ -4,3 +4,30 @@ pub enum {{ ident }} {
     {{ member }}{% if not loop.last %},{% endif %}
 {% endfor %}
 }
+
+impl xidl_xcdr::XcdrSerialize for {{ ident }} {
+    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+        &self,
+        serializer: &mut S,
+    ) -> xidl_xcdr::error::XcdrResult<()> {
+        let value = *self as u32;
+        xidl_xcdr::XcdrSerialize::serialize_with(&value, serializer)
+    }
+}
+
+impl xidl_xcdr::XcdrDeserialize for {{ ident }} {
+    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+        deserializer: &mut D,
+    ) -> xidl_xcdr::error::XcdrResult<Self> {
+        let value: u32 = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+        match value {
+{% for member in members %}
+            {{ loop.index0 }} => Ok(Self::{{ member }}),
+{% endfor %}
+            _ => Err(xidl_xcdr::error::XcdrError::Message(format!(
+                "invalid {{ ident }} discriminant: {}",
+                value
+            ))),
+        }
+    }
+}

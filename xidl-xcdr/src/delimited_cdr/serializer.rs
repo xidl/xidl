@@ -4,7 +4,7 @@ use crate::{
         align::{align_pos, write_aligned, AlignCdr2},
         ToNeBytes,
     },
-    XcdrSerialize,
+    XcdrSerializer,
 };
 
 const ENDIAN_FLAG: u32 = 1 << 31;
@@ -63,7 +63,7 @@ impl DelimitedCdrSerialize {
     }
 }
 
-impl XcdrSerialize for DelimitedCdrSerialize {
+impl XcdrSerializer for DelimitedCdrSerialize {
     fn begin_struct(&mut self) -> XcdrResult<()> {
         if self.struct_open {
             return Err(XcdrError::Message("Struct already open".into()));

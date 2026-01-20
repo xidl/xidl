@@ -50,18 +50,30 @@ impl RustRender for hir::UnionDef {
                         hir::CaseLabel::Default => "default".to_string(),
                     })
                     .collect::<Vec<_>>();
+                let is_default = labels.iter().any(|label| label == "default");
+                let pattern = if is_default {
+                    "_".to_string()
+                } else {
+                    labels.join(" | ")
+                };
                 json!({
                     "labels": labels,
+                    "pattern": pattern,
+                    "is_default": is_default,
                     "member": crate::generate::rust::util::rust_ident(&declarator_name(&case.element.value)),
                 })
             })
             .collect::<Vec<_>>();
+        let has_default = cases
+            .iter()
+            .any(|case| case["is_default"].as_bool() == Some(true));
 
         let ctx = json!({
             "ident": crate::generate::rust::util::rust_ident(&self.ident),
             "switch_ty": rust_switch_type(&self.switch_type_spec),
             "members": members,
             "cases": cases,
+            "has_default": has_default,
         });
         let rendered = renderer.render_template("union.rs.j2", &ctx)?;
         Ok(RustRenderOutput::default().push_source(rendered))

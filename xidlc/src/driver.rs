@@ -72,7 +72,7 @@ pub fn spawn_codegen_server(
 
             Ok(server)
         }
-        "rust" => {
+        "rust" | "rs" => {
             let server = thread::spawn(move || {
                 let reader = BufReader::new(stdout_rx);
                 crate::generate::rust::serve_jsonrpc(reader, stdin_tx)

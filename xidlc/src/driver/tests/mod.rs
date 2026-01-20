@@ -50,7 +50,7 @@ fn test_code_gen() {
         testcases::UNION_CASES,
     ];
 
-    let langs = ["c", "cpp"];
+    let langs = ["c", "cpp", "rs"];
 
     for case in test_case {
         for lang in langs {

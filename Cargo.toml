@@ -11,3 +11,4 @@ members = [
 [workspace.dependencies]
 xidl-parser = { path = "xidl-parser" }
 xidl-derive = { path = "xidl-derive" }
+xidl-xcdr = { path = "xidl-xcdr" }

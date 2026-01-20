@@ -4,23 +4,28 @@ expression: hir
 ---
 Specification(
     [
-        ConstrTypeDcl(
-            EnumDcl(
-                EnumDcl {
-                    annotations: [],
-                    ident: "A",
-                    member: [
-                        Enumerator {
+        TypeDcl(
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    EnumDcl(
+                        EnumDcl {
                             annotations: [],
-                            ident: "B",
+                            ident: "A",
+                            member: [
+                                Enumerator {
+                                    annotations: [],
+                                    ident: "B",
+                                },
+                                Enumerator {
+                                    annotations: [],
+                                    ident: "C",
+                                },
+                            ],
                         },
-                        Enumerator {
-                            annotations: [],
-                            ident: "C",
-                        },
-                    ],
-                },
-            ),
+                    ),
+                ),
+            },
         ),
     ],
 )

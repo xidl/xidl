@@ -1,4 +1,4 @@
-use crate::XcdrDeserialize;
+use crate::XcdrDeserializer;
 
 use crate::{
     ffi::{macros::impl_ffi_deserialize_for, XcdrFfiError},

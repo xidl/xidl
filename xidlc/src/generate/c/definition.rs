@@ -34,6 +34,7 @@ impl CRender for hir::Definition {
                     Ok(rendered)
                 }
             }
+            hir::Definition::Pragma(_) => Ok(CRenderOutput::default()),
         }
     }
 }
