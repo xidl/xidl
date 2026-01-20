@@ -1,4 +1,5 @@
 use crate::error::IdlcResult;
+use crate::generate::rust::typeobject_runtime;
 use crate::generate::rust::util::{
     declarator_name, rust_scoped_name, serialize_kind_name, type_with_decl,
 };
@@ -14,7 +15,7 @@ impl RustRender for hir::StructForwardDcl {
 
 impl RustRender for hir::StructDcl {
     fn render(&self, renderer: &RustRenderer) -> IdlcResult<RustRenderOutput> {
-        render_struct_with_config(self, renderer, &hir::SerializeConfig::default())
+        render_struct_with_config(self, renderer, &hir::SerializeConfig::default(), &[])
     }
 }
 
@@ -22,7 +23,9 @@ pub(crate) fn render_struct_with_config(
     def: &hir::StructDcl,
     renderer: &RustRenderer,
     config: &hir::SerializeConfig,
+    module_path: &[String],
 ) -> IdlcResult<RustRenderOutput> {
+    let type_object = typeobject_runtime::typeobject_for_struct(def, module_path);
     let parent = def.parent.first().map(rust_scoped_name);
     let members = def
         .member
@@ -37,11 +40,16 @@ pub(crate) fn render_struct_with_config(
         })
         .collect::<Vec<_>>();
     let serialize_kind = serialize_kind_name(def.serialize_kind(config));
+    let module_path = module_path.to_vec();
     let ctx = json!({
         "ident": crate::generate::rust::util::rust_ident(&def.ident),
         "parent": parent,
         "members": members,
         "serialize_kind": serialize_kind,
+        "module_path": module_path,
+        "typeobject_path": renderer.typeobject_path(),
+        "typeobject_complete": type_object.complete,
+        "typeobject_minimal": type_object.minimal,
     });
     let rendered = renderer.render_template("struct.rs.j2", &ctx)?;
     Ok(RustRenderOutput::default().push_source(rendered))

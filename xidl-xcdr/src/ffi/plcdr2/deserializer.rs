@@ -1,7 +1,7 @@
 use crate::XcdrDeserializer;
 
 use crate::{
-    ffi::{macros::impl_ffi_deserialize_for, XcdrFfiError},
+    ffi::{XcdrFfiError, macros::impl_ffi_deserialize_for},
     plcdr2::Plcdr2Deserializer,
 };
 

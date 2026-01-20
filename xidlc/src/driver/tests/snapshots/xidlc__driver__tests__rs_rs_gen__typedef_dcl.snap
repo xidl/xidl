@@ -17,6 +17,46 @@ use std::ffi::c_void;
 
 
 pub type FooSeq = Vec<Foo>;
+
+impl xidl_typeobject::XidlTypeObject for FooSeq {
+    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_minimal_alias(0u32, xidl_typeobject::runtime::type_identifier_sequence(xidl_typeobject::runtime::type_identifier_for::<Foo>(xidl_typeobject::runtime::TypeEquivalence::Minimal), 0u32, xidl_typeobject::runtime::TypeEquivalence::Minimal))
+    }
+
+    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_complete_alias("FooSeq", 0u32, xidl_typeobject::runtime::type_identifier_sequence(xidl_typeobject::runtime::type_identifier_for::<Foo>(xidl_typeobject::runtime::TypeEquivalence::Complete), 0u32, xidl_typeobject::runtime::TypeEquivalence::Complete))
+    }
+}
 pub type uint8_t = u8;
+
+impl xidl_typeobject::XidlTypeObject for uint8_t {
+    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_minimal_alias(0u32, xidl_typeobject::runtime::type_identifier_for::<u8>(xidl_typeobject::runtime::TypeEquivalence::Minimal))
+    }
+
+    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_complete_alias("uint8_t", 0u32, xidl_typeobject::runtime::type_identifier_for::<u8>(xidl_typeobject::runtime::TypeEquivalence::Complete))
+    }
+}
 pub type u8string = String;
+
+impl xidl_typeobject::XidlTypeObject for u8string {
+    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_minimal_alias(0u32, xidl_typeobject::runtime::type_identifier_string(None, false))
+    }
+
+    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_complete_alias("u8string", 0u32, xidl_typeobject::runtime::type_identifier_string(None, false))
+    }
+}
 pub type u16string = String;
+
+impl xidl_typeobject::XidlTypeObject for u16string {
+    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_minimal_alias(0u32, xidl_typeobject::runtime::type_identifier_string(None, true))
+    }
+
+    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_complete_alias("u16string", 0u32, xidl_typeobject::runtime::type_identifier_string(None, true))
+    }
+}

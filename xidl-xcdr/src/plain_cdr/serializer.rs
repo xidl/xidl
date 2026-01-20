@@ -1,10 +1,10 @@
 use crate::{
+    XcdrSerializer,
     error::{XcdrError, XcdrResult},
     utils::{
-        align::{write_aligned, Align8},
         ToNeBytes,
+        align::{Align8, write_aligned},
     },
-    XcdrSerializer,
 };
 
 #[repr(C)]

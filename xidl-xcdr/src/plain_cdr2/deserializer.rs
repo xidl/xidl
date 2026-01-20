@@ -1,8 +1,8 @@
 use crate::utils::{
-    align::{read_aligned, AlignCdr2},
     FromBytes,
+    align::{AlignCdr2, read_aligned},
 };
-use crate::{error::XcdrError, XcdrDeserializer};
+use crate::{XcdrDeserializer, error::XcdrError};
 
 pub struct PlainCdr2Deserializer<'a> {
     buf: &'a [u8],

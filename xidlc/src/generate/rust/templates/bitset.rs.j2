@@ -9,12 +9,21 @@ pub struct {{ ident }} {
 {% endfor %}
 }
 
+impl {{ ident }} {
+    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
+        xidl_xcdr::SerializeKind::{{ serialize_kind }};
+}
+
 impl xidl_xcdr::XcdrSerialize for {{ ident }} {
+    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+        Self::SERIALIZE_KIND
+    }
+
     fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
         &self,
         serializer: &mut S,
     ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct()?;
+        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 {% if parent %}
         xidl_xcdr::XcdrSerialize::serialize_with(&self.base, serializer)?;
 {% endif %}
@@ -54,5 +63,15 @@ impl xidl_xcdr::XcdrDeserialize for {{ ident }} {
 {% endif %}
 {% endfor %}
         })
+    }
+}
+
+impl {{ typeobject_path }}::XidlTypeObject for {{ ident }} {
+    fn minimal_type_object() -> {{ typeobject_path }}::DDS::XTypes::TypeObject {
+        {{ typeobject_minimal }}
+    }
+
+    fn complete_type_object() -> {{ typeobject_path }}::DDS::XTypes::TypeObject {
+        {{ typeobject_complete }}
     }
 }

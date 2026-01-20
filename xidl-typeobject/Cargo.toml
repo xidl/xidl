@@ -5,3 +5,4 @@ edition = "2024"
 
 [dependencies]
 xidl-xcdr = { workspace = true }
+md5 = "0.7"

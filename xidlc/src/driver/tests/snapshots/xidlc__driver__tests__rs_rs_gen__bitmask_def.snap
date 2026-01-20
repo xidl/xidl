@@ -41,35 +41,14 @@ impl xidl_xcdr::XcdrDeserialize for A {
         Ok(Self { value })
     }
 }
-pub struct A {
-    pub value: u32,
-}
 
-impl A {
-
-    pub const A: u32 = 1u32 << 0;
-
-    pub const B: u32 = 1u32 << 1;
-
-    pub const C: u32 = 1u32 << 2;
-
-}
-
-impl xidl_xcdr::XcdrSerialize for A {
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.value, serializer)
+impl xidl_typeobject::XidlTypeObject for A {
+    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_minimal_bitmask(0u32, 32u16, vec![])
     }
-}
 
-impl xidl_xcdr::XcdrDeserialize for A {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let value = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { value })
+    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_complete_bitmask("A", 0u32, 32u16, vec![])
     }
 }
 pub struct A {
@@ -101,5 +80,56 @@ impl xidl_xcdr::XcdrDeserialize for A {
     ) -> xidl_xcdr::error::XcdrResult<Self> {
         let value = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
         Ok(Self { value })
+    }
+}
+
+impl xidl_typeobject::XidlTypeObject for A {
+    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_minimal_bitmask(0u32, 32u16, vec![xidl_typeobject::runtime::BitflagDesc { position: 0u16, flags: 0u32, name: "A" }, xidl_typeobject::runtime::BitflagDesc { position: 1u16, flags: 0u32, name: "B" }, xidl_typeobject::runtime::BitflagDesc { position: 2u16, flags: 0u32, name: "C" }])
+    }
+
+    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_complete_bitmask("A", 0u32, 32u16, vec![xidl_typeobject::runtime::BitflagDesc { position: 0u16, flags: 0u32, name: "A" }, xidl_typeobject::runtime::BitflagDesc { position: 1u16, flags: 0u32, name: "B" }, xidl_typeobject::runtime::BitflagDesc { position: 2u16, flags: 0u32, name: "C" }])
+    }
+}
+pub struct A {
+    pub value: u32,
+}
+
+impl A {
+
+    pub const A: u32 = 1u32 << 0;
+
+    pub const B: u32 = 1u32 << 1;
+
+    pub const C: u32 = 1u32 << 2;
+
+}
+
+impl xidl_xcdr::XcdrSerialize for A {
+    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+        &self,
+        serializer: &mut S,
+    ) -> xidl_xcdr::error::XcdrResult<()> {
+        xidl_xcdr::XcdrSerialize::serialize_with(&self.value, serializer)
+    }
+}
+
+impl xidl_xcdr::XcdrDeserialize for A {
+    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+        deserializer: &mut D,
+    ) -> xidl_xcdr::error::XcdrResult<Self> {
+        let value = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+        Ok(Self { value })
+    }
+}
+
+impl xidl_typeobject::XidlTypeObject for A {
+    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_minimal_bitmask(0u32, 32u16, vec![xidl_typeobject::runtime::BitflagDesc { position: 0u16, flags: 0u32, name: "A" }, xidl_typeobject::runtime::BitflagDesc { position: 1u16, flags: 0u32, name: "B" }, xidl_typeobject::runtime::BitflagDesc { position: 2u16, flags: 0u32, name: "C" }])
+    }
+
+    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_complete_bitmask("A", 0u32, 32u16, vec![xidl_typeobject::runtime::BitflagDesc { position: 0u16, flags: 0u32, name: "A" }, xidl_typeobject::runtime::BitflagDesc { position: 1u16, flags: 0u32, name: "B" }, xidl_typeobject::runtime::BitflagDesc { position: 2u16, flags: 0u32, name: "C" }])
     }
 }

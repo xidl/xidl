@@ -21,12 +21,21 @@ pub struct A {
 
 }
 
+impl A {
+    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
+        xidl_xcdr::SerializeKind::Cdr;
+}
+
 impl xidl_xcdr::XcdrSerialize for A {
+    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+        Self::SERIALIZE_KIND
+    }
+
     fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
         &self,
         serializer: &mut S,
     ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct()?;
+        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
 
 
@@ -47,6 +56,16 @@ impl xidl_xcdr::XcdrDeserialize for A {
         })
     }
 }
+
+impl xidl_typeobject::XidlTypeObject for A {
+    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_minimal_bitset(0u32, vec![])
+    }
+
+    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_complete_bitset("A", 0u32, vec![])
+    }
+}
 pub struct A {
 
     pub base: B,
@@ -54,12 +73,21 @@ pub struct A {
 
 }
 
+impl A {
+    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
+        xidl_xcdr::SerializeKind::Cdr;
+}
+
 impl xidl_xcdr::XcdrSerialize for A {
+    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+        Self::SERIALIZE_KIND
+    }
+
     fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
         &self,
         serializer: &mut S,
     ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct()?;
+        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
         xidl_xcdr::XcdrSerialize::serialize_with(&self.base, serializer)?;
 
@@ -86,6 +114,16 @@ impl xidl_xcdr::XcdrDeserialize for A {
         })
     }
 }
+
+impl xidl_typeobject::XidlTypeObject for A {
+    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_minimal_bitset(0u32, vec![])
+    }
+
+    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_complete_bitset("A", 0u32, vec![])
+    }
+}
 pub struct A {
 
     pub base: B,
@@ -109,12 +147,21 @@ pub struct A {
 
 }
 
+impl A {
+    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
+        xidl_xcdr::SerializeKind::Cdr;
+}
+
 impl xidl_xcdr::XcdrSerialize for A {
+    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+        Self::SERIALIZE_KIND
+    }
+
     fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
         &self,
         serializer: &mut S,
     ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct()?;
+        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
         xidl_xcdr::XcdrSerialize::serialize_with(&self.base, serializer)?;
 
@@ -199,5 +246,15 @@ impl xidl_xcdr::XcdrDeserialize for A {
 
 
         })
+    }
+}
+
+impl xidl_typeobject::XidlTypeObject for A {
+    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_minimal_bitset(0u32, vec![xidl_typeobject::runtime::BitfieldDesc { position: 0u16, flags: 0u32, bitcount: 1u8, holder_type: xidl_typeobject::DDS::XTypes::TK_UINT32, name: Some("a") }, xidl_typeobject::runtime::BitfieldDesc { position: 1u16, flags: 0u32, bitcount: 1u8, holder_type: xidl_typeobject::DDS::XTypes::TK_UINT32, name: Some("a") }, xidl_typeobject::runtime::BitfieldDesc { position: 2u16, flags: 0u32, bitcount: 1u8, holder_type: xidl_typeobject::DDS::XTypes::TK_UINT32, name: Some("b") }, xidl_typeobject::runtime::BitfieldDesc { position: 3u16, flags: 0u32, bitcount: 1u8, holder_type: xidl_typeobject::DDS::XTypes::TK_UINT32, name: Some("c") }])
+    }
+
+    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_complete_bitset("A", 0u32, vec![xidl_typeobject::runtime::BitfieldDesc { position: 0u16, flags: 0u32, bitcount: 1u8, holder_type: xidl_typeobject::DDS::XTypes::TK_UINT32, name: Some("a") }, xidl_typeobject::runtime::BitfieldDesc { position: 1u16, flags: 0u32, bitcount: 1u8, holder_type: xidl_typeobject::DDS::XTypes::TK_UINT32, name: Some("a") }, xidl_typeobject::runtime::BitfieldDesc { position: 2u16, flags: 0u32, bitcount: 1u8, holder_type: xidl_typeobject::DDS::XTypes::TK_UINT32, name: Some("b") }, xidl_typeobject::runtime::BitfieldDesc { position: 3u16, flags: 0u32, bitcount: 1u8, holder_type: xidl_typeobject::DDS::XTypes::TK_UINT32, name: Some("c") }])
     }
 }

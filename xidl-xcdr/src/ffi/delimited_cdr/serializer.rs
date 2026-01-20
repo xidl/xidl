@@ -1,7 +1,7 @@
 use crate::XcdrSerializer;
 use crate::{
     delimited_cdr::DelimitedCdrSerialize,
-    ffi::{macros::impl_ffi_serialize_for, XcdrFfiError},
+    ffi::{XcdrFfiError, macros::impl_ffi_serialize_for},
 };
 
 pub type FfiDelimitedCdrSerializer = DelimitedCdrSerialize;

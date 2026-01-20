@@ -3,8 +3,8 @@ mod tests;
 
 use crate::cli::CliArgs;
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::jsonrpc::JsonRpcClient;
 use crate::generate::GeneratedFile;
+use crate::generate::jsonrpc::JsonRpcClient;
 use std::fs;
 use std::io::BufReader;
 use std::path::Path;

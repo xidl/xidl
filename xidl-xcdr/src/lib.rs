@@ -7,6 +7,7 @@ pub mod plain_cdr;
 pub mod plain_cdr2;
 pub mod plcdr;
 pub mod plcdr2;
+pub mod xcdr2;
 pub mod xcdr_plcdr;
 
 mod utils;
@@ -30,6 +31,9 @@ pub enum SerializeKind {
 pub trait XcdrSerializer {
     fn begin_struct(&mut self) -> XcdrResult<()> {
         Ok(())
+    }
+    fn begin_struct_with_kind(&mut self, _kind: SerializeKind) -> XcdrResult<()> {
+        self.begin_struct()
     }
     fn end_struct(&mut self) -> XcdrResult<()> {
         Ok(())
@@ -236,42 +240,71 @@ impl<T: XcdrDeserialize, const N: usize> XcdrDeserialize for [T; N] {
 }
 
 impl XcdrSerialize for String {
-    fn serialize_with<S: XcdrSerializer + ?Sized>(&self, _serializer: &mut S) -> XcdrResult<()> {
-        Err(XcdrError::Message(
-            "String serialization is not supported yet".to_string(),
-        ))
+    fn serialize_with<S: XcdrSerializer + ?Sized>(&self, serializer: &mut S) -> XcdrResult<()> {
+        let bytes = self.as_bytes();
+        let len = bytes.len().saturating_add(1);
+        if len > u32::MAX as usize {
+            return Err(XcdrError::Message("String too large".to_string()));
+        }
+        serializer.write_u32(len as u32)?;
+        serializer.write_bytes(bytes)?;
+        serializer.write_u8(0)?;
+        Ok(())
     }
 }
 
 impl XcdrDeserialize for String {
-    fn deserialize<D: XcdrDeserializer + ?Sized>(_deserializer: &mut D) -> XcdrResult<Self> {
-        Err(XcdrError::Message(
-            "String deserialization is not supported yet".to_string(),
-        ))
+    fn deserialize<D: XcdrDeserializer + ?Sized>(deserializer: &mut D) -> XcdrResult<Self> {
+        let len = deserializer.read_u32_le()? as usize;
+        if len == 0 {
+            return Ok(String::new());
+        }
+        let mut buf = vec![0u8; len];
+        deserializer.read_bytes(&mut buf)?;
+        if let Some(last) = buf.last() {
+            if *last == 0 {
+                buf.pop();
+            }
+        }
+        String::from_utf8(buf).map_err(|err| XcdrError::Message(err.to_string()))
     }
 }
 
-impl<T> XcdrSerialize for Vec<T> {
-    fn serialize_with<S: XcdrSerializer + ?Sized>(&self, _serializer: &mut S) -> XcdrResult<()> {
-        Err(XcdrError::Message(
-            "Vec serialization is not supported yet".to_string(),
-        ))
+impl<T: XcdrSerialize> XcdrSerialize for Vec<T> {
+    fn serialize_with<S: XcdrSerializer + ?Sized>(&self, serializer: &mut S) -> XcdrResult<()> {
+        if self.len() > u32::MAX as usize {
+            return Err(XcdrError::Message("Sequence too large".to_string()));
+        }
+        serializer.write_u32(self.len() as u32)?;
+        for item in self {
+            item.serialize_with(serializer)?;
+        }
+        Ok(())
     }
 }
 
-impl<T> XcdrDeserialize for Vec<T> {
-    fn deserialize<D: XcdrDeserializer + ?Sized>(_deserializer: &mut D) -> XcdrResult<Self> {
-        Err(XcdrError::Message(
-            "Vec deserialization is not supported yet".to_string(),
-        ))
+impl<T: XcdrDeserialize> XcdrDeserialize for Vec<T> {
+    fn deserialize<D: XcdrDeserializer + ?Sized>(deserializer: &mut D) -> XcdrResult<Self> {
+        let len = deserializer.read_u32_le()? as usize;
+        let mut out = Vec::with_capacity(len);
+        for _ in 0..len {
+            out.push(T::deserialize(deserializer)?);
+        }
+        Ok(out)
     }
 }
 
-impl<K, V> XcdrSerialize for BTreeMap<K, V> {
-    fn serialize_with<S: XcdrSerializer + ?Sized>(&self, _serializer: &mut S) -> XcdrResult<()> {
-        Err(XcdrError::Message(
-            "BTreeMap serialization is not supported yet".to_string(),
-        ))
+impl<K: XcdrSerialize, V: XcdrSerialize> XcdrSerialize for BTreeMap<K, V> {
+    fn serialize_with<S: XcdrSerializer + ?Sized>(&self, serializer: &mut S) -> XcdrResult<()> {
+        if self.len() > u32::MAX as usize {
+            return Err(XcdrError::Message("Map too large".to_string()));
+        }
+        serializer.write_u32(self.len() as u32)?;
+        for (key, value) in self {
+            key.serialize_with(serializer)?;
+            value.serialize_with(serializer)?;
+        }
+        Ok(())
     }
 }
 
@@ -315,10 +348,15 @@ fn serialize_with_kind<T: XcdrSerialize + ?Sized>(
     }
 }
 
-impl<K, V> XcdrDeserialize for BTreeMap<K, V> {
-    fn deserialize<D: XcdrDeserializer + ?Sized>(_deserializer: &mut D) -> XcdrResult<Self> {
-        Err(XcdrError::Message(
-            "BTreeMap deserialization is not supported yet".to_string(),
-        ))
+impl<K: XcdrDeserialize + Ord, V: XcdrDeserialize> XcdrDeserialize for BTreeMap<K, V> {
+    fn deserialize<D: XcdrDeserializer + ?Sized>(deserializer: &mut D) -> XcdrResult<Self> {
+        let len = deserializer.read_u32_le()? as usize;
+        let mut out = BTreeMap::new();
+        for _ in 0..len {
+            let key = K::deserialize(deserializer)?;
+            let value = V::deserialize(deserializer)?;
+            out.insert(key, value);
+        }
+        Ok(out)
     }
 }

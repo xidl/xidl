@@ -2,7 +2,7 @@ use crate::XcdrDeserializer;
 
 use crate::{
     delimited_cdr::DelimitedCdrDeserializer,
-    ffi::{macros::impl_ffi_deserialize_for, XcdrFfiError},
+    ffi::{XcdrFfiError, macros::impl_ffi_deserialize_for},
 };
 
 #[repr(C)]

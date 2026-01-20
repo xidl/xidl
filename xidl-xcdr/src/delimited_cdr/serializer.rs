@@ -1,10 +1,10 @@
 use crate::{
+    XcdrSerializer,
     error::{XcdrError, XcdrResult},
     utils::{
-        align::{align_pos, write_aligned, AlignCdr2},
         ToNeBytes,
+        align::{AlignCdr2, align_pos, write_aligned},
     },
-    XcdrSerializer,
 };
 
 const ENDIAN_FLAG: u32 = 1 << 31;

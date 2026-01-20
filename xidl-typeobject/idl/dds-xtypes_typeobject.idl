@@ -1,6 +1,7 @@
 /* dds-xtypes_typeobject.idl */
 
 // The types in this file shall be serialized with XCDR encoding version 2
+#pragma xidlc XCDR2
 module DDS { module XTypes {
 
     // ---------- Equivalence Kinds -------------------

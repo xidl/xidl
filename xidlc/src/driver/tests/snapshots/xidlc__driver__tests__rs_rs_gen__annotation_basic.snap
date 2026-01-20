@@ -39,7 +39,7 @@ impl xidl_xcdr::XcdrSerialize for S {
         &self,
         serializer: &mut S,
     ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct()?;
+        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
 
 
@@ -79,6 +79,16 @@ impl xidl_xcdr::XcdrDeserialize for S {
         })
     }
 }
+
+impl xidl_typeobject::XidlTypeObject for S {
+    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_minimal_struct(0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "a" }, xidl_typeobject::runtime::StructMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT16), name: "b" }])
+    }
+
+    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_complete_struct("S", 0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "a" }, xidl_typeobject::runtime::StructMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT16), name: "b" }])
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum E {
 
@@ -116,6 +126,16 @@ impl xidl_xcdr::XcdrDeserialize for E {
         }
     }
 }
+
+impl xidl_typeobject::XidlTypeObject for E {
+    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_minimal_enum(0u32, 32u16, vec![xidl_typeobject::runtime::EnumLiteralDesc { value: 0i32, flags: 0u32, name: "A" }, xidl_typeobject::runtime::EnumLiteralDesc { value: 1i32, flags: 0u32, name: "B" }])
+    }
+
+    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_complete_enum("E", 0u32, 32u16, vec![xidl_typeobject::runtime::EnumLiteralDesc { value: 0i32, flags: 0u32, name: "A" }, xidl_typeobject::runtime::EnumLiteralDesc { value: 1i32, flags: 0u32, name: "B" }])
+    }
+}
 pub struct BM {
     pub value: u32,
 }
@@ -145,6 +165,16 @@ impl xidl_xcdr::XcdrDeserialize for BM {
         Ok(Self { value })
     }
 }
+
+impl xidl_typeobject::XidlTypeObject for BM {
+    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_minimal_bitmask(0u32, 32u16, vec![xidl_typeobject::runtime::BitflagDesc { position: 0u16, flags: 0u32, name: "A" }, xidl_typeobject::runtime::BitflagDesc { position: 1u16, flags: 0u32, name: "B" }])
+    }
+
+    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_complete_bitmask("BM", 0u32, 32u16, vec![xidl_typeobject::runtime::BitflagDesc { position: 0u16, flags: 0u32, name: "A" }, xidl_typeobject::runtime::BitflagDesc { position: 1u16, flags: 0u32, name: "B" }])
+    }
+}
 pub struct U {
     pub _d: i32,
 
@@ -154,12 +184,21 @@ pub struct U {
 
 }
 
+impl U {
+    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
+        xidl_xcdr::SerializeKind::Cdr;
+}
+
 impl xidl_xcdr::XcdrSerialize for U {
+    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+        Self::SERIALIZE_KIND
+    }
+
     fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
         &self,
         serializer: &mut S,
     ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct()?;
+        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
         serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
         xidl_xcdr::XcdrSerialize::serialize_with(&self._d, serializer)?;
         serializer.end_field()?;
@@ -222,6 +261,16 @@ impl xidl_xcdr::XcdrDeserialize for U {
         Ok(out)
     }
 }
+
+impl xidl_typeobject::XidlTypeObject for U {
+    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "b", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "a", labels: vec![0i32] }])
+    }
+
+    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_complete_union("U", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "b", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "a", labels: vec![0i32] }])
+    }
+}
 pub const I_ping_Hash: i32 = 18846175;
 pub const I_get_attribute_value_Hash: i32 = 3881857402;
 pub const I_set_attribute_value_Hash: i32 = 1976821110;
@@ -246,7 +295,7 @@ impl xidl_xcdr::XcdrSerialize for I_ping_In {
         &self,
         serializer: &mut S,
     ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct()?;
+        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
 
 
@@ -276,6 +325,16 @@ impl xidl_xcdr::XcdrDeserialize for I_ping_In {
         })
     }
 }
+
+impl xidl_typeobject::XidlTypeObject for I_ping_In {
+    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_minimal_struct(0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnusedMember>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "dummy" }])
+    }
+
+    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_complete_struct("I_ping_In", 0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnusedMember>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "dummy" }])
+    }
+}
 pub struct I_ping_Out {
 
 
@@ -297,7 +356,7 @@ impl xidl_xcdr::XcdrSerialize for I_ping_Out {
         &self,
         serializer: &mut S,
     ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct()?;
+        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
 
 
@@ -327,6 +386,16 @@ impl xidl_xcdr::XcdrDeserialize for I_ping_Out {
         })
     }
 }
+
+impl xidl_typeobject::XidlTypeObject for I_ping_Out {
+    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_minimal_struct(0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnusedMember>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "dummy" }])
+    }
+
+    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_complete_struct("I_ping_Out", 0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnusedMember>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "dummy" }])
+    }
+}
 pub struct I_ping_Result {
     pub _d: i32,
 
@@ -334,12 +403,21 @@ pub struct I_ping_Result {
 
 }
 
+impl I_ping_Result {
+    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
+        xidl_xcdr::SerializeKind::Cdr;
+}
+
 impl xidl_xcdr::XcdrSerialize for I_ping_Result {
+    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+        Self::SERIALIZE_KIND
+    }
+
     fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
         &self,
         serializer: &mut S,
     ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct()?;
+        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
         serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
         xidl_xcdr::XcdrSerialize::serialize_with(&self._d, serializer)?;
         serializer.end_field()?;
@@ -389,6 +467,16 @@ impl xidl_xcdr::XcdrDeserialize for I_ping_Result {
         Ok(out)
     }
 }
+
+impl xidl_typeobject::XidlTypeObject for I_ping_Result {
+    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_ping_Out>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "result", labels: vec![0i32] }])
+    }
+
+    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_complete_union("I_ping_Result", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_ping_Out>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "result", labels: vec![0i32] }])
+    }
+}
 pub struct I_get_attribute_value_In {
 
 
@@ -410,7 +498,7 @@ impl xidl_xcdr::XcdrSerialize for I_get_attribute_value_In {
         &self,
         serializer: &mut S,
     ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct()?;
+        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
 
 
@@ -440,6 +528,16 @@ impl xidl_xcdr::XcdrDeserialize for I_get_attribute_value_In {
         })
     }
 }
+
+impl xidl_typeobject::XidlTypeObject for I_get_attribute_value_In {
+    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_minimal_struct(0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnusedMember>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "dummy" }])
+    }
+
+    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_complete_struct("I_get_attribute_value_In", 0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnusedMember>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "dummy" }])
+    }
+}
 pub struct I_get_attribute_value_Out {
 
 
@@ -461,7 +559,7 @@ impl xidl_xcdr::XcdrSerialize for I_get_attribute_value_Out {
         &self,
         serializer: &mut S,
     ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct()?;
+        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
 
 
@@ -491,6 +589,16 @@ impl xidl_xcdr::XcdrDeserialize for I_get_attribute_value_Out {
         })
     }
 }
+
+impl xidl_typeobject::XidlTypeObject for I_get_attribute_value_Out {
+    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_minimal_struct(0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "return_" }])
+    }
+
+    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_complete_struct("I_get_attribute_value_Out", 0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "return_" }])
+    }
+}
 pub struct I_get_attribute_value_Result {
     pub _d: i32,
 
@@ -498,12 +606,21 @@ pub struct I_get_attribute_value_Result {
 
 }
 
+impl I_get_attribute_value_Result {
+    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
+        xidl_xcdr::SerializeKind::Cdr;
+}
+
 impl xidl_xcdr::XcdrSerialize for I_get_attribute_value_Result {
+    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+        Self::SERIALIZE_KIND
+    }
+
     fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
         &self,
         serializer: &mut S,
     ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct()?;
+        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
         serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
         xidl_xcdr::XcdrSerialize::serialize_with(&self._d, serializer)?;
         serializer.end_field()?;
@@ -553,6 +670,16 @@ impl xidl_xcdr::XcdrDeserialize for I_get_attribute_value_Result {
         Ok(out)
     }
 }
+
+impl xidl_typeobject::XidlTypeObject for I_get_attribute_value_Result {
+    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_get_attribute_value_Out>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "result", labels: vec![0i32] }])
+    }
+
+    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_complete_union("I_get_attribute_value_Result", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_get_attribute_value_Out>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "result", labels: vec![0i32] }])
+    }
+}
 pub struct I_set_attribute_value_In {
 
 
@@ -574,7 +701,7 @@ impl xidl_xcdr::XcdrSerialize for I_set_attribute_value_In {
         &self,
         serializer: &mut S,
     ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct()?;
+        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
 
 
@@ -604,6 +731,16 @@ impl xidl_xcdr::XcdrDeserialize for I_set_attribute_value_In {
         })
     }
 }
+
+impl xidl_typeobject::XidlTypeObject for I_set_attribute_value_In {
+    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_minimal_struct(0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "value" }])
+    }
+
+    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_complete_struct("I_set_attribute_value_In", 0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "value" }])
+    }
+}
 pub struct I_set_attribute_value_Out {
 
 
@@ -625,7 +762,7 @@ impl xidl_xcdr::XcdrSerialize for I_set_attribute_value_Out {
         &self,
         serializer: &mut S,
     ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct()?;
+        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
 
 
@@ -655,6 +792,16 @@ impl xidl_xcdr::XcdrDeserialize for I_set_attribute_value_Out {
         })
     }
 }
+
+impl xidl_typeobject::XidlTypeObject for I_set_attribute_value_Out {
+    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_minimal_struct(0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnusedMember>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "dummy" }])
+    }
+
+    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_complete_struct("I_set_attribute_value_Out", 0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnusedMember>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "dummy" }])
+    }
+}
 pub struct I_set_attribute_value_Result {
     pub _d: i32,
 
@@ -662,12 +809,21 @@ pub struct I_set_attribute_value_Result {
 
 }
 
+impl I_set_attribute_value_Result {
+    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
+        xidl_xcdr::SerializeKind::Cdr;
+}
+
 impl xidl_xcdr::XcdrSerialize for I_set_attribute_value_Result {
+    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+        Self::SERIALIZE_KIND
+    }
+
     fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
         &self,
         serializer: &mut S,
     ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct()?;
+        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
         serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
         xidl_xcdr::XcdrSerialize::serialize_with(&self._d, serializer)?;
         serializer.end_field()?;
@@ -717,6 +873,16 @@ impl xidl_xcdr::XcdrDeserialize for I_set_attribute_value_Result {
         Ok(out)
     }
 }
+
+impl xidl_typeobject::XidlTypeObject for I_set_attribute_value_Result {
+    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_set_attribute_value_Out>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "result", labels: vec![0i32] }])
+    }
+
+    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_complete_union("I_set_attribute_value_Result", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_set_attribute_value_Out>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "result", labels: vec![0i32] }])
+    }
+}
 pub struct I_Call {
     pub _d: i32,
 
@@ -730,12 +896,21 @@ pub struct I_Call {
 
 }
 
+impl I_Call {
+    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
+        xidl_xcdr::SerializeKind::Cdr;
+}
+
 impl xidl_xcdr::XcdrSerialize for I_Call {
+    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+        Self::SERIALIZE_KIND
+    }
+
     fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
         &self,
         serializer: &mut S,
     ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct()?;
+        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
         serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
         xidl_xcdr::XcdrSerialize::serialize_with(&self._d, serializer)?;
         serializer.end_field()?;
@@ -832,6 +1007,16 @@ impl xidl_xcdr::XcdrDeserialize for I_Call {
         Ok(out)
     }
 }
+
+impl xidl_typeobject::XidlTypeObject for I_Call {
+    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 4u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_set_attribute_value_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "set_attribute_value", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_ping_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "ping", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 3u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_get_attribute_value_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "get_attribute_value", labels: vec![0i32] }])
+    }
+
+    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_complete_union("I_Call", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 4u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_set_attribute_value_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "set_attribute_value", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_ping_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "ping", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 3u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_get_attribute_value_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "get_attribute_value", labels: vec![0i32] }])
+    }
+}
 pub struct I_Request {
 
 
@@ -855,7 +1040,7 @@ impl xidl_xcdr::XcdrSerialize for I_Request {
         &self,
         serializer: &mut S,
     ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct()?;
+        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
 
 
@@ -895,6 +1080,16 @@ impl xidl_xcdr::XcdrDeserialize for I_Request {
         })
     }
 }
+
+impl xidl_typeobject::XidlTypeObject for I_Request {
+    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_minimal_struct(0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<RequestHeader>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "header" }, xidl_typeobject::runtime::StructMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_Call>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "data" }])
+    }
+
+    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_complete_struct("I_Request", 0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<RequestHeader>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "header" }, xidl_typeobject::runtime::StructMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_Call>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "data" }])
+    }
+}
 pub struct I_Return {
     pub _d: i32,
 
@@ -908,12 +1103,21 @@ pub struct I_Return {
 
 }
 
+impl I_Return {
+    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
+        xidl_xcdr::SerializeKind::Cdr;
+}
+
 impl xidl_xcdr::XcdrSerialize for I_Return {
+    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+        Self::SERIALIZE_KIND
+    }
+
     fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
         &self,
         serializer: &mut S,
     ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct()?;
+        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
         serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
         xidl_xcdr::XcdrSerialize::serialize_with(&self._d, serializer)?;
         serializer.end_field()?;
@@ -1010,6 +1214,16 @@ impl xidl_xcdr::XcdrDeserialize for I_Return {
         Ok(out)
     }
 }
+
+impl xidl_typeobject::XidlTypeObject for I_Return {
+    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 4u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_set_attribute_value_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "set_attribute_value", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 3u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_get_attribute_value_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "get_attribute_value", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_ping_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "ping", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }])
+    }
+
+    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_complete_union("I_Return", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 4u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_set_attribute_value_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "set_attribute_value", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 3u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_get_attribute_value_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "get_attribute_value", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_ping_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "ping", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }])
+    }
+}
 pub struct I_Reply {
 
 
@@ -1033,7 +1247,7 @@ impl xidl_xcdr::XcdrSerialize for I_Reply {
         &self,
         serializer: &mut S,
     ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct()?;
+        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
 
 
@@ -1071,6 +1285,16 @@ impl xidl_xcdr::XcdrDeserialize for I_Reply {
             data,
 
         })
+    }
+}
+
+impl xidl_typeobject::XidlTypeObject for I_Reply {
+    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_minimal_struct(0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<ReplyHeader>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "header" }, xidl_typeobject::runtime::StructMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_Return>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "data" }])
+    }
+
+    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+        xidl_typeobject::runtime::build_complete_struct("I_Reply", 0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<ReplyHeader>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "header" }, xidl_typeobject::runtime::StructMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_Return>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "data" }])
     }
 }
 pub trait I {

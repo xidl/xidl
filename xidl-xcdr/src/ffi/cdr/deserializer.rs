@@ -1,6 +1,6 @@
 use crate::XcdrDeserializer;
 
-use crate::{cdr::CdrDeserializer, ffi::macros::impl_ffi_deserialize_for, ffi::XcdrFfiError};
+use crate::{cdr::CdrDeserializer, ffi::XcdrFfiError, ffi::macros::impl_ffi_deserialize_for};
 
 #[repr(C)]
 pub struct FfiCdrDeserializer {

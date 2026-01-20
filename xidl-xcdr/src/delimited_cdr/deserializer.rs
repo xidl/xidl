@@ -1,8 +1,8 @@
 use crate::utils::{
-    align::{read_aligned_with_limit, AlignCdr2},
     FromBytes,
+    align::{AlignCdr2, read_aligned_with_limit},
 };
-use crate::{error::XcdrError, XcdrDeserializer};
+use crate::{XcdrDeserializer, error::XcdrError};
 
 const ENDIAN_FLAG: u32 = 1 << 31;
 const LEN_MASK: u32 = !ENDIAN_FLAG;

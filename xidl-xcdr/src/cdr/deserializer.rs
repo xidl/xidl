@@ -4,8 +4,8 @@ pub struct CdrDeserializer<'a> {
 }
 
 use crate::utils::{
-    align::{read_aligned, Align4},
     FromBytes,
+    align::{Align4, read_aligned},
 };
 
 impl<'a> CdrDeserializer<'a> {

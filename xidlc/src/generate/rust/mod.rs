@@ -10,6 +10,7 @@ mod render;
 mod spec;
 mod struct_dcl;
 mod type_dcl;
+mod typeobject_runtime;
 mod union_def;
 mod util;
 
@@ -29,7 +30,8 @@ pub fn generate(spec: &hir::Specification, input_path: &Path) -> IdlcResult<Vec<
     let base = crate::generate::to_snake_case(stem);
     let filename = format!("{base}.rs");
 
-    let renderer = RustRenderer::new()?;
+    let typeobject_path = "xidl_typeobject";
+    let renderer = RustRenderer::new(typeobject_path.to_string())?;
     let output = spec.render(&renderer)?;
 
     let source = renderer.render_template(

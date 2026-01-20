@@ -140,6 +140,20 @@ pub fn extensibility_from_annotations(annotations: &[Annotation]) -> Extensibili
                 mutable = true;
             }
         }
+        if let Annotation::Builtin { name, params } = anno {
+            if name.eq_ignore_ascii_case("extensibility") {
+                if let Some(AnnotationParams::Raw(raw)) = params {
+                    let value = raw.trim().trim_matches('"');
+                    if value.eq_ignore_ascii_case("final") {
+                        final_flag = true;
+                    } else if value.eq_ignore_ascii_case("appendable") {
+                        appendable = true;
+                    } else if value.eq_ignore_ascii_case("mutable") {
+                        mutable = true;
+                    }
+                }
+            }
+        }
     }
 
     if mutable {
@@ -476,7 +490,7 @@ impl From<crate::typed_ast::UnionForwardDcl> for UnionForwardDcl {
     fn from(value: crate::typed_ast::UnionForwardDcl) -> Self {
         Self {
             annotations: vec![],
-            ident: value.0 .0,
+            ident: value.0.0,
         }
     }
 }

@@ -1,4 +1,4 @@
-use xidl_typeobject::DDS::XTypes::{EquivalenceHash, MemberFlag, TypeObjectHashId, EK_COMPLETE};
+use xidl_typeobject::DDS::XTypes::{EK_COMPLETE, EquivalenceHash, MemberFlag, TypeObjectHashId};
 use xidl_xcdr::{XcdrDeserialize, XcdrSerialize};
 
 fn serialize_to_vec<T: XcdrSerialize>(value: &T) -> Vec<u8> {

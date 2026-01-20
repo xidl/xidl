@@ -21,7 +21,7 @@ impl xidl_xcdr::XcdrSerialize for {{ ident }} {
         &self,
         serializer: &mut S,
     ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct()?;
+        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 {% if parent %}
         xidl_xcdr::XcdrSerialize::serialize_with(&self.base, serializer)?;
 {% endif %}
@@ -57,5 +57,15 @@ impl xidl_xcdr::XcdrDeserialize for {{ ident }} {
             {{ member.name }},
 {% endfor %}
         })
+    }
+}
+
+impl {{ typeobject_path }}::XidlTypeObject for {{ ident }} {
+    fn minimal_type_object() -> {{ typeobject_path }}::DDS::XTypes::TypeObject {
+        {{ typeobject_minimal }}
+    }
+
+    fn complete_type_object() -> {{ typeobject_path }}::DDS::XTypes::TypeObject {
+        {{ typeobject_complete }}
     }
 }

@@ -1,8 +1,8 @@
 use crate::XcdrSerializer;
 use crate::{
-    ffi::{macros::impl_ffi_serialize_for, XcdrFfiError},
-    xcdr_plcdr::XcdrPlcdrSerialize,
     FieldId,
+    ffi::{XcdrFfiError, macros::impl_ffi_serialize_for},
+    xcdr_plcdr::XcdrPlcdrSerialize,
 };
 
 pub type FfiXcdrPlcdrSerializer = XcdrPlcdrSerialize;

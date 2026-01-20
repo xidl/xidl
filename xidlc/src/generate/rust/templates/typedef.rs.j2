@@ -1,1 +1,11 @@
-pub type {{ name }} = {{ ty }};
+pub struct {{ name }}(pub {{ ty }});
+
+impl {{ typeobject_path }}::XidlTypeObject for {{ name }} {
+    fn minimal_type_object() -> {{ typeobject_path }}::DDS::XTypes::TypeObject {
+        {{ typeobject_minimal }}
+    }
+
+    fn complete_type_object() -> {{ typeobject_path }}::DDS::XTypes::TypeObject {
+        {{ typeobject_complete }}
+    }
+}

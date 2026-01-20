@@ -1,7 +1,7 @@
 use crate::{
+    FieldId, XcdrSerializer,
     error::{XcdrError, XcdrResult},
     utils::ToNeBytes,
-    FieldId, XcdrSerializer,
 };
 
 #[repr(C)]

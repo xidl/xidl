@@ -29,13 +29,20 @@ pub trait RustRender {
 
 pub struct RustRenderer {
     env: Environment<'static>,
+    typeobject_path: String,
 }
 
 impl RustRenderer {
-    pub fn new() -> IdlcResult<Self> {
+    pub fn new(typeobject_path: String) -> IdlcResult<Self> {
         let mut env = Environment::new();
         env.set_loader(|name| load_template(name).map(Some));
-        Ok(Self { env })
+        env.add_function("md5_14", |value: String| md5_prefix(value.as_bytes(), 14));
+        env.add_function("md5_4", |value: String| md5_prefix(value.as_bytes(), 4));
+        env.add_function("name_hash", |value: String| md5_prefix(value.as_bytes(), 4));
+        Ok(Self {
+            env,
+            typeobject_path,
+        })
     }
 
     pub fn render_template<T: Serialize>(&self, template: &str, ctx: &T) -> IdlcResult<String> {
@@ -44,6 +51,10 @@ impl RustRenderer {
             .map_err(|err| IdlcError::template(err.to_string()))?
             .render(ctx)
             .map_err(|err| IdlcError::template(err.to_string()))
+    }
+
+    pub fn typeobject_path(&self) -> &str {
+        self.typeobject_path.as_str()
     }
 }
 
@@ -62,4 +73,10 @@ fn load_template(name: &str) -> std::result::Result<String, Error> {
         )
     })?;
     Ok(content)
+}
+
+fn md5_prefix(input: &[u8], len: usize) -> Vec<u8> {
+    let digest = md5::compute(input);
+    let end = len.min(digest.0.len());
+    digest.0[..end].to_vec()
 }
