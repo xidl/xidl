@@ -21,7 +21,7 @@ impl CdrSerialize {
             buf,
             len,
             pos: 0,
-            do_io: buf.is_null() || len == 0,
+            do_io: !(buf.is_null() || len == 0),
         }
     }
 

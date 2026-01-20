@@ -9,7 +9,7 @@ pub type FfiPlcdrSerializer = PlcdrSerialize;
 impl FfiPlcdrSerializer {
     #[unsafe(no_mangle)]
     pub extern "C" fn plcdr_serializer_new(buf_ptr: *mut u8, buf_len: usize) -> Self {
-        let do_io = buf_ptr.is_null() || buf_len == 0;
+        let do_io = !(buf_ptr.is_null() || buf_len == 0);
         Self {
             buf: buf_ptr,
             len: buf_len,

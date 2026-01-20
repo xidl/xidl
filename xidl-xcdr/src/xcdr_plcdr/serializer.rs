@@ -21,7 +21,7 @@ impl XcdrPlcdrSerialize {
             buf,
             len,
             pos: 0,
-            do_io: buf.is_null() || len == 0,
+            do_io: !(buf.is_null() || len == 0),
             field_len_pos: 0,
             field_start_pos: 0,
             field_open: false,

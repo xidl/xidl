@@ -27,7 +27,7 @@ impl Plcdr2Serialize {
             buf,
             len,
             pos: 0,
-            do_io: buf.is_null() || len == 0,
+            do_io: !(buf.is_null() || len == 0),
             emheader_pos: 0,
             field_start: 0,
             field_open: false,

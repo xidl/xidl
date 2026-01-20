@@ -27,7 +27,7 @@ impl DelimitedCdrSerialize {
             buf,
             len,
             pos: 0,
-            do_io: buf.is_null() || len == 0,
+            do_io: !(buf.is_null() || len == 0),
             header_pos: 0,
             content_start: 0,
             struct_open: false,
