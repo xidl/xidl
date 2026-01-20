@@ -17,8 +17,8 @@ mod xcdr;
 pub use render::{CRender, CRenderOutput, CRenderer};
 
 use crate::error::IdlcResult;
-use crate::generate::c::util::{c_header, c_source_header};
 use crate::generate::GeneratedFile;
+use serde_json::json;
 use std::path::Path;
 use xidl_parser::hir;
 
@@ -32,40 +32,53 @@ pub fn generate(spec: &hir::Specification, input_path: &Path) -> IdlcResult<Vec<
     let xcdr_header_name = format!("{base}_xcdr.h");
 
     let renderer = CRenderer::new()?;
-    let mut output = spec.render(&renderer)?;
+    let output = spec.render(&renderer)?;
 
-    let mut header_chunks = Vec::new();
-    header_chunks.push(c_header());
-    header_chunks.append(&mut output.header);
-
-    let mut source_chunks = Vec::new();
-    source_chunks.push(c_source_header(&filename));
-    source_chunks.append(&mut output.source);
-
-    let mut xcdr_header_chunks = Vec::new();
-    xcdr_header_chunks.push(xcdr::xcdr_header(&filename));
-    xcdr_header_chunks.append(&mut output.xcdr_header);
-
-    let mut xcdr_source_chunks = Vec::new();
-    xcdr_source_chunks.push(xcdr::xcdr_source_header(&xcdr_header_name));
-    xcdr_source_chunks.append(&mut output.xcdr_source);
+    let header = renderer.render_template(
+        "spec.h.j2",
+        &json!({
+            "definitions": output.header,
+            "filename": filename,
+        }),
+    )?;
+    let source = renderer.render_template(
+        "spec.c.j2",
+        &json!({
+            "header_name": filename,
+            "definitions": output.source,
+        }),
+    )?;
+    let xcdr_header = renderer.render_template(
+        "spec.h.j2",
+        &json!({
+            "definitions": output.xcdr_header,
+            "filename": xcdr_header_name,
+        }),
+    )?;
+    let xcdr_source = renderer.render_template(
+        "spec.c.j2",
+        &json!({
+            "header_name": xcdr_header_name,
+            "definitions": output.xcdr_source,
+        }),
+    )?;
 
     Ok(vec![
         GeneratedFile {
             filename: filename.clone(),
-            filecontent: header_chunks.join("\n"),
+            filecontent: header,
         },
         GeneratedFile {
             filename: format!("{base}.c"),
-            filecontent: source_chunks.join("\n"),
+            filecontent: source,
         },
         GeneratedFile {
             filename: xcdr_header_name.clone(),
-            filecontent: xcdr_header_chunks.join("\n"),
+            filecontent: xcdr_header,
         },
         GeneratedFile {
             filename: format!("{base}_xcdr.c"),
-            filecontent: xcdr_source_chunks.join("\n"),
+            filecontent: xcdr_source,
         },
     ])
 }

@@ -1,4 +1,7 @@
-use crate::error::{IdlcError, IdlcResult};
+use crate::{
+    error::{IdlcError, IdlcResult},
+    generate::utils::to_case,
+};
 use minijinja::{Environment, Error, ErrorKind};
 use rust_embed::RustEmbed;
 use serde::Serialize;
@@ -43,6 +46,7 @@ impl CppRenderer {
     pub fn new() -> IdlcResult<Self> {
         let mut env = Environment::new();
         env.set_loader(|name| load_template(name).map(Some));
+        env.add_filter("to_case", to_case);
         Ok(Self { env })
     }
 

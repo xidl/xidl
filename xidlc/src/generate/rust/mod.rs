@@ -16,8 +16,8 @@ mod util;
 pub use render::{RustRender, RustRenderOutput, RustRenderer};
 
 use crate::error::IdlcResult;
-use crate::generate::rust::util::rust_header;
 use crate::generate::GeneratedFile;
+use serde_json::json;
 use std::path::Path;
 use xidl_parser::hir;
 
@@ -30,15 +30,18 @@ pub fn generate(spec: &hir::Specification, input_path: &Path) -> IdlcResult<Vec<
     let filename = format!("{base}.rs");
 
     let renderer = RustRenderer::new()?;
-    let mut output = spec.render(&renderer)?;
+    let output = spec.render(&renderer)?;
 
-    let mut chunks = Vec::new();
-    chunks.push(rust_header());
-    chunks.append(&mut output.source);
+    let source = renderer.render_template(
+        "spec.rs.j2",
+        &json!({
+            "definitions": output.source,
+        }),
+    )?;
 
     Ok(vec![GeneratedFile {
         filename,
-        filecontent: chunks.join("\n"),
+        filecontent: source,
     }])
 }
 

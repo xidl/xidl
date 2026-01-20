@@ -16,8 +16,8 @@ mod util;
 pub use render::{CppRender, CppRenderOutput, CppRenderer};
 
 use crate::error::IdlcResult;
-use crate::generate::cpp::util::{cpp_header, cpp_source_header};
 use crate::generate::GeneratedFile;
+use serde_json::json;
 use std::path::Path;
 use xidl_parser::hir;
 
@@ -30,24 +30,31 @@ pub fn generate(spec: &hir::Specification, input_path: &Path) -> IdlcResult<Vec<
     let header_name = format!("{base}.h");
 
     let renderer = CppRenderer::new()?;
-    let mut output = spec.render(&renderer)?;
+    let output = spec.render(&renderer)?;
 
-    let mut header_chunks = Vec::new();
-    header_chunks.push(cpp_header());
-    header_chunks.append(&mut output.header);
-
-    let mut source_chunks = Vec::new();
-    source_chunks.push(cpp_source_header(&header_name));
-    source_chunks.append(&mut output.source);
+    let header = renderer.render_template(
+        "spec.h.j2",
+        &json!({
+            "definitions": output.header,
+            "filename": header_name,
+        }),
+    )?;
+    let source = renderer.render_template(
+        "spec.cpp.j2",
+        &json!({
+            "header_name": header_name,
+            "definitions": output.source,
+        }),
+    )?;
 
     Ok(vec![
         GeneratedFile {
             filename: header_name.clone(),
-            filecontent: header_chunks.join("\n"),
+            filecontent: header,
         },
         GeneratedFile {
             filename: format!("{base}.cpp"),
-            filecontent: source_chunks.join("\n"),
+            filecontent: source,
         },
     ])
 }
