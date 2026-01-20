@@ -1037,18 +1037,18 @@ module DDS { module XTypes {
     typedef sequence<TypeIdentifierPair> TypeIdentifierPairSeq;
 
     @extensibility(APPENDABLE) @nested
-    struct TypeIdentfierWithSize {
+    struct TypeIdentifierWithSize {
         DDS::Xtypes::TypeIdentifier  type_id;
         unsigned long                typeobject_serialized_size;
     };
-    typedef sequence<TypeIdentfierWithSize> TypeIdentfierWithSizeSeq;
+    typedef sequence<TypeIdentifierWithSize> TypeIdentifierWithSizeSeq;
 
     @extensibility(APPENDABLE) @nested
     struct TypeIdentifierWithDependencies {
-        TypeIdentfierWithSize            typeid_with_size;
+        TypeIdentifierWithSize            typeid_with_size;
         // The total additional types related to minimal_type
         long                             dependent_typeid_count;
-        sequence<TypeIdentfierWithSize>  dependent_typeids;
+        sequence<TypeIdentifierWithSize>  dependent_typeids;
     };
     typedef
     sequence<TypeIdentifierWithDependencies> TypeIdentifierWithDependenciesSeq;

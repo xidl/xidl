@@ -35,11 +35,19 @@ pub struct Specification(pub Vec<Definition>);
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Definition {
+    ModuleDcl(ModuleDcl),
     ConstrTypeDcl(ConstrTypeDcl),
     TypeDcl(TypeDcl),
     ConstDcl(ConstDcl),
     ExceptDcl(ExceptDcl),
     InterfaceDcl(InterfaceDcl),
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ModuleDcl {
+    pub annotations: Vec<Annotation>,
+    pub ident: String,
+    pub definition: Vec<Definition>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -188,9 +196,17 @@ fn collect_defs(
     for def in defs {
         match def {
             crate::typed_ast::Definition::ModuleDcl(module) => {
-                modules.push(module.ident.0);
-                collect_defs(module.definition, modules, expand_interfaces, out);
+                let ident = module.ident.0;
+                let annotations = expand_annotations(module.annotations);
+                modules.push(ident.clone());
+                let mut inner = Vec::new();
+                collect_defs(module.definition, modules, expand_interfaces, &mut inner);
                 modules.pop();
+                out.push(Definition::ModuleDcl(ModuleDcl {
+                    annotations,
+                    ident,
+                    definition: inner,
+                }));
             }
             crate::typed_ast::Definition::TypeDcl(type_dcl) => {
                 let type_dcl: TypeDcl = type_dcl.into();

@@ -3,9 +3,20 @@ use crate::generate::c::util::{comment_placeholder, interface_name};
 use crate::generate::c::{CRender, CRenderOutput, CRenderer};
 use xidl_parser::hir;
 
+impl CRender for hir::ModuleDcl {
+    fn render(&self, renderer: &CRenderer) -> IdlcResult<CRenderOutput> {
+        let mut out = CRenderOutput::default();
+        for def in &self.definition {
+            out.extend(def.render(renderer)?);
+        }
+        Ok(out)
+    }
+}
+
 impl CRender for hir::Definition {
     fn render(&self, renderer: &CRenderer) -> IdlcResult<CRenderOutput> {
         match self {
+            hir::Definition::ModuleDcl(module) => module.render(renderer),
             hir::Definition::ConstrTypeDcl(constr) => constr.render(renderer),
             hir::Definition::TypeDcl(type_dcl) => type_dcl.render(renderer),
             hir::Definition::ConstDcl(const_dcl) => const_dcl.render(renderer),
