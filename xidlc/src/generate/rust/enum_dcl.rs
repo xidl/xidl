@@ -8,9 +8,12 @@ impl RustRender for hir::EnumDcl {
         let members = self
             .member
             .iter()
-            .map(|member| member.ident.clone())
+            .map(|member| crate::generate::rust::util::rust_ident(&member.ident))
             .collect::<Vec<_>>();
-        let ctx = json!({ "ident": &self.ident, "members": members });
+        let ctx = json!({
+            "ident": crate::generate::rust::util::rust_ident(&self.ident),
+            "members": members
+        });
         let rendered = renderer.render_template("enum.rs.j2", &ctx)?;
         Ok(RustRenderOutput::default().push_source(rendered))
     }

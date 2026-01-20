@@ -13,12 +13,8 @@ pub fn rust_header() -> String {
 }
 
 pub fn rust_scoped_name(value: &hir::ScopedName) -> String {
-    let name = value.name.join("::");
-    if value.is_root {
-        format!("::{name}")
-    } else {
-        name
-    }
+    let name = value.name.last().map(|value| value.as_str()).unwrap_or("");
+    rust_ident(name)
 }
 
 pub fn rust_integer_type(value: &hir::IntegerType) -> String {
@@ -33,6 +29,21 @@ pub fn rust_integer_type(value: &hir::IntegerType) -> String {
         hir::IntegerType::I16 => "i16".to_string(),
         hir::IntegerType::I32 => "i32".to_string(),
         hir::IntegerType::I64 => "i64".to_string(),
+    }
+}
+
+pub fn rust_ident(value: &str) -> String {
+    const KEYWORDS: &[&str] = &[
+        "as", "break", "const", "continue", "crate", "else", "enum", "extern", "false", "fn",
+        "for", "if", "impl", "in", "let", "loop", "match", "mod", "move", "mut", "pub", "ref",
+        "return", "self", "Self", "static", "struct", "super", "trait", "true", "type", "unsafe",
+        "use", "where", "while", "async", "await", "dyn", "abstract", "become", "box", "do",
+        "final", "macro", "override", "priv", "try", "typeof", "unsized", "virtual", "yield",
+    ];
+    if KEYWORDS.contains(&value) {
+        format!("r#{value}")
+    } else {
+        value.to_string()
     }
 }
 
@@ -158,7 +169,13 @@ pub fn declarator_name(decl: &hir::Declarator) -> String {
 }
 
 pub fn type_with_decl(ty: &hir::TypeSpec, decl: &hir::Declarator) -> String {
-    let base = rust_type(ty);
+    let mut base = rust_type(ty);
+    if matches!(
+        ty,
+        hir::TypeSpec::SimpleTypeSpec(hir::SimpleTypeSpec::ScopedName(_))
+    ) {
+        base = format!("Box<{base}>");
+    }
     let dims = declarator_dims(decl);
     if dims.is_empty() {
         base
@@ -168,13 +185,13 @@ pub fn type_with_decl(ty: &hir::TypeSpec, decl: &hir::Declarator) -> String {
 }
 
 pub fn member_json(ty: &hir::TypeSpec, decl: &hir::Declarator) -> serde_json::Value {
-    let name = declarator_name(decl);
+    let name = rust_ident(&declarator_name(decl));
     let ty = type_with_decl(ty, decl);
     json!({ "ty": ty, "name": name })
 }
 
 pub fn typedef_json(base: &str, decl: &hir::Declarator) -> serde_json::Value {
-    let name = declarator_name(decl);
+    let name = rust_ident(&declarator_name(decl));
     let dims = declarator_dims(decl);
     let ty = if dims.is_empty() {
         base.to_string()

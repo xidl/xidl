@@ -11,13 +11,13 @@ impl RustRender for hir::BitmaskDcl {
             .enumerate()
             .map(|(idx, value)| {
                 json!({
-                    "name": value.ident,
+                    "name": crate::generate::rust::util::rust_ident(&value.ident),
                     "index": idx,
                 })
             })
             .collect::<Vec<_>>();
         let ctx = json!({
-            "ident": &self.ident,
+            "ident": crate::generate::rust::util::rust_ident(&self.ident),
             "values": values,
         });
         let rendered = renderer.render_template("bitmask.rs.j2", &ctx)?;

@@ -10,7 +10,7 @@ impl RustRender for hir::ConstDcl {
         let value = render_const(&self.value);
         let ctx = json!({
             "ty": ty,
-            "ident": &self.ident,
+            "ident": crate::generate::rust::util::rust_ident(&self.ident),
             "value": value,
         });
         let rendered = renderer.render_template("const.rs.j2", &ctx)?;

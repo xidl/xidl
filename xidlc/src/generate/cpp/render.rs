@@ -15,6 +15,7 @@ impl CppRenderOutput {
         self
     }
 
+    #[allow(dead_code)]
     pub fn push_source(mut self, value: String) -> Self {
         self.source.push(value);
         self

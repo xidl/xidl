@@ -11,7 +11,7 @@ impl RustRender for hir::TypeDcl {
             hir::TypeDclInner::TypedefDcl(typedef) => typedef.render(renderer),
             hir::TypeDclInner::NativeDcl(native) => {
                 let ctx = json!({
-                    "name": &native.decl.0,
+                    "name": crate::generate::rust::util::rust_ident(&native.decl.0),
                     "ty": "*mut c_void",
                 });
                 let rendered = renderer.render_template("typedef.rs.j2", &ctx)?;

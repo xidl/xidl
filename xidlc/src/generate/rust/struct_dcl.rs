@@ -24,7 +24,7 @@ impl RustRender for hir::StructDcl {
             })
             .collect::<Vec<_>>();
         let ctx = json!({
-            "ident": &self.ident,
+            "ident": crate::generate::rust::util::rust_ident(&self.ident),
             "parent": parent,
             "members": members,
         });

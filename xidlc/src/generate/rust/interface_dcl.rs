@@ -47,7 +47,7 @@ impl RustRender for hir::InterfaceDef {
         }
 
         let ctx = json!({
-            "ident": &self.header.ident,
+            "ident": crate::generate::rust::util::rust_ident(&self.header.ident),
             "methods": methods,
         });
         let rendered = renderer.render_template("interface.rs.j2", &ctx)?;
@@ -69,12 +69,12 @@ fn render_op(op: &hir::OpDcl) -> serde_json::Value {
     let mut param_list = Vec::new();
     for param in params {
         let ty = render_param_type(&param.ty, param.attr.as_ref());
-        let name = &param.declarator.0;
+        let name = crate::generate::rust::util::rust_ident(&param.declarator.0);
         param_list.push(format!("{name}: {ty}"));
     }
     json!({
         "ret": ret,
-        "name": &op.ident,
+        "name": crate::generate::rust::util::rust_ident(&op.ident),
         "params": param_list,
     })
 }
@@ -97,12 +97,12 @@ fn render_attr(attr: &hir::AttrDcl) -> Vec<serde_json::Value> {
             match &spec.declarator {
                 hir::AttrDeclarator::SimpleDeclarator(list) => {
                     for decl in list {
-                        let name = decl.0.as_str();
+                        let name = crate::generate::rust::util::rust_ident(&decl.0);
                         let ret = attr_return_type(&spec.ty);
                         let param = render_param_type(&spec.ty, None);
                         out.push(json!({
                             "ret": ret,
-                            "name": name,
+                            "name": name.clone(),
                             "params": Vec::<String>::new(),
                         }));
                         out.push(json!({
@@ -113,12 +113,12 @@ fn render_attr(attr: &hir::AttrDcl) -> Vec<serde_json::Value> {
                     }
                 }
                 hir::AttrDeclarator::WithRaises { declarator, .. } => {
-                    let name = declarator.0.as_str();
+                    let name = crate::generate::rust::util::rust_ident(&declarator.0);
                     let ret = attr_return_type(&spec.ty);
                     let param = render_param_type(&spec.ty, None);
                     out.push(json!({
                         "ret": ret,
-                        "name": name,
+                        "name": name.clone(),
                         "params": Vec::<String>::new(),
                     }));
                     out.push(json!({
@@ -135,7 +135,9 @@ fn render_attr(attr: &hir::AttrDcl) -> Vec<serde_json::Value> {
 
 fn readonly_attr_names(spec: &hir::ReadonlyAttrSpec) -> Vec<String> {
     match &spec.declarator {
-        hir::ReadonlyAttrDeclarator::SimpleDeclarator(decl) => vec![decl.0.clone()],
+        hir::ReadonlyAttrDeclarator::SimpleDeclarator(decl) => {
+            vec![crate::generate::rust::util::rust_ident(&decl.0)]
+        }
         hir::ReadonlyAttrDeclarator::RaisesExpr(_raises) => Vec::new(),
     }
 }

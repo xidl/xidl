@@ -19,13 +19,13 @@ impl RustRender for hir::BitsetDcl {
                 let width = render_const(&field.pos.0);
                 json!({
                     "ty": ty,
-                    "name": field.ident,
+                    "name": crate::generate::rust::util::rust_ident(&field.ident),
                     "width": width,
                 })
             })
             .collect::<Vec<_>>();
         let ctx = json!({
-            "ident": &self.ident,
+            "ident": crate::generate::rust::util::rust_ident(&self.ident),
             "parent": parent,
             "fields": fields,
         });

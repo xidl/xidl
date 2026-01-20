@@ -36,7 +36,9 @@ pub struct Specification(pub Vec<Definition>);
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Definition {
     ConstrTypeDcl(ConstrTypeDcl),
+    TypeDcl(TypeDcl),
     ConstDcl(ConstDcl),
+    ExceptDcl(ExceptDcl),
     InterfaceDcl(InterfaceDcl),
 }
 
@@ -191,15 +193,14 @@ fn collect_defs(
                 modules.pop();
             }
             crate::typed_ast::Definition::TypeDcl(type_dcl) => {
-                if let crate::typed_ast::TypeDclInner::ConstrTypeDcl(constr) = type_dcl.decl {
-                    let mut constr: ConstrTypeDcl = constr.into();
-                    let annotations = expand_annotations(type_dcl.annotations);
-                    apply_constr_annotations(&mut constr, annotations);
-                    out.push(Definition::ConstrTypeDcl(constr));
-                }
+                let type_dcl: TypeDcl = type_dcl.into();
+                out.push(Definition::TypeDcl(type_dcl));
             }
             crate::typed_ast::Definition::ConstDcl(const_dcl) => {
                 out.push(Definition::ConstDcl(const_dcl.into()));
+            }
+            crate::typed_ast::Definition::ExceptDcl(except_dcl) => {
+                out.push(Definition::ExceptDcl(except_dcl.into()));
             }
             crate::typed_ast::Definition::InterfaceDcl(interface_dcl) => {
                 let interface: InterfaceDcl = interface_dcl.into();
@@ -212,8 +213,7 @@ fn collect_defs(
                 }
                 out.push(Definition::InterfaceDcl(interface));
             }
-            crate::typed_ast::Definition::ExceptDcl(_)
-            | crate::typed_ast::Definition::TemplateModuleDcl(_)
+            crate::typed_ast::Definition::TemplateModuleDcl(_)
             | crate::typed_ast::Definition::TemplateModuleInst(_)
             | crate::typed_ast::Definition::PreprocInclude(_)
             | crate::typed_ast::Definition::PreprocCall(_)

@@ -17,7 +17,7 @@ impl RustRender for hir::ExceptDcl {
             })
             .collect::<Vec<_>>();
         let ctx = json!({
-            "ident": &self.ident,
+            "ident": crate::generate::rust::util::rust_ident(&self.ident),
             "members": members,
         });
         let rendered = renderer.render_template("exception.rs.j2", &ctx)?;

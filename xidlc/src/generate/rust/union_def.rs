@@ -18,7 +18,8 @@ impl RustRender for hir::UnionDef {
         let mut fields = Vec::new();
         let mut seen = BTreeSet::new();
         for case in &self.case {
-            let name = declarator_name(&case.element.value);
+            let name =
+                crate::generate::rust::util::rust_ident(&declarator_name(&case.element.value));
             if seen.insert(name.clone()) {
                 fields.push((name, &case.element.ty, &case.element.value));
             }
@@ -30,8 +31,7 @@ impl RustRender for hir::UnionDef {
                 let ty = match ty {
                     hir::ElementSpecTy::TypeSpec(spec) => type_with_decl(spec, decl),
                     hir::ElementSpecTy::ConstrTypeDcl(constr) => {
-                        let base = rust_scoped_name(&constr_type_name(constr));
-                        base
+                        rust_scoped_name(&constr_type_name(constr))
                     }
                 };
                 json!({ "name": name, "ty": ty })
@@ -52,13 +52,13 @@ impl RustRender for hir::UnionDef {
                     .collect::<Vec<_>>();
                 json!({
                     "labels": labels,
-                    "member": declarator_name(&case.element.value),
+                    "member": crate::generate::rust::util::rust_ident(&declarator_name(&case.element.value)),
                 })
             })
             .collect::<Vec<_>>();
 
         let ctx = json!({
-            "ident": &self.ident,
+            "ident": crate::generate::rust::util::rust_ident(&self.ident),
             "switch_ty": rust_switch_type(&self.switch_type_spec),
             "members": members,
             "cases": cases,

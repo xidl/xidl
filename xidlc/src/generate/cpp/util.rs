@@ -202,7 +202,3 @@ pub fn collect_inline_defs(
         _ => Ok(crate::generate::cpp::CppRenderOutput::default()),
     }
 }
-
-pub fn kind_json(kind: &str) -> serde_json::Value {
-    json!({ "kind": kind })
-}
