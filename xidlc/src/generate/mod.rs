@@ -1,6 +1,7 @@
 pub mod c;
 pub mod cpp;
 pub mod jsonrpc;
+pub mod rust;
 
 use serde::{Deserialize, Serialize};
 use xidl_parser::hir;

@@ -1,0 +1,9 @@
+pub struct {{ ident }} {
+    pub value: u32,
+}
+
+impl {{ ident }} {
+{% for value in values %}
+    pub const {{ value.name }}: u32 = 1u32 << {{ value.index }};
+{% endfor %}
+}

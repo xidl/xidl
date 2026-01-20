@@ -1,0 +1,10 @@
+pub struct {{ ident }} {
+{% if parent %}
+    pub base: {{ parent }},
+{% endif %}
+{% for field in fields %}
+{% if field.name %}
+    pub {{ field.name }}: {{ field.ty }},
+{% endif %}
+{% endfor %}
+}

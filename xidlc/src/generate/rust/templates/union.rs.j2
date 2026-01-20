@@ -1,0 +1,6 @@
+pub struct {{ ident }} {
+    pub _d: {{ switch_ty }},
+{% for member in members %}
+    pub {{ member.name }}: Option<{{ member.ty }}>,
+{% endfor %}
+}

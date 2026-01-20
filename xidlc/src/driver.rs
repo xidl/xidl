@@ -72,6 +72,14 @@ pub fn spawn_codegen_server(
 
             Ok(server)
         }
+        "rust" => {
+            let server = thread::spawn(move || {
+                let reader = BufReader::new(stdout_rx);
+                crate::generate::rust::serve_jsonrpc(reader, stdin_tx)
+            });
+
+            Ok(server)
+        }
         _ => {
             let exe = format!("xidl-{lang}");
             let mut child = Command::new(&exe)

@@ -1,0 +1,8 @@
+pub struct {{ ident }} {
+{% if parent %}
+    pub base: {{ parent }},
+{% endif %}
+{% for member in members %}
+    pub {{ member.name }}: {{ member.ty }},
+{% endfor %}
+}

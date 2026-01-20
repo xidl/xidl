@@ -1,0 +1,5 @@
+pub trait {{ ident }} {
+{% for method in methods %}
+    fn {{ method.name }}(&self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> {{ method.ret }};
+{% endfor %}
+}
