@@ -28,6 +28,7 @@ Specification(
                             ),
                         ],
                         default: None,
+                        field_id: None,
                     },
                     Member {
                         annotations: [],
@@ -76,6 +77,7 @@ Specification(
                             ),
                         ],
                         default: None,
+                        field_id: None,
                     },
                     Member {
                         annotations: [],
@@ -146,6 +148,7 @@ Specification(
                             ),
                         ],
                         default: None,
+                        field_id: None,
                     },
                     Member {
                         annotations: [],
@@ -174,6 +177,7 @@ Specification(
                             ),
                         ],
                         default: None,
+                        field_id: None,
                     },
                     Member {
                         annotations: [],
@@ -218,6 +222,7 @@ Specification(
                             ),
                         ],
                         default: None,
+                        field_id: None,
                     },
                     Member {
                         annotations: [],
@@ -262,6 +267,7 @@ Specification(
                             ),
                         ],
                         default: None,
+                        field_id: None,
                     },
                     Member {
                         annotations: [],
@@ -329,6 +335,7 @@ Specification(
                             ),
                         ],
                         default: None,
+                        field_id: None,
                     },
                 ],
             },

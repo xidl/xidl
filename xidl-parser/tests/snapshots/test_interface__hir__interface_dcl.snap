@@ -874,6 +874,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -913,6 +916,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -980,6 +986,9 @@ Specification(
                                             SimpleDeclarator(
                                                 "result",
                                             ),
+                                        ),
+                                        field_id: Some(
+                                            1,
                                         ),
                                     },
                                 },
@@ -1021,6 +1030,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -1060,6 +1072,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -1127,6 +1142,9 @@ Specification(
                                             SimpleDeclarator(
                                                 "result",
                                             ),
+                                        ),
+                                        field_id: Some(
+                                            1,
                                         ),
                                     },
                                 },
@@ -1178,6 +1196,9 @@ Specification(
                                                 "a_ex",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            2,
+                                        ),
                                     },
                                 },
                             ],
@@ -1218,6 +1239,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -1257,6 +1281,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -1325,6 +1352,9 @@ Specification(
                                                 "result",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            1,
+                                        ),
                                     },
                                 },
                                 Case {
@@ -1374,6 +1404,9 @@ Specification(
                                             SimpleDeclarator(
                                                 "a_ex",
                                             ),
+                                        ),
+                                        field_id: Some(
+                                            2,
                                         ),
                                     },
                                 },
@@ -1425,6 +1458,9 @@ Specification(
                                                 "b_ex",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            3,
+                                        ),
                                     },
                                 },
                                 Case {
@@ -1475,6 +1511,9 @@ Specification(
                                                 "c_ex",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            4,
+                                        ),
                                     },
                                 },
                             ],
@@ -1513,6 +1552,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -1550,6 +1592,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -1618,6 +1663,9 @@ Specification(
                                                 "result",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            1,
+                                        ),
                                     },
                                 },
                             ],
@@ -1656,6 +1704,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -1693,6 +1744,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -1760,6 +1814,9 @@ Specification(
                                             SimpleDeclarator(
                                                 "result",
                                             ),
+                                        ),
+                                        field_id: Some(
+                                            1,
                                         ),
                                     },
                                 },
@@ -1811,6 +1868,9 @@ Specification(
                                                 "a_ex",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            2,
+                                        ),
                                     },
                                 },
                             ],
@@ -1849,6 +1909,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -1886,6 +1949,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -1954,6 +2020,9 @@ Specification(
                                                 "result",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            1,
+                                        ),
                                     },
                                 },
                                 Case {
@@ -2003,6 +2072,9 @@ Specification(
                                             SimpleDeclarator(
                                                 "a_ex",
                                             ),
+                                        ),
+                                        field_id: Some(
+                                            2,
                                         ),
                                     },
                                 },
@@ -2054,6 +2126,9 @@ Specification(
                                                 "b_ex",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            3,
+                                        ),
                                     },
                                 },
                                 Case {
@@ -2104,6 +2179,9 @@ Specification(
                                                 "c_ex",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            4,
+                                        ),
                                     },
                                 },
                             ],
@@ -2144,6 +2222,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -2181,6 +2262,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -2249,6 +2333,9 @@ Specification(
                                                 "result",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            1,
+                                        ),
                                     },
                                 },
                             ],
@@ -2289,6 +2376,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -2326,6 +2416,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -2394,6 +2487,9 @@ Specification(
                                                 "result",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            1,
+                                        ),
                                     },
                                 },
                             ],
@@ -2434,6 +2530,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -2471,6 +2570,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -2539,6 +2641,9 @@ Specification(
                                                 "result",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            1,
+                                        ),
                                     },
                                 },
                             ],
@@ -2579,6 +2684,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -2616,6 +2724,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -2683,6 +2794,9 @@ Specification(
                                             SimpleDeclarator(
                                                 "result",
                                             ),
+                                        ),
+                                        field_id: Some(
+                                            1,
                                         ),
                                     },
                                 },
@@ -2722,6 +2836,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -2761,6 +2878,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -2829,6 +2949,9 @@ Specification(
                                                 "result",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            1,
+                                        ),
                                     },
                                 },
                             ],
@@ -2869,6 +2992,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -2906,6 +3032,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -2974,6 +3103,9 @@ Specification(
                                                 "result",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            1,
+                                        ),
                                     },
                                 },
                             ],
@@ -3012,6 +3144,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -3051,6 +3186,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -3119,6 +3257,9 @@ Specification(
                                                 "result",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            1,
+                                        ),
                                     },
                                 },
                             ],
@@ -3159,6 +3300,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -3196,6 +3340,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -3264,6 +3411,9 @@ Specification(
                                                 "result",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            1,
+                                        ),
                                     },
                                 },
                             ],
@@ -3302,6 +3452,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -3341,6 +3494,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -3409,6 +3565,9 @@ Specification(
                                                 "result",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            1,
+                                        ),
                                     },
                                 },
                             ],
@@ -3449,6 +3608,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -3486,6 +3648,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -3554,6 +3719,9 @@ Specification(
                                                 "result",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            1,
+                                        ),
                                     },
                                 },
                                 Case {
@@ -3604,6 +3772,9 @@ Specification(
                                                 "a_ex",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            2,
+                                        ),
                                     },
                                 },
                             ],
@@ -3642,6 +3813,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -3681,6 +3855,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -3749,6 +3926,9 @@ Specification(
                                                 "result",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            1,
+                                        ),
                                     },
                                 },
                             ],
@@ -3789,6 +3969,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -3826,6 +4009,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -3894,6 +4080,9 @@ Specification(
                                                 "result",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            1,
+                                        ),
                                     },
                                 },
                                 Case {
@@ -3943,6 +4132,9 @@ Specification(
                                             SimpleDeclarator(
                                                 "a_ex",
                                             ),
+                                        ),
+                                        field_id: Some(
+                                            2,
                                         ),
                                     },
                                 },
@@ -3994,6 +4186,9 @@ Specification(
                                                 "b_ex",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            3,
+                                        ),
                                     },
                                 },
                                 Case {
@@ -4044,6 +4239,9 @@ Specification(
                                                 "c_ex",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            4,
+                                        ),
                                     },
                                 },
                             ],
@@ -4082,6 +4280,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -4121,6 +4322,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -4189,6 +4393,9 @@ Specification(
                                                 "result",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            1,
+                                        ),
                                     },
                                 },
                                 Case {
@@ -4239,6 +4446,9 @@ Specification(
                                                 "a_ex",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            2,
+                                        ),
                                     },
                                 },
                             ],
@@ -4279,6 +4489,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -4316,6 +4529,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -4384,6 +4600,9 @@ Specification(
                                                 "result",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            1,
+                                        ),
                                     },
                                 },
                             ],
@@ -4422,6 +4641,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -4461,6 +4683,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -4529,6 +4754,9 @@ Specification(
                                                 "result",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            1,
+                                        ),
                                     },
                                 },
                                 Case {
@@ -4579,6 +4807,9 @@ Specification(
                                                 "a_ex",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            2,
+                                        ),
                                     },
                                 },
                             ],
@@ -4624,55 +4855,8 @@ Specification(
                                                 "unknownOp",
                                             ),
                                         ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "A_func1_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "A_func1_In",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "func1",
-                                            ),
+                                        field_id: Some(
+                                            1,
                                         ),
                                     },
                                 },
@@ -4724,55 +4908,8 @@ Specification(
                                                 "func1",
                                             ),
                                         ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "A_func1_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "A_func1_In",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "func1",
-                                            ),
+                                        field_id: Some(
+                                            2,
                                         ),
                                     },
                                 },
@@ -4824,55 +4961,8 @@ Specification(
                                                 "func1",
                                             ),
                                         ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "A_func1_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "A_func1_In",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "func1",
-                                            ),
+                                        field_id: Some(
+                                            2,
                                         ),
                                     },
                                 },
@@ -4923,6 +5013,168 @@ Specification(
                                             SimpleDeclarator(
                                                 "func1",
                                             ),
+                                        ),
+                                        field_id: Some(
+                                            2,
+                                        ),
+                                    },
+                                },
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "A_func1_Hash",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "A_func1_In",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "func1",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            2,
+                                        ),
+                                    },
+                                },
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "A_func1_Hash",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "A_func1_In",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "func1",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            2,
+                                        ),
+                                    },
+                                },
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "A_func1_Hash",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "A_func1_In",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "func1",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            2,
                                         ),
                                     },
                                 },
@@ -4974,55 +5226,8 @@ Specification(
                                                 "get_attribute_attr1",
                                             ),
                                         ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "A_get_attribute_attr1_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "A_get_attribute_attr1_In",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "get_attribute_attr1",
-                                            ),
+                                        field_id: Some(
+                                            3,
                                         ),
                                     },
                                 },
@@ -5074,6 +5279,9 @@ Specification(
                                                 "get_attribute_attr1",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            3,
+                                        ),
                                     },
                                 },
                                 Case {
@@ -5123,6 +5331,62 @@ Specification(
                                             SimpleDeclarator(
                                                 "get_attribute_attr1",
                                             ),
+                                        ),
+                                        field_id: Some(
+                                            3,
+                                        ),
+                                    },
+                                },
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "A_get_attribute_attr1_Hash",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "A_get_attribute_attr1_In",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "get_attribute_attr1",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            3,
                                         ),
                                     },
                                 },
@@ -5173,6 +5437,9 @@ Specification(
                                             SimpleDeclarator(
                                                 "set_attribute_attr1",
                                             ),
+                                        ),
+                                        field_id: Some(
+                                            4,
                                         ),
                                     },
                                 },
@@ -5224,6 +5491,9 @@ Specification(
                                                 "get_attribute_attr2",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            5,
+                                        ),
                                     },
                                 },
                                 Case {
@@ -5273,6 +5543,9 @@ Specification(
                                             SimpleDeclarator(
                                                 "set_attribute_attr2",
                                             ),
+                                        ),
+                                        field_id: Some(
+                                            6,
                                         ),
                                     },
                                 },
@@ -5324,6 +5597,9 @@ Specification(
                                                 "get_attribute_attr3",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            7,
+                                        ),
                                     },
                                 },
                                 Case {
@@ -5374,105 +5650,8 @@ Specification(
                                                 "set_attribute_attr3",
                                             ),
                                         ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "A_get_attribute_attr1_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "A_get_attribute_attr1_In",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "get_attribute_attr1",
-                                            ),
-                                        ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "A_set_attribute_attr1_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "A_set_attribute_attr1_In",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "set_attribute_attr1",
-                                            ),
+                                        field_id: Some(
+                                            8,
                                         ),
                                     },
                                 },
@@ -5524,6 +5703,9 @@ Specification(
                                                 "get_attribute_attr1",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            3,
+                                        ),
                                     },
                                 },
                                 Case {
@@ -5573,6 +5755,9 @@ Specification(
                                             SimpleDeclarator(
                                                 "set_attribute_attr1",
                                             ),
+                                        ),
+                                        field_id: Some(
+                                            4,
                                         ),
                                     },
                                 },
@@ -5624,6 +5809,9 @@ Specification(
                                                 "get_attribute_attr1",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            3,
+                                        ),
                                     },
                                 },
                                 Case {
@@ -5673,6 +5861,115 @@ Specification(
                                             SimpleDeclarator(
                                                 "set_attribute_attr1",
                                             ),
+                                        ),
+                                        field_id: Some(
+                                            4,
+                                        ),
+                                    },
+                                },
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "A_get_attribute_attr1_Hash",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "A_get_attribute_attr1_In",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "get_attribute_attr1",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            3,
+                                        ),
+                                    },
+                                },
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "A_set_attribute_attr1_Hash",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "A_set_attribute_attr1_In",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "set_attribute_attr1",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            4,
                                         ),
                                     },
                                 },
@@ -5714,6 +6011,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                                 Member {
                                     annotations: [],
@@ -5735,6 +6035,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        2,
+                                    ),
                                 },
                             ],
                         },
@@ -5779,55 +6082,8 @@ Specification(
                                                 "unknownOp",
                                             ),
                                         ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "A_func1_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "A_func1_Result",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "func1",
-                                            ),
+                                        field_id: Some(
+                                            1,
                                         ),
                                     },
                                 },
@@ -5879,55 +6135,8 @@ Specification(
                                                 "func1",
                                             ),
                                         ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "A_func1_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "A_func1_Result",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "func1",
-                                            ),
+                                        field_id: Some(
+                                            2,
                                         ),
                                     },
                                 },
@@ -5979,55 +6188,8 @@ Specification(
                                                 "func1",
                                             ),
                                         ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "A_func1_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "A_func1_Result",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "func1",
-                                            ),
+                                        field_id: Some(
+                                            2,
                                         ),
                                     },
                                 },
@@ -6078,6 +6240,168 @@ Specification(
                                             SimpleDeclarator(
                                                 "func1",
                                             ),
+                                        ),
+                                        field_id: Some(
+                                            2,
+                                        ),
+                                    },
+                                },
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "A_func1_Hash",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "A_func1_Result",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "func1",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            2,
+                                        ),
+                                    },
+                                },
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "A_func1_Hash",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "A_func1_Result",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "func1",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            2,
+                                        ),
+                                    },
+                                },
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "A_func1_Hash",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "A_func1_Result",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "func1",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            2,
                                         ),
                                     },
                                 },
@@ -6129,55 +6453,8 @@ Specification(
                                                 "get_attribute_attr1",
                                             ),
                                         ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "A_get_attribute_attr1_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "A_get_attribute_attr1_Result",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "get_attribute_attr1",
-                                            ),
+                                        field_id: Some(
+                                            3,
                                         ),
                                     },
                                 },
@@ -6229,6 +6506,9 @@ Specification(
                                                 "get_attribute_attr1",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            3,
+                                        ),
                                     },
                                 },
                                 Case {
@@ -6278,6 +6558,62 @@ Specification(
                                             SimpleDeclarator(
                                                 "get_attribute_attr1",
                                             ),
+                                        ),
+                                        field_id: Some(
+                                            3,
+                                        ),
+                                    },
+                                },
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "A_get_attribute_attr1_Hash",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "A_get_attribute_attr1_Result",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "get_attribute_attr1",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            3,
                                         ),
                                     },
                                 },
@@ -6328,6 +6664,9 @@ Specification(
                                             SimpleDeclarator(
                                                 "set_attribute_attr1",
                                             ),
+                                        ),
+                                        field_id: Some(
+                                            4,
                                         ),
                                     },
                                 },
@@ -6379,6 +6718,9 @@ Specification(
                                                 "get_attribute_attr2",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            5,
+                                        ),
                                     },
                                 },
                                 Case {
@@ -6428,6 +6770,9 @@ Specification(
                                             SimpleDeclarator(
                                                 "set_attribute_attr2",
                                             ),
+                                        ),
+                                        field_id: Some(
+                                            6,
                                         ),
                                     },
                                 },
@@ -6479,6 +6824,9 @@ Specification(
                                                 "get_attribute_attr3",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            7,
+                                        ),
                                     },
                                 },
                                 Case {
@@ -6529,105 +6877,8 @@ Specification(
                                                 "set_attribute_attr3",
                                             ),
                                         ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "A_get_attribute_attr1_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "A_get_attribute_attr1_Result",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "get_attribute_attr1",
-                                            ),
-                                        ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "A_set_attribute_attr1_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "A_set_attribute_attr1_Result",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "set_attribute_attr1",
-                                            ),
+                                        field_id: Some(
+                                            8,
                                         ),
                                     },
                                 },
@@ -6679,6 +6930,9 @@ Specification(
                                                 "get_attribute_attr1",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            3,
+                                        ),
                                     },
                                 },
                                 Case {
@@ -6728,6 +6982,9 @@ Specification(
                                             SimpleDeclarator(
                                                 "set_attribute_attr1",
                                             ),
+                                        ),
+                                        field_id: Some(
+                                            4,
                                         ),
                                     },
                                 },
@@ -6779,6 +7036,9 @@ Specification(
                                                 "get_attribute_attr1",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            3,
+                                        ),
                                     },
                                 },
                                 Case {
@@ -6828,6 +7088,115 @@ Specification(
                                             SimpleDeclarator(
                                                 "set_attribute_attr1",
                                             ),
+                                        ),
+                                        field_id: Some(
+                                            4,
+                                        ),
+                                    },
+                                },
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "A_get_attribute_attr1_Hash",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "A_get_attribute_attr1_Result",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "get_attribute_attr1",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            3,
+                                        ),
+                                    },
+                                },
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "A_set_attribute_attr1_Hash",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "A_set_attribute_attr1_Result",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "set_attribute_attr1",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            4,
                                         ),
                                     },
                                 },
@@ -6869,6 +7238,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                                 Member {
                                     annotations: [],
@@ -6890,6 +7262,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        2,
+                                    ),
                                 },
                             ],
                         },
@@ -7508,6 +7883,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -7540,6 +7918,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -7608,6 +7989,9 @@ Specification(
                                                 "result",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            1,
+                                        ),
                                     },
                                 },
                             ],
@@ -7652,6 +8036,9 @@ Specification(
                                             SimpleDeclarator(
                                                 "unknownOp",
                                             ),
+                                        ),
+                                        field_id: Some(
+                                            1,
                                         ),
                                     },
                                 },
@@ -7703,6 +8090,9 @@ Specification(
                                                 "opA",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            2,
+                                        ),
                                     },
                                 },
                             ],
@@ -7743,6 +8133,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                                 Member {
                                     annotations: [],
@@ -7764,6 +8157,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        2,
+                                    ),
                                 },
                             ],
                         },
@@ -7807,6 +8203,9 @@ Specification(
                                             SimpleDeclarator(
                                                 "unknownOp",
                                             ),
+                                        ),
+                                        field_id: Some(
+                                            1,
                                         ),
                                     },
                                 },
@@ -7858,6 +8257,9 @@ Specification(
                                                 "opA",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            2,
+                                        ),
                                     },
                                 },
                             ],
@@ -7898,6 +8300,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                                 Member {
                                     annotations: [],
@@ -7919,6 +8324,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        2,
+                                    ),
                                 },
                             ],
                         },
@@ -8021,6 +8429,7 @@ Specification(
                                                         ),
                                                     ],
                                                     default: None,
+                                                    field_id: None,
                                                 },
                                             ],
                                         },

@@ -88,7 +88,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -225,6 +225,7 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.bound, serializer)?;
                 serializer.end_field()?;
 
@@ -262,6 +263,7 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.bound, serializer)?;
                 serializer.end_field()?;
 
@@ -301,10 +303,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.equiv_kind, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.element_flags, serializer)?;
                 serializer.end_field()?;
 
@@ -352,14 +356,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.bound, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.element_identifier, serializer)?;
                 serializer.end_field()?;
 
@@ -411,14 +418,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.bound, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.element_identifier, serializer)?;
                 serializer.end_field()?;
 
@@ -470,14 +480,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.array_bound_seq, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.element_identifier, serializer)?;
                 serializer.end_field()?;
 
@@ -529,14 +542,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.array_bound_seq, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.element_identifier, serializer)?;
                 serializer.end_field()?;
 
@@ -592,22 +608,27 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.bound, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.element_identifier, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.key_flags, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(5u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.key_identifier, serializer)?;
                 serializer.end_field()?;
 
@@ -671,22 +692,27 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.bound, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.element_identifier, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.key_flags, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(5u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.key_identifier, serializer)?;
                 serializer.end_field()?;
 
@@ -746,14 +772,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.sc_component_id, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.scc_length, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.scc_index, serializer)?;
                 serializer.end_field()?;
 
@@ -852,7 +881,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -863,7 +892,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -874,7 +903,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -885,7 +914,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -896,7 +925,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(5u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -907,7 +936,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(6u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -918,7 +947,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(7u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -929,7 +958,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(8u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -940,7 +969,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(9u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -951,7 +980,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(10u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -962,7 +991,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(11u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -1148,7 +1177,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -1159,7 +1188,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -1170,7 +1199,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -1181,7 +1210,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -1192,7 +1221,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(5u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -1203,7 +1232,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(6u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -1214,7 +1243,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(7u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -1225,7 +1254,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(8u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -1236,7 +1265,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(9u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -1247,7 +1276,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(10u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -1258,7 +1287,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(11u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -1269,7 +1298,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(12u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -1280,7 +1309,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(13u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -1291,7 +1320,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(14u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -1302,7 +1331,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(15u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -1313,7 +1342,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(16u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -1324,7 +1353,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(17u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -1487,10 +1516,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.paramname_hash, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.value, serializer)?;
                 serializer.end_field()?;
 
@@ -1537,10 +1568,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.annotation_typeid, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.param_seq, serializer)?;
                 serializer.end_field()?;
 
@@ -1589,14 +1622,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.placement, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.language, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.text, serializer)?;
                 serializer.end_field()?;
 
@@ -1650,18 +1686,22 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.unit, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.min, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.max, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.hash_id, serializer)?;
                 serializer.end_field()?;
 
@@ -1717,14 +1757,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.member_id, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.member_flags, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.member_type_id, serializer)?;
                 serializer.end_field()?;
 
@@ -1776,14 +1819,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.name, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.ann_builtin, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.ann_custom, serializer)?;
                 serializer.end_field()?;
 
@@ -1831,6 +1877,7 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.name_hash, serializer)?;
                 serializer.end_field()?;
 
@@ -1870,10 +1917,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
                 serializer.end_field()?;
 
@@ -1916,10 +1965,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
                 serializer.end_field()?;
 
@@ -1960,6 +2011,7 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.verbatim, serializer)?;
                 serializer.end_field()?;
 
@@ -2030,14 +2082,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.ann_builtin, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.ann_custom, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.type_name, serializer)?;
                 serializer.end_field()?;
 
@@ -2087,10 +2142,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.base_type, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
                 serializer.end_field()?;
 
@@ -2132,10 +2189,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.base_type, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
                 serializer.end_field()?;
 
@@ -2179,14 +2238,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.struct_flags, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.member_seq, serializer)?;
                 serializer.end_field()?;
 
@@ -2238,14 +2300,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.struct_flags, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.member_seq, serializer)?;
                 serializer.end_field()?;
 
@@ -2300,18 +2365,22 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.member_id, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.member_flags, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.type_id, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.label_seq, serializer)?;
                 serializer.end_field()?;
 
@@ -2365,10 +2434,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
                 serializer.end_field()?;
 
@@ -2411,10 +2482,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
                 serializer.end_field()?;
 
@@ -2457,10 +2530,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.member_flags, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.type_id, serializer)?;
                 serializer.end_field()?;
 
@@ -2508,14 +2583,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.ann_builtin, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.ann_custom, serializer)?;
                 serializer.end_field()?;
 
@@ -2563,6 +2641,7 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
                 serializer.end_field()?;
 
@@ -2600,6 +2679,7 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
                 serializer.end_field()?;
 
@@ -2637,6 +2717,7 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
                 serializer.end_field()?;
 
@@ -2680,18 +2761,22 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.union_flags, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.discriminator, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.member_seq, serializer)?;
                 serializer.end_field()?;
 
@@ -2749,18 +2834,22 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.union_flags, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.discriminator, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.member_seq, serializer)?;
                 serializer.end_field()?;
 
@@ -2814,10 +2903,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.member_flags, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.member_type_id, serializer)?;
                 serializer.end_field()?;
 
@@ -2865,14 +2956,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.name, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.default_value, serializer)?;
                 serializer.end_field()?;
 
@@ -2925,14 +3019,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.name_hash, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.default_value, serializer)?;
                 serializer.end_field()?;
 
@@ -2981,6 +3078,7 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.annotation_name, serializer)?;
                 serializer.end_field()?;
 
@@ -3051,14 +3149,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.annotation_flag, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.member_seq, serializer)?;
                 serializer.end_field()?;
 
@@ -3110,14 +3211,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.annotation_flag, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.member_seq, serializer)?;
                 serializer.end_field()?;
 
@@ -3167,10 +3271,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.related_flags, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.related_type, serializer)?;
                 serializer.end_field()?;
 
@@ -3218,14 +3324,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.ann_builtin, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.ann_custom, serializer)?;
                 serializer.end_field()?;
 
@@ -3273,6 +3382,7 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
                 serializer.end_field()?;
 
@@ -3310,6 +3420,7 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
                 serializer.end_field()?;
 
@@ -3380,14 +3491,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.alias_flags, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.body, serializer)?;
                 serializer.end_field()?;
 
@@ -3439,14 +3553,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.alias_flags, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.body, serializer)?;
                 serializer.end_field()?;
 
@@ -3496,10 +3613,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.ann_builtin, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.ann_custom, serializer)?;
                 serializer.end_field()?;
 
@@ -3545,10 +3664,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.element_flags, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.r#type, serializer)?;
                 serializer.end_field()?;
 
@@ -3594,10 +3715,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
                 serializer.end_field()?;
 
@@ -3637,6 +3760,7 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
                 serializer.end_field()?;
 
@@ -3674,6 +3798,7 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.bound, serializer)?;
                 serializer.end_field()?;
 
@@ -3713,10 +3838,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
                 serializer.end_field()?;
 
@@ -3756,6 +3883,7 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
                 serializer.end_field()?;
 
@@ -3797,14 +3925,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.collection_flag, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.element, serializer)?;
                 serializer.end_field()?;
 
@@ -3856,14 +3987,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.collection_flag, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.element, serializer)?;
                 serializer.end_field()?;
 
@@ -3911,6 +4045,7 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.bound_seq, serializer)?;
                 serializer.end_field()?;
 
@@ -3950,10 +4085,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
                 serializer.end_field()?;
 
@@ -3993,6 +4130,7 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
                 serializer.end_field()?;
 
@@ -4034,14 +4172,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.collection_flag, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.element, serializer)?;
                 serializer.end_field()?;
 
@@ -4093,14 +4234,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.collection_flag, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.element, serializer)?;
                 serializer.end_field()?;
 
@@ -4154,18 +4298,22 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.collection_flag, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.key, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.element, serializer)?;
                 serializer.end_field()?;
 
@@ -4223,18 +4371,22 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.collection_flag, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.key, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.element, serializer)?;
                 serializer.end_field()?;
 
@@ -4289,10 +4441,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.value, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.flags, serializer)?;
                 serializer.end_field()?;
 
@@ -4334,10 +4488,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
                 serializer.end_field()?;
 
@@ -4380,10 +4536,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
                 serializer.end_field()?;
 
@@ -4424,6 +4582,7 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.bit_bound, serializer)?;
                 serializer.end_field()?;
 
@@ -4463,10 +4622,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
                 serializer.end_field()?;
 
@@ -4506,6 +4667,7 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
                 serializer.end_field()?;
 
@@ -4547,14 +4709,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.enum_flags, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.literal_seq, serializer)?;
                 serializer.end_field()?;
 
@@ -4606,14 +4771,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.enum_flags, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.literal_seq, serializer)?;
                 serializer.end_field()?;
 
@@ -4663,10 +4831,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.position, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.flags, serializer)?;
                 serializer.end_field()?;
 
@@ -4708,10 +4878,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
                 serializer.end_field()?;
 
@@ -4754,10 +4926,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
                 serializer.end_field()?;
 
@@ -4798,6 +4972,7 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.bit_bound, serializer)?;
                 serializer.end_field()?;
 
@@ -4841,14 +5016,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.bitmask_flags, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.flag_seq, serializer)?;
                 serializer.end_field()?;
 
@@ -4900,14 +5078,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.bitmask_flags, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.flag_seq, serializer)?;
                 serializer.end_field()?;
 
@@ -4961,18 +5142,22 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.position, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.flags, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.bitcount, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.holder_type, serializer)?;
                 serializer.end_field()?;
 
@@ -5026,10 +5211,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
                 serializer.end_field()?;
 
@@ -5072,10 +5259,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.common, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.name_hash, serializer)?;
                 serializer.end_field()?;
 
@@ -5116,6 +5305,7 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.detail, serializer)?;
                 serializer.end_field()?;
 
@@ -5186,14 +5376,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.bitset_flags, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.field_seq, serializer)?;
                 serializer.end_field()?;
 
@@ -5245,14 +5438,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.bitset_flags, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.field_seq, serializer)?;
                 serializer.end_field()?;
 
@@ -5351,7 +5547,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -5362,7 +5558,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -5373,7 +5569,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -5384,7 +5580,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -5395,7 +5591,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(5u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -5406,7 +5602,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(6u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -5417,7 +5613,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(7u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -5428,7 +5624,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(8u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -5439,7 +5635,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(9u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -5450,7 +5646,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(10u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -5461,7 +5657,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(11u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -5630,7 +5826,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -5641,7 +5837,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -5652,7 +5848,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -5663,7 +5859,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -5674,7 +5870,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(5u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -5685,7 +5881,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(6u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -5696,7 +5892,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(7u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -5707,7 +5903,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(8u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -5718,7 +5914,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(9u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -5729,7 +5925,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(10u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -5740,7 +5936,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(11u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -5862,7 +6058,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -5873,7 +6069,7 @@ pub mod DDS {
                                 "union member is not set for discriminator".to_string(),
                             )
                         })?;
-                        serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                        serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
                         xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                         serializer.end_field()?;
                     }
@@ -5935,10 +6131,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.type_identifier, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.type_object, serializer)?;
                 serializer.end_field()?;
 
@@ -5985,10 +6183,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.type_identifier1, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.type_identifier2, serializer)?;
                 serializer.end_field()?;
 
@@ -6035,10 +6235,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.type_id, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(
                     &self.typeobject_serialized_size,
                     serializer,
@@ -6091,14 +6293,17 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.typeid_with_size, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.dependent_typeid_count, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.dependent_typeids, serializer)?;
                 serializer.end_field()?;
 
@@ -6149,10 +6354,12 @@ pub mod DDS {
                 serializer.begin_struct()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.minimal, serializer)?;
                 serializer.end_field()?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.complete, serializer)?;
                 serializer.end_field()?;
 

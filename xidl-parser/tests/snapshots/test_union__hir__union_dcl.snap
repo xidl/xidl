@@ -88,6 +88,9 @@ Specification(
                                                 "a",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            1,
+                                        ),
                                     },
                                 },
                                 Case {
@@ -133,6 +136,9 @@ Specification(
                                             SimpleDeclarator(
                                                 "b",
                                             ),
+                                        ),
+                                        field_id: Some(
+                                            2,
                                         ),
                                     },
                                 },

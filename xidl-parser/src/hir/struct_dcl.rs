@@ -21,6 +21,7 @@ pub struct Member {
     pub ty: TypeSpec,
     pub ident: Vec<Declarator>,
     pub default: Option<Default>,
+    pub field_id: Option<u32>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -34,22 +35,35 @@ impl StructDcl {
 
 impl From<crate::typed_ast::StructDef> for StructDcl {
     fn from(value: crate::typed_ast::StructDef) -> Self {
+        let mut members = value
+            .member
+            .into_iter()
+            .map(Into::into)
+            .collect::<Vec<Member>>();
+        for (index, member) in members.iter_mut().enumerate() {
+            if member.field_id.is_none() {
+                member.field_id = Some((index + 1) as u32);
+            }
+        }
         Self {
             annotations: vec![],
             ident: value.ident.0,
             parent: value.parent.into_iter().map(Into::into).collect(),
-            member: value.member.into_iter().map(|x| x.into()).collect(),
+            member: members,
         }
     }
 }
 
 impl From<crate::typed_ast::Member> for Member {
     fn from(value: crate::typed_ast::Member) -> Self {
+        let annotations = expand_annotations(value.annotations);
+        let field_id = annotation_id_value(&annotations);
         Self {
-            annotations: expand_annotations(value.annotations),
+            annotations,
             ty: value.ty.into(),
             ident: value.ident.0.into_iter().map(Into::into).collect(),
             default: value.default.map(Into::into),
+            field_id,
         }
     }
 }

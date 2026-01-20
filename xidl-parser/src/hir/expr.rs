@@ -100,6 +100,109 @@ pub struct DecNumber(pub String);
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PositiveIntConst(pub ConstExpr);
 
+pub fn const_expr_to_i64(expr: &ConstExpr) -> Option<i64> {
+    or_expr_to_i64(&expr.0)
+}
+
+fn or_expr_to_i64(expr: &OrExpr) -> Option<i64> {
+    match expr {
+        OrExpr::XorExpr(value) => xor_expr_to_i64(value),
+        OrExpr::OrExpr(_, _) => None,
+    }
+}
+
+fn xor_expr_to_i64(expr: &XorExpr) -> Option<i64> {
+    match expr {
+        XorExpr::AndExpr(value) => and_expr_to_i64(value),
+        XorExpr::XorExpr(_, _) => None,
+    }
+}
+
+fn and_expr_to_i64(expr: &AndExpr) -> Option<i64> {
+    match expr {
+        AndExpr::ShiftExpr(value) => shift_expr_to_i64(value),
+        AndExpr::AndExpr(_, _) => None,
+    }
+}
+
+fn shift_expr_to_i64(expr: &ShiftExpr) -> Option<i64> {
+    match expr {
+        ShiftExpr::AddExpr(value) => add_expr_to_i64(value),
+        ShiftExpr::LeftShiftExpr(_, _) => None,
+        ShiftExpr::RightShiftExpr(_, _) => None,
+    }
+}
+
+fn add_expr_to_i64(expr: &AddExpr) -> Option<i64> {
+    match expr {
+        AddExpr::MultExpr(value) => mult_expr_to_i64(value),
+        AddExpr::AddExpr(_, _) => None,
+        AddExpr::SubExpr(_, _) => None,
+    }
+}
+
+fn mult_expr_to_i64(expr: &MultExpr) -> Option<i64> {
+    match expr {
+        MultExpr::UnaryExpr(value) => unary_expr_to_i64(value),
+        MultExpr::MultExpr(_, _) => None,
+        MultExpr::DivExpr(_, _) => None,
+        MultExpr::ModExpr(_, _) => None,
+    }
+}
+
+fn unary_expr_to_i64(expr: &UnaryExpr) -> Option<i64> {
+    match expr {
+        UnaryExpr::PrimaryExpr(value) => primary_expr_to_i64(value),
+        UnaryExpr::UnaryExpr(op, value) => match op {
+            UnaryOperator::Add => primary_expr_to_i64(value),
+            UnaryOperator::Sub => primary_expr_to_i64(value).map(|value| -value),
+            UnaryOperator::Not => None,
+        },
+    }
+}
+
+fn primary_expr_to_i64(expr: &PrimaryExpr) -> Option<i64> {
+    match expr {
+        PrimaryExpr::Literal(value) => literal_to_i64(value),
+        PrimaryExpr::ScopedName(_) | PrimaryExpr::ConstExpr(_) => None,
+    }
+}
+
+fn literal_to_i64(value: &Literal) -> Option<i64> {
+    match value {
+        Literal::IntegerLiteral(lit) => parse_int_literal(lit),
+        _ => None,
+    }
+}
+
+fn parse_int_literal(value: &IntegerLiteral) -> Option<i64> {
+    match value {
+        IntegerLiteral::BinNumber(value) => parse_radix(value, 2),
+        IntegerLiteral::OctNumber(value) => parse_radix(value, 8),
+        IntegerLiteral::DecNumber(value) => parse_radix(value, 10),
+        IntegerLiteral::HexNumber(value) => parse_radix(value, 16),
+    }
+}
+
+fn parse_radix(value: &str, radix: u32) -> Option<i64> {
+    let cleaned = value.replace('_', "");
+    let trimmed = cleaned.trim();
+    let stripped = match radix {
+        2 => trimmed
+            .strip_prefix("0b")
+            .or_else(|| trimmed.strip_prefix("0B")),
+        8 => trimmed
+            .strip_prefix("0o")
+            .or_else(|| trimmed.strip_prefix("0O")),
+        16 => trimmed
+            .strip_prefix("0x")
+            .or_else(|| trimmed.strip_prefix("0X")),
+        _ => None,
+    };
+    let digits = stripped.unwrap_or(trimmed);
+    i64::from_str_radix(digits, radix).ok()
+}
+
 impl From<crate::typed_ast::ConstExpr> for ConstExpr {
     fn from(value: crate::typed_ast::ConstExpr) -> Self {
         Self(value.0.into())

@@ -56,11 +56,19 @@ impl RustRender for hir::UnionDef {
                 } else {
                     labels.join(" | ")
                 };
+                let member =
+                    crate::generate::rust::util::rust_ident(&declarator_name(&case.element.value));
+                let field_id = case
+                    .element
+                    .field_id
+                    .map(|value| format!("{value}u32"))
+                    .unwrap_or_else(|| "1u32".to_string());
                 json!({
                     "labels": labels,
                     "pattern": pattern,
                     "is_default": is_default,
-                    "member": crate::generate::rust::util::rust_ident(&declarator_name(&case.element.value)),
+                    "member": member,
+                    "field_id": field_id,
                 })
             })
             .collect::<Vec<_>>();

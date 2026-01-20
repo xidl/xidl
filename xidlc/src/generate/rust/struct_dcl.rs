@@ -1,5 +1,7 @@
 use crate::error::IdlcResult;
-use crate::generate::rust::util::{member_json, rust_scoped_name, serialize_kind_name};
+use crate::generate::rust::util::{
+    declarator_name, rust_scoped_name, serialize_kind_name, type_with_decl,
+};
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use serde_json::json;
 use xidl_parser::hir;
@@ -26,10 +28,12 @@ pub(crate) fn render_struct_with_config(
         .member
         .iter()
         .flat_map(|member| {
-            member
-                .ident
-                .iter()
-                .map(|decl| member_json(&member.ty, decl))
+            let field_id = member.field_id.map(|value| format!("{value}u32"));
+            member.ident.iter().map(move |decl| {
+                let name = crate::generate::rust::util::rust_ident(&declarator_name(decl));
+                let ty = type_with_decl(&member.ty, decl);
+                json!({ "ty": ty, "name": name, "field_id": field_id.clone() })
+            })
         })
         .collect::<Vec<_>>();
     let serialize_kind = serialize_kind_name(def.serialize_kind(config));

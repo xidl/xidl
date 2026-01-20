@@ -47,6 +47,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                                 Member {
                                     annotations: [
@@ -84,6 +87,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        2,
+                                    ),
                                 },
                             ],
                         },
@@ -298,6 +304,9 @@ Specification(
                                                 "a",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            1,
+                                        ),
                                     },
                                 },
                                 Case {
@@ -317,6 +326,9 @@ Specification(
                                             SimpleDeclarator(
                                                 "b",
                                             ),
+                                        ),
+                                        field_id: Some(
+                                            2,
                                         ),
                                     },
                                 },
@@ -451,6 +463,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -490,6 +505,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -558,6 +576,9 @@ Specification(
                                                 "result",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            1,
+                                        ),
                                     },
                                 },
                             ],
@@ -598,6 +619,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -630,6 +654,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -698,6 +725,9 @@ Specification(
                                                 "result",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            1,
+                                        ),
                                     },
                                 },
                             ],
@@ -731,6 +761,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -770,6 +803,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                             ],
                         },
@@ -838,6 +874,9 @@ Specification(
                                                 "result",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            1,
+                                        ),
                                     },
                                 },
                             ],
@@ -882,6 +921,9 @@ Specification(
                                             SimpleDeclarator(
                                                 "unknownOp",
                                             ),
+                                        ),
+                                        field_id: Some(
+                                            1,
                                         ),
                                     },
                                 },
@@ -933,6 +975,9 @@ Specification(
                                                 "ping",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            2,
+                                        ),
                                     },
                                 },
                                 Case {
@@ -982,6 +1027,9 @@ Specification(
                                             SimpleDeclarator(
                                                 "get_attribute_value",
                                             ),
+                                        ),
+                                        field_id: Some(
+                                            3,
                                         ),
                                     },
                                 },
@@ -1033,6 +1081,9 @@ Specification(
                                                 "set_attribute_value",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            4,
+                                        ),
                                     },
                                 },
                             ],
@@ -1073,6 +1124,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                                 Member {
                                     annotations: [],
@@ -1094,6 +1148,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        2,
+                                    ),
                                 },
                             ],
                         },
@@ -1137,6 +1194,9 @@ Specification(
                                             SimpleDeclarator(
                                                 "unknownOp",
                                             ),
+                                        ),
+                                        field_id: Some(
+                                            1,
                                         ),
                                     },
                                 },
@@ -1188,6 +1248,9 @@ Specification(
                                                 "ping",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            2,
+                                        ),
                                     },
                                 },
                                 Case {
@@ -1237,6 +1300,9 @@ Specification(
                                             SimpleDeclarator(
                                                 "get_attribute_value",
                                             ),
+                                        ),
+                                        field_id: Some(
+                                            3,
                                         ),
                                     },
                                 },
@@ -1288,6 +1354,9 @@ Specification(
                                                 "set_attribute_value",
                                             ),
                                         ),
+                                        field_id: Some(
+                                            4,
+                                        ),
                                     },
                                 },
                             ],
@@ -1328,6 +1397,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
                                 Member {
                                     annotations: [],
@@ -1349,6 +1421,9 @@ Specification(
                                         ),
                                     ],
                                     default: None,
+                                    field_id: Some(
+                                        2,
+                                    ),
                                 },
                             ],
                         },

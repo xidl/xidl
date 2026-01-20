@@ -30,6 +30,19 @@ pub struct AnnotationParam {
     pub value: Option<ConstExpr>,
 }
 
+pub fn annotation_id_value(annotations: &[Annotation]) -> Option<u32> {
+    for annotation in annotations {
+        if let Annotation::Id { value } = annotation {
+            if let Some(value) = super::expr::const_expr_to_i64(value) {
+                if value >= 0 && value <= u32::MAX as i64 {
+                    return Some(value as u32);
+                }
+            }
+        }
+    }
+    None
+}
+
 pub fn expand_annotations(values: Vec<crate::typed_ast::AnnotationAppl>) -> Vec<Annotation> {
     let mut out = Vec::new();
     for value in values {

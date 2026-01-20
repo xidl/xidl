@@ -79,7 +79,9 @@ impl xidl_xcdr::XcdrSerialize for A {
         serializer.begin_struct()?;
 
 
+
         serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
         xidl_xcdr::XcdrSerialize::serialize_with(&self.a, serializer)?;
         serializer.end_field()?;
 
@@ -128,7 +130,9 @@ impl xidl_xcdr::XcdrSerialize for A {
         serializer.begin_struct()?;
 
 
+
         serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
         xidl_xcdr::XcdrSerialize::serialize_with(&self.a, serializer)?;
         serializer.end_field()?;
 
@@ -263,7 +267,9 @@ impl xidl_xcdr::XcdrSerialize for _Custom {
         serializer.begin_struct()?;
 
 
+
         serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
         xidl_xcdr::XcdrSerialize::serialize_with(&self.var_inner, serializer)?;
         serializer.end_field()?;
 
@@ -324,31 +330,45 @@ impl xidl_xcdr::XcdrSerialize for HelloWorld {
         serializer.begin_struct()?;
 
 
+
         serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
         xidl_xcdr::XcdrSerialize::serialize_with(&self.a, serializer)?;
         serializer.end_field()?;
 
+
         serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
         xidl_xcdr::XcdrSerialize::serialize_with(&self.b, serializer)?;
         serializer.end_field()?;
 
+
         serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+
         xidl_xcdr::XcdrSerialize::serialize_with(&self.c, serializer)?;
         serializer.end_field()?;
+
 
         serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
+
         xidl_xcdr::XcdrSerialize::serialize_with(&self.c, serializer)?;
         serializer.end_field()?;
 
+
         serializer.begin_field(xidl_xcdr::FieldId(5u32), false, 0)?;
+
         xidl_xcdr::XcdrSerialize::serialize_with(&self.d, serializer)?;
         serializer.end_field()?;
+
 
         serializer.begin_field(xidl_xcdr::FieldId(6u32), false, 0)?;
+
         xidl_xcdr::XcdrSerialize::serialize_with(&self.d, serializer)?;
         serializer.end_field()?;
 
+
         serializer.begin_field(xidl_xcdr::FieldId(7u32), false, 0)?;
+
         xidl_xcdr::XcdrSerialize::serialize_with(&self.d, serializer)?;
         serializer.end_field()?;
 

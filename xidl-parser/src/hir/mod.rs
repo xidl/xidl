@@ -201,6 +201,7 @@ pub struct ElementSpec {
     pub annotations: Vec<Annotation>,
     pub ty: ElementSpecTy,
     pub value: Declarator,
+    pub field_id: Option<u32>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -482,11 +483,33 @@ impl From<crate::typed_ast::UnionForwardDcl> for UnionForwardDcl {
 
 impl From<crate::typed_ast::UnionDef> for UnionDef {
     fn from(value: crate::typed_ast::UnionDef) -> Self {
+        let mut cases = value
+            .case
+            .into_iter()
+            .map(Into::into)
+            .collect::<Vec<Case>>();
+        let mut member_ids = std::collections::HashMap::new();
+        let mut next_field_id = 1u32;
+        for case in cases.iter_mut() {
+            let name = declarator_name(&case.element.value).to_string();
+            if let Some(id) = case.element.field_id {
+                let entry = member_ids.entry(name.clone()).or_insert(id);
+                case.element.field_id = Some(*entry);
+                continue;
+            }
+            if let Some(existing) = member_ids.get(&name) {
+                case.element.field_id = Some(*existing);
+                continue;
+            }
+            member_ids.insert(name, next_field_id);
+            case.element.field_id = Some(next_field_id);
+            next_field_id += 1;
+        }
         Self {
             annotations: vec![],
             ident: value.ident.0,
             switch_type_spec: value.switch_type_spec.into(),
-            case: value.case.into_iter().map(Into::into).collect(),
+            case: cases,
         }
     }
 }
@@ -511,10 +534,13 @@ impl From<crate::typed_ast::CaseLabel> for CaseLabel {
 
 impl From<crate::typed_ast::ElementSpec> for ElementSpec {
     fn from(value: crate::typed_ast::ElementSpec) -> Self {
+        let annotations = expand_annotations(value.annotations);
+        let field_id = annotation_id_value(&annotations);
         Self {
-            annotations: expand_annotations(value.annotations),
+            annotations,
             ty: value.ty.into(),
             value: value.value.into(),
+            field_id,
         }
     }
 }
@@ -544,6 +570,13 @@ impl From<crate::typed_ast::SwitchTypeSpec> for SwitchTypeSpec {
             }
             crate::typed_ast::SwitchTypeSpec::OctetType(_) => Self::OctetType,
         }
+    }
+}
+
+fn declarator_name(value: &Declarator) -> &str {
+    match value {
+        Declarator::SimpleDeclarator(value) => &value.0,
+        Declarator::ArrayDeclarator(value) => &value.ident,
     }
 }
 

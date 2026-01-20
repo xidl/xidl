@@ -42,11 +42,15 @@ impl xidl_xcdr::XcdrSerialize for S {
         serializer.begin_struct()?;
 
 
+
         serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
         xidl_xcdr::XcdrSerialize::serialize_with(&self.a, serializer)?;
         serializer.end_field()?;
 
+
         serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
         xidl_xcdr::XcdrSerialize::serialize_with(&self.b, serializer)?;
         serializer.end_field()?;
 
@@ -167,7 +171,7 @@ impl xidl_xcdr::XcdrSerialize for U {
                         "union member is not set for discriminator".to_string(),
                     )
                 })?;
-                serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
                 xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                 serializer.end_field()?;
             }
@@ -178,7 +182,7 @@ impl xidl_xcdr::XcdrSerialize for U {
                         "union member is not set for discriminator".to_string(),
                     )
                 })?;
-                serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
                 xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                 serializer.end_field()?;
             }
@@ -245,7 +249,9 @@ impl xidl_xcdr::XcdrSerialize for I_ping_In {
         serializer.begin_struct()?;
 
 
+
         serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
         xidl_xcdr::XcdrSerialize::serialize_with(&self.dummy, serializer)?;
         serializer.end_field()?;
 
@@ -294,7 +300,9 @@ impl xidl_xcdr::XcdrSerialize for I_ping_Out {
         serializer.begin_struct()?;
 
 
+
         serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
         xidl_xcdr::XcdrSerialize::serialize_with(&self.dummy, serializer)?;
         serializer.end_field()?;
 
@@ -343,7 +351,7 @@ impl xidl_xcdr::XcdrSerialize for I_ping_Result {
                         "union member is not set for discriminator".to_string(),
                     )
                 })?;
-                serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
                 xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                 serializer.end_field()?;
             }
@@ -405,7 +413,9 @@ impl xidl_xcdr::XcdrSerialize for I_get_attribute_value_In {
         serializer.begin_struct()?;
 
 
+
         serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
         xidl_xcdr::XcdrSerialize::serialize_with(&self.dummy, serializer)?;
         serializer.end_field()?;
 
@@ -454,7 +464,9 @@ impl xidl_xcdr::XcdrSerialize for I_get_attribute_value_Out {
         serializer.begin_struct()?;
 
 
+
         serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
         xidl_xcdr::XcdrSerialize::serialize_with(&self.return_, serializer)?;
         serializer.end_field()?;
 
@@ -503,7 +515,7 @@ impl xidl_xcdr::XcdrSerialize for I_get_attribute_value_Result {
                         "union member is not set for discriminator".to_string(),
                     )
                 })?;
-                serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
                 xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                 serializer.end_field()?;
             }
@@ -565,7 +577,9 @@ impl xidl_xcdr::XcdrSerialize for I_set_attribute_value_In {
         serializer.begin_struct()?;
 
 
+
         serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
         xidl_xcdr::XcdrSerialize::serialize_with(&self.value, serializer)?;
         serializer.end_field()?;
 
@@ -614,7 +628,9 @@ impl xidl_xcdr::XcdrSerialize for I_set_attribute_value_Out {
         serializer.begin_struct()?;
 
 
+
         serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
         xidl_xcdr::XcdrSerialize::serialize_with(&self.dummy, serializer)?;
         serializer.end_field()?;
 
@@ -663,7 +679,7 @@ impl xidl_xcdr::XcdrSerialize for I_set_attribute_value_Result {
                         "union member is not set for discriminator".to_string(),
                     )
                 })?;
-                serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
                 xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                 serializer.end_field()?;
             }
@@ -731,7 +747,7 @@ impl xidl_xcdr::XcdrSerialize for I_Call {
                         "union member is not set for discriminator".to_string(),
                     )
                 })?;
-                serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
                 xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                 serializer.end_field()?;
             }
@@ -742,7 +758,7 @@ impl xidl_xcdr::XcdrSerialize for I_Call {
                         "union member is not set for discriminator".to_string(),
                     )
                 })?;
-                serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
                 xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                 serializer.end_field()?;
             }
@@ -753,7 +769,7 @@ impl xidl_xcdr::XcdrSerialize for I_Call {
                         "union member is not set for discriminator".to_string(),
                     )
                 })?;
-                serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
                 xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                 serializer.end_field()?;
             }
@@ -764,7 +780,7 @@ impl xidl_xcdr::XcdrSerialize for I_Call {
                         "union member is not set for discriminator".to_string(),
                     )
                 })?;
-                serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
                 xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                 serializer.end_field()?;
             }
@@ -842,11 +858,15 @@ impl xidl_xcdr::XcdrSerialize for I_Request {
         serializer.begin_struct()?;
 
 
+
         serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
         xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
         serializer.end_field()?;
 
+
         serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
         xidl_xcdr::XcdrSerialize::serialize_with(&self.data, serializer)?;
         serializer.end_field()?;
 
@@ -905,7 +925,7 @@ impl xidl_xcdr::XcdrSerialize for I_Return {
                         "union member is not set for discriminator".to_string(),
                     )
                 })?;
-                serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
                 xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                 serializer.end_field()?;
             }
@@ -916,7 +936,7 @@ impl xidl_xcdr::XcdrSerialize for I_Return {
                         "union member is not set for discriminator".to_string(),
                     )
                 })?;
-                serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
                 xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                 serializer.end_field()?;
             }
@@ -927,7 +947,7 @@ impl xidl_xcdr::XcdrSerialize for I_Return {
                         "union member is not set for discriminator".to_string(),
                     )
                 })?;
-                serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
                 xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                 serializer.end_field()?;
             }
@@ -938,7 +958,7 @@ impl xidl_xcdr::XcdrSerialize for I_Return {
                         "union member is not set for discriminator".to_string(),
                     )
                 })?;
-                serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
                 xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                 serializer.end_field()?;
             }
@@ -1016,11 +1036,15 @@ impl xidl_xcdr::XcdrSerialize for I_Reply {
         serializer.begin_struct()?;
 
 
+
         serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+
         xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
         serializer.end_field()?;
 
+
         serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+
         xidl_xcdr::XcdrSerialize::serialize_with(&self.data, serializer)?;
         serializer.end_field()?;
 

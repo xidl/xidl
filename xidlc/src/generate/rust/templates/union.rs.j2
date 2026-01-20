@@ -22,7 +22,7 @@ impl xidl_xcdr::XcdrSerialize for {{ ident }} {
                         "union member is not set for discriminator".to_string(),
                     )
                 })?;
-                serializer.begin_field(xidl_xcdr::FieldId(1), false, 0)?;
+                serializer.begin_field(xidl_xcdr::FieldId({{ case.field_id }}), false, 0)?;
                 xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
                 serializer.end_field()?;
             }
