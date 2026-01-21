@@ -4,6 +4,7 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
+#![allow(unreachable_patterns)]
 
 use std::collections::BTreeMap;
 use std::ffi::c_void;
@@ -72,12 +73,35 @@ pub mod DDS {
             pub hash: Option<Box<EquivalenceHash>>,
         }
 
+        impl TypeObjectHashId {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+
+            pub fn new_hash(value: Box<EquivalenceHash>) -> Self {
+                Self {
+                    _d: EK_COMPLETE | EK_MINIMAL,
+                    hash: Some(value),
+                }
+            }
+
+            pub fn is_hash(&self) -> bool {
+                matches!(self._d, EK_COMPLETE | EK_MINIMAL)
+            }
+
+            pub fn tag(&self) -> &u8 {
+                &self._d
+            }
+        }
+
         impl xidl_xcdr::XcdrSerialize for TypeObjectHashId {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
             fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
                 serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
                 xidl_xcdr::XcdrSerialize::serialize_with(&self._d, serializer)?;
                 serializer.end_field()?;
@@ -116,6 +140,45 @@ pub mod DDS {
                 Ok(out)
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for TypeObjectHashId {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_union(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_primitive(
+                        xidl_typeobject::DDS::XTypes::TK_BYTE,
+                    ),
+                    vec![xidl_typeobject::runtime::UnionMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<EquivalenceHash>(
+                            xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                        ),
+                        name: "hash",
+                        labels: vec![0i32, 0i32],
+                    }],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_union(
+                    "DDS::XTypes::TypeObjectHashId",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_primitive(
+                        xidl_typeobject::DDS::XTypes::TK_BYTE,
+                    ),
+                    vec![xidl_typeobject::runtime::UnionMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<EquivalenceHash>(
+                            xidl_typeobject::runtime::TypeEquivalence::Complete,
+                        ),
+                        name: "hash",
+                        labels: vec![0i32, 0i32],
+                    }],
+                )
+            }
+        }
         pub struct MemberFlag {
             pub value: u32,
         }
@@ -151,6 +214,97 @@ pub mod DDS {
             ) -> xidl_xcdr::error::XcdrResult<Self> {
                 let value = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
                 Ok(Self { value })
+            }
+        }
+
+        impl xidl_typeobject::XidlTypeObject for MemberFlag {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_bitmask(
+                    0u32,
+                    32u16,
+                    vec![
+                        xidl_typeobject::runtime::BitflagDesc {
+                            position: 0u16,
+                            flags: 0u32,
+                            name: "TRY_CONSTRUCT1",
+                        },
+                        xidl_typeobject::runtime::BitflagDesc {
+                            position: 1u16,
+                            flags: 0u32,
+                            name: "TRY_CONSTRUCT2",
+                        },
+                        xidl_typeobject::runtime::BitflagDesc {
+                            position: 2u16,
+                            flags: 0u32,
+                            name: "IS_EXTERNAL",
+                        },
+                        xidl_typeobject::runtime::BitflagDesc {
+                            position: 3u16,
+                            flags: 0u32,
+                            name: "IS_OPTIONAL",
+                        },
+                        xidl_typeobject::runtime::BitflagDesc {
+                            position: 4u16,
+                            flags: 0u32,
+                            name: "IS_MUST_UNDERSTAND",
+                        },
+                        xidl_typeobject::runtime::BitflagDesc {
+                            position: 5u16,
+                            flags: 0u32,
+                            name: "IS_KEY",
+                        },
+                        xidl_typeobject::runtime::BitflagDesc {
+                            position: 6u16,
+                            flags: 0u32,
+                            name: "IS_DEFAULT",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_bitmask(
+                    "DDS::XTypes::MemberFlag",
+                    0u32,
+                    32u16,
+                    vec![
+                        xidl_typeobject::runtime::BitflagDesc {
+                            position: 0u16,
+                            flags: 0u32,
+                            name: "TRY_CONSTRUCT1",
+                        },
+                        xidl_typeobject::runtime::BitflagDesc {
+                            position: 1u16,
+                            flags: 0u32,
+                            name: "TRY_CONSTRUCT2",
+                        },
+                        xidl_typeobject::runtime::BitflagDesc {
+                            position: 2u16,
+                            flags: 0u32,
+                            name: "IS_EXTERNAL",
+                        },
+                        xidl_typeobject::runtime::BitflagDesc {
+                            position: 3u16,
+                            flags: 0u32,
+                            name: "IS_OPTIONAL",
+                        },
+                        xidl_typeobject::runtime::BitflagDesc {
+                            position: 4u16,
+                            flags: 0u32,
+                            name: "IS_MUST_UNDERSTAND",
+                        },
+                        xidl_typeobject::runtime::BitflagDesc {
+                            position: 5u16,
+                            flags: 0u32,
+                            name: "IS_KEY",
+                        },
+                        xidl_typeobject::runtime::BitflagDesc {
+                            position: 6u16,
+                            flags: 0u32,
+                            name: "IS_DEFAULT",
+                        },
+                    ],
+                )
             }
         }
         pub type CollectionElementFlag = MemberFlag;
@@ -196,6 +350,77 @@ pub mod DDS {
                 Ok(Self { value })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for TypeFlag {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_bitmask(
+                    0u32,
+                    32u16,
+                    vec![
+                        xidl_typeobject::runtime::BitflagDesc {
+                            position: 0u16,
+                            flags: 0u32,
+                            name: "IS_FINAL",
+                        },
+                        xidl_typeobject::runtime::BitflagDesc {
+                            position: 1u16,
+                            flags: 0u32,
+                            name: "IS_APPENDABLE",
+                        },
+                        xidl_typeobject::runtime::BitflagDesc {
+                            position: 2u16,
+                            flags: 0u32,
+                            name: "IS_MUTABLE",
+                        },
+                        xidl_typeobject::runtime::BitflagDesc {
+                            position: 3u16,
+                            flags: 0u32,
+                            name: "IS_NESTED",
+                        },
+                        xidl_typeobject::runtime::BitflagDesc {
+                            position: 4u16,
+                            flags: 0u32,
+                            name: "IS_AUTOID_HASH",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_bitmask(
+                    "DDS::XTypes::TypeFlag",
+                    0u32,
+                    32u16,
+                    vec![
+                        xidl_typeobject::runtime::BitflagDesc {
+                            position: 0u16,
+                            flags: 0u32,
+                            name: "IS_FINAL",
+                        },
+                        xidl_typeobject::runtime::BitflagDesc {
+                            position: 1u16,
+                            flags: 0u32,
+                            name: "IS_APPENDABLE",
+                        },
+                        xidl_typeobject::runtime::BitflagDesc {
+                            position: 2u16,
+                            flags: 0u32,
+                            name: "IS_MUTABLE",
+                        },
+                        xidl_typeobject::runtime::BitflagDesc {
+                            position: 3u16,
+                            flags: 0u32,
+                            name: "IS_NESTED",
+                        },
+                        xidl_typeobject::runtime::BitflagDesc {
+                            position: 4u16,
+                            flags: 0u32,
+                            name: "IS_AUTOID_HASH",
+                        },
+                    ],
+                )
+            }
+        }
         pub type StructTypeFlag = TypeFlag;
         pub type UnionTypeFlag = TypeFlag;
         pub type CollectionTypeFlag = TypeFlag;
@@ -222,7 +447,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -243,6 +468,39 @@ pub mod DDS {
                 Ok(Self { bound })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for StringSTypeDefn {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<SBound>(
+                            xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                        ),
+                        name: "bound",
+                    }],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::StringSTypeDefn",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<SBound>(
+                            xidl_typeobject::runtime::TypeEquivalence::Complete,
+                        ),
+                        name: "bound",
+                    }],
+                )
+            }
+        }
         pub struct StringLTypeDefn {
             pub bound: Box<LBound>,
         }
@@ -260,7 +518,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -279,6 +537,39 @@ pub mod DDS {
                 let bound = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
 
                 Ok(Self { bound })
+            }
+        }
+
+        impl xidl_typeobject::XidlTypeObject for StringLTypeDefn {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<LBound>(
+                            xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                        ),
+                        name: "bound",
+                    }],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::StringLTypeDefn",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<LBound>(
+                            xidl_typeobject::runtime::TypeEquivalence::Complete,
+                        ),
+                        name: "bound",
+                    }],
+                )
             }
         }
         pub struct PlainCollectionHeader {
@@ -300,7 +591,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -332,6 +623,63 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for PlainCollectionHeader {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<EquivalenceKind>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "equiv_kind",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CollectionElementFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "element_flags",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::PlainCollectionHeader",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<EquivalenceKind>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "equiv_kind",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CollectionElementFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "element_flags",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct PlainSequenceSElemDefn {
             pub header: Box<PlainCollectionHeader>,
 
@@ -353,7 +701,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -394,6 +742,79 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for PlainSequenceSElemDefn {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                PlainCollectionHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<SBound>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "bound",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 4u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "element_identifier",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::PlainSequenceSElemDefn",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                PlainCollectionHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<SBound>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "bound",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 4u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "element_identifier",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct PlainSequenceLElemDefn {
             pub header: Box<PlainCollectionHeader>,
 
@@ -415,7 +836,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -456,6 +877,79 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for PlainSequenceLElemDefn {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                PlainCollectionHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<LBound>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "bound",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 4u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "element_identifier",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::PlainSequenceLElemDefn",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                PlainCollectionHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<LBound>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "bound",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 4u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "element_identifier",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct PlainArraySElemDefn {
             pub header: Box<PlainCollectionHeader>,
 
@@ -477,7 +971,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -518,6 +1012,79 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for PlainArraySElemDefn {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                PlainCollectionHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<SBoundSeq>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "array_bound_seq",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 4u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "element_identifier",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::PlainArraySElemDefn",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                PlainCollectionHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<SBoundSeq>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "array_bound_seq",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 4u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "element_identifier",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct PlainArrayLElemDefn {
             pub header: Box<PlainCollectionHeader>,
 
@@ -539,7 +1106,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -580,6 +1147,79 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for PlainArrayLElemDefn {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                PlainCollectionHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<LBoundSeq>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "array_bound_seq",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 4u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "element_identifier",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::PlainArrayLElemDefn",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                PlainCollectionHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<LBoundSeq>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "array_bound_seq",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 4u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "element_identifier",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct PlainMapSTypeDefn {
             pub header: Box<PlainCollectionHeader>,
 
@@ -605,7 +1245,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -664,6 +1304,115 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for PlainMapSTypeDefn {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                PlainCollectionHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<SBound>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "bound",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 4u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "element_identifier",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 4u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CollectionElementFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "key_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 5u32,
+                            member_flags: 4u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "key_identifier",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::PlainMapSTypeDefn",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                PlainCollectionHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<SBound>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "bound",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 4u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "element_identifier",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 4u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CollectionElementFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "key_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 5u32,
+                            member_flags: 4u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "key_identifier",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct PlainMapLTypeDefn {
             pub header: Box<PlainCollectionHeader>,
 
@@ -689,7 +1438,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -748,6 +1497,115 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for PlainMapLTypeDefn {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                PlainCollectionHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<LBound>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "bound",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 4u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "element_identifier",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 4u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CollectionElementFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "key_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 5u32,
+                            member_flags: 4u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "key_identifier",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::PlainMapLTypeDefn",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                PlainCollectionHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<LBound>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "bound",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 4u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "element_identifier",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 4u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CollectionElementFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "key_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 5u32,
+                            member_flags: 4u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "key_identifier",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct StronglyConnectedComponentId {
             pub sc_component_id: Box<TypeObjectHashId>,
 
@@ -769,7 +1627,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -810,6 +1668,79 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for StronglyConnectedComponentId {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                TypeObjectHashId,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "sc_component_id",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_INT32,
+                            ),
+                            name: "scc_length",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_INT32,
+                            ),
+                            name: "scc_index",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::StronglyConnectedComponentId",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                TypeObjectHashId,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "sc_component_id",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_INT32,
+                            ),
+                            name: "scc_length",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_INT32,
+                            ),
+                            name: "scc_index",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct ExtendedTypeDefn {}
 
         impl ExtendedTypeDefn {
@@ -825,7 +1756,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.end_struct()?;
                 Ok(())
@@ -837,6 +1768,25 @@ pub mod DDS {
                 deserializer: &mut D,
             ) -> xidl_xcdr::error::XcdrResult<Self> {
                 Ok(Self {})
+            }
+        }
+
+        impl xidl_typeobject::XidlTypeObject for ExtendedTypeDefn {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::ExtendedTypeDefn",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![],
+                )
             }
         }
         pub struct TypeIdentifier {
@@ -865,12 +1815,365 @@ pub mod DDS {
             pub extended_defn: Option<Box<ExtendedTypeDefn>>,
         }
 
+        impl TypeIdentifier {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+
+            pub fn new_string_sdefn(value: Box<StringSTypeDefn>) -> Self {
+                Self {
+                    _d: TI_STRING8_SMALL | TI_STRING16_SMALL,
+                    string_sdefn: Some(value),
+
+                    string_ldefn: None,
+
+                    seq_sdefn: None,
+
+                    seq_ldefn: None,
+
+                    array_sdefn: None,
+
+                    array_ldefn: None,
+
+                    map_sdefn: None,
+
+                    map_ldefn: None,
+
+                    sc_component_id: None,
+
+                    equivalence_hash: None,
+
+                    extended_defn: None,
+                }
+            }
+
+            pub fn is_string_sdefn(&self) -> bool {
+                matches!(self._d, TI_STRING8_SMALL | TI_STRING16_SMALL)
+            }
+
+            pub fn new_string_ldefn(value: Box<StringLTypeDefn>) -> Self {
+                Self {
+                    _d: TI_STRING8_LARGE | TI_STRING16_LARGE,
+                    string_ldefn: Some(value),
+
+                    string_sdefn: None,
+
+                    seq_sdefn: None,
+
+                    seq_ldefn: None,
+
+                    array_sdefn: None,
+
+                    array_ldefn: None,
+
+                    map_sdefn: None,
+
+                    map_ldefn: None,
+
+                    sc_component_id: None,
+
+                    equivalence_hash: None,
+
+                    extended_defn: None,
+                }
+            }
+
+            pub fn is_string_ldefn(&self) -> bool {
+                matches!(self._d, TI_STRING8_LARGE | TI_STRING16_LARGE)
+            }
+
+            pub fn new_seq_sdefn(value: Box<PlainSequenceSElemDefn>) -> Self {
+                Self {
+                    _d: TI_PLAIN_SEQUENCE_SMALL,
+                    seq_sdefn: Some(value),
+
+                    string_sdefn: None,
+
+                    string_ldefn: None,
+
+                    seq_ldefn: None,
+
+                    array_sdefn: None,
+
+                    array_ldefn: None,
+
+                    map_sdefn: None,
+
+                    map_ldefn: None,
+
+                    sc_component_id: None,
+
+                    equivalence_hash: None,
+
+                    extended_defn: None,
+                }
+            }
+
+            pub fn is_seq_sdefn(&self) -> bool {
+                matches!(self._d, TI_PLAIN_SEQUENCE_SMALL)
+            }
+
+            pub fn new_seq_ldefn(value: Box<PlainSequenceLElemDefn>) -> Self {
+                Self {
+                    _d: TI_PLAIN_SEQUENCE_LARGE,
+                    seq_ldefn: Some(value),
+
+                    string_sdefn: None,
+
+                    string_ldefn: None,
+
+                    seq_sdefn: None,
+
+                    array_sdefn: None,
+
+                    array_ldefn: None,
+
+                    map_sdefn: None,
+
+                    map_ldefn: None,
+
+                    sc_component_id: None,
+
+                    equivalence_hash: None,
+
+                    extended_defn: None,
+                }
+            }
+
+            pub fn is_seq_ldefn(&self) -> bool {
+                matches!(self._d, TI_PLAIN_SEQUENCE_LARGE)
+            }
+
+            pub fn new_array_sdefn(value: Box<PlainArraySElemDefn>) -> Self {
+                Self {
+                    _d: TI_PLAIN_ARRAY_SMALL,
+                    array_sdefn: Some(value),
+
+                    string_sdefn: None,
+
+                    string_ldefn: None,
+
+                    seq_sdefn: None,
+
+                    seq_ldefn: None,
+
+                    array_ldefn: None,
+
+                    map_sdefn: None,
+
+                    map_ldefn: None,
+
+                    sc_component_id: None,
+
+                    equivalence_hash: None,
+
+                    extended_defn: None,
+                }
+            }
+
+            pub fn is_array_sdefn(&self) -> bool {
+                matches!(self._d, TI_PLAIN_ARRAY_SMALL)
+            }
+
+            pub fn new_array_ldefn(value: Box<PlainArrayLElemDefn>) -> Self {
+                Self {
+                    _d: TI_PLAIN_ARRAY_LARGE,
+                    array_ldefn: Some(value),
+
+                    string_sdefn: None,
+
+                    string_ldefn: None,
+
+                    seq_sdefn: None,
+
+                    seq_ldefn: None,
+
+                    array_sdefn: None,
+
+                    map_sdefn: None,
+
+                    map_ldefn: None,
+
+                    sc_component_id: None,
+
+                    equivalence_hash: None,
+
+                    extended_defn: None,
+                }
+            }
+
+            pub fn is_array_ldefn(&self) -> bool {
+                matches!(self._d, TI_PLAIN_ARRAY_LARGE)
+            }
+
+            pub fn new_map_sdefn(value: Box<PlainMapSTypeDefn>) -> Self {
+                Self {
+                    _d: TI_PLAIN_MAP_SMALL,
+                    map_sdefn: Some(value),
+
+                    string_sdefn: None,
+
+                    string_ldefn: None,
+
+                    seq_sdefn: None,
+
+                    seq_ldefn: None,
+
+                    array_sdefn: None,
+
+                    array_ldefn: None,
+
+                    map_ldefn: None,
+
+                    sc_component_id: None,
+
+                    equivalence_hash: None,
+
+                    extended_defn: None,
+                }
+            }
+
+            pub fn is_map_sdefn(&self) -> bool {
+                matches!(self._d, TI_PLAIN_MAP_SMALL)
+            }
+
+            pub fn new_map_ldefn(value: Box<PlainMapLTypeDefn>) -> Self {
+                Self {
+                    _d: TI_PLAIN_MAP_LARGE,
+                    map_ldefn: Some(value),
+
+                    string_sdefn: None,
+
+                    string_ldefn: None,
+
+                    seq_sdefn: None,
+
+                    seq_ldefn: None,
+
+                    array_sdefn: None,
+
+                    array_ldefn: None,
+
+                    map_sdefn: None,
+
+                    sc_component_id: None,
+
+                    equivalence_hash: None,
+
+                    extended_defn: None,
+                }
+            }
+
+            pub fn is_map_ldefn(&self) -> bool {
+                matches!(self._d, TI_PLAIN_MAP_LARGE)
+            }
+
+            pub fn new_sc_component_id(value: Box<StronglyConnectedComponentId>) -> Self {
+                Self {
+                    _d: TI_STRONGLY_CONNECTED_COMPONENT,
+                    sc_component_id: Some(value),
+
+                    string_sdefn: None,
+
+                    string_ldefn: None,
+
+                    seq_sdefn: None,
+
+                    seq_ldefn: None,
+
+                    array_sdefn: None,
+
+                    array_ldefn: None,
+
+                    map_sdefn: None,
+
+                    map_ldefn: None,
+
+                    equivalence_hash: None,
+
+                    extended_defn: None,
+                }
+            }
+
+            pub fn is_sc_component_id(&self) -> bool {
+                matches!(self._d, TI_STRONGLY_CONNECTED_COMPONENT)
+            }
+
+            pub fn new_equivalence_hash(value: Box<EquivalenceHash>) -> Self {
+                Self {
+                    _d: EK_COMPLETE | EK_MINIMAL,
+                    equivalence_hash: Some(value),
+
+                    string_sdefn: None,
+
+                    string_ldefn: None,
+
+                    seq_sdefn: None,
+
+                    seq_ldefn: None,
+
+                    array_sdefn: None,
+
+                    array_ldefn: None,
+
+                    map_sdefn: None,
+
+                    map_ldefn: None,
+
+                    sc_component_id: None,
+
+                    extended_defn: None,
+                }
+            }
+
+            pub fn is_equivalence_hash(&self) -> bool {
+                matches!(self._d, EK_COMPLETE | EK_MINIMAL)
+            }
+
+            pub fn new_extended_defn(value: Box<ExtendedTypeDefn>) -> Self {
+                Self {
+                    _d: u8::default(),
+                    extended_defn: Some(value),
+
+                    string_sdefn: None,
+
+                    string_ldefn: None,
+
+                    seq_sdefn: None,
+
+                    seq_ldefn: None,
+
+                    array_sdefn: None,
+
+                    array_ldefn: None,
+
+                    map_sdefn: None,
+
+                    map_ldefn: None,
+
+                    sc_component_id: None,
+
+                    equivalence_hash: None,
+                }
+            }
+
+            pub fn is_extended_defn(&self) -> bool {
+                matches!(self._d, _)
+            }
+
+            pub fn tag(&self) -> &u8 {
+                &self._d
+            }
+        }
+
         impl xidl_xcdr::XcdrSerialize for TypeIdentifier {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
             fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
                 serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
                 xidl_xcdr::XcdrSerialize::serialize_with(&self._d, serializer)?;
                 serializer.end_field()?;
@@ -1090,6 +2393,261 @@ pub mod DDS {
                 Ok(out)
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for TypeIdentifier {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_union(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_primitive(
+                        xidl_typeobject::DDS::XTypes::TK_BYTE,
+                    ),
+                    vec![
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<StringSTypeDefn>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "string_sdefn",
+                            labels: vec![0i32, 0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                PlainSequenceSElemDefn,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "seq_sdefn",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 9u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                StronglyConnectedComponentId,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "sc_component_id",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 11u32,
+                            member_flags: 64u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                ExtendedTypeDefn,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "extended_defn",
+                            labels: vec![],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 5u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                PlainArraySElemDefn,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "array_sdefn",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 10u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<EquivalenceHash>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "equivalence_hash",
+                            labels: vec![0i32, 0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 4u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                PlainSequenceLElemDefn,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "seq_ldefn",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 6u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                PlainArrayLElemDefn,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "array_ldefn",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 7u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                PlainMapSTypeDefn,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "map_sdefn",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<StringLTypeDefn>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "string_ldefn",
+                            labels: vec![0i32, 0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 8u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                PlainMapLTypeDefn,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "map_ldefn",
+                            labels: vec![0i32],
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_union(
+                    "DDS::XTypes::TypeIdentifier",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_primitive(
+                        xidl_typeobject::DDS::XTypes::TK_BYTE,
+                    ),
+                    vec![
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<StringSTypeDefn>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "string_sdefn",
+                            labels: vec![0i32, 0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                PlainSequenceSElemDefn,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "seq_sdefn",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 9u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                StronglyConnectedComponentId,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "sc_component_id",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 11u32,
+                            member_flags: 64u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                ExtendedTypeDefn,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "extended_defn",
+                            labels: vec![],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 5u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                PlainArraySElemDefn,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "array_sdefn",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 10u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<EquivalenceHash>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "equivalence_hash",
+                            labels: vec![0i32, 0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 4u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                PlainSequenceLElemDefn,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "seq_ldefn",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 6u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                PlainArrayLElemDefn,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "array_ldefn",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 7u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                PlainMapSTypeDefn,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "map_sdefn",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<StringLTypeDefn>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "string_ldefn",
+                            labels: vec![0i32, 0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 8u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                PlainMapLTypeDefn,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "map_ldefn",
+                            labels: vec![0i32],
+                        },
+                    ],
+                )
+            }
+        }
         pub type TypeIdentifierSeq = Vec<TypeIdentifier>;
         pub type MemberId = u32;
         pub const ANNOTATION_STR_VALUE_MAX_LEN: u32 = 128;
@@ -1109,7 +2667,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.end_struct()?;
                 Ok(())
@@ -1121,6 +2679,25 @@ pub mod DDS {
                 deserializer: &mut D,
             ) -> xidl_xcdr::error::XcdrResult<Self> {
                 Ok(Self {})
+            }
+        }
+
+        impl xidl_typeobject::XidlTypeObject for ExtendedAnnotationParameterValue {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::ExtendedAnnotationParameterValue",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![],
+                )
             }
         }
         pub struct AnnotationParameterValue {
@@ -1161,12 +2738,755 @@ pub mod DDS {
             pub extended_value: Option<Box<ExtendedAnnotationParameterValue>>,
         }
 
+        impl AnnotationParameterValue {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+
+            pub fn new_boolean_value(value: bool) -> Self {
+                Self {
+                    _d: TK_BOOLEAN,
+                    boolean_value: Some(value),
+
+                    byte_value: None,
+
+                    int16_value: None,
+
+                    uint_16_value: None,
+
+                    int32_value: None,
+
+                    uint32_value: None,
+
+                    int64_value: None,
+
+                    uint64_value: None,
+
+                    float32_value: None,
+
+                    float64_value: None,
+
+                    float128_value: None,
+
+                    char_value: None,
+
+                    wchar_value: None,
+
+                    enumerated_value: None,
+
+                    string8_value: None,
+
+                    string16_value: None,
+
+                    extended_value: None,
+                }
+            }
+
+            pub fn is_boolean_value(&self) -> bool {
+                matches!(self._d, TK_BOOLEAN)
+            }
+
+            pub fn new_byte_value(value: u8) -> Self {
+                Self {
+                    _d: TK_BYTE,
+                    byte_value: Some(value),
+
+                    boolean_value: None,
+
+                    int16_value: None,
+
+                    uint_16_value: None,
+
+                    int32_value: None,
+
+                    uint32_value: None,
+
+                    int64_value: None,
+
+                    uint64_value: None,
+
+                    float32_value: None,
+
+                    float64_value: None,
+
+                    float128_value: None,
+
+                    char_value: None,
+
+                    wchar_value: None,
+
+                    enumerated_value: None,
+
+                    string8_value: None,
+
+                    string16_value: None,
+
+                    extended_value: None,
+                }
+            }
+
+            pub fn is_byte_value(&self) -> bool {
+                matches!(self._d, TK_BYTE)
+            }
+
+            pub fn new_int16_value(value: i16) -> Self {
+                Self {
+                    _d: TK_INT16,
+                    int16_value: Some(value),
+
+                    boolean_value: None,
+
+                    byte_value: None,
+
+                    uint_16_value: None,
+
+                    int32_value: None,
+
+                    uint32_value: None,
+
+                    int64_value: None,
+
+                    uint64_value: None,
+
+                    float32_value: None,
+
+                    float64_value: None,
+
+                    float128_value: None,
+
+                    char_value: None,
+
+                    wchar_value: None,
+
+                    enumerated_value: None,
+
+                    string8_value: None,
+
+                    string16_value: None,
+
+                    extended_value: None,
+                }
+            }
+
+            pub fn is_int16_value(&self) -> bool {
+                matches!(self._d, TK_INT16)
+            }
+
+            pub fn new_uint_16_value(value: u16) -> Self {
+                Self {
+                    _d: TK_UINT16,
+                    uint_16_value: Some(value),
+
+                    boolean_value: None,
+
+                    byte_value: None,
+
+                    int16_value: None,
+
+                    int32_value: None,
+
+                    uint32_value: None,
+
+                    int64_value: None,
+
+                    uint64_value: None,
+
+                    float32_value: None,
+
+                    float64_value: None,
+
+                    float128_value: None,
+
+                    char_value: None,
+
+                    wchar_value: None,
+
+                    enumerated_value: None,
+
+                    string8_value: None,
+
+                    string16_value: None,
+
+                    extended_value: None,
+                }
+            }
+
+            pub fn is_uint_16_value(&self) -> bool {
+                matches!(self._d, TK_UINT16)
+            }
+
+            pub fn new_int32_value(value: i32) -> Self {
+                Self {
+                    _d: TK_INT32,
+                    int32_value: Some(value),
+
+                    boolean_value: None,
+
+                    byte_value: None,
+
+                    int16_value: None,
+
+                    uint_16_value: None,
+
+                    uint32_value: None,
+
+                    int64_value: None,
+
+                    uint64_value: None,
+
+                    float32_value: None,
+
+                    float64_value: None,
+
+                    float128_value: None,
+
+                    char_value: None,
+
+                    wchar_value: None,
+
+                    enumerated_value: None,
+
+                    string8_value: None,
+
+                    string16_value: None,
+
+                    extended_value: None,
+                }
+            }
+
+            pub fn is_int32_value(&self) -> bool {
+                matches!(self._d, TK_INT32)
+            }
+
+            pub fn new_uint32_value(value: u32) -> Self {
+                Self {
+                    _d: TK_UINT32,
+                    uint32_value: Some(value),
+
+                    boolean_value: None,
+
+                    byte_value: None,
+
+                    int16_value: None,
+
+                    uint_16_value: None,
+
+                    int32_value: None,
+
+                    int64_value: None,
+
+                    uint64_value: None,
+
+                    float32_value: None,
+
+                    float64_value: None,
+
+                    float128_value: None,
+
+                    char_value: None,
+
+                    wchar_value: None,
+
+                    enumerated_value: None,
+
+                    string8_value: None,
+
+                    string16_value: None,
+
+                    extended_value: None,
+                }
+            }
+
+            pub fn is_uint32_value(&self) -> bool {
+                matches!(self._d, TK_UINT32)
+            }
+
+            pub fn new_int64_value(value: i64) -> Self {
+                Self {
+                    _d: TK_INT64,
+                    int64_value: Some(value),
+
+                    boolean_value: None,
+
+                    byte_value: None,
+
+                    int16_value: None,
+
+                    uint_16_value: None,
+
+                    int32_value: None,
+
+                    uint32_value: None,
+
+                    uint64_value: None,
+
+                    float32_value: None,
+
+                    float64_value: None,
+
+                    float128_value: None,
+
+                    char_value: None,
+
+                    wchar_value: None,
+
+                    enumerated_value: None,
+
+                    string8_value: None,
+
+                    string16_value: None,
+
+                    extended_value: None,
+                }
+            }
+
+            pub fn is_int64_value(&self) -> bool {
+                matches!(self._d, TK_INT64)
+            }
+
+            pub fn new_uint64_value(value: u64) -> Self {
+                Self {
+                    _d: TK_UINT64,
+                    uint64_value: Some(value),
+
+                    boolean_value: None,
+
+                    byte_value: None,
+
+                    int16_value: None,
+
+                    uint_16_value: None,
+
+                    int32_value: None,
+
+                    uint32_value: None,
+
+                    int64_value: None,
+
+                    float32_value: None,
+
+                    float64_value: None,
+
+                    float128_value: None,
+
+                    char_value: None,
+
+                    wchar_value: None,
+
+                    enumerated_value: None,
+
+                    string8_value: None,
+
+                    string16_value: None,
+
+                    extended_value: None,
+                }
+            }
+
+            pub fn is_uint64_value(&self) -> bool {
+                matches!(self._d, TK_UINT64)
+            }
+
+            pub fn new_float32_value(value: f64) -> Self {
+                Self {
+                    _d: TK_FLOAT32,
+                    float32_value: Some(value),
+
+                    boolean_value: None,
+
+                    byte_value: None,
+
+                    int16_value: None,
+
+                    uint_16_value: None,
+
+                    int32_value: None,
+
+                    uint32_value: None,
+
+                    int64_value: None,
+
+                    uint64_value: None,
+
+                    float64_value: None,
+
+                    float128_value: None,
+
+                    char_value: None,
+
+                    wchar_value: None,
+
+                    enumerated_value: None,
+
+                    string8_value: None,
+
+                    string16_value: None,
+
+                    extended_value: None,
+                }
+            }
+
+            pub fn is_float32_value(&self) -> bool {
+                matches!(self._d, TK_FLOAT32)
+            }
+
+            pub fn new_float64_value(value: f64) -> Self {
+                Self {
+                    _d: TK_FLOAT64,
+                    float64_value: Some(value),
+
+                    boolean_value: None,
+
+                    byte_value: None,
+
+                    int16_value: None,
+
+                    uint_16_value: None,
+
+                    int32_value: None,
+
+                    uint32_value: None,
+
+                    int64_value: None,
+
+                    uint64_value: None,
+
+                    float32_value: None,
+
+                    float128_value: None,
+
+                    char_value: None,
+
+                    wchar_value: None,
+
+                    enumerated_value: None,
+
+                    string8_value: None,
+
+                    string16_value: None,
+
+                    extended_value: None,
+                }
+            }
+
+            pub fn is_float64_value(&self) -> bool {
+                matches!(self._d, TK_FLOAT64)
+            }
+
+            pub fn new_float128_value(value: f64) -> Self {
+                Self {
+                    _d: TK_FLOAT128,
+                    float128_value: Some(value),
+
+                    boolean_value: None,
+
+                    byte_value: None,
+
+                    int16_value: None,
+
+                    uint_16_value: None,
+
+                    int32_value: None,
+
+                    uint32_value: None,
+
+                    int64_value: None,
+
+                    uint64_value: None,
+
+                    float32_value: None,
+
+                    float64_value: None,
+
+                    char_value: None,
+
+                    wchar_value: None,
+
+                    enumerated_value: None,
+
+                    string8_value: None,
+
+                    string16_value: None,
+
+                    extended_value: None,
+                }
+            }
+
+            pub fn is_float128_value(&self) -> bool {
+                matches!(self._d, TK_FLOAT128)
+            }
+
+            pub fn new_char_value(value: char) -> Self {
+                Self {
+                    _d: TK_CHAR8,
+                    char_value: Some(value),
+
+                    boolean_value: None,
+
+                    byte_value: None,
+
+                    int16_value: None,
+
+                    uint_16_value: None,
+
+                    int32_value: None,
+
+                    uint32_value: None,
+
+                    int64_value: None,
+
+                    uint64_value: None,
+
+                    float32_value: None,
+
+                    float64_value: None,
+
+                    float128_value: None,
+
+                    wchar_value: None,
+
+                    enumerated_value: None,
+
+                    string8_value: None,
+
+                    string16_value: None,
+
+                    extended_value: None,
+                }
+            }
+
+            pub fn is_char_value(&self) -> bool {
+                matches!(self._d, TK_CHAR8)
+            }
+
+            pub fn new_wchar_value(value: char) -> Self {
+                Self {
+                    _d: TK_CHAR16,
+                    wchar_value: Some(value),
+
+                    boolean_value: None,
+
+                    byte_value: None,
+
+                    int16_value: None,
+
+                    uint_16_value: None,
+
+                    int32_value: None,
+
+                    uint32_value: None,
+
+                    int64_value: None,
+
+                    uint64_value: None,
+
+                    float32_value: None,
+
+                    float64_value: None,
+
+                    float128_value: None,
+
+                    char_value: None,
+
+                    enumerated_value: None,
+
+                    string8_value: None,
+
+                    string16_value: None,
+
+                    extended_value: None,
+                }
+            }
+
+            pub fn is_wchar_value(&self) -> bool {
+                matches!(self._d, TK_CHAR16)
+            }
+
+            pub fn new_enumerated_value(value: i32) -> Self {
+                Self {
+                    _d: TK_ENUM,
+                    enumerated_value: Some(value),
+
+                    boolean_value: None,
+
+                    byte_value: None,
+
+                    int16_value: None,
+
+                    uint_16_value: None,
+
+                    int32_value: None,
+
+                    uint32_value: None,
+
+                    int64_value: None,
+
+                    uint64_value: None,
+
+                    float32_value: None,
+
+                    float64_value: None,
+
+                    float128_value: None,
+
+                    char_value: None,
+
+                    wchar_value: None,
+
+                    string8_value: None,
+
+                    string16_value: None,
+
+                    extended_value: None,
+                }
+            }
+
+            pub fn is_enumerated_value(&self) -> bool {
+                matches!(self._d, TK_ENUM)
+            }
+
+            pub fn new_string8_value(value: String) -> Self {
+                Self {
+                    _d: TK_STRING8,
+                    string8_value: Some(value),
+
+                    boolean_value: None,
+
+                    byte_value: None,
+
+                    int16_value: None,
+
+                    uint_16_value: None,
+
+                    int32_value: None,
+
+                    uint32_value: None,
+
+                    int64_value: None,
+
+                    uint64_value: None,
+
+                    float32_value: None,
+
+                    float64_value: None,
+
+                    float128_value: None,
+
+                    char_value: None,
+
+                    wchar_value: None,
+
+                    enumerated_value: None,
+
+                    string16_value: None,
+
+                    extended_value: None,
+                }
+            }
+
+            pub fn is_string8_value(&self) -> bool {
+                matches!(self._d, TK_STRING8)
+            }
+
+            pub fn new_string16_value(value: String) -> Self {
+                Self {
+                    _d: TK_STRING16,
+                    string16_value: Some(value),
+
+                    boolean_value: None,
+
+                    byte_value: None,
+
+                    int16_value: None,
+
+                    uint_16_value: None,
+
+                    int32_value: None,
+
+                    uint32_value: None,
+
+                    int64_value: None,
+
+                    uint64_value: None,
+
+                    float32_value: None,
+
+                    float64_value: None,
+
+                    float128_value: None,
+
+                    char_value: None,
+
+                    wchar_value: None,
+
+                    enumerated_value: None,
+
+                    string8_value: None,
+
+                    extended_value: None,
+                }
+            }
+
+            pub fn is_string16_value(&self) -> bool {
+                matches!(self._d, TK_STRING16)
+            }
+
+            pub fn new_extended_value(value: Box<ExtendedAnnotationParameterValue>) -> Self {
+                Self {
+                    _d: u8::default(),
+                    extended_value: Some(value),
+
+                    boolean_value: None,
+
+                    byte_value: None,
+
+                    int16_value: None,
+
+                    uint_16_value: None,
+
+                    int32_value: None,
+
+                    uint32_value: None,
+
+                    int64_value: None,
+
+                    uint64_value: None,
+
+                    float32_value: None,
+
+                    float64_value: None,
+
+                    float128_value: None,
+
+                    char_value: None,
+
+                    wchar_value: None,
+
+                    enumerated_value: None,
+
+                    string8_value: None,
+
+                    string16_value: None,
+                }
+            }
+
+            pub fn is_extended_value(&self) -> bool {
+                matches!(self._d, _)
+            }
+
+            pub fn tag(&self) -> &u8 {
+                &self._d
+            }
+        }
+
         impl xidl_xcdr::XcdrSerialize for AnnotationParameterValue {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
             fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
                 serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
                 xidl_xcdr::XcdrSerialize::serialize_with(&self._d, serializer)?;
                 serializer.end_field()?;
@@ -1494,6 +3814,333 @@ pub mod DDS {
                 Ok(out)
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for AnnotationParameterValue {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_union(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_primitive(
+                        xidl_typeobject::DDS::XTypes::TK_BYTE,
+                    ),
+                    vec![
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 12u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_CHAR8,
+                            ),
+                            name: "char_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 6u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_UINT32,
+                            ),
+                            name: "uint32_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_BYTE,
+                            ),
+                            name: "byte_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 7u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_INT64,
+                            ),
+                            name: "int64_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 8u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_UINT64,
+                            ),
+                            name: "uint64_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 4u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_UINT16,
+                            ),
+                            name: "uint_16_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_BOOLEAN,
+                            ),
+                            name: "boolean_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 5u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_INT32,
+                            ),
+                            name: "int32_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 13u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_CHAR16,
+                            ),
+                            name: "wchar_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 17u32,
+                            member_flags: 64u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                ExtendedAnnotationParameterValue,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "extended_value",
+                            labels: vec![],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 16u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_string(None, true),
+                            name: "string16_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 11u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_FLOAT64,
+                            ),
+                            name: "float128_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 9u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_FLOAT64,
+                            ),
+                            name: "float32_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 14u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_INT32,
+                            ),
+                            name: "enumerated_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 10u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_FLOAT64,
+                            ),
+                            name: "float64_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 15u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_string(None, false),
+                            name: "string8_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_INT16,
+                            ),
+                            name: "int16_value",
+                            labels: vec![0i32],
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_union(
+                    "DDS::XTypes::AnnotationParameterValue",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_primitive(
+                        xidl_typeobject::DDS::XTypes::TK_BYTE,
+                    ),
+                    vec![
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 12u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_CHAR8,
+                            ),
+                            name: "char_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 6u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_UINT32,
+                            ),
+                            name: "uint32_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_BYTE,
+                            ),
+                            name: "byte_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 7u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_INT64,
+                            ),
+                            name: "int64_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 8u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_UINT64,
+                            ),
+                            name: "uint64_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 4u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_UINT16,
+                            ),
+                            name: "uint_16_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_BOOLEAN,
+                            ),
+                            name: "boolean_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 5u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_INT32,
+                            ),
+                            name: "int32_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 13u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_CHAR16,
+                            ),
+                            name: "wchar_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 17u32,
+                            member_flags: 64u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                ExtendedAnnotationParameterValue,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "extended_value",
+                            labels: vec![],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 16u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_string(None, true),
+                            name: "string16_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 11u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_FLOAT64,
+                            ),
+                            name: "float128_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 9u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_FLOAT64,
+                            ),
+                            name: "float32_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 14u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_INT32,
+                            ),
+                            name: "enumerated_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 10u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_FLOAT64,
+                            ),
+                            name: "float64_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 15u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_string(None, false),
+                            name: "string8_value",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_INT16,
+                            ),
+                            name: "int16_value",
+                            labels: vec![0i32],
+                        },
+                    ],
+                )
+            }
+        }
         pub struct AppliedAnnotationParameter {
             pub paramname_hash: Box<NameHash>,
 
@@ -1513,7 +4160,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -1545,6 +4192,63 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for AppliedAnnotationParameter {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<NameHash>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "paramname_hash",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AnnotationParameterValue,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "value",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::AppliedAnnotationParameter",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<NameHash>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "paramname_hash",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AnnotationParameterValue,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "value",
+                        },
+                    ],
+                )
+            }
+        }
         pub type AppliedAnnotationParameterSeq = Vec<AppliedAnnotationParameter>;
         pub struct AppliedAnnotation {
             pub annotation_typeid: Box<TypeIdentifier>,
@@ -1565,7 +4269,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -1597,6 +4301,63 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for AppliedAnnotation {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "annotation_typeid",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AppliedAnnotationParameterSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "param_seq",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::AppliedAnnotation",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "annotation_typeid",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AppliedAnnotationParameterSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "param_seq",
+                        },
+                    ],
+                )
+            }
+        }
         pub type AppliedAnnotationSeq = Vec<AppliedAnnotation>;
         pub struct AppliedVerbatimAnnotation {
             pub placement: String,
@@ -1619,7 +4380,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -1660,6 +4421,75 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for AppliedVerbatimAnnotation {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_string(
+                                Some(32u32),
+                                false,
+                            ),
+                            name: "placement",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_string(
+                                Some(32u32),
+                                false,
+                            ),
+                            name: "language",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_string(None, false),
+                            name: "text",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::AppliedVerbatimAnnotation",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_string(
+                                Some(32u32),
+                                false,
+                            ),
+                            name: "placement",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_string(
+                                Some(32u32),
+                                false,
+                            ),
+                            name: "language",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_string(None, false),
+                            name: "text",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct AppliedBuiltinMemberAnnotations {
             pub unit: String,
 
@@ -1683,7 +4513,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -1733,6 +4563,91 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for AppliedBuiltinMemberAnnotations {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_string(None, false),
+                            name: "unit",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AnnotationParameterValue,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "min",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AnnotationParameterValue,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "max",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 4u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_string(None, false),
+                            name: "hash_id",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::AppliedBuiltinMemberAnnotations",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_string(None, false),
+                            name: "unit",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AnnotationParameterValue,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "min",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AnnotationParameterValue,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "max",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 4u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_string(None, false),
+                            name: "hash_id",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct CommonStructMember {
             pub member_id: Box<MemberId>,
 
@@ -1754,7 +4669,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -1795,6 +4710,79 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CommonStructMember {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<MemberId>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "member_id",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                StructMemberFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "member_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "member_type_id",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CommonStructMember",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<MemberId>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "member_id",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                StructMemberFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "member_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "member_type_id",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct CompleteMemberDetail {
             pub name: Box<MemberName>,
 
@@ -1816,7 +4804,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -1857,6 +4845,83 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteMemberDetail {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<MemberName>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "name",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AppliedBuiltinMemberAnnotations,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "ann_builtin",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AppliedAnnotationSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "ann_custom",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteMemberDetail",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<MemberName>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "name",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AppliedBuiltinMemberAnnotations,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "ann_builtin",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AppliedAnnotationSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "ann_custom",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct MinimalMemberDetail {
             pub name_hash: Box<NameHash>,
         }
@@ -1874,7 +4939,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -1893,6 +4958,39 @@ pub mod DDS {
                 let name_hash = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
 
                 Ok(Self { name_hash })
+            }
+        }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalMemberDetail {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<NameHash>(
+                            xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                        ),
+                        name: "name_hash",
+                    }],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalMemberDetail",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<NameHash>(
+                            xidl_typeobject::runtime::TypeEquivalence::Complete,
+                        ),
+                        name: "name_hash",
+                    }],
+                )
             }
         }
         pub struct CompleteStructMember {
@@ -1914,7 +5012,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -1942,6 +5040,67 @@ pub mod DDS {
                 Ok(Self { common, detail })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteStructMember {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CommonStructMember,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteMemberDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteStructMember",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CommonStructMember,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteMemberDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+        }
         pub type CompleteStructMemberSeq = Vec<CompleteStructMember>;
         pub struct MinimalStructMember {
             pub common: Box<CommonStructMember>,
@@ -1962,7 +5121,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -1990,6 +5149,67 @@ pub mod DDS {
                 Ok(Self { common, detail })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalStructMember {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CommonStructMember,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalMemberDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalStructMember",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CommonStructMember,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalMemberDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+        }
         pub type MinimalStructMemberSeq = Vec<MinimalStructMember>;
         pub struct AppliedBuiltinTypeAnnotations {
             pub verbatim: Box<AppliedVerbatimAnnotation>,
@@ -2008,7 +5228,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -2029,6 +5249,43 @@ pub mod DDS {
                 Ok(Self { verbatim })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for AppliedBuiltinTypeAnnotations {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<
+                            AppliedVerbatimAnnotation,
+                        >(
+                            xidl_typeobject::runtime::TypeEquivalence::Minimal
+                        ),
+                        name: "verbatim",
+                    }],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::AppliedBuiltinTypeAnnotations",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<
+                            AppliedVerbatimAnnotation,
+                        >(
+                            xidl_typeobject::runtime::TypeEquivalence::Complete
+                        ),
+                        name: "verbatim",
+                    }],
+                )
+            }
+        }
         pub struct MinimalTypeDetail {}
 
         impl MinimalTypeDetail {
@@ -2044,7 +5301,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.end_struct()?;
                 Ok(())
@@ -2056,6 +5313,25 @@ pub mod DDS {
                 deserializer: &mut D,
             ) -> xidl_xcdr::error::XcdrResult<Self> {
                 Ok(Self {})
+            }
+        }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalTypeDetail {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalTypeDetail",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![],
+                )
             }
         }
         pub struct CompleteTypeDetail {
@@ -2079,7 +5355,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -2120,6 +5396,87 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteTypeDetail {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AppliedBuiltinTypeAnnotations,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "ann_builtin",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AppliedAnnotationSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "ann_custom",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                QualifiedTypeName,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "type_name",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteTypeDetail",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AppliedBuiltinTypeAnnotations,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "ann_builtin",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AppliedAnnotationSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "ann_custom",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                QualifiedTypeName,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "type_name",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct CompleteStructHeader {
             pub base_type: Box<TypeIdentifier>,
 
@@ -2139,7 +5496,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -2167,6 +5524,63 @@ pub mod DDS {
                 Ok(Self { base_type, detail })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteStructHeader {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "base_type",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteTypeDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteStructHeader",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "base_type",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteTypeDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct MinimalStructHeader {
             pub base_type: Box<TypeIdentifier>,
 
@@ -2186,7 +5600,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -2214,6 +5628,63 @@ pub mod DDS {
                 Ok(Self { base_type, detail })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalStructHeader {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "base_type",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalTypeDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalStructHeader",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "base_type",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalTypeDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct CompleteStructType {
             pub struct_flags: Box<StructTypeFlag>,
 
@@ -2235,7 +5706,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -2276,6 +5747,83 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteStructType {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<StructTypeFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "struct_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteStructHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteStructMemberSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "member_seq",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteStructType",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<StructTypeFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "struct_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteStructHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteStructMemberSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "member_seq",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct MinimalStructType {
             pub struct_flags: Box<StructTypeFlag>,
 
@@ -2297,7 +5845,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -2338,6 +5886,83 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalStructType {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<StructTypeFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "struct_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalStructHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalStructMemberSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "member_seq",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalStructType",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<StructTypeFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "struct_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalStructHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalStructMemberSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "member_seq",
+                        },
+                    ],
+                )
+            }
+        }
         pub type UnionCaseLabelSeq = Vec<i32>;
         pub struct CommonUnionMember {
             pub member_id: Box<MemberId>,
@@ -2362,7 +5987,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -2412,6 +6037,95 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CommonUnionMember {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<MemberId>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "member_id",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<UnionMemberFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "member_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "type_id",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 4u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                UnionCaseLabelSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "label_seq",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CommonUnionMember",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<MemberId>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "member_id",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<UnionMemberFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "member_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "type_id",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 4u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                UnionCaseLabelSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "label_seq",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct CompleteUnionMember {
             pub common: Box<CommonUnionMember>,
 
@@ -2431,7 +6145,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -2459,6 +6173,67 @@ pub mod DDS {
                 Ok(Self { common, detail })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteUnionMember {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CommonUnionMember,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteMemberDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteUnionMember",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CommonUnionMember,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteMemberDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+        }
         pub type CompleteUnionMemberSeq = Vec<CompleteUnionMember>;
         pub struct MinimalUnionMember {
             pub common: Box<CommonUnionMember>,
@@ -2479,7 +6254,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -2507,6 +6282,67 @@ pub mod DDS {
                 Ok(Self { common, detail })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalUnionMember {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CommonUnionMember,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalMemberDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalUnionMember",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CommonUnionMember,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalMemberDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+        }
         pub type MinimalUnionMemberSeq = Vec<MinimalUnionMember>;
         pub struct CommonDiscriminatorMember {
             pub member_flags: Box<UnionDiscriminatorFlag>,
@@ -2527,7 +6363,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -2559,6 +6395,63 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CommonDiscriminatorMember {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                UnionDiscriminatorFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "member_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "type_id",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CommonDiscriminatorMember",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                UnionDiscriminatorFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "member_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "type_id",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct CompleteDiscriminatorMember {
             pub common: Box<CommonDiscriminatorMember>,
 
@@ -2580,7 +6473,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -2621,6 +6514,87 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteDiscriminatorMember {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CommonDiscriminatorMember,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AppliedBuiltinTypeAnnotations,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "ann_builtin",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AppliedAnnotationSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "ann_custom",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteDiscriminatorMember",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CommonDiscriminatorMember,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AppliedBuiltinTypeAnnotations,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "ann_builtin",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AppliedAnnotationSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "ann_custom",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct MinimalDiscriminatorMember {
             pub common: Box<CommonDiscriminatorMember>,
         }
@@ -2638,7 +6612,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -2659,6 +6633,43 @@ pub mod DDS {
                 Ok(Self { common })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalDiscriminatorMember {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<
+                            CommonDiscriminatorMember,
+                        >(
+                            xidl_typeobject::runtime::TypeEquivalence::Minimal
+                        ),
+                        name: "common",
+                    }],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalDiscriminatorMember",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<
+                            CommonDiscriminatorMember,
+                        >(
+                            xidl_typeobject::runtime::TypeEquivalence::Complete
+                        ),
+                        name: "common",
+                    }],
+                )
+            }
+        }
         pub struct CompleteUnionHeader {
             pub detail: Box<CompleteTypeDetail>,
         }
@@ -2676,7 +6687,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -2697,6 +6708,39 @@ pub mod DDS {
                 Ok(Self { detail })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteUnionHeader {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<CompleteTypeDetail>(
+                            xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                        ),
+                        name: "detail",
+                    }],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteUnionHeader",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<CompleteTypeDetail>(
+                            xidl_typeobject::runtime::TypeEquivalence::Complete,
+                        ),
+                        name: "detail",
+                    }],
+                )
+            }
+        }
         pub struct MinimalUnionHeader {
             pub detail: Box<MinimalTypeDetail>,
         }
@@ -2714,7 +6758,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -2733,6 +6777,39 @@ pub mod DDS {
                 let detail = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
 
                 Ok(Self { detail })
+            }
+        }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalUnionHeader {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<MinimalTypeDetail>(
+                            xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                        ),
+                        name: "detail",
+                    }],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalUnionHeader",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<MinimalTypeDetail>(
+                            xidl_typeobject::runtime::TypeEquivalence::Complete,
+                        ),
+                        name: "detail",
+                    }],
+                )
             }
         }
         pub struct CompleteUnionType {
@@ -2758,7 +6835,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -2808,6 +6885,103 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteUnionType {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<UnionTypeFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "union_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteUnionHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteDiscriminatorMember,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "discriminator",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 4u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteUnionMemberSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "member_seq",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteUnionType",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<UnionTypeFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "union_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteUnionHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteDiscriminatorMember,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "discriminator",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 4u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteUnionMemberSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "member_seq",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct MinimalUnionType {
             pub union_flags: Box<UnionTypeFlag>,
 
@@ -2831,7 +7005,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -2881,6 +7055,103 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalUnionType {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<UnionTypeFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "union_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalUnionHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalDiscriminatorMember,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "discriminator",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 4u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalUnionMemberSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "member_seq",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalUnionType",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<UnionTypeFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "union_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalUnionHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalDiscriminatorMember,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "discriminator",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 4u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalUnionMemberSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "member_seq",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct CommonAnnotationParameter {
             pub member_flags: Box<AnnotationParameterFlag>,
 
@@ -2900,7 +7171,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -2932,6 +7203,63 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CommonAnnotationParameter {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AnnotationParameterFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "member_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "member_type_id",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CommonAnnotationParameter",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AnnotationParameterFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "member_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "member_type_id",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct CompleteAnnotationParameter {
             pub common: Box<CommonAnnotationParameter>,
 
@@ -2953,7 +7281,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -2994,6 +7322,83 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteAnnotationParameter {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CommonAnnotationParameter,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<MemberName>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "name",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AnnotationParameterValue,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "default_value",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteAnnotationParameter",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CommonAnnotationParameter,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<MemberName>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "name",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AnnotationParameterValue,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "default_value",
+                        },
+                    ],
+                )
+            }
+        }
         pub type CompleteAnnotationParameterSeq = Vec<CompleteAnnotationParameter>;
         pub struct MinimalAnnotationParameter {
             pub common: Box<CommonAnnotationParameter>,
@@ -3016,7 +7421,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -3057,6 +7462,83 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalAnnotationParameter {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CommonAnnotationParameter,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<NameHash>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "name_hash",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AnnotationParameterValue,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "default_value",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalAnnotationParameter",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CommonAnnotationParameter,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<NameHash>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "name_hash",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AnnotationParameterValue,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "default_value",
+                        },
+                    ],
+                )
+            }
+        }
         pub type MinimalAnnotationParameterSeq = Vec<MinimalAnnotationParameter>;
         pub struct CompleteAnnotationHeader {
             pub annotation_name: Box<QualifiedTypeName>,
@@ -3075,7 +7557,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -3096,6 +7578,39 @@ pub mod DDS {
                 Ok(Self { annotation_name })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteAnnotationHeader {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<QualifiedTypeName>(
+                            xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                        ),
+                        name: "annotation_name",
+                    }],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteAnnotationHeader",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<QualifiedTypeName>(
+                            xidl_typeobject::runtime::TypeEquivalence::Complete,
+                        ),
+                        name: "annotation_name",
+                    }],
+                )
+            }
+        }
         pub struct MinimalAnnotationHeader {}
 
         impl MinimalAnnotationHeader {
@@ -3111,7 +7626,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.end_struct()?;
                 Ok(())
@@ -3123,6 +7638,25 @@ pub mod DDS {
                 deserializer: &mut D,
             ) -> xidl_xcdr::error::XcdrResult<Self> {
                 Ok(Self {})
+            }
+        }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalAnnotationHeader {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalAnnotationHeader",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![],
+                )
             }
         }
         pub struct CompleteAnnotationType {
@@ -3146,7 +7680,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -3187,6 +7721,87 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteAnnotationType {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AnnotationTypeFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "annotation_flag",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteAnnotationHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteAnnotationParameterSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "member_seq",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteAnnotationType",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AnnotationTypeFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "annotation_flag",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteAnnotationHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteAnnotationParameterSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "member_seq",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct MinimalAnnotationType {
             pub annotation_flag: Box<AnnotationTypeFlag>,
 
@@ -3208,7 +7823,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -3249,6 +7864,87 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalAnnotationType {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AnnotationTypeFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "annotation_flag",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalAnnotationHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalAnnotationParameterSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "member_seq",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalAnnotationType",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AnnotationTypeFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "annotation_flag",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalAnnotationHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalAnnotationParameterSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "member_seq",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct CommonAliasBody {
             pub related_flags: Box<AliasMemberFlag>,
 
@@ -3268,7 +7964,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -3300,6 +7996,59 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CommonAliasBody {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<AliasMemberFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "related_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "related_type",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CommonAliasBody",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<AliasMemberFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "related_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "related_type",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct CompleteAliasBody {
             pub common: Box<CommonAliasBody>,
 
@@ -3321,7 +8070,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -3362,6 +8111,83 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteAliasBody {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<CommonAliasBody>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AppliedBuiltinMemberAnnotations,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "ann_builtin",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AppliedAnnotationSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "ann_custom",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteAliasBody",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<CommonAliasBody>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AppliedBuiltinMemberAnnotations,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "ann_builtin",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AppliedAnnotationSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "ann_custom",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct MinimalAliasBody {
             pub common: Box<CommonAliasBody>,
         }
@@ -3379,7 +8205,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -3400,6 +8226,39 @@ pub mod DDS {
                 Ok(Self { common })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalAliasBody {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<CommonAliasBody>(
+                            xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                        ),
+                        name: "common",
+                    }],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalAliasBody",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<CommonAliasBody>(
+                            xidl_typeobject::runtime::TypeEquivalence::Complete,
+                        ),
+                        name: "common",
+                    }],
+                )
+            }
+        }
         pub struct CompleteAliasHeader {
             pub detail: Box<CompleteTypeDetail>,
         }
@@ -3417,7 +8276,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -3438,6 +8297,39 @@ pub mod DDS {
                 Ok(Self { detail })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteAliasHeader {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<CompleteTypeDetail>(
+                            xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                        ),
+                        name: "detail",
+                    }],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteAliasHeader",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<CompleteTypeDetail>(
+                            xidl_typeobject::runtime::TypeEquivalence::Complete,
+                        ),
+                        name: "detail",
+                    }],
+                )
+            }
+        }
         pub struct MinimalAliasHeader {}
 
         impl MinimalAliasHeader {
@@ -3453,7 +8345,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.end_struct()?;
                 Ok(())
@@ -3465,6 +8357,25 @@ pub mod DDS {
                 deserializer: &mut D,
             ) -> xidl_xcdr::error::XcdrResult<Self> {
                 Ok(Self {})
+            }
+        }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalAliasHeader {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalAliasHeader",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![],
+                )
             }
         }
         pub struct CompleteAliasType {
@@ -3488,7 +8399,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -3529,6 +8440,83 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteAliasType {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<AliasTypeFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "alias_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteAliasHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteAliasBody,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "body",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteAliasType",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<AliasTypeFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "alias_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteAliasHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteAliasBody,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "body",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct MinimalAliasType {
             pub alias_flags: Box<AliasTypeFlag>,
 
@@ -3550,7 +8538,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -3591,6 +8579,83 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalAliasType {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<AliasTypeFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "alias_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalAliasHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalAliasBody,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "body",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalAliasType",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<AliasTypeFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "alias_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalAliasHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalAliasBody,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "body",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct CompleteElementDetail {
             pub ann_builtin: Box<AppliedBuiltinMemberAnnotations>,
 
@@ -3610,7 +8675,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -3642,6 +8707,67 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteElementDetail {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AppliedBuiltinMemberAnnotations,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "ann_builtin",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AppliedAnnotationSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "ann_custom",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteElementDetail",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AppliedBuiltinMemberAnnotations,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "ann_builtin",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                AppliedAnnotationSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "ann_custom",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct CommonCollectionElement {
             pub element_flags: Box<CollectionElementFlag>,
 
@@ -3661,7 +8787,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -3693,6 +8819,63 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CommonCollectionElement {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CollectionElementFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "element_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "type",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CommonCollectionElement",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CollectionElementFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "element_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "type",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct CompleteCollectionElement {
             pub common: Box<CommonCollectionElement>,
 
@@ -3712,7 +8895,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -3740,6 +8923,67 @@ pub mod DDS {
                 Ok(Self { common, detail })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteCollectionElement {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CommonCollectionElement,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteElementDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteCollectionElement",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CommonCollectionElement,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteElementDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct MinimalCollectionElement {
             pub common: Box<CommonCollectionElement>,
         }
@@ -3757,7 +9001,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -3778,6 +9022,43 @@ pub mod DDS {
                 Ok(Self { common })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalCollectionElement {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<
+                            CommonCollectionElement,
+                        >(
+                            xidl_typeobject::runtime::TypeEquivalence::Minimal
+                        ),
+                        name: "common",
+                    }],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalCollectionElement",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<
+                            CommonCollectionElement,
+                        >(
+                            xidl_typeobject::runtime::TypeEquivalence::Complete
+                        ),
+                        name: "common",
+                    }],
+                )
+            }
+        }
         pub struct CommonCollectionHeader {
             pub bound: Box<LBound>,
         }
@@ -3795,7 +9076,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -3814,6 +9095,39 @@ pub mod DDS {
                 let bound = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
 
                 Ok(Self { bound })
+            }
+        }
+
+        impl xidl_typeobject::XidlTypeObject for CommonCollectionHeader {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<LBound>(
+                            xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                        ),
+                        name: "bound",
+                    }],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CommonCollectionHeader",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<LBound>(
+                            xidl_typeobject::runtime::TypeEquivalence::Complete,
+                        ),
+                        name: "bound",
+                    }],
+                )
             }
         }
         pub struct CompleteCollectionHeader {
@@ -3835,7 +9149,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -3863,6 +9177,67 @@ pub mod DDS {
                 Ok(Self { common, detail })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteCollectionHeader {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CommonCollectionHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteTypeDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteCollectionHeader",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CommonCollectionHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteTypeDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct MinimalCollectionHeader {
             pub common: Box<CommonCollectionHeader>,
         }
@@ -3880,7 +9255,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -3899,6 +9274,43 @@ pub mod DDS {
                 let common = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
 
                 Ok(Self { common })
+            }
+        }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalCollectionHeader {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<
+                            CommonCollectionHeader,
+                        >(
+                            xidl_typeobject::runtime::TypeEquivalence::Minimal
+                        ),
+                        name: "common",
+                    }],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalCollectionHeader",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<
+                            CommonCollectionHeader,
+                        >(
+                            xidl_typeobject::runtime::TypeEquivalence::Complete
+                        ),
+                        name: "common",
+                    }],
+                )
             }
         }
         pub struct CompleteSequenceType {
@@ -3922,7 +9334,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -3963,6 +9375,87 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteSequenceType {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CollectionTypeFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "collection_flag",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteCollectionHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteCollectionElement,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "element",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteSequenceType",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CollectionTypeFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "collection_flag",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteCollectionHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteCollectionElement,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "element",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct MinimalSequenceType {
             pub collection_flag: Box<CollectionTypeFlag>,
 
@@ -3984,7 +9477,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -4025,6 +9518,87 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalSequenceType {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CollectionTypeFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "collection_flag",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalCollectionHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalCollectionElement,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "element",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalSequenceType",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CollectionTypeFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "collection_flag",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalCollectionHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalCollectionElement,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "element",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct CommonArrayHeader {
             pub bound_seq: Box<LBoundSeq>,
         }
@@ -4042,7 +9616,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -4061,6 +9635,39 @@ pub mod DDS {
                 let bound_seq = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
 
                 Ok(Self { bound_seq })
+            }
+        }
+
+        impl xidl_typeobject::XidlTypeObject for CommonArrayHeader {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<LBoundSeq>(
+                            xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                        ),
+                        name: "bound_seq",
+                    }],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CommonArrayHeader",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<LBoundSeq>(
+                            xidl_typeobject::runtime::TypeEquivalence::Complete,
+                        ),
+                        name: "bound_seq",
+                    }],
+                )
             }
         }
         pub struct CompleteArrayHeader {
@@ -4082,7 +9689,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -4110,6 +9717,67 @@ pub mod DDS {
                 Ok(Self { common, detail })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteArrayHeader {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CommonArrayHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteTypeDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteArrayHeader",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CommonArrayHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteTypeDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct MinimalArrayHeader {
             pub common: Box<CommonArrayHeader>,
         }
@@ -4127,7 +9795,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -4146,6 +9814,39 @@ pub mod DDS {
                 let common = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
 
                 Ok(Self { common })
+            }
+        }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalArrayHeader {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<CommonArrayHeader>(
+                            xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                        ),
+                        name: "common",
+                    }],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalArrayHeader",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<CommonArrayHeader>(
+                            xidl_typeobject::runtime::TypeEquivalence::Complete,
+                        ),
+                        name: "common",
+                    }],
+                )
             }
         }
         pub struct CompleteArrayType {
@@ -4169,7 +9870,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -4210,6 +9911,87 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteArrayType {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CollectionTypeFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "collection_flag",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteArrayHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteCollectionElement,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "element",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteArrayType",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CollectionTypeFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "collection_flag",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteArrayHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteCollectionElement,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "element",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct MinimalArrayType {
             pub collection_flag: Box<CollectionTypeFlag>,
 
@@ -4231,7 +10013,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -4272,6 +10054,87 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalArrayType {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CollectionTypeFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "collection_flag",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalArrayHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalCollectionElement,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "element",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalArrayType",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CollectionTypeFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "collection_flag",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalArrayHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalCollectionElement,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "element",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct CompleteMapType {
             pub collection_flag: Box<CollectionTypeFlag>,
 
@@ -4295,7 +10158,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -4345,6 +10208,107 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteMapType {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CollectionTypeFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "collection_flag",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteCollectionHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteCollectionElement,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "key",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 4u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteCollectionElement,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "element",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteMapType",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CollectionTypeFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "collection_flag",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteCollectionHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteCollectionElement,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "key",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 4u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteCollectionElement,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "element",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct MinimalMapType {
             pub collection_flag: Box<CollectionTypeFlag>,
 
@@ -4368,7 +10332,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -4418,6 +10382,107 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalMapType {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CollectionTypeFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "collection_flag",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalCollectionHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalCollectionElement,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "key",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 4u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalCollectionElement,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "element",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalMapType",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CollectionTypeFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "collection_flag",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalCollectionHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalCollectionElement,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "key",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 4u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalCollectionElement,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "element",
+                        },
+                    ],
+                )
+            }
+        }
         pub type BitBound = u16;
         pub struct CommonEnumeratedLiteral {
             pub value: i32,
@@ -4438,7 +10503,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -4466,6 +10531,63 @@ pub mod DDS {
                 Ok(Self { value, flags })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CommonEnumeratedLiteral {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_INT32,
+                            ),
+                            name: "value",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                EnumeratedLiteralFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "flags",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CommonEnumeratedLiteral",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_INT32,
+                            ),
+                            name: "value",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                EnumeratedLiteralFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "flags",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct CompleteEnumeratedLiteral {
             pub common: Box<CommonEnumeratedLiteral>,
 
@@ -4485,7 +10607,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -4513,6 +10635,67 @@ pub mod DDS {
                 Ok(Self { common, detail })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteEnumeratedLiteral {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CommonEnumeratedLiteral,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteMemberDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteEnumeratedLiteral",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CommonEnumeratedLiteral,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteMemberDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+        }
         pub type CompleteEnumeratedLiteralSeq = Vec<CompleteEnumeratedLiteral>;
         pub struct MinimalEnumeratedLiteral {
             pub common: Box<CommonEnumeratedLiteral>,
@@ -4533,7 +10716,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -4561,6 +10744,67 @@ pub mod DDS {
                 Ok(Self { common, detail })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalEnumeratedLiteral {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CommonEnumeratedLiteral,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalMemberDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalEnumeratedLiteral",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CommonEnumeratedLiteral,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalMemberDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+        }
         pub type MinimalEnumeratedLiteralSeq = Vec<MinimalEnumeratedLiteral>;
         pub struct CommonEnumeratedHeader {
             pub bit_bound: Box<BitBound>,
@@ -4579,7 +10823,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -4598,6 +10842,39 @@ pub mod DDS {
                 let bit_bound = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
 
                 Ok(Self { bit_bound })
+            }
+        }
+
+        impl xidl_typeobject::XidlTypeObject for CommonEnumeratedHeader {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<BitBound>(
+                            xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                        ),
+                        name: "bit_bound",
+                    }],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CommonEnumeratedHeader",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<BitBound>(
+                            xidl_typeobject::runtime::TypeEquivalence::Complete,
+                        ),
+                        name: "bit_bound",
+                    }],
+                )
             }
         }
         pub struct CompleteEnumeratedHeader {
@@ -4619,7 +10896,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -4647,6 +10924,67 @@ pub mod DDS {
                 Ok(Self { common, detail })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteEnumeratedHeader {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CommonEnumeratedHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteTypeDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteEnumeratedHeader",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CommonEnumeratedHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteTypeDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct MinimalEnumeratedHeader {
             pub common: Box<CommonEnumeratedHeader>,
         }
@@ -4664,7 +11002,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -4683,6 +11021,43 @@ pub mod DDS {
                 let common = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
 
                 Ok(Self { common })
+            }
+        }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalEnumeratedHeader {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<
+                            CommonEnumeratedHeader,
+                        >(
+                            xidl_typeobject::runtime::TypeEquivalence::Minimal
+                        ),
+                        name: "common",
+                    }],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalEnumeratedHeader",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<
+                            CommonEnumeratedHeader,
+                        >(
+                            xidl_typeobject::runtime::TypeEquivalence::Complete
+                        ),
+                        name: "common",
+                    }],
+                )
             }
         }
         pub struct CompleteEnumeratedType {
@@ -4706,7 +11081,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -4747,6 +11122,83 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteEnumeratedType {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<EnumTypeFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "enum_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteEnumeratedHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteEnumeratedLiteralSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "literal_seq",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteEnumeratedType",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<EnumTypeFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "enum_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteEnumeratedHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteEnumeratedLiteralSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "literal_seq",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct MinimalEnumeratedType {
             pub enum_flags: Box<EnumTypeFlag>,
 
@@ -4768,7 +11220,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -4809,6 +11261,83 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalEnumeratedType {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<EnumTypeFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "enum_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalEnumeratedHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalEnumeratedLiteralSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "literal_seq",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalEnumeratedType",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<EnumTypeFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "enum_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalEnumeratedHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalEnumeratedLiteralSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "literal_seq",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct CommonBitflag {
             pub position: u16,
 
@@ -4828,7 +11357,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -4856,6 +11385,59 @@ pub mod DDS {
                 Ok(Self { position, flags })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CommonBitflag {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_UINT16,
+                            ),
+                            name: "position",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<BitflagFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "flags",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CommonBitflag",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_UINT16,
+                            ),
+                            name: "position",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<BitflagFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "flags",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct CompleteBitflag {
             pub common: Box<CommonBitflag>,
 
@@ -4875,7 +11457,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -4903,6 +11485,63 @@ pub mod DDS {
                 Ok(Self { common, detail })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteBitflag {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<CommonBitflag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteMemberDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteBitflag",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<CommonBitflag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteMemberDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+        }
         pub type CompleteBitflagSeq = Vec<CompleteBitflag>;
         pub struct MinimalBitflag {
             pub common: Box<CommonBitflag>,
@@ -4923,7 +11562,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -4951,6 +11590,63 @@ pub mod DDS {
                 Ok(Self { common, detail })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalBitflag {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<CommonBitflag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalMemberDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalBitflag",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<CommonBitflag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalMemberDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+        }
         pub type MinimalBitflagSeq = Vec<MinimalBitflag>;
         pub struct CommonBitmaskHeader {
             pub bit_bound: Box<BitBound>,
@@ -4969,7 +11665,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -4988,6 +11684,39 @@ pub mod DDS {
                 let bit_bound = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
 
                 Ok(Self { bit_bound })
+            }
+        }
+
+        impl xidl_typeobject::XidlTypeObject for CommonBitmaskHeader {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<BitBound>(
+                            xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                        ),
+                        name: "bit_bound",
+                    }],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CommonBitmaskHeader",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<BitBound>(
+                            xidl_typeobject::runtime::TypeEquivalence::Complete,
+                        ),
+                        name: "bit_bound",
+                    }],
+                )
             }
         }
         pub type CompleteBitmaskHeader = CompleteEnumeratedHeader;
@@ -5013,7 +11742,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -5054,6 +11783,83 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteBitmaskType {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<BitmaskTypeFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "bitmask_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteBitmaskHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteBitflagSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "flag_seq",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteBitmaskType",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<BitmaskTypeFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "bitmask_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteBitmaskHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteBitflagSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "flag_seq",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct MinimalBitmaskType {
             pub bitmask_flags: Box<BitmaskTypeFlag>,
 
@@ -5075,7 +11881,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -5116,6 +11922,83 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalBitmaskType {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<BitmaskTypeFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "bitmask_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalBitmaskHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalBitflagSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "flag_seq",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalBitmaskType",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<BitmaskTypeFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "bitmask_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalBitmaskHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalBitflagSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "flag_seq",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct CommonBitfield {
             pub position: u16,
 
@@ -5139,7 +12022,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -5189,6 +12072,95 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CommonBitfield {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_UINT16,
+                            ),
+                            name: "position",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                BitsetMemberFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_BYTE,
+                            ),
+                            name: "bitcount",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 4u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeKind>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "holder_type",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CommonBitfield",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_UINT16,
+                            ),
+                            name: "position",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                BitsetMemberFlag,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_BYTE,
+                            ),
+                            name: "bitcount",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 4u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeKind>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "holder_type",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct CompleteBitfield {
             pub common: Box<CommonBitfield>,
 
@@ -5208,7 +12180,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -5236,6 +12208,63 @@ pub mod DDS {
                 Ok(Self { common, detail })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteBitfield {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<CommonBitfield>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteMemberDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteBitfield",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<CommonBitfield>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteMemberDetail,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "detail",
+                        },
+                    ],
+                )
+            }
+        }
         pub type CompleteBitfieldSeq = Vec<CompleteBitfield>;
         pub struct MinimalBitfield {
             pub common: Box<CommonBitfield>,
@@ -5256,7 +12285,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -5284,6 +12313,59 @@ pub mod DDS {
                 Ok(Self { common, name_hash })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalBitfield {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<CommonBitfield>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<NameHash>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "name_hash",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalBitfield",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<CommonBitfield>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "common",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<NameHash>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "name_hash",
+                        },
+                    ],
+                )
+            }
+        }
         pub type MinimalBitfieldSeq = Vec<MinimalBitfield>;
         pub struct CompleteBitsetHeader {
             pub detail: Box<CompleteTypeDetail>,
@@ -5302,7 +12384,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -5323,6 +12405,39 @@ pub mod DDS {
                 Ok(Self { detail })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteBitsetHeader {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<CompleteTypeDetail>(
+                            xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                        ),
+                        name: "detail",
+                    }],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteBitsetHeader",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![xidl_typeobject::runtime::StructMemberDesc {
+                        member_id: 1u32,
+                        member_flags: 0u32,
+                        type_id: xidl_typeobject::runtime::type_identifier_for::<CompleteTypeDetail>(
+                            xidl_typeobject::runtime::TypeEquivalence::Complete,
+                        ),
+                        name: "detail",
+                    }],
+                )
+            }
+        }
         pub struct MinimalBitsetHeader {}
 
         impl MinimalBitsetHeader {
@@ -5338,7 +12453,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.end_struct()?;
                 Ok(())
@@ -5350,6 +12465,25 @@ pub mod DDS {
                 deserializer: &mut D,
             ) -> xidl_xcdr::error::XcdrResult<Self> {
                 Ok(Self {})
+            }
+        }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalBitsetHeader {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalBitsetHeader",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![],
+                )
             }
         }
         pub struct CompleteBitsetType {
@@ -5373,7 +12507,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -5414,6 +12548,83 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteBitsetType {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<BitsetTypeFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "bitset_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteBitsetHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteBitfieldSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "field_seq",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteBitsetType",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<BitsetTypeFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "bitset_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteBitsetHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteBitfieldSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "field_seq",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct MinimalBitsetType {
             pub bitset_flags: Box<BitsetTypeFlag>,
 
@@ -5435,7 +12646,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -5476,6 +12687,83 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalBitsetType {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<BitsetTypeFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "bitset_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalBitsetHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalBitfieldSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "field_seq",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalBitsetType",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<BitsetTypeFlag>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "bitset_flags",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalBitsetHeader,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "header",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalBitfieldSeq,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "field_seq",
+                        },
+                    ],
+                )
+            }
+        }
         pub struct CompleteExtendedType {}
 
         impl CompleteExtendedType {
@@ -5491,7 +12779,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.end_struct()?;
                 Ok(())
@@ -5503,6 +12791,25 @@ pub mod DDS {
                 deserializer: &mut D,
             ) -> xidl_xcdr::error::XcdrResult<Self> {
                 Ok(Self {})
+            }
+        }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteExtendedType {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::CompleteExtendedType",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![],
+                )
             }
         }
         pub struct CompleteTypeObject {
@@ -5531,12 +12838,365 @@ pub mod DDS {
             pub extended_type: Option<Box<CompleteExtendedType>>,
         }
 
+        impl CompleteTypeObject {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+
+            pub fn new_alias_type(value: Box<CompleteAliasType>) -> Self {
+                Self {
+                    _d: TK_ALIAS,
+                    alias_type: Some(value),
+
+                    annotation_type: None,
+
+                    struct_type: None,
+
+                    union_type: None,
+
+                    bitset_type: None,
+
+                    sequence_type: None,
+
+                    array_type: None,
+
+                    map_type: None,
+
+                    enumerated_type: None,
+
+                    bitmask_type: None,
+
+                    extended_type: None,
+                }
+            }
+
+            pub fn is_alias_type(&self) -> bool {
+                matches!(self._d, TK_ALIAS)
+            }
+
+            pub fn new_annotation_type(value: Box<CompleteAnnotationType>) -> Self {
+                Self {
+                    _d: TK_ANNOTATION,
+                    annotation_type: Some(value),
+
+                    alias_type: None,
+
+                    struct_type: None,
+
+                    union_type: None,
+
+                    bitset_type: None,
+
+                    sequence_type: None,
+
+                    array_type: None,
+
+                    map_type: None,
+
+                    enumerated_type: None,
+
+                    bitmask_type: None,
+
+                    extended_type: None,
+                }
+            }
+
+            pub fn is_annotation_type(&self) -> bool {
+                matches!(self._d, TK_ANNOTATION)
+            }
+
+            pub fn new_struct_type(value: Box<CompleteStructType>) -> Self {
+                Self {
+                    _d: TK_STRUCTURE,
+                    struct_type: Some(value),
+
+                    alias_type: None,
+
+                    annotation_type: None,
+
+                    union_type: None,
+
+                    bitset_type: None,
+
+                    sequence_type: None,
+
+                    array_type: None,
+
+                    map_type: None,
+
+                    enumerated_type: None,
+
+                    bitmask_type: None,
+
+                    extended_type: None,
+                }
+            }
+
+            pub fn is_struct_type(&self) -> bool {
+                matches!(self._d, TK_STRUCTURE)
+            }
+
+            pub fn new_union_type(value: Box<CompleteUnionType>) -> Self {
+                Self {
+                    _d: TK_UNION,
+                    union_type: Some(value),
+
+                    alias_type: None,
+
+                    annotation_type: None,
+
+                    struct_type: None,
+
+                    bitset_type: None,
+
+                    sequence_type: None,
+
+                    array_type: None,
+
+                    map_type: None,
+
+                    enumerated_type: None,
+
+                    bitmask_type: None,
+
+                    extended_type: None,
+                }
+            }
+
+            pub fn is_union_type(&self) -> bool {
+                matches!(self._d, TK_UNION)
+            }
+
+            pub fn new_bitset_type(value: Box<CompleteBitsetType>) -> Self {
+                Self {
+                    _d: TK_BITSET,
+                    bitset_type: Some(value),
+
+                    alias_type: None,
+
+                    annotation_type: None,
+
+                    struct_type: None,
+
+                    union_type: None,
+
+                    sequence_type: None,
+
+                    array_type: None,
+
+                    map_type: None,
+
+                    enumerated_type: None,
+
+                    bitmask_type: None,
+
+                    extended_type: None,
+                }
+            }
+
+            pub fn is_bitset_type(&self) -> bool {
+                matches!(self._d, TK_BITSET)
+            }
+
+            pub fn new_sequence_type(value: Box<CompleteSequenceType>) -> Self {
+                Self {
+                    _d: TK_SEQUENCE,
+                    sequence_type: Some(value),
+
+                    alias_type: None,
+
+                    annotation_type: None,
+
+                    struct_type: None,
+
+                    union_type: None,
+
+                    bitset_type: None,
+
+                    array_type: None,
+
+                    map_type: None,
+
+                    enumerated_type: None,
+
+                    bitmask_type: None,
+
+                    extended_type: None,
+                }
+            }
+
+            pub fn is_sequence_type(&self) -> bool {
+                matches!(self._d, TK_SEQUENCE)
+            }
+
+            pub fn new_array_type(value: Box<CompleteArrayType>) -> Self {
+                Self {
+                    _d: TK_ARRAY,
+                    array_type: Some(value),
+
+                    alias_type: None,
+
+                    annotation_type: None,
+
+                    struct_type: None,
+
+                    union_type: None,
+
+                    bitset_type: None,
+
+                    sequence_type: None,
+
+                    map_type: None,
+
+                    enumerated_type: None,
+
+                    bitmask_type: None,
+
+                    extended_type: None,
+                }
+            }
+
+            pub fn is_array_type(&self) -> bool {
+                matches!(self._d, TK_ARRAY)
+            }
+
+            pub fn new_map_type(value: Box<CompleteMapType>) -> Self {
+                Self {
+                    _d: TK_MAP,
+                    map_type: Some(value),
+
+                    alias_type: None,
+
+                    annotation_type: None,
+
+                    struct_type: None,
+
+                    union_type: None,
+
+                    bitset_type: None,
+
+                    sequence_type: None,
+
+                    array_type: None,
+
+                    enumerated_type: None,
+
+                    bitmask_type: None,
+
+                    extended_type: None,
+                }
+            }
+
+            pub fn is_map_type(&self) -> bool {
+                matches!(self._d, TK_MAP)
+            }
+
+            pub fn new_enumerated_type(value: Box<CompleteEnumeratedType>) -> Self {
+                Self {
+                    _d: TK_ENUM,
+                    enumerated_type: Some(value),
+
+                    alias_type: None,
+
+                    annotation_type: None,
+
+                    struct_type: None,
+
+                    union_type: None,
+
+                    bitset_type: None,
+
+                    sequence_type: None,
+
+                    array_type: None,
+
+                    map_type: None,
+
+                    bitmask_type: None,
+
+                    extended_type: None,
+                }
+            }
+
+            pub fn is_enumerated_type(&self) -> bool {
+                matches!(self._d, TK_ENUM)
+            }
+
+            pub fn new_bitmask_type(value: Box<CompleteBitmaskType>) -> Self {
+                Self {
+                    _d: TK_BITMASK,
+                    bitmask_type: Some(value),
+
+                    alias_type: None,
+
+                    annotation_type: None,
+
+                    struct_type: None,
+
+                    union_type: None,
+
+                    bitset_type: None,
+
+                    sequence_type: None,
+
+                    array_type: None,
+
+                    map_type: None,
+
+                    enumerated_type: None,
+
+                    extended_type: None,
+                }
+            }
+
+            pub fn is_bitmask_type(&self) -> bool {
+                matches!(self._d, TK_BITMASK)
+            }
+
+            pub fn new_extended_type(value: Box<CompleteExtendedType>) -> Self {
+                Self {
+                    _d: u8::default(),
+                    extended_type: Some(value),
+
+                    alias_type: None,
+
+                    annotation_type: None,
+
+                    struct_type: None,
+
+                    union_type: None,
+
+                    bitset_type: None,
+
+                    sequence_type: None,
+
+                    array_type: None,
+
+                    map_type: None,
+
+                    enumerated_type: None,
+
+                    bitmask_type: None,
+                }
+            }
+
+            pub fn is_extended_type(&self) -> bool {
+                matches!(self._d, _)
+            }
+
+            pub fn tag(&self) -> &u8 {
+                &self._d
+            }
+        }
+
         impl xidl_xcdr::XcdrSerialize for CompleteTypeObject {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
             fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
                 serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
                 xidl_xcdr::XcdrSerialize::serialize_with(&self._d, serializer)?;
                 serializer.end_field()?;
@@ -5755,6 +13415,269 @@ pub mod DDS {
                 Ok(out)
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for CompleteTypeObject {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_union(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_primitive(
+                        xidl_typeobject::DDS::XTypes::TK_BYTE,
+                    ),
+                    vec![
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 7u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteArrayType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "array_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 4u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteUnionType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "union_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteStructType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "struct_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 11u32,
+                            member_flags: 64u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteExtendedType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "extended_type",
+                            labels: vec![],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 6u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteSequenceType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "sequence_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 10u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteBitmaskType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "bitmask_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 8u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<CompleteMapType>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "map_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteAnnotationType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "annotation_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 9u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteEnumeratedType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "enumerated_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteAliasType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "alias_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 5u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteBitsetType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "bitset_type",
+                            labels: vec![0i32],
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_union(
+                    "DDS::XTypes::CompleteTypeObject",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_primitive(
+                        xidl_typeobject::DDS::XTypes::TK_BYTE,
+                    ),
+                    vec![
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 7u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteArrayType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "array_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 4u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteUnionType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "union_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteStructType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "struct_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 11u32,
+                            member_flags: 64u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteExtendedType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "extended_type",
+                            labels: vec![],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 6u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteSequenceType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "sequence_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 10u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteBitmaskType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "bitmask_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 8u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<CompleteMapType>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "map_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteAnnotationType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "annotation_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 9u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteEnumeratedType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "enumerated_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteAliasType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "alias_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 5u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteBitsetType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "bitset_type",
+                            labels: vec![0i32],
+                        },
+                    ],
+                )
+            }
+        }
         pub struct MinimalExtendedType {}
 
         impl MinimalExtendedType {
@@ -5770,7 +13693,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.end_struct()?;
                 Ok(())
@@ -5782,6 +13705,25 @@ pub mod DDS {
                 deserializer: &mut D,
             ) -> xidl_xcdr::error::XcdrResult<Self> {
                 Ok(Self {})
+            }
+        }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalExtendedType {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::MinimalExtendedType",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![],
+                )
             }
         }
         pub struct MinimalTypeObject {
@@ -5810,12 +13752,365 @@ pub mod DDS {
             pub extended_type: Option<Box<MinimalExtendedType>>,
         }
 
+        impl MinimalTypeObject {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+
+            pub fn new_alias_type(value: Box<MinimalAliasType>) -> Self {
+                Self {
+                    _d: TK_ALIAS,
+                    alias_type: Some(value),
+
+                    annotation_type: None,
+
+                    struct_type: None,
+
+                    union_type: None,
+
+                    bitset_type: None,
+
+                    sequence_type: None,
+
+                    array_type: None,
+
+                    map_type: None,
+
+                    enumerated_type: None,
+
+                    bitmask_type: None,
+
+                    extended_type: None,
+                }
+            }
+
+            pub fn is_alias_type(&self) -> bool {
+                matches!(self._d, TK_ALIAS)
+            }
+
+            pub fn new_annotation_type(value: Box<MinimalAnnotationType>) -> Self {
+                Self {
+                    _d: TK_ANNOTATION,
+                    annotation_type: Some(value),
+
+                    alias_type: None,
+
+                    struct_type: None,
+
+                    union_type: None,
+
+                    bitset_type: None,
+
+                    sequence_type: None,
+
+                    array_type: None,
+
+                    map_type: None,
+
+                    enumerated_type: None,
+
+                    bitmask_type: None,
+
+                    extended_type: None,
+                }
+            }
+
+            pub fn is_annotation_type(&self) -> bool {
+                matches!(self._d, TK_ANNOTATION)
+            }
+
+            pub fn new_struct_type(value: Box<MinimalStructType>) -> Self {
+                Self {
+                    _d: TK_STRUCTURE,
+                    struct_type: Some(value),
+
+                    alias_type: None,
+
+                    annotation_type: None,
+
+                    union_type: None,
+
+                    bitset_type: None,
+
+                    sequence_type: None,
+
+                    array_type: None,
+
+                    map_type: None,
+
+                    enumerated_type: None,
+
+                    bitmask_type: None,
+
+                    extended_type: None,
+                }
+            }
+
+            pub fn is_struct_type(&self) -> bool {
+                matches!(self._d, TK_STRUCTURE)
+            }
+
+            pub fn new_union_type(value: Box<MinimalUnionType>) -> Self {
+                Self {
+                    _d: TK_UNION,
+                    union_type: Some(value),
+
+                    alias_type: None,
+
+                    annotation_type: None,
+
+                    struct_type: None,
+
+                    bitset_type: None,
+
+                    sequence_type: None,
+
+                    array_type: None,
+
+                    map_type: None,
+
+                    enumerated_type: None,
+
+                    bitmask_type: None,
+
+                    extended_type: None,
+                }
+            }
+
+            pub fn is_union_type(&self) -> bool {
+                matches!(self._d, TK_UNION)
+            }
+
+            pub fn new_bitset_type(value: Box<MinimalBitsetType>) -> Self {
+                Self {
+                    _d: TK_BITSET,
+                    bitset_type: Some(value),
+
+                    alias_type: None,
+
+                    annotation_type: None,
+
+                    struct_type: None,
+
+                    union_type: None,
+
+                    sequence_type: None,
+
+                    array_type: None,
+
+                    map_type: None,
+
+                    enumerated_type: None,
+
+                    bitmask_type: None,
+
+                    extended_type: None,
+                }
+            }
+
+            pub fn is_bitset_type(&self) -> bool {
+                matches!(self._d, TK_BITSET)
+            }
+
+            pub fn new_sequence_type(value: Box<MinimalSequenceType>) -> Self {
+                Self {
+                    _d: TK_SEQUENCE,
+                    sequence_type: Some(value),
+
+                    alias_type: None,
+
+                    annotation_type: None,
+
+                    struct_type: None,
+
+                    union_type: None,
+
+                    bitset_type: None,
+
+                    array_type: None,
+
+                    map_type: None,
+
+                    enumerated_type: None,
+
+                    bitmask_type: None,
+
+                    extended_type: None,
+                }
+            }
+
+            pub fn is_sequence_type(&self) -> bool {
+                matches!(self._d, TK_SEQUENCE)
+            }
+
+            pub fn new_array_type(value: Box<MinimalArrayType>) -> Self {
+                Self {
+                    _d: TK_ARRAY,
+                    array_type: Some(value),
+
+                    alias_type: None,
+
+                    annotation_type: None,
+
+                    struct_type: None,
+
+                    union_type: None,
+
+                    bitset_type: None,
+
+                    sequence_type: None,
+
+                    map_type: None,
+
+                    enumerated_type: None,
+
+                    bitmask_type: None,
+
+                    extended_type: None,
+                }
+            }
+
+            pub fn is_array_type(&self) -> bool {
+                matches!(self._d, TK_ARRAY)
+            }
+
+            pub fn new_map_type(value: Box<MinimalMapType>) -> Self {
+                Self {
+                    _d: TK_MAP,
+                    map_type: Some(value),
+
+                    alias_type: None,
+
+                    annotation_type: None,
+
+                    struct_type: None,
+
+                    union_type: None,
+
+                    bitset_type: None,
+
+                    sequence_type: None,
+
+                    array_type: None,
+
+                    enumerated_type: None,
+
+                    bitmask_type: None,
+
+                    extended_type: None,
+                }
+            }
+
+            pub fn is_map_type(&self) -> bool {
+                matches!(self._d, TK_MAP)
+            }
+
+            pub fn new_enumerated_type(value: Box<MinimalEnumeratedType>) -> Self {
+                Self {
+                    _d: TK_ENUM,
+                    enumerated_type: Some(value),
+
+                    alias_type: None,
+
+                    annotation_type: None,
+
+                    struct_type: None,
+
+                    union_type: None,
+
+                    bitset_type: None,
+
+                    sequence_type: None,
+
+                    array_type: None,
+
+                    map_type: None,
+
+                    bitmask_type: None,
+
+                    extended_type: None,
+                }
+            }
+
+            pub fn is_enumerated_type(&self) -> bool {
+                matches!(self._d, TK_ENUM)
+            }
+
+            pub fn new_bitmask_type(value: Box<MinimalBitmaskType>) -> Self {
+                Self {
+                    _d: TK_BITMASK,
+                    bitmask_type: Some(value),
+
+                    alias_type: None,
+
+                    annotation_type: None,
+
+                    struct_type: None,
+
+                    union_type: None,
+
+                    bitset_type: None,
+
+                    sequence_type: None,
+
+                    array_type: None,
+
+                    map_type: None,
+
+                    enumerated_type: None,
+
+                    extended_type: None,
+                }
+            }
+
+            pub fn is_bitmask_type(&self) -> bool {
+                matches!(self._d, TK_BITMASK)
+            }
+
+            pub fn new_extended_type(value: Box<MinimalExtendedType>) -> Self {
+                Self {
+                    _d: u8::default(),
+                    extended_type: Some(value),
+
+                    alias_type: None,
+
+                    annotation_type: None,
+
+                    struct_type: None,
+
+                    union_type: None,
+
+                    bitset_type: None,
+
+                    sequence_type: None,
+
+                    array_type: None,
+
+                    map_type: None,
+
+                    enumerated_type: None,
+
+                    bitmask_type: None,
+                }
+            }
+
+            pub fn is_extended_type(&self) -> bool {
+                matches!(self._d, _)
+            }
+
+            pub fn tag(&self) -> &u8 {
+                &self._d
+            }
+        }
+
         impl xidl_xcdr::XcdrSerialize for MinimalTypeObject {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
             fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
                 serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
                 xidl_xcdr::XcdrSerialize::serialize_with(&self._d, serializer)?;
                 serializer.end_field()?;
@@ -6034,6 +14329,269 @@ pub mod DDS {
                 Ok(out)
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for MinimalTypeObject {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_union(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_primitive(
+                        xidl_typeobject::DDS::XTypes::TK_BYTE,
+                    ),
+                    vec![
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 10u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalBitmaskType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "bitmask_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 9u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalEnumeratedType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "enumerated_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalAliasType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "alias_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 4u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalUnionType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "union_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalAnnotationType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "annotation_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 11u32,
+                            member_flags: 64u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalExtendedType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "extended_type",
+                            labels: vec![],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 8u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<MinimalMapType>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "map_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 7u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalArrayType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "array_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 6u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalSequenceType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "sequence_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 5u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalBitsetType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "bitset_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalStructType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "struct_type",
+                            labels: vec![0i32],
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_union(
+                    "DDS::XTypes::MinimalTypeObject",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_primitive(
+                        xidl_typeobject::DDS::XTypes::TK_BYTE,
+                    ),
+                    vec![
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 10u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalBitmaskType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "bitmask_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 9u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalEnumeratedType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "enumerated_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalAliasType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "alias_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 4u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalUnionType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "union_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalAnnotationType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "annotation_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 11u32,
+                            member_flags: 64u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalExtendedType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "extended_type",
+                            labels: vec![],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 8u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<MinimalMapType>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "map_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 7u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalArrayType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "array_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 6u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalSequenceType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "sequence_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 5u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalBitsetType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "bitset_type",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalStructType,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "struct_type",
+                            labels: vec![0i32],
+                        },
+                    ],
+                )
+            }
+        }
         pub struct TypeObject {
             pub _d: u8,
 
@@ -6042,12 +14600,50 @@ pub mod DDS {
             pub minimal: Option<Box<MinimalTypeObject>>,
         }
 
+        impl TypeObject {
+            pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+
+            pub fn new_complete(value: Box<CompleteTypeObject>) -> Self {
+                Self {
+                    _d: EK_COMPLETE,
+                    complete: Some(value),
+
+                    minimal: None,
+                }
+            }
+
+            pub fn is_complete(&self) -> bool {
+                matches!(self._d, EK_COMPLETE)
+            }
+
+            pub fn new_minimal(value: Box<MinimalTypeObject>) -> Self {
+                Self {
+                    _d: EK_MINIMAL,
+                    minimal: Some(value),
+
+                    complete: None,
+                }
+            }
+
+            pub fn is_minimal(&self) -> bool {
+                matches!(self._d, EK_MINIMAL)
+            }
+
+            pub fn tag(&self) -> &u8 {
+                &self._d
+            }
+        }
+
         impl xidl_xcdr::XcdrSerialize for TypeObject {
+            fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                Self::SERIALIZE_KIND
+            }
+
             fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
                 serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
                 xidl_xcdr::XcdrSerialize::serialize_with(&self._d, serializer)?;
                 serializer.end_field()?;
@@ -6107,6 +14703,75 @@ pub mod DDS {
                 Ok(out)
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for TypeObject {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_union(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_primitive(
+                        xidl_typeobject::DDS::XTypes::TK_BYTE,
+                    ),
+                    vec![
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteTypeObject,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "complete",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalTypeObject,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "minimal",
+                            labels: vec![0i32],
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_union(
+                    "DDS::XTypes::TypeObject",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_primitive(
+                        xidl_typeobject::DDS::XTypes::TK_BYTE,
+                    ),
+                    vec![
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                CompleteTypeObject,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "complete",
+                            labels: vec![0i32],
+                        },
+                        xidl_typeobject::runtime::UnionMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                MinimalTypeObject,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "minimal",
+                            labels: vec![0i32],
+                        },
+                    ],
+                )
+            }
+        }
         pub type TypeObjectSeq = Vec<TypeObject>;
         pub type StronglyConnectedComponent = TypeObjectSeq;
         pub struct TypeIdentifierTypeObjectPair {
@@ -6128,7 +14793,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -6160,6 +14825,59 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for TypeIdentifierTypeObjectPair {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "type_identifier",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeObject>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "type_object",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::TypeIdentifierTypeObjectPair",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "type_identifier",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeObject>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "type_object",
+                        },
+                    ],
+                )
+            }
+        }
         pub type TypeIdentifierTypeObjectPairSeq = Vec<TypeIdentifierTypeObjectPair>;
         pub struct TypeIdentifierPair {
             pub type_identifier1: Box<TypeIdentifier>,
@@ -6180,7 +14898,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -6212,6 +14930,59 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for TypeIdentifierPair {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "type_identifier1",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "type_identifier2",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::TypeIdentifierPair",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "type_identifier1",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "type_identifier2",
+                        },
+                    ],
+                )
+            }
+        }
         pub type TypeIdentifierPairSeq = Vec<TypeIdentifierPair>;
         pub struct TypeIdentifierWithSize {
             pub type_id: Box<TypeIdentifier>,
@@ -6232,7 +15003,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -6268,6 +15039,59 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for TypeIdentifierWithSize {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "type_id",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_UINT32,
+                            ),
+                            name: "typeobject_serialized_size",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::TypeIdentifierWithSize",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<TypeIdentifier>(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "type_id",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_UINT32,
+                            ),
+                            name: "typeobject_serialized_size",
+                        },
+                    ],
+                )
+            }
+        }
         pub type TypeIdentifierWithSizeSeq = Vec<TypeIdentifierWithSize>;
         pub struct TypeIdentifierWithDependencies {
             pub typeid_with_size: Box<TypeIdentifierWithSize>,
@@ -6290,7 +15114,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -6331,6 +15155,91 @@ pub mod DDS {
                 })
             }
         }
+
+        impl xidl_typeobject::XidlTypeObject for TypeIdentifierWithDependencies {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                TypeIdentifierWithSize,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "typeid_with_size",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_INT32,
+                            ),
+                            name: "dependent_typeid_count",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_sequence(
+                                xidl_typeobject::runtime::type_identifier_for::<
+                                    TypeIdentifierWithSize,
+                                >(
+                                    xidl_typeobject::runtime::TypeEquivalence::Minimal
+                                ),
+                                0u32,
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal,
+                            ),
+                            name: "dependent_typeids",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::TypeIdentifierWithDependencies",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                TypeIdentifierWithSize,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "typeid_with_size",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_primitive(
+                                xidl_typeobject::DDS::XTypes::TK_INT32,
+                            ),
+                            name: "dependent_typeid_count",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 3u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_sequence(
+                                xidl_typeobject::runtime::type_identifier_for::<
+                                    TypeIdentifierWithSize,
+                                >(
+                                    xidl_typeobject::runtime::TypeEquivalence::Complete
+                                ),
+                                0u32,
+                                xidl_typeobject::runtime::TypeEquivalence::Complete,
+                            ),
+                            name: "dependent_typeids",
+                        },
+                    ],
+                )
+            }
+        }
         pub type TypeIdentifierWithDependenciesSeq = Vec<TypeIdentifierWithDependencies>;
         pub struct TypeInformation {
             pub minimal: Box<TypeIdentifierWithDependencies>,
@@ -6351,7 +15260,7 @@ pub mod DDS {
                 &self,
                 serializer: &mut S,
             ) -> xidl_xcdr::error::XcdrResult<()> {
-                serializer.begin_struct()?;
+                serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
 
                 serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
 
@@ -6377,6 +15286,67 @@ pub mod DDS {
                 let complete = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
 
                 Ok(Self { minimal, complete })
+            }
+        }
+
+        impl xidl_typeobject::XidlTypeObject for TypeInformation {
+            fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_minimal_struct(
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                TypeIdentifierWithDependencies,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "minimal",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                TypeIdentifierWithDependencies,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Minimal
+                            ),
+                            name: "complete",
+                        },
+                    ],
+                )
+            }
+
+            fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
+                xidl_typeobject::runtime::build_complete_struct(
+                    "DDS::XTypes::TypeInformation",
+                    0u32,
+                    xidl_typeobject::runtime::type_identifier_none(),
+                    vec![
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 1u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                TypeIdentifierWithDependencies,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "minimal",
+                        },
+                        xidl_typeobject::runtime::StructMemberDesc {
+                            member_id: 2u32,
+                            member_flags: 0u32,
+                            type_id: xidl_typeobject::runtime::type_identifier_for::<
+                                TypeIdentifierWithDependencies,
+                            >(
+                                xidl_typeobject::runtime::TypeEquivalence::Complete
+                            ),
+                            name: "complete",
+                        },
+                    ],
+                )
             }
         }
         pub type TypeInformationSeq = Vec<TypeInformation>;

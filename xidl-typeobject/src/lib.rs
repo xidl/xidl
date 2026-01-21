@@ -1,11 +1,23 @@
 mod dds_xtypes_typeobject;
-pub mod runtime;
+use core::mem::ManuallyDrop;
 
 pub use dds_xtypes_typeobject::*;
 
+pub mod runtime;
+
+mod typeobject;
+pub use typeobject::*;
+
 extern crate self as xidl_typeobject;
 
-pub trait XidlTypeObject {
-    fn minimal_type_object() -> DDS::XTypes::TypeObject;
-    fn complete_type_object() -> DDS::XTypes::TypeObject;
+union X {
+    v: ManuallyDrop<u32>,
+}
+
+impl Drop for X {
+    fn drop(&mut self) {
+        unsafe {
+            ManuallyDrop::drop(&mut self.v);
+        }
+    }
 }

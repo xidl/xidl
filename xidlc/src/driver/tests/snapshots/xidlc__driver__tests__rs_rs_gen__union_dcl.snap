@@ -11,6 +11,7 @@ union_dcl.rs
 #![allow(non_upper_case_globals)]
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
+#![allow(unreachable_patterns)]
 
 use std::collections::BTreeMap;
 use std::ffi::c_void;
@@ -24,6 +25,13 @@ pub struct B {
 impl B {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for B {
@@ -90,6 +98,53 @@ pub struct C {
 impl C {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_a(value: i32) -> Self {
+            
+            
+            Self {
+                _d: 0,
+                a: Some(value),
+                
+                    
+                
+                    
+                b: None,
+                    
+                
+            }
+        }
+
+        pub fn is_a(&self) -> bool {
+            matches!(self._d, 0)
+        }
+    
+        pub fn new_b(value: String) -> Self {
+            
+            
+            Self {
+                _d: 1,
+                b: Some(value),
+                
+                    
+                a: None,
+                    
+                
+                    
+                
+            }
+        }
+
+        pub fn is_b(&self) -> bool {
+            matches!(self._d, 1)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for C {
@@ -171,10 +226,10 @@ impl xidl_xcdr::XcdrDeserialize for C {
 
 impl xidl_typeobject::XidlTypeObject for C {
     fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_string(None, false), name: "b", labels: vec![1i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "a", labels: vec![0i32] }])
+        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "a", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_string(None, false), name: "b", labels: vec![1i32] }])
     }
 
     fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_union("C", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_string(None, false), name: "b", labels: vec![1i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "a", labels: vec![0i32] }])
+        xidl_typeobject::runtime::build_complete_union("C", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "a", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_string(None, false), name: "b", labels: vec![1i32] }])
     }
 }

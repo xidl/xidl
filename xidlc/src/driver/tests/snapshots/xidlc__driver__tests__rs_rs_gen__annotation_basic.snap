@@ -11,6 +11,7 @@ annotation_basic.rs
 #![allow(non_upper_case_globals)]
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
+#![allow(unreachable_patterns)]
 
 use std::collections::BTreeMap;
 use std::ffi::c_void;
@@ -187,6 +188,55 @@ pub struct U {
 impl U {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_a(value: i32) -> Self {
+            
+            
+            Self {
+                _d: 0,
+                a: Some(value),
+                
+                    
+                
+                    
+                b: None,
+                    
+                
+            }
+        }
+
+        pub fn is_a(&self) -> bool {
+            matches!(self._d, 0)
+        }
+    
+        pub fn new_b(value: i32) -> Self {
+            
+            
+                
+            
+            Self {
+                _d: i32::default(),
+                b: Some(value),
+                
+                    
+                a: None,
+                    
+                
+                    
+                
+            }
+        }
+
+        pub fn is_b(&self) -> bool {
+            matches!(self._d, _)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for U {
@@ -264,11 +314,11 @@ impl xidl_xcdr::XcdrDeserialize for U {
 
 impl xidl_typeobject::XidlTypeObject for U {
     fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "b", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "a", labels: vec![0i32] }])
+        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "a", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "b", labels: vec![] }])
     }
 
     fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_union("U", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "b", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "a", labels: vec![0i32] }])
+        xidl_typeobject::runtime::build_complete_union("U", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "a", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "b", labels: vec![] }])
     }
 }
 pub const I_ping_Hash: i32 = 18846175;
@@ -406,6 +456,29 @@ pub struct I_ping_Result {
 impl I_ping_Result {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_result(value: Box<I_ping_Out>) -> Self {
+            
+            
+            Self {
+                _d: RETCODE_OK,
+                result: Some(value),
+                
+                    
+                
+            }
+        }
+
+        pub fn is_result(&self) -> bool {
+            matches!(self._d, RETCODE_OK)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for I_ping_Result {
@@ -609,6 +682,29 @@ pub struct I_get_attribute_value_Result {
 impl I_get_attribute_value_Result {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_result(value: Box<I_get_attribute_value_Out>) -> Self {
+            
+            
+            Self {
+                _d: RETCODE_OK,
+                result: Some(value),
+                
+                    
+                
+            }
+        }
+
+        pub fn is_result(&self) -> bool {
+            matches!(self._d, RETCODE_OK)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for I_get_attribute_value_Result {
@@ -812,6 +908,29 @@ pub struct I_set_attribute_value_Result {
 impl I_set_attribute_value_Result {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_result(value: Box<I_set_attribute_value_Out>) -> Self {
+            
+            
+            Self {
+                _d: RETCODE_OK,
+                result: Some(value),
+                
+                    
+                
+            }
+        }
+
+        pub fn is_result(&self) -> bool {
+            matches!(self._d, RETCODE_OK)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for I_set_attribute_value_Result {
@@ -899,6 +1018,127 @@ pub struct I_Call {
 impl I_Call {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_unknownOp(value: Box<UnknownOperation>) -> Self {
+            
+            
+                
+            
+            Self {
+                _d: i32::default(),
+                unknownOp: Some(value),
+                
+                    
+                
+                    
+                ping: None,
+                    
+                
+                    
+                get_attribute_value: None,
+                    
+                
+                    
+                set_attribute_value: None,
+                    
+                
+            }
+        }
+
+        pub fn is_unknownOp(&self) -> bool {
+            matches!(self._d, _)
+        }
+    
+        pub fn new_ping(value: Box<I_ping_In>) -> Self {
+            
+            
+            Self {
+                _d: I_ping_Hash,
+                ping: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                
+                    
+                get_attribute_value: None,
+                    
+                
+                    
+                set_attribute_value: None,
+                    
+                
+            }
+        }
+
+        pub fn is_ping(&self) -> bool {
+            matches!(self._d, I_ping_Hash)
+        }
+    
+        pub fn new_get_attribute_value(value: Box<I_get_attribute_value_In>) -> Self {
+            
+            
+            Self {
+                _d: I_get_attribute_value_Hash,
+                get_attribute_value: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                ping: None,
+                    
+                
+                    
+                
+                    
+                set_attribute_value: None,
+                    
+                
+            }
+        }
+
+        pub fn is_get_attribute_value(&self) -> bool {
+            matches!(self._d, I_get_attribute_value_Hash)
+        }
+    
+        pub fn new_set_attribute_value(value: Box<I_set_attribute_value_In>) -> Self {
+            
+            
+            Self {
+                _d: I_set_attribute_value_Hash,
+                set_attribute_value: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                ping: None,
+                    
+                
+                    
+                get_attribute_value: None,
+                    
+                
+                    
+                
+            }
+        }
+
+        pub fn is_set_attribute_value(&self) -> bool {
+            matches!(self._d, I_set_attribute_value_Hash)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for I_Call {
@@ -1010,11 +1250,11 @@ impl xidl_xcdr::XcdrDeserialize for I_Call {
 
 impl xidl_typeobject::XidlTypeObject for I_Call {
     fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 4u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_set_attribute_value_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "set_attribute_value", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_ping_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "ping", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 3u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_get_attribute_value_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "get_attribute_value", labels: vec![0i32] }])
+        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 3u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_get_attribute_value_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "get_attribute_value", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_ping_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "ping", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 4u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_set_attribute_value_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "set_attribute_value", labels: vec![0i32] }])
     }
 
     fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_union("I_Call", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 4u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_set_attribute_value_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "set_attribute_value", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_ping_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "ping", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 3u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_get_attribute_value_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "get_attribute_value", labels: vec![0i32] }])
+        xidl_typeobject::runtime::build_complete_union("I_Call", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 3u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_get_attribute_value_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "get_attribute_value", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_ping_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "ping", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 4u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_set_attribute_value_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "set_attribute_value", labels: vec![0i32] }])
     }
 }
 pub struct I_Request {
@@ -1106,6 +1346,127 @@ pub struct I_Return {
 impl I_Return {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_unknownOp(value: Box<UnknownOperation>) -> Self {
+            
+            
+                
+            
+            Self {
+                _d: i32::default(),
+                unknownOp: Some(value),
+                
+                    
+                
+                    
+                ping: None,
+                    
+                
+                    
+                get_attribute_value: None,
+                    
+                
+                    
+                set_attribute_value: None,
+                    
+                
+            }
+        }
+
+        pub fn is_unknownOp(&self) -> bool {
+            matches!(self._d, _)
+        }
+    
+        pub fn new_ping(value: Box<I_ping_Result>) -> Self {
+            
+            
+            Self {
+                _d: I_ping_Hash,
+                ping: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                
+                    
+                get_attribute_value: None,
+                    
+                
+                    
+                set_attribute_value: None,
+                    
+                
+            }
+        }
+
+        pub fn is_ping(&self) -> bool {
+            matches!(self._d, I_ping_Hash)
+        }
+    
+        pub fn new_get_attribute_value(value: Box<I_get_attribute_value_Result>) -> Self {
+            
+            
+            Self {
+                _d: I_get_attribute_value_Hash,
+                get_attribute_value: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                ping: None,
+                    
+                
+                    
+                
+                    
+                set_attribute_value: None,
+                    
+                
+            }
+        }
+
+        pub fn is_get_attribute_value(&self) -> bool {
+            matches!(self._d, I_get_attribute_value_Hash)
+        }
+    
+        pub fn new_set_attribute_value(value: Box<I_set_attribute_value_Result>) -> Self {
+            
+            
+            Self {
+                _d: I_set_attribute_value_Hash,
+                set_attribute_value: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                ping: None,
+                    
+                
+                    
+                get_attribute_value: None,
+                    
+                
+                    
+                
+            }
+        }
+
+        pub fn is_set_attribute_value(&self) -> bool {
+            matches!(self._d, I_set_attribute_value_Hash)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for I_Return {
@@ -1217,11 +1578,11 @@ impl xidl_xcdr::XcdrDeserialize for I_Return {
 
 impl xidl_typeobject::XidlTypeObject for I_Return {
     fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 4u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_set_attribute_value_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "set_attribute_value", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 3u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_get_attribute_value_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "get_attribute_value", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_ping_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "ping", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }])
+        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_ping_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "ping", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 3u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_get_attribute_value_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "get_attribute_value", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 4u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_set_attribute_value_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "set_attribute_value", labels: vec![0i32] }])
     }
 
     fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_union("I_Return", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 4u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_set_attribute_value_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "set_attribute_value", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 3u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_get_attribute_value_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "get_attribute_value", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_ping_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "ping", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }])
+        xidl_typeobject::runtime::build_complete_union("I_Return", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_ping_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "ping", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 3u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_get_attribute_value_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "get_attribute_value", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 4u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_set_attribute_value_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "set_attribute_value", labels: vec![0i32] }])
     }
 }
 pub struct I_Reply {

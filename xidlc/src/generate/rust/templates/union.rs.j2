@@ -1,13 +1,55 @@
 pub struct {{ ident }} {
-    pub _d: {{ switch_ty }},
+    tag: {{ switch_ty }},
+    data: {{ ident }}Data,
+}
+
+union {{ ident }}Data {
 {% for member in members %}
-    pub {{ member.name }}: Option<{{ member.ty }}>,
+    {{ member.name }}: core::mem::ManuallyDrop<{{ member.ty }}>,
 {% endfor %}
+}
+
+impl Drop for {{ ident }} {
+    fn drop(&mut self) {
+        match self.tag {
+            {% for case in cases %}
+                {{ case.pattern }} => {
+                    unsafe {
+                        core::mem::ManuallyDrop::drop(&mut self.data.{{ case.member }});
+                    }
+                }
+            {% endfor %}
+        }
+    }
 }
 
 impl {{ ident }} {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::{{ serialize_kind }};
+
+    {% for member in members %}
+        pub fn new_{{ member.name }}(value: {{ member.ty }}) -> Self {
+            {% set case = cases[loop.index - 1].pattern %}
+            {% if case == "_" %}
+                {% set case = [switch_ty, "::default()"] | join %}
+            {% endif %}
+            Self {
+                tag: {{ case }},
+                data: {{ ident }}Data {
+                    {{ member.name }}: core::mem::ManuallyDrop::new(value),
+                }
+            }
+        }
+
+        pub fn is_{{ member.name }}(&self) -> bool {
+            matches!(self.tag, {{ cases[loop.index - 1].pattern }})
+        }
+    {% endfor %}
+
+
+    pub fn tag(&self) -> &{{ switch_ty }} {
+        &self.tag
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for {{ ident }} {
@@ -21,24 +63,20 @@ impl xidl_xcdr::XcdrSerialize for {{ ident }} {
     ) -> xidl_xcdr::error::XcdrResult<()> {
         serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
         serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self._d, serializer)?;
+        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
         serializer.end_field()?;
-        match self._d {
-{% for case in cases %}
-            {{ case.pattern }} => {
-                let value = self.{{ case.member }}.as_ref().ok_or_else(|| {
-                    xidl_xcdr::error::XcdrError::Message(
-                        "union member is not set for discriminator".to_string(),
-                    )
-                })?;
-                serializer.begin_field(xidl_xcdr::FieldId({{ case.field_id }}), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-{% endfor %}
-{% if not has_default %}
-            _ => {}
-{% endif %}
+        match self.tag {
+            {% for case in cases %}
+                {{ case.pattern }} => {
+                    let value = unsafe { self.data.{{ case.member }}.as_ref() };
+                    serializer.begin_field(xidl_xcdr::FieldId({{ case.field_id }}), false, 0)?;
+                    xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                    serializer.end_field()?;
+                },
+            {% endfor %}
+            {% if not has_default %}
+                _ => {}
+            {% endif %}
         }
         serializer.end_struct()?;
         Ok(())
@@ -49,24 +87,20 @@ impl xidl_xcdr::XcdrDeserialize for {{ ident }} {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
     ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let _d = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let mut out = Self {
-            _d,
-{% for member in members %}
-            {{ member.name }}: None,
-{% endfor %}
+        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+        let data = match tag {
+            {% for case in cases %}
+                {{ case.pattern }} => {
+                    {{ ident }}Data {
+                        {{ case.member }}: core::mem::ManuallyDrop::new(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?),
+                    }
+                }
+            {% endfor %}
+            {% if not has_default %}
+                    _ => { todo!() }
+            {% endif %}
         };
-        match out._d {
-{% for case in cases %}
-            {{ case.pattern }} => {
-                out.{{ case.member }} = Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
-            }
-{% endfor %}
-{% if not has_default %}
-            _ => {}
-{% endif %}
-        }
-        Ok(out)
+        Ok(Self { tag, data } )
     }
 }
 

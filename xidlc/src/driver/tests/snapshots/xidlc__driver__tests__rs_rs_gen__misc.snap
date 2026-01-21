@@ -11,6 +11,7 @@ misc.rs
 #![allow(non_upper_case_globals)]
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
+#![allow(unreachable_patterns)]
 
 use std::collections::BTreeMap;
 use std::ffi::c_void;
@@ -72,38 +73,8 @@ pub const MYSIZE: Size = medium;
 pub const col: Color = red;
 pub const another: Color = medium;
 pub type FooSeq = Vec<Foo>;
-
-impl xidl_typeobject::XidlTypeObject for FooSeq {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_alias(0u32, xidl_typeobject::runtime::type_identifier_sequence(xidl_typeobject::runtime::type_identifier_for::<Foo>(xidl_typeobject::runtime::TypeEquivalence::Minimal), 0u32, xidl_typeobject::runtime::TypeEquivalence::Minimal))
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_alias("FooSeq", 0u32, xidl_typeobject::runtime::type_identifier_sequence(xidl_typeobject::runtime::type_identifier_for::<Foo>(xidl_typeobject::runtime::TypeEquivalence::Complete), 0u32, xidl_typeobject::runtime::TypeEquivalence::Complete))
-    }
-}
 pub type FooSeq = Vec<Foo>;
-
-impl xidl_typeobject::XidlTypeObject for FooSeq {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_alias(0u32, xidl_typeobject::runtime::type_identifier_sequence(xidl_typeobject::runtime::type_identifier_for::<Foo>(xidl_typeobject::runtime::TypeEquivalence::Minimal), 12u32, xidl_typeobject::runtime::TypeEquivalence::Minimal))
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_alias("FooSeq", 0u32, xidl_typeobject::runtime::type_identifier_sequence(xidl_typeobject::runtime::type_identifier_for::<Foo>(xidl_typeobject::runtime::TypeEquivalence::Complete), 12u32, xidl_typeobject::runtime::TypeEquivalence::Complete))
-    }
-}
 pub type FooSeq = Vec<Foo>;
-
-impl xidl_typeobject::XidlTypeObject for FooSeq {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_alias(0u32, xidl_typeobject::runtime::type_identifier_sequence(xidl_typeobject::runtime::type_identifier_for::<Foo>(xidl_typeobject::runtime::TypeEquivalence::Minimal), 0u32, xidl_typeobject::runtime::TypeEquivalence::Minimal))
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_alias("FooSeq", 0u32, xidl_typeobject::runtime::type_identifier_sequence(xidl_typeobject::runtime::type_identifier_for::<Foo>(xidl_typeobject::runtime::TypeEquivalence::Complete), 0u32, xidl_typeobject::runtime::TypeEquivalence::Complete))
-    }
-}
 pub struct Foo {
 
 
@@ -178,16 +149,6 @@ impl xidl_typeobject::XidlTypeObject for Foo {
     }
 }
 pub type BarSeq = Vec<Bar>;
-
-impl xidl_typeobject::XidlTypeObject for BarSeq {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_alias(0u32, xidl_typeobject::runtime::type_identifier_sequence(xidl_typeobject::runtime::type_identifier_for::<Bar>(xidl_typeobject::runtime::TypeEquivalence::Minimal), 0u32, xidl_typeobject::runtime::TypeEquivalence::Minimal))
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_alias("BarSeq", 0u32, xidl_typeobject::runtime::type_identifier_sequence(xidl_typeobject::runtime::type_identifier_for::<Bar>(xidl_typeobject::runtime::TypeEquivalence::Complete), 0u32, xidl_typeobject::runtime::TypeEquivalence::Complete))
-    }
-}
 pub struct Bar {
     pub _d: i32,
 
@@ -200,6 +161,53 @@ pub struct Bar {
 impl Bar {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_l_mem(value: i32) -> Self {
+            
+            
+            Self {
+                _d: 0,
+                l_mem: Some(value),
+                
+                    
+                
+                    
+                s_mem: None,
+                    
+                
+            }
+        }
+
+        pub fn is_l_mem(&self) -> bool {
+            matches!(self._d, 0)
+        }
+    
+        pub fn new_s_mem(value: Foo) -> Self {
+            
+            
+            Self {
+                _d: 1,
+                s_mem: Some(value),
+                
+                    
+                l_mem: None,
+                    
+                
+                    
+                
+            }
+        }
+
+        pub fn is_s_mem(&self) -> bool {
+            matches!(self._d, 1)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for Bar {
@@ -436,6 +444,29 @@ pub struct A_make_it_so_Result {
 impl A_make_it_so_Result {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_result(value: Box<A_make_it_so_Out>) -> Self {
+            
+            
+            Self {
+                _d: RETCODE_OK,
+                result: Some(value),
+                
+                    
+                
+            }
+        }
+
+        pub fn is_result(&self) -> bool {
+            matches!(self._d, RETCODE_OK)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for A_make_it_so_Result {
@@ -519,6 +550,55 @@ pub struct A_Call {
 impl A_Call {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_unknownOp(value: Box<UnknownOperation>) -> Self {
+            
+            
+                
+            
+            Self {
+                _d: i32::default(),
+                unknownOp: Some(value),
+                
+                    
+                
+                    
+                make_it_so: None,
+                    
+                
+            }
+        }
+
+        pub fn is_unknownOp(&self) -> bool {
+            matches!(self._d, _)
+        }
+    
+        pub fn new_make_it_so(value: Box<A_make_it_so_In>) -> Self {
+            
+            
+            Self {
+                _d: A_make_it_so_Hash,
+                make_it_so: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                
+            }
+        }
+
+        pub fn is_make_it_so(&self) -> bool {
+            matches!(self._d, A_make_it_so_Hash)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for A_Call {
@@ -596,11 +676,11 @@ impl xidl_xcdr::XcdrDeserialize for A_Call {
 
 impl xidl_typeobject::XidlTypeObject for A_Call {
     fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<A_make_it_so_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "make_it_so", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }])
+        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<A_make_it_so_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "make_it_so", labels: vec![0i32] }])
     }
 
     fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_union("A_Call", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<A_make_it_so_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "make_it_so", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }])
+        xidl_typeobject::runtime::build_complete_union("A_Call", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<A_make_it_so_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "make_it_so", labels: vec![0i32] }])
     }
 }
 pub struct A_Request {
@@ -688,6 +768,55 @@ pub struct A_Return {
 impl A_Return {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_unknownOp(value: Box<UnknownOperation>) -> Self {
+            
+            
+                
+            
+            Self {
+                _d: i32::default(),
+                unknownOp: Some(value),
+                
+                    
+                
+                    
+                make_it_so: None,
+                    
+                
+            }
+        }
+
+        pub fn is_unknownOp(&self) -> bool {
+            matches!(self._d, _)
+        }
+    
+        pub fn new_make_it_so(value: Box<A_make_it_so_Result>) -> Self {
+            
+            
+            Self {
+                _d: A_make_it_so_Hash,
+                make_it_so: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                
+            }
+        }
+
+        pub fn is_make_it_so(&self) -> bool {
+            matches!(self._d, A_make_it_so_Hash)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for A_Return {
@@ -983,6 +1112,29 @@ pub struct B_make_it_so_Result {
 impl B_make_it_so_Result {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_result(value: Box<B_make_it_so_Out>) -> Self {
+            
+            
+            Self {
+                _d: RETCODE_OK,
+                result: Some(value),
+                
+                    
+                
+            }
+        }
+
+        pub fn is_result(&self) -> bool {
+            matches!(self._d, RETCODE_OK)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for B_make_it_so_Result {
@@ -1066,6 +1218,55 @@ pub struct B_Call {
 impl B_Call {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_unknownOp(value: Box<UnknownOperation>) -> Self {
+            
+            
+                
+            
+            Self {
+                _d: i32::default(),
+                unknownOp: Some(value),
+                
+                    
+                
+                    
+                make_it_so: None,
+                    
+                
+            }
+        }
+
+        pub fn is_unknownOp(&self) -> bool {
+            matches!(self._d, _)
+        }
+    
+        pub fn new_make_it_so(value: Box<B_make_it_so_In>) -> Self {
+            
+            
+            Self {
+                _d: B_make_it_so_Hash,
+                make_it_so: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                
+            }
+        }
+
+        pub fn is_make_it_so(&self) -> bool {
+            matches!(self._d, B_make_it_so_Hash)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for B_Call {
@@ -1143,11 +1344,11 @@ impl xidl_xcdr::XcdrDeserialize for B_Call {
 
 impl xidl_typeobject::XidlTypeObject for B_Call {
     fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<B_make_it_so_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "make_it_so", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }])
+        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<B_make_it_so_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "make_it_so", labels: vec![0i32] }])
     }
 
     fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_union("B_Call", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<B_make_it_so_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "make_it_so", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }])
+        xidl_typeobject::runtime::build_complete_union("B_Call", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<B_make_it_so_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "make_it_so", labels: vec![0i32] }])
     }
 }
 pub struct B_Request {
@@ -1235,6 +1436,55 @@ pub struct B_Return {
 impl B_Return {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_unknownOp(value: Box<UnknownOperation>) -> Self {
+            
+            
+                
+            
+            Self {
+                _d: i32::default(),
+                unknownOp: Some(value),
+                
+                    
+                
+                    
+                make_it_so: None,
+                    
+                
+            }
+        }
+
+        pub fn is_unknownOp(&self) -> bool {
+            matches!(self._d, _)
+        }
+    
+        pub fn new_make_it_so(value: Box<B_make_it_so_Result>) -> Self {
+            
+            
+            Self {
+                _d: B_make_it_so_Hash,
+                make_it_so: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                
+            }
+        }
+
+        pub fn is_make_it_so(&self) -> bool {
+            matches!(self._d, B_make_it_so_Hash)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for B_Return {
@@ -1312,11 +1562,11 @@ impl xidl_xcdr::XcdrDeserialize for B_Return {
 
 impl xidl_typeobject::XidlTypeObject for B_Return {
     fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<B_make_it_so_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "make_it_so", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }])
+        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<B_make_it_so_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "make_it_so", labels: vec![0i32] }])
     }
 
     fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_union("B_Return", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<B_make_it_so_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "make_it_so", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }])
+        xidl_typeobject::runtime::build_complete_union("B_Return", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<B_make_it_so_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "make_it_so", labels: vec![0i32] }])
     }
 }
 pub struct B_Reply {
@@ -1530,6 +1780,29 @@ pub struct A_opA_Result {
 impl A_opA_Result {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_result(value: Box<A_opA_Out>) -> Self {
+            
+            
+            Self {
+                _d: RETCODE_OK,
+                result: Some(value),
+                
+                    
+                
+            }
+        }
+
+        pub fn is_result(&self) -> bool {
+            matches!(self._d, RETCODE_OK)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for A_opA_Result {
@@ -1613,6 +1886,55 @@ pub struct A_Call {
 impl A_Call {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_unknownOp(value: Box<UnknownOperation>) -> Self {
+            
+            
+                
+            
+            Self {
+                _d: i32::default(),
+                unknownOp: Some(value),
+                
+                    
+                
+                    
+                opA: None,
+                    
+                
+            }
+        }
+
+        pub fn is_unknownOp(&self) -> bool {
+            matches!(self._d, _)
+        }
+    
+        pub fn new_opA(value: Box<A_opA_In>) -> Self {
+            
+            
+            Self {
+                _d: A_opA_Hash,
+                opA: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                
+            }
+        }
+
+        pub fn is_opA(&self) -> bool {
+            matches!(self._d, A_opA_Hash)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for A_Call {
@@ -1690,11 +2012,11 @@ impl xidl_xcdr::XcdrDeserialize for A_Call {
 
 impl xidl_typeobject::XidlTypeObject for A_Call {
     fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<A_opA_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "opA", labels: vec![0i32] }])
+        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<A_opA_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "opA", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }])
     }
 
     fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_union("A_Call", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<A_opA_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "opA", labels: vec![0i32] }])
+        xidl_typeobject::runtime::build_complete_union("A_Call", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<A_opA_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "opA", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }])
     }
 }
 pub struct A_Request {
@@ -1782,6 +2104,55 @@ pub struct A_Return {
 impl A_Return {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_unknownOp(value: Box<UnknownOperation>) -> Self {
+            
+            
+                
+            
+            Self {
+                _d: i32::default(),
+                unknownOp: Some(value),
+                
+                    
+                
+                    
+                opA: None,
+                    
+                
+            }
+        }
+
+        pub fn is_unknownOp(&self) -> bool {
+            matches!(self._d, _)
+        }
+    
+        pub fn new_opA(value: Box<A_opA_Result>) -> Self {
+            
+            
+            Self {
+                _d: A_opA_Hash,
+                opA: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                
+            }
+        }
+
+        pub fn is_opA(&self) -> bool {
+            matches!(self._d, A_opA_Hash)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for A_Return {
@@ -1859,11 +2230,11 @@ impl xidl_xcdr::XcdrDeserialize for A_Return {
 
 impl xidl_typeobject::XidlTypeObject for A_Return {
     fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<A_opA_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "opA", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }])
+        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<A_opA_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "opA", labels: vec![0i32] }])
     }
 
     fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_union("A_Return", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<A_opA_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "opA", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }])
+        xidl_typeobject::runtime::build_complete_union("A_Return", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<A_opA_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "opA", labels: vec![0i32] }])
     }
 }
 pub struct A_Reply {
@@ -1940,16 +2311,6 @@ impl xidl_typeobject::XidlTypeObject for A_Reply {
     }
 }
 pub type L1 = i32;
-
-impl xidl_typeobject::XidlTypeObject for L1 {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_alias(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32))
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_alias("L1", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32))
-    }
-}
 pub trait A {
 
     fn opA(&self, l_1: &L1) -> i16;
@@ -2088,6 +2449,29 @@ pub struct B_opB_Result {
 impl B_opB_Result {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_result(value: Box<B_opB_Out>) -> Self {
+            
+            
+            Self {
+                _d: RETCODE_OK,
+                result: Some(value),
+                
+                    
+                
+            }
+        }
+
+        pub fn is_result(&self) -> bool {
+            matches!(self._d, RETCODE_OK)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for B_opB_Result {
@@ -2171,6 +2555,55 @@ pub struct B_Call {
 impl B_Call {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_unknownOp(value: Box<UnknownOperation>) -> Self {
+            
+            
+                
+            
+            Self {
+                _d: i32::default(),
+                unknownOp: Some(value),
+                
+                    
+                
+                    
+                opB: None,
+                    
+                
+            }
+        }
+
+        pub fn is_unknownOp(&self) -> bool {
+            matches!(self._d, _)
+        }
+    
+        pub fn new_opB(value: Box<B_opB_In>) -> Self {
+            
+            
+            Self {
+                _d: B_opB_Hash,
+                opB: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                
+            }
+        }
+
+        pub fn is_opB(&self) -> bool {
+            matches!(self._d, B_opB_Hash)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for B_Call {
@@ -2340,6 +2773,55 @@ pub struct B_Return {
 impl B_Return {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_unknownOp(value: Box<UnknownOperation>) -> Self {
+            
+            
+                
+            
+            Self {
+                _d: i32::default(),
+                unknownOp: Some(value),
+                
+                    
+                
+                    
+                opB: None,
+                    
+                
+            }
+        }
+
+        pub fn is_unknownOp(&self) -> bool {
+            matches!(self._d, _)
+        }
+    
+        pub fn new_opB(value: Box<B_opB_Result>) -> Self {
+            
+            
+            Self {
+                _d: B_opB_Hash,
+                opB: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                
+            }
+        }
+
+        pub fn is_opB(&self) -> bool {
+            matches!(self._d, B_opB_Hash)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for B_Return {
@@ -2417,11 +2899,11 @@ impl xidl_xcdr::XcdrDeserialize for B_Return {
 
 impl xidl_typeobject::XidlTypeObject for B_Return {
     fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<B_opB_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "opB", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }])
+        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<B_opB_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "opB", labels: vec![0i32] }])
     }
 
     fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_union("B_Return", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<B_opB_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "opB", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }])
+        xidl_typeobject::runtime::build_complete_union("B_Return", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<B_opB_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "opB", labels: vec![0i32] }])
     }
 }
 pub struct B_Reply {
@@ -2498,16 +2980,6 @@ impl xidl_typeobject::XidlTypeObject for B_Reply {
     }
 }
 pub type L1 = i16;
-
-impl xidl_typeobject::XidlTypeObject for L1 {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_alias(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT16))
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_alias("L1", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT16))
-    }
-}
 pub trait B {
 
     fn opB(&self, l: i32) -> L1;
@@ -2646,6 +3118,29 @@ pub struct C_opC_Result {
 impl C_opC_Result {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_result(value: Box<C_opC_Out>) -> Self {
+            
+            
+            Self {
+                _d: RETCODE_OK,
+                result: Some(value),
+                
+                    
+                
+            }
+        }
+
+        pub fn is_result(&self) -> bool {
+            matches!(self._d, RETCODE_OK)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for C_opC_Result {
@@ -2729,6 +3224,55 @@ pub struct C_Call {
 impl C_Call {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_unknownOp(value: Box<UnknownOperation>) -> Self {
+            
+            
+                
+            
+            Self {
+                _d: i32::default(),
+                unknownOp: Some(value),
+                
+                    
+                
+                    
+                opC: None,
+                    
+                
+            }
+        }
+
+        pub fn is_unknownOp(&self) -> bool {
+            matches!(self._d, _)
+        }
+    
+        pub fn new_opC(value: Box<C_opC_In>) -> Self {
+            
+            
+            Self {
+                _d: C_opC_Hash,
+                opC: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                
+            }
+        }
+
+        pub fn is_opC(&self) -> bool {
+            matches!(self._d, C_opC_Hash)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for C_Call {
@@ -2806,11 +3350,11 @@ impl xidl_xcdr::XcdrDeserialize for C_Call {
 
 impl xidl_typeobject::XidlTypeObject for C_Call {
     fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_opC_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "opC", labels: vec![0i32] }])
+        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_opC_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "opC", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }])
     }
 
     fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_union("C_Call", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_opC_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "opC", labels: vec![0i32] }])
+        xidl_typeobject::runtime::build_complete_union("C_Call", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_opC_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "opC", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }])
     }
 }
 pub struct C_Request {
@@ -2898,6 +3442,55 @@ pub struct C_Return {
 impl C_Return {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_unknownOp(value: Box<UnknownOperation>) -> Self {
+            
+            
+                
+            
+            Self {
+                _d: i32::default(),
+                unknownOp: Some(value),
+                
+                    
+                
+                    
+                opC: None,
+                    
+                
+            }
+        }
+
+        pub fn is_unknownOp(&self) -> bool {
+            matches!(self._d, _)
+        }
+    
+        pub fn new_opC(value: Box<C_opC_Result>) -> Self {
+            
+            
+            Self {
+                _d: C_opC_Hash,
+                opC: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                
+            }
+        }
+
+        pub fn is_opC(&self) -> bool {
+            matches!(self._d, C_opC_Hash)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for C_Return {
@@ -2975,11 +3568,11 @@ impl xidl_xcdr::XcdrDeserialize for C_Return {
 
 impl xidl_typeobject::XidlTypeObject for C_Return {
     fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_opC_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "opC", labels: vec![0i32] }])
+        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_opC_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "opC", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }])
     }
 
     fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_union("C_Return", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_opC_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "opC", labels: vec![0i32] }])
+        xidl_typeobject::runtime::build_complete_union("C_Return", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_opC_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "opC", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }])
     }
 }
 pub struct C_Reply {
@@ -3056,27 +3649,7 @@ impl xidl_typeobject::XidlTypeObject for C_Reply {
     }
 }
 pub type L2 = L1;
-
-impl xidl_typeobject::XidlTypeObject for L2 {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_alias(0u32, xidl_typeobject::runtime::type_identifier_for::<L1>(xidl_typeobject::runtime::TypeEquivalence::Minimal))
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_alias("L2", 0u32, xidl_typeobject::runtime::type_identifier_for::<L1>(xidl_typeobject::runtime::TypeEquivalence::Complete))
-    }
-}
 pub type L3 = L1;
-
-impl xidl_typeobject::XidlTypeObject for L3 {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_alias(0u32, xidl_typeobject::runtime::type_identifier_for::<L1>(xidl_typeobject::runtime::TypeEquivalence::Minimal))
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_alias("L3", 0u32, xidl_typeobject::runtime::type_identifier_for::<L1>(xidl_typeobject::runtime::TypeEquivalence::Complete))
-    }
-}
 pub trait C {
 
     fn opC(&self, l_3: &L3) -> L1;
@@ -3216,6 +3789,29 @@ pub struct A_f_Result {
 impl A_f_Result {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_result(value: Box<A_f_Out>) -> Self {
+            
+            
+            Self {
+                _d: RETCODE_OK,
+                result: Some(value),
+                
+                    
+                
+            }
+        }
+
+        pub fn is_result(&self) -> bool {
+            matches!(self._d, RETCODE_OK)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for A_f_Result {
@@ -3299,6 +3895,55 @@ pub struct A_Call {
 impl A_Call {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_unknownOp(value: Box<UnknownOperation>) -> Self {
+            
+            
+                
+            
+            Self {
+                _d: i32::default(),
+                unknownOp: Some(value),
+                
+                    
+                
+                    
+                f: None,
+                    
+                
+            }
+        }
+
+        pub fn is_unknownOp(&self) -> bool {
+            matches!(self._d, _)
+        }
+    
+        pub fn new_f(value: Box<A_f_In>) -> Self {
+            
+            
+            Self {
+                _d: A_f_Hash,
+                f: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                
+            }
+        }
+
+        pub fn is_f(&self) -> bool {
+            matches!(self._d, A_f_Hash)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for A_Call {
@@ -3376,11 +4021,11 @@ impl xidl_xcdr::XcdrDeserialize for A_Call {
 
 impl xidl_typeobject::XidlTypeObject for A_Call {
     fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<A_f_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "f", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }])
+        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<A_f_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "f", labels: vec![0i32] }])
     }
 
     fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_union("A_Call", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<A_f_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "f", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }])
+        xidl_typeobject::runtime::build_complete_union("A_Call", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<A_f_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "f", labels: vec![0i32] }])
     }
 }
 pub struct A_Request {
@@ -3468,6 +4113,55 @@ pub struct A_Return {
 impl A_Return {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_unknownOp(value: Box<UnknownOperation>) -> Self {
+            
+            
+                
+            
+            Self {
+                _d: i32::default(),
+                unknownOp: Some(value),
+                
+                    
+                
+                    
+                f: None,
+                    
+                
+            }
+        }
+
+        pub fn is_unknownOp(&self) -> bool {
+            matches!(self._d, _)
+        }
+    
+        pub fn new_f(value: Box<A_f_Result>) -> Self {
+            
+            
+            Self {
+                _d: A_f_Hash,
+                f: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                
+            }
+        }
+
+        pub fn is_f(&self) -> bool {
+            matches!(self._d, A_f_Hash)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for A_Return {
@@ -3545,11 +4239,11 @@ impl xidl_xcdr::XcdrDeserialize for A_Return {
 
 impl xidl_typeobject::XidlTypeObject for A_Return {
     fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<A_f_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "f", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }])
+        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<A_f_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "f", labels: vec![0i32] }])
     }
 
     fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_union("A_Return", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<A_f_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "f", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }])
+        xidl_typeobject::runtime::build_complete_union("A_Return", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<A_f_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "f", labels: vec![0i32] }])
     }
 }
 pub struct A_Reply {
@@ -3626,16 +4320,6 @@ impl xidl_typeobject::XidlTypeObject for A_Reply {
     }
 }
 pub type coord = [f64; 1];
-
-impl xidl_typeobject::XidlTypeObject for coord {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_alias(0u32, xidl_typeobject::runtime::type_identifier_array(xidl_typeobject::runtime::type_identifier_array(xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_FLOAT64), &[1u32], xidl_typeobject::runtime::TypeEquivalence::Minimal), &[1u32], xidl_typeobject::runtime::TypeEquivalence::Minimal))
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_alias("coord", 0u32, xidl_typeobject::runtime::type_identifier_array(xidl_typeobject::runtime::type_identifier_array(xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_FLOAT64), &[1u32], xidl_typeobject::runtime::TypeEquivalence::Complete), &[1u32], xidl_typeobject::runtime::TypeEquivalence::Complete))
-    }
-}
 pub trait A {
 
     fn f(&self, s: &coord) -> ();
@@ -3649,30 +4333,10 @@ pub trait C {
 
 }
 pub type string_t = String;
-
-impl xidl_typeobject::XidlTypeObject for string_t {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_alias(0u32, xidl_typeobject::runtime::type_identifier_string(Some(128u32), false))
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_alias("string_t", 0u32, xidl_typeobject::runtime::type_identifier_string(Some(128u32), false))
-    }
-}
 pub trait A {
 
 }
 pub type string_t = String;
-
-impl xidl_typeobject::XidlTypeObject for string_t {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_alias(0u32, xidl_typeobject::runtime::type_identifier_string(Some(256u32), false))
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_alias("string_t", 0u32, xidl_typeobject::runtime::type_identifier_string(Some(256u32), false))
-    }
-}
 pub trait B {
 
 }
@@ -3814,6 +4478,29 @@ pub struct C_get_attribute_Title_Result {
 impl C_get_attribute_Title_Result {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_result(value: Box<C_get_attribute_Title_Out>) -> Self {
+            
+            
+            Self {
+                _d: RETCODE_OK,
+                result: Some(value),
+                
+                    
+                
+            }
+        }
+
+        pub fn is_result(&self) -> bool {
+            matches!(self._d, RETCODE_OK)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for C_get_attribute_Title_Result {
@@ -4017,6 +4704,29 @@ pub struct C_set_attribute_Title_Result {
 impl C_set_attribute_Title_Result {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_result(value: Box<C_set_attribute_Title_Out>) -> Self {
+            
+            
+            Self {
+                _d: RETCODE_OK,
+                result: Some(value),
+                
+                    
+                
+            }
+        }
+
+        pub fn is_result(&self) -> bool {
+            matches!(self._d, RETCODE_OK)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for C_set_attribute_Title_Result {
@@ -4220,6 +4930,29 @@ pub struct C_get_attribute_Name_Result {
 impl C_get_attribute_Name_Result {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_result(value: Box<C_get_attribute_Name_Out>) -> Self {
+            
+            
+            Self {
+                _d: RETCODE_OK,
+                result: Some(value),
+                
+                    
+                
+            }
+        }
+
+        pub fn is_result(&self) -> bool {
+            matches!(self._d, RETCODE_OK)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for C_get_attribute_Name_Result {
@@ -4423,6 +5156,29 @@ pub struct C_set_attribute_Name_Result {
 impl C_set_attribute_Name_Result {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_result(value: Box<C_set_attribute_Name_Out>) -> Self {
+            
+            
+            Self {
+                _d: RETCODE_OK,
+                result: Some(value),
+                
+                    
+                
+            }
+        }
+
+        pub fn is_result(&self) -> bool {
+            matches!(self._d, RETCODE_OK)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for C_set_attribute_Name_Result {
@@ -4626,6 +5382,29 @@ pub struct C_get_attribute_City_Result {
 impl C_get_attribute_City_Result {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_result(value: Box<C_get_attribute_City_Out>) -> Self {
+            
+            
+            Self {
+                _d: RETCODE_OK,
+                result: Some(value),
+                
+                    
+                
+            }
+        }
+
+        pub fn is_result(&self) -> bool {
+            matches!(self._d, RETCODE_OK)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for C_get_attribute_City_Result {
@@ -4829,6 +5608,29 @@ pub struct C_set_attribute_City_Result {
 impl C_set_attribute_City_Result {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_result(value: Box<C_set_attribute_City_Out>) -> Self {
+            
+            
+            Self {
+                _d: RETCODE_OK,
+                result: Some(value),
+                
+                    
+                
+            }
+        }
+
+        pub fn is_result(&self) -> bool {
+            matches!(self._d, RETCODE_OK)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for C_set_attribute_City_Result {
@@ -4922,6 +5724,295 @@ pub struct C_Call {
 impl C_Call {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_unknownOp(value: Box<UnknownOperation>) -> Self {
+            
+            
+                
+            
+            Self {
+                _d: i32::default(),
+                unknownOp: Some(value),
+                
+                    
+                
+                    
+                get_attribute_Title: None,
+                    
+                
+                    
+                set_attribute_Title: None,
+                    
+                
+                    
+                get_attribute_Name: None,
+                    
+                
+                    
+                set_attribute_Name: None,
+                    
+                
+                    
+                get_attribute_City: None,
+                    
+                
+                    
+                set_attribute_City: None,
+                    
+                
+            }
+        }
+
+        pub fn is_unknownOp(&self) -> bool {
+            matches!(self._d, _)
+        }
+    
+        pub fn new_get_attribute_Title(value: Box<C_get_attribute_Title_In>) -> Self {
+            
+            
+            Self {
+                _d: C_get_attribute_Title_Hash,
+                get_attribute_Title: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                
+                    
+                set_attribute_Title: None,
+                    
+                
+                    
+                get_attribute_Name: None,
+                    
+                
+                    
+                set_attribute_Name: None,
+                    
+                
+                    
+                get_attribute_City: None,
+                    
+                
+                    
+                set_attribute_City: None,
+                    
+                
+            }
+        }
+
+        pub fn is_get_attribute_Title(&self) -> bool {
+            matches!(self._d, C_get_attribute_Title_Hash)
+        }
+    
+        pub fn new_set_attribute_Title(value: Box<C_set_attribute_Title_In>) -> Self {
+            
+            
+            Self {
+                _d: C_set_attribute_Title_Hash,
+                set_attribute_Title: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                get_attribute_Title: None,
+                    
+                
+                    
+                
+                    
+                get_attribute_Name: None,
+                    
+                
+                    
+                set_attribute_Name: None,
+                    
+                
+                    
+                get_attribute_City: None,
+                    
+                
+                    
+                set_attribute_City: None,
+                    
+                
+            }
+        }
+
+        pub fn is_set_attribute_Title(&self) -> bool {
+            matches!(self._d, C_set_attribute_Title_Hash)
+        }
+    
+        pub fn new_get_attribute_Name(value: Box<C_get_attribute_Name_In>) -> Self {
+            
+            
+            Self {
+                _d: C_get_attribute_Name_Hash,
+                get_attribute_Name: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                get_attribute_Title: None,
+                    
+                
+                    
+                set_attribute_Title: None,
+                    
+                
+                    
+                
+                    
+                set_attribute_Name: None,
+                    
+                
+                    
+                get_attribute_City: None,
+                    
+                
+                    
+                set_attribute_City: None,
+                    
+                
+            }
+        }
+
+        pub fn is_get_attribute_Name(&self) -> bool {
+            matches!(self._d, C_get_attribute_Name_Hash)
+        }
+    
+        pub fn new_set_attribute_Name(value: Box<C_set_attribute_Name_In>) -> Self {
+            
+            
+            Self {
+                _d: C_set_attribute_Name_Hash,
+                set_attribute_Name: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                get_attribute_Title: None,
+                    
+                
+                    
+                set_attribute_Title: None,
+                    
+                
+                    
+                get_attribute_Name: None,
+                    
+                
+                    
+                
+                    
+                get_attribute_City: None,
+                    
+                
+                    
+                set_attribute_City: None,
+                    
+                
+            }
+        }
+
+        pub fn is_set_attribute_Name(&self) -> bool {
+            matches!(self._d, C_set_attribute_Name_Hash)
+        }
+    
+        pub fn new_get_attribute_City(value: Box<C_get_attribute_City_In>) -> Self {
+            
+            
+            Self {
+                _d: C_get_attribute_City_Hash,
+                get_attribute_City: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                get_attribute_Title: None,
+                    
+                
+                    
+                set_attribute_Title: None,
+                    
+                
+                    
+                get_attribute_Name: None,
+                    
+                
+                    
+                set_attribute_Name: None,
+                    
+                
+                    
+                
+                    
+                set_attribute_City: None,
+                    
+                
+            }
+        }
+
+        pub fn is_get_attribute_City(&self) -> bool {
+            matches!(self._d, C_get_attribute_City_Hash)
+        }
+    
+        pub fn new_set_attribute_City(value: Box<C_set_attribute_City_In>) -> Self {
+            
+            
+            Self {
+                _d: C_set_attribute_City_Hash,
+                set_attribute_City: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                get_attribute_Title: None,
+                    
+                
+                    
+                set_attribute_Title: None,
+                    
+                
+                    
+                get_attribute_Name: None,
+                    
+                
+                    
+                set_attribute_Name: None,
+                    
+                
+                    
+                get_attribute_City: None,
+                    
+                
+                    
+                
+            }
+        }
+
+        pub fn is_set_attribute_City(&self) -> bool {
+            matches!(self._d, C_set_attribute_City_Hash)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for C_Call {
@@ -5084,11 +6175,11 @@ impl xidl_xcdr::XcdrDeserialize for C_Call {
 
 impl xidl_typeobject::XidlTypeObject for C_Call {
     fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_get_attribute_Title_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "get_attribute_Title", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 7u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_set_attribute_City_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "set_attribute_City", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 4u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_get_attribute_Name_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "get_attribute_Name", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 5u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_set_attribute_Name_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "set_attribute_Name", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 6u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_get_attribute_City_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "get_attribute_City", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 3u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_set_attribute_Title_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "set_attribute_Title", labels: vec![0i32] }])
+        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_get_attribute_Title_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "get_attribute_Title", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 7u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_set_attribute_City_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "set_attribute_City", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 6u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_get_attribute_City_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "get_attribute_City", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 3u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_set_attribute_Title_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "set_attribute_Title", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 4u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_get_attribute_Name_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "get_attribute_Name", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 5u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_set_attribute_Name_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "set_attribute_Name", labels: vec![0i32] }])
     }
 
     fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_union("C_Call", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_get_attribute_Title_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "get_attribute_Title", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 7u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_set_attribute_City_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "set_attribute_City", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 4u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_get_attribute_Name_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "get_attribute_Name", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 5u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_set_attribute_Name_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "set_attribute_Name", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 6u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_get_attribute_City_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "get_attribute_City", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 3u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_set_attribute_Title_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "set_attribute_Title", labels: vec![0i32] }])
+        xidl_typeobject::runtime::build_complete_union("C_Call", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_get_attribute_Title_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "get_attribute_Title", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 7u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_set_attribute_City_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "set_attribute_City", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 6u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_get_attribute_City_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "get_attribute_City", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 3u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_set_attribute_Title_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "set_attribute_Title", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 4u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_get_attribute_Name_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "get_attribute_Name", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 5u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_set_attribute_Name_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "set_attribute_Name", labels: vec![0i32] }])
     }
 }
 pub struct C_Request {
@@ -5186,6 +6277,295 @@ pub struct C_Return {
 impl C_Return {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+
+    
+        pub fn new_unknownOp(value: Box<UnknownOperation>) -> Self {
+            
+            
+                
+            
+            Self {
+                _d: i32::default(),
+                unknownOp: Some(value),
+                
+                    
+                
+                    
+                get_attribute_Title: None,
+                    
+                
+                    
+                set_attribute_Title: None,
+                    
+                
+                    
+                get_attribute_Name: None,
+                    
+                
+                    
+                set_attribute_Name: None,
+                    
+                
+                    
+                get_attribute_City: None,
+                    
+                
+                    
+                set_attribute_City: None,
+                    
+                
+            }
+        }
+
+        pub fn is_unknownOp(&self) -> bool {
+            matches!(self._d, _)
+        }
+    
+        pub fn new_get_attribute_Title(value: Box<C_get_attribute_Title_Result>) -> Self {
+            
+            
+            Self {
+                _d: C_get_attribute_Title_Hash,
+                get_attribute_Title: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                
+                    
+                set_attribute_Title: None,
+                    
+                
+                    
+                get_attribute_Name: None,
+                    
+                
+                    
+                set_attribute_Name: None,
+                    
+                
+                    
+                get_attribute_City: None,
+                    
+                
+                    
+                set_attribute_City: None,
+                    
+                
+            }
+        }
+
+        pub fn is_get_attribute_Title(&self) -> bool {
+            matches!(self._d, C_get_attribute_Title_Hash)
+        }
+    
+        pub fn new_set_attribute_Title(value: Box<C_set_attribute_Title_Result>) -> Self {
+            
+            
+            Self {
+                _d: C_set_attribute_Title_Hash,
+                set_attribute_Title: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                get_attribute_Title: None,
+                    
+                
+                    
+                
+                    
+                get_attribute_Name: None,
+                    
+                
+                    
+                set_attribute_Name: None,
+                    
+                
+                    
+                get_attribute_City: None,
+                    
+                
+                    
+                set_attribute_City: None,
+                    
+                
+            }
+        }
+
+        pub fn is_set_attribute_Title(&self) -> bool {
+            matches!(self._d, C_set_attribute_Title_Hash)
+        }
+    
+        pub fn new_get_attribute_Name(value: Box<C_get_attribute_Name_Result>) -> Self {
+            
+            
+            Self {
+                _d: C_get_attribute_Name_Hash,
+                get_attribute_Name: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                get_attribute_Title: None,
+                    
+                
+                    
+                set_attribute_Title: None,
+                    
+                
+                    
+                
+                    
+                set_attribute_Name: None,
+                    
+                
+                    
+                get_attribute_City: None,
+                    
+                
+                    
+                set_attribute_City: None,
+                    
+                
+            }
+        }
+
+        pub fn is_get_attribute_Name(&self) -> bool {
+            matches!(self._d, C_get_attribute_Name_Hash)
+        }
+    
+        pub fn new_set_attribute_Name(value: Box<C_set_attribute_Name_Result>) -> Self {
+            
+            
+            Self {
+                _d: C_set_attribute_Name_Hash,
+                set_attribute_Name: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                get_attribute_Title: None,
+                    
+                
+                    
+                set_attribute_Title: None,
+                    
+                
+                    
+                get_attribute_Name: None,
+                    
+                
+                    
+                
+                    
+                get_attribute_City: None,
+                    
+                
+                    
+                set_attribute_City: None,
+                    
+                
+            }
+        }
+
+        pub fn is_set_attribute_Name(&self) -> bool {
+            matches!(self._d, C_set_attribute_Name_Hash)
+        }
+    
+        pub fn new_get_attribute_City(value: Box<C_get_attribute_City_Result>) -> Self {
+            
+            
+            Self {
+                _d: C_get_attribute_City_Hash,
+                get_attribute_City: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                get_attribute_Title: None,
+                    
+                
+                    
+                set_attribute_Title: None,
+                    
+                
+                    
+                get_attribute_Name: None,
+                    
+                
+                    
+                set_attribute_Name: None,
+                    
+                
+                    
+                
+                    
+                set_attribute_City: None,
+                    
+                
+            }
+        }
+
+        pub fn is_get_attribute_City(&self) -> bool {
+            matches!(self._d, C_get_attribute_City_Hash)
+        }
+    
+        pub fn new_set_attribute_City(value: Box<C_set_attribute_City_Result>) -> Self {
+            
+            
+            Self {
+                _d: C_set_attribute_City_Hash,
+                set_attribute_City: Some(value),
+                
+                    
+                unknownOp: None,
+                    
+                
+                    
+                get_attribute_Title: None,
+                    
+                
+                    
+                set_attribute_Title: None,
+                    
+                
+                    
+                get_attribute_Name: None,
+                    
+                
+                    
+                set_attribute_Name: None,
+                    
+                
+                    
+                get_attribute_City: None,
+                    
+                
+                    
+                
+            }
+        }
+
+        pub fn is_set_attribute_City(&self) -> bool {
+            matches!(self._d, C_set_attribute_City_Hash)
+        }
+    
+
+
+    pub fn tag(&self) -> &i32 {
+        &self._d
+    }
 }
 
 impl xidl_xcdr::XcdrSerialize for C_Return {
@@ -5348,11 +6728,11 @@ impl xidl_xcdr::XcdrDeserialize for C_Return {
 
 impl xidl_typeobject::XidlTypeObject for C_Return {
     fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 4u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_get_attribute_Name_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "get_attribute_Name", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 5u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_set_attribute_Name_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "set_attribute_Name", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 3u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_set_attribute_Title_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "set_attribute_Title", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 6u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_get_attribute_City_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "get_attribute_City", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 7u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_set_attribute_City_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "set_attribute_City", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_get_attribute_Title_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "get_attribute_Title", labels: vec![0i32] }])
+        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 4u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_get_attribute_Name_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "get_attribute_Name", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 5u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_set_attribute_Name_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "set_attribute_Name", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 6u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_get_attribute_City_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "get_attribute_City", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 7u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_set_attribute_City_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "set_attribute_City", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_get_attribute_Title_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "get_attribute_Title", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 3u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_set_attribute_Title_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "set_attribute_Title", labels: vec![0i32] }])
     }
 
     fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_union("C_Return", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 4u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_get_attribute_Name_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "get_attribute_Name", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 5u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_set_attribute_Name_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "set_attribute_Name", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 3u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_set_attribute_Title_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "set_attribute_Title", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 6u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_get_attribute_City_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "get_attribute_City", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 7u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_set_attribute_City_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "set_attribute_City", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_get_attribute_Title_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "get_attribute_Title", labels: vec![0i32] }])
+        xidl_typeobject::runtime::build_complete_union("C_Return", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 4u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_get_attribute_Name_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "get_attribute_Name", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 5u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_set_attribute_Name_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "set_attribute_Name", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 6u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_get_attribute_City_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "get_attribute_City", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 7u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_set_attribute_City_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "set_attribute_City", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_get_attribute_Title_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "get_attribute_Title", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 3u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<C_set_attribute_Title_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "set_attribute_Title", labels: vec![0i32] }])
     }
 }
 pub struct C_Reply {
