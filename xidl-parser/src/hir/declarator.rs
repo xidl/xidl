@@ -31,7 +31,7 @@ impl From<crate::typed_ast::Declarator> for Declarator {
 
 impl From<crate::typed_ast::SimpleDeclarator> for SimpleDeclarator {
     fn from(value: crate::typed_ast::SimpleDeclarator) -> Self {
-        Self(value.0.0)
+        Self(value.0 .0)
     }
 }
 

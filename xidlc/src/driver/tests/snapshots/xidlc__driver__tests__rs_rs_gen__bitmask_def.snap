@@ -17,7 +17,7 @@ use std::collections::BTreeMap;
 use std::ffi::c_void;
 
 
-pub struct A {
+    pub struct A {
     pub value: u32,
 }
 
@@ -40,16 +40,6 @@ impl xidl_xcdr::XcdrDeserialize for A {
     ) -> xidl_xcdr::error::XcdrResult<Self> {
         let value = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
         Ok(Self { value })
-    }
-}
-
-impl xidl_typeobject::XidlTypeObject for A {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_bitmask(0u32, 32u16, vec![])
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_bitmask("A", 0u32, 32u16, vec![])
     }
 }
 pub struct A {
@@ -83,16 +73,6 @@ impl xidl_xcdr::XcdrDeserialize for A {
         Ok(Self { value })
     }
 }
-
-impl xidl_typeobject::XidlTypeObject for A {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_bitmask(0u32, 32u16, vec![xidl_typeobject::runtime::BitflagDesc { position: 0u16, flags: 0u32, name: "A" }, xidl_typeobject::runtime::BitflagDesc { position: 1u16, flags: 0u32, name: "B" }, xidl_typeobject::runtime::BitflagDesc { position: 2u16, flags: 0u32, name: "C" }])
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_bitmask("A", 0u32, 32u16, vec![xidl_typeobject::runtime::BitflagDesc { position: 0u16, flags: 0u32, name: "A" }, xidl_typeobject::runtime::BitflagDesc { position: 1u16, flags: 0u32, name: "B" }, xidl_typeobject::runtime::BitflagDesc { position: 2u16, flags: 0u32, name: "C" }])
-    }
-}
 pub struct A {
     pub value: u32,
 }
@@ -122,15 +102,5 @@ impl xidl_xcdr::XcdrDeserialize for A {
     ) -> xidl_xcdr::error::XcdrResult<Self> {
         let value = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
         Ok(Self { value })
-    }
-}
-
-impl xidl_typeobject::XidlTypeObject for A {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_bitmask(0u32, 32u16, vec![xidl_typeobject::runtime::BitflagDesc { position: 0u16, flags: 0u32, name: "A" }, xidl_typeobject::runtime::BitflagDesc { position: 1u16, flags: 0u32, name: "B" }, xidl_typeobject::runtime::BitflagDesc { position: 2u16, flags: 0u32, name: "C" }])
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_bitmask("A", 0u32, 32u16, vec![xidl_typeobject::runtime::BitflagDesc { position: 0u16, flags: 0u32, name: "A" }, xidl_typeobject::runtime::BitflagDesc { position: 1u16, flags: 0u32, name: "B" }, xidl_typeobject::runtime::BitflagDesc { position: 2u16, flags: 0u32, name: "C" }])
     }
 }

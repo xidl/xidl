@@ -17,7 +17,7 @@ use std::collections::BTreeMap;
 use std::ffi::c_void;
 
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum A {
 
     B,
@@ -52,15 +52,5 @@ impl xidl_xcdr::XcdrDeserialize for A {
                 value
             ))),
         }
-    }
-}
-
-impl xidl_typeobject::XidlTypeObject for A {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_enum(0u32, 32u16, vec![xidl_typeobject::runtime::EnumLiteralDesc { value: 0i32, flags: 0u32, name: "B" }, xidl_typeobject::runtime::EnumLiteralDesc { value: 1i32, flags: 0u32, name: "C" }])
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_enum("A", 0u32, 32u16, vec![xidl_typeobject::runtime::EnumLiteralDesc { value: 0i32, flags: 0u32, name: "B" }, xidl_typeobject::runtime::EnumLiteralDesc { value: 1i32, flags: 0u32, name: "C" }])
     }
 }

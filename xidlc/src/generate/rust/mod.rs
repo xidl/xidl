@@ -10,7 +10,6 @@ mod render;
 mod spec;
 mod struct_dcl;
 mod type_dcl;
-mod typeobject_runtime;
 mod union_def;
 mod util;
 

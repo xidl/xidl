@@ -17,7 +17,7 @@ use std::collections::BTreeMap;
 use std::ffi::c_void;
 
 
-pub struct S {
+    pub struct S {
 
 
     pub a: i32,
@@ -80,16 +80,6 @@ impl xidl_xcdr::XcdrDeserialize for S {
         })
     }
 }
-
-impl xidl_typeobject::XidlTypeObject for S {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_struct(0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "a" }, xidl_typeobject::runtime::StructMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT16), name: "b" }])
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_struct("S", 0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "a" }, xidl_typeobject::runtime::StructMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT16), name: "b" }])
-    }
-}
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum E {
 
@@ -127,16 +117,6 @@ impl xidl_xcdr::XcdrDeserialize for E {
         }
     }
 }
-
-impl xidl_typeobject::XidlTypeObject for E {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_enum(0u32, 32u16, vec![xidl_typeobject::runtime::EnumLiteralDesc { value: 0i32, flags: 0u32, name: "A" }, xidl_typeobject::runtime::EnumLiteralDesc { value: 1i32, flags: 0u32, name: "B" }])
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_enum("E", 0u32, 32u16, vec![xidl_typeobject::runtime::EnumLiteralDesc { value: 0i32, flags: 0u32, name: "A" }, xidl_typeobject::runtime::EnumLiteralDesc { value: 1i32, flags: 0u32, name: "B" }])
-    }
-}
 pub struct BM {
     pub value: u32,
 }
@@ -166,23 +146,37 @@ impl xidl_xcdr::XcdrDeserialize for BM {
         Ok(Self { value })
     }
 }
-
-impl xidl_typeobject::XidlTypeObject for BM {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_bitmask(0u32, 32u16, vec![xidl_typeobject::runtime::BitflagDesc { position: 0u16, flags: 0u32, name: "A" }, xidl_typeobject::runtime::BitflagDesc { position: 1u16, flags: 0u32, name: "B" }])
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_bitmask("BM", 0u32, 32u16, vec![xidl_typeobject::runtime::BitflagDesc { position: 0u16, flags: 0u32, name: "A" }, xidl_typeobject::runtime::BitflagDesc { position: 1u16, flags: 0u32, name: "B" }])
-    }
-}
 pub struct U {
-    pub _d: i32,
+    tag: i32,
+    data: UData,
+}
 
-    pub a: Option<i32>,
+union UData {
 
-    pub b: Option<i32>,
+    a: core::mem::ManuallyDrop<i32>,
 
+    b: core::mem::ManuallyDrop<i32>,
+
+}
+
+impl Drop for U {
+    fn drop(&mut self) {
+        match self.tag {
+            
+                0 => {
+                    unsafe {
+                        core::mem::ManuallyDrop::drop(&mut self.data.a);
+                    }
+                }
+            
+                _ => {
+                    unsafe {
+                        core::mem::ManuallyDrop::drop(&mut self.data.b);
+                    }
+                }
+            
+        }
+    }
 }
 
 impl U {
@@ -194,20 +188,15 @@ impl U {
             
             
             Self {
-                _d: 0,
-                a: Some(value),
-                
-                    
-                
-                    
-                b: None,
-                    
-                
+                tag: 0,
+                data: UData {
+                    a: core::mem::ManuallyDrop::new(value),
+                }
             }
         }
 
         pub fn is_a(&self) -> bool {
-            matches!(self._d, 0)
+            matches!(self.tag, 0)
         }
     
         pub fn new_b(value: i32) -> Self {
@@ -216,26 +205,21 @@ impl U {
                 
             
             Self {
-                _d: i32::default(),
-                b: Some(value),
-                
-                    
-                a: None,
-                    
-                
-                    
-                
+                tag: i32::default(),
+                data: UData {
+                    b: core::mem::ManuallyDrop::new(value),
+                }
             }
         }
 
         pub fn is_b(&self) -> bool {
-            matches!(self._d, _)
+            matches!(self.tag, _)
         }
     
 
 
     pub fn tag(&self) -> &i32 {
-        &self._d
+        &self.tag
     }
 }
 
@@ -250,33 +234,25 @@ impl xidl_xcdr::XcdrSerialize for U {
     ) -> xidl_xcdr::error::XcdrResult<()> {
         serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
         serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self._d, serializer)?;
+        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
         serializer.end_field()?;
-        match self._d {
-
-            0 => {
-                let value = self.a.as_ref().ok_or_else(|| {
-                    xidl_xcdr::error::XcdrError::Message(
-                        "union member is not set for discriminator".to_string(),
-                    )
-                })?;
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-
-            _ => {
-                let value = self.b.as_ref().ok_or_else(|| {
-                    xidl_xcdr::error::XcdrError::Message(
-                        "union member is not set for discriminator".to_string(),
-                    )
-                })?;
-                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-
-
+        match self.tag {
+            
+                0 => {
+                    let value = unsafe { self.data.a.as_ref() };
+                    serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                    xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                    serializer.end_field()?;
+                },
+            
+                _ => {
+                    let value = unsafe { self.data.b.as_ref() };
+                    serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                    xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                    serializer.end_field()?;
+                },
+            
+            
         }
         serializer.end_struct()?;
         Ok(())
@@ -287,38 +263,24 @@ impl xidl_xcdr::XcdrDeserialize for U {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
     ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let _d = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let mut out = Self {
-            _d,
-
-            a: None,
-
-            b: None,
-
+        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+        let data = match tag {
+            
+                0 => {
+                    UData {
+                        a: core::mem::ManuallyDrop::new(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?),
+                    }
+                }
+            
+                _ => {
+                    UData {
+                        b: core::mem::ManuallyDrop::new(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?),
+                    }
+                }
+            
+            
         };
-        match out._d {
-
-            0 => {
-                out.a = Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
-            }
-
-            _ => {
-                out.b = Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
-            }
-
-
-        }
-        Ok(out)
-    }
-}
-
-impl xidl_typeobject::XidlTypeObject for U {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "a", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "b", labels: vec![] }])
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_union("U", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "a", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "b", labels: vec![] }])
+        Ok(Self { tag, data } )
     }
 }
 pub const I_ping_Hash: i32 = 18846175;
@@ -375,16 +337,6 @@ impl xidl_xcdr::XcdrDeserialize for I_ping_In {
         })
     }
 }
-
-impl xidl_typeobject::XidlTypeObject for I_ping_In {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_struct(0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnusedMember>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "dummy" }])
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_struct("I_ping_In", 0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnusedMember>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "dummy" }])
-    }
-}
 pub struct I_ping_Out {
 
 
@@ -436,21 +388,29 @@ impl xidl_xcdr::XcdrDeserialize for I_ping_Out {
         })
     }
 }
-
-impl xidl_typeobject::XidlTypeObject for I_ping_Out {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_struct(0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnusedMember>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "dummy" }])
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_struct("I_ping_Out", 0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnusedMember>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "dummy" }])
-    }
-}
 pub struct I_ping_Result {
-    pub _d: i32,
+    tag: i32,
+    data: I_ping_ResultData,
+}
 
-    pub result: Option<Box<I_ping_Out>>,
+union I_ping_ResultData {
 
+    result: core::mem::ManuallyDrop<Box<I_ping_Out>>,
+
+}
+
+impl Drop for I_ping_Result {
+    fn drop(&mut self) {
+        match self.tag {
+            
+                RETCODE_OK => {
+                    unsafe {
+                        core::mem::ManuallyDrop::drop(&mut self.data.result);
+                    }
+                }
+            
+        }
+    }
 }
 
 impl I_ping_Result {
@@ -462,22 +422,21 @@ impl I_ping_Result {
             
             
             Self {
-                _d: RETCODE_OK,
-                result: Some(value),
-                
-                    
-                
+                tag: RETCODE_OK,
+                data: I_ping_ResultData {
+                    result: core::mem::ManuallyDrop::new(value),
+                }
             }
         }
 
         pub fn is_result(&self) -> bool {
-            matches!(self._d, RETCODE_OK)
+            matches!(self.tag, RETCODE_OK)
         }
     
 
 
     pub fn tag(&self) -> &i32 {
-        &self._d
+        &self.tag
     }
 }
 
@@ -492,24 +451,20 @@ impl xidl_xcdr::XcdrSerialize for I_ping_Result {
     ) -> xidl_xcdr::error::XcdrResult<()> {
         serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
         serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self._d, serializer)?;
+        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
         serializer.end_field()?;
-        match self._d {
-
-            RETCODE_OK => {
-                let value = self.result.as_ref().ok_or_else(|| {
-                    xidl_xcdr::error::XcdrError::Message(
-                        "union member is not set for discriminator".to_string(),
-                    )
-                })?;
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-
-
-            _ => {}
-
+        match self.tag {
+            
+                RETCODE_OK => {
+                    let value = unsafe { self.data.result.as_ref() };
+                    serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                    xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                    serializer.end_field()?;
+                },
+            
+            
+                _ => {}
+            
         }
         serializer.end_struct()?;
         Ok(())
@@ -520,34 +475,20 @@ impl xidl_xcdr::XcdrDeserialize for I_ping_Result {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
     ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let _d = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let mut out = Self {
-            _d,
-
-            result: None,
-
+        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+        let data = match tag {
+            
+                RETCODE_OK => {
+                    I_ping_ResultData {
+                        result: core::mem::ManuallyDrop::new(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?),
+                    }
+                }
+            
+            
+                    _ => { todo!() }
+            
         };
-        match out._d {
-
-            RETCODE_OK => {
-                out.result = Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
-            }
-
-
-            _ => {}
-
-        }
-        Ok(out)
-    }
-}
-
-impl xidl_typeobject::XidlTypeObject for I_ping_Result {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_ping_Out>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "result", labels: vec![0i32] }])
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_union("I_ping_Result", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_ping_Out>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "result", labels: vec![0i32] }])
+        Ok(Self { tag, data } )
     }
 }
 pub struct I_get_attribute_value_In {
@@ -601,16 +542,6 @@ impl xidl_xcdr::XcdrDeserialize for I_get_attribute_value_In {
         })
     }
 }
-
-impl xidl_typeobject::XidlTypeObject for I_get_attribute_value_In {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_struct(0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnusedMember>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "dummy" }])
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_struct("I_get_attribute_value_In", 0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnusedMember>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "dummy" }])
-    }
-}
 pub struct I_get_attribute_value_Out {
 
 
@@ -662,21 +593,29 @@ impl xidl_xcdr::XcdrDeserialize for I_get_attribute_value_Out {
         })
     }
 }
-
-impl xidl_typeobject::XidlTypeObject for I_get_attribute_value_Out {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_struct(0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "return_" }])
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_struct("I_get_attribute_value_Out", 0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "return_" }])
-    }
-}
 pub struct I_get_attribute_value_Result {
-    pub _d: i32,
+    tag: i32,
+    data: I_get_attribute_value_ResultData,
+}
 
-    pub result: Option<Box<I_get_attribute_value_Out>>,
+union I_get_attribute_value_ResultData {
 
+    result: core::mem::ManuallyDrop<Box<I_get_attribute_value_Out>>,
+
+}
+
+impl Drop for I_get_attribute_value_Result {
+    fn drop(&mut self) {
+        match self.tag {
+            
+                RETCODE_OK => {
+                    unsafe {
+                        core::mem::ManuallyDrop::drop(&mut self.data.result);
+                    }
+                }
+            
+        }
+    }
 }
 
 impl I_get_attribute_value_Result {
@@ -688,22 +627,21 @@ impl I_get_attribute_value_Result {
             
             
             Self {
-                _d: RETCODE_OK,
-                result: Some(value),
-                
-                    
-                
+                tag: RETCODE_OK,
+                data: I_get_attribute_value_ResultData {
+                    result: core::mem::ManuallyDrop::new(value),
+                }
             }
         }
 
         pub fn is_result(&self) -> bool {
-            matches!(self._d, RETCODE_OK)
+            matches!(self.tag, RETCODE_OK)
         }
     
 
 
     pub fn tag(&self) -> &i32 {
-        &self._d
+        &self.tag
     }
 }
 
@@ -718,24 +656,20 @@ impl xidl_xcdr::XcdrSerialize for I_get_attribute_value_Result {
     ) -> xidl_xcdr::error::XcdrResult<()> {
         serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
         serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self._d, serializer)?;
+        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
         serializer.end_field()?;
-        match self._d {
-
-            RETCODE_OK => {
-                let value = self.result.as_ref().ok_or_else(|| {
-                    xidl_xcdr::error::XcdrError::Message(
-                        "union member is not set for discriminator".to_string(),
-                    )
-                })?;
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-
-
-            _ => {}
-
+        match self.tag {
+            
+                RETCODE_OK => {
+                    let value = unsafe { self.data.result.as_ref() };
+                    serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                    xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                    serializer.end_field()?;
+                },
+            
+            
+                _ => {}
+            
         }
         serializer.end_struct()?;
         Ok(())
@@ -746,34 +680,20 @@ impl xidl_xcdr::XcdrDeserialize for I_get_attribute_value_Result {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
     ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let _d = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let mut out = Self {
-            _d,
-
-            result: None,
-
+        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+        let data = match tag {
+            
+                RETCODE_OK => {
+                    I_get_attribute_value_ResultData {
+                        result: core::mem::ManuallyDrop::new(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?),
+                    }
+                }
+            
+            
+                    _ => { todo!() }
+            
         };
-        match out._d {
-
-            RETCODE_OK => {
-                out.result = Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
-            }
-
-
-            _ => {}
-
-        }
-        Ok(out)
-    }
-}
-
-impl xidl_typeobject::XidlTypeObject for I_get_attribute_value_Result {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_get_attribute_value_Out>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "result", labels: vec![0i32] }])
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_union("I_get_attribute_value_Result", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_get_attribute_value_Out>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "result", labels: vec![0i32] }])
+        Ok(Self { tag, data } )
     }
 }
 pub struct I_set_attribute_value_In {
@@ -827,16 +747,6 @@ impl xidl_xcdr::XcdrDeserialize for I_set_attribute_value_In {
         })
     }
 }
-
-impl xidl_typeobject::XidlTypeObject for I_set_attribute_value_In {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_struct(0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "value" }])
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_struct("I_set_attribute_value_In", 0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "value" }])
-    }
-}
 pub struct I_set_attribute_value_Out {
 
 
@@ -888,21 +798,29 @@ impl xidl_xcdr::XcdrDeserialize for I_set_attribute_value_Out {
         })
     }
 }
-
-impl xidl_typeobject::XidlTypeObject for I_set_attribute_value_Out {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_struct(0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnusedMember>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "dummy" }])
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_struct("I_set_attribute_value_Out", 0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnusedMember>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "dummy" }])
-    }
-}
 pub struct I_set_attribute_value_Result {
-    pub _d: i32,
+    tag: i32,
+    data: I_set_attribute_value_ResultData,
+}
 
-    pub result: Option<Box<I_set_attribute_value_Out>>,
+union I_set_attribute_value_ResultData {
 
+    result: core::mem::ManuallyDrop<Box<I_set_attribute_value_Out>>,
+
+}
+
+impl Drop for I_set_attribute_value_Result {
+    fn drop(&mut self) {
+        match self.tag {
+            
+                RETCODE_OK => {
+                    unsafe {
+                        core::mem::ManuallyDrop::drop(&mut self.data.result);
+                    }
+                }
+            
+        }
+    }
 }
 
 impl I_set_attribute_value_Result {
@@ -914,22 +832,21 @@ impl I_set_attribute_value_Result {
             
             
             Self {
-                _d: RETCODE_OK,
-                result: Some(value),
-                
-                    
-                
+                tag: RETCODE_OK,
+                data: I_set_attribute_value_ResultData {
+                    result: core::mem::ManuallyDrop::new(value),
+                }
             }
         }
 
         pub fn is_result(&self) -> bool {
-            matches!(self._d, RETCODE_OK)
+            matches!(self.tag, RETCODE_OK)
         }
     
 
 
     pub fn tag(&self) -> &i32 {
-        &self._d
+        &self.tag
     }
 }
 
@@ -944,24 +861,20 @@ impl xidl_xcdr::XcdrSerialize for I_set_attribute_value_Result {
     ) -> xidl_xcdr::error::XcdrResult<()> {
         serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
         serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self._d, serializer)?;
+        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
         serializer.end_field()?;
-        match self._d {
-
-            RETCODE_OK => {
-                let value = self.result.as_ref().ok_or_else(|| {
-                    xidl_xcdr::error::XcdrError::Message(
-                        "union member is not set for discriminator".to_string(),
-                    )
-                })?;
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-
-
-            _ => {}
-
+        match self.tag {
+            
+                RETCODE_OK => {
+                    let value = unsafe { self.data.result.as_ref() };
+                    serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                    xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                    serializer.end_field()?;
+                },
+            
+            
+                _ => {}
+            
         }
         serializer.end_struct()?;
         Ok(())
@@ -972,47 +885,69 @@ impl xidl_xcdr::XcdrDeserialize for I_set_attribute_value_Result {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
     ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let _d = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let mut out = Self {
-            _d,
-
-            result: None,
-
+        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+        let data = match tag {
+            
+                RETCODE_OK => {
+                    I_set_attribute_value_ResultData {
+                        result: core::mem::ManuallyDrop::new(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?),
+                    }
+                }
+            
+            
+                    _ => { todo!() }
+            
         };
-        match out._d {
-
-            RETCODE_OK => {
-                out.result = Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
-            }
-
-
-            _ => {}
-
-        }
-        Ok(out)
-    }
-}
-
-impl xidl_typeobject::XidlTypeObject for I_set_attribute_value_Result {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_set_attribute_value_Out>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "result", labels: vec![0i32] }])
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_union("I_set_attribute_value_Result", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_set_attribute_value_Out>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "result", labels: vec![0i32] }])
+        Ok(Self { tag, data } )
     }
 }
 pub struct I_Call {
-    pub _d: i32,
+    tag: i32,
+    data: I_CallData,
+}
 
-    pub unknownOp: Option<Box<UnknownOperation>>,
+union I_CallData {
 
-    pub ping: Option<Box<I_ping_In>>,
+    unknownOp: core::mem::ManuallyDrop<Box<UnknownOperation>>,
 
-    pub get_attribute_value: Option<Box<I_get_attribute_value_In>>,
+    ping: core::mem::ManuallyDrop<Box<I_ping_In>>,
 
-    pub set_attribute_value: Option<Box<I_set_attribute_value_In>>,
+    get_attribute_value: core::mem::ManuallyDrop<Box<I_get_attribute_value_In>>,
 
+    set_attribute_value: core::mem::ManuallyDrop<Box<I_set_attribute_value_In>>,
+
+}
+
+impl Drop for I_Call {
+    fn drop(&mut self) {
+        match self.tag {
+            
+                _ => {
+                    unsafe {
+                        core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
+                    }
+                }
+            
+                I_ping_Hash => {
+                    unsafe {
+                        core::mem::ManuallyDrop::drop(&mut self.data.ping);
+                    }
+                }
+            
+                I_get_attribute_value_Hash => {
+                    unsafe {
+                        core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_value);
+                    }
+                }
+            
+                I_set_attribute_value_Hash => {
+                    unsafe {
+                        core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_value);
+                    }
+                }
+            
+        }
+    }
 }
 
 impl I_Call {
@@ -1026,118 +961,66 @@ impl I_Call {
                 
             
             Self {
-                _d: i32::default(),
-                unknownOp: Some(value),
-                
-                    
-                
-                    
-                ping: None,
-                    
-                
-                    
-                get_attribute_value: None,
-                    
-                
-                    
-                set_attribute_value: None,
-                    
-                
+                tag: i32::default(),
+                data: I_CallData {
+                    unknownOp: core::mem::ManuallyDrop::new(value),
+                }
             }
         }
 
         pub fn is_unknownOp(&self) -> bool {
-            matches!(self._d, _)
+            matches!(self.tag, _)
         }
     
         pub fn new_ping(value: Box<I_ping_In>) -> Self {
             
             
             Self {
-                _d: I_ping_Hash,
-                ping: Some(value),
-                
-                    
-                unknownOp: None,
-                    
-                
-                    
-                
-                    
-                get_attribute_value: None,
-                    
-                
-                    
-                set_attribute_value: None,
-                    
-                
+                tag: I_ping_Hash,
+                data: I_CallData {
+                    ping: core::mem::ManuallyDrop::new(value),
+                }
             }
         }
 
         pub fn is_ping(&self) -> bool {
-            matches!(self._d, I_ping_Hash)
+            matches!(self.tag, I_ping_Hash)
         }
     
         pub fn new_get_attribute_value(value: Box<I_get_attribute_value_In>) -> Self {
             
             
             Self {
-                _d: I_get_attribute_value_Hash,
-                get_attribute_value: Some(value),
-                
-                    
-                unknownOp: None,
-                    
-                
-                    
-                ping: None,
-                    
-                
-                    
-                
-                    
-                set_attribute_value: None,
-                    
-                
+                tag: I_get_attribute_value_Hash,
+                data: I_CallData {
+                    get_attribute_value: core::mem::ManuallyDrop::new(value),
+                }
             }
         }
 
         pub fn is_get_attribute_value(&self) -> bool {
-            matches!(self._d, I_get_attribute_value_Hash)
+            matches!(self.tag, I_get_attribute_value_Hash)
         }
     
         pub fn new_set_attribute_value(value: Box<I_set_attribute_value_In>) -> Self {
             
             
             Self {
-                _d: I_set_attribute_value_Hash,
-                set_attribute_value: Some(value),
-                
-                    
-                unknownOp: None,
-                    
-                
-                    
-                ping: None,
-                    
-                
-                    
-                get_attribute_value: None,
-                    
-                
-                    
-                
+                tag: I_set_attribute_value_Hash,
+                data: I_CallData {
+                    set_attribute_value: core::mem::ManuallyDrop::new(value),
+                }
             }
         }
 
         pub fn is_set_attribute_value(&self) -> bool {
-            matches!(self._d, I_set_attribute_value_Hash)
+            matches!(self.tag, I_set_attribute_value_Hash)
         }
     
 
 
     pub fn tag(&self) -> &i32 {
-        &self._d
+        &self.tag
     }
 }
 
@@ -1152,55 +1035,39 @@ impl xidl_xcdr::XcdrSerialize for I_Call {
     ) -> xidl_xcdr::error::XcdrResult<()> {
         serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
         serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self._d, serializer)?;
+        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
         serializer.end_field()?;
-        match self._d {
-
-            _ => {
-                let value = self.unknownOp.as_ref().ok_or_else(|| {
-                    xidl_xcdr::error::XcdrError::Message(
-                        "union member is not set for discriminator".to_string(),
-                    )
-                })?;
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-
-            I_ping_Hash => {
-                let value = self.ping.as_ref().ok_or_else(|| {
-                    xidl_xcdr::error::XcdrError::Message(
-                        "union member is not set for discriminator".to_string(),
-                    )
-                })?;
-                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-
-            I_get_attribute_value_Hash => {
-                let value = self.get_attribute_value.as_ref().ok_or_else(|| {
-                    xidl_xcdr::error::XcdrError::Message(
-                        "union member is not set for discriminator".to_string(),
-                    )
-                })?;
-                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-
-            I_set_attribute_value_Hash => {
-                let value = self.set_attribute_value.as_ref().ok_or_else(|| {
-                    xidl_xcdr::error::XcdrError::Message(
-                        "union member is not set for discriminator".to_string(),
-                    )
-                })?;
-                serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-
-
+        match self.tag {
+            
+                _ => {
+                    let value = unsafe { self.data.unknownOp.as_ref() };
+                    serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                    xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                    serializer.end_field()?;
+                },
+            
+                I_ping_Hash => {
+                    let value = unsafe { self.data.ping.as_ref() };
+                    serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                    xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                    serializer.end_field()?;
+                },
+            
+                I_get_attribute_value_Hash => {
+                    let value = unsafe { self.data.get_attribute_value.as_ref() };
+                    serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                    xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                    serializer.end_field()?;
+                },
+            
+                I_set_attribute_value_Hash => {
+                    let value = unsafe { self.data.set_attribute_value.as_ref() };
+                    serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
+                    xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                    serializer.end_field()?;
+                },
+            
+            
         }
         serializer.end_struct()?;
         Ok(())
@@ -1211,50 +1078,36 @@ impl xidl_xcdr::XcdrDeserialize for I_Call {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
     ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let _d = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let mut out = Self {
-            _d,
-
-            unknownOp: None,
-
-            ping: None,
-
-            get_attribute_value: None,
-
-            set_attribute_value: None,
-
+        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+        let data = match tag {
+            
+                _ => {
+                    I_CallData {
+                        unknownOp: core::mem::ManuallyDrop::new(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?),
+                    }
+                }
+            
+                I_ping_Hash => {
+                    I_CallData {
+                        ping: core::mem::ManuallyDrop::new(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?),
+                    }
+                }
+            
+                I_get_attribute_value_Hash => {
+                    I_CallData {
+                        get_attribute_value: core::mem::ManuallyDrop::new(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?),
+                    }
+                }
+            
+                I_set_attribute_value_Hash => {
+                    I_CallData {
+                        set_attribute_value: core::mem::ManuallyDrop::new(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?),
+                    }
+                }
+            
+            
         };
-        match out._d {
-
-            _ => {
-                out.unknownOp = Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
-            }
-
-            I_ping_Hash => {
-                out.ping = Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
-            }
-
-            I_get_attribute_value_Hash => {
-                out.get_attribute_value = Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
-            }
-
-            I_set_attribute_value_Hash => {
-                out.set_attribute_value = Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
-            }
-
-
-        }
-        Ok(out)
-    }
-}
-
-impl xidl_typeobject::XidlTypeObject for I_Call {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 3u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_get_attribute_value_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "get_attribute_value", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_ping_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "ping", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 4u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_set_attribute_value_In>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "set_attribute_value", labels: vec![0i32] }])
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_union("I_Call", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 3u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_get_attribute_value_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "get_attribute_value", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_ping_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "ping", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 4u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_set_attribute_value_In>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "set_attribute_value", labels: vec![0i32] }])
+        Ok(Self { tag, data } )
     }
 }
 pub struct I_Request {
@@ -1320,27 +1173,53 @@ impl xidl_xcdr::XcdrDeserialize for I_Request {
         })
     }
 }
-
-impl xidl_typeobject::XidlTypeObject for I_Request {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_struct(0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<RequestHeader>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "header" }, xidl_typeobject::runtime::StructMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_Call>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "data" }])
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_struct("I_Request", 0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<RequestHeader>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "header" }, xidl_typeobject::runtime::StructMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_Call>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "data" }])
-    }
-}
 pub struct I_Return {
-    pub _d: i32,
+    tag: i32,
+    data: I_ReturnData,
+}
 
-    pub unknownOp: Option<Box<UnknownOperation>>,
+union I_ReturnData {
 
-    pub ping: Option<Box<I_ping_Result>>,
+    unknownOp: core::mem::ManuallyDrop<Box<UnknownOperation>>,
 
-    pub get_attribute_value: Option<Box<I_get_attribute_value_Result>>,
+    ping: core::mem::ManuallyDrop<Box<I_ping_Result>>,
 
-    pub set_attribute_value: Option<Box<I_set_attribute_value_Result>>,
+    get_attribute_value: core::mem::ManuallyDrop<Box<I_get_attribute_value_Result>>,
 
+    set_attribute_value: core::mem::ManuallyDrop<Box<I_set_attribute_value_Result>>,
+
+}
+
+impl Drop for I_Return {
+    fn drop(&mut self) {
+        match self.tag {
+            
+                _ => {
+                    unsafe {
+                        core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
+                    }
+                }
+            
+                I_ping_Hash => {
+                    unsafe {
+                        core::mem::ManuallyDrop::drop(&mut self.data.ping);
+                    }
+                }
+            
+                I_get_attribute_value_Hash => {
+                    unsafe {
+                        core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_value);
+                    }
+                }
+            
+                I_set_attribute_value_Hash => {
+                    unsafe {
+                        core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_value);
+                    }
+                }
+            
+        }
+    }
 }
 
 impl I_Return {
@@ -1354,118 +1233,66 @@ impl I_Return {
                 
             
             Self {
-                _d: i32::default(),
-                unknownOp: Some(value),
-                
-                    
-                
-                    
-                ping: None,
-                    
-                
-                    
-                get_attribute_value: None,
-                    
-                
-                    
-                set_attribute_value: None,
-                    
-                
+                tag: i32::default(),
+                data: I_ReturnData {
+                    unknownOp: core::mem::ManuallyDrop::new(value),
+                }
             }
         }
 
         pub fn is_unknownOp(&self) -> bool {
-            matches!(self._d, _)
+            matches!(self.tag, _)
         }
     
         pub fn new_ping(value: Box<I_ping_Result>) -> Self {
             
             
             Self {
-                _d: I_ping_Hash,
-                ping: Some(value),
-                
-                    
-                unknownOp: None,
-                    
-                
-                    
-                
-                    
-                get_attribute_value: None,
-                    
-                
-                    
-                set_attribute_value: None,
-                    
-                
+                tag: I_ping_Hash,
+                data: I_ReturnData {
+                    ping: core::mem::ManuallyDrop::new(value),
+                }
             }
         }
 
         pub fn is_ping(&self) -> bool {
-            matches!(self._d, I_ping_Hash)
+            matches!(self.tag, I_ping_Hash)
         }
     
         pub fn new_get_attribute_value(value: Box<I_get_attribute_value_Result>) -> Self {
             
             
             Self {
-                _d: I_get_attribute_value_Hash,
-                get_attribute_value: Some(value),
-                
-                    
-                unknownOp: None,
-                    
-                
-                    
-                ping: None,
-                    
-                
-                    
-                
-                    
-                set_attribute_value: None,
-                    
-                
+                tag: I_get_attribute_value_Hash,
+                data: I_ReturnData {
+                    get_attribute_value: core::mem::ManuallyDrop::new(value),
+                }
             }
         }
 
         pub fn is_get_attribute_value(&self) -> bool {
-            matches!(self._d, I_get_attribute_value_Hash)
+            matches!(self.tag, I_get_attribute_value_Hash)
         }
     
         pub fn new_set_attribute_value(value: Box<I_set_attribute_value_Result>) -> Self {
             
             
             Self {
-                _d: I_set_attribute_value_Hash,
-                set_attribute_value: Some(value),
-                
-                    
-                unknownOp: None,
-                    
-                
-                    
-                ping: None,
-                    
-                
-                    
-                get_attribute_value: None,
-                    
-                
-                    
-                
+                tag: I_set_attribute_value_Hash,
+                data: I_ReturnData {
+                    set_attribute_value: core::mem::ManuallyDrop::new(value),
+                }
             }
         }
 
         pub fn is_set_attribute_value(&self) -> bool {
-            matches!(self._d, I_set_attribute_value_Hash)
+            matches!(self.tag, I_set_attribute_value_Hash)
         }
     
 
 
     pub fn tag(&self) -> &i32 {
-        &self._d
+        &self.tag
     }
 }
 
@@ -1480,55 +1307,39 @@ impl xidl_xcdr::XcdrSerialize for I_Return {
     ) -> xidl_xcdr::error::XcdrResult<()> {
         serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
         serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self._d, serializer)?;
+        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
         serializer.end_field()?;
-        match self._d {
-
-            _ => {
-                let value = self.unknownOp.as_ref().ok_or_else(|| {
-                    xidl_xcdr::error::XcdrError::Message(
-                        "union member is not set for discriminator".to_string(),
-                    )
-                })?;
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-
-            I_ping_Hash => {
-                let value = self.ping.as_ref().ok_or_else(|| {
-                    xidl_xcdr::error::XcdrError::Message(
-                        "union member is not set for discriminator".to_string(),
-                    )
-                })?;
-                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-
-            I_get_attribute_value_Hash => {
-                let value = self.get_attribute_value.as_ref().ok_or_else(|| {
-                    xidl_xcdr::error::XcdrError::Message(
-                        "union member is not set for discriminator".to_string(),
-                    )
-                })?;
-                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-
-            I_set_attribute_value_Hash => {
-                let value = self.set_attribute_value.as_ref().ok_or_else(|| {
-                    xidl_xcdr::error::XcdrError::Message(
-                        "union member is not set for discriminator".to_string(),
-                    )
-                })?;
-                serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-
-
+        match self.tag {
+            
+                _ => {
+                    let value = unsafe { self.data.unknownOp.as_ref() };
+                    serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                    xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                    serializer.end_field()?;
+                },
+            
+                I_ping_Hash => {
+                    let value = unsafe { self.data.ping.as_ref() };
+                    serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                    xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                    serializer.end_field()?;
+                },
+            
+                I_get_attribute_value_Hash => {
+                    let value = unsafe { self.data.get_attribute_value.as_ref() };
+                    serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
+                    xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                    serializer.end_field()?;
+                },
+            
+                I_set_attribute_value_Hash => {
+                    let value = unsafe { self.data.set_attribute_value.as_ref() };
+                    serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
+                    xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                    serializer.end_field()?;
+                },
+            
+            
         }
         serializer.end_struct()?;
         Ok(())
@@ -1539,50 +1350,36 @@ impl xidl_xcdr::XcdrDeserialize for I_Return {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
     ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let _d = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let mut out = Self {
-            _d,
-
-            unknownOp: None,
-
-            ping: None,
-
-            get_attribute_value: None,
-
-            set_attribute_value: None,
-
+        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+        let data = match tag {
+            
+                _ => {
+                    I_ReturnData {
+                        unknownOp: core::mem::ManuallyDrop::new(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?),
+                    }
+                }
+            
+                I_ping_Hash => {
+                    I_ReturnData {
+                        ping: core::mem::ManuallyDrop::new(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?),
+                    }
+                }
+            
+                I_get_attribute_value_Hash => {
+                    I_ReturnData {
+                        get_attribute_value: core::mem::ManuallyDrop::new(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?),
+                    }
+                }
+            
+                I_set_attribute_value_Hash => {
+                    I_ReturnData {
+                        set_attribute_value: core::mem::ManuallyDrop::new(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?),
+                    }
+                }
+            
+            
         };
-        match out._d {
-
-            _ => {
-                out.unknownOp = Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
-            }
-
-            I_ping_Hash => {
-                out.ping = Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
-            }
-
-            I_get_attribute_value_Hash => {
-                out.get_attribute_value = Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
-            }
-
-            I_set_attribute_value_Hash => {
-                out.set_attribute_value = Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
-            }
-
-
-        }
-        Ok(out)
-    }
-}
-
-impl xidl_typeobject::XidlTypeObject for I_Return {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_ping_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "ping", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 3u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_get_attribute_value_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "get_attribute_value", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 4u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_set_attribute_value_Result>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "set_attribute_value", labels: vec![0i32] }])
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_union("I_Return", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_ping_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "ping", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 64u32, type_id: xidl_typeobject::runtime::type_identifier_for::<UnknownOperation>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "unknownOp", labels: vec![] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 3u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_get_attribute_value_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "get_attribute_value", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 4u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_set_attribute_value_Result>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "set_attribute_value", labels: vec![0i32] }])
+        Ok(Self { tag, data } )
     }
 }
 pub struct I_Reply {
@@ -1646,16 +1443,6 @@ impl xidl_xcdr::XcdrDeserialize for I_Reply {
             data,
 
         })
-    }
-}
-
-impl xidl_typeobject::XidlTypeObject for I_Reply {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_struct(0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<ReplyHeader>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "header" }, xidl_typeobject::runtime::StructMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_Return>(xidl_typeobject::runtime::TypeEquivalence::Minimal), name: "data" }])
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_struct("I_Reply", 0u32, xidl_typeobject::runtime::type_identifier_none(), vec![xidl_typeobject::runtime::StructMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<ReplyHeader>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "header" }, xidl_typeobject::runtime::StructMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_for::<I_Return>(xidl_typeobject::runtime::TypeEquivalence::Complete), name: "data" }])
     }
 }
 pub trait I {

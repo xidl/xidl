@@ -3,7 +3,6 @@ use crate::generate::rust::bitmask_dcl::render_bitmask_with_config;
 use crate::generate::rust::bitset_dcl::render_bitset_with_config;
 use crate::generate::rust::enum_dcl::render_enum_with_config;
 use crate::generate::rust::struct_dcl::render_struct_with_config;
-use crate::generate::rust::typeobject_runtime;
 use crate::generate::rust::union_def::render_union_with_config;
 use crate::generate::rust::util::{rust_scoped_name, rust_type, typedef_json};
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
@@ -42,22 +41,15 @@ pub(crate) fn render_typedef_with_config(
     def: &hir::TypedefDcl,
     renderer: &RustRenderer,
     module_path: &[String],
-    annotations: &[hir::Annotation],
+    _annotations: &[hir::Annotation],
 ) -> IdlcResult<RustRenderOutput> {
     let mut out = RustRenderOutput::default();
     match &def.ty {
         hir::TypedefType::TypeSpec(ty) => {
             for decl in &def.decl {
-                let type_object =
-                    typeobject_runtime::typeobject_for_typedef(def, decl, module_path, annotations);
                 let base = rust_type(ty);
                 let mut ctx = typedef_json(&base, decl);
                 if let Some(obj) = ctx.as_object_mut() {
-                    obj.insert(
-                        "typeobject_complete".to_string(),
-                        json!(type_object.complete),
-                    );
-                    obj.insert("typeobject_minimal".to_string(), json!(type_object.minimal));
                     obj.insert(
                         "typeobject_path".to_string(),
                         json!(renderer.typeobject_path()),
@@ -110,15 +102,8 @@ pub(crate) fn render_typedef_with_config(
                 _ => unreachable!(),
             };
             for decl in &def.decl {
-                let type_object =
-                    typeobject_runtime::typeobject_for_typedef(def, decl, module_path, annotations);
                 let mut ctx = typedef_json(&base, decl);
                 if let Some(obj) = ctx.as_object_mut() {
-                    obj.insert(
-                        "typeobject_complete".to_string(),
-                        json!(type_object.complete),
-                    );
-                    obj.insert("typeobject_minimal".to_string(), json!(type_object.minimal));
                     obj.insert(
                         "typeobject_path".to_string(),
                         json!(renderer.typeobject_path()),

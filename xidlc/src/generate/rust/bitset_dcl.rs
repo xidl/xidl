@@ -1,5 +1,4 @@
 use crate::error::IdlcResult;
-use crate::generate::rust::typeobject_runtime;
 use crate::generate::rust::util::{
     bitfield_type, render_const, rust_scoped_name, serialize_kind_name,
 };
@@ -19,7 +18,6 @@ pub(crate) fn render_bitset_with_config(
     config: &hir::SerializeConfig,
     module_path: &[String],
 ) -> IdlcResult<RustRenderOutput> {
-    let type_object = typeobject_runtime::typeobject_for_bitset(def, module_path);
     let parent = def.parent.as_ref().map(rust_scoped_name);
     let fields = def
         .field
@@ -47,8 +45,6 @@ pub(crate) fn render_bitset_with_config(
         "serialize_kind": serialize_kind,
         "module_path": module_path,
         "typeobject_path": renderer.typeobject_path(),
-        "typeobject_complete": type_object.complete,
-        "typeobject_minimal": type_object.minimal,
     });
     let rendered = renderer.render_template("bitset.rs.j2", &ctx)?;
     Ok(RustRenderOutput::default().push_source(rendered))

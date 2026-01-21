@@ -103,13 +103,3 @@ impl xidl_xcdr::XcdrDeserialize for {{ ident }} {
         Ok(Self { tag, data } )
     }
 }
-
-impl {{ typeobject_path }}::XidlTypeObject for {{ ident }} {
-    fn minimal_type_object() -> {{ typeobject_path }}::DDS::XTypes::TypeObject {
-        {{ typeobject_minimal }}
-    }
-
-    fn complete_type_object() -> {{ typeobject_path }}::DDS::XTypes::TypeObject {
-        {{ typeobject_complete }}
-    }
-}

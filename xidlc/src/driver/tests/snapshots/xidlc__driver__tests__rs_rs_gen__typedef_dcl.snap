@@ -17,7 +17,7 @@ use std::collections::BTreeMap;
 use std::ffi::c_void;
 
 
-pub type FooSeq = Vec<Foo>;
+    pub type FooSeq = Vec<Foo>;
 pub type uint8_t = u8;
 pub type u8string = String;
 pub type u16string = String;

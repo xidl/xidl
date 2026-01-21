@@ -17,9 +17,9 @@ use std::collections::BTreeMap;
 use std::ffi::c_void;
 
 
-pub mod A {
-
+    pub mod A {
+    
 }
 pub mod B {
-    pub const a: u8 = 10;
+        pub const a: u8 = 10;
 }

@@ -436,18 +436,6 @@ fn parse_serialize_kind(value: &str) -> Option<SerializeKind> {
     }
 }
 
-fn apply_constr_annotations(constr: &mut ConstrTypeDcl, annotations: Vec<Annotation>) {
-    match constr {
-        ConstrTypeDcl::StructForwardDcl(def) => def.annotations = annotations,
-        ConstrTypeDcl::StructDcl(def) => def.annotations = annotations,
-        ConstrTypeDcl::EnumDcl(def) => def.annotations = annotations,
-        ConstrTypeDcl::UnionForwardDcl(def) => def.annotations = annotations,
-        ConstrTypeDcl::UnionDef(def) => def.annotations = annotations,
-        ConstrTypeDcl::BitsetDcl(def) => def.annotations = annotations,
-        ConstrTypeDcl::BitmaskDcl(def) => def.annotations = annotations,
-    }
-}
-
 impl From<crate::typed_ast::ConstrTypeDcl> for ConstrTypeDcl {
     fn from(value: crate::typed_ast::ConstrTypeDcl) -> Self {
         match value {
@@ -490,7 +478,7 @@ impl From<crate::typed_ast::UnionForwardDcl> for UnionForwardDcl {
     fn from(value: crate::typed_ast::UnionForwardDcl) -> Self {
         Self {
             annotations: vec![],
-            ident: value.0.0,
+            ident: value.0 .0,
         }
     }
 }

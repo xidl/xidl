@@ -17,7 +17,7 @@ use std::collections::BTreeMap;
 use std::ffi::c_void;
 
 
-pub const a: int = 0;
+    pub const a: int = 0;
 pub const a: u8 = 0;
 pub const a: u16 = 0;
 pub const a: u32 = 0;

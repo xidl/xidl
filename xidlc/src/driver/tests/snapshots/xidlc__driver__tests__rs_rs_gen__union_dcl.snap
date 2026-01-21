@@ -17,9 +17,21 @@ use std::collections::BTreeMap;
 use std::ffi::c_void;
 
 
-pub struct B {
-    pub _d: i32,
+    pub struct B {
+    tag: i32,
+    data: BData,
+}
 
+union BData {
+
+}
+
+impl Drop for B {
+    fn drop(&mut self) {
+        match self.tag {
+            
+        }
+    }
 }
 
 impl B {
@@ -30,7 +42,7 @@ impl B {
 
 
     pub fn tag(&self) -> &i32 {
-        &self._d
+        &self.tag
     }
 }
 
@@ -45,13 +57,13 @@ impl xidl_xcdr::XcdrSerialize for B {
     ) -> xidl_xcdr::error::XcdrResult<()> {
         serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
         serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self._d, serializer)?;
+        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
         serializer.end_field()?;
-        match self._d {
-
-
-            _ => {}
-
+        match self.tag {
+            
+            
+                _ => {}
+            
         }
         serializer.end_struct()?;
         Ok(())
@@ -62,37 +74,47 @@ impl xidl_xcdr::XcdrDeserialize for B {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
     ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let _d = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let mut out = Self {
-            _d,
-
+        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+        let data = match tag {
+            
+            
+                    _ => { todo!() }
+            
         };
-        match out._d {
-
-
-            _ => {}
-
-        }
-        Ok(out)
-    }
-}
-
-impl xidl_typeobject::XidlTypeObject for B {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![])
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_union("B", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![])
+        Ok(Self { tag, data } )
     }
 }
 pub struct C {
-    pub _d: i32,
+    tag: i32,
+    data: CData,
+}
 
-    pub a: Option<i32>,
+union CData {
 
-    pub b: Option<String>,
+    a: core::mem::ManuallyDrop<i32>,
 
+    b: core::mem::ManuallyDrop<String>,
+
+}
+
+impl Drop for C {
+    fn drop(&mut self) {
+        match self.tag {
+            
+                0 => {
+                    unsafe {
+                        core::mem::ManuallyDrop::drop(&mut self.data.a);
+                    }
+                }
+            
+                1 => {
+                    unsafe {
+                        core::mem::ManuallyDrop::drop(&mut self.data.b);
+                    }
+                }
+            
+        }
+    }
 }
 
 impl C {
@@ -104,46 +126,36 @@ impl C {
             
             
             Self {
-                _d: 0,
-                a: Some(value),
-                
-                    
-                
-                    
-                b: None,
-                    
-                
+                tag: 0,
+                data: CData {
+                    a: core::mem::ManuallyDrop::new(value),
+                }
             }
         }
 
         pub fn is_a(&self) -> bool {
-            matches!(self._d, 0)
+            matches!(self.tag, 0)
         }
     
         pub fn new_b(value: String) -> Self {
             
             
             Self {
-                _d: 1,
-                b: Some(value),
-                
-                    
-                a: None,
-                    
-                
-                    
-                
+                tag: 1,
+                data: CData {
+                    b: core::mem::ManuallyDrop::new(value),
+                }
             }
         }
 
         pub fn is_b(&self) -> bool {
-            matches!(self._d, 1)
+            matches!(self.tag, 1)
         }
     
 
 
     pub fn tag(&self) -> &i32 {
-        &self._d
+        &self.tag
     }
 }
 
@@ -158,35 +170,27 @@ impl xidl_xcdr::XcdrSerialize for C {
     ) -> xidl_xcdr::error::XcdrResult<()> {
         serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
         serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self._d, serializer)?;
+        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
         serializer.end_field()?;
-        match self._d {
-
-            0 => {
-                let value = self.a.as_ref().ok_or_else(|| {
-                    xidl_xcdr::error::XcdrError::Message(
-                        "union member is not set for discriminator".to_string(),
-                    )
-                })?;
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-
-            1 => {
-                let value = self.b.as_ref().ok_or_else(|| {
-                    xidl_xcdr::error::XcdrError::Message(
-                        "union member is not set for discriminator".to_string(),
-                    )
-                })?;
-                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-
-
-            _ => {}
-
+        match self.tag {
+            
+                0 => {
+                    let value = unsafe { self.data.a.as_ref() };
+                    serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
+                    xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                    serializer.end_field()?;
+                },
+            
+                1 => {
+                    let value = unsafe { self.data.b.as_ref() };
+                    serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
+                    xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                    serializer.end_field()?;
+                },
+            
+            
+                _ => {}
+            
         }
         serializer.end_struct()?;
         Ok(())
@@ -197,39 +201,25 @@ impl xidl_xcdr::XcdrDeserialize for C {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
     ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let _d = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let mut out = Self {
-            _d,
-
-            a: None,
-
-            b: None,
-
+        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+        let data = match tag {
+            
+                0 => {
+                    CData {
+                        a: core::mem::ManuallyDrop::new(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?),
+                    }
+                }
+            
+                1 => {
+                    CData {
+                        b: core::mem::ManuallyDrop::new(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?),
+                    }
+                }
+            
+            
+                    _ => { todo!() }
+            
         };
-        match out._d {
-
-            0 => {
-                out.a = Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
-            }
-
-            1 => {
-                out.b = Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
-            }
-
-
-            _ => {}
-
-        }
-        Ok(out)
-    }
-}
-
-impl xidl_typeobject::XidlTypeObject for C {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_union(0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "a", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_string(None, false), name: "b", labels: vec![1i32] }])
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_union("C", 0u32, xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), vec![xidl_typeobject::runtime::UnionMemberDesc { member_id: 1u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_primitive(xidl_typeobject::DDS::XTypes::TK_INT32), name: "a", labels: vec![0i32] }, xidl_typeobject::runtime::UnionMemberDesc { member_id: 2u32, member_flags: 0u32, type_id: xidl_typeobject::runtime::type_identifier_string(None, false), name: "b", labels: vec![1i32] }])
+        Ok(Self { tag, data } )
     }
 }

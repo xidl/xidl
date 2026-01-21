@@ -1,5 +1,4 @@
 use crate::error::IdlcResult;
-use crate::generate::rust::typeobject_runtime;
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use serde_json::json;
 use xidl_parser::hir;
@@ -15,7 +14,6 @@ pub(crate) fn render_bitmask_with_config(
     renderer: &RustRenderer,
     module_path: &[String],
 ) -> IdlcResult<RustRenderOutput> {
-    let type_object = typeobject_runtime::typeobject_for_bitmask(def, module_path);
     let values = def
         .value
         .iter()
@@ -33,8 +31,6 @@ pub(crate) fn render_bitmask_with_config(
         "values": values,
         "module_path": module_path,
         "typeobject_path": renderer.typeobject_path(),
-        "typeobject_complete": type_object.complete,
-        "typeobject_minimal": type_object.minimal,
     });
     let rendered = renderer.render_template("bitmask.rs.j2", &ctx)?;
     Ok(RustRenderOutput::default().push_source(rendered))

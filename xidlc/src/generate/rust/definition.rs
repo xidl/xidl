@@ -67,8 +67,7 @@ pub(crate) fn render_module_body(
                     Vec::new()
                 });
                 let defs = module.definition.iter().collect::<Vec<_>>();
-                let mut module_path = Vec::new();
-                module_path.push(module.ident.clone());
+                let module_path = vec![module.ident.clone()];
                 let body = render_module_body_with_config(
                     &defs,
                     renderer,

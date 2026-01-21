@@ -17,7 +17,7 @@ use std::collections::BTreeMap;
 use std::ffi::c_void;
 
 
-pub struct A {
+    pub struct A {
 
 
 }
@@ -55,16 +55,6 @@ impl xidl_xcdr::XcdrDeserialize for A {
 
 
         })
-    }
-}
-
-impl xidl_typeobject::XidlTypeObject for A {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_bitset(0u32, vec![])
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_bitset("A", 0u32, vec![])
     }
 }
 pub struct A {
@@ -113,16 +103,6 @@ impl xidl_xcdr::XcdrDeserialize for A {
 
 
         })
-    }
-}
-
-impl xidl_typeobject::XidlTypeObject for A {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_bitset(0u32, vec![])
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_bitset("A", 0u32, vec![])
     }
 }
 pub struct A {
@@ -247,15 +227,5 @@ impl xidl_xcdr::XcdrDeserialize for A {
 
 
         })
-    }
-}
-
-impl xidl_typeobject::XidlTypeObject for A {
-    fn minimal_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_minimal_bitset(0u32, vec![xidl_typeobject::runtime::BitfieldDesc { position: 0u16, flags: 0u32, bitcount: 1u8, holder_type: xidl_typeobject::DDS::XTypes::TK_UINT32, name: Some("a") }, xidl_typeobject::runtime::BitfieldDesc { position: 1u16, flags: 0u32, bitcount: 1u8, holder_type: xidl_typeobject::DDS::XTypes::TK_UINT32, name: Some("a") }, xidl_typeobject::runtime::BitfieldDesc { position: 2u16, flags: 0u32, bitcount: 1u8, holder_type: xidl_typeobject::DDS::XTypes::TK_UINT32, name: Some("b") }, xidl_typeobject::runtime::BitfieldDesc { position: 3u16, flags: 0u32, bitcount: 1u8, holder_type: xidl_typeobject::DDS::XTypes::TK_UINT32, name: Some("c") }])
-    }
-
-    fn complete_type_object() -> xidl_typeobject::DDS::XTypes::TypeObject {
-        xidl_typeobject::runtime::build_complete_bitset("A", 0u32, vec![xidl_typeobject::runtime::BitfieldDesc { position: 0u16, flags: 0u32, bitcount: 1u8, holder_type: xidl_typeobject::DDS::XTypes::TK_UINT32, name: Some("a") }, xidl_typeobject::runtime::BitfieldDesc { position: 1u16, flags: 0u32, bitcount: 1u8, holder_type: xidl_typeobject::DDS::XTypes::TK_UINT32, name: Some("a") }, xidl_typeobject::runtime::BitfieldDesc { position: 2u16, flags: 0u32, bitcount: 1u8, holder_type: xidl_typeobject::DDS::XTypes::TK_UINT32, name: Some("b") }, xidl_typeobject::runtime::BitfieldDesc { position: 3u16, flags: 0u32, bitcount: 1u8, holder_type: xidl_typeobject::DDS::XTypes::TK_UINT32, name: Some("c") }])
     }
 }
