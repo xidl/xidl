@@ -1,3 +1,6 @@
+{% if derive and derive | length > 0 %}
+#[derive({{ derive | join(", ") }})]
+{% endif %}
 pub struct {{ ident }} {
     pub value: u32,
 }

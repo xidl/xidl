@@ -5,7 +5,7 @@ use xidl_parser::hir;
 
 impl RustRender for hir::BitmaskDcl {
     fn render(&self, renderer: &RustRenderer) -> IdlcResult<RustRenderOutput> {
-        render_bitmask_with_config(self, renderer, &[])
+        render_bitmask_with_config(self, renderer, &[], &[])
     }
 }
 
@@ -13,6 +13,7 @@ pub(crate) fn render_bitmask_with_config(
     def: &hir::BitmaskDcl,
     renderer: &RustRenderer,
     module_path: &[String],
+    annotations: &[hir::Annotation],
 ) -> IdlcResult<RustRenderOutput> {
     let values = def
         .value
@@ -25,10 +26,15 @@ pub(crate) fn render_bitmask_with_config(
             })
         })
         .collect::<Vec<_>>();
+    let derive = crate::generate::rust::util::rust_derives_from_annotations_with_extra(
+        &def.annotations,
+        annotations,
+    );
     let module_path = module_path.to_vec();
     let ctx = json!({
         "ident": crate::generate::rust::util::rust_ident(&def.ident),
         "values": values,
+        "derive": derive,
         "module_path": module_path,
         "typeobject_path": renderer.typeobject_path(),
     });

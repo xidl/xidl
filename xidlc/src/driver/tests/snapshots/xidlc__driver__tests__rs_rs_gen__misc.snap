@@ -67,6 +67,7 @@ pub const another: Color = medium;
 pub type FooSeq = Vec<Foo>;
 pub type FooSeq = Vec<Foo>;
 pub type FooSeq = Vec<Foo>;
+
 pub struct Foo {
 
 
@@ -131,10 +132,12 @@ impl xidl_xcdr::XcdrDeserialize for Foo {
     }
 }
 pub type BarSeq = Vec<Bar>;
+
 pub struct Bar {
     tag: i32,
     data: BarData,
 }
+
 
 union BarData {
 
@@ -286,6 +289,7 @@ pub trait E {
 
 }
 pub const A_make_it_so_Hash: i32 = 4027367364;
+
 pub struct A_make_it_so_In {
 
 
@@ -337,6 +341,7 @@ impl xidl_xcdr::XcdrDeserialize for A_make_it_so_In {
         })
     }
 }
+
 pub struct A_make_it_so_Out {
 
 
@@ -388,10 +393,12 @@ impl xidl_xcdr::XcdrDeserialize for A_make_it_so_Out {
         })
     }
 }
+
 pub struct A_make_it_so_Result {
     tag: i32,
     data: A_make_it_so_ResultData,
 }
+
 
 union A_make_it_so_ResultData {
 
@@ -491,10 +498,12 @@ impl xidl_xcdr::XcdrDeserialize for A_make_it_so_Result {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct A_Call {
     tag: i32,
     data: A_CallData,
 }
+
 
 union A_CallData {
 
@@ -628,6 +637,7 @@ impl xidl_xcdr::XcdrDeserialize for A_Call {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct A_Request {
 
 
@@ -691,10 +701,12 @@ impl xidl_xcdr::XcdrDeserialize for A_Request {
         })
     }
 }
+
 pub struct A_Return {
     tag: i32,
     data: A_ReturnData,
 }
+
 
 union A_ReturnData {
 
@@ -828,6 +840,7 @@ impl xidl_xcdr::XcdrDeserialize for A_Return {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct A_Reply {
 
 
@@ -897,6 +910,7 @@ pub trait A {
 
 }
 pub const B_make_it_so_Hash: i32 = 4027367364;
+
 pub struct B_make_it_so_In {
 
 
@@ -948,6 +962,7 @@ impl xidl_xcdr::XcdrDeserialize for B_make_it_so_In {
         })
     }
 }
+
 pub struct B_make_it_so_Out {
 
 
@@ -999,10 +1014,12 @@ impl xidl_xcdr::XcdrDeserialize for B_make_it_so_Out {
         })
     }
 }
+
 pub struct B_make_it_so_Result {
     tag: i32,
     data: B_make_it_so_ResultData,
 }
+
 
 union B_make_it_so_ResultData {
 
@@ -1102,10 +1119,12 @@ impl xidl_xcdr::XcdrDeserialize for B_make_it_so_Result {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct B_Call {
     tag: i32,
     data: B_CallData,
 }
+
 
 union B_CallData {
 
@@ -1239,6 +1258,7 @@ impl xidl_xcdr::XcdrDeserialize for B_Call {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct B_Request {
 
 
@@ -1302,10 +1322,12 @@ impl xidl_xcdr::XcdrDeserialize for B_Request {
         })
     }
 }
+
 pub struct B_Return {
     tag: i32,
     data: B_ReturnData,
 }
+
 
 union B_ReturnData {
 
@@ -1439,6 +1461,7 @@ impl xidl_xcdr::XcdrDeserialize for B_Return {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct B_Reply {
 
 
@@ -1508,6 +1531,7 @@ pub trait B {
 
 }
 pub const A_opA_Hash: i32 = 3927698569;
+
 pub struct A_opA_In {
 
 
@@ -1559,6 +1583,7 @@ impl xidl_xcdr::XcdrDeserialize for A_opA_In {
         })
     }
 }
+
 pub struct A_opA_Out {
 
 
@@ -1610,10 +1635,12 @@ impl xidl_xcdr::XcdrDeserialize for A_opA_Out {
         })
     }
 }
+
 pub struct A_opA_Result {
     tag: i32,
     data: A_opA_ResultData,
 }
+
 
 union A_opA_ResultData {
 
@@ -1713,10 +1740,12 @@ impl xidl_xcdr::XcdrDeserialize for A_opA_Result {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct A_Call {
     tag: i32,
     data: A_CallData,
 }
+
 
 union A_CallData {
 
@@ -1850,6 +1879,7 @@ impl xidl_xcdr::XcdrDeserialize for A_Call {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct A_Request {
 
 
@@ -1913,10 +1943,12 @@ impl xidl_xcdr::XcdrDeserialize for A_Request {
         })
     }
 }
+
 pub struct A_Return {
     tag: i32,
     data: A_ReturnData,
 }
+
 
 union A_ReturnData {
 
@@ -2050,6 +2082,7 @@ impl xidl_xcdr::XcdrDeserialize for A_Return {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct A_Reply {
 
 
@@ -2120,6 +2153,7 @@ pub trait A {
 
 }
 pub const B_opB_Hash: i32 = 772252025;
+
 pub struct B_opB_In {
 
 
@@ -2171,6 +2205,7 @@ impl xidl_xcdr::XcdrDeserialize for B_opB_In {
         })
     }
 }
+
 pub struct B_opB_Out {
 
 
@@ -2222,10 +2257,12 @@ impl xidl_xcdr::XcdrDeserialize for B_opB_Out {
         })
     }
 }
+
 pub struct B_opB_Result {
     tag: i32,
     data: B_opB_ResultData,
 }
+
 
 union B_opB_ResultData {
 
@@ -2325,10 +2362,12 @@ impl xidl_xcdr::XcdrDeserialize for B_opB_Result {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct B_Call {
     tag: i32,
     data: B_CallData,
 }
+
 
 union B_CallData {
 
@@ -2462,6 +2501,7 @@ impl xidl_xcdr::XcdrDeserialize for B_Call {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct B_Request {
 
 
@@ -2525,10 +2565,12 @@ impl xidl_xcdr::XcdrDeserialize for B_Request {
         })
     }
 }
+
 pub struct B_Return {
     tag: i32,
     data: B_ReturnData,
 }
+
 
 union B_ReturnData {
 
@@ -2662,6 +2704,7 @@ impl xidl_xcdr::XcdrDeserialize for B_Return {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct B_Reply {
 
 
@@ -2732,6 +2775,7 @@ pub trait B {
 
 }
 pub const C_opC_Hash: i32 = 1200187224;
+
 pub struct C_opC_In {
 
 
@@ -2783,6 +2827,7 @@ impl xidl_xcdr::XcdrDeserialize for C_opC_In {
         })
     }
 }
+
 pub struct C_opC_Out {
 
 
@@ -2834,10 +2879,12 @@ impl xidl_xcdr::XcdrDeserialize for C_opC_Out {
         })
     }
 }
+
 pub struct C_opC_Result {
     tag: i32,
     data: C_opC_ResultData,
 }
+
 
 union C_opC_ResultData {
 
@@ -2937,10 +2984,12 @@ impl xidl_xcdr::XcdrDeserialize for C_opC_Result {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct C_Call {
     tag: i32,
     data: C_CallData,
 }
+
 
 union C_CallData {
 
@@ -3074,6 +3123,7 @@ impl xidl_xcdr::XcdrDeserialize for C_Call {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct C_Request {
 
 
@@ -3137,10 +3187,12 @@ impl xidl_xcdr::XcdrDeserialize for C_Request {
         })
     }
 }
+
 pub struct C_Return {
     tag: i32,
     data: C_ReturnData,
 }
+
 
 union C_ReturnData {
 
@@ -3274,6 +3326,7 @@ impl xidl_xcdr::XcdrDeserialize for C_Return {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct C_Reply {
 
 
@@ -3346,6 +3399,7 @@ pub trait C {
 }
 pub const L: i32 = 3;
 pub const A_f_Hash: i32 = 3712786831;
+
 pub struct A_f_In {
 
 
@@ -3397,6 +3451,7 @@ impl xidl_xcdr::XcdrDeserialize for A_f_In {
         })
     }
 }
+
 pub struct A_f_Out {
 
 
@@ -3448,10 +3503,12 @@ impl xidl_xcdr::XcdrDeserialize for A_f_Out {
         })
     }
 }
+
 pub struct A_f_Result {
     tag: i32,
     data: A_f_ResultData,
 }
+
 
 union A_f_ResultData {
 
@@ -3551,10 +3608,12 @@ impl xidl_xcdr::XcdrDeserialize for A_f_Result {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct A_Call {
     tag: i32,
     data: A_CallData,
 }
+
 
 union A_CallData {
 
@@ -3688,6 +3747,7 @@ impl xidl_xcdr::XcdrDeserialize for A_Call {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct A_Request {
 
 
@@ -3751,10 +3811,12 @@ impl xidl_xcdr::XcdrDeserialize for A_Request {
         })
     }
 }
+
 pub struct A_Return {
     tag: i32,
     data: A_ReturnData,
 }
+
 
 union A_ReturnData {
 
@@ -3888,6 +3950,7 @@ impl xidl_xcdr::XcdrDeserialize for A_Return {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct A_Reply {
 
 
@@ -3978,6 +4041,7 @@ pub const C_get_attribute_Name_Hash: i32 = 1786101153;
 pub const C_set_attribute_Name_Hash: i32 = 2852545551;
 pub const C_get_attribute_City_Hash: i32 = 3564363613;
 pub const C_set_attribute_City_Hash: i32 = 1017480313;
+
 pub struct C_get_attribute_Title_In {
 
 
@@ -4029,6 +4093,7 @@ impl xidl_xcdr::XcdrDeserialize for C_get_attribute_Title_In {
         })
     }
 }
+
 pub struct C_get_attribute_Title_Out {
 
 
@@ -4080,10 +4145,12 @@ impl xidl_xcdr::XcdrDeserialize for C_get_attribute_Title_Out {
         })
     }
 }
+
 pub struct C_get_attribute_Title_Result {
     tag: i32,
     data: C_get_attribute_Title_ResultData,
 }
+
 
 union C_get_attribute_Title_ResultData {
 
@@ -4183,6 +4250,7 @@ impl xidl_xcdr::XcdrDeserialize for C_get_attribute_Title_Result {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct C_set_attribute_Title_In {
 
 
@@ -4234,6 +4302,7 @@ impl xidl_xcdr::XcdrDeserialize for C_set_attribute_Title_In {
         })
     }
 }
+
 pub struct C_set_attribute_Title_Out {
 
 
@@ -4285,10 +4354,12 @@ impl xidl_xcdr::XcdrDeserialize for C_set_attribute_Title_Out {
         })
     }
 }
+
 pub struct C_set_attribute_Title_Result {
     tag: i32,
     data: C_set_attribute_Title_ResultData,
 }
+
 
 union C_set_attribute_Title_ResultData {
 
@@ -4388,6 +4459,7 @@ impl xidl_xcdr::XcdrDeserialize for C_set_attribute_Title_Result {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct C_get_attribute_Name_In {
 
 
@@ -4439,6 +4511,7 @@ impl xidl_xcdr::XcdrDeserialize for C_get_attribute_Name_In {
         })
     }
 }
+
 pub struct C_get_attribute_Name_Out {
 
 
@@ -4490,10 +4563,12 @@ impl xidl_xcdr::XcdrDeserialize for C_get_attribute_Name_Out {
         })
     }
 }
+
 pub struct C_get_attribute_Name_Result {
     tag: i32,
     data: C_get_attribute_Name_ResultData,
 }
+
 
 union C_get_attribute_Name_ResultData {
 
@@ -4593,6 +4668,7 @@ impl xidl_xcdr::XcdrDeserialize for C_get_attribute_Name_Result {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct C_set_attribute_Name_In {
 
 
@@ -4644,6 +4720,7 @@ impl xidl_xcdr::XcdrDeserialize for C_set_attribute_Name_In {
         })
     }
 }
+
 pub struct C_set_attribute_Name_Out {
 
 
@@ -4695,10 +4772,12 @@ impl xidl_xcdr::XcdrDeserialize for C_set_attribute_Name_Out {
         })
     }
 }
+
 pub struct C_set_attribute_Name_Result {
     tag: i32,
     data: C_set_attribute_Name_ResultData,
 }
+
 
 union C_set_attribute_Name_ResultData {
 
@@ -4798,6 +4877,7 @@ impl xidl_xcdr::XcdrDeserialize for C_set_attribute_Name_Result {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct C_get_attribute_City_In {
 
 
@@ -4849,6 +4929,7 @@ impl xidl_xcdr::XcdrDeserialize for C_get_attribute_City_In {
         })
     }
 }
+
 pub struct C_get_attribute_City_Out {
 
 
@@ -4900,10 +4981,12 @@ impl xidl_xcdr::XcdrDeserialize for C_get_attribute_City_Out {
         })
     }
 }
+
 pub struct C_get_attribute_City_Result {
     tag: i32,
     data: C_get_attribute_City_ResultData,
 }
+
 
 union C_get_attribute_City_ResultData {
 
@@ -5003,6 +5086,7 @@ impl xidl_xcdr::XcdrDeserialize for C_get_attribute_City_Result {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct C_set_attribute_City_In {
 
 
@@ -5054,6 +5138,7 @@ impl xidl_xcdr::XcdrDeserialize for C_set_attribute_City_In {
         })
     }
 }
+
 pub struct C_set_attribute_City_Out {
 
 
@@ -5105,10 +5190,12 @@ impl xidl_xcdr::XcdrDeserialize for C_set_attribute_City_Out {
         })
     }
 }
+
 pub struct C_set_attribute_City_Result {
     tag: i32,
     data: C_set_attribute_City_ResultData,
 }
+
 
 union C_set_attribute_City_ResultData {
 
@@ -5208,10 +5295,12 @@ impl xidl_xcdr::XcdrDeserialize for C_set_attribute_City_Result {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct C_Call {
     tag: i32,
     data: C_CallData,
 }
+
 
 union C_CallData {
 
@@ -5525,6 +5614,7 @@ impl xidl_xcdr::XcdrDeserialize for C_Call {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct C_Request {
 
 
@@ -5588,10 +5678,12 @@ impl xidl_xcdr::XcdrDeserialize for C_Request {
         })
     }
 }
+
 pub struct C_Return {
     tag: i32,
     data: C_ReturnData,
 }
+
 
 union C_ReturnData {
 
@@ -5905,6 +5997,7 @@ impl xidl_xcdr::XcdrDeserialize for C_Return {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct C_Reply {
 
 

@@ -19,7 +19,8 @@ use std::ffi::c_void;
 
 
 
-    pub struct A {
+    
+pub struct A {
 
 
 }
@@ -58,6 +59,7 @@ impl xidl_xcdr::XcdrDeserialize for A {
         })
     }
 }
+
 pub struct A {
 
 
@@ -109,6 +111,7 @@ impl xidl_xcdr::XcdrDeserialize for A {
         })
     }
 }
+
 pub struct A {
 
 
@@ -160,6 +163,7 @@ impl xidl_xcdr::XcdrDeserialize for A {
         })
     }
 }
+
 pub struct A {
 
     pub base: B,
@@ -207,6 +211,7 @@ impl xidl_xcdr::XcdrDeserialize for A {
         })
     }
 }
+
 pub struct _A {
 
 
@@ -246,6 +251,7 @@ impl xidl_xcdr::XcdrDeserialize for _A {
         })
     }
 }
+
 pub struct _Custom {
 
 
@@ -297,6 +303,7 @@ impl xidl_xcdr::XcdrDeserialize for _Custom {
         })
     }
 }
+
 pub struct HelloWorld {
 
 

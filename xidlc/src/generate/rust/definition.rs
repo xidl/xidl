@@ -168,7 +168,7 @@ fn render_definition_with_config(
             Ok(RustRenderOutput::default())
         }
         hir::Definition::ConstrTypeDcl(constr) => {
-            render_constr_with_config(constr, renderer, config, module_path)
+            render_constr_with_config(constr, renderer, config, module_path, &[])
         }
         hir::Definition::TypeDcl(type_dcl) => {
             render_type_dcl_with_config(type_dcl, renderer, config, module_path)
@@ -182,20 +182,21 @@ fn render_constr_with_config(
     renderer: &RustRenderer,
     config: &hir::SerializeConfig,
     module_path: &[String],
+    annotations: &[hir::Annotation],
 ) -> IdlcResult<RustRenderOutput> {
     match constr {
         hir::ConstrTypeDcl::StructDcl(def) => {
-            render_struct_with_config(def, renderer, config, module_path)
+            render_struct_with_config(def, renderer, config, module_path, annotations)
         }
         hir::ConstrTypeDcl::UnionDef(def) => {
-            render_union_with_config(def, renderer, config, module_path)
+            render_union_with_config(def, renderer, config, module_path, annotations)
         }
         hir::ConstrTypeDcl::BitsetDcl(def) => {
-            render_bitset_with_config(def, renderer, config, module_path)
+            render_bitset_with_config(def, renderer, config, module_path, annotations)
         }
         hir::ConstrTypeDcl::EnumDcl(def) => render_enum_with_config(def, renderer, module_path),
         hir::ConstrTypeDcl::BitmaskDcl(def) => {
-            render_bitmask_with_config(def, renderer, module_path)
+            render_bitmask_with_config(def, renderer, module_path, annotations)
         }
         _ => constr.render(renderer),
     }
@@ -209,7 +210,7 @@ fn render_type_dcl_with_config(
 ) -> IdlcResult<RustRenderOutput> {
     match &def.decl {
         hir::TypeDclInner::ConstrTypeDcl(constr) => {
-            render_constr_with_config(constr, renderer, config, module_path)
+            render_constr_with_config(constr, renderer, config, module_path, &def.annotations)
         }
         hir::TypeDclInner::TypedefDcl(typedef) => {
             render_typedef_with_config(typedef, renderer, module_path, &def.annotations)

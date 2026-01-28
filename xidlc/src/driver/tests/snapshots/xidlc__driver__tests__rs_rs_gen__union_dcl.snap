@@ -19,10 +19,12 @@ use std::ffi::c_void;
 
 
 
-    pub struct B {
+    
+pub struct B {
     tag: i32,
     data: BData,
 }
+
 
 union BData {
 
@@ -86,10 +88,12 @@ impl xidl_xcdr::XcdrDeserialize for B {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct C {
     tag: i32,
     data: CData,
 }
+
 
 union CData {
 

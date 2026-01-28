@@ -41,7 +41,7 @@ pub(crate) fn render_typedef_with_config(
     def: &hir::TypedefDcl,
     renderer: &RustRenderer,
     module_path: &[String],
-    _annotations: &[hir::Annotation],
+    annotations: &[hir::Annotation],
 ) -> IdlcResult<RustRenderOutput> {
     let mut out = RustRenderOutput::default();
     match &def.ty {
@@ -63,19 +63,19 @@ pub(crate) fn render_typedef_with_config(
             let config = hir::SerializeConfig::default();
             let rendered = match constr {
                 hir::ConstrTypeDcl::StructDcl(def) => {
-                    render_struct_with_config(def, renderer, &config, module_path)?
+                    render_struct_with_config(def, renderer, &config, module_path, annotations)?
                 }
                 hir::ConstrTypeDcl::UnionDef(def) => {
-                    render_union_with_config(def, renderer, &config, module_path)?
+                    render_union_with_config(def, renderer, &config, module_path, annotations)?
                 }
                 hir::ConstrTypeDcl::EnumDcl(def) => {
                     render_enum_with_config(def, renderer, module_path)?
                 }
                 hir::ConstrTypeDcl::BitsetDcl(def) => {
-                    render_bitset_with_config(def, renderer, &config, module_path)?
+                    render_bitset_with_config(def, renderer, &config, module_path, annotations)?
                 }
                 hir::ConstrTypeDcl::BitmaskDcl(def) => {
-                    render_bitmask_with_config(def, renderer, module_path)?
+                    render_bitmask_with_config(def, renderer, module_path, annotations)?
                 }
                 hir::ConstrTypeDcl::StructForwardDcl(_)
                 | hir::ConstrTypeDcl::UnionForwardDcl(_) => RustRenderOutput::default(),

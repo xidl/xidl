@@ -19,7 +19,8 @@ use std::ffi::c_void;
 
 
 
-    pub struct S {
+    
+pub struct S {
 
 
     pub a: i32,
@@ -119,6 +120,7 @@ impl xidl_xcdr::XcdrDeserialize for E {
         }
     }
 }
+
 pub struct BM {
     pub value: u32,
 }
@@ -148,10 +150,12 @@ impl xidl_xcdr::XcdrDeserialize for BM {
         Ok(Self { value })
     }
 }
+
 pub struct U {
     tag: i32,
     data: UData,
 }
+
 
 union UData {
 
@@ -288,6 +292,7 @@ impl xidl_xcdr::XcdrDeserialize for U {
 pub const I_ping_Hash: i32 = 18846175;
 pub const I_get_attribute_value_Hash: i32 = 3881857402;
 pub const I_set_attribute_value_Hash: i32 = 1976821110;
+
 pub struct I_ping_In {
 
 
@@ -339,6 +344,7 @@ impl xidl_xcdr::XcdrDeserialize for I_ping_In {
         })
     }
 }
+
 pub struct I_ping_Out {
 
 
@@ -390,10 +396,12 @@ impl xidl_xcdr::XcdrDeserialize for I_ping_Out {
         })
     }
 }
+
 pub struct I_ping_Result {
     tag: i32,
     data: I_ping_ResultData,
 }
+
 
 union I_ping_ResultData {
 
@@ -493,6 +501,7 @@ impl xidl_xcdr::XcdrDeserialize for I_ping_Result {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct I_get_attribute_value_In {
 
 
@@ -544,6 +553,7 @@ impl xidl_xcdr::XcdrDeserialize for I_get_attribute_value_In {
         })
     }
 }
+
 pub struct I_get_attribute_value_Out {
 
 
@@ -595,10 +605,12 @@ impl xidl_xcdr::XcdrDeserialize for I_get_attribute_value_Out {
         })
     }
 }
+
 pub struct I_get_attribute_value_Result {
     tag: i32,
     data: I_get_attribute_value_ResultData,
 }
+
 
 union I_get_attribute_value_ResultData {
 
@@ -698,6 +710,7 @@ impl xidl_xcdr::XcdrDeserialize for I_get_attribute_value_Result {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct I_set_attribute_value_In {
 
 
@@ -749,6 +762,7 @@ impl xidl_xcdr::XcdrDeserialize for I_set_attribute_value_In {
         })
     }
 }
+
 pub struct I_set_attribute_value_Out {
 
 
@@ -800,10 +814,12 @@ impl xidl_xcdr::XcdrDeserialize for I_set_attribute_value_Out {
         })
     }
 }
+
 pub struct I_set_attribute_value_Result {
     tag: i32,
     data: I_set_attribute_value_ResultData,
 }
+
 
 union I_set_attribute_value_ResultData {
 
@@ -903,10 +919,12 @@ impl xidl_xcdr::XcdrDeserialize for I_set_attribute_value_Result {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct I_Call {
     tag: i32,
     data: I_CallData,
 }
+
 
 union I_CallData {
 
@@ -1112,6 +1130,7 @@ impl xidl_xcdr::XcdrDeserialize for I_Call {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct I_Request {
 
 
@@ -1175,10 +1194,12 @@ impl xidl_xcdr::XcdrDeserialize for I_Request {
         })
     }
 }
+
 pub struct I_Return {
     tag: i32,
     data: I_ReturnData,
 }
+
 
 union I_ReturnData {
 
@@ -1384,6 +1405,7 @@ impl xidl_xcdr::XcdrDeserialize for I_Return {
         Ok(Self { tag, data } )
     }
 }
+
 pub struct I_Reply {
 
 

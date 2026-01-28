@@ -1,8 +1,14 @@
+{% if derive and derive | length > 0 %}
+#[derive({{ derive | join(", ") }})]
+{% endif %}
 pub struct {{ ident }} {
     tag: {{ switch_ty }},
     data: {{ ident }}Data,
 }
 
+{% if derive and derive | length > 0 %}
+#[derive({{ derive | join(", ") }})]
+{% endif %}
 union {{ ident }}Data {
 {% for member in members %}
     {{ member.name }}: core::mem::ManuallyDrop<{{ member.ty }}>,

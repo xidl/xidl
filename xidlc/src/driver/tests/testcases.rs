@@ -278,6 +278,16 @@ pub(crate) const STRUCT_CASES: &[(&str, &str)] = &[
     ("struct_empty", ""),
     ("struct_simple", "struct A;"),
     (
+        "struct_derive",
+        r#"
+        @derive(Debug)
+        struct A {};
+
+        @derive(Debug, Serialize)
+        struct A {};
+    "#,
+    ),
+    (
         "struct_def",
         r#"
             struct A {};

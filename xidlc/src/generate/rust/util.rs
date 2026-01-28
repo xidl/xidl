@@ -1,5 +1,6 @@
 use crate::generate::render_const_expr;
 use serde_json::json;
+use std::collections::HashSet;
 use xidl_parser::hir;
 
 pub fn rust_scoped_name(value: &hir::ScopedName) -> String {
@@ -200,4 +201,80 @@ pub fn typedef_json(base: &str, decl: &hir::Declarator) -> serde_json::Value {
         array_type(base, &dims)
     };
     json!({ "ty": ty, "name": name })
+}
+
+fn annotation_name_is_derive(annotation: &hir::Annotation) -> bool {
+    match annotation {
+        hir::Annotation::Builtin { name, .. } => name.eq_ignore_ascii_case("derive"),
+        hir::Annotation::ScopedName { name, .. } => name
+            .name
+            .last()
+            .map(|value| value.eq_ignore_ascii_case("derive"))
+            .unwrap_or(false),
+        _ => false,
+    }
+}
+
+fn push_derive(out: &mut Vec<String>, seen: &mut HashSet<String>, value: &str) {
+    let item = value.trim();
+    if item.is_empty() {
+        return;
+    }
+    if seen.insert(item.to_string()) {
+        out.push(item.to_string());
+    }
+}
+
+pub fn rust_derives_from_annotations(annotations: &[hir::Annotation]) -> Vec<String> {
+    let mut out = Vec::new();
+    let mut seen = HashSet::new();
+    for annotation in annotations {
+        if !annotation_name_is_derive(annotation) {
+            continue;
+        };
+        let params = match annotation {
+            hir::Annotation::Builtin { params, .. } => params.as_ref(),
+            hir::Annotation::ScopedName { params, .. } => params.as_ref(),
+            _ => None,
+        };
+        let Some(params) = params else {
+            continue;
+        };
+        match params {
+            hir::AnnotationParams::Raw(value) => {
+                for item in value.split(',') {
+                    push_derive(&mut out, &mut seen, item);
+                }
+            }
+            hir::AnnotationParams::ConstExpr(expr) => {
+                let rendered = render_const_expr(expr, &rust_scoped_name, &rust_literal);
+                for item in rendered.split(',') {
+                    push_derive(&mut out, &mut seen, item);
+                }
+            }
+            hir::AnnotationParams::Params(values) => {
+                for value in values {
+                    push_derive(&mut out, &mut seen, &value.ident);
+                }
+            }
+        }
+    }
+    out
+}
+
+pub fn rust_derives_from_annotations_with_extra(
+    primary: &[hir::Annotation],
+    extra: &[hir::Annotation],
+) -> Vec<String> {
+    let mut out = rust_derives_from_annotations(primary);
+    if extra.is_empty() {
+        return out;
+    }
+    let mut seen: HashSet<String> = out.iter().cloned().collect();
+    for derive in rust_derives_from_annotations(extra) {
+        if seen.insert(derive.clone()) {
+            out.push(derive);
+        }
+    }
+    out
 }
