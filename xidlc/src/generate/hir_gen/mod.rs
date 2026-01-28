@@ -23,10 +23,17 @@ impl crate::jsonrpc::Codegen for HirGen {
         let hir =
             xidl_parser::hir::Specification::from_typed_ast_with_properties(typed, props.clone());
 
-        Ok(vec![Artifact::Hir {
-            lang: target_lang,
-            hir,
-            properties: props,
-        }])
+        if target_lang == "hir" {
+            Ok(vec![Artifact::File {
+                path: _input,
+                content: serde_json::to_string(&hir)?,
+            }])
+        } else {
+            Ok(vec![Artifact::Hir {
+                lang: target_lang,
+                hir,
+                properties: props,
+            }])
+        }
     }
 }

@@ -9,7 +9,7 @@ pub struct CliArgs {
     #[arg(long = "lang", short = 'l')]
     pub lang: String,
     #[arg(long = "out-dir", short = 'o')]
-    pub out_dir: PathBuf,
+    pub out_dir: String,
     #[arg(required = true)]
     pub inputs: Vec<PathBuf>,
 }

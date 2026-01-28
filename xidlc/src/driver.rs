@@ -18,7 +18,9 @@ pub struct File {
 }
 
 pub fn run(args: CliArgs) -> IdlcResult<()> {
-    fs::create_dir_all(&args.out_dir)?;
+    if args.out_dir != "-" {
+        fs::create_dir_all(&args.out_dir)?;
+    }
 
     for input in args.inputs {
         let source = fs::read_to_string(&input)?;
@@ -156,7 +158,7 @@ pub fn spawn_codegen_server(
     }
 }
 
-fn write_files(out_dir: &Path, files: Vec<File>) -> IdlcResult<()> {
+fn write_files(out_dir: &str, files: Vec<File>) -> IdlcResult<()> {
     let mut order = Vec::new();
     let mut merged: HashMap<String, String> = HashMap::new();
     for file in files {
@@ -169,19 +171,27 @@ fn write_files(out_dir: &Path, files: Vec<File>) -> IdlcResult<()> {
         }
     }
 
+    let out_dir_path = Path::new(out_dir);
+
     for path in order {
         let content = merged.remove(&path).unwrap_or_default();
         let file_path = Path::new(&path);
         let out_path = if file_path.is_absolute() {
             file_path.to_path_buf()
         } else {
-            out_dir.join(file_path)
+            out_dir_path.join(file_path)
         };
-        if let Some(parent) = out_path.parent() {
-            fs::create_dir_all(parent)?;
+        if out_dir != "-" {
+            if let Some(parent) = out_path.parent() {
+                fs::create_dir_all(parent)?;
+            }
         }
         tracing::info!("write file: {}", out_path.display());
-        fs::write(out_path, content)?;
+        if out_dir == "-" {
+            println!("{}", content);
+        } else {
+            fs::write(out_path, content)?;
+        }
     }
     Ok(())
 }
