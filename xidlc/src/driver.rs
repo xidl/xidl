@@ -3,8 +3,8 @@ mod tests;
 
 use crate::cli::CliArgs;
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::GeneratedFile;
 use crate::generate::jsonrpc::JsonRpcClient;
+use crate::generate::GeneratedFile;
 use std::fs;
 use std::io::BufReader;
 use std::path::Path;
@@ -16,20 +16,14 @@ pub fn run(args: CliArgs) -> IdlcResult<()> {
 
     for input in args.inputs {
         let source = fs::read_to_string(&input)?;
-        let typed = xidl_parser::parser::parser_text(&source)?;
-        let hir = xidl_parser::hir::Specification::from(typed);
-        let files = generate_for_lang(&args.lang, &hir, &input)?;
+        let files = generate_for_lang(&args.lang, &source, &input)?;
         write_files(&args.out_dir, files)?;
     }
 
     Ok(())
 }
 
-fn generate_for_lang(
-    lang: &str,
-    hir: &xidl_parser::hir::Specification,
-    input: &Path,
-) -> IdlcResult<Vec<GeneratedFile>> {
+fn generate_for_lang(lang: &str, source: &str, input: &Path) -> IdlcResult<Vec<GeneratedFile>> {
     let input_str = input.to_string_lossy();
 
     let (stdout_tx, stdout_rx) = interprocess::unnamed_pipe::pipe()?;
@@ -40,7 +34,10 @@ fn generate_for_lang(
     let reader = BufReader::new(stdin_rx);
     let writer = stdout_tx;
     let mut client = JsonRpcClient::new(reader, writer);
-    let files = client.generate(hir, Some(&input_str))?;
+    let properties = client.parser_properties()?;
+    let typed = xidl_parser::parser::parser_text(source)?;
+    let hir = xidl_parser::hir::Specification::from_typed_ast_with_properties(typed, properties);
+    let files = client.generate(&hir, Some(&input_str))?;
 
     let server_result = server
         .join()

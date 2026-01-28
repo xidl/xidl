@@ -11,7 +11,8 @@ struct RpcRequest<'a> {
     jsonrpc: &'static str,
     id: u64,
     method: &'static str,
-    params: RpcParams<'a>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    params: Option<RpcParams<'a>>,
 }
 
 #[derive(Serialize)]
@@ -24,7 +25,7 @@ struct RpcParams<'a> {
 struct RpcRequestOwned {
     id: Option<u64>,
     method: Option<String>,
-    params: RpcParamsOwned,
+    params: Option<serde_json::Value>,
 }
 
 #[derive(Deserialize)]
@@ -42,8 +43,10 @@ struct RpcResponse {
 }
 
 #[derive(Serialize, Deserialize)]
-struct RpcResult {
-    files: Vec<GeneratedFile>,
+#[serde(untagged)]
+enum RpcResult {
+    Files { files: Vec<GeneratedFile> },
+    ParserProperties(hir::ParserProperties),
 }
 
 #[derive(Serialize, Deserialize)]
@@ -84,7 +87,7 @@ where
             jsonrpc: JSONRPC_VERSION,
             id,
             method: "generate",
-            params: RpcParams { hir: spec, input },
+            params: Some(RpcParams { hir: spec, input }),
         };
         let payload = serde_json::to_string(&request)?;
         self.writer.write_all(payload.as_bytes()).unwrap();
@@ -111,7 +114,51 @@ where
         let result = response
             .result
             .ok_or_else(|| IdlcError::rpc("missing JSON-RPC result"))?;
-        Ok(result.files)
+        match result {
+            RpcResult::Files { files } => Ok(files),
+            _ => Err(IdlcError::rpc("unexpected JSON-RPC result")),
+        }
+    }
+
+    pub fn parser_properties(&mut self) -> IdlcResult<hir::ParserProperties> {
+        let id = self.next_id;
+        self.next_id += 1;
+
+        let request = RpcRequest {
+            jsonrpc: JSONRPC_VERSION,
+            id,
+            method: "parser_properties",
+            params: None,
+        };
+        let payload = serde_json::to_string(&request)?;
+        self.writer.write_all(payload.as_bytes()).unwrap();
+        self.writer.write_all(b"\n").unwrap();
+
+        let mut line = String::new();
+        let bytes = self.reader.read_line(&mut line)?;
+        if bytes == 0 {
+            return Err(IdlcError::rpc("plugin returned no response"));
+        }
+
+        let response: RpcResponse = serde_json::from_str(&line)?;
+        if let Some(error) = response.error {
+            return Err(IdlcError::rpc(format!(
+                "plugin error {}: {}",
+                error.code, error.message
+            )));
+        }
+
+        if response.id != Some(id) {
+            return Err(IdlcError::rpc("unexpected JSON-RPC id"));
+        }
+
+        let result = response
+            .result
+            .ok_or_else(|| IdlcError::rpc("missing JSON-RPC result"))?;
+        match result {
+            RpcResult::ParserProperties(properties) => Ok(properties),
+            _ => Err(IdlcError::rpc("unexpected JSON-RPC result")),
+        }
     }
 }
 
@@ -119,32 +166,49 @@ pub fn serve_generate<R, W, F>(mut reader: R, mut writer: W, handler: F) -> Idlc
 where
     R: BufRead,
     W: Write,
-    F: FnOnce(&hir::Specification, Option<&str>) -> IdlcResult<Vec<GeneratedFile>>,
+    F: FnMut(&hir::Specification, Option<&str>) -> IdlcResult<Vec<GeneratedFile>>,
 {
+    let mut handler = handler;
     let mut line = String::new();
-    let bytes = reader.read_line(&mut line)?;
-    if bytes == 0 {
-        return Err(IdlcError::rpc("client returned no request"));
-    }
+    loop {
+        line.clear();
+        let bytes = reader.read_line(&mut line)?;
+        if bytes == 0 {
+            return Err(IdlcError::rpc("client returned no request"));
+        }
 
-    let request: RpcRequestOwned = serde_json::from_str(&line)?;
-    let id = request.id.unwrap_or(0);
-    if request.method.as_deref() != Some("generate") {
-        return write_error(&mut writer, id, "unknown method");
-    }
-
-    let result = handler(&request.params.hir, request.params.input.as_deref());
-    match result {
-        Ok(files) => write_result(&mut writer, id, files),
-        Err(err) => write_error(&mut writer, id, &err.to_string()),
+        let request: RpcRequestOwned = serde_json::from_str(&line)?;
+        let id = request.id.unwrap_or(0);
+        match request.method.as_deref() {
+            Some("parser_properties") => {
+                let properties = hir::ParserProperties::default();
+                write_result(&mut writer, id, RpcResult::ParserProperties(properties))?;
+            }
+            Some("generate") => {
+                let params = request
+                    .params
+                    .ok_or_else(|| IdlcError::rpc("missing JSON-RPC params"))?;
+                let params: RpcParamsOwned = serde_json::from_value(params)?;
+                let result = handler(&params.hir, params.input.as_deref());
+                match result {
+                    Ok(files) => write_result(&mut writer, id, RpcResult::Files { files })?,
+                    Err(err) => write_error(&mut writer, id, &err.to_string())?,
+                }
+                return Ok(());
+            }
+            _ => {
+                write_error(&mut writer, id, "unknown method")?;
+                return Ok(());
+            }
+        }
     }
 }
 
-fn write_result<W: Write>(writer: &mut W, id: u64, files: Vec<GeneratedFile>) -> IdlcResult<()> {
+fn write_result<W: Write>(writer: &mut W, id: u64, result: RpcResult) -> IdlcResult<()> {
     let response = RpcResponse {
         jsonrpc: Some(JSONRPC_VERSION.to_string()),
         id: Some(id),
-        result: Some(RpcResult { files }),
+        result: Some(result),
         error: None,
     };
     write_response(writer, response)

@@ -2,7 +2,6 @@ mod enum_dcl;
 pub use enum_dcl::*;
 
 mod struct_dcl;
-use serde::{Deserialize, Serialize};
 pub use struct_dcl::*;
 
 mod annotation;
@@ -30,8 +29,24 @@ mod exception_dcl;
 pub use exception_dcl::*;
 
 mod interface_codegen;
+
+use serde::{Deserialize, Serialize};
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Specification(pub Vec<Definition>);
+
+#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
+pub struct ParserProperties {
+    pub expand_interface: bool,
+}
+
+impl std::default::Default for ParserProperties {
+    fn default() -> Self {
+        Self {
+            expand_interface: true,
+        }
+    }
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Definition {
@@ -310,6 +325,15 @@ fn get_scoped_name<'a>(pre: &mut Vec<&'a str>, value: &'a crate::typed_ast::Scop
 impl From<crate::typed_ast::Specification> for Specification {
     fn from(value: crate::typed_ast::Specification) -> Self {
         spec_from_typed_ast(value, true)
+    }
+}
+
+impl Specification {
+    pub fn from_typed_ast_with_properties(
+        value: crate::typed_ast::Specification,
+        properties: ParserProperties,
+    ) -> Self {
+        spec_from_typed_ast(value, properties.expand_interface)
     }
 }
 

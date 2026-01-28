@@ -3,10 +3,8 @@ mod testcases;
 use super::generate_for_lang;
 use std::path::Path;
 
-fn render_lang_output(lang: &str, input_name: &str, idl: &str) -> String {
-    let typed = xidl_parser::parser::parser_text(idl).expect("parse idl");
-    let hir = xidl_parser::hir::Specification::from(typed);
-    let mut files = generate_for_lang(lang, &hir, Path::new(input_name)).expect("generate");
+fn render_lang_output(lang: &str, input_name: &str, source: &str) -> String {
+    let mut files = generate_for_lang(lang, source, Path::new(input_name)).expect("generate");
     files.sort_by(|a, b| a.filename.cmp(&b.filename));
 
     let mut out = String::new();
