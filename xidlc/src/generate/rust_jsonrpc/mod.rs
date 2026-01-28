@@ -12,7 +12,7 @@ use xidl_parser::hir::{ParserProperties, Specification};
 
 pub use render::{JsonRpcRender, JsonRpcRenderOutput, JsonRpcRenderer};
 
-pub fn generate(spec: &hir::Specification, input_path: &Path) -> IdlcResult<Vec<Artifact>> {
+pub fn generate(spec: hir::Specification, input_path: &Path) -> IdlcResult<Vec<Artifact>> {
     let stem = input_path
         .file_stem()
         .and_then(|value| value.to_str())
@@ -32,10 +32,23 @@ pub fn generate(spec: &hir::Specification, input_path: &Path) -> IdlcResult<Vec<
         }),
     )?;
 
-    Ok(vec![Artifact::File {
+    let mut artifacts = vec![Artifact::File {
         path: filename,
         content: source,
-    }])
+    }];
+    if let Some(non_interface) = strip_interfaces(spec) {
+        let mut properties = ParserProperties::default();
+        properties.insert(
+            "render_header".to_string(),
+            serde_json::Value::Bool(false),
+        );
+        artifacts.push(Artifact::Hir {
+            lang: "rs".to_string(),
+            hir: non_interface,
+            properties,
+        });
+    }
+    Ok(artifacts)
 }
 
 pub fn serve_jsonrpc<R: std::io::BufRead, W: std::io::Write>(
@@ -51,7 +64,12 @@ struct RustJsonRpcCodegen;
 
 impl crate::jsonrpc::Codegen for RustJsonRpcCodegen {
     fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
-        Ok(ParserProperties::default())
+        let mut props = ParserProperties::default();
+        props.insert(
+            "expand_interface".to_string(),
+            serde_json::Value::Bool(false),
+        );
+        Ok(props)
     }
 
     fn generate(
@@ -59,7 +77,33 @@ impl crate::jsonrpc::Codegen for RustJsonRpcCodegen {
         hir: Specification,
         input: String,
     ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
-        generate(&hir, Path::new(&input)).map_err(map_codegen_error)
+        generate(hir, Path::new(&input)).map_err(map_codegen_error)
+    }
+}
+
+fn strip_interfaces(spec: hir::Specification) -> Option<hir::Specification> {
+    fn strip_defs(defs: Vec<hir::Definition>) -> Vec<hir::Definition> {
+        let mut out = Vec::new();
+        for def in defs {
+            match def {
+                hir::Definition::InterfaceDcl(_) => {}
+                hir::Definition::ModuleDcl(mut module) => {
+                    module.definition = strip_defs(module.definition);
+                    if !module.definition.is_empty() {
+                        out.push(hir::Definition::ModuleDcl(module));
+                    }
+                }
+                other => out.push(other),
+            }
+        }
+        out
+    }
+
+    let defs = strip_defs(spec.0);
+    if defs.is_empty() {
+        None
+    } else {
+        Some(hir::Specification(defs))
     }
 }
 

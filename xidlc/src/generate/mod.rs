@@ -12,6 +12,7 @@ pub enum Artifact {
     Hir {
         lang: String,
         hir: hir::Specification,
+        properties: hir::ParserProperties,
     },
     File {
         path: String,

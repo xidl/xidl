@@ -31,22 +31,13 @@ pub use exception_dcl::*;
 mod interface_codegen;
 
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use std::collections::HashMap;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Specification(pub Vec<Definition>);
 
-#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
-pub struct ParserProperties {
-    pub expand_interface: bool,
-}
-
-impl std::default::Default for ParserProperties {
-    fn default() -> Self {
-        Self {
-            expand_interface: true,
-        }
-    }
-}
+pub type ParserProperties = HashMap<String, Value>;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Definition {
@@ -333,7 +324,11 @@ impl Specification {
         value: crate::typed_ast::Specification,
         properties: ParserProperties,
     ) -> Self {
-        spec_from_typed_ast(value, properties.expand_interface)
+        let expand_interface = properties
+            .get("expand_interface")
+            .and_then(Value::as_bool)
+            .unwrap_or(true);
+        spec_from_typed_ast(value, expand_interface)
     }
 }
 

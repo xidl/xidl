@@ -22,7 +22,11 @@ use std::path::Path;
 use xidl_parser::hir;
 use xidl_parser::hir::{ParserProperties, Specification};
 
-pub fn generate(spec: &hir::Specification, input_path: &Path) -> IdlcResult<Vec<Artifact>> {
+pub fn generate_with_properties(
+    spec: &hir::Specification,
+    input_path: &Path,
+    properties: &ParserProperties,
+) -> IdlcResult<Vec<Artifact>> {
     let stem = input_path
         .file_stem()
         .and_then(|value| value.to_str())
@@ -31,7 +35,8 @@ pub fn generate(spec: &hir::Specification, input_path: &Path) -> IdlcResult<Vec<
     let filename = format!("{base}.rs");
 
     let typeobject_path = "xidl_typeobject";
-    let renderer = RustRenderer::new(typeobject_path.to_string())?;
+
+    let renderer = RustRenderer::new(typeobject_path.to_string(), properties.clone())?;
     let output = spec.render(&renderer)?;
 
     let source = renderer.render_template(
@@ -51,12 +56,16 @@ pub fn serve_jsonrpc<R: std::io::BufRead, W: std::io::Write>(
     reader: R,
     writer: W,
 ) -> IdlcResult<()> {
-    let handler = crate::jsonrpc::CodegenServer::new(RustCodegen);
+    let handler = crate::jsonrpc::CodegenServer::new(RustCodegen {
+        render_header: true,
+    });
     xidl_jsonrpc::serve(reader, writer, handler)
         .map_err(|err| crate::error::IdlcError::rpc(err.to_string()))
 }
 
-struct RustCodegen;
+struct RustCodegen {
+    render_header: bool,
+}
 
 impl crate::jsonrpc::Codegen for RustCodegen {
     fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
@@ -68,7 +77,12 @@ impl crate::jsonrpc::Codegen for RustCodegen {
         hir: Specification,
         input: String,
     ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
-        generate(&hir, Path::new(&input)).map_err(map_codegen_error)
+        let mut properties = ParserProperties::default();
+        properties.insert(
+            "render_header".to_string(),
+            serde_json::Value::Bool(self.render_header),
+        );
+        generate_with_properties(&hir, Path::new(&input), &properties).map_err(map_codegen_error)
     }
 }
 

@@ -5,6 +5,7 @@ use crate::cli::CliArgs;
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::Artifact;
 use crate::jsonrpc::{Codegen, CodegenClient};
+use std::collections::HashMap;
 use std::fs;
 use std::io::BufReader;
 use std::path::Path;
@@ -33,17 +34,19 @@ fn generate_for_lang(lang: &str, source: &str, input: &Path) -> IdlcResult<Vec<A
 
     let reader = BufReader::new(stdin_rx);
     let writer = stdout_tx;
-    let artifacts = {
+    let (artifacts, global_properties) = {
         let client = CodegenClient::new(reader, writer);
         let properties = client
             .get_properties()
             .map_err(|err| IdlcError::rpc(err.to_string()))?;
+        let global_properties = properties.clone();
         let typed = xidl_parser::parser::parser_text(source)?;
         let hir =
             xidl_parser::hir::Specification::from_typed_ast_with_properties(typed, properties);
-        client
+        let artifacts = client
             .generate(hir, input_str.to_string())
-            .map_err(|err| IdlcError::rpc(err.to_string()))?
+            .map_err(|err| IdlcError::rpc(err.to_string()))?;
+        (artifacts, global_properties)
     };
 
     let server_result = server
@@ -51,7 +54,7 @@ fn generate_for_lang(lang: &str, source: &str, input: &Path) -> IdlcResult<Vec<A
         .map_err(|_| IdlcError::rpc("c server thread panicked"))?;
 
     server_result?;
-    resolve_artifacts(artifacts, input)
+    resolve_artifacts_with_properties(artifacts, input, global_properties)
 }
 
 pub fn spawn_codegen_server(
@@ -84,7 +87,7 @@ pub fn spawn_codegen_server(
 
             Ok(server)
         }
-        "rust_jsonrpc" => {
+        "rs_jsonrpc" | "rust_jsonrpc" => {
             let server = thread::spawn(move || {
                 let reader = BufReader::new(stdout_rx);
                 crate::generate::rust_jsonrpc::serve_jsonrpc(reader, stdin_tx)
@@ -112,6 +115,7 @@ fn generate_from_hir(
     lang: &str,
     hir: xidl_parser::hir::Specification,
     input: &Path,
+    _properties: &xidl_parser::hir::ParserProperties,
 ) -> IdlcResult<Vec<Artifact>> {
     let input_str = input.to_string_lossy();
     let (stdout_tx, stdout_rx) = interprocess::unnamed_pipe::pipe()?;
@@ -135,14 +139,38 @@ fn generate_from_hir(
     Ok(artifacts)
 }
 
-fn resolve_artifacts(artifacts: Vec<Artifact>, input: &Path) -> IdlcResult<Vec<Artifact>> {
+fn merge_properties(
+    base: &xidl_parser::hir::ParserProperties,
+    injected: &xidl_parser::hir::ParserProperties,
+) -> xidl_parser::hir::ParserProperties {
+    let mut merged = base.clone();
+    for (key, value) in injected {
+        merged.insert(key.clone(), value.clone());
+    }
+    merged
+}
+
+fn resolve_artifacts_with_properties(
+    artifacts: Vec<Artifact>,
+    input: &Path,
+    global_properties: xidl_parser::hir::ParserProperties,
+) -> IdlcResult<Vec<Artifact>> {
     let mut out = Vec::new();
     for artifact in artifacts {
         match artifact {
             Artifact::File { path, content } => out.push(Artifact::File { path, content }),
-            Artifact::Hir { lang, hir } => {
-                let nested = generate_from_hir(&lang, hir, input)?;
-                let nested = resolve_artifacts(nested, input)?;
+            Artifact::Hir {
+                lang,
+                hir,
+                properties,
+            } => {
+                let merged = merge_properties(&global_properties, &properties);
+                let nested = if lang == "rs" || lang == "rust" {
+                    crate::generate::rust::generate_with_properties(&hir, input, &merged)?
+                } else {
+                    generate_from_hir(&lang, hir, input, &merged)?
+                };
+                let nested = resolve_artifacts_with_properties(nested, input, merged)?;
                 out.extend(nested);
             }
         }
@@ -151,15 +179,27 @@ fn resolve_artifacts(artifacts: Vec<Artifact>, input: &Path) -> IdlcResult<Vec<A
 }
 
 fn write_files(out_dir: &Path, files: Vec<Artifact>) -> IdlcResult<()> {
+    let mut order = Vec::new();
+    let mut merged: HashMap<String, String> = HashMap::new();
     for file in files {
         let (path, content) = match file {
             Artifact::File { path, content } => (path, content),
             Artifact::Hir { .. } => {
                 return Err(IdlcError::rpc(
                     "unresolved Hir artifact reached write_files",
-                ))
+                ));
             }
         };
+        if let Some(existing) = merged.get_mut(&path) {
+            existing.push_str(&content);
+        } else {
+            order.push(path.clone());
+            merged.insert(path, content);
+        }
+    }
+
+    for path in order {
+        let content = merged.remove(&path).unwrap_or_default();
         let file_path = Path::new(&path);
         let out_path = if file_path.is_absolute() {
             file_path.to_path_buf()

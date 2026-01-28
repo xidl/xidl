@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::error::{IdlcError, IdlcResult};
 use minijinja::{Environment, Error, ErrorKind};
 use rust_embed::RustEmbed;
@@ -33,12 +35,18 @@ pub struct RustRenderer {
 }
 
 impl RustRenderer {
-    pub fn new(typeobject_path: String) -> IdlcResult<Self> {
+    pub fn new(
+        typeobject_path: String,
+        attribute: HashMap<String, serde_json::Value>,
+    ) -> IdlcResult<Self> {
         let mut env = Environment::new();
         env.set_loader(|name| load_template(name).map(Some));
         env.add_function("md5_14", |value: String| md5_prefix(value.as_bytes(), 14));
         env.add_function("md5_4", |value: String| md5_prefix(value.as_bytes(), 4));
         env.add_function("name_hash", |value: String| md5_prefix(value.as_bytes(), 4));
+        for (k, v) in attribute {
+            env.add_global(k, minijinja::Value::from_serialize(v));
+        }
         Ok(Self {
             env,
             typeobject_path,
