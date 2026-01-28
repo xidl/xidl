@@ -1,0 +1,24 @@
+struct ArtifactHir {
+    string lang;
+    ::xidl_parser::hir::Specification hir;
+    ::hir::ParserProperties path;
+};
+
+struct ArtifactFile {
+    string path;
+    string content;
+};
+
+union Artifact switch (string) {
+    case "hir": ArtifactHir hir;
+    case "ast": ArtifactFile ast;
+};
+
+interface Codegen {
+    ::xidl_parser::hir::ParserProperties get_properties();
+    sequence<Artifact> generate(
+        in ::xidl_parser::hir::Specification hir,
+        in string path,
+        in ::xidl_parser::hir::ParserProperties props
+    );
+};
