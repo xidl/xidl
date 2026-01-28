@@ -5,7 +5,7 @@ use std::cell::RefCell;
 use xidl_xcdr::xcdr2::Xcdr2Serialize;
 
 thread_local! {
-    static TYPE_STACK: RefCell<Vec<TypeId>> = RefCell::new(Vec::new());
+    static TYPE_STACK: RefCell<Vec<TypeId>> = const{ RefCell::new(Vec::new()) };
 }
 
 #[derive(Clone, Copy, Debug)]

@@ -14,9 +14,7 @@ use std::ffi::c_void;
 use std::io::{BufRead, Write};
 
 pub trait Codegen {
-    fn parser_properties(
-        &self,
-    ) -> Result<::xidl_parser::hir::ParserProperties, xidl_jsonrpc::Error>;
+    fn get_properties(&self) -> Result<::xidl_parser::hir::ParserProperties, xidl_jsonrpc::Error>;
 
     fn generate(
         &self,
@@ -26,7 +24,7 @@ pub trait Codegen {
 }
 
 #[derive(Serialize, Deserialize)]
-struct CodegenParserPropertiesParams {}
+struct CodegenGetPropertiesParams {}
 
 #[derive(Serialize, Deserialize)]
 struct CodegenGenerateParams {
@@ -51,10 +49,10 @@ where
 {
     fn handle(&self, method: &str, params: Value) -> Result<Value, xidl_jsonrpc::Error> {
         match method {
-            "Codegen.parser_properties" => {
-                let params: CodegenParserPropertiesParams = serde_json::from_value(params)?;
+            "Codegen.get_properties" => {
+                let params: CodegenGetPropertiesParams = serde_json::from_value(params)?;
 
-                let result = self.inner.parser_properties()?;
+                let result = self.inner.get_properties()?;
 
                 Ok(serde_json::to_value(result)?)
             }
@@ -93,13 +91,11 @@ where
     R: BufRead,
     W: Write,
 {
-    fn parser_properties(
-        &self,
-    ) -> Result<::xidl_parser::hir::ParserProperties, xidl_jsonrpc::Error> {
-        let params = CodegenParserPropertiesParams {};
+    fn get_properties(&self) -> Result<::xidl_parser::hir::ParserProperties, xidl_jsonrpc::Error> {
+        let params = CodegenGetPropertiesParams {};
         self.client
             .borrow_mut()
-            .call("Codegen.parser_properties", params)
+            .call("Codegen.get_properties", params)
     }
 
     fn generate(

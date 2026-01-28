@@ -96,7 +96,7 @@ pub fn serve_jsonrpc<R: std::io::BufRead, W: std::io::Write>(
 struct CCodegen;
 
 impl crate::jsonrpc::Codegen for CCodegen {
-    fn parser_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
+    fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
         Ok(ParserProperties::default())
     }
 

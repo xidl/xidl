@@ -36,7 +36,7 @@ fn generate_for_lang(lang: &str, source: &str, input: &Path) -> IdlcResult<Vec<G
     let files = {
         let client = CodegenClient::new(reader, writer);
         let properties = client
-            .parser_properties()
+            .get_properties()
             .map_err(|err| IdlcError::rpc(err.to_string()))?;
         let typed = xidl_parser::parser::parser_text(source)?;
         let hir =
