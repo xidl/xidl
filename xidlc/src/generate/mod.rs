@@ -1,7 +1,7 @@
 pub mod c;
 pub mod cpp;
-pub mod jsonrpc;
 pub mod rust;
+pub mod rust_jsonrpc;
 mod utils;
 
 use serde::{Deserialize, Serialize};

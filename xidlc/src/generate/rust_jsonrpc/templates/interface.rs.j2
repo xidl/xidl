@@ -1,0 +1,79 @@
+pub trait {{ ident }} {
+{% for method in methods %}
+    fn {{ method.name }}(&self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.ret }}, xidl_jsonrpc::Error>;
+{% endfor %}
+}
+
+{% for method in methods %}
+#[derive(Serialize, Deserialize)]
+struct {{ method.params_struct }} {
+{% for field in method.params_fields %}
+    {{ field.name }}: {{ field.ty }},
+{% endfor %}
+}
+{% endfor %}
+
+pub struct {{ ident }}Server<T> {
+    inner: T,
+}
+
+impl<T> {{ ident }}Server<T> {
+    pub fn new(inner: T) -> Self {
+        Self { inner }
+    }
+}
+
+impl<T> xidl_jsonrpc::Handler for {{ ident }}Server<T>
+where
+    T: {{ ident }},
+{
+    fn handle(&self, method: &str, params: Value) -> Result<Value, xidl_jsonrpc::Error> {
+        match method {
+{% for method in methods %}
+            "{{ method.rpc_name }}" => {
+                let params: {{ method.params_struct }} = serde_json::from_value(params)?;
+{% if method.args | length > 0 %}
+                let result = self.inner.{{ method.name }}({% for arg in method.args %}params.{{ arg }}{% if not loop.last %}, {% endif %}{% endfor %})?;
+{% else %}
+                let result = self.inner.{{ method.name }}()?;
+{% endif %}
+                Ok(serde_json::to_value(result)?)
+            }
+{% endfor %}
+            _ => Err(xidl_jsonrpc::Error::method_not_found(method)),
+        }
+    }
+}
+
+pub struct {{ ident }}Client<R, W> {
+    client: RefCell<xidl_jsonrpc::Client<R, W>>,
+}
+
+impl<R, W> {{ ident }}Client<R, W>
+where
+    R: BufRead,
+    W: Write,
+{
+    pub fn new(reader: R, writer: W) -> Self {
+        Self {
+            client: RefCell::new(xidl_jsonrpc::Client::new(reader, writer)),
+        }
+    }
+}
+
+impl<R, W> {{ ident }} for {{ ident }}Client<R, W>
+where
+    R: BufRead,
+    W: Write,
+{
+{% for method in methods %}
+    fn {{ method.name }}(&self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.ret }}, xidl_jsonrpc::Error> {
+        let params = {{ method.params_struct }} {
+{% for field in method.params_fields %}
+            {{ field.name }},
+{% endfor %}
+        };
+        self.client.borrow_mut().call("{{ method.rpc_name }}", params)
+    }
+{% endfor %}
+}

@@ -1,0 +1,7 @@
+interface Codegen {
+    ::xidl_parser::hir::ParserProperties parser_properties();
+    sequence<::xidlc::generate::GeneratedFile> generate(
+        in ::xidl_parser::hir::Specification hir,
+        in string input
+    );
+};

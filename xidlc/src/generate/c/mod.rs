@@ -21,6 +21,7 @@ use crate::generate::GeneratedFile;
 use serde_json::json;
 use std::path::Path;
 use xidl_parser::hir;
+use xidl_parser::hir::{ParserProperties, Specification};
 
 pub fn generate(spec: &hir::Specification, input_path: &Path) -> IdlcResult<Vec<GeneratedFile>> {
     let stem = input_path
@@ -87,8 +88,31 @@ pub fn serve_jsonrpc<R: std::io::BufRead, W: std::io::Write>(
     reader: R,
     writer: W,
 ) -> IdlcResult<()> {
-    crate::generate::jsonrpc::serve_generate(reader, writer, |spec, input| {
-        let input = input.ok_or_else(|| crate::error::IdlcError::rpc("missing input path"))?;
-        generate(spec, Path::new(input))
-    })
+    let handler = crate::jsonrpc::CodegenServer::new(CCodegen);
+    xidl_jsonrpc::serve(reader, writer, handler)
+        .map_err(|err| crate::error::IdlcError::rpc(err.to_string()))
+}
+
+struct CCodegen;
+
+impl crate::jsonrpc::Codegen for CCodegen {
+    fn parser_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
+        Ok(ParserProperties::default())
+    }
+
+    fn generate(
+        &self,
+        hir: Specification,
+        input: String,
+    ) -> Result<Vec<GeneratedFile>, xidl_jsonrpc::Error> {
+        generate(&hir, Path::new(&input)).map_err(map_codegen_error)
+    }
+}
+
+fn map_codegen_error(err: crate::error::IdlcError) -> xidl_jsonrpc::Error {
+    xidl_jsonrpc::Error::Rpc {
+        code: -32000,
+        message: err.to_string(),
+        data: None,
+    }
 }

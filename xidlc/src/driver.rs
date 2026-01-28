@@ -3,8 +3,8 @@ mod tests;
 
 use crate::cli::CliArgs;
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::jsonrpc::JsonRpcClient;
 use crate::generate::GeneratedFile;
+use crate::jsonrpc::{Codegen, CodegenClient};
 use std::fs;
 use std::io::BufReader;
 use std::path::Path;
@@ -33,11 +33,18 @@ fn generate_for_lang(lang: &str, source: &str, input: &Path) -> IdlcResult<Vec<G
 
     let reader = BufReader::new(stdin_rx);
     let writer = stdout_tx;
-    let mut client = JsonRpcClient::new(reader, writer);
-    let properties = client.parser_properties()?;
-    let typed = xidl_parser::parser::parser_text(source)?;
-    let hir = xidl_parser::hir::Specification::from_typed_ast_with_properties(typed, properties);
-    let files = client.generate(&hir, Some(&input_str))?;
+    let files = {
+        let client = CodegenClient::new(reader, writer);
+        let properties = client
+            .parser_properties()
+            .map_err(|err| IdlcError::rpc(err.to_string()))?;
+        let typed = xidl_parser::parser::parser_text(source)?;
+        let hir =
+            xidl_parser::hir::Specification::from_typed_ast_with_properties(typed, properties);
+        client
+            .generate(hir, input_str.to_string())
+            .map_err(|err| IdlcError::rpc(err.to_string()))?
+    };
 
     let server_result = server
         .join()
@@ -73,6 +80,14 @@ pub fn spawn_codegen_server(
             let server = thread::spawn(move || {
                 let reader = BufReader::new(stdout_rx);
                 crate::generate::rust::serve_jsonrpc(reader, stdin_tx)
+            });
+
+            Ok(server)
+        }
+        "rust_jsonrpc" => {
+            let server = thread::spawn(move || {
+                let reader = BufReader::new(stdout_rx);
+                crate::generate::rust_jsonrpc::serve_jsonrpc(reader, stdin_tx)
             });
 
             Ok(server)

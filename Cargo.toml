@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
   "xidl-derive",
+  "xidl-jsonrpc",
   "xidlc",
   "xidl-parser",
   "xidl-xcdr",
@@ -12,3 +13,4 @@ members = [
 xidl-parser = { path = "xidl-parser" }
 xidl-derive = { path = "xidl-derive" }
 xidl-xcdr = { path = "xidl-xcdr" }
+xidl-jsonrpc = { path = "xidl-jsonrpc" }
