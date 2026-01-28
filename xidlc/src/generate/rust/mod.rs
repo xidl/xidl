@@ -74,7 +74,7 @@ impl crate::jsonrpc::Codegen for RustCodegen {
 
 fn map_codegen_error(err: crate::error::IdlcError) -> xidl_jsonrpc::Error {
     xidl_jsonrpc::Error::Rpc {
-        code: -32000,
+        code: xidl_jsonrpc::ErrorCode::ServerError,
         message: err.to_string(),
         data: None,
     }

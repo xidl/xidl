@@ -5,19 +5,54 @@ use std::io::{BufRead, Write};
 
 const JSONRPC_VERSION: &str = "2.0";
 
+#[derive(Debug, Clone, Copy)]
+pub enum ErrorCode {
+    ParseError,
+    InvalidRequest,
+    MethodNotFound,
+    InvalidParams,
+    InternalError,
+    ServerError,
+}
+
+impl ErrorCode {
+    pub fn code(self) -> i64 {
+        match self {
+            Self::ParseError => -32700,
+            Self::InvalidRequest => -32600,
+            Self::MethodNotFound => -32601,
+            Self::InvalidParams => -32602,
+            Self::InternalError => -32603,
+            Self::ServerError => -32000,
+        }
+    }
+}
+
 #[derive(Debug)]
 pub enum Error {
     Io(std::io::Error),
     Json(serde_json::Error),
-    Rpc { code: i64, message: String, data: Option<Value> },
+    Rpc {
+        code: ErrorCode,
+        message: String,
+        data: Option<Value>,
+    },
     Protocol(&'static str),
 }
 
 impl Error {
     pub fn method_not_found(method: &str) -> Self {
         Self::Rpc {
-            code: -32601,
+            code: ErrorCode::MethodNotFound,
             message: format!("method not found: {method}"),
+            data: None,
+        }
+    }
+
+    pub fn invalid_params(message: impl Into<String>) -> Self {
+        Self::Rpc {
+            code: ErrorCode::InvalidParams,
+            message: message.into(),
             data: None,
         }
     }
@@ -28,7 +63,9 @@ impl std::fmt::Display for Error {
         match self {
             Self::Io(err) => write!(f, "io error: {err}"),
             Self::Json(err) => write!(f, "json error: {err}"),
-            Self::Rpc { code, message, .. } => write!(f, "rpc error {code}: {message}"),
+            Self::Rpc { code, message, .. } => {
+                write!(f, "rpc error {}: {message}", code.code())
+            }
             Self::Protocol(message) => write!(f, "protocol error: {message}"),
         }
     }
@@ -127,7 +164,7 @@ where
         }
         if let Some(error) = response.error {
             return Err(Error::Rpc {
-                code: error.code,
+                code: ErrorCode::ServerError,
                 message: error.message,
                 data: error.data,
             });
@@ -194,19 +231,27 @@ fn write_result<W: Write>(writer: &mut W, id: Option<u64>, result: Value) -> Res
 
 fn write_error<W: Write>(writer: &mut W, id: Option<u64>, error: Error) -> Result<(), Error> {
     let rpc_error = match error {
-        Error::Rpc { code, message, data } => RpcError { code, message, data },
+        Error::Rpc {
+            code,
+            message,
+            data,
+        } => RpcError {
+            code: code.code(),
+            message,
+            data,
+        },
         Error::Json(err) => RpcError {
-            code: -32700,
+            code: ErrorCode::ParseError.code(),
             message: err.to_string(),
             data: None,
         },
         Error::Protocol(message) => RpcError {
-            code: -32600,
+            code: ErrorCode::InvalidRequest.code(),
             message: message.to_string(),
             data: None,
         },
         Error::Io(err) => RpcError {
-            code: -32603,
+            code: ErrorCode::InternalError.code(),
             message: err.to_string(),
             data: None,
         },

@@ -50,7 +50,8 @@ where
     fn handle(&self, method: &str, params: Value) -> Result<Value, xidl_jsonrpc::Error> {
         match method {
             "Codegen.get_properties" => {
-                let params: CodegenGetPropertiesParams = serde_json::from_value(params)?;
+                let params: CodegenGetPropertiesParams = serde_json::from_value(params)
+                    .map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
 
                 let result = self.inner.get_properties()?;
 
@@ -58,7 +59,8 @@ where
             }
 
             "Codegen.generate" => {
-                let params: CodegenGenerateParams = serde_json::from_value(params)?;
+                let params: CodegenGenerateParams = serde_json::from_value(params)
+                    .map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
 
                 let result = self.inner.generate(params.hir, params.input)?;
 

@@ -31,7 +31,8 @@ where
         match method {
 {% for method in methods %}
             "{{ method.rpc_name }}" => {
-                let params: {{ method.params_struct }} = serde_json::from_value(params)?;
+                let params: {{ method.params_struct }} =
+                    serde_json::from_value(params).map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
 {% if method.args | length > 0 %}
                 let result = self.inner.{{ method.name }}({% for arg in method.args %}params.{{ arg }}{% if not loop.last %}, {% endif %}{% endfor %})?;
 {% else %}
