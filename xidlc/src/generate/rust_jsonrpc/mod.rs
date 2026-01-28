@@ -18,7 +18,9 @@ pub fn generate(spec: &hir::Specification, input_path: &Path) -> IdlcResult<Vec<
         .and_then(|value| value.to_str())
         .unwrap_or("output");
     let _base = crate::generate::to_snake_case(stem);
-    let filename = "mod.rs".to_string();
+
+    let file_name = input_path.file_stem().unwrap().to_str().unwrap();
+    let filename = format!("{file_name}.rs");
 
     let renderer = JsonRpcRenderer::new()?;
     let output = spec.render(&renderer)?;
