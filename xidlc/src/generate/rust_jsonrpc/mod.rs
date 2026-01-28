@@ -49,6 +49,9 @@ pub fn generate(
     if let Some(non_interface) = strip_interfaces(spec) {
         let mut properties = ParserProperties::default();
         properties.insert("render_header".to_string(), serde_json::Value::Bool(false));
+        properties.insert("skip_serialize".into(), true.into());
+        properties.insert("skip_deserialize".into(), true.into());
+
         artifacts.push(Artifact::Hir {
             lang: "rs".to_string(),
             hir: non_interface,

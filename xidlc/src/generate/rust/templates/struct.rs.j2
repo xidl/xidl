@@ -11,10 +11,13 @@ pub struct {{ ident }} {
 }
 
 impl {{ ident }} {
+    {% if not skip_serialize and not skip_deserialize %}
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::{{ serialize_kind }};
+    {% endif %}
 }
 
+{% if not skip_serialize %}
 impl xidl_xcdr::XcdrSerialize for {{ ident }} {
     fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
         Self::SERIALIZE_KIND
@@ -41,7 +44,9 @@ impl xidl_xcdr::XcdrSerialize for {{ ident }} {
         Ok(())
     }
 }
+{% endif %}
 
+{% if not skip_deserialize %}
 impl xidl_xcdr::XcdrDeserialize for {{ ident }} {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
@@ -62,3 +67,4 @@ impl xidl_xcdr::XcdrDeserialize for {{ ident }} {
         })
     }
 }
+{% endif %}
