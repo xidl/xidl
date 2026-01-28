@@ -3,7 +3,7 @@ mod tests;
 
 use crate::cli::CliArgs;
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::GeneratedFile;
+use crate::generate::Artifact;
 use crate::jsonrpc::{Codegen, CodegenClient};
 use std::fs;
 use std::io::BufReader;
@@ -23,7 +23,7 @@ pub fn run(args: CliArgs) -> IdlcResult<()> {
     Ok(())
 }
 
-fn generate_for_lang(lang: &str, source: &str, input: &Path) -> IdlcResult<Vec<GeneratedFile>> {
+fn generate_for_lang(lang: &str, source: &str, input: &Path) -> IdlcResult<Vec<Artifact>> {
     let input_str = input.to_string_lossy();
 
     let (stdout_tx, stdout_rx) = interprocess::unnamed_pipe::pipe()?;
@@ -33,7 +33,7 @@ fn generate_for_lang(lang: &str, source: &str, input: &Path) -> IdlcResult<Vec<G
 
     let reader = BufReader::new(stdin_rx);
     let writer = stdout_tx;
-    let files = {
+    let artifacts = {
         let client = CodegenClient::new(reader, writer);
         let properties = client
             .get_properties()
@@ -51,7 +51,7 @@ fn generate_for_lang(lang: &str, source: &str, input: &Path) -> IdlcResult<Vec<G
         .map_err(|_| IdlcError::rpc("c server thread panicked"))?;
 
     server_result?;
-    Ok(files)
+    resolve_artifacts(artifacts, input)
 }
 
 pub fn spawn_codegen_server(
@@ -108,10 +108,68 @@ pub fn spawn_codegen_server(
     }
 }
 
-fn write_files(out_dir: &Path, files: Vec<GeneratedFile>) -> IdlcResult<()> {
+fn generate_from_hir(
+    lang: &str,
+    hir: xidl_parser::hir::Specification,
+    input: &Path,
+) -> IdlcResult<Vec<Artifact>> {
+    let input_str = input.to_string_lossy();
+    let (stdout_tx, stdout_rx) = interprocess::unnamed_pipe::pipe()?;
+    let (stdin_tx, stdin_rx) = interprocess::unnamed_pipe::pipe()?;
+
+    let server = spawn_codegen_server(lang, stdout_rx, stdin_tx)?;
+    let reader = BufReader::new(stdin_rx);
+    let writer = stdout_tx;
+
+    let artifacts = {
+        let client = CodegenClient::new(reader, writer);
+        client
+            .generate(hir, input_str.to_string())
+            .map_err(|err| IdlcError::rpc(err.to_string()))?
+    };
+
+    let server_result = server
+        .join()
+        .map_err(|_| IdlcError::rpc("c server thread panicked"))?;
+    server_result?;
+    Ok(artifacts)
+}
+
+fn resolve_artifacts(artifacts: Vec<Artifact>, input: &Path) -> IdlcResult<Vec<Artifact>> {
+    let mut out = Vec::new();
+    for artifact in artifacts {
+        match artifact {
+            Artifact::File { path, content } => out.push(Artifact::File { path, content }),
+            Artifact::Hir { lang, hir } => {
+                let nested = generate_from_hir(&lang, hir, input)?;
+                let nested = resolve_artifacts(nested, input)?;
+                out.extend(nested);
+            }
+        }
+    }
+    Ok(out)
+}
+
+fn write_files(out_dir: &Path, files: Vec<Artifact>) -> IdlcResult<()> {
     for file in files {
-        let path = out_dir.join(file.filename);
-        fs::write(path, file.filecontent)?;
+        let (path, content) = match file {
+            Artifact::File { path, content } => (path, content),
+            Artifact::Hir { .. } => {
+                return Err(IdlcError::rpc(
+                    "unresolved Hir artifact reached write_files",
+                ))
+            }
+        };
+        let file_path = Path::new(&path);
+        let out_path = if file_path.is_absolute() {
+            file_path.to_path_buf()
+        } else {
+            out_dir.join(file_path)
+        };
+        if let Some(parent) = out_path.parent() {
+            fs::create_dir_all(parent)?;
+        }
+        fs::write(out_path, content)?;
     }
     Ok(())
 }

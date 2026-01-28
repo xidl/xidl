@@ -8,9 +8,15 @@ use serde::{Deserialize, Serialize};
 use xidl_parser::hir;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct GeneratedFile {
-    pub filename: String,
-    pub filecontent: String,
+pub enum Artifact {
+    Hir {
+        lang: String,
+        hir: hir::Specification,
+    },
+    File {
+        path: String,
+        content: String,
+    },
 }
 
 pub fn to_snake_case(input: &str) -> String {

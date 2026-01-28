@@ -17,13 +17,13 @@ mod xcdr;
 pub use render::{CRender, CRenderOutput, CRenderer};
 
 use crate::error::IdlcResult;
-use crate::generate::GeneratedFile;
+use crate::generate::Artifact;
 use serde_json::json;
 use std::path::Path;
 use xidl_parser::hir;
 use xidl_parser::hir::{ParserProperties, Specification};
 
-pub fn generate(spec: &hir::Specification, input_path: &Path) -> IdlcResult<Vec<GeneratedFile>> {
+pub fn generate(spec: &hir::Specification, input_path: &Path) -> IdlcResult<Vec<Artifact>> {
     let stem = input_path
         .file_stem()
         .and_then(|value| value.to_str())
@@ -65,21 +65,21 @@ pub fn generate(spec: &hir::Specification, input_path: &Path) -> IdlcResult<Vec<
     )?;
 
     Ok(vec![
-        GeneratedFile {
-            filename: filename.clone(),
-            filecontent: header,
+        Artifact::File {
+            path: filename.clone(),
+            content: header,
         },
-        GeneratedFile {
-            filename: format!("{base}.c"),
-            filecontent: source,
+        Artifact::File {
+            path: format!("{base}.c"),
+            content: source,
         },
-        GeneratedFile {
-            filename: xcdr_header_name.clone(),
-            filecontent: xcdr_header,
+        Artifact::File {
+            path: xcdr_header_name.clone(),
+            content: xcdr_header,
         },
-        GeneratedFile {
-            filename: format!("{base}_xcdr.c"),
-            filecontent: xcdr_source,
+        Artifact::File {
+            path: format!("{base}_xcdr.c"),
+            content: xcdr_source,
         },
     ])
 }
@@ -104,7 +104,7 @@ impl crate::jsonrpc::Codegen for CCodegen {
         &self,
         hir: Specification,
         input: String,
-    ) -> Result<Vec<GeneratedFile>, xidl_jsonrpc::Error> {
+    ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
         generate(&hir, Path::new(&input)).map_err(map_codegen_error)
     }
 }

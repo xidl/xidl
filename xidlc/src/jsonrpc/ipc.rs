@@ -20,7 +20,7 @@ pub trait Codegen {
         &self,
         hir: ::xidl_parser::hir::Specification,
         input: String,
-    ) -> Result<Vec<::xidlc::generate::GeneratedFile>, xidl_jsonrpc::Error>;
+    ) -> Result<Vec<::xidlc::generate::Artifact>, xidl_jsonrpc::Error>;
 }
 
 #[derive(Serialize, Deserialize)]
@@ -104,7 +104,7 @@ where
         &self,
         hir: ::xidl_parser::hir::Specification,
         input: String,
-    ) -> Result<Vec<::xidlc::generate::GeneratedFile>, xidl_jsonrpc::Error> {
+    ) -> Result<Vec<::xidlc::generate::Artifact>, xidl_jsonrpc::Error> {
         let params = CodegenGenerateParams { hir, input };
         self.client.borrow_mut().call("Codegen.generate", params)
     }

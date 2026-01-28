@@ -5,16 +5,27 @@ use std::path::Path;
 
 fn render_lang_output(lang: &str, input_name: &str, source: &str) -> String {
     let mut files = generate_for_lang(lang, source, Path::new(input_name)).expect("generate");
-    files.sort_by(|a, b| a.filename.cmp(&b.filename));
+    files.sort_by(|a, b| match (a, b) {
+        (
+            crate::generate::Artifact::File { path: a_path, .. },
+            crate::generate::Artifact::File { path: b_path, .. },
+        ) => a_path.cmp(b_path),
+        _ => std::cmp::Ordering::Equal,
+    });
 
     let mut out = String::new();
     for file in files {
-        out.push_str("===============\n");
-        out.push_str(&file.filename);
-        out.push_str("\n===============\n");
-        out.push_str(&file.filecontent);
-        if !file.filecontent.ends_with('\n') {
-            out.push('\n');
+        match file {
+            crate::generate::Artifact::File { path, content } => {
+                out.push_str("===============\n");
+                out.push_str(&path);
+                out.push_str("\n===============\n");
+                out.push_str(&content);
+                if !content.ends_with('\n') {
+                    out.push('\n');
+                }
+            }
+            crate::generate::Artifact::Hir { .. } => {}
         }
     }
     out

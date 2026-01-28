@@ -16,13 +16,13 @@ pub(crate) mod util;
 pub use render::{RustRender, RustRenderOutput, RustRenderer};
 
 use crate::error::IdlcResult;
-use crate::generate::GeneratedFile;
+use crate::generate::Artifact;
 use serde_json::json;
 use std::path::Path;
 use xidl_parser::hir;
 use xidl_parser::hir::{ParserProperties, Specification};
 
-pub fn generate(spec: &hir::Specification, input_path: &Path) -> IdlcResult<Vec<GeneratedFile>> {
+pub fn generate(spec: &hir::Specification, input_path: &Path) -> IdlcResult<Vec<Artifact>> {
     let stem = input_path
         .file_stem()
         .and_then(|value| value.to_str())
@@ -41,9 +41,9 @@ pub fn generate(spec: &hir::Specification, input_path: &Path) -> IdlcResult<Vec<
         }),
     )?;
 
-    Ok(vec![GeneratedFile {
-        filename,
-        filecontent: source,
+    Ok(vec![Artifact::File {
+        path: filename,
+        content: source,
     }])
 }
 
@@ -67,7 +67,7 @@ impl crate::jsonrpc::Codegen for RustCodegen {
         &self,
         hir: Specification,
         input: String,
-    ) -> Result<Vec<GeneratedFile>, xidl_jsonrpc::Error> {
+    ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
         generate(&hir, Path::new(&input)).map_err(map_codegen_error)
     }
 }
