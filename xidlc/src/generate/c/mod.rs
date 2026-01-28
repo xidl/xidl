@@ -19,11 +19,16 @@ pub use render::{CRender, CRenderOutput, CRenderer};
 use crate::error::IdlcResult;
 use crate::generate::Artifact;
 use serde_json::json;
+use std::collections::HashMap;
 use std::path::Path;
 use xidl_parser::hir;
 use xidl_parser::hir::{ParserProperties, Specification};
 
-pub fn generate(spec: &hir::Specification, input_path: &Path) -> IdlcResult<Vec<Artifact>> {
+pub fn generate(
+    spec: &hir::Specification,
+    input_path: &Path,
+    props: HashMap<String, serde_json::Value>,
+) -> IdlcResult<Vec<Artifact>> {
     let stem = input_path
         .file_stem()
         .and_then(|value| value.to_str())
@@ -32,7 +37,12 @@ pub fn generate(spec: &hir::Specification, input_path: &Path) -> IdlcResult<Vec<
     let filename = format!("{base}.h");
     let xcdr_header_name = format!("{base}_xcdr.h");
 
-    let renderer = CRenderer::new()?;
+    let mut renderer = CRenderer::new()?;
+    for (k, v) in props {
+        renderer
+            .env()
+            .add_global(k, minijinja::Value::from_serialize(v));
+    }
     let output = spec.render(&renderer)?;
 
     let header = renderer.render_template(
@@ -94,9 +104,10 @@ impl crate::jsonrpc::Codegen for CCodegen {
     fn generate(
         &self,
         hir: Specification,
-        input: String,
+        path: String,
+        props: ::xidl_parser::hir::ParserProperties,
     ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
-        generate(&hir, Path::new(&input)).map_err(map_codegen_error)
+        generate(&hir, Path::new(&path), props).map_err(map_codegen_error)
     }
 }
 

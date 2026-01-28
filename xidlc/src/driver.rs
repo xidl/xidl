@@ -12,21 +12,89 @@ use std::path::Path;
 use std::process::Command;
 use std::thread::{self, JoinHandle};
 
+pub struct File {
+    path: String,
+    content: String,
+}
+
 pub fn run(args: CliArgs) -> IdlcResult<()> {
     fs::create_dir_all(&args.out_dir)?;
 
     for input in args.inputs {
         let source = fs::read_to_string(&input)?;
-        let files = generate_for_lang(&args.lang, &source, &input)?;
+        let files = generate_from_idl(&source, &input, &args.lang)?;
         write_files(&args.out_dir, files)?;
     }
 
     Ok(())
 }
 
-fn generate_for_lang(lang: &str, source: &str, input: &Path) -> IdlcResult<Vec<Artifact>> {
+fn generate_from_idl(source: &str, path: &Path, lang: &str) -> IdlcResult<Vec<File>> {
+    let mut props: HashMap<String, serde_json::Value> = HashMap::new();
+    props.insert("idl".into(), source.into());
+    props.insert("target_lang".into(), lang.into());
+
+    let empty = xidl_parser::hir::Specification(vec![]);
+
+    let target_props = get_properties_for_lang(lang)?;
+    props.extend(target_props);
+
+    generate_for_lang("hir", empty, path, props)
+}
+
+fn generate_for_lang(
+    lang: &str,
+    hir: xidl_parser::hir::Specification,
+    input: &Path,
+    props: HashMap<String, serde_json::Value>,
+) -> IdlcResult<Vec<File>> {
     let input_str = input.to_string_lossy();
 
+    let (stdout_tx, stdout_rx) = interprocess::unnamed_pipe::pipe()?;
+    let (stdin_tx, stdin_rx) = interprocess::unnamed_pipe::pipe()?;
+
+    let server = spawn_codegen_server(lang, stdout_rx, stdin_tx)?;
+
+    let reader = BufReader::new(stdin_rx);
+    let writer = stdout_tx;
+
+    let client = CodegenClient::new(reader, writer);
+    let mut properties = client
+        .get_properties()
+        .map_err(|err| IdlcError::rpc(err.to_string()))?;
+
+    properties.extend(props);
+
+    let artifacts = client
+        .generate(hir, input_str.to_string(), properties)
+        .map_err(|err| IdlcError::rpc(err.to_string()))?;
+
+    let mut ret: Vec<File> = vec![];
+
+    drop(client);
+    if let Err(err) = server.join().unwrap() {
+        eprintln!("codegen server failed: {}", err);
+    }
+
+    for file in artifacts {
+        match file {
+            Artifact::Hir {
+                lang,
+                hir,
+                properties,
+            } => {
+                ret.extend(generate_for_lang(&lang, hir, input, properties)?);
+            }
+            Artifact::File { path, content } => {
+                ret.push(File { path, content });
+            }
+        }
+    }
+
+    Ok(ret)
+}
+
+fn get_properties_for_lang(lang: &str) -> IdlcResult<HashMap<String, serde_json::Value>> {
     let (stdout_tx, stdout_rx) = interprocess::unnamed_pipe::pipe()?;
     let (stdin_tx, stdin_rx) = interprocess::unnamed_pipe::pipe()?;
 
@@ -39,22 +107,10 @@ fn generate_for_lang(lang: &str, source: &str, input: &Path) -> IdlcResult<Vec<A
 
     let reader = BufReader::new(stdin_rx);
     let writer = stdout_tx;
-    let (artifacts, global_properties) = {
-        let client = CodegenClient::new(reader, writer);
-        let properties = client
-            .get_properties()
-            .map_err(|err| IdlcError::rpc(err.to_string()))?;
-        let global_properties = properties.clone();
-        let typed = xidl_parser::parser::parser_text(source)?;
-        let hir =
-            xidl_parser::hir::Specification::from_typed_ast_with_properties(typed, properties);
-        let artifacts = client
-            .generate(hir, input_str.to_string())
-            .map_err(|err| IdlcError::rpc(err.to_string()))?;
-        (artifacts, global_properties)
-    };
-
-    resolve_artifacts_with_properties(artifacts, input, global_properties)
+    let client = CodegenClient::new(reader, writer);
+    client
+        .get_properties()
+        .map_err(|err| IdlcError::rpc(err.to_string()))
 }
 
 pub fn spawn_codegen_server(
@@ -77,6 +133,7 @@ pub fn spawn_codegen_server(
     }
 
     match lang {
+        "hir" => run_server!(crate::generate::hir_gen::HirGen),
         "c" => run_server!(crate::generate::c::CCodegen),
         "cpp" => run_server!(crate::generate::cpp::CppCodegen),
         "rust" | "rs" => run_server!(crate::generate::rust::RustCodegen),
@@ -99,85 +156,11 @@ pub fn spawn_codegen_server(
     }
 }
 
-fn generate_from_hir(
-    lang: &str,
-    hir: xidl_parser::hir::Specification,
-    input: &Path,
-    _properties: &xidl_parser::hir::ParserProperties,
-) -> IdlcResult<Vec<Artifact>> {
-    let input_str = input.to_string_lossy();
-    let (stdout_tx, stdout_rx) = interprocess::unnamed_pipe::pipe()?;
-    let (stdin_tx, stdin_rx) = interprocess::unnamed_pipe::pipe()?;
-
-    let server = spawn_codegen_server(lang, stdout_rx, stdin_tx)?;
-    let reader = BufReader::new(stdin_rx);
-    let writer = stdout_tx;
-
-    let artifacts = {
-        let client = CodegenClient::new(reader, writer);
-        client
-            .generate(hir, input_str.to_string())
-            .map_err(|err| IdlcError::rpc(err.to_string()))?
-    };
-
-    let server_result = server
-        .join()
-        .map_err(|_| IdlcError::rpc("c server thread panicked"))?;
-    server_result?;
-    Ok(artifacts)
-}
-
-fn merge_properties(
-    base: &xidl_parser::hir::ParserProperties,
-    injected: &xidl_parser::hir::ParserProperties,
-) -> xidl_parser::hir::ParserProperties {
-    let mut merged = base.clone();
-    for (key, value) in injected {
-        merged.insert(key.clone(), value.clone());
-    }
-    merged
-}
-
-fn resolve_artifacts_with_properties(
-    artifacts: Vec<Artifact>,
-    input: &Path,
-    global_properties: xidl_parser::hir::ParserProperties,
-) -> IdlcResult<Vec<Artifact>> {
-    let mut out = Vec::new();
-    for artifact in artifacts {
-        match artifact {
-            Artifact::File { path, content } => out.push(Artifact::File { path, content }),
-            Artifact::Hir {
-                lang,
-                hir,
-                properties,
-            } => {
-                let merged = merge_properties(&global_properties, &properties);
-                let nested = if lang == "rs" || lang == "rust" {
-                    crate::generate::rust::generate_with_properties(&hir, input, &merged)?
-                } else {
-                    generate_from_hir(&lang, hir, input, &merged)?
-                };
-                let nested = resolve_artifacts_with_properties(nested, input, merged)?;
-                out.extend(nested);
-            }
-        }
-    }
-    Ok(out)
-}
-
-fn write_files(out_dir: &Path, files: Vec<Artifact>) -> IdlcResult<()> {
+fn write_files(out_dir: &Path, files: Vec<File>) -> IdlcResult<()> {
     let mut order = Vec::new();
     let mut merged: HashMap<String, String> = HashMap::new();
     for file in files {
-        let (path, content) = match file {
-            Artifact::File { path, content } => (path, content),
-            Artifact::Hir { .. } => {
-                return Err(IdlcError::rpc(
-                    "unresolved Hir artifact reached write_files",
-                ));
-            }
-        };
+        let File { path, content } = file;
         if let Some(existing) = merged.get_mut(&path) {
             existing.push_str(&content);
         } else {

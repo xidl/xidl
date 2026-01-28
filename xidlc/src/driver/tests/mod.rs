@@ -1,31 +1,25 @@
 mod testcases;
 
-use super::generate_for_lang;
+use crate::driver::generate_from_idl;
+
 use std::path::Path;
 
 fn render_lang_output(lang: &str, input_name: &str, source: &str) -> String {
-    let mut files = generate_for_lang(lang, source, Path::new(input_name)).expect("generate");
-    files.sort_by(|a, b| match (a, b) {
-        (
-            crate::generate::Artifact::File { path: a_path, .. },
-            crate::generate::Artifact::File { path: b_path, .. },
-        ) => a_path.cmp(b_path),
-        _ => std::cmp::Ordering::Equal,
-    });
+    let mut files = generate_from_idl(source, Path::new(input_name), lang).expect("generate");
+    files.sort_by(|a, b| a.path.cmp(&b.path));
 
     let mut out = String::new();
     for file in files {
-        match file {
-            crate::generate::Artifact::File { path, content } => {
-                out.push_str("===============\n");
-                out.push_str(&path);
-                out.push_str("\n===============\n");
-                out.push_str(&content);
-                if !content.ends_with('\n') {
-                    out.push('\n');
-                }
+        let path = file.path;
+        let content = file.content;
+        {
+            out.push_str("===============\n");
+            out.push_str(&path);
+            out.push_str("\n===============\n");
+            out.push_str(&content);
+            if !content.ends_with('\n') {
+                out.push('\n');
             }
-            crate::generate::Artifact::Hir { .. } => {}
         }
     }
     out

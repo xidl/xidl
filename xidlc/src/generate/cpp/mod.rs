@@ -18,11 +18,16 @@ pub use render::{CppRender, CppRenderOutput, CppRenderer};
 use crate::error::IdlcResult;
 use crate::generate::Artifact;
 use serde_json::json;
+use std::collections::HashMap;
 use std::path::Path;
 use xidl_parser::hir;
 use xidl_parser::hir::{ParserProperties, Specification};
 
-pub fn generate(spec: &hir::Specification, input_path: &Path) -> IdlcResult<Vec<Artifact>> {
+pub fn generate(
+    spec: &hir::Specification,
+    input_path: &Path,
+    props: HashMap<String, serde_json::Value>,
+) -> IdlcResult<Vec<Artifact>> {
     let stem = input_path
         .file_stem()
         .and_then(|value| value.to_str())
@@ -30,7 +35,13 @@ pub fn generate(spec: &hir::Specification, input_path: &Path) -> IdlcResult<Vec<
     let base = crate::generate::to_snake_case(stem);
     let header_name = format!("{base}.h");
 
-    let renderer = CppRenderer::new()?;
+    let mut renderer = CppRenderer::new()?;
+    for (k, v) in props {
+        renderer
+            .env()
+            .add_global(k, minijinja::Value::from_serialize(v));
+    }
+
     let output = spec.render(&renderer)?;
 
     let header = renderer.render_template(
@@ -71,8 +82,9 @@ impl crate::jsonrpc::Codegen for CppCodegen {
         &self,
         hir: Specification,
         input: String,
+        props: ::xidl_parser::hir::ParserProperties,
     ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
-        generate(&hir, Path::new(&input)).map_err(map_codegen_error)
+        generate(&hir, Path::new(&input), props).map_err(map_codegen_error)
     }
 }
 

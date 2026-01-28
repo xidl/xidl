@@ -2,6 +2,7 @@ interface Codegen {
     ::xidl_parser::hir::ParserProperties get_properties();
     sequence<::xidlc::generate::Artifact> generate(
         in ::xidl_parser::hir::Specification hir,
-        in string input
+        in string path,
+        in ::xidl_parser::hir::ParserProperties props
     );
 };

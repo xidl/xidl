@@ -19,7 +19,8 @@ pub trait Codegen {
     fn generate(
         &self,
         hir: ::xidl_parser::hir::Specification,
-        input: String,
+        path: String,
+        props: ::xidl_parser::hir::ParserProperties,
     ) -> Result<Vec<::xidlc::generate::Artifact>, xidl_jsonrpc::Error>;
 }
 
@@ -30,7 +31,9 @@ struct CodegenGetPropertiesParams {}
 struct CodegenGenerateParams {
     hir: ::xidl_parser::hir::Specification,
 
-    input: String,
+    path: String,
+
+    props: ::xidl_parser::hir::ParserProperties,
 }
 
 pub struct CodegenServer<T> {
@@ -62,7 +65,7 @@ where
                 let params: CodegenGenerateParams = serde_json::from_value(params)
                     .map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
 
-                let result = self.inner.generate(params.hir, params.input)?;
+                let result = self.inner.generate(params.hir, params.path, params.props)?;
 
                 Ok(serde_json::to_value(result)?)
             }
@@ -103,9 +106,10 @@ where
     fn generate(
         &self,
         hir: ::xidl_parser::hir::Specification,
-        input: String,
+        path: String,
+        props: ::xidl_parser::hir::ParserProperties,
     ) -> Result<Vec<::xidlc::generate::Artifact>, xidl_jsonrpc::Error> {
-        let params = CodegenGenerateParams { hir, input };
+        let params = CodegenGenerateParams { hir, path, props };
         self.client.borrow_mut().call("Codegen.generate", params)
     }
 }

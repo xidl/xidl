@@ -34,6 +34,10 @@ impl JsonRpcRenderer {
         Ok(Self { env })
     }
 
+    pub fn env(&mut self) -> &mut Environment<'static> {
+        &mut self.env
+    }
+
     pub fn render_template<T: Serialize>(&self, template: &str, ctx: &T) -> IdlcResult<String> {
         self.env
             .get_template(template)
