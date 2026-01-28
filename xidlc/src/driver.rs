@@ -31,6 +31,11 @@ fn generate_for_lang(lang: &str, source: &str, input: &Path) -> IdlcResult<Vec<A
     let (stdin_tx, stdin_rx) = interprocess::unnamed_pipe::pipe()?;
 
     let server = spawn_codegen_server(lang, stdout_rx, stdin_tx)?;
+    scopeguard::defer! {
+        if let Err(err) = server.join().unwrap() {
+            eprintln!("codegen server failed: {}", err);
+        }
+    }
 
     let reader = BufReader::new(stdin_rx);
     let writer = stdout_tx;
@@ -49,11 +54,6 @@ fn generate_for_lang(lang: &str, source: &str, input: &Path) -> IdlcResult<Vec<A
         (artifacts, global_properties)
     };
 
-    let server_result = server
-        .join()
-        .map_err(|_| IdlcError::rpc("c server thread panicked"))?;
-
-    server_result?;
     resolve_artifacts_with_properties(artifacts, input, global_properties)
 }
 
@@ -62,38 +62,26 @@ pub fn spawn_codegen_server(
     stdout_rx: interprocess::unnamed_pipe::Recver,
     stdin_tx: interprocess::unnamed_pipe::Sender,
 ) -> IdlcResult<JoinHandle<IdlcResult<()>>> {
+    macro_rules! run_server {
+        ($obj:expr) => {
+            Ok(thread::spawn(move || {
+                let io = xidl_jsonrpc::Io::new(BufReader::new(stdout_rx), stdin_tx);
+                let handler = crate::jsonrpc::CodegenServer::new($obj);
+                xidl_jsonrpc::Server::builder()
+                    .with_io(io)
+                    .with_service(handler)
+                    .serve()
+                    .map_err(|err| crate::error::IdlcError::rpc(err.to_string()))
+            }))
+        };
+    }
+
     match lang {
-        "c" => {
-            let server = thread::spawn(move || {
-                let reader = BufReader::new(stdout_rx);
-                crate::generate::c::serve_jsonrpc(reader, stdin_tx)
-            });
-
-            Ok(server)
-        }
-        "cpp" => {
-            let server = thread::spawn(move || {
-                let reader = BufReader::new(stdout_rx);
-                crate::generate::cpp::serve_jsonrpc(reader, stdin_tx)
-            });
-
-            Ok(server)
-        }
-        "rust" | "rs" => {
-            let server = thread::spawn(move || {
-                let reader = BufReader::new(stdout_rx);
-                crate::generate::rust::serve_jsonrpc(reader, stdin_tx)
-            });
-
-            Ok(server)
-        }
+        "c" => run_server!(crate::generate::c::CCodegen),
+        "cpp" => run_server!(crate::generate::cpp::CppCodegen),
+        "rust" | "rs" => run_server!(crate::generate::rust::RustCodegen),
         "rs_jsonrpc" | "rust_jsonrpc" => {
-            let server = thread::spawn(move || {
-                let reader = BufReader::new(stdout_rx);
-                crate::generate::rust_jsonrpc::serve_jsonrpc(reader, stdin_tx)
-            });
-
-            Ok(server)
+            run_server!(crate::generate::rust_jsonrpc::RustJsonRpcCodegen)
         }
         _ => {
             let exe = format!("xidl-{lang}");

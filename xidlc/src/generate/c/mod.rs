@@ -84,16 +84,7 @@ pub fn generate(spec: &hir::Specification, input_path: &Path) -> IdlcResult<Vec<
     ])
 }
 
-pub fn serve_jsonrpc<R: std::io::BufRead, W: std::io::Write>(
-    reader: R,
-    writer: W,
-) -> IdlcResult<()> {
-    let handler = crate::jsonrpc::CodegenServer::new(CCodegen);
-    xidl_jsonrpc::serve(reader, writer, handler)
-        .map_err(|err| crate::error::IdlcError::rpc(err.to_string()))
-}
-
-struct CCodegen;
+pub(crate) struct CCodegen;
 
 impl crate::jsonrpc::Codegen for CCodegen {
     fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {

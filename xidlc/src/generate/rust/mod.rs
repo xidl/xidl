@@ -52,20 +52,7 @@ pub fn generate_with_properties(
     }])
 }
 
-pub fn serve_jsonrpc<R: std::io::BufRead, W: std::io::Write>(
-    reader: R,
-    writer: W,
-) -> IdlcResult<()> {
-    let handler = crate::jsonrpc::CodegenServer::new(RustCodegen {
-        render_header: true,
-    });
-    xidl_jsonrpc::serve(reader, writer, handler)
-        .map_err(|err| crate::error::IdlcError::rpc(err.to_string()))
-}
-
-struct RustCodegen {
-    render_header: bool,
-}
+pub(crate) struct RustCodegen;
 
 impl crate::jsonrpc::Codegen for RustCodegen {
     fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
@@ -77,12 +64,9 @@ impl crate::jsonrpc::Codegen for RustCodegen {
         hir: Specification,
         input: String,
     ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
-        let mut properties = ParserProperties::default();
-        properties.insert(
-            "render_header".to_string(),
-            serde_json::Value::Bool(self.render_header),
-        );
-        generate_with_properties(&hir, Path::new(&input), &properties).map_err(map_codegen_error)
+        let mut props = ParserProperties::default();
+        props.insert("render_header".to_string(), false.into());
+        generate_with_properties(&hir, Path::new(&input), &props).map_err(map_codegen_error)
     }
 }
 

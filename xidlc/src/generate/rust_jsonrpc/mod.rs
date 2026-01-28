@@ -38,10 +38,7 @@ pub fn generate(spec: hir::Specification, input_path: &Path) -> IdlcResult<Vec<A
     }];
     if let Some(non_interface) = strip_interfaces(spec) {
         let mut properties = ParserProperties::default();
-        properties.insert(
-            "render_header".to_string(),
-            serde_json::Value::Bool(false),
-        );
+        properties.insert("render_header".to_string(), serde_json::Value::Bool(false));
         artifacts.push(Artifact::Hir {
             lang: "rs".to_string(),
             hir: non_interface,
@@ -51,24 +48,12 @@ pub fn generate(spec: hir::Specification, input_path: &Path) -> IdlcResult<Vec<A
     Ok(artifacts)
 }
 
-pub fn serve_jsonrpc<R: std::io::BufRead, W: std::io::Write>(
-    reader: R,
-    writer: W,
-) -> IdlcResult<()> {
-    let handler = crate::jsonrpc::CodegenServer::new(RustJsonRpcCodegen);
-    xidl_jsonrpc::serve(reader, writer, handler)
-        .map_err(|err| crate::error::IdlcError::rpc(err.to_string()))
-}
-
-struct RustJsonRpcCodegen;
+pub(crate) struct RustJsonRpcCodegen;
 
 impl crate::jsonrpc::Codegen for RustJsonRpcCodegen {
     fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
         let mut props = ParserProperties::default();
-        props.insert(
-            "expand_interface".to_string(),
-            serde_json::Value::Bool(false),
-        );
+        props.insert("expand_interface".into(), false.into());
         Ok(props)
     }
 

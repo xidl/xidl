@@ -56,6 +56,16 @@ impl Error {
             data: None,
         }
     }
+
+    pub fn is_method_not_found(&self) -> bool {
+        matches!(
+            self,
+            Error::Rpc {
+                code: ErrorCode::MethodNotFound,
+                ..
+            }
+        )
+    }
 }
 
 impl std::fmt::Display for Error {
@@ -176,6 +186,92 @@ where
 
 pub trait Handler {
     fn handle(&self, method: &str, params: Value) -> Result<Value, Error>;
+}
+
+pub struct Io<R, W> {
+    pub reader: R,
+    pub writer: W,
+}
+
+impl<R, W> Io<R, W> {
+    pub fn new(reader: R, writer: W) -> Self {
+        Self { reader, writer }
+    }
+}
+
+struct MultiHandler {
+    services: Vec<Box<dyn Handler>>,
+}
+
+impl Handler for MultiHandler {
+    fn handle(&self, method: &str, params: Value) -> Result<Value, Error> {
+        for service in &self.services {
+            match service.handle(method, params.clone()) {
+                Ok(value) => return Ok(value),
+                Err(err) => {
+                    if err.is_method_not_found() {
+                        continue;
+                    }
+                    return Err(err);
+                }
+            }
+        }
+        Err(Error::method_not_found(method))
+    }
+}
+
+pub struct ServerBuilder {
+    io: Option<Io<Box<dyn BufRead>, Box<dyn Write>>>,
+    services: Vec<Box<dyn Handler>>,
+}
+
+pub struct Server {
+    io: Io<Box<dyn BufRead>, Box<dyn Write>>,
+    services: Vec<Box<dyn Handler>>,
+}
+
+impl Server {
+    pub fn builder() -> ServerBuilder {
+        ServerBuilder {
+            io: None,
+            services: Vec::new(),
+        }
+    }
+
+    pub fn serve(self) -> Result<(), Error> {
+        let handler = MultiHandler {
+            services: self.services,
+        };
+        serve(self.io.reader, self.io.writer, handler)
+    }
+}
+
+impl ServerBuilder {
+    pub fn with_io<R, W>(mut self, io: Io<R, W>) -> Self
+    where
+        R: BufRead + 'static,
+        W: Write + 'static,
+    {
+        self.io = Some(Io::new(Box::new(io.reader), Box::new(io.writer)));
+        self
+    }
+
+    pub fn with_service<S>(mut self, service: S) -> Self
+    where
+        S: Handler + 'static,
+    {
+        self.services.push(Box::new(service));
+        self
+    }
+
+    pub fn serve(self) -> Result<(), Error> {
+        let io = self.io.ok_or(Error::Protocol("missing io"))?;
+        let server = Server {
+            io,
+            services: self.services,
+        };
+        server.serve()
+    }
 }
 
 pub fn serve<R, W, H>(mut reader: R, mut writer: W, handler: H) -> Result<(), Error>
