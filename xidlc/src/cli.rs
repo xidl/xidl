@@ -6,9 +6,9 @@ use std::path::PathBuf;
 #[derive(Debug, Parser)]
 #[command(name = "idlc", about = "IDL translator", version)]
 pub struct CliArgs {
-    #[arg(long)]
+    #[arg(long = "lang", short = 'l')]
     pub lang: String,
-    #[arg(long = "out-dir")]
+    #[arg(long = "out-dir", short = 'o')]
     pub out_dir: PathBuf,
     #[arg(required = true)]
     pub inputs: Vec<PathBuf>,
