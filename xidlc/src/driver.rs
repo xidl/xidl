@@ -180,6 +180,7 @@ fn write_files(out_dir: &Path, files: Vec<File>) -> IdlcResult<()> {
         if let Some(parent) = out_path.parent() {
             fs::create_dir_all(parent)?;
         }
+        tracing::info!("write file: {}", out_path.display());
         fs::write(out_path, content)?;
     }
     Ok(())

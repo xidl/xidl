@@ -17,6 +17,8 @@ rust-embed = "8.5"
 interprocess = "2.2.3"
 md5 = "0.7"
 scopeguard = "1.2.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [dev-dependencies]
 insta = "1.44"
