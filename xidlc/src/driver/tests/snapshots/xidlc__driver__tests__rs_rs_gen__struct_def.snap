@@ -26,9 +26,12 @@ pub struct A {
 }
 
 impl A {
+    
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+    
 }
+
 
 impl xidl_xcdr::XcdrSerialize for A {
     fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
@@ -47,6 +50,8 @@ impl xidl_xcdr::XcdrSerialize for A {
     }
 }
 
+
+
 impl xidl_xcdr::XcdrDeserialize for A {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
@@ -59,6 +64,7 @@ impl xidl_xcdr::XcdrDeserialize for A {
         })
     }
 }
+
 
 pub struct A {
 
@@ -68,9 +74,12 @@ pub struct A {
 }
 
 impl A {
+    
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+    
 }
+
 
 impl xidl_xcdr::XcdrSerialize for A {
     fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
@@ -95,6 +104,8 @@ impl xidl_xcdr::XcdrSerialize for A {
     }
 }
 
+
+
 impl xidl_xcdr::XcdrDeserialize for A {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
@@ -111,18 +122,22 @@ impl xidl_xcdr::XcdrDeserialize for A {
         })
     }
 }
+
 
 pub struct A {
 
 
-    pub a: Box<b>,
+    pub a: ::A::b,
 
 }
 
 impl A {
+    
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+    
 }
+
 
 impl xidl_xcdr::XcdrSerialize for A {
     fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
@@ -147,6 +162,8 @@ impl xidl_xcdr::XcdrSerialize for A {
     }
 }
 
+
+
 impl xidl_xcdr::XcdrDeserialize for A {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
@@ -163,6 +180,7 @@ impl xidl_xcdr::XcdrDeserialize for A {
         })
     }
 }
+
 
 pub struct A {
 
@@ -172,9 +190,12 @@ pub struct A {
 }
 
 impl A {
+    
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+    
 }
+
 
 impl xidl_xcdr::XcdrSerialize for A {
     fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
@@ -195,6 +216,8 @@ impl xidl_xcdr::XcdrSerialize for A {
     }
 }
 
+
+
 impl xidl_xcdr::XcdrDeserialize for A {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
@@ -212,15 +235,19 @@ impl xidl_xcdr::XcdrDeserialize for A {
     }
 }
 
+
 pub struct _A {
 
 
 }
 
 impl _A {
+    
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+    
 }
+
 
 impl xidl_xcdr::XcdrSerialize for _A {
     fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
@@ -239,6 +266,8 @@ impl xidl_xcdr::XcdrSerialize for _A {
     }
 }
 
+
+
 impl xidl_xcdr::XcdrDeserialize for _A {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
@@ -252,17 +281,21 @@ impl xidl_xcdr::XcdrDeserialize for _A {
     }
 }
 
+
 pub struct _Custom {
 
 
-    pub var_inner: Box<Inner>,
+    pub var_inner: Inner,
 
 }
 
 impl _Custom {
+    
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+    
 }
+
 
 impl xidl_xcdr::XcdrSerialize for _Custom {
     fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
@@ -287,6 +320,8 @@ impl xidl_xcdr::XcdrSerialize for _Custom {
     }
 }
 
+
+
 impl xidl_xcdr::XcdrDeserialize for _Custom {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
@@ -304,12 +339,13 @@ impl xidl_xcdr::XcdrDeserialize for _Custom {
     }
 }
 
+
 pub struct HelloWorld {
 
 
-    pub a: Box<u8>,
+    pub a: u8,
 
-    pub b: [Box<u16>; 10],
+    pub b: [u16; 10],
 
     pub c: [[String; 20]; 10],
 
@@ -324,9 +360,12 @@ pub struct HelloWorld {
 }
 
 impl HelloWorld {
+    
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+    
 }
+
 
 impl xidl_xcdr::XcdrSerialize for HelloWorld {
     fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
@@ -386,6 +425,8 @@ impl xidl_xcdr::XcdrSerialize for HelloWorld {
         Ok(())
     }
 }
+
+
 
 impl xidl_xcdr::XcdrDeserialize for HelloWorld {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(

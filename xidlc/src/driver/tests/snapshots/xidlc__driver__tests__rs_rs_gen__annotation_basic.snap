@@ -30,9 +30,12 @@ pub struct S {
 }
 
 impl S {
+    
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+    
 }
+
 
 impl xidl_xcdr::XcdrSerialize for S {
     fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
@@ -63,6 +66,8 @@ impl xidl_xcdr::XcdrSerialize for S {
     }
 }
 
+
+
 impl xidl_xcdr::XcdrDeserialize for S {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
@@ -83,6 +88,7 @@ impl xidl_xcdr::XcdrDeserialize for S {
         })
     }
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum E {
 
@@ -186,8 +192,10 @@ impl Drop for U {
 }
 
 impl U {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
-        xidl_xcdr::SerializeKind::Cdr;
+    
+        pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
+            xidl_xcdr::SerializeKind::Cdr;
+    
 
     
         pub fn new_a(value: i32) -> Self {
@@ -203,6 +211,21 @@ impl U {
 
         pub fn is_a(&self) -> bool {
             matches!(self.tag, 0)
+        }
+
+        pub unsafe fn as_a(&self) -> &i32 {
+            unsafe { &self.data.a }
+        }
+
+        pub unsafe fn as_a_mut(&mut self) -> &mut i32 {
+            unsafe { &mut self.data.a }
+        }
+
+        pub unsafe fn into_a(self) -> i32 {
+            unsafe {
+                let mut forget = core::mem::ManuallyDrop::new(self);
+                core::mem::ManuallyDrop::take(&mut forget.data.a)
+            }
         }
     
         pub fn new_b(value: i32) -> Self {
@@ -221,6 +244,21 @@ impl U {
         pub fn is_b(&self) -> bool {
             matches!(self.tag, _)
         }
+
+        pub unsafe fn as_b(&self) -> &i32 {
+            unsafe { &self.data.b }
+        }
+
+        pub unsafe fn as_b_mut(&mut self) -> &mut i32 {
+            unsafe { &mut self.data.b }
+        }
+
+        pub unsafe fn into_b(self) -> i32 {
+            unsafe {
+                let mut forget = core::mem::ManuallyDrop::new(self);
+                core::mem::ManuallyDrop::take(&mut forget.data.b)
+            }
+        }
     
 
 
@@ -228,6 +266,226 @@ impl U {
         &self.tag
     }
 }
+
+impl serde::Serialize for U {
+    fn serialize<__S>(&self, __serializer: __S) -> serde::__private228::Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        match self.tag {
+            
+                0 => {
+                    let mut s = serde::Serializer::serialize_struct_variant(
+                        __serializer,
+                        "U",
+                        0,
+                        "0",
+                        size_of::<i32>(),
+                    )?;
+                    let x = unsafe { std::ops::Deref::deref(&self.data.a) };
+                    serde::ser::SerializeStructVariant::serialize_field(&mut s, "0", x)?;
+                    serde::ser::SerializeStructVariant::end(s)
+                },
+            
+                _ => {
+                    let mut s = serde::Serializer::serialize_struct_variant(
+                        __serializer,
+                        "U",
+                        1,
+                        "_",
+                        size_of::<i32>(),
+                    )?;
+                    let x = unsafe { std::ops::Deref::deref(&self.data.b) };
+                    serde::ser::SerializeStructVariant::serialize_field(&mut s, "_", x)?;
+                    serde::ser::SerializeStructVariant::end(s)
+                },
+            
+        }
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for U {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        const VARIANTS: &[&str] = &[
+            
+                "0",
+            
+                "_",
+            
+        ];
+
+        enum __Variant {
+            
+                __Case0,
+            
+                __Case1,
+            
+        }
+
+        impl<'de> serde::Deserialize<'de> for __Variant {
+            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+            where
+                D: serde::Deserializer<'de>,
+            {
+                struct __VariantVisitor;
+
+                impl serde::de::Visitor<'_> for __VariantVisitor {
+                    type Value = __Variant;
+
+                    fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+                        formatter.write_str("union variant")
+                    }
+
+                    fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+                    where
+                        E: serde::de::Error,
+                    {
+                        match value {
+                            
+                                "0" => Ok(__Variant::__Case0),
+                            
+                                "_" => Ok(__Variant::__Case1),
+                            
+                            _ => Err(E::unknown_variant(value, VARIANTS)),
+                        }
+                    }
+                }
+
+                deserializer.deserialize_identifier(__VariantVisitor)
+            }
+        }
+
+        struct __Visitor;
+
+        impl<'de> serde::de::Visitor<'de> for __Visitor {
+            type Value = U;
+
+            fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+                formatter.write_str("externally tagged union U")
+            }
+
+            fn visit_enum<A>(self, data: A) -> Result<Self::Value, A::Error>
+            where
+                A: serde::de::EnumAccess<'de>,
+            {
+                let (variant, variant_access) = data.variant::<__Variant>()?;
+                match variant {
+                    
+                        __Variant::__Case0 => {
+                            struct __CaseVisitor;
+
+                            impl<'de> serde::de::Visitor<'de> for __CaseVisitor {
+                                type Value = i32;
+
+                                fn expecting(
+                                    &self,
+                                    formatter: &mut core::fmt::Formatter,
+                                ) -> core::fmt::Result {
+                                    formatter.write_str("struct variant 0")
+                                }
+
+                                fn visit_map<M>(self, mut map: M) -> Result<Self::Value, M::Error>
+                                where
+                                    M: serde::de::MapAccess<'de>,
+                                {
+                                    let mut value = None;
+                                    while let Some(key) = map.next_key::<String>()? {
+                                        if key == "0" {
+                                            if value.is_some() {
+                                                return Err(serde::de::Error::duplicate_field(
+                                                    "0",
+                                                ));
+                                            }
+                                            value = Some(map.next_value()?);
+                                        } else {
+                                            let _: serde::de::IgnoredAny = map.next_value()?;
+                                        }
+                                    }
+                                    value.ok_or_else(|| {
+                                        serde::de::Error::missing_field("0")
+                                    })
+                                }
+                            }
+
+                            let value = serde::de::VariantAccess::struct_variant(
+                                variant_access,
+                                &["0"],
+                                __CaseVisitor,
+                            )?;
+                            
+                                let tag = 0;
+                            
+                            Ok(U {
+                                tag,
+                                data: UData {
+                                    a: core::mem::ManuallyDrop::new(value),
+                                },
+                            })
+                        }
+                    
+                        __Variant::__Case1 => {
+                            struct __CaseVisitor;
+
+                            impl<'de> serde::de::Visitor<'de> for __CaseVisitor {
+                                type Value = i32;
+
+                                fn expecting(
+                                    &self,
+                                    formatter: &mut core::fmt::Formatter,
+                                ) -> core::fmt::Result {
+                                    formatter.write_str("struct variant _")
+                                }
+
+                                fn visit_map<M>(self, mut map: M) -> Result<Self::Value, M::Error>
+                                where
+                                    M: serde::de::MapAccess<'de>,
+                                {
+                                    let mut value = None;
+                                    while let Some(key) = map.next_key::<String>()? {
+                                        if key == "_" {
+                                            if value.is_some() {
+                                                return Err(serde::de::Error::duplicate_field(
+                                                    "_",
+                                                ));
+                                            }
+                                            value = Some(map.next_value()?);
+                                        } else {
+                                            let _: serde::de::IgnoredAny = map.next_value()?;
+                                        }
+                                    }
+                                    value.ok_or_else(|| {
+                                        serde::de::Error::missing_field("_")
+                                    })
+                                }
+                            }
+
+                            let value = serde::de::VariantAccess::struct_variant(
+                                variant_access,
+                                &["_"],
+                                __CaseVisitor,
+                            )?;
+                            
+                                let tag = i32::default();
+                            
+                            Ok(U {
+                                tag,
+                                data: UData {
+                                    b: core::mem::ManuallyDrop::new(value),
+                                },
+                            })
+                        }
+                    
+                }
+            }
+        }
+
+        deserializer.deserialize_enum("U", VARIANTS, __Visitor)
+    }
+}
+
 
 impl xidl_xcdr::XcdrSerialize for U {
     fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
@@ -265,6 +523,8 @@ impl xidl_xcdr::XcdrSerialize for U {
     }
 }
 
+
+
 impl xidl_xcdr::XcdrDeserialize for U {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
@@ -289,6 +549,7 @@ impl xidl_xcdr::XcdrDeserialize for U {
         Ok(Self { tag, data } )
     }
 }
+
 pub const I_ping_Hash: i32 = 18846175;
 pub const I_get_attribute_value_Hash: i32 = 3881857402;
 pub const I_set_attribute_value_Hash: i32 = 1976821110;
@@ -296,14 +557,17 @@ pub const I_set_attribute_value_Hash: i32 = 1976821110;
 pub struct I_ping_In {
 
 
-    pub dummy: Box<UnusedMember>,
+    pub dummy: dds::rpc::UnusedMember,
 
 }
 
 impl I_ping_In {
+    
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+    
 }
+
 
 impl xidl_xcdr::XcdrSerialize for I_ping_In {
     fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
@@ -328,6 +592,8 @@ impl xidl_xcdr::XcdrSerialize for I_ping_In {
     }
 }
 
+
+
 impl xidl_xcdr::XcdrDeserialize for I_ping_In {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
@@ -345,17 +611,21 @@ impl xidl_xcdr::XcdrDeserialize for I_ping_In {
     }
 }
 
+
 pub struct I_ping_Out {
 
 
-    pub dummy: Box<UnusedMember>,
+    pub dummy: dds::rpc::UnusedMember,
 
 }
 
 impl I_ping_Out {
+    
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+    
 }
+
 
 impl xidl_xcdr::XcdrSerialize for I_ping_Out {
     fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
@@ -380,6 +650,8 @@ impl xidl_xcdr::XcdrSerialize for I_ping_Out {
     }
 }
 
+
+
 impl xidl_xcdr::XcdrDeserialize for I_ping_Out {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
@@ -397,6 +669,7 @@ impl xidl_xcdr::XcdrDeserialize for I_ping_Out {
     }
 }
 
+
 pub struct I_ping_Result {
     tag: i32,
     data: I_ping_ResultData,
@@ -405,7 +678,7 @@ pub struct I_ping_Result {
 
 union I_ping_ResultData {
 
-    result: core::mem::ManuallyDrop<Box<I_ping_Out>>,
+    result: core::mem::ManuallyDrop<I_ping_Out>,
 
 }
 
@@ -413,7 +686,7 @@ impl Drop for I_ping_Result {
     fn drop(&mut self) {
         match self.tag {
             
-                RETCODE_OK => {
+                dds::RETCODE_OK => {
                     unsafe {
                         core::mem::ManuallyDrop::drop(&mut self.data.result);
                     }
@@ -424,15 +697,17 @@ impl Drop for I_ping_Result {
 }
 
 impl I_ping_Result {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
-        xidl_xcdr::SerializeKind::Cdr;
+    
+        pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
+            xidl_xcdr::SerializeKind::Cdr;
+    
 
     
-        pub fn new_result(value: Box<I_ping_Out>) -> Self {
+        pub fn new_result(value: I_ping_Out) -> Self {
             
             
             Self {
-                tag: RETCODE_OK,
+                tag: dds::RETCODE_OK,
                 data: I_ping_ResultData {
                     result: core::mem::ManuallyDrop::new(value),
                 }
@@ -440,7 +715,22 @@ impl I_ping_Result {
         }
 
         pub fn is_result(&self) -> bool {
-            matches!(self.tag, RETCODE_OK)
+            matches!(self.tag, dds::RETCODE_OK)
+        }
+
+        pub unsafe fn as_result(&self) -> &I_ping_Out {
+            unsafe { &self.data.result }
+        }
+
+        pub unsafe fn as_result_mut(&mut self) -> &mut I_ping_Out {
+            unsafe { &mut self.data.result }
+        }
+
+        pub unsafe fn into_result(self) -> I_ping_Out {
+            unsafe {
+                let mut forget = core::mem::ManuallyDrop::new(self);
+                core::mem::ManuallyDrop::take(&mut forget.data.result)
+            }
         }
     
 
@@ -449,6 +739,155 @@ impl I_ping_Result {
         &self.tag
     }
 }
+
+impl serde::Serialize for I_ping_Result {
+    fn serialize<__S>(&self, __serializer: __S) -> serde::__private228::Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        match self.tag {
+            
+                dds::RETCODE_OK => {
+                    let mut s = serde::Serializer::serialize_struct_variant(
+                        __serializer,
+                        "I_ping_Result",
+                        0,
+                        "dds::RETCODE_OK",
+                        size_of::<I_ping_Out>(),
+                    )?;
+                    let x = unsafe { std::ops::Deref::deref(&self.data.result) };
+                    serde::ser::SerializeStructVariant::serialize_field(&mut s, "dds::RETCODE_OK", x)?;
+                    serde::ser::SerializeStructVariant::end(s)
+                },
+            
+        }
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for I_ping_Result {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        const VARIANTS: &[&str] = &[
+            
+                "dds::RETCODE_OK",
+            
+        ];
+
+        enum __Variant {
+            
+                __Case0,
+            
+        }
+
+        impl<'de> serde::Deserialize<'de> for __Variant {
+            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+            where
+                D: serde::Deserializer<'de>,
+            {
+                struct __VariantVisitor;
+
+                impl serde::de::Visitor<'_> for __VariantVisitor {
+                    type Value = __Variant;
+
+                    fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+                        formatter.write_str("union variant")
+                    }
+
+                    fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+                    where
+                        E: serde::de::Error,
+                    {
+                        match value {
+                            
+                                "dds::RETCODE_OK" => Ok(__Variant::__Case0),
+                            
+                            _ => Err(E::unknown_variant(value, VARIANTS)),
+                        }
+                    }
+                }
+
+                deserializer.deserialize_identifier(__VariantVisitor)
+            }
+        }
+
+        struct __Visitor;
+
+        impl<'de> serde::de::Visitor<'de> for __Visitor {
+            type Value = I_ping_Result;
+
+            fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+                formatter.write_str("externally tagged union I_ping_Result")
+            }
+
+            fn visit_enum<A>(self, data: A) -> Result<Self::Value, A::Error>
+            where
+                A: serde::de::EnumAccess<'de>,
+            {
+                let (variant, variant_access) = data.variant::<__Variant>()?;
+                match variant {
+                    
+                        __Variant::__Case0 => {
+                            struct __CaseVisitor;
+
+                            impl<'de> serde::de::Visitor<'de> for __CaseVisitor {
+                                type Value = I_ping_Out;
+
+                                fn expecting(
+                                    &self,
+                                    formatter: &mut core::fmt::Formatter,
+                                ) -> core::fmt::Result {
+                                    formatter.write_str("struct variant dds::RETCODE_OK")
+                                }
+
+                                fn visit_map<M>(self, mut map: M) -> Result<Self::Value, M::Error>
+                                where
+                                    M: serde::de::MapAccess<'de>,
+                                {
+                                    let mut value = None;
+                                    while let Some(key) = map.next_key::<String>()? {
+                                        if key == "dds::RETCODE_OK" {
+                                            if value.is_some() {
+                                                return Err(serde::de::Error::duplicate_field(
+                                                    "dds::RETCODE_OK",
+                                                ));
+                                            }
+                                            value = Some(map.next_value()?);
+                                        } else {
+                                            let _: serde::de::IgnoredAny = map.next_value()?;
+                                        }
+                                    }
+                                    value.ok_or_else(|| {
+                                        serde::de::Error::missing_field("dds::RETCODE_OK")
+                                    })
+                                }
+                            }
+
+                            let value = serde::de::VariantAccess::struct_variant(
+                                variant_access,
+                                &["dds::RETCODE_OK"],
+                                __CaseVisitor,
+                            )?;
+                            
+                                let tag = dds::RETCODE_OK;
+                            
+                            Ok(I_ping_Result {
+                                tag,
+                                data: I_ping_ResultData {
+                                    result: core::mem::ManuallyDrop::new(value),
+                                },
+                            })
+                        }
+                    
+                }
+            }
+        }
+
+        deserializer.deserialize_enum("I_ping_Result", VARIANTS, __Visitor)
+    }
+}
+
 
 impl xidl_xcdr::XcdrSerialize for I_ping_Result {
     fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
@@ -465,7 +904,7 @@ impl xidl_xcdr::XcdrSerialize for I_ping_Result {
         serializer.end_field()?;
         match self.tag {
             
-                RETCODE_OK => {
+                dds::RETCODE_OK => {
                     let value = unsafe { self.data.result.as_ref() };
                     serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
                     xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
@@ -481,6 +920,8 @@ impl xidl_xcdr::XcdrSerialize for I_ping_Result {
     }
 }
 
+
+
 impl xidl_xcdr::XcdrDeserialize for I_ping_Result {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
@@ -488,7 +929,7 @@ impl xidl_xcdr::XcdrDeserialize for I_ping_Result {
         let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
         let data = match tag {
             
-                RETCODE_OK => {
+                dds::RETCODE_OK => {
                     I_ping_ResultData {
                         result: core::mem::ManuallyDrop::new(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?),
                     }
@@ -502,17 +943,21 @@ impl xidl_xcdr::XcdrDeserialize for I_ping_Result {
     }
 }
 
+
 pub struct I_get_attribute_value_In {
 
 
-    pub dummy: Box<UnusedMember>,
+    pub dummy: dds::rpc::UnusedMember,
 
 }
 
 impl I_get_attribute_value_In {
+    
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+    
 }
+
 
 impl xidl_xcdr::XcdrSerialize for I_get_attribute_value_In {
     fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
@@ -537,6 +982,8 @@ impl xidl_xcdr::XcdrSerialize for I_get_attribute_value_In {
     }
 }
 
+
+
 impl xidl_xcdr::XcdrDeserialize for I_get_attribute_value_In {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
@@ -554,6 +1001,7 @@ impl xidl_xcdr::XcdrDeserialize for I_get_attribute_value_In {
     }
 }
 
+
 pub struct I_get_attribute_value_Out {
 
 
@@ -562,9 +1010,12 @@ pub struct I_get_attribute_value_Out {
 }
 
 impl I_get_attribute_value_Out {
+    
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+    
 }
+
 
 impl xidl_xcdr::XcdrSerialize for I_get_attribute_value_Out {
     fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
@@ -589,6 +1040,8 @@ impl xidl_xcdr::XcdrSerialize for I_get_attribute_value_Out {
     }
 }
 
+
+
 impl xidl_xcdr::XcdrDeserialize for I_get_attribute_value_Out {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
@@ -606,6 +1059,7 @@ impl xidl_xcdr::XcdrDeserialize for I_get_attribute_value_Out {
     }
 }
 
+
 pub struct I_get_attribute_value_Result {
     tag: i32,
     data: I_get_attribute_value_ResultData,
@@ -614,7 +1068,7 @@ pub struct I_get_attribute_value_Result {
 
 union I_get_attribute_value_ResultData {
 
-    result: core::mem::ManuallyDrop<Box<I_get_attribute_value_Out>>,
+    result: core::mem::ManuallyDrop<I_get_attribute_value_Out>,
 
 }
 
@@ -622,7 +1076,7 @@ impl Drop for I_get_attribute_value_Result {
     fn drop(&mut self) {
         match self.tag {
             
-                RETCODE_OK => {
+                dds::RETCODE_OK => {
                     unsafe {
                         core::mem::ManuallyDrop::drop(&mut self.data.result);
                     }
@@ -633,15 +1087,17 @@ impl Drop for I_get_attribute_value_Result {
 }
 
 impl I_get_attribute_value_Result {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
-        xidl_xcdr::SerializeKind::Cdr;
+    
+        pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
+            xidl_xcdr::SerializeKind::Cdr;
+    
 
     
-        pub fn new_result(value: Box<I_get_attribute_value_Out>) -> Self {
+        pub fn new_result(value: I_get_attribute_value_Out) -> Self {
             
             
             Self {
-                tag: RETCODE_OK,
+                tag: dds::RETCODE_OK,
                 data: I_get_attribute_value_ResultData {
                     result: core::mem::ManuallyDrop::new(value),
                 }
@@ -649,7 +1105,22 @@ impl I_get_attribute_value_Result {
         }
 
         pub fn is_result(&self) -> bool {
-            matches!(self.tag, RETCODE_OK)
+            matches!(self.tag, dds::RETCODE_OK)
+        }
+
+        pub unsafe fn as_result(&self) -> &I_get_attribute_value_Out {
+            unsafe { &self.data.result }
+        }
+
+        pub unsafe fn as_result_mut(&mut self) -> &mut I_get_attribute_value_Out {
+            unsafe { &mut self.data.result }
+        }
+
+        pub unsafe fn into_result(self) -> I_get_attribute_value_Out {
+            unsafe {
+                let mut forget = core::mem::ManuallyDrop::new(self);
+                core::mem::ManuallyDrop::take(&mut forget.data.result)
+            }
         }
     
 
@@ -658,6 +1129,155 @@ impl I_get_attribute_value_Result {
         &self.tag
     }
 }
+
+impl serde::Serialize for I_get_attribute_value_Result {
+    fn serialize<__S>(&self, __serializer: __S) -> serde::__private228::Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        match self.tag {
+            
+                dds::RETCODE_OK => {
+                    let mut s = serde::Serializer::serialize_struct_variant(
+                        __serializer,
+                        "I_get_attribute_value_Result",
+                        0,
+                        "dds::RETCODE_OK",
+                        size_of::<I_get_attribute_value_Out>(),
+                    )?;
+                    let x = unsafe { std::ops::Deref::deref(&self.data.result) };
+                    serde::ser::SerializeStructVariant::serialize_field(&mut s, "dds::RETCODE_OK", x)?;
+                    serde::ser::SerializeStructVariant::end(s)
+                },
+            
+        }
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for I_get_attribute_value_Result {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        const VARIANTS: &[&str] = &[
+            
+                "dds::RETCODE_OK",
+            
+        ];
+
+        enum __Variant {
+            
+                __Case0,
+            
+        }
+
+        impl<'de> serde::Deserialize<'de> for __Variant {
+            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+            where
+                D: serde::Deserializer<'de>,
+            {
+                struct __VariantVisitor;
+
+                impl serde::de::Visitor<'_> for __VariantVisitor {
+                    type Value = __Variant;
+
+                    fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+                        formatter.write_str("union variant")
+                    }
+
+                    fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+                    where
+                        E: serde::de::Error,
+                    {
+                        match value {
+                            
+                                "dds::RETCODE_OK" => Ok(__Variant::__Case0),
+                            
+                            _ => Err(E::unknown_variant(value, VARIANTS)),
+                        }
+                    }
+                }
+
+                deserializer.deserialize_identifier(__VariantVisitor)
+            }
+        }
+
+        struct __Visitor;
+
+        impl<'de> serde::de::Visitor<'de> for __Visitor {
+            type Value = I_get_attribute_value_Result;
+
+            fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+                formatter.write_str("externally tagged union I_get_attribute_value_Result")
+            }
+
+            fn visit_enum<A>(self, data: A) -> Result<Self::Value, A::Error>
+            where
+                A: serde::de::EnumAccess<'de>,
+            {
+                let (variant, variant_access) = data.variant::<__Variant>()?;
+                match variant {
+                    
+                        __Variant::__Case0 => {
+                            struct __CaseVisitor;
+
+                            impl<'de> serde::de::Visitor<'de> for __CaseVisitor {
+                                type Value = I_get_attribute_value_Out;
+
+                                fn expecting(
+                                    &self,
+                                    formatter: &mut core::fmt::Formatter,
+                                ) -> core::fmt::Result {
+                                    formatter.write_str("struct variant dds::RETCODE_OK")
+                                }
+
+                                fn visit_map<M>(self, mut map: M) -> Result<Self::Value, M::Error>
+                                where
+                                    M: serde::de::MapAccess<'de>,
+                                {
+                                    let mut value = None;
+                                    while let Some(key) = map.next_key::<String>()? {
+                                        if key == "dds::RETCODE_OK" {
+                                            if value.is_some() {
+                                                return Err(serde::de::Error::duplicate_field(
+                                                    "dds::RETCODE_OK",
+                                                ));
+                                            }
+                                            value = Some(map.next_value()?);
+                                        } else {
+                                            let _: serde::de::IgnoredAny = map.next_value()?;
+                                        }
+                                    }
+                                    value.ok_or_else(|| {
+                                        serde::de::Error::missing_field("dds::RETCODE_OK")
+                                    })
+                                }
+                            }
+
+                            let value = serde::de::VariantAccess::struct_variant(
+                                variant_access,
+                                &["dds::RETCODE_OK"],
+                                __CaseVisitor,
+                            )?;
+                            
+                                let tag = dds::RETCODE_OK;
+                            
+                            Ok(I_get_attribute_value_Result {
+                                tag,
+                                data: I_get_attribute_value_ResultData {
+                                    result: core::mem::ManuallyDrop::new(value),
+                                },
+                            })
+                        }
+                    
+                }
+            }
+        }
+
+        deserializer.deserialize_enum("I_get_attribute_value_Result", VARIANTS, __Visitor)
+    }
+}
+
 
 impl xidl_xcdr::XcdrSerialize for I_get_attribute_value_Result {
     fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
@@ -674,7 +1294,7 @@ impl xidl_xcdr::XcdrSerialize for I_get_attribute_value_Result {
         serializer.end_field()?;
         match self.tag {
             
-                RETCODE_OK => {
+                dds::RETCODE_OK => {
                     let value = unsafe { self.data.result.as_ref() };
                     serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
                     xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
@@ -690,6 +1310,8 @@ impl xidl_xcdr::XcdrSerialize for I_get_attribute_value_Result {
     }
 }
 
+
+
 impl xidl_xcdr::XcdrDeserialize for I_get_attribute_value_Result {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
@@ -697,7 +1319,7 @@ impl xidl_xcdr::XcdrDeserialize for I_get_attribute_value_Result {
         let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
         let data = match tag {
             
-                RETCODE_OK => {
+                dds::RETCODE_OK => {
                     I_get_attribute_value_ResultData {
                         result: core::mem::ManuallyDrop::new(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?),
                     }
@@ -711,6 +1333,7 @@ impl xidl_xcdr::XcdrDeserialize for I_get_attribute_value_Result {
     }
 }
 
+
 pub struct I_set_attribute_value_In {
 
 
@@ -719,9 +1342,12 @@ pub struct I_set_attribute_value_In {
 }
 
 impl I_set_attribute_value_In {
+    
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+    
 }
+
 
 impl xidl_xcdr::XcdrSerialize for I_set_attribute_value_In {
     fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
@@ -746,6 +1372,8 @@ impl xidl_xcdr::XcdrSerialize for I_set_attribute_value_In {
     }
 }
 
+
+
 impl xidl_xcdr::XcdrDeserialize for I_set_attribute_value_In {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
@@ -763,17 +1391,21 @@ impl xidl_xcdr::XcdrDeserialize for I_set_attribute_value_In {
     }
 }
 
+
 pub struct I_set_attribute_value_Out {
 
 
-    pub dummy: Box<UnusedMember>,
+    pub dummy: dds::rpc::UnusedMember,
 
 }
 
 impl I_set_attribute_value_Out {
+    
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+    
 }
+
 
 impl xidl_xcdr::XcdrSerialize for I_set_attribute_value_Out {
     fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
@@ -798,6 +1430,8 @@ impl xidl_xcdr::XcdrSerialize for I_set_attribute_value_Out {
     }
 }
 
+
+
 impl xidl_xcdr::XcdrDeserialize for I_set_attribute_value_Out {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
@@ -815,6 +1449,7 @@ impl xidl_xcdr::XcdrDeserialize for I_set_attribute_value_Out {
     }
 }
 
+
 pub struct I_set_attribute_value_Result {
     tag: i32,
     data: I_set_attribute_value_ResultData,
@@ -823,7 +1458,7 @@ pub struct I_set_attribute_value_Result {
 
 union I_set_attribute_value_ResultData {
 
-    result: core::mem::ManuallyDrop<Box<I_set_attribute_value_Out>>,
+    result: core::mem::ManuallyDrop<I_set_attribute_value_Out>,
 
 }
 
@@ -831,7 +1466,7 @@ impl Drop for I_set_attribute_value_Result {
     fn drop(&mut self) {
         match self.tag {
             
-                RETCODE_OK => {
+                dds::RETCODE_OK => {
                     unsafe {
                         core::mem::ManuallyDrop::drop(&mut self.data.result);
                     }
@@ -842,15 +1477,17 @@ impl Drop for I_set_attribute_value_Result {
 }
 
 impl I_set_attribute_value_Result {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
-        xidl_xcdr::SerializeKind::Cdr;
+    
+        pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
+            xidl_xcdr::SerializeKind::Cdr;
+    
 
     
-        pub fn new_result(value: Box<I_set_attribute_value_Out>) -> Self {
+        pub fn new_result(value: I_set_attribute_value_Out) -> Self {
             
             
             Self {
-                tag: RETCODE_OK,
+                tag: dds::RETCODE_OK,
                 data: I_set_attribute_value_ResultData {
                     result: core::mem::ManuallyDrop::new(value),
                 }
@@ -858,7 +1495,22 @@ impl I_set_attribute_value_Result {
         }
 
         pub fn is_result(&self) -> bool {
-            matches!(self.tag, RETCODE_OK)
+            matches!(self.tag, dds::RETCODE_OK)
+        }
+
+        pub unsafe fn as_result(&self) -> &I_set_attribute_value_Out {
+            unsafe { &self.data.result }
+        }
+
+        pub unsafe fn as_result_mut(&mut self) -> &mut I_set_attribute_value_Out {
+            unsafe { &mut self.data.result }
+        }
+
+        pub unsafe fn into_result(self) -> I_set_attribute_value_Out {
+            unsafe {
+                let mut forget = core::mem::ManuallyDrop::new(self);
+                core::mem::ManuallyDrop::take(&mut forget.data.result)
+            }
         }
     
 
@@ -867,6 +1519,155 @@ impl I_set_attribute_value_Result {
         &self.tag
     }
 }
+
+impl serde::Serialize for I_set_attribute_value_Result {
+    fn serialize<__S>(&self, __serializer: __S) -> serde::__private228::Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        match self.tag {
+            
+                dds::RETCODE_OK => {
+                    let mut s = serde::Serializer::serialize_struct_variant(
+                        __serializer,
+                        "I_set_attribute_value_Result",
+                        0,
+                        "dds::RETCODE_OK",
+                        size_of::<I_set_attribute_value_Out>(),
+                    )?;
+                    let x = unsafe { std::ops::Deref::deref(&self.data.result) };
+                    serde::ser::SerializeStructVariant::serialize_field(&mut s, "dds::RETCODE_OK", x)?;
+                    serde::ser::SerializeStructVariant::end(s)
+                },
+            
+        }
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for I_set_attribute_value_Result {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        const VARIANTS: &[&str] = &[
+            
+                "dds::RETCODE_OK",
+            
+        ];
+
+        enum __Variant {
+            
+                __Case0,
+            
+        }
+
+        impl<'de> serde::Deserialize<'de> for __Variant {
+            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+            where
+                D: serde::Deserializer<'de>,
+            {
+                struct __VariantVisitor;
+
+                impl serde::de::Visitor<'_> for __VariantVisitor {
+                    type Value = __Variant;
+
+                    fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+                        formatter.write_str("union variant")
+                    }
+
+                    fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+                    where
+                        E: serde::de::Error,
+                    {
+                        match value {
+                            
+                                "dds::RETCODE_OK" => Ok(__Variant::__Case0),
+                            
+                            _ => Err(E::unknown_variant(value, VARIANTS)),
+                        }
+                    }
+                }
+
+                deserializer.deserialize_identifier(__VariantVisitor)
+            }
+        }
+
+        struct __Visitor;
+
+        impl<'de> serde::de::Visitor<'de> for __Visitor {
+            type Value = I_set_attribute_value_Result;
+
+            fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+                formatter.write_str("externally tagged union I_set_attribute_value_Result")
+            }
+
+            fn visit_enum<A>(self, data: A) -> Result<Self::Value, A::Error>
+            where
+                A: serde::de::EnumAccess<'de>,
+            {
+                let (variant, variant_access) = data.variant::<__Variant>()?;
+                match variant {
+                    
+                        __Variant::__Case0 => {
+                            struct __CaseVisitor;
+
+                            impl<'de> serde::de::Visitor<'de> for __CaseVisitor {
+                                type Value = I_set_attribute_value_Out;
+
+                                fn expecting(
+                                    &self,
+                                    formatter: &mut core::fmt::Formatter,
+                                ) -> core::fmt::Result {
+                                    formatter.write_str("struct variant dds::RETCODE_OK")
+                                }
+
+                                fn visit_map<M>(self, mut map: M) -> Result<Self::Value, M::Error>
+                                where
+                                    M: serde::de::MapAccess<'de>,
+                                {
+                                    let mut value = None;
+                                    while let Some(key) = map.next_key::<String>()? {
+                                        if key == "dds::RETCODE_OK" {
+                                            if value.is_some() {
+                                                return Err(serde::de::Error::duplicate_field(
+                                                    "dds::RETCODE_OK",
+                                                ));
+                                            }
+                                            value = Some(map.next_value()?);
+                                        } else {
+                                            let _: serde::de::IgnoredAny = map.next_value()?;
+                                        }
+                                    }
+                                    value.ok_or_else(|| {
+                                        serde::de::Error::missing_field("dds::RETCODE_OK")
+                                    })
+                                }
+                            }
+
+                            let value = serde::de::VariantAccess::struct_variant(
+                                variant_access,
+                                &["dds::RETCODE_OK"],
+                                __CaseVisitor,
+                            )?;
+                            
+                                let tag = dds::RETCODE_OK;
+                            
+                            Ok(I_set_attribute_value_Result {
+                                tag,
+                                data: I_set_attribute_value_ResultData {
+                                    result: core::mem::ManuallyDrop::new(value),
+                                },
+                            })
+                        }
+                    
+                }
+            }
+        }
+
+        deserializer.deserialize_enum("I_set_attribute_value_Result", VARIANTS, __Visitor)
+    }
+}
+
 
 impl xidl_xcdr::XcdrSerialize for I_set_attribute_value_Result {
     fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
@@ -883,7 +1684,7 @@ impl xidl_xcdr::XcdrSerialize for I_set_attribute_value_Result {
         serializer.end_field()?;
         match self.tag {
             
-                RETCODE_OK => {
+                dds::RETCODE_OK => {
                     let value = unsafe { self.data.result.as_ref() };
                     serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
                     xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
@@ -899,6 +1700,8 @@ impl xidl_xcdr::XcdrSerialize for I_set_attribute_value_Result {
     }
 }
 
+
+
 impl xidl_xcdr::XcdrDeserialize for I_set_attribute_value_Result {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
@@ -906,7 +1709,7 @@ impl xidl_xcdr::XcdrDeserialize for I_set_attribute_value_Result {
         let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
         let data = match tag {
             
-                RETCODE_OK => {
+                dds::RETCODE_OK => {
                     I_set_attribute_value_ResultData {
                         result: core::mem::ManuallyDrop::new(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?),
                     }
@@ -920,6 +1723,7 @@ impl xidl_xcdr::XcdrDeserialize for I_set_attribute_value_Result {
     }
 }
 
+
 pub struct I_Call {
     tag: i32,
     data: I_CallData,
@@ -928,13 +1732,13 @@ pub struct I_Call {
 
 union I_CallData {
 
-    unknownOp: core::mem::ManuallyDrop<Box<UnknownOperation>>,
+    unknownOp: core::mem::ManuallyDrop<dds::rpc::UnknownOperation>,
 
-    ping: core::mem::ManuallyDrop<Box<I_ping_In>>,
+    ping: core::mem::ManuallyDrop<I_ping_In>,
 
-    get_attribute_value: core::mem::ManuallyDrop<Box<I_get_attribute_value_In>>,
+    get_attribute_value: core::mem::ManuallyDrop<I_get_attribute_value_In>,
 
-    set_attribute_value: core::mem::ManuallyDrop<Box<I_set_attribute_value_In>>,
+    set_attribute_value: core::mem::ManuallyDrop<I_set_attribute_value_In>,
 
 }
 
@@ -971,11 +1775,13 @@ impl Drop for I_Call {
 }
 
 impl I_Call {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
-        xidl_xcdr::SerializeKind::Cdr;
+    
+        pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
+            xidl_xcdr::SerializeKind::Cdr;
+    
 
     
-        pub fn new_unknownOp(value: Box<UnknownOperation>) -> Self {
+        pub fn new_unknownOp(value: dds::rpc::UnknownOperation) -> Self {
             
             
                 
@@ -991,8 +1797,23 @@ impl I_Call {
         pub fn is_unknownOp(&self) -> bool {
             matches!(self.tag, _)
         }
+
+        pub unsafe fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
+            unsafe { &self.data.unknownOp }
+        }
+
+        pub unsafe fn as_unknownOp_mut(&mut self) -> &mut dds::rpc::UnknownOperation {
+            unsafe { &mut self.data.unknownOp }
+        }
+
+        pub unsafe fn into_unknownOp(self) -> dds::rpc::UnknownOperation {
+            unsafe {
+                let mut forget = core::mem::ManuallyDrop::new(self);
+                core::mem::ManuallyDrop::take(&mut forget.data.unknownOp)
+            }
+        }
     
-        pub fn new_ping(value: Box<I_ping_In>) -> Self {
+        pub fn new_ping(value: I_ping_In) -> Self {
             
             
             Self {
@@ -1006,8 +1827,23 @@ impl I_Call {
         pub fn is_ping(&self) -> bool {
             matches!(self.tag, I_ping_Hash)
         }
+
+        pub unsafe fn as_ping(&self) -> &I_ping_In {
+            unsafe { &self.data.ping }
+        }
+
+        pub unsafe fn as_ping_mut(&mut self) -> &mut I_ping_In {
+            unsafe { &mut self.data.ping }
+        }
+
+        pub unsafe fn into_ping(self) -> I_ping_In {
+            unsafe {
+                let mut forget = core::mem::ManuallyDrop::new(self);
+                core::mem::ManuallyDrop::take(&mut forget.data.ping)
+            }
+        }
     
-        pub fn new_get_attribute_value(value: Box<I_get_attribute_value_In>) -> Self {
+        pub fn new_get_attribute_value(value: I_get_attribute_value_In) -> Self {
             
             
             Self {
@@ -1021,8 +1857,23 @@ impl I_Call {
         pub fn is_get_attribute_value(&self) -> bool {
             matches!(self.tag, I_get_attribute_value_Hash)
         }
+
+        pub unsafe fn as_get_attribute_value(&self) -> &I_get_attribute_value_In {
+            unsafe { &self.data.get_attribute_value }
+        }
+
+        pub unsafe fn as_get_attribute_value_mut(&mut self) -> &mut I_get_attribute_value_In {
+            unsafe { &mut self.data.get_attribute_value }
+        }
+
+        pub unsafe fn into_get_attribute_value(self) -> I_get_attribute_value_In {
+            unsafe {
+                let mut forget = core::mem::ManuallyDrop::new(self);
+                core::mem::ManuallyDrop::take(&mut forget.data.get_attribute_value)
+            }
+        }
     
-        pub fn new_set_attribute_value(value: Box<I_set_attribute_value_In>) -> Self {
+        pub fn new_set_attribute_value(value: I_set_attribute_value_In) -> Self {
             
             
             Self {
@@ -1036,6 +1887,21 @@ impl I_Call {
         pub fn is_set_attribute_value(&self) -> bool {
             matches!(self.tag, I_set_attribute_value_Hash)
         }
+
+        pub unsafe fn as_set_attribute_value(&self) -> &I_set_attribute_value_In {
+            unsafe { &self.data.set_attribute_value }
+        }
+
+        pub unsafe fn as_set_attribute_value_mut(&mut self) -> &mut I_set_attribute_value_In {
+            unsafe { &mut self.data.set_attribute_value }
+        }
+
+        pub unsafe fn into_set_attribute_value(self) -> I_set_attribute_value_In {
+            unsafe {
+                let mut forget = core::mem::ManuallyDrop::new(self);
+                core::mem::ManuallyDrop::take(&mut forget.data.set_attribute_value)
+            }
+        }
     
 
 
@@ -1043,6 +1909,368 @@ impl I_Call {
         &self.tag
     }
 }
+
+impl serde::Serialize for I_Call {
+    fn serialize<__S>(&self, __serializer: __S) -> serde::__private228::Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        match self.tag {
+            
+                _ => {
+                    let mut s = serde::Serializer::serialize_struct_variant(
+                        __serializer,
+                        "I_Call",
+                        0,
+                        "_",
+                        size_of::<dds::rpc::UnknownOperation>(),
+                    )?;
+                    let x = unsafe { std::ops::Deref::deref(&self.data.unknownOp) };
+                    serde::ser::SerializeStructVariant::serialize_field(&mut s, "_", x)?;
+                    serde::ser::SerializeStructVariant::end(s)
+                },
+            
+                I_ping_Hash => {
+                    let mut s = serde::Serializer::serialize_struct_variant(
+                        __serializer,
+                        "I_Call",
+                        1,
+                        "I_ping_Hash",
+                        size_of::<I_ping_In>(),
+                    )?;
+                    let x = unsafe { std::ops::Deref::deref(&self.data.ping) };
+                    serde::ser::SerializeStructVariant::serialize_field(&mut s, "I_ping_Hash", x)?;
+                    serde::ser::SerializeStructVariant::end(s)
+                },
+            
+                I_get_attribute_value_Hash => {
+                    let mut s = serde::Serializer::serialize_struct_variant(
+                        __serializer,
+                        "I_Call",
+                        2,
+                        "I_get_attribute_value_Hash",
+                        size_of::<I_get_attribute_value_In>(),
+                    )?;
+                    let x = unsafe { std::ops::Deref::deref(&self.data.get_attribute_value) };
+                    serde::ser::SerializeStructVariant::serialize_field(&mut s, "I_get_attribute_value_Hash", x)?;
+                    serde::ser::SerializeStructVariant::end(s)
+                },
+            
+                I_set_attribute_value_Hash => {
+                    let mut s = serde::Serializer::serialize_struct_variant(
+                        __serializer,
+                        "I_Call",
+                        3,
+                        "I_set_attribute_value_Hash",
+                        size_of::<I_set_attribute_value_In>(),
+                    )?;
+                    let x = unsafe { std::ops::Deref::deref(&self.data.set_attribute_value) };
+                    serde::ser::SerializeStructVariant::serialize_field(&mut s, "I_set_attribute_value_Hash", x)?;
+                    serde::ser::SerializeStructVariant::end(s)
+                },
+            
+        }
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for I_Call {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        const VARIANTS: &[&str] = &[
+            
+                "_",
+            
+                "I_ping_Hash",
+            
+                "I_get_attribute_value_Hash",
+            
+                "I_set_attribute_value_Hash",
+            
+        ];
+
+        enum __Variant {
+            
+                __Case0,
+            
+                __Case1,
+            
+                __Case2,
+            
+                __Case3,
+            
+        }
+
+        impl<'de> serde::Deserialize<'de> for __Variant {
+            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+            where
+                D: serde::Deserializer<'de>,
+            {
+                struct __VariantVisitor;
+
+                impl serde::de::Visitor<'_> for __VariantVisitor {
+                    type Value = __Variant;
+
+                    fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+                        formatter.write_str("union variant")
+                    }
+
+                    fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+                    where
+                        E: serde::de::Error,
+                    {
+                        match value {
+                            
+                                "_" => Ok(__Variant::__Case0),
+                            
+                                "I_ping_Hash" => Ok(__Variant::__Case1),
+                            
+                                "I_get_attribute_value_Hash" => Ok(__Variant::__Case2),
+                            
+                                "I_set_attribute_value_Hash" => Ok(__Variant::__Case3),
+                            
+                            _ => Err(E::unknown_variant(value, VARIANTS)),
+                        }
+                    }
+                }
+
+                deserializer.deserialize_identifier(__VariantVisitor)
+            }
+        }
+
+        struct __Visitor;
+
+        impl<'de> serde::de::Visitor<'de> for __Visitor {
+            type Value = I_Call;
+
+            fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+                formatter.write_str("externally tagged union I_Call")
+            }
+
+            fn visit_enum<A>(self, data: A) -> Result<Self::Value, A::Error>
+            where
+                A: serde::de::EnumAccess<'de>,
+            {
+                let (variant, variant_access) = data.variant::<__Variant>()?;
+                match variant {
+                    
+                        __Variant::__Case0 => {
+                            struct __CaseVisitor;
+
+                            impl<'de> serde::de::Visitor<'de> for __CaseVisitor {
+                                type Value = dds::rpc::UnknownOperation;
+
+                                fn expecting(
+                                    &self,
+                                    formatter: &mut core::fmt::Formatter,
+                                ) -> core::fmt::Result {
+                                    formatter.write_str("struct variant _")
+                                }
+
+                                fn visit_map<M>(self, mut map: M) -> Result<Self::Value, M::Error>
+                                where
+                                    M: serde::de::MapAccess<'de>,
+                                {
+                                    let mut value = None;
+                                    while let Some(key) = map.next_key::<String>()? {
+                                        if key == "_" {
+                                            if value.is_some() {
+                                                return Err(serde::de::Error::duplicate_field(
+                                                    "_",
+                                                ));
+                                            }
+                                            value = Some(map.next_value()?);
+                                        } else {
+                                            let _: serde::de::IgnoredAny = map.next_value()?;
+                                        }
+                                    }
+                                    value.ok_or_else(|| {
+                                        serde::de::Error::missing_field("_")
+                                    })
+                                }
+                            }
+
+                            let value = serde::de::VariantAccess::struct_variant(
+                                variant_access,
+                                &["_"],
+                                __CaseVisitor,
+                            )?;
+                            
+                                let tag = i32::default();
+                            
+                            Ok(I_Call {
+                                tag,
+                                data: I_CallData {
+                                    unknownOp: core::mem::ManuallyDrop::new(value),
+                                },
+                            })
+                        }
+                    
+                        __Variant::__Case1 => {
+                            struct __CaseVisitor;
+
+                            impl<'de> serde::de::Visitor<'de> for __CaseVisitor {
+                                type Value = I_ping_In;
+
+                                fn expecting(
+                                    &self,
+                                    formatter: &mut core::fmt::Formatter,
+                                ) -> core::fmt::Result {
+                                    formatter.write_str("struct variant I_ping_Hash")
+                                }
+
+                                fn visit_map<M>(self, mut map: M) -> Result<Self::Value, M::Error>
+                                where
+                                    M: serde::de::MapAccess<'de>,
+                                {
+                                    let mut value = None;
+                                    while let Some(key) = map.next_key::<String>()? {
+                                        if key == "I_ping_Hash" {
+                                            if value.is_some() {
+                                                return Err(serde::de::Error::duplicate_field(
+                                                    "I_ping_Hash",
+                                                ));
+                                            }
+                                            value = Some(map.next_value()?);
+                                        } else {
+                                            let _: serde::de::IgnoredAny = map.next_value()?;
+                                        }
+                                    }
+                                    value.ok_or_else(|| {
+                                        serde::de::Error::missing_field("I_ping_Hash")
+                                    })
+                                }
+                            }
+
+                            let value = serde::de::VariantAccess::struct_variant(
+                                variant_access,
+                                &["I_ping_Hash"],
+                                __CaseVisitor,
+                            )?;
+                            
+                                let tag = I_ping_Hash;
+                            
+                            Ok(I_Call {
+                                tag,
+                                data: I_CallData {
+                                    ping: core::mem::ManuallyDrop::new(value),
+                                },
+                            })
+                        }
+                    
+                        __Variant::__Case2 => {
+                            struct __CaseVisitor;
+
+                            impl<'de> serde::de::Visitor<'de> for __CaseVisitor {
+                                type Value = I_get_attribute_value_In;
+
+                                fn expecting(
+                                    &self,
+                                    formatter: &mut core::fmt::Formatter,
+                                ) -> core::fmt::Result {
+                                    formatter.write_str("struct variant I_get_attribute_value_Hash")
+                                }
+
+                                fn visit_map<M>(self, mut map: M) -> Result<Self::Value, M::Error>
+                                where
+                                    M: serde::de::MapAccess<'de>,
+                                {
+                                    let mut value = None;
+                                    while let Some(key) = map.next_key::<String>()? {
+                                        if key == "I_get_attribute_value_Hash" {
+                                            if value.is_some() {
+                                                return Err(serde::de::Error::duplicate_field(
+                                                    "I_get_attribute_value_Hash",
+                                                ));
+                                            }
+                                            value = Some(map.next_value()?);
+                                        } else {
+                                            let _: serde::de::IgnoredAny = map.next_value()?;
+                                        }
+                                    }
+                                    value.ok_or_else(|| {
+                                        serde::de::Error::missing_field("I_get_attribute_value_Hash")
+                                    })
+                                }
+                            }
+
+                            let value = serde::de::VariantAccess::struct_variant(
+                                variant_access,
+                                &["I_get_attribute_value_Hash"],
+                                __CaseVisitor,
+                            )?;
+                            
+                                let tag = I_get_attribute_value_Hash;
+                            
+                            Ok(I_Call {
+                                tag,
+                                data: I_CallData {
+                                    get_attribute_value: core::mem::ManuallyDrop::new(value),
+                                },
+                            })
+                        }
+                    
+                        __Variant::__Case3 => {
+                            struct __CaseVisitor;
+
+                            impl<'de> serde::de::Visitor<'de> for __CaseVisitor {
+                                type Value = I_set_attribute_value_In;
+
+                                fn expecting(
+                                    &self,
+                                    formatter: &mut core::fmt::Formatter,
+                                ) -> core::fmt::Result {
+                                    formatter.write_str("struct variant I_set_attribute_value_Hash")
+                                }
+
+                                fn visit_map<M>(self, mut map: M) -> Result<Self::Value, M::Error>
+                                where
+                                    M: serde::de::MapAccess<'de>,
+                                {
+                                    let mut value = None;
+                                    while let Some(key) = map.next_key::<String>()? {
+                                        if key == "I_set_attribute_value_Hash" {
+                                            if value.is_some() {
+                                                return Err(serde::de::Error::duplicate_field(
+                                                    "I_set_attribute_value_Hash",
+                                                ));
+                                            }
+                                            value = Some(map.next_value()?);
+                                        } else {
+                                            let _: serde::de::IgnoredAny = map.next_value()?;
+                                        }
+                                    }
+                                    value.ok_or_else(|| {
+                                        serde::de::Error::missing_field("I_set_attribute_value_Hash")
+                                    })
+                                }
+                            }
+
+                            let value = serde::de::VariantAccess::struct_variant(
+                                variant_access,
+                                &["I_set_attribute_value_Hash"],
+                                __CaseVisitor,
+                            )?;
+                            
+                                let tag = I_set_attribute_value_Hash;
+                            
+                            Ok(I_Call {
+                                tag,
+                                data: I_CallData {
+                                    set_attribute_value: core::mem::ManuallyDrop::new(value),
+                                },
+                            })
+                        }
+                    
+                }
+            }
+        }
+
+        deserializer.deserialize_enum("I_Call", VARIANTS, __Visitor)
+    }
+}
+
 
 impl xidl_xcdr::XcdrSerialize for I_Call {
     fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
@@ -1094,6 +2322,8 @@ impl xidl_xcdr::XcdrSerialize for I_Call {
     }
 }
 
+
+
 impl xidl_xcdr::XcdrDeserialize for I_Call {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
@@ -1131,19 +2361,23 @@ impl xidl_xcdr::XcdrDeserialize for I_Call {
     }
 }
 
+
 pub struct I_Request {
 
 
-    pub header: Box<RequestHeader>,
+    pub header: dds::rpc::RequestHeader,
 
-    pub data: Box<I_Call>,
+    pub data: I_Call,
 
 }
 
 impl I_Request {
+    
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+    
 }
+
 
 impl xidl_xcdr::XcdrSerialize for I_Request {
     fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
@@ -1174,6 +2408,8 @@ impl xidl_xcdr::XcdrSerialize for I_Request {
     }
 }
 
+
+
 impl xidl_xcdr::XcdrDeserialize for I_Request {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
@@ -1195,6 +2431,7 @@ impl xidl_xcdr::XcdrDeserialize for I_Request {
     }
 }
 
+
 pub struct I_Return {
     tag: i32,
     data: I_ReturnData,
@@ -1203,13 +2440,13 @@ pub struct I_Return {
 
 union I_ReturnData {
 
-    unknownOp: core::mem::ManuallyDrop<Box<UnknownOperation>>,
+    unknownOp: core::mem::ManuallyDrop<dds::rpc::UnknownOperation>,
 
-    ping: core::mem::ManuallyDrop<Box<I_ping_Result>>,
+    ping: core::mem::ManuallyDrop<I_ping_Result>,
 
-    get_attribute_value: core::mem::ManuallyDrop<Box<I_get_attribute_value_Result>>,
+    get_attribute_value: core::mem::ManuallyDrop<I_get_attribute_value_Result>,
 
-    set_attribute_value: core::mem::ManuallyDrop<Box<I_set_attribute_value_Result>>,
+    set_attribute_value: core::mem::ManuallyDrop<I_set_attribute_value_Result>,
 
 }
 
@@ -1246,11 +2483,13 @@ impl Drop for I_Return {
 }
 
 impl I_Return {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
-        xidl_xcdr::SerializeKind::Cdr;
+    
+        pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
+            xidl_xcdr::SerializeKind::Cdr;
+    
 
     
-        pub fn new_unknownOp(value: Box<UnknownOperation>) -> Self {
+        pub fn new_unknownOp(value: dds::rpc::UnknownOperation) -> Self {
             
             
                 
@@ -1266,8 +2505,23 @@ impl I_Return {
         pub fn is_unknownOp(&self) -> bool {
             matches!(self.tag, _)
         }
+
+        pub unsafe fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
+            unsafe { &self.data.unknownOp }
+        }
+
+        pub unsafe fn as_unknownOp_mut(&mut self) -> &mut dds::rpc::UnknownOperation {
+            unsafe { &mut self.data.unknownOp }
+        }
+
+        pub unsafe fn into_unknownOp(self) -> dds::rpc::UnknownOperation {
+            unsafe {
+                let mut forget = core::mem::ManuallyDrop::new(self);
+                core::mem::ManuallyDrop::take(&mut forget.data.unknownOp)
+            }
+        }
     
-        pub fn new_ping(value: Box<I_ping_Result>) -> Self {
+        pub fn new_ping(value: I_ping_Result) -> Self {
             
             
             Self {
@@ -1281,8 +2535,23 @@ impl I_Return {
         pub fn is_ping(&self) -> bool {
             matches!(self.tag, I_ping_Hash)
         }
+
+        pub unsafe fn as_ping(&self) -> &I_ping_Result {
+            unsafe { &self.data.ping }
+        }
+
+        pub unsafe fn as_ping_mut(&mut self) -> &mut I_ping_Result {
+            unsafe { &mut self.data.ping }
+        }
+
+        pub unsafe fn into_ping(self) -> I_ping_Result {
+            unsafe {
+                let mut forget = core::mem::ManuallyDrop::new(self);
+                core::mem::ManuallyDrop::take(&mut forget.data.ping)
+            }
+        }
     
-        pub fn new_get_attribute_value(value: Box<I_get_attribute_value_Result>) -> Self {
+        pub fn new_get_attribute_value(value: I_get_attribute_value_Result) -> Self {
             
             
             Self {
@@ -1296,8 +2565,23 @@ impl I_Return {
         pub fn is_get_attribute_value(&self) -> bool {
             matches!(self.tag, I_get_attribute_value_Hash)
         }
+
+        pub unsafe fn as_get_attribute_value(&self) -> &I_get_attribute_value_Result {
+            unsafe { &self.data.get_attribute_value }
+        }
+
+        pub unsafe fn as_get_attribute_value_mut(&mut self) -> &mut I_get_attribute_value_Result {
+            unsafe { &mut self.data.get_attribute_value }
+        }
+
+        pub unsafe fn into_get_attribute_value(self) -> I_get_attribute_value_Result {
+            unsafe {
+                let mut forget = core::mem::ManuallyDrop::new(self);
+                core::mem::ManuallyDrop::take(&mut forget.data.get_attribute_value)
+            }
+        }
     
-        pub fn new_set_attribute_value(value: Box<I_set_attribute_value_Result>) -> Self {
+        pub fn new_set_attribute_value(value: I_set_attribute_value_Result) -> Self {
             
             
             Self {
@@ -1311,6 +2595,21 @@ impl I_Return {
         pub fn is_set_attribute_value(&self) -> bool {
             matches!(self.tag, I_set_attribute_value_Hash)
         }
+
+        pub unsafe fn as_set_attribute_value(&self) -> &I_set_attribute_value_Result {
+            unsafe { &self.data.set_attribute_value }
+        }
+
+        pub unsafe fn as_set_attribute_value_mut(&mut self) -> &mut I_set_attribute_value_Result {
+            unsafe { &mut self.data.set_attribute_value }
+        }
+
+        pub unsafe fn into_set_attribute_value(self) -> I_set_attribute_value_Result {
+            unsafe {
+                let mut forget = core::mem::ManuallyDrop::new(self);
+                core::mem::ManuallyDrop::take(&mut forget.data.set_attribute_value)
+            }
+        }
     
 
 
@@ -1318,6 +2617,368 @@ impl I_Return {
         &self.tag
     }
 }
+
+impl serde::Serialize for I_Return {
+    fn serialize<__S>(&self, __serializer: __S) -> serde::__private228::Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        match self.tag {
+            
+                _ => {
+                    let mut s = serde::Serializer::serialize_struct_variant(
+                        __serializer,
+                        "I_Return",
+                        0,
+                        "_",
+                        size_of::<dds::rpc::UnknownOperation>(),
+                    )?;
+                    let x = unsafe { std::ops::Deref::deref(&self.data.unknownOp) };
+                    serde::ser::SerializeStructVariant::serialize_field(&mut s, "_", x)?;
+                    serde::ser::SerializeStructVariant::end(s)
+                },
+            
+                I_ping_Hash => {
+                    let mut s = serde::Serializer::serialize_struct_variant(
+                        __serializer,
+                        "I_Return",
+                        1,
+                        "I_ping_Hash",
+                        size_of::<I_ping_Result>(),
+                    )?;
+                    let x = unsafe { std::ops::Deref::deref(&self.data.ping) };
+                    serde::ser::SerializeStructVariant::serialize_field(&mut s, "I_ping_Hash", x)?;
+                    serde::ser::SerializeStructVariant::end(s)
+                },
+            
+                I_get_attribute_value_Hash => {
+                    let mut s = serde::Serializer::serialize_struct_variant(
+                        __serializer,
+                        "I_Return",
+                        2,
+                        "I_get_attribute_value_Hash",
+                        size_of::<I_get_attribute_value_Result>(),
+                    )?;
+                    let x = unsafe { std::ops::Deref::deref(&self.data.get_attribute_value) };
+                    serde::ser::SerializeStructVariant::serialize_field(&mut s, "I_get_attribute_value_Hash", x)?;
+                    serde::ser::SerializeStructVariant::end(s)
+                },
+            
+                I_set_attribute_value_Hash => {
+                    let mut s = serde::Serializer::serialize_struct_variant(
+                        __serializer,
+                        "I_Return",
+                        3,
+                        "I_set_attribute_value_Hash",
+                        size_of::<I_set_attribute_value_Result>(),
+                    )?;
+                    let x = unsafe { std::ops::Deref::deref(&self.data.set_attribute_value) };
+                    serde::ser::SerializeStructVariant::serialize_field(&mut s, "I_set_attribute_value_Hash", x)?;
+                    serde::ser::SerializeStructVariant::end(s)
+                },
+            
+        }
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for I_Return {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        const VARIANTS: &[&str] = &[
+            
+                "_",
+            
+                "I_ping_Hash",
+            
+                "I_get_attribute_value_Hash",
+            
+                "I_set_attribute_value_Hash",
+            
+        ];
+
+        enum __Variant {
+            
+                __Case0,
+            
+                __Case1,
+            
+                __Case2,
+            
+                __Case3,
+            
+        }
+
+        impl<'de> serde::Deserialize<'de> for __Variant {
+            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+            where
+                D: serde::Deserializer<'de>,
+            {
+                struct __VariantVisitor;
+
+                impl serde::de::Visitor<'_> for __VariantVisitor {
+                    type Value = __Variant;
+
+                    fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+                        formatter.write_str("union variant")
+                    }
+
+                    fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+                    where
+                        E: serde::de::Error,
+                    {
+                        match value {
+                            
+                                "_" => Ok(__Variant::__Case0),
+                            
+                                "I_ping_Hash" => Ok(__Variant::__Case1),
+                            
+                                "I_get_attribute_value_Hash" => Ok(__Variant::__Case2),
+                            
+                                "I_set_attribute_value_Hash" => Ok(__Variant::__Case3),
+                            
+                            _ => Err(E::unknown_variant(value, VARIANTS)),
+                        }
+                    }
+                }
+
+                deserializer.deserialize_identifier(__VariantVisitor)
+            }
+        }
+
+        struct __Visitor;
+
+        impl<'de> serde::de::Visitor<'de> for __Visitor {
+            type Value = I_Return;
+
+            fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+                formatter.write_str("externally tagged union I_Return")
+            }
+
+            fn visit_enum<A>(self, data: A) -> Result<Self::Value, A::Error>
+            where
+                A: serde::de::EnumAccess<'de>,
+            {
+                let (variant, variant_access) = data.variant::<__Variant>()?;
+                match variant {
+                    
+                        __Variant::__Case0 => {
+                            struct __CaseVisitor;
+
+                            impl<'de> serde::de::Visitor<'de> for __CaseVisitor {
+                                type Value = dds::rpc::UnknownOperation;
+
+                                fn expecting(
+                                    &self,
+                                    formatter: &mut core::fmt::Formatter,
+                                ) -> core::fmt::Result {
+                                    formatter.write_str("struct variant _")
+                                }
+
+                                fn visit_map<M>(self, mut map: M) -> Result<Self::Value, M::Error>
+                                where
+                                    M: serde::de::MapAccess<'de>,
+                                {
+                                    let mut value = None;
+                                    while let Some(key) = map.next_key::<String>()? {
+                                        if key == "_" {
+                                            if value.is_some() {
+                                                return Err(serde::de::Error::duplicate_field(
+                                                    "_",
+                                                ));
+                                            }
+                                            value = Some(map.next_value()?);
+                                        } else {
+                                            let _: serde::de::IgnoredAny = map.next_value()?;
+                                        }
+                                    }
+                                    value.ok_or_else(|| {
+                                        serde::de::Error::missing_field("_")
+                                    })
+                                }
+                            }
+
+                            let value = serde::de::VariantAccess::struct_variant(
+                                variant_access,
+                                &["_"],
+                                __CaseVisitor,
+                            )?;
+                            
+                                let tag = i32::default();
+                            
+                            Ok(I_Return {
+                                tag,
+                                data: I_ReturnData {
+                                    unknownOp: core::mem::ManuallyDrop::new(value),
+                                },
+                            })
+                        }
+                    
+                        __Variant::__Case1 => {
+                            struct __CaseVisitor;
+
+                            impl<'de> serde::de::Visitor<'de> for __CaseVisitor {
+                                type Value = I_ping_Result;
+
+                                fn expecting(
+                                    &self,
+                                    formatter: &mut core::fmt::Formatter,
+                                ) -> core::fmt::Result {
+                                    formatter.write_str("struct variant I_ping_Hash")
+                                }
+
+                                fn visit_map<M>(self, mut map: M) -> Result<Self::Value, M::Error>
+                                where
+                                    M: serde::de::MapAccess<'de>,
+                                {
+                                    let mut value = None;
+                                    while let Some(key) = map.next_key::<String>()? {
+                                        if key == "I_ping_Hash" {
+                                            if value.is_some() {
+                                                return Err(serde::de::Error::duplicate_field(
+                                                    "I_ping_Hash",
+                                                ));
+                                            }
+                                            value = Some(map.next_value()?);
+                                        } else {
+                                            let _: serde::de::IgnoredAny = map.next_value()?;
+                                        }
+                                    }
+                                    value.ok_or_else(|| {
+                                        serde::de::Error::missing_field("I_ping_Hash")
+                                    })
+                                }
+                            }
+
+                            let value = serde::de::VariantAccess::struct_variant(
+                                variant_access,
+                                &["I_ping_Hash"],
+                                __CaseVisitor,
+                            )?;
+                            
+                                let tag = I_ping_Hash;
+                            
+                            Ok(I_Return {
+                                tag,
+                                data: I_ReturnData {
+                                    ping: core::mem::ManuallyDrop::new(value),
+                                },
+                            })
+                        }
+                    
+                        __Variant::__Case2 => {
+                            struct __CaseVisitor;
+
+                            impl<'de> serde::de::Visitor<'de> for __CaseVisitor {
+                                type Value = I_get_attribute_value_Result;
+
+                                fn expecting(
+                                    &self,
+                                    formatter: &mut core::fmt::Formatter,
+                                ) -> core::fmt::Result {
+                                    formatter.write_str("struct variant I_get_attribute_value_Hash")
+                                }
+
+                                fn visit_map<M>(self, mut map: M) -> Result<Self::Value, M::Error>
+                                where
+                                    M: serde::de::MapAccess<'de>,
+                                {
+                                    let mut value = None;
+                                    while let Some(key) = map.next_key::<String>()? {
+                                        if key == "I_get_attribute_value_Hash" {
+                                            if value.is_some() {
+                                                return Err(serde::de::Error::duplicate_field(
+                                                    "I_get_attribute_value_Hash",
+                                                ));
+                                            }
+                                            value = Some(map.next_value()?);
+                                        } else {
+                                            let _: serde::de::IgnoredAny = map.next_value()?;
+                                        }
+                                    }
+                                    value.ok_or_else(|| {
+                                        serde::de::Error::missing_field("I_get_attribute_value_Hash")
+                                    })
+                                }
+                            }
+
+                            let value = serde::de::VariantAccess::struct_variant(
+                                variant_access,
+                                &["I_get_attribute_value_Hash"],
+                                __CaseVisitor,
+                            )?;
+                            
+                                let tag = I_get_attribute_value_Hash;
+                            
+                            Ok(I_Return {
+                                tag,
+                                data: I_ReturnData {
+                                    get_attribute_value: core::mem::ManuallyDrop::new(value),
+                                },
+                            })
+                        }
+                    
+                        __Variant::__Case3 => {
+                            struct __CaseVisitor;
+
+                            impl<'de> serde::de::Visitor<'de> for __CaseVisitor {
+                                type Value = I_set_attribute_value_Result;
+
+                                fn expecting(
+                                    &self,
+                                    formatter: &mut core::fmt::Formatter,
+                                ) -> core::fmt::Result {
+                                    formatter.write_str("struct variant I_set_attribute_value_Hash")
+                                }
+
+                                fn visit_map<M>(self, mut map: M) -> Result<Self::Value, M::Error>
+                                where
+                                    M: serde::de::MapAccess<'de>,
+                                {
+                                    let mut value = None;
+                                    while let Some(key) = map.next_key::<String>()? {
+                                        if key == "I_set_attribute_value_Hash" {
+                                            if value.is_some() {
+                                                return Err(serde::de::Error::duplicate_field(
+                                                    "I_set_attribute_value_Hash",
+                                                ));
+                                            }
+                                            value = Some(map.next_value()?);
+                                        } else {
+                                            let _: serde::de::IgnoredAny = map.next_value()?;
+                                        }
+                                    }
+                                    value.ok_or_else(|| {
+                                        serde::de::Error::missing_field("I_set_attribute_value_Hash")
+                                    })
+                                }
+                            }
+
+                            let value = serde::de::VariantAccess::struct_variant(
+                                variant_access,
+                                &["I_set_attribute_value_Hash"],
+                                __CaseVisitor,
+                            )?;
+                            
+                                let tag = I_set_attribute_value_Hash;
+                            
+                            Ok(I_Return {
+                                tag,
+                                data: I_ReturnData {
+                                    set_attribute_value: core::mem::ManuallyDrop::new(value),
+                                },
+                            })
+                        }
+                    
+                }
+            }
+        }
+
+        deserializer.deserialize_enum("I_Return", VARIANTS, __Visitor)
+    }
+}
+
 
 impl xidl_xcdr::XcdrSerialize for I_Return {
     fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
@@ -1369,6 +3030,8 @@ impl xidl_xcdr::XcdrSerialize for I_Return {
     }
 }
 
+
+
 impl xidl_xcdr::XcdrDeserialize for I_Return {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
@@ -1406,19 +3069,23 @@ impl xidl_xcdr::XcdrDeserialize for I_Return {
     }
 }
 
+
 pub struct I_Reply {
 
 
-    pub header: Box<ReplyHeader>,
+    pub header: dds::rpc::ReplyHeader,
 
-    pub data: Box<I_Return>,
+    pub data: I_Return,
 
 }
 
 impl I_Reply {
+    
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
+    
 }
+
 
 impl xidl_xcdr::XcdrSerialize for I_Reply {
     fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
@@ -1449,6 +3116,8 @@ impl xidl_xcdr::XcdrSerialize for I_Reply {
     }
 }
 
+
+
 impl xidl_xcdr::XcdrDeserialize for I_Reply {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
@@ -1469,6 +3138,7 @@ impl xidl_xcdr::XcdrDeserialize for I_Reply {
         })
     }
 }
+
 pub trait I {
 
     fn ping(&self) -> ();

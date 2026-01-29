@@ -22,9 +22,9 @@ use std::ffi::c_void;
     #[derive(Debug, Clone)]
 pub struct HelloWorld {
 
-    pub a: Box<u8>,
+    pub a: u8,
 
-    pub b: [Box<u16>; 10],
+    pub b: [u16; 10],
 
     pub c: [[String; 20]; 10],
 

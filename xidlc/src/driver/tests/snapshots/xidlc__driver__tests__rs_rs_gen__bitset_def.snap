@@ -30,6 +30,7 @@ impl A {
         xidl_xcdr::SerializeKind::Cdr;
 }
 
+
 impl xidl_xcdr::XcdrSerialize for A {
     fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
         Self::SERIALIZE_KIND
@@ -48,6 +49,8 @@ impl xidl_xcdr::XcdrSerialize for A {
     }
 }
 
+
+
 impl xidl_xcdr::XcdrDeserialize for A {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
@@ -61,6 +64,7 @@ impl xidl_xcdr::XcdrDeserialize for A {
     }
 }
 
+
 pub struct A {
 
     pub base: B,
@@ -72,6 +76,7 @@ impl A {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
 }
+
 
 impl xidl_xcdr::XcdrSerialize for A {
     fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
@@ -93,6 +98,8 @@ impl xidl_xcdr::XcdrSerialize for A {
     }
 }
 
+
+
 impl xidl_xcdr::XcdrDeserialize for A {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
@@ -109,6 +116,7 @@ impl xidl_xcdr::XcdrDeserialize for A {
         })
     }
 }
+
 
 pub struct A {
 
@@ -137,6 +145,7 @@ impl A {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
         xidl_xcdr::SerializeKind::Cdr;
 }
+
 
 impl xidl_xcdr::XcdrSerialize for A {
     fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
@@ -185,6 +194,8 @@ impl xidl_xcdr::XcdrSerialize for A {
         Ok(())
     }
 }
+
+
 
 impl xidl_xcdr::XcdrDeserialize for A {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
