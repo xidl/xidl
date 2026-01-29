@@ -4,7 +4,7 @@ mod render;
 mod spec;
 
 use crate::error::IdlcResult;
-use crate::generate::Artifact;
+use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactHir};
 use serde_json::json;
 use std::collections::HashMap;
 use std::path::Path;
@@ -42,21 +42,21 @@ pub fn generate(
         }),
     )?;
 
-    let mut artifacts = vec![Artifact::File {
+    let mut artifacts = vec![Artifact::new_file(ArtifactFile {
         path: filename,
         content: source,
-    }];
+    })];
     if let Some(non_interface) = strip_interfaces(spec) {
         let mut properties = ParserProperties::default();
         properties.insert("render_header".to_string(), serde_json::Value::Bool(false));
         properties.insert("skip_serialize".into(), true.into());
         properties.insert("skip_deserialize".into(), true.into());
 
-        artifacts.push(Artifact::Hir {
-            lang: "rs".to_string(),
+        artifacts.push(Artifact::new_hir(ArtifactHir {
+            lang: "rs".into(),
             hir: non_interface,
-            properties,
-        });
+            props: properties,
+        }));
     }
     Ok(artifacts)
 }

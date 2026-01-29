@@ -16,7 +16,7 @@ pub(crate) mod util;
 pub use render::{RustRender, RustRenderOutput, RustRenderer};
 
 use crate::error::IdlcResult;
-use crate::generate::Artifact;
+use crate::jsonrpc::{Artifact, ArtifactFile};
 use serde_json::json;
 use std::collections::HashMap;
 use std::path::Path;
@@ -47,10 +47,10 @@ pub fn generate_with_properties(
         }),
     )?;
 
-    Ok(vec![Artifact::File {
+    Ok(vec![Artifact::new_file(ArtifactFile {
         path: filename,
         content: source,
-    }])
+    })])
 }
 
 pub(crate) struct RustCodegen;

@@ -17,7 +17,7 @@ mod xcdr;
 pub use render::{CRender, CRenderOutput, CRenderer};
 
 use crate::error::IdlcResult;
-use crate::generate::Artifact;
+use crate::jsonrpc::{Artifact, ArtifactFile};
 use serde_json::json;
 use std::collections::HashMap;
 use std::path::Path;
@@ -75,22 +75,22 @@ pub fn generate(
     )?;
 
     Ok(vec![
-        Artifact::File {
+        Artifact::new_file(ArtifactFile {
             path: filename.clone(),
             content: header,
-        },
-        Artifact::File {
+        }),
+        Artifact::new_file(ArtifactFile {
             path: format!("{base}.c"),
             content: source,
-        },
-        Artifact::File {
+        }),
+        Artifact::new_file(ArtifactFile {
             path: xcdr_header_name.clone(),
             content: xcdr_header,
-        },
-        Artifact::File {
+        }),
+        Artifact::new_file(ArtifactFile {
             path: format!("{base}_xcdr.c"),
             content: xcdr_source,
-        },
+        }),
     ])
 }
 

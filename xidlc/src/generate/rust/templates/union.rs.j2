@@ -52,11 +52,176 @@ impl {{ ident }} {
         pub fn is_{{ member.name }}(&self) -> bool {
             matches!(self.tag, {{ cases[loop.index - 1].pattern }})
         }
+
+        pub unsafe fn as_{{ member.name }}(&self) -> &{{ member.ty }} {
+            unsafe { &self.data.{{ member.name }} }
+        }
+
+        pub unsafe fn as_{{ member.name }}_mut(&mut self) -> &mut {{ member.ty }} {
+            unsafe { &mut self.data.{{ member.name }} }
+        }
+
+        pub unsafe fn into_{{ member.name }}(self) -> {{ member.ty }} {
+            unsafe {
+                let mut forget = core::mem::ManuallyDrop::new(self);
+                core::mem::ManuallyDrop::take(&mut forget.data.{{ member.name }})
+            }
+        }
     {% endfor %}
 
 
     pub fn tag(&self) -> &{{ switch_ty }} {
         &self.tag
+    }
+}
+
+impl serde::Serialize for {{ ident }} {
+    fn serialize<__S>(&self, __serializer: __S) -> serde::__private228::Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        match self.tag {
+            {% for case in cases %}
+                {{ case.pattern }} => {
+                    let mut s = serde::Serializer::serialize_struct_variant(
+                        __serializer,
+                        "{{ ident }}",
+                        {{ loop.index - 1}},
+                        "{{ case.pattern }}",
+                        size_of::<{{ case.type }}>(),
+                    )?;
+                    let x = unsafe { std::ops::Deref::deref(&self.data.{{ case.member }}) };
+                    serde::ser::SerializeStructVariant::serialize_field(&mut s, "{{ case.pattern }}", x)?;
+                    serde::ser::SerializeStructVariant::end(s)
+                },
+            {% endfor %}
+        }
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for {{ ident }} {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        const VARIANTS: &[&str] = &[
+            {% for case in cases %}
+                "{{ case.pattern }}",
+            {% endfor %}
+        ];
+
+        enum __Variant {
+            {% for case in cases %}
+                __Case{{ loop.index0 }},
+            {% endfor %}
+        }
+
+        impl<'de> serde::Deserialize<'de> for __Variant {
+            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+            where
+                D: serde::Deserializer<'de>,
+            {
+                struct __VariantVisitor;
+
+                impl serde::de::Visitor<'_> for __VariantVisitor {
+                    type Value = __Variant;
+
+                    fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+                        formatter.write_str("union variant")
+                    }
+
+                    fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+                    where
+                        E: serde::de::Error,
+                    {
+                        match value {
+                            {% for case in cases %}
+                                "{{ case.pattern }}" => Ok(__Variant::__Case{{ loop.index0 }}),
+                            {% endfor %}
+                            _ => Err(E::unknown_variant(value, VARIANTS)),
+                        }
+                    }
+                }
+
+                deserializer.deserialize_identifier(__VariantVisitor)
+            }
+        }
+
+        struct __Visitor;
+
+        impl<'de> serde::de::Visitor<'de> for __Visitor {
+            type Value = {{ ident }};
+
+            fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+                formatter.write_str("externally tagged union {{ ident }}")
+            }
+
+            fn visit_enum<A>(self, data: A) -> Result<Self::Value, A::Error>
+            where
+                A: serde::de::EnumAccess<'de>,
+            {
+                let (variant, variant_access) = data.variant::<__Variant>()?;
+                match variant {
+                    {% for case in cases %}
+                        __Variant::__Case{{ loop.index0 }} => {
+                            struct __CaseVisitor;
+
+                            impl<'de> serde::de::Visitor<'de> for __CaseVisitor {
+                                type Value = {{ case.type }};
+
+                                fn expecting(
+                                    &self,
+                                    formatter: &mut core::fmt::Formatter,
+                                ) -> core::fmt::Result {
+                                    formatter.write_str("struct variant {{ case.pattern }}")
+                                }
+
+                                fn visit_map<M>(self, mut map: M) -> Result<Self::Value, M::Error>
+                                where
+                                    M: serde::de::MapAccess<'de>,
+                                {
+                                    let mut value = None;
+                                    while let Some(key) = map.next_key::<String>()? {
+                                        if key == "{{ case.pattern }}" {
+                                            if value.is_some() {
+                                                return Err(serde::de::Error::duplicate_field(
+                                                    "{{ case.pattern }}",
+                                                ));
+                                            }
+                                            value = Some(map.next_value()?);
+                                        } else {
+                                            let _: serde::de::IgnoredAny = map.next_value()?;
+                                        }
+                                    }
+                                    value.ok_or_else(|| {
+                                        serde::de::Error::missing_field("{{ case.pattern }}")
+                                    })
+                                }
+                            }
+
+                            let value = serde::de::VariantAccess::struct_variant(
+                                variant_access,
+                                &["{{ case.pattern }}"],
+                                __CaseVisitor,
+                            )?;
+                            {% if case.is_default %}
+                                let tag = {{ switch_ty }}::default();
+                            {% else %}
+                                let tag = {{ case.labels[0] }};
+                            {% endif %}
+                            Ok({{ ident }} {
+                                tag,
+                                data: {{ ident }}Data {
+                                    {{ case.member }}: core::mem::ManuallyDrop::new(value),
+                                },
+                            })
+                        }
+                    {% endfor %}
+                }
+            }
+        }
+
+        deserializer.deserialize_enum("{{ ident }}", VARIANTS, __Visitor)
     }
 }
 

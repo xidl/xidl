@@ -21,7 +21,7 @@ pub trait Codegen {
         hir: ::xidl_parser::hir::Specification,
         path: String,
         props: ::xidl_parser::hir::ParserProperties,
-    ) -> Result<Vec<::xidlc::generate::Artifact>, xidl_jsonrpc::Error>;
+    ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error>;
 }
 
 #[derive(Serialize, Deserialize)]
@@ -108,8 +108,366 @@ where
         hir: ::xidl_parser::hir::Specification,
         path: String,
         props: ::xidl_parser::hir::ParserProperties,
-    ) -> Result<Vec<::xidlc::generate::Artifact>, xidl_jsonrpc::Error> {
+    ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
         let params = CodegenGenerateParams { hir, path, props };
         self.client.borrow_mut().call("Codegen.generate", params)
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+
+pub struct ArtifactHir {
+    pub lang: String,
+
+    pub hir: ::xidl_parser::hir::Specification,
+
+    pub props: ::xidl_parser::hir::ParserProperties,
+}
+
+impl ArtifactHir {}
+
+#[derive(Debug, Serialize, Deserialize)]
+
+pub struct ArtifactFile {
+    pub path: String,
+
+    pub content: String,
+}
+
+impl ArtifactFile {}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ArtifactKind {
+    Hir,
+
+    File,
+}
+
+impl xidl_xcdr::XcdrSerialize for ArtifactKind {
+    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+        &self,
+        serializer: &mut S,
+    ) -> xidl_xcdr::error::XcdrResult<()> {
+        let value = *self as u32;
+        xidl_xcdr::XcdrSerialize::serialize_with(&value, serializer)
+    }
+}
+
+impl xidl_xcdr::XcdrDeserialize for ArtifactKind {
+    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+        deserializer: &mut D,
+    ) -> xidl_xcdr::error::XcdrResult<Self> {
+        let value: u32 = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+        match value {
+            0 => Ok(Self::Hir),
+
+            1 => Ok(Self::File),
+
+            _ => Err(xidl_xcdr::error::XcdrError::Message(format!(
+                "invalid ArtifactKind discriminant: {}",
+                value
+            ))),
+        }
+    }
+}
+
+pub struct Artifact {
+    tag: ArtifactKind,
+    data: ArtifactData,
+}
+
+union ArtifactData {
+    hir: core::mem::ManuallyDrop<ArtifactHir>,
+
+    file: core::mem::ManuallyDrop<ArtifactFile>,
+}
+
+impl Drop for Artifact {
+    fn drop(&mut self) {
+        match self.tag {
+            ArtifactKind::Hir => unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.hir);
+            },
+
+            ArtifactKind::File => unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.file);
+            },
+        }
+    }
+}
+
+impl Artifact {
+    pub fn new_hir(value: ArtifactHir) -> Self {
+        Self {
+            tag: ArtifactKind::Hir,
+            data: ArtifactData {
+                hir: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+
+    pub fn is_hir(&self) -> bool {
+        matches!(self.tag, ArtifactKind::Hir)
+    }
+
+    pub unsafe fn as_hir(&self) -> &ArtifactHir {
+        unsafe { &self.data.hir }
+    }
+
+    pub unsafe fn as_hir_mut(&mut self) -> &mut ArtifactHir {
+        unsafe { &mut self.data.hir }
+    }
+
+    pub unsafe fn into_hir(self) -> ArtifactHir {
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.hir)
+        }
+    }
+
+    pub fn new_file(value: ArtifactFile) -> Self {
+        Self {
+            tag: ArtifactKind::File,
+            data: ArtifactData {
+                file: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+
+    pub fn is_file(&self) -> bool {
+        matches!(self.tag, ArtifactKind::File)
+    }
+
+    pub unsafe fn as_file(&self) -> &ArtifactFile {
+        unsafe { &self.data.file }
+    }
+
+    pub unsafe fn as_file_mut(&mut self) -> &mut ArtifactFile {
+        unsafe { &mut self.data.file }
+    }
+
+    pub unsafe fn into_file(self) -> ArtifactFile {
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.file)
+        }
+    }
+
+    pub fn tag(&self) -> &ArtifactKind {
+        &self.tag
+    }
+}
+
+impl serde::Serialize for Artifact {
+    fn serialize<__S>(&self, __serializer: __S) -> serde::__private228::Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        match self.tag {
+            ArtifactKind::Hir => {
+                let mut s = serde::Serializer::serialize_struct_variant(
+                    __serializer,
+                    "Artifact",
+                    0,
+                    "ArtifactKind::Hir",
+                    size_of::<ArtifactHir>(),
+                )?;
+                let x = unsafe { std::ops::Deref::deref(&self.data.hir) };
+                serde::ser::SerializeStructVariant::serialize_field(
+                    &mut s,
+                    "ArtifactKind::Hir",
+                    x,
+                )?;
+                serde::ser::SerializeStructVariant::end(s)
+            }
+
+            ArtifactKind::File => {
+                let mut s = serde::Serializer::serialize_struct_variant(
+                    __serializer,
+                    "Artifact",
+                    1,
+                    "ArtifactKind::File",
+                    size_of::<ArtifactFile>(),
+                )?;
+                let x = unsafe { std::ops::Deref::deref(&self.data.file) };
+                serde::ser::SerializeStructVariant::serialize_field(
+                    &mut s,
+                    "ArtifactKind::File",
+                    x,
+                )?;
+                serde::ser::SerializeStructVariant::end(s)
+            }
+        }
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for Artifact {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        const VARIANTS: &[&str] = &["ArtifactKind::Hir", "ArtifactKind::File"];
+
+        enum __Variant {
+            __Case0,
+
+            __Case1,
+        }
+
+        impl<'de> serde::Deserialize<'de> for __Variant {
+            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+            where
+                D: serde::Deserializer<'de>,
+            {
+                struct __VariantVisitor;
+
+                impl serde::de::Visitor<'_> for __VariantVisitor {
+                    type Value = __Variant;
+
+                    fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+                        formatter.write_str("union variant")
+                    }
+
+                    fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+                    where
+                        E: serde::de::Error,
+                    {
+                        match value {
+                            "ArtifactKind::Hir" => Ok(__Variant::__Case0),
+
+                            "ArtifactKind::File" => Ok(__Variant::__Case1),
+
+                            _ => Err(E::unknown_variant(value, VARIANTS)),
+                        }
+                    }
+                }
+
+                deserializer.deserialize_identifier(__VariantVisitor)
+            }
+        }
+
+        struct __Visitor;
+
+        impl<'de> serde::de::Visitor<'de> for __Visitor {
+            type Value = Artifact;
+
+            fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+                formatter.write_str("externally tagged union Artifact")
+            }
+
+            fn visit_enum<A>(self, data: A) -> Result<Self::Value, A::Error>
+            where
+                A: serde::de::EnumAccess<'de>,
+            {
+                let (variant, variant_access) = data.variant::<__Variant>()?;
+                match variant {
+                    __Variant::__Case0 => {
+                        struct __CaseVisitor;
+
+                        impl<'de> serde::de::Visitor<'de> for __CaseVisitor {
+                            type Value = ArtifactHir;
+
+                            fn expecting(
+                                &self,
+                                formatter: &mut core::fmt::Formatter,
+                            ) -> core::fmt::Result {
+                                formatter.write_str("struct variant ArtifactKind::Hir")
+                            }
+
+                            fn visit_map<M>(self, mut map: M) -> Result<Self::Value, M::Error>
+                            where
+                                M: serde::de::MapAccess<'de>,
+                            {
+                                let mut value = None;
+                                while let Some(key) = map.next_key::<String>()? {
+                                    if key == "ArtifactKind::Hir" {
+                                        if value.is_some() {
+                                            return Err(serde::de::Error::duplicate_field(
+                                                "ArtifactKind::Hir",
+                                            ));
+                                        }
+                                        value = Some(map.next_value()?);
+                                    } else {
+                                        let _: serde::de::IgnoredAny = map.next_value()?;
+                                    }
+                                }
+                                value.ok_or_else(|| {
+                                    serde::de::Error::missing_field("ArtifactKind::Hir")
+                                })
+                            }
+                        }
+
+                        let value = serde::de::VariantAccess::struct_variant(
+                            variant_access,
+                            &["ArtifactKind::Hir"],
+                            __CaseVisitor,
+                        )?;
+
+                        let tag = ArtifactKind::Hir;
+
+                        Ok(Artifact {
+                            tag,
+                            data: ArtifactData {
+                                hir: core::mem::ManuallyDrop::new(value),
+                            },
+                        })
+                    }
+
+                    __Variant::__Case1 => {
+                        struct __CaseVisitor;
+
+                        impl<'de> serde::de::Visitor<'de> for __CaseVisitor {
+                            type Value = ArtifactFile;
+
+                            fn expecting(
+                                &self,
+                                formatter: &mut core::fmt::Formatter,
+                            ) -> core::fmt::Result {
+                                formatter.write_str("struct variant ArtifactKind::File")
+                            }
+
+                            fn visit_map<M>(self, mut map: M) -> Result<Self::Value, M::Error>
+                            where
+                                M: serde::de::MapAccess<'de>,
+                            {
+                                let mut value = None;
+                                while let Some(key) = map.next_key::<String>()? {
+                                    if key == "ArtifactKind::File" {
+                                        if value.is_some() {
+                                            return Err(serde::de::Error::duplicate_field(
+                                                "ArtifactKind::File",
+                                            ));
+                                        }
+                                        value = Some(map.next_value()?);
+                                    } else {
+                                        let _: serde::de::IgnoredAny = map.next_value()?;
+                                    }
+                                }
+                                value.ok_or_else(|| {
+                                    serde::de::Error::missing_field("ArtifactKind::File")
+                                })
+                            }
+                        }
+
+                        let value = serde::de::VariantAccess::struct_variant(
+                            variant_access,
+                            &["ArtifactKind::File"],
+                            __CaseVisitor,
+                        )?;
+
+                        let tag = ArtifactKind::File;
+
+                        Ok(Artifact {
+                            tag,
+                            data: ArtifactData {
+                                file: core::mem::ManuallyDrop::new(value),
+                            },
+                        })
+                    }
+                }
+            }
+        }
+
+        deserializer.deserialize_enum("Artifact", VARIANTS, __Visitor)
     }
 }

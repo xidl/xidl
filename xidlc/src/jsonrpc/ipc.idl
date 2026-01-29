@@ -1,6 +1,30 @@
+@derive(Debug, Serialize, Deserialize)
+struct ArtifactHir {
+    string lang;
+    ::xidl_parser::hir::Specification hir;
+    ::xidl_parser::hir::ParserProperties props;
+};
+
+@derive(Debug, Serialize, Deserialize)
+struct ArtifactFile {
+    string path;
+    string content;
+};
+
+@derive(Debug, Serialize, Deserialize)
+enum ArtifactKind {
+    Hir,
+    File
+};
+
+union Artifact switch (ArtifactKind) {
+    case ArtifactKind::Hir: ArtifactHir hir;
+    case ArtifactKind::File: ArtifactFile file;
+};
+
 interface Codegen {
     ::xidl_parser::hir::ParserProperties get_properties();
-    sequence<::xidlc::generate::Artifact> generate(
+    sequence<Artifact> generate(
         in ::xidl_parser::hir::Specification hir,
         in string path,
         in ::xidl_parser::hir::ParserProperties props

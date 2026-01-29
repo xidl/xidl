@@ -16,7 +16,7 @@ mod util;
 pub use render::{CppRender, CppRenderOutput, CppRenderer};
 
 use crate::error::IdlcResult;
-use crate::generate::Artifact;
+use crate::jsonrpc::{Artifact, ArtifactFile};
 use serde_json::json;
 use std::collections::HashMap;
 use std::path::Path;
@@ -60,14 +60,14 @@ pub fn generate(
     )?;
 
     Ok(vec![
-        Artifact::File {
+        Artifact::new_file(ArtifactFile {
             path: header_name.clone(),
             content: header,
-        },
-        Artifact::File {
+        }),
+        Artifact::new_file(ArtifactFile {
             path: format!("{base}.cpp"),
             content: source,
-        },
+        }),
     ])
 }
 

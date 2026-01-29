@@ -74,9 +74,16 @@ pub(crate) fn render_union_with_config(
                 .field_id
                 .map(|value| format!("{value}u32"))
                 .unwrap_or_else(|| "1u32".to_string());
+            let field_ty = match &case.element.ty {
+                hir::ElementSpecTy::TypeSpec(spec) => type_with_decl(spec, &case.element.value),
+                hir::ElementSpecTy::ConstrTypeDcl(constr) => {
+                    rust_scoped_name(&constr_type_name(constr))
+                }
+            };
             json!({
                 "labels": labels,
                 "pattern": pattern,
+                "type": field_ty,
                 "is_default": is_default,
                 "member": member,
                 "field_id": field_id,

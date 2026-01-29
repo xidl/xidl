@@ -5,21 +5,7 @@ pub mod rust;
 pub mod rust_jsonrpc;
 mod utils;
 
-use serde::{Deserialize, Serialize};
 use xidl_parser::hir;
-
-#[derive(Debug, Serialize, Deserialize)]
-pub enum Artifact {
-    Hir {
-        lang: String,
-        hir: hir::Specification,
-        properties: hir::ParserProperties,
-    },
-    File {
-        path: String,
-        content: String,
-    },
-}
 
 pub fn to_snake_case(input: &str) -> String {
     let mut out = String::new();

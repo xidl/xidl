@@ -3,7 +3,6 @@ mod tests;
 
 use crate::cli::CliArgs;
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::Artifact;
 use crate::jsonrpc::{Codegen, CodegenClient};
 use std::collections::HashMap;
 use std::fs;
@@ -79,16 +78,22 @@ fn generate_for_lang(
     }
 
     for file in artifacts {
-        match file {
-            Artifact::Hir {
-                lang,
-                hir,
-                properties,
-            } => {
-                ret.extend(generate_for_lang(&lang, hir, input, properties)?);
+        match file.tag() {
+            crate::jsonrpc::ArtifactKind::Hir => {
+                let data = unsafe { file.into_hir() };
+                ret.extend(generate_for_lang(
+                    &data.lang,
+                    data.hir,
+                    input,
+                    data.props.clone(),
+                )?);
             }
-            Artifact::File { path, content } => {
-                ret.push(File { path, content });
+            crate::jsonrpc::ArtifactKind::File => {
+                let data = unsafe { file.into_file() };
+                ret.push(File {
+                    path: data.path.clone(),
+                    content: data.content.clone(),
+                })
             }
         }
     }

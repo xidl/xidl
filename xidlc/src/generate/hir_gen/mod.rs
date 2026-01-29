@@ -1,6 +1,6 @@
 use xidl_parser::hir::{ParserProperties, Specification};
 
-use crate::generate::Artifact;
+use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactHir};
 
 pub struct HirGen;
 
@@ -24,16 +24,16 @@ impl crate::jsonrpc::Codegen for HirGen {
             xidl_parser::hir::Specification::from_typed_ast_with_properties(typed, props.clone());
 
         if target_lang == "hir" {
-            Ok(vec![Artifact::File {
+            Ok(vec![Artifact::new_file(ArtifactFile {
                 path: _input,
                 content: serde_json::to_string(&hir)?,
-            }])
+            })])
         } else {
-            Ok(vec![Artifact::Hir {
+            Ok(vec![Artifact::new_hir(ArtifactHir {
                 lang: target_lang,
                 hir,
-                properties: props,
-            }])
+                props,
+            })])
         }
     }
 }
