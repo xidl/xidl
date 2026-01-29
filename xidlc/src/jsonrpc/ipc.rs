@@ -115,22 +115,17 @@ where
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-
 pub struct ArtifactHir {
     pub lang: String,
-
     pub hir: ::xidl_parser::hir::Specification,
-
     pub props: ::xidl_parser::hir::ParserProperties,
 }
 
 impl ArtifactHir {}
 
 #[derive(Debug, Serialize, Deserialize)]
-
 pub struct ArtifactFile {
     pub path: String,
-
     pub content: String,
 }
 
@@ -139,36 +134,7 @@ impl ArtifactFile {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ArtifactKind {
     Hir,
-
     File,
-}
-
-impl xidl_xcdr::XcdrSerialize for ArtifactKind {
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        let value = *self as u32;
-        xidl_xcdr::XcdrSerialize::serialize_with(&value, serializer)
-    }
-}
-
-impl xidl_xcdr::XcdrDeserialize for ArtifactKind {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let value: u32 = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        match value {
-            0 => Ok(Self::Hir),
-
-            1 => Ok(Self::File),
-
-            _ => Err(xidl_xcdr::error::XcdrError::Message(format!(
-                "invalid ArtifactKind discriminant: {}",
-                value
-            ))),
-        }
-    }
 }
 
 pub struct Artifact {
@@ -178,7 +144,6 @@ pub struct Artifact {
 
 union ArtifactData {
     hir: core::mem::ManuallyDrop<ArtifactHir>,
-
     file: core::mem::ManuallyDrop<ArtifactFile>,
 }
 

@@ -1,6 +1,6 @@
 {% if derive and derive | length > 0 %}
 #[derive({{ derive | join(", ") }})]
-{% endif %}
+{%- endif %}
 pub struct {{ ident }} {
     tag: {{ switch_ty }},
     data: {{ ident }}Data,
@@ -10,9 +10,9 @@ pub struct {{ ident }} {
 #[derive({{ derive | join(", ") }})]
 {% endif %}
 union {{ ident }}Data {
-{% for member in members %}
+{%- for member in members %}
     {{ member.name }}: core::mem::ManuallyDrop<{{ member.ty }}>,
-{% endfor %}
+{%- endfor %}
 }
 
 impl Drop for {{ ident }} {
@@ -75,6 +75,7 @@ impl {{ ident }} {
     }
 }
 
+{% if has_serde_serialize %}
 impl serde::Serialize for {{ ident }} {
     fn serialize<__S>(&self, __serializer: __S) -> serde::__private228::Result<__S::Ok, __S::Error>
     where
@@ -98,7 +99,9 @@ impl serde::Serialize for {{ ident }} {
         }
     }
 }
+{% endif %}
 
+{% if has_serde_deserialize %}
 impl<'de> serde::Deserialize<'de> for {{ ident }} {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -224,6 +227,7 @@ impl<'de> serde::Deserialize<'de> for {{ ident }} {
         deserializer.deserialize_enum("{{ ident }}", VARIANTS, __Visitor)
     }
 }
+{% endif %}
 
 {% if not skip_serialize %}
 impl xidl_xcdr::XcdrSerialize for {{ ident }} {

@@ -1,0 +1,25 @@
+use serde_json::json;
+
+pub(super) fn get_test_cases() -> Vec<(&'static str, &'static str, serde_json::Value)> {
+    vec![
+        (
+            "simple_union",
+            r#"
+            enum Tag {
+                A,
+                B,
+            };
+            union SimpleUnion switch (Tag) {
+                case A: int a;
+                case B: int b;
+            };
+        "#,
+            json!({
+                "skip_serialize": true,
+                "skip_deserialize": true,
+                "skip_render_header": true
+            }),
+        ),
+        //
+    ]
+}

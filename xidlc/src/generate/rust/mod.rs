@@ -18,7 +18,6 @@ pub use render::{RustRender, RustRenderOutput, RustRenderer};
 use crate::error::IdlcResult;
 use crate::jsonrpc::{Artifact, ArtifactFile};
 use serde_json::json;
-use std::collections::HashMap;
 use std::path::Path;
 use xidl_parser::hir;
 use xidl_parser::hir::{ParserProperties, Specification};
@@ -57,9 +56,7 @@ pub(crate) struct RustCodegen;
 
 impl crate::jsonrpc::Codegen for RustCodegen {
     fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
-        let mut props = HashMap::default();
-        props.insert("render_header".into(), true.into());
-        Ok(props)
+        Ok(Default::default())
     }
 
     fn generate(

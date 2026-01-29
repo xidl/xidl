@@ -2,9 +2,10 @@
 pub enum {{ ident }} {
 {% for member in members %}
     {{ member }}{% if not loop.last %},{% endif %}
-{% endfor %}
+{%- endfor %}
 }
 
+{% if not skip_serialize %}
 impl xidl_xcdr::XcdrSerialize for {{ ident }} {
     fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
         &self,
@@ -14,7 +15,9 @@ impl xidl_xcdr::XcdrSerialize for {{ ident }} {
         xidl_xcdr::XcdrSerialize::serialize_with(&value, serializer)
     }
 }
+{% endif %}
 
+{% if not skip_deserialize %}
 impl xidl_xcdr::XcdrDeserialize for {{ ident }} {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,
@@ -31,3 +34,4 @@ impl xidl_xcdr::XcdrDeserialize for {{ ident }} {
         }
     }
 }
+{% endif %}

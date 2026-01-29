@@ -23,15 +23,19 @@ pub fn run(args: CliArgs) -> IdlcResult<()> {
 
     for input in args.inputs {
         let source = fs::read_to_string(&input)?;
-        let files = generate_from_idl(&source, &input, &args.lang)?;
+        let files = generate_from_idl(&source, &input, &args.lang, Default::default())?;
         write_files(&args.out_dir, files)?;
     }
 
     Ok(())
 }
 
-fn generate_from_idl(source: &str, path: &Path, lang: &str) -> IdlcResult<Vec<File>> {
-    let mut props: HashMap<String, serde_json::Value> = HashMap::new();
+fn generate_from_idl(
+    source: &str,
+    path: &Path,
+    lang: &str,
+    mut props: HashMap<String, serde_json::Value>,
+) -> IdlcResult<Vec<File>> {
     props.insert("idl".into(), source.into());
     props.insert("target_lang".into(), lang.into());
 

@@ -4,6 +4,7 @@ use crate::generate::rust::util::{
     type_with_decl,
 };
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
+use itertools::Itertools;
 use serde_json::json;
 use std::collections::BTreeSet;
 use xidl_parser::hir;
@@ -100,6 +101,7 @@ pub(crate) fn render_union_with_config(
         annotations,
     );
     let module_path = module_path.to_vec();
+
     let ctx = json!({
         "ident": crate::generate::rust::util::rust_ident(&def.ident),
         "switch_ty": rust_switch_type(&def.switch_type_spec),
@@ -107,7 +109,9 @@ pub(crate) fn render_union_with_config(
         "cases": cases,
         "has_default": has_default,
         "serialize_kind": serialize_kind,
-        "derive": derive,
+        "has_serde_serialize": derive.iter().find(|v|*v=="Serialize"),
+        "has_serde_deserialize": derive.iter().find(|v|*v=="Deserialize"),
+        "derive": derive.into_iter().filter(|v| v != "Serialize" && v!="Deserialize").collect_vec(),
         "module_path": module_path,
         "typeobject_path": renderer.typeobject_path(),
     });

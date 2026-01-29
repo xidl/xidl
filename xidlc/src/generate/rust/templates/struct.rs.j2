@@ -1,13 +1,13 @@
-{% if derive and derive | length > 0 %}
+{%- if derive and derive | length > 0 %}
 #[derive({{ derive | join(", ") }})]
-{% endif %}
+{%- endif %}
 pub struct {{ ident }} {
 {% if parent %}
     pub base: {{ parent }},
 {% endif %}
-{% for member in members %}
+{%- for member in members %}
     pub {{ member.name }}: {{ member.ty }},
-{% endfor %}
+{%- endfor %}
 }
 
 impl {{ ident }} {

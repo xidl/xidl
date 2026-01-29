@@ -1,11 +1,14 @@
 mod testcases;
 
+mod test_rust;
+
 use crate::driver::generate_from_idl;
 
 use std::path::Path;
 
 fn render_lang_output(lang: &str, input_name: &str, source: &str) -> String {
-    let mut files = generate_from_idl(source, Path::new(input_name), lang).expect("generate");
+    let mut files = generate_from_idl(source, Path::new(input_name), lang, Default::default())
+        .expect("generate");
     files.sort_by(|a, b| a.path.cmp(&b.path));
 
     let mut out = String::new();

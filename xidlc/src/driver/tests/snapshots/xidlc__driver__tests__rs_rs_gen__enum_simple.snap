@@ -28,6 +28,7 @@ pub enum A {
 
 }
 
+
 impl xidl_xcdr::XcdrSerialize for A {
     fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
         &self,
@@ -37,6 +38,8 @@ impl xidl_xcdr::XcdrSerialize for A {
         xidl_xcdr::XcdrSerialize::serialize_with(&value, serializer)
     }
 }
+
+
 
 impl xidl_xcdr::XcdrDeserialize for A {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
