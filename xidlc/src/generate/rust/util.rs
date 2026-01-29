@@ -1,11 +1,16 @@
 use crate::generate::render_const_expr;
+use itertools::Itertools;
 use serde_json::json;
 use std::collections::HashSet;
 use xidl_parser::hir;
 
 pub fn rust_scoped_name(value: &hir::ScopedName) -> String {
-    let name = value.name.last().map(|value| value.as_str()).unwrap_or("");
-    rust_ident(name)
+    let mut name = value.name.iter().map(|v| rust_ident(v)).join("::");
+    if value.is_root {
+        name = "::".to_string() + &name;
+    }
+
+    name
 }
 
 pub fn rust_integer_type(value: &hir::IntegerType) -> String {
@@ -171,13 +176,7 @@ pub fn declarator_name(decl: &hir::Declarator) -> String {
 }
 
 pub fn type_with_decl(ty: &hir::TypeSpec, decl: &hir::Declarator) -> String {
-    let mut base = rust_type(ty);
-    if matches!(
-        ty,
-        hir::TypeSpec::SimpleTypeSpec(hir::SimpleTypeSpec::ScopedName(_))
-    ) {
-        base = format!("Box<{base}>");
-    }
+    let base = rust_type(ty);
     let dims = declarator_dims(decl);
     if dims.is_empty() {
         base
