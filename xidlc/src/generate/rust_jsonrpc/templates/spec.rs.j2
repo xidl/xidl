@@ -5,6 +5,7 @@
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
 #![allow(unreachable_patterns)]
+#![allow(clippy::let_unit_value)]
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
