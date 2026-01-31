@@ -2,6 +2,7 @@ use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::io::{BufRead, Write};
+use thiserror::Error;
 
 const JSONRPC_VERSION: &str = "2.0";
 
@@ -28,15 +29,25 @@ impl ErrorCode {
     }
 }
 
-#[derive(Debug)]
+impl std::fmt::Display for ErrorCode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.code())
+    }
+}
+
+#[derive(Debug, Error)]
 pub enum Error {
-    Io(std::io::Error),
-    Json(serde_json::Error),
+    #[error("io error: {0}")]
+    Io(#[from] std::io::Error),
+    #[error("json error: {0}")]
+    Json(#[from] serde_json::Error),
+    #[error("rpc error {code}: {message}")]
     Rpc {
         code: ErrorCode,
         message: String,
         data: Option<Value>,
     },
+    #[error("protocol error: {0}")]
     Protocol(&'static str),
 }
 
@@ -65,33 +76,6 @@ impl Error {
                 ..
             }
         )
-    }
-}
-
-impl std::fmt::Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Io(err) => write!(f, "io error: {err}"),
-            Self::Json(err) => write!(f, "json error: {err}"),
-            Self::Rpc { code, message, .. } => {
-                write!(f, "rpc error {}: {message}", code.code())
-            }
-            Self::Protocol(message) => write!(f, "protocol error: {message}"),
-        }
-    }
-}
-
-impl std::error::Error for Error {}
-
-impl From<std::io::Error> for Error {
-    fn from(value: std::io::Error) -> Self {
-        Self::Io(value)
-    }
-}
-
-impl From<serde_json::Error> for Error {
-    fn from(value: serde_json::Error) -> Self {
-        Self::Json(value)
     }
 }
 
@@ -179,7 +163,7 @@ where
                 data: error.data,
             });
         }
-        let result = response.result.ok_or(Error::Protocol("missing result"))?;
+        let result = response.result.unwrap_or(Value::Null);
         Ok(serde_json::from_value(result)?)
     }
 }

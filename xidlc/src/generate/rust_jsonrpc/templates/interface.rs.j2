@@ -47,24 +47,24 @@ where
 }
 
 pub struct {{ ident }}Client<R, W> {
-    client: RefCell<xidl_jsonrpc::Client<R, W>>,
+    client: RefCell<xidl_jsonrpc::Client<BufReader<R>, W>>,
 }
 
 impl<R, W> {{ ident }}Client<R, W>
 where
-    R: BufRead,
+    R: Read,
     W: Write,
 {
     pub fn new(reader: R, writer: W) -> Self {
         Self {
-            client: RefCell::new(xidl_jsonrpc::Client::new(reader, writer)),
+            client: RefCell::new(xidl_jsonrpc::Client::new(BufReader::new(reader), writer)),
         }
     }
 }
 
 impl<R, W> {{ ident }} for {{ ident }}Client<R, W>
 where
-    R: BufRead,
+    R: Read,
     W: Write,
 {
 {% for method in methods %}
