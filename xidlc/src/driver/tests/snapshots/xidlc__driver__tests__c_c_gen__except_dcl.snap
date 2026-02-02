@@ -6,7 +6,6 @@ expression: output
 except_dcl.c
 ===============
 #include "except_dcl.h"
-
 ===============
 except_dcl.h
 ===============
@@ -22,7 +21,6 @@ except_dcl.h
 except_dcl_xcdr.c
 ===============
 #include "except_dcl_xcdr.h"
-
 ===============
 except_dcl_xcdr.h
 ===============

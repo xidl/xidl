@@ -6,7 +6,6 @@ expression: output
 preproc.c
 ===============
 #include "preproc.h"
-
 ===============
 preproc.h
 ===============
@@ -22,7 +21,6 @@ preproc.h
 preproc_xcdr.c
 ===============
 #include "preproc_xcdr.h"
-
 ===============
 preproc_xcdr.h
 ===============

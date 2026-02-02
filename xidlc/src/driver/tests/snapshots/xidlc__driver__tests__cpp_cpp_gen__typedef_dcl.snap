@@ -37,7 +37,6 @@ struct xidl::xcdr::Traits<FooSeq> {
   }
 };
 
-
 using uint8_t = u8;
 
 template <>
@@ -52,7 +51,6 @@ struct xidl::xcdr::Traits<uint8_t> {
     return xidl::xcdr::Traits<u8>::template deserialize<Codec>(de, value);
   }
 };
-
 
 using u8string = std::string;
 
@@ -69,7 +67,6 @@ struct xidl::xcdr::Traits<u8string> {
   }
 };
 
-
 using u16string = std::wstring;
 
 template <>
@@ -84,6 +81,5 @@ struct xidl::xcdr::Traits<u16string> {
     return xidl::xcdr::Traits<std::wstring>::template deserialize<Codec>(de, value);
   }
 };
-
 
 #endif

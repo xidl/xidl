@@ -6,7 +6,6 @@ expression: output
 template_module_dcl.c
 ===============
 #include "template_module_dcl.h"
-
 ===============
 template_module_dcl.h
 ===============
@@ -22,7 +21,6 @@ template_module_dcl.h
 template_module_dcl_xcdr.c
 ===============
 #include "template_module_dcl_xcdr.h"
-
 ===============
 template_module_dcl_xcdr.h
 ===============

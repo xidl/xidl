@@ -37,10 +37,10 @@ pub fn generate(
     let header_name = format!("{base}.h");
 
     let mut renderer = CppRenderer::new()?;
-    for (k, v) in props {
+    for (k, v) in &props {
         renderer
             .env()
-            .add_global(k, minijinja::Value::from_serialize(v));
+            .add_global(k.clone(), minijinja::Value::from_serialize(v));
     }
 
     let output = spec.render(&renderer)?;
@@ -59,6 +59,8 @@ pub fn generate(
             "definitions": output.source,
         }),
     )?;
+    let header = maybe_format_c(header, &props)?;
+    let source = maybe_format_c(source, &props)?;
 
     Ok(vec![
         Artifact::new_file(ArtifactFile {
@@ -76,7 +78,9 @@ pub(crate) struct CppCodegen;
 
 impl crate::jsonrpc::Codegen for CppCodegen {
     fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
-        Ok(ParserProperties::default())
+        Ok(crate::macros::hashmap! {
+            "format_c" => true
+        })
     }
 
     fn generate(
@@ -94,5 +98,20 @@ fn map_codegen_error(err: crate::error::IdlcError) -> xidl_jsonrpc::Error {
         code: xidl_jsonrpc::ErrorCode::ServerError,
         message: err.to_string(),
         data: None,
+    }
+}
+
+fn maybe_format_c(
+    source: String,
+    properties: &HashMap<String, serde_json::Value>,
+) -> IdlcResult<String> {
+    let format = properties
+        .get("format_c")
+        .and_then(|value| value.as_bool())
+        .unwrap_or(false);
+    if format {
+        crate::fmt::format_c_source(&source)
+    } else {
+        Ok(source)
     }
 }

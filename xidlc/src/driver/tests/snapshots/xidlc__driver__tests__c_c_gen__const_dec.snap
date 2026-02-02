@@ -6,7 +6,6 @@ expression: output
 const_dec.c
 ===============
 #include "const_dec.h"
-
 ===============
 const_dec.h
 ===============
@@ -24,7 +23,6 @@ static const int32_t a = 10;
 const_dec_xcdr.c
 ===============
 #include "const_dec_xcdr.h"
-
 ===============
 const_dec_xcdr.h
 ===============

@@ -28,13 +28,11 @@ class HelloWorld {
 public:
     virtual ~HelloWorld() = default;
 
-
 };
 
 class HelloWorld : public Parent {
 public:
     virtual ~HelloWorld() = default;
-
 
 };
 
@@ -42,104 +40,55 @@ class HelloWorld : public Parent1, public Parent2, public Parent3 {
 public:
     virtual ~HelloWorld() = default;
 
-
 };
 
-
 constexpr int32_t A_func1_Hash = 4091574330;
 
-
-
 constexpr int32_t A_func1_Hash = 4091574330;
-
-
 
 constexpr int32_t A_Ex_Hash = 1885521279;
 
-
-
 constexpr int32_t A_func1_Hash = 4091574330;
-
-
 
 constexpr int32_t B_Ex_Hash = 2027314845;
 
-
-
 constexpr int32_t C_Ex_Hash = 939024653;
 
-
+constexpr int32_t A_func1_Hash = 4091574330;
 
 constexpr int32_t A_func1_Hash = 4091574330;
 
-
-
 constexpr int32_t A_func1_Hash = 4091574330;
 
-
-
-constexpr int32_t A_func1_Hash = 4091574330;
-
-
+constexpr int32_t A_get_attribute_attr1_Hash = 608996360;
 
 constexpr int32_t A_get_attribute_attr1_Hash = 608996360;
 
-
-
 constexpr int32_t A_get_attribute_attr1_Hash = 608996360;
 
-
-
 constexpr int32_t A_get_attribute_attr1_Hash = 608996360;
-
-
-
-constexpr int32_t A_get_attribute_attr1_Hash = 608996360;
-
-
 
 constexpr int32_t A_set_attribute_attr1_Hash = 2553876227;
-
-
 
 constexpr int32_t A_get_attribute_attr2_Hash = 2525005575;
 
-
-
 constexpr int32_t A_set_attribute_attr2_Hash = 2258850027;
-
-
 
 constexpr int32_t A_get_attribute_attr3_Hash = 3118622849;
 
-
-
 constexpr int32_t A_set_attribute_attr3_Hash = 700810472;
 
-
-
 constexpr int32_t A_get_attribute_attr1_Hash = 608996360;
-
-
 
 constexpr int32_t A_set_attribute_attr1_Hash = 2553876227;
 
-
-
 constexpr int32_t A_get_attribute_attr1_Hash = 608996360;
-
-
 
 constexpr int32_t A_set_attribute_attr1_Hash = 2553876227;
 
-
-
 constexpr int32_t A_get_attribute_attr1_Hash = 608996360;
 
-
-
 constexpr int32_t A_set_attribute_attr1_Hash = 2553876227;
-
 
 struct A_func1_In {
 
@@ -225,17 +174,13 @@ struct xidl::xcdr::Traits<A_func1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = ser.write(value.result);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
   }
@@ -248,17 +193,13 @@ struct xidl::xcdr::Traits<A_func1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = de.read(value.result);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
   }
@@ -350,10 +291,7 @@ struct xidl::xcdr::Traits<A_func1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = ser.write(value.result);
         if (!res.ok()) {
@@ -361,17 +299,13 @@ struct xidl::xcdr::Traits<A_func1_Result> {
         }
         break;
 
-
-
       case A_Ex_Hash:
-
 
         res = ser.write(value.a_ex);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
   }
@@ -384,10 +318,7 @@ struct xidl::xcdr::Traits<A_func1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = de.read(value.result);
         if (!res.ok()) {
@@ -395,17 +326,13 @@ struct xidl::xcdr::Traits<A_func1_Result> {
         }
         break;
 
-
-
       case A_Ex_Hash:
-
 
         res = de.read(value.a_ex);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
   }
@@ -501,10 +428,7 @@ struct xidl::xcdr::Traits<A_func1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = ser.write(value.result);
         if (!res.ok()) {
@@ -512,10 +436,7 @@ struct xidl::xcdr::Traits<A_func1_Result> {
         }
         break;
 
-
-
       case A_Ex_Hash:
-
 
         res = ser.write(value.a_ex);
         if (!res.ok()) {
@@ -523,10 +444,7 @@ struct xidl::xcdr::Traits<A_func1_Result> {
         }
         break;
 
-
-
       case B_Ex_Hash:
-
 
         res = ser.write(value.b_ex);
         if (!res.ok()) {
@@ -534,17 +452,13 @@ struct xidl::xcdr::Traits<A_func1_Result> {
         }
         break;
 
-
-
       case C_Ex_Hash:
-
 
         res = ser.write(value.c_ex);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
   }
@@ -557,10 +471,7 @@ struct xidl::xcdr::Traits<A_func1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = de.read(value.result);
         if (!res.ok()) {
@@ -568,10 +479,7 @@ struct xidl::xcdr::Traits<A_func1_Result> {
         }
         break;
 
-
-
       case A_Ex_Hash:
-
 
         res = de.read(value.a_ex);
         if (!res.ok()) {
@@ -579,10 +487,7 @@ struct xidl::xcdr::Traits<A_func1_Result> {
         }
         break;
 
-
-
       case B_Ex_Hash:
-
 
         res = de.read(value.b_ex);
         if (!res.ok()) {
@@ -590,17 +495,13 @@ struct xidl::xcdr::Traits<A_func1_Result> {
         }
         break;
 
-
-
       case C_Ex_Hash:
-
 
         res = de.read(value.c_ex);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
   }
@@ -690,17 +591,13 @@ struct xidl::xcdr::Traits<A_func1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = ser.write(value.result);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
   }
@@ -713,17 +610,13 @@ struct xidl::xcdr::Traits<A_func1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = de.read(value.result);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
   }
@@ -815,10 +708,7 @@ struct xidl::xcdr::Traits<A_func1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = ser.write(value.result);
         if (!res.ok()) {
@@ -826,17 +716,13 @@ struct xidl::xcdr::Traits<A_func1_Result> {
         }
         break;
 
-
-
       case A_Ex_Hash:
-
 
         res = ser.write(value.a_ex);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
   }
@@ -849,10 +735,7 @@ struct xidl::xcdr::Traits<A_func1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = de.read(value.result);
         if (!res.ok()) {
@@ -860,17 +743,13 @@ struct xidl::xcdr::Traits<A_func1_Result> {
         }
         break;
 
-
-
       case A_Ex_Hash:
-
 
         res = de.read(value.a_ex);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
   }
@@ -966,10 +845,7 @@ struct xidl::xcdr::Traits<A_func1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = ser.write(value.result);
         if (!res.ok()) {
@@ -977,10 +853,7 @@ struct xidl::xcdr::Traits<A_func1_Result> {
         }
         break;
 
-
-
       case A_Ex_Hash:
-
 
         res = ser.write(value.a_ex);
         if (!res.ok()) {
@@ -988,10 +861,7 @@ struct xidl::xcdr::Traits<A_func1_Result> {
         }
         break;
 
-
-
       case B_Ex_Hash:
-
 
         res = ser.write(value.b_ex);
         if (!res.ok()) {
@@ -999,17 +869,13 @@ struct xidl::xcdr::Traits<A_func1_Result> {
         }
         break;
 
-
-
       case C_Ex_Hash:
-
 
         res = ser.write(value.c_ex);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
   }
@@ -1022,10 +888,7 @@ struct xidl::xcdr::Traits<A_func1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = de.read(value.result);
         if (!res.ok()) {
@@ -1033,10 +896,7 @@ struct xidl::xcdr::Traits<A_func1_Result> {
         }
         break;
 
-
-
       case A_Ex_Hash:
-
 
         res = de.read(value.a_ex);
         if (!res.ok()) {
@@ -1044,10 +904,7 @@ struct xidl::xcdr::Traits<A_func1_Result> {
         }
         break;
 
-
-
       case B_Ex_Hash:
-
 
         res = de.read(value.b_ex);
         if (!res.ok()) {
@@ -1055,17 +912,13 @@ struct xidl::xcdr::Traits<A_func1_Result> {
         }
         break;
 
-
-
       case C_Ex_Hash:
-
 
         res = de.read(value.c_ex);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
   }
@@ -1155,17 +1008,13 @@ struct xidl::xcdr::Traits<A_get_attribute_attr1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = ser.write(value.result);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
   }
@@ -1178,17 +1027,13 @@ struct xidl::xcdr::Traits<A_get_attribute_attr1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = de.read(value.result);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
   }
@@ -1278,17 +1123,13 @@ struct xidl::xcdr::Traits<A_get_attribute_attr1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = ser.write(value.result);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
   }
@@ -1301,17 +1142,13 @@ struct xidl::xcdr::Traits<A_get_attribute_attr1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = de.read(value.result);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
   }
@@ -1401,17 +1238,13 @@ struct xidl::xcdr::Traits<A_get_attribute_attr1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = ser.write(value.result);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
   }
@@ -1424,17 +1257,13 @@ struct xidl::xcdr::Traits<A_get_attribute_attr1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = de.read(value.result);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
   }
@@ -1524,17 +1353,13 @@ struct xidl::xcdr::Traits<A_get_attribute_attr1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = ser.write(value.result);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
   }
@@ -1547,17 +1372,13 @@ struct xidl::xcdr::Traits<A_get_attribute_attr1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = de.read(value.result);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
   }
@@ -1647,17 +1468,13 @@ struct xidl::xcdr::Traits<A_set_attribute_attr1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = ser.write(value.result);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
   }
@@ -1670,17 +1487,13 @@ struct xidl::xcdr::Traits<A_set_attribute_attr1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = de.read(value.result);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
   }
@@ -1770,17 +1583,13 @@ struct xidl::xcdr::Traits<A_get_attribute_attr2_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = ser.write(value.result);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
   }
@@ -1793,17 +1602,13 @@ struct xidl::xcdr::Traits<A_get_attribute_attr2_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = de.read(value.result);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
   }
@@ -1893,17 +1698,13 @@ struct xidl::xcdr::Traits<A_set_attribute_attr2_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = ser.write(value.result);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
   }
@@ -1916,17 +1717,13 @@ struct xidl::xcdr::Traits<A_set_attribute_attr2_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = de.read(value.result);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
   }
@@ -2016,17 +1813,13 @@ struct xidl::xcdr::Traits<A_get_attribute_attr3_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = ser.write(value.result);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
   }
@@ -2039,17 +1832,13 @@ struct xidl::xcdr::Traits<A_get_attribute_attr3_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = de.read(value.result);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
   }
@@ -2139,17 +1928,13 @@ struct xidl::xcdr::Traits<A_set_attribute_attr3_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = ser.write(value.result);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
   }
@@ -2162,17 +1947,13 @@ struct xidl::xcdr::Traits<A_set_attribute_attr3_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = de.read(value.result);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
   }
@@ -2264,10 +2045,7 @@ struct xidl::xcdr::Traits<A_get_attribute_attr1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = ser.write(value.result);
         if (!res.ok()) {
@@ -2275,17 +2053,13 @@ struct xidl::xcdr::Traits<A_get_attribute_attr1_Result> {
         }
         break;
 
-
-
       case A_Ex_Hash:
-
 
         res = ser.write(value.a_ex);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
   }
@@ -2298,10 +2072,7 @@ struct xidl::xcdr::Traits<A_get_attribute_attr1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = de.read(value.result);
         if (!res.ok()) {
@@ -2309,17 +2080,13 @@ struct xidl::xcdr::Traits<A_get_attribute_attr1_Result> {
         }
         break;
 
-
-
       case A_Ex_Hash:
-
 
         res = de.read(value.a_ex);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
   }
@@ -2409,17 +2176,13 @@ struct xidl::xcdr::Traits<A_set_attribute_attr1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = ser.write(value.result);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
   }
@@ -2432,17 +2195,13 @@ struct xidl::xcdr::Traits<A_set_attribute_attr1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = de.read(value.result);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
   }
@@ -2538,10 +2297,7 @@ struct xidl::xcdr::Traits<A_get_attribute_attr1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = ser.write(value.result);
         if (!res.ok()) {
@@ -2549,10 +2305,7 @@ struct xidl::xcdr::Traits<A_get_attribute_attr1_Result> {
         }
         break;
 
-
-
       case A_Ex_Hash:
-
 
         res = ser.write(value.a_ex);
         if (!res.ok()) {
@@ -2560,10 +2313,7 @@ struct xidl::xcdr::Traits<A_get_attribute_attr1_Result> {
         }
         break;
 
-
-
       case B_Ex_Hash:
-
 
         res = ser.write(value.b_ex);
         if (!res.ok()) {
@@ -2571,17 +2321,13 @@ struct xidl::xcdr::Traits<A_get_attribute_attr1_Result> {
         }
         break;
 
-
-
       case C_Ex_Hash:
-
 
         res = ser.write(value.c_ex);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
   }
@@ -2594,10 +2340,7 @@ struct xidl::xcdr::Traits<A_get_attribute_attr1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = de.read(value.result);
         if (!res.ok()) {
@@ -2605,10 +2348,7 @@ struct xidl::xcdr::Traits<A_get_attribute_attr1_Result> {
         }
         break;
 
-
-
       case A_Ex_Hash:
-
 
         res = de.read(value.a_ex);
         if (!res.ok()) {
@@ -2616,10 +2356,7 @@ struct xidl::xcdr::Traits<A_get_attribute_attr1_Result> {
         }
         break;
 
-
-
       case B_Ex_Hash:
-
 
         res = de.read(value.b_ex);
         if (!res.ok()) {
@@ -2627,17 +2364,13 @@ struct xidl::xcdr::Traits<A_get_attribute_attr1_Result> {
         }
         break;
 
-
-
       case C_Ex_Hash:
-
 
         res = de.read(value.c_ex);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
   }
@@ -2729,10 +2462,7 @@ struct xidl::xcdr::Traits<A_set_attribute_attr1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = ser.write(value.result);
         if (!res.ok()) {
@@ -2740,17 +2470,13 @@ struct xidl::xcdr::Traits<A_set_attribute_attr1_Result> {
         }
         break;
 
-
-
       case A_Ex_Hash:
-
 
         res = ser.write(value.a_ex);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
   }
@@ -2763,10 +2489,7 @@ struct xidl::xcdr::Traits<A_set_attribute_attr1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = de.read(value.result);
         if (!res.ok()) {
@@ -2774,17 +2497,13 @@ struct xidl::xcdr::Traits<A_set_attribute_attr1_Result> {
         }
         break;
 
-
-
       case A_Ex_Hash:
-
 
         res = de.read(value.a_ex);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
   }
@@ -2874,17 +2593,13 @@ struct xidl::xcdr::Traits<A_get_attribute_attr1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = ser.write(value.result);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
   }
@@ -2897,17 +2612,13 @@ struct xidl::xcdr::Traits<A_get_attribute_attr1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = de.read(value.result);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
   }
@@ -2999,10 +2710,7 @@ struct xidl::xcdr::Traits<A_set_attribute_attr1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = ser.write(value.result);
         if (!res.ok()) {
@@ -3010,17 +2718,13 @@ struct xidl::xcdr::Traits<A_set_attribute_attr1_Result> {
         }
         break;
 
-
-
       case A_Ex_Hash:
-
 
         res = ser.write(value.a_ex);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
   }
@@ -3033,10 +2737,7 @@ struct xidl::xcdr::Traits<A_set_attribute_attr1_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = de.read(value.result);
         if (!res.ok()) {
@@ -3044,17 +2745,13 @@ struct xidl::xcdr::Traits<A_set_attribute_attr1_Result> {
         }
         break;
 
-
-
       case A_Ex_Hash:
-
 
         res = de.read(value.a_ex);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
   }
@@ -3092,10 +2789,7 @@ struct xidl::xcdr::Traits<A_Call> {
     }
     switch (value._d) {
 
-
-
       default:
-
 
         res = ser.write(value.unknownOp);
         if (!res.ok()) {
@@ -3103,10 +2797,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_func1_Hash:
-
 
         res = ser.write(value.func1);
         if (!res.ok()) {
@@ -3114,10 +2805,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_func1_Hash:
-
 
         res = ser.write(value.func1);
         if (!res.ok()) {
@@ -3125,10 +2813,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_func1_Hash:
-
 
         res = ser.write(value.func1);
         if (!res.ok()) {
@@ -3136,10 +2821,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_func1_Hash:
-
 
         res = ser.write(value.func1);
         if (!res.ok()) {
@@ -3147,10 +2829,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_func1_Hash:
-
 
         res = ser.write(value.func1);
         if (!res.ok()) {
@@ -3158,21 +2837,15 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_func1_Hash:
-
 
         res = ser.write(value.func1);
         if (!res.ok()) {
           return res;
         }
         break;
-
-
 
       case A_get_attribute_attr1_Hash:
-
 
         res = ser.write(value.get_attribute_attr1);
         if (!res.ok()) {
@@ -3180,10 +2853,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_get_attribute_attr1_Hash:
-
 
         res = ser.write(value.get_attribute_attr1);
         if (!res.ok()) {
@@ -3191,10 +2861,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_get_attribute_attr1_Hash:
-
 
         res = ser.write(value.get_attribute_attr1);
         if (!res.ok()) {
@@ -3202,21 +2869,15 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_get_attribute_attr1_Hash:
-
 
         res = ser.write(value.get_attribute_attr1);
         if (!res.ok()) {
           return res;
         }
         break;
-
-
 
       case A_set_attribute_attr1_Hash:
-
 
         res = ser.write(value.set_attribute_attr1);
         if (!res.ok()) {
@@ -3224,10 +2885,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_get_attribute_attr2_Hash:
-
 
         res = ser.write(value.get_attribute_attr2);
         if (!res.ok()) {
@@ -3235,10 +2893,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_set_attribute_attr2_Hash:
-
 
         res = ser.write(value.set_attribute_attr2);
         if (!res.ok()) {
@@ -3246,10 +2901,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_get_attribute_attr3_Hash:
-
 
         res = ser.write(value.get_attribute_attr3);
         if (!res.ok()) {
@@ -3257,10 +2909,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_set_attribute_attr3_Hash:
-
 
         res = ser.write(value.set_attribute_attr3);
         if (!res.ok()) {
@@ -3268,10 +2917,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_get_attribute_attr1_Hash:
-
 
         res = ser.write(value.get_attribute_attr1);
         if (!res.ok()) {
@@ -3279,10 +2925,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_set_attribute_attr1_Hash:
-
 
         res = ser.write(value.set_attribute_attr1);
         if (!res.ok()) {
@@ -3290,10 +2933,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_get_attribute_attr1_Hash:
-
 
         res = ser.write(value.get_attribute_attr1);
         if (!res.ok()) {
@@ -3301,10 +2941,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_set_attribute_attr1_Hash:
-
 
         res = ser.write(value.set_attribute_attr1);
         if (!res.ok()) {
@@ -3312,10 +2949,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_get_attribute_attr1_Hash:
-
 
         res = ser.write(value.get_attribute_attr1);
         if (!res.ok()) {
@@ -3323,17 +2957,13 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_set_attribute_attr1_Hash:
-
 
         res = ser.write(value.set_attribute_attr1);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
   }
@@ -3346,10 +2976,7 @@ struct xidl::xcdr::Traits<A_Call> {
     }
     switch (value._d) {
 
-
-
       default:
-
 
         res = de.read(value.unknownOp);
         if (!res.ok()) {
@@ -3357,10 +2984,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_func1_Hash:
-
 
         res = de.read(value.func1);
         if (!res.ok()) {
@@ -3368,10 +2992,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_func1_Hash:
-
 
         res = de.read(value.func1);
         if (!res.ok()) {
@@ -3379,10 +3000,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_func1_Hash:
-
 
         res = de.read(value.func1);
         if (!res.ok()) {
@@ -3390,10 +3008,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_func1_Hash:
-
 
         res = de.read(value.func1);
         if (!res.ok()) {
@@ -3401,10 +3016,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_func1_Hash:
-
 
         res = de.read(value.func1);
         if (!res.ok()) {
@@ -3412,21 +3024,15 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_func1_Hash:
-
 
         res = de.read(value.func1);
         if (!res.ok()) {
           return res;
         }
         break;
-
-
 
       case A_get_attribute_attr1_Hash:
-
 
         res = de.read(value.get_attribute_attr1);
         if (!res.ok()) {
@@ -3434,10 +3040,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_get_attribute_attr1_Hash:
-
 
         res = de.read(value.get_attribute_attr1);
         if (!res.ok()) {
@@ -3445,10 +3048,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_get_attribute_attr1_Hash:
-
 
         res = de.read(value.get_attribute_attr1);
         if (!res.ok()) {
@@ -3456,21 +3056,15 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_get_attribute_attr1_Hash:
-
 
         res = de.read(value.get_attribute_attr1);
         if (!res.ok()) {
           return res;
         }
         break;
-
-
 
       case A_set_attribute_attr1_Hash:
-
 
         res = de.read(value.set_attribute_attr1);
         if (!res.ok()) {
@@ -3478,10 +3072,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_get_attribute_attr2_Hash:
-
 
         res = de.read(value.get_attribute_attr2);
         if (!res.ok()) {
@@ -3489,10 +3080,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_set_attribute_attr2_Hash:
-
 
         res = de.read(value.set_attribute_attr2);
         if (!res.ok()) {
@@ -3500,10 +3088,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_get_attribute_attr3_Hash:
-
 
         res = de.read(value.get_attribute_attr3);
         if (!res.ok()) {
@@ -3511,10 +3096,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_set_attribute_attr3_Hash:
-
 
         res = de.read(value.set_attribute_attr3);
         if (!res.ok()) {
@@ -3522,10 +3104,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_get_attribute_attr1_Hash:
-
 
         res = de.read(value.get_attribute_attr1);
         if (!res.ok()) {
@@ -3533,10 +3112,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_set_attribute_attr1_Hash:
-
 
         res = de.read(value.set_attribute_attr1);
         if (!res.ok()) {
@@ -3544,10 +3120,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_get_attribute_attr1_Hash:
-
 
         res = de.read(value.get_attribute_attr1);
         if (!res.ok()) {
@@ -3555,10 +3128,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_set_attribute_attr1_Hash:
-
 
         res = de.read(value.set_attribute_attr1);
         if (!res.ok()) {
@@ -3566,10 +3136,7 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_get_attribute_attr1_Hash:
-
 
         res = de.read(value.get_attribute_attr1);
         if (!res.ok()) {
@@ -3577,17 +3144,13 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_set_attribute_attr1_Hash:
-
 
         res = de.read(value.set_attribute_attr1);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
   }
@@ -3670,10 +3233,7 @@ struct xidl::xcdr::Traits<A_Return> {
     }
     switch (value._d) {
 
-
-
       default:
-
 
         res = ser.write(value.unknownOp);
         if (!res.ok()) {
@@ -3681,10 +3241,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_func1_Hash:
-
 
         res = ser.write(value.func1);
         if (!res.ok()) {
@@ -3692,10 +3249,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_func1_Hash:
-
 
         res = ser.write(value.func1);
         if (!res.ok()) {
@@ -3703,10 +3257,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_func1_Hash:
-
 
         res = ser.write(value.func1);
         if (!res.ok()) {
@@ -3714,10 +3265,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_func1_Hash:
-
 
         res = ser.write(value.func1);
         if (!res.ok()) {
@@ -3725,10 +3273,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_func1_Hash:
-
 
         res = ser.write(value.func1);
         if (!res.ok()) {
@@ -3736,21 +3281,15 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_func1_Hash:
-
 
         res = ser.write(value.func1);
         if (!res.ok()) {
           return res;
         }
         break;
-
-
 
       case A_get_attribute_attr1_Hash:
-
 
         res = ser.write(value.get_attribute_attr1);
         if (!res.ok()) {
@@ -3758,10 +3297,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_get_attribute_attr1_Hash:
-
 
         res = ser.write(value.get_attribute_attr1);
         if (!res.ok()) {
@@ -3769,10 +3305,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_get_attribute_attr1_Hash:
-
 
         res = ser.write(value.get_attribute_attr1);
         if (!res.ok()) {
@@ -3780,21 +3313,15 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_get_attribute_attr1_Hash:
-
 
         res = ser.write(value.get_attribute_attr1);
         if (!res.ok()) {
           return res;
         }
         break;
-
-
 
       case A_set_attribute_attr1_Hash:
-
 
         res = ser.write(value.set_attribute_attr1);
         if (!res.ok()) {
@@ -3802,10 +3329,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_get_attribute_attr2_Hash:
-
 
         res = ser.write(value.get_attribute_attr2);
         if (!res.ok()) {
@@ -3813,10 +3337,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_set_attribute_attr2_Hash:
-
 
         res = ser.write(value.set_attribute_attr2);
         if (!res.ok()) {
@@ -3824,10 +3345,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_get_attribute_attr3_Hash:
-
 
         res = ser.write(value.get_attribute_attr3);
         if (!res.ok()) {
@@ -3835,10 +3353,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_set_attribute_attr3_Hash:
-
 
         res = ser.write(value.set_attribute_attr3);
         if (!res.ok()) {
@@ -3846,10 +3361,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_get_attribute_attr1_Hash:
-
 
         res = ser.write(value.get_attribute_attr1);
         if (!res.ok()) {
@@ -3857,10 +3369,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_set_attribute_attr1_Hash:
-
 
         res = ser.write(value.set_attribute_attr1);
         if (!res.ok()) {
@@ -3868,10 +3377,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_get_attribute_attr1_Hash:
-
 
         res = ser.write(value.get_attribute_attr1);
         if (!res.ok()) {
@@ -3879,10 +3385,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_set_attribute_attr1_Hash:
-
 
         res = ser.write(value.set_attribute_attr1);
         if (!res.ok()) {
@@ -3890,10 +3393,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_get_attribute_attr1_Hash:
-
 
         res = ser.write(value.get_attribute_attr1);
         if (!res.ok()) {
@@ -3901,17 +3401,13 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_set_attribute_attr1_Hash:
-
 
         res = ser.write(value.set_attribute_attr1);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
   }
@@ -3924,10 +3420,7 @@ struct xidl::xcdr::Traits<A_Return> {
     }
     switch (value._d) {
 
-
-
       default:
-
 
         res = de.read(value.unknownOp);
         if (!res.ok()) {
@@ -3935,10 +3428,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_func1_Hash:
-
 
         res = de.read(value.func1);
         if (!res.ok()) {
@@ -3946,10 +3436,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_func1_Hash:
-
 
         res = de.read(value.func1);
         if (!res.ok()) {
@@ -3957,10 +3444,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_func1_Hash:
-
 
         res = de.read(value.func1);
         if (!res.ok()) {
@@ -3968,10 +3452,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_func1_Hash:
-
 
         res = de.read(value.func1);
         if (!res.ok()) {
@@ -3979,10 +3460,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_func1_Hash:
-
 
         res = de.read(value.func1);
         if (!res.ok()) {
@@ -3990,21 +3468,15 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_func1_Hash:
-
 
         res = de.read(value.func1);
         if (!res.ok()) {
           return res;
         }
         break;
-
-
 
       case A_get_attribute_attr1_Hash:
-
 
         res = de.read(value.get_attribute_attr1);
         if (!res.ok()) {
@@ -4012,10 +3484,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_get_attribute_attr1_Hash:
-
 
         res = de.read(value.get_attribute_attr1);
         if (!res.ok()) {
@@ -4023,10 +3492,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_get_attribute_attr1_Hash:
-
 
         res = de.read(value.get_attribute_attr1);
         if (!res.ok()) {
@@ -4034,21 +3500,15 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_get_attribute_attr1_Hash:
-
 
         res = de.read(value.get_attribute_attr1);
         if (!res.ok()) {
           return res;
         }
         break;
-
-
 
       case A_set_attribute_attr1_Hash:
-
 
         res = de.read(value.set_attribute_attr1);
         if (!res.ok()) {
@@ -4056,10 +3516,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_get_attribute_attr2_Hash:
-
 
         res = de.read(value.get_attribute_attr2);
         if (!res.ok()) {
@@ -4067,10 +3524,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_set_attribute_attr2_Hash:
-
 
         res = de.read(value.set_attribute_attr2);
         if (!res.ok()) {
@@ -4078,10 +3532,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_get_attribute_attr3_Hash:
-
 
         res = de.read(value.get_attribute_attr3);
         if (!res.ok()) {
@@ -4089,10 +3540,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_set_attribute_attr3_Hash:
-
 
         res = de.read(value.set_attribute_attr3);
         if (!res.ok()) {
@@ -4100,10 +3548,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_get_attribute_attr1_Hash:
-
 
         res = de.read(value.get_attribute_attr1);
         if (!res.ok()) {
@@ -4111,10 +3556,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_set_attribute_attr1_Hash:
-
 
         res = de.read(value.set_attribute_attr1);
         if (!res.ok()) {
@@ -4122,10 +3564,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_get_attribute_attr1_Hash:
-
 
         res = de.read(value.get_attribute_attr1);
         if (!res.ok()) {
@@ -4133,10 +3572,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_set_attribute_attr1_Hash:
-
 
         res = de.read(value.set_attribute_attr1);
         if (!res.ok()) {
@@ -4144,10 +3580,7 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_get_attribute_attr1_Hash:
-
 
         res = de.read(value.get_attribute_attr1);
         if (!res.ok()) {
@@ -4155,17 +3588,13 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_set_attribute_attr1_Hash:
-
 
         res = de.read(value.set_attribute_attr1);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
   }
@@ -4262,12 +3691,9 @@ public:
 
     virtual void attr1(const u8& value) = 0;
 
-
 };
 
-
 constexpr int32_t A_opA_Hash = 3927698569;
-
 
 struct A_opA_In {
 
@@ -4353,17 +3779,13 @@ struct xidl::xcdr::Traits<A_opA_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = ser.write(value.result);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
   }
@@ -4376,17 +3798,13 @@ struct xidl::xcdr::Traits<A_opA_Result> {
     }
     switch (value._d) {
 
-
-
       case dds::RETCODE_OK:
-
 
         res = de.read(value.result);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
   }
@@ -4412,10 +3830,7 @@ struct xidl::xcdr::Traits<A_Call> {
     }
     switch (value._d) {
 
-
-
       default:
-
 
         res = ser.write(value.unknownOp);
         if (!res.ok()) {
@@ -4423,17 +3838,13 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_opA_Hash:
-
 
         res = ser.write(value.opA);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
   }
@@ -4446,10 +3857,7 @@ struct xidl::xcdr::Traits<A_Call> {
     }
     switch (value._d) {
 
-
-
       default:
-
 
         res = de.read(value.unknownOp);
         if (!res.ok()) {
@@ -4457,17 +3865,13 @@ struct xidl::xcdr::Traits<A_Call> {
         }
         break;
 
-
-
       case A_opA_Hash:
-
 
         res = de.read(value.opA);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
   }
@@ -4538,10 +3942,7 @@ struct xidl::xcdr::Traits<A_Return> {
     }
     switch (value._d) {
 
-
-
       default:
-
 
         res = ser.write(value.unknownOp);
         if (!res.ok()) {
@@ -4549,17 +3950,13 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_opA_Hash:
-
 
         res = ser.write(value.opA);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
   }
@@ -4572,10 +3969,7 @@ struct xidl::xcdr::Traits<A_Return> {
     }
     switch (value._d) {
 
-
-
       default:
-
 
         res = de.read(value.unknownOp);
         if (!res.ok()) {
@@ -4583,17 +3977,13 @@ struct xidl::xcdr::Traits<A_Return> {
         }
         break;
 
-
-
       case A_opA_Hash:
-
 
         res = de.read(value.opA);
         if (!res.ok()) {
           return res;
         }
         break;
-
     }
     return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
   }
@@ -4650,10 +4040,7 @@ public:
 
     virtual int16_t opA(const L1& l_1) = 0;
 
-
     using L1 = int32_t;
-
-    
 
     template <>
 
@@ -4664,22 +4051,16 @@ public:
       static inline xidl::xcdr::BufferResult serialize(xidl::xcdr::Serializer<Codec>& ser, const L1& value) {
 
         return xidl::xcdr::Traits<int32_t>::template serialize<Codec>(ser, value);
-
       }
-
-    
 
       template <typename Codec>
 
       static inline xidl::xcdr::BufferResult deserialize(xidl::xcdr::Deserializer<Codec>& de, L1& value) {
 
         return xidl::xcdr::Traits<int32_t>::template deserialize<Codec>(de, value);
-
       }
 
     };
-
-    
 
     constexpr int a = 10;
 
@@ -4691,15 +4072,9 @@ public:
 
         const char* what() const noexcept override { return ""; }
 
-    
-
         int a;
 
-    
-
     };
-
-    
 
     template <>
 
@@ -4711,23 +4086,15 @@ public:
 
         xidl::xcdr::BufferResult res{XcdrFfiError::Ok, 0};
 
-    
-
         res = ser.write(value.a);
 
         if (!res.ok()) {
 
           return res;
-
         }
 
-    
-
         return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
-
       }
-
-    
 
       template <typename Codec>
 
@@ -4735,20 +4102,14 @@ public:
 
         xidl::xcdr::BufferResult res{XcdrFfiError::Ok, 0};
 
-    
-
         res = de.read(value.a);
 
         if (!res.ok()) {
 
           return res;
-
         }
 
-    
-
         return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
-
       }
 
     };

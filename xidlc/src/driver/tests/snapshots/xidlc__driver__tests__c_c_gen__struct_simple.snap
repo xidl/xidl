@@ -6,7 +6,6 @@ expression: output
 struct_simple.c
 ===============
 #include "struct_simple.h"
-
 ===============
 struct_simple.h
 ===============
@@ -24,7 +23,6 @@ struct_simple.h
 struct_simple_xcdr.c
 ===============
 #include "struct_simple_xcdr.h"
-
 ===============
 struct_simple_xcdr.h
 ===============

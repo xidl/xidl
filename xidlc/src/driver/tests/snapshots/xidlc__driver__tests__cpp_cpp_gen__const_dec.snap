@@ -22,8 +22,6 @@ const_dec.h
 #include <string>
 #include <vector>
 
-
 constexpr int32_t a = 10;
-
 
 #endif

@@ -60,6 +60,7 @@ impl CRenderer {
         let mut env = Environment::new();
         env.set_loader(|name| load_template(name).map(Some));
         env.add_filter("to_case", to_case);
+        env.add_filter("clang-format", clang_format_filter);
         Ok(Self { env })
     }
 
@@ -91,4 +92,13 @@ fn load_template(name: &str) -> std::result::Result<String, Error> {
         )
     })?;
     Ok(content)
+}
+
+fn clang_format_filter(value: String) -> std::result::Result<String, Error> {
+    crate::fmt::format_c_source(&value).map_err(|err| {
+        Error::new(
+            ErrorKind::InvalidOperation,
+            format!("clang-format failed: {err}"),
+        )
+    })
 }

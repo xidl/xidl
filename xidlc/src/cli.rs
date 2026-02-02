@@ -28,6 +28,8 @@ enum Command {
 
 #[derive(Debug, Args)]
 struct FormatArgs {
+    #[arg(long = "lang", short = 'l', value_enum, default_value_t = FormatLang::Idl)]
+    lang: FormatLang,
     #[arg(long = "out-dir", short = 'o', default_value = "-")]
     out_dir: String,
     #[arg(long)]
@@ -76,7 +78,14 @@ fn run_format(args: FormatArgs) -> IdlcResult<()> {
     }
 
     for (idx, input) in args.inputs.iter().enumerate() {
-        let formatted = crate::fmt::format_idl_file(input)?;
+        let source = std::fs::read_to_string(input)?;
+        let formatted = match args.lang {
+            FormatLang::Idl => crate::fmt::format_idl_source(&source)?,
+            FormatLang::Rs => crate::fmt::format_rust_source(&source)?,
+            FormatLang::C => crate::fmt::format_c_source(&source)?,
+            FormatLang::Cpp => crate::fmt::format_c_source(&source)?,
+            FormatLang::Cxx => crate::fmt::format_c_source(&source)?,
+        };
         if args.write {
             std::fs::write(input, formatted)?;
         } else if args.out_dir == "-" {
@@ -94,6 +103,15 @@ fn run_format(args: FormatArgs) -> IdlcResult<()> {
     }
 
     Ok(())
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, clap::ValueEnum)]
+enum FormatLang {
+    Idl,
+    Rs,
+    C,
+    Cpp,
+    Cxx,
 }
 
 fn format_output_path(out_dir: &str, input: &Path) -> PathBuf {

@@ -6,7 +6,6 @@ expression: output
 struct_empty.c
 ===============
 #include "struct_empty.h"
-
 ===============
 struct_empty.h
 ===============
@@ -22,7 +21,6 @@ struct_empty.h
 struct_empty_xcdr.c
 ===============
 #include "struct_empty_xcdr.h"
-
 ===============
 struct_empty_xcdr.h
 ===============

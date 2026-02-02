@@ -6,7 +6,6 @@ expression: output
 typedef_dcl.c
 ===============
 #include "typedef_dcl.h"
-
 ===============
 typedef_dcl.h
 ===============
@@ -22,7 +21,6 @@ typedef_dcl.h
 typedef_dcl_xcdr.c
 ===============
 #include "typedef_dcl_xcdr.h"
-
 ===============
 typedef_dcl_xcdr.h
 ===============

@@ -22,8 +22,6 @@ const_hex.h
 #include <string>
 #include <vector>
 
-
 constexpr int32_t a = 0xff;
-
 
 #endif

@@ -6,7 +6,6 @@ expression: output
 const_binary.c
 ===============
 #include "const_binary.h"
-
 ===============
 const_binary.h
 ===============
@@ -24,7 +23,6 @@ static const int32_t a = 0b10;
 const_binary_xcdr.c
 ===============
 #include "const_binary_xcdr.h"
-
 ===============
 const_binary_xcdr.h
 ===============

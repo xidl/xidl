@@ -1,10 +1,10 @@
 use crate::error::{IdlcError, IdlcResult};
 use std::collections::HashMap;
-use std::path::Path;
 use tree_sitter::{Parser, Query, QueryCursor, StreamingIterator};
 
 const IDL_QUERY: &str = include_str!("queries/idl.scm");
 const RUST_QUERY: &str = include_str!("queries/rust.scm");
+const CPP_QUERY: &str = include_str!("queries/cpp.scm");
 const INDENT: &str = "    ";
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -21,17 +21,13 @@ struct Token {
     end: usize,
 }
 
-pub fn format_idl_file(path: &Path) -> IdlcResult<String> {
-    let source = std::fs::read_to_string(path)?;
-    format_idl_source(&source)
-}
-
 pub fn format_idl_source(source: &str) -> IdlcResult<String> {
     format_with_query(
         source,
         tree_sitter_idl::language(),
         IDL_QUERY,
         "idl",
+        false,
         false,
         true,
         true,
@@ -44,6 +40,7 @@ pub fn format_rust_source(source: &str) -> IdlcResult<String> {
         tree_sitter_rust::LANGUAGE.into(),
         RUST_QUERY,
         "rust",
+        false,
         true,
         false,
         false,
@@ -51,11 +48,27 @@ pub fn format_rust_source(source: &str) -> IdlcResult<String> {
     Ok(normalize_blank_lines(&output))
 }
 
+pub fn format_c_source(source: &str) -> IdlcResult<String> {
+    let output = format_with_query(
+        source,
+        tree_sitter_cpp::LANGUAGE.into(),
+        CPP_QUERY,
+        "c",
+        true,
+        true,
+        false,
+        true,
+    )?;
+    Ok(normalize_blank_lines(&output))
+}
+
+#[allow(clippy::too_many_arguments)]
 fn format_with_query(
     source: &str,
     language: tree_sitter::Language,
     query_source: &str,
     label: &str,
+    allow_parse_error: bool,
     preserve_inline_ws: bool,
     indent_parens: bool,
     normalize_indent: bool,
@@ -70,6 +83,9 @@ fn format_with_query(
         .ok_or_else(|| IdlcError::fmt(format!("failed to parse {label}")))?;
     let root = tree.root_node();
     if root.has_error() {
+        if allow_parse_error {
+            return Ok(source.to_string());
+        }
         return Err(IdlcError::fmt(format!("{label} parse error")));
     }
 
@@ -153,6 +169,7 @@ fn collect_tokens(root: tree_sitter::Node<'_>) -> Vec<Token> {
     tokens
 }
 
+#[allow(clippy::too_many_arguments)]
 fn rebuild_source(
     source: &str,
     tokens: &[Token],
@@ -340,6 +357,7 @@ fn normalize_indentation(input: &str, indent_parens: bool) -> String {
         }
 
         let mut indent = line_brace_depth + if indent_parens { line_paren_depth } else { 0 };
+        #[allow(clippy::collapsible_if)]
         if !is_case_label {
             if let Some(depth) = case_depth {
                 if line_brace_depth >= depth {
@@ -422,6 +440,7 @@ fn normalize_indentation(input: &str, indent_parens: bool) -> String {
             i += 1;
         }
 
+        #[allow(clippy::collapsible_if)]
         if is_case_label {
             case_depth = Some(line_brace_depth);
         } else if let Some(depth) = case_depth {

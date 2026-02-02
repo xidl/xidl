@@ -22,9 +22,7 @@ module_dcl.h
 #include <string>
 #include <vector>
 
-
 constexpr u8 a = 10;
-
 
 struct B;
 

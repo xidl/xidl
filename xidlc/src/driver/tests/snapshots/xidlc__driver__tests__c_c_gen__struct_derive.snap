@@ -7,25 +7,28 @@ struct_derive.c
 ===============
 #include "struct_derive.h"
 
+A A_new(void) {
+    A value;
+    A_init(&value);
+    return value;
+}
+
+void A_init(A * self) {
+    * self = (A){
+        0
+    };
+}
 
 A A_new(void) {
-  A value;
-  A_init(&value);
-  return value;
+    A value;
+    A_init(&value);
+    return value;
 }
 
-void A_init(A* self) {
-  *self = (A){0};
-}
-
-A A_new(void) {
-  A value;
-  A_init(&value);
-  return value;
-}
-
-void A_init(A* self) {
-  *self = (A){0};
+void A_init(A * self) {
+    * self = (A){
+        0
+    };
 }
 ===============
 struct_derive.h
@@ -57,49 +60,48 @@ struct_derive_xcdr.c
 ===============
 #include "struct_derive_xcdr.h"
 
-
-XcdrBufferResult A_serialize(A const* self, XcdrBuffer buf) {
-  uint8_t *ptr = buf.ptr;
-  size_t len = buf.len;
-  FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
-  XcdrFfiError err = Ok;
-  
-  (void)self;
-  
-  return (XcdrBufferResult){ Ok, cdr_serializer_position(&serializer) };
+XcdrBufferResult A_serialize(A const * self, XcdrBuffer buf) {
+    uint8_t * ptr = buf.ptr;
+    size_t len = buf.len;
+    FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
+    XcdrFfiError err = Ok;
+    (void)self;
+    return (XcdrBufferResult){
+        Ok, cdr_serializer_position(&serializer)
+    };
 }
 
-XcdrBufferResult A_deserialize(A* self, XcdrConstBuffer buf) {
-  const uint8_t *ptr = buf.ptr;
-  size_t len = buf.len;
-  FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
-  XcdrFfiError err = Ok;
-  
-  (void)self;
-  
-  return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
+XcdrBufferResult A_deserialize(A * self, XcdrConstBuffer buf) {
+    const uint8_t * ptr = buf.ptr;
+    size_t len = buf.len;
+    FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
+    XcdrFfiError err = Ok;
+    (void)self;
+    return (XcdrBufferResult){
+        Ok, cdr_deserializer_position(&deserializer)
+    };
 }
 
-XcdrBufferResult A_serialize(A const* self, XcdrBuffer buf) {
-  uint8_t *ptr = buf.ptr;
-  size_t len = buf.len;
-  FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
-  XcdrFfiError err = Ok;
-  
-  (void)self;
-  
-  return (XcdrBufferResult){ Ok, cdr_serializer_position(&serializer) };
+XcdrBufferResult A_serialize(A const * self, XcdrBuffer buf) {
+    uint8_t * ptr = buf.ptr;
+    size_t len = buf.len;
+    FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
+    XcdrFfiError err = Ok;
+    (void)self;
+    return (XcdrBufferResult){
+        Ok, cdr_serializer_position(&serializer)
+    };
 }
 
-XcdrBufferResult A_deserialize(A* self, XcdrConstBuffer buf) {
-  const uint8_t *ptr = buf.ptr;
-  size_t len = buf.len;
-  FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
-  XcdrFfiError err = Ok;
-  
-  (void)self;
-  
-  return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
+XcdrBufferResult A_deserialize(A * self, XcdrConstBuffer buf) {
+    const uint8_t * ptr = buf.ptr;
+    size_t len = buf.len;
+    FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
+    XcdrFfiError err = Ok;
+    (void)self;
+    return (XcdrBufferResult){
+        Ok, cdr_deserializer_position(&deserializer)
+    };
 }
 ===============
 struct_derive_xcdr.h

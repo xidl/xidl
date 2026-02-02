@@ -6,7 +6,6 @@ expression: output
 const_scoped_name.c
 ===============
 #include "const_scoped_name.h"
-
 ===============
 const_scoped_name.h
 ===============
@@ -70,7 +69,6 @@ static const double const_longdouble = 46.1;
 const_scoped_name_xcdr.c
 ===============
 #include "const_scoped_name_xcdr.h"
-
 ===============
 const_scoped_name_xcdr.h
 ===============

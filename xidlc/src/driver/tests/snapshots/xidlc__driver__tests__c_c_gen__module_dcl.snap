@@ -6,7 +6,6 @@ expression: output
 module_dcl.c
 ===============
 #include "module_dcl.h"
-
 ===============
 module_dcl.h
 ===============
@@ -26,7 +25,6 @@ static const u8 a = 10;
 module_dcl_xcdr.c
 ===============
 #include "module_dcl_xcdr.h"
-
 ===============
 module_dcl_xcdr.h
 ===============

@@ -6,7 +6,6 @@ expression: output
 const_hex.c
 ===============
 #include "const_hex.h"
-
 ===============
 const_hex.h
 ===============
@@ -24,7 +23,6 @@ static const int32_t a = 0xff;
 const_hex_xcdr.c
 ===============
 #include "const_hex_xcdr.h"
-
 ===============
 const_hex_xcdr.h
 ===============

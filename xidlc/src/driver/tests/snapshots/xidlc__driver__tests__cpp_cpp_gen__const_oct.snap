@@ -22,8 +22,6 @@ const_oct.h
 #include <string>
 #include <vector>
 
-
 constexpr int32_t a = 0o10;
-
 
 #endif

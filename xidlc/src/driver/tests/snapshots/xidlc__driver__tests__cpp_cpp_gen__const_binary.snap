@@ -22,8 +22,6 @@ const_binary.h
 #include <string>
 #include <vector>
 
-
 constexpr int32_t a = 0b10;
-
 
 #endif
