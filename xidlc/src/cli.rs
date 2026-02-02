@@ -25,12 +25,24 @@ struct GenerateArgs {
 enum Command {
     #[command(alias = "format")]
     Fmt(FormatArgs),
+    #[command(hide = true)]
+    Highlight(HighlightArgs),
 }
 
 #[derive(Debug, Args)]
 struct FormatArgs {
     #[arg(long = "lang", short = 'l', value_enum, default_value_t = FormatLang::Idl)]
     lang: FormatLang,
+    #[arg(long = "out-dir", short = 'o', default_value = "-")]
+    out_dir: String,
+    #[arg(long)]
+    write: bool,
+    #[arg(required = true)]
+    inputs: Vec<PathBuf>,
+}
+
+#[derive(Debug, Args)]
+struct HighlightArgs {
     #[arg(long = "out-dir", short = 'o', default_value = "-")]
     out_dir: String,
     #[arg(long)]
@@ -50,6 +62,7 @@ impl Cli {
     pub fn run(self) -> IdlcResult<()> {
         match self.command {
             Some(Command::Fmt(args)) => args.execute(),
+            Some(Command::Highlight(args)) => args.execute(),
             None => {
                 let args = self.generate.into_cli_args()?;
                 driver::Driver::run(args)
@@ -124,6 +137,45 @@ impl FormatArgs {
     }
 
     fn format_output_path(&self, input: &Path) -> PathBuf {
+        let file_name = input
+            .file_name()
+            .unwrap_or_else(|| std::ffi::OsStr::new("output.idl"));
+        Path::new(&self.out_dir).join(file_name)
+    }
+}
+
+impl HighlightArgs {
+    fn execute(self) -> IdlcResult<()> {
+        if self.inputs.len() > 1 && self.out_dir == "-" && !self.write {
+            return Err(IdlcError::fmt(
+                "multiple inputs require --write or --out-dir".to_string(),
+            ));
+        }
+
+        for (idx, input) in self.inputs.iter().enumerate() {
+            let source = std::fs::read_to_string(input)?;
+            let highlighted =
+                crate::highlight::highlight_idl(&source, input.to_string_lossy().as_ref())?;
+            if self.write {
+                std::fs::write(input, highlighted.text)?;
+            } else if self.out_dir == "-" {
+                if idx > 0 {
+                    println!();
+                }
+                print!("{}", highlighted.text);
+            } else {
+                let out_path = self.highlight_output_path(input);
+                if let Some(parent) = out_path.parent() {
+                    std::fs::create_dir_all(parent)?;
+                }
+                std::fs::write(out_path, highlighted.text)?;
+            }
+        }
+
+        Ok(())
+    }
+
+    fn highlight_output_path(&self, input: &Path) -> PathBuf {
         let file_name = input
             .file_name()
             .unwrap_or_else(|| std::ffi::OsStr::new("output.idl"));

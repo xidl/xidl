@@ -3,6 +3,7 @@ mod driver;
 mod error;
 mod fmt;
 mod generate;
+mod highlight;
 mod jsonrpc;
 mod macros;
 
@@ -19,7 +20,11 @@ fn main() {
         .init();
 
     if let Err(err) = cli::Cli::parse().run() {
-        tracing::error!("idlc: {err}");
+        if let crate::error::IdlcError::Diagnostic(report) = err {
+            eprintln!("{report:?}");
+        } else {
+            tracing::error!("idlc: {err}");
+        }
         std::process::exit(1);
     }
 }

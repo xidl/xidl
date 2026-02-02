@@ -14,6 +14,8 @@ pub enum IdlcError {
     Rpc(String),
     #[error("{0}")]
     Fmt(String),
+    #[error("{0}")]
+    Diagnostic(miette::Report),
 }
 
 pub type IdlcResult<T> = std::result::Result<T, IdlcError>;
@@ -29,5 +31,9 @@ impl IdlcError {
 
     pub fn fmt(message: impl Into<String>) -> Self {
         Self::Fmt(message.into())
+    }
+
+    pub fn diagnostic(report: miette::Report) -> Self {
+        Self::Diagnostic(report)
     }
 }
