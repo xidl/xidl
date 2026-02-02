@@ -23,7 +23,8 @@ struct GenerateArgs {
 
 #[derive(Debug, Subcommand)]
 enum Command {
-    Format(FormatArgs),
+    #[command(alias = "format")]
+    Fmt(FormatArgs),
 }
 
 #[derive(Debug, Args)]
@@ -48,7 +49,7 @@ pub struct CliArgs {
 pub fn run() -> IdlcResult<()> {
     let cli = Cli::parse();
     match cli.command {
-        Some(Command::Format(args)) => run_format(args),
+        Some(Command::Fmt(args)) => run_format(args),
         None => {
             if cli.generate.inputs.is_empty() {
                 return Err(IdlcError::fmt("missing input files".to_string()));
@@ -81,10 +82,9 @@ fn run_format(args: FormatArgs) -> IdlcResult<()> {
         let source = std::fs::read_to_string(input)?;
         let formatted = match args.lang {
             FormatLang::Idl => crate::fmt::format_idl_source(&source)?,
-            FormatLang::Rs => crate::fmt::format_rust_source(&source)?,
+            FormatLang::Rust => crate::fmt::format_rust_source(&source)?,
             FormatLang::C => crate::fmt::format_c_source(&source)?,
             FormatLang::Cpp => crate::fmt::format_c_source(&source)?,
-            FormatLang::Cxx => crate::fmt::format_c_source(&source)?,
         };
         if args.write {
             std::fs::write(input, formatted)?;
@@ -108,10 +108,11 @@ fn run_format(args: FormatArgs) -> IdlcResult<()> {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, clap::ValueEnum)]
 enum FormatLang {
     Idl,
-    Rs,
+    #[value(aliases = ["rs"])]
+    Rust,
     C,
+    #[value(aliases = ["cpp", "c++"])]
     Cpp,
-    Cxx,
 }
 
 fn format_output_path(out_dir: &str, input: &Path) -> PathBuf {
