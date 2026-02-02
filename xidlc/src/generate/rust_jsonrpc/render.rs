@@ -26,6 +26,8 @@ impl JsonRpcRenderer {
     pub fn new() -> IdlcResult<Self> {
         let mut env = Environment::new();
         env.set_loader(|name| load_template(name).map(Some));
+        env.add_filter("rust", rust_format_filter);
+        env.add_filter("rustfmt", rust_format_filter);
         Ok(Self { env })
     }
 
@@ -37,9 +39,10 @@ impl JsonRpcRenderer {
             .map_err(|err| IdlcError::template(err.to_string()))
     }
 
-    pub fn extend(&mut self, props: HashMap<String, serde_json::Value>) {
+    pub fn extend(&mut self, props: &HashMap<String, serde_json::Value>) {
         for (k, v) in props {
-            self.env.add_global(k, minijinja::Value::from_serialize(v));
+            self.env
+                .add_global(k.clone(), minijinja::Value::from_serialize(v));
         }
     }
 }
@@ -59,4 +62,13 @@ fn load_template(name: &str) -> std::result::Result<String, Error> {
         )
     })?;
     Ok(content)
+}
+
+fn rust_format_filter(value: String) -> std::result::Result<String, Error> {
+    crate::fmt::format_rust_source(&value).map_err(|err| {
+        Error::new(
+            ErrorKind::InvalidOperation,
+            format!("rust format failed: {err}"),
+        )
+    })
 }

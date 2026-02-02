@@ -23,7 +23,7 @@ pub fn generate(
     let filename = format!("{file_name}.rs");
 
     let mut renderer = JsonRpcRenderer::new()?;
-    renderer.extend(props);
+    renderer.extend(&props);
     let output = spec.render(&renderer)?;
 
     let content = renderer.render_template(
@@ -32,6 +32,7 @@ pub fn generate(
             "definitions": output.source,
         }),
     )?;
+    let content = maybe_format_rust(content, &props)?;
 
     let mut artifacts = vec![Artifact::new_file(ArtifactFile {
         path: filename,
@@ -61,7 +62,8 @@ pub(crate) struct RustJsonRpcCodegen;
 impl crate::jsonrpc::Codegen for RustJsonRpcCodegen {
     fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
         Ok(hashmap! {
-            "expand_interface" => false
+            "expand_interface" => false,
+            "format_rust" => true
         })
     }
 
@@ -98,4 +100,19 @@ fn strip_interfaces(spec: hir::Specification) -> hir::Specification {
     }
 
     hir::Specification(strip_defs(spec.0))
+}
+
+fn maybe_format_rust(
+    source: String,
+    properties: &HashMap<String, serde_json::Value>,
+) -> IdlcResult<String> {
+    let format = properties
+        .get("format_rust")
+        .and_then(|value| value.as_bool())
+        .unwrap_or(false);
+    if format {
+        crate::fmt::format_rust_source(&source)
+    } else {
+        Ok(source)
+    }
 }

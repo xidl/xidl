@@ -5,25 +5,16 @@ expression: output
 ===============
 simple_union.rs
 ===============
-
-
-
     #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Tag {
-
     A,
     B
 }
-
-
-
-
 
 pub struct SimpleUnion {
     tag: Tag,
     data: SimpleUnionData,
 }
-
 
 union SimpleUnionData {
     a: core::mem::ManuallyDrop<int>,
@@ -33,88 +24,84 @@ union SimpleUnionData {
 impl Drop for SimpleUnion {
     fn drop(&mut self) {
         match self.tag {
-            
-                A => {
-                    unsafe {
-                        core::mem::ManuallyDrop::drop(&mut self.data.a);
-                    }
+            A => {
+                unsafe {
+                    core::mem::ManuallyDrop::drop(&mut self.data.a);
                 }
-            
-                B => {
-                    unsafe {
-                        core::mem::ManuallyDrop::drop(&mut self.data.b);
-                    }
+            }
+            B => {
+                unsafe {
+                    core::mem::ManuallyDrop::drop(&mut self.data.b);
                 }
-            
+            }
         }
     }
 }
 
 impl SimpleUnion {
-    
-
-    
-        pub fn new_a(value: int) -> Self {
-            
-            
-            Self {
-                tag: A,
-                data: SimpleUnionData {
-                    a: core::mem::ManuallyDrop::new(value),
-                }
+    pub fn new_a(value: int) -> Self {
+        Self {
+            tag: A,
+            data: SimpleUnionData {
+                a: core::mem::ManuallyDrop::new(value),
             }
-        }
+            }
+    }
 
         pub fn is_a(&self) -> bool {
-            matches!(self.tag, A)
-        }
+        matches!(self.tag, A)
+    }
 
         pub unsafe fn as_a(&self) -> &int {
-            unsafe { &self.data.a }
+        unsafe {
+            &self.data.a
         }
+    }
 
         pub unsafe fn as_a_mut(&mut self) -> &mut int {
-            unsafe { &mut self.data.a }
+        unsafe {
+            &mut self.data.a
         }
+    }
 
         pub unsafe fn into_a(self) -> int {
-            unsafe {
-                let mut forget = core::mem::ManuallyDrop::new(self);
-                core::mem::ManuallyDrop::take(&mut forget.data.a)
-            }
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.a)
         }
-    
+    }
+
         pub fn new_b(value: int) -> Self {
-            
-            
-            Self {
-                tag: B,
-                data: SimpleUnionData {
-                    b: core::mem::ManuallyDrop::new(value),
-                }
+        Self {
+            tag: B,
+            data: SimpleUnionData {
+                b: core::mem::ManuallyDrop::new(value),
             }
-        }
+            }
+    }
 
         pub fn is_b(&self) -> bool {
-            matches!(self.tag, B)
-        }
+        matches!(self.tag, B)
+    }
 
         pub unsafe fn as_b(&self) -> &int {
-            unsafe { &self.data.b }
+        unsafe {
+            &self.data.b
         }
+    }
 
         pub unsafe fn as_b_mut(&mut self) -> &mut int {
-            unsafe { &mut self.data.b }
+        unsafe {
+            &mut self.data.b
         }
+    }
 
         pub unsafe fn into_b(self) -> int {
-            unsafe {
-                let mut forget = core::mem::ManuallyDrop::new(self);
-                core::mem::ManuallyDrop::take(&mut forget.data.b)
-            }
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.b)
         }
-    
-
+    }
 
     pub fn tag(&self) -> &Tag {
         &self.tag

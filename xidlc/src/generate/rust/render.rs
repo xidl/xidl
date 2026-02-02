@@ -44,6 +44,8 @@ impl RustRenderer {
         env.add_function("md5_14", |value: String| md5_prefix(value.as_bytes(), 14));
         env.add_function("md5_4", |value: String| md5_prefix(value.as_bytes(), 4));
         env.add_function("name_hash", |value: String| md5_prefix(value.as_bytes(), 4));
+        env.add_filter("rust", rust_format_filter);
+        env.add_filter("rustfmt", rust_format_filter);
         for (k, v) in attribute {
             env.add_global(k, minijinja::Value::from_serialize(v));
         }
@@ -81,6 +83,15 @@ fn load_template(name: &str) -> std::result::Result<String, Error> {
         )
     })?;
     Ok(content)
+}
+
+fn rust_format_filter(value: String) -> std::result::Result<String, Error> {
+    crate::fmt::format_rust_source(&value).map_err(|err| {
+        Error::new(
+            ErrorKind::InvalidOperation,
+            format!("rust format failed: {err}"),
+        )
+    })
 }
 
 fn md5_prefix(input: &[u8], len: usize) -> Vec<u8> {

@@ -46,6 +46,7 @@ pub fn generate_with_properties(
             "definitions": output.source,
         }),
     )?;
+    let source = maybe_format_rust(source, properties)?;
 
     Ok(vec![Artifact::new_file(ArtifactFile {
         path: filename,
@@ -57,7 +58,9 @@ pub(crate) struct RustCodegen;
 
 impl crate::jsonrpc::Codegen for RustCodegen {
     fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
-        Ok(Default::default())
+        Ok(crate::macros::hashmap! {
+            "format_rust" => true
+        })
     }
 
     fn generate(
@@ -75,5 +78,20 @@ fn map_codegen_error(err: crate::error::IdlcError) -> xidl_jsonrpc::Error {
         code: xidl_jsonrpc::ErrorCode::ServerError,
         message: err.to_string(),
         data: None,
+    }
+}
+
+fn maybe_format_rust(
+    source: String,
+    properties: &ParserProperties,
+) -> IdlcResult<String> {
+    let format = properties
+        .get("format_rust")
+        .and_then(|value| value.as_bool())
+        .unwrap_or(false);
+    if format {
+        crate::fmt::format_rust_source(&source)
+    } else {
+        Ok(source)
     }
 }

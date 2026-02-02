@@ -4,6 +4,7 @@ use std::path::Path;
 use tree_sitter::{Parser, Query, QueryCursor, StreamingIterator};
 
 const IDL_QUERY: &str = include_str!("queries/idl.scm");
+const RUST_QUERY: &str = include_str!("queries/rust.scm");
 const INDENT: &str = "    ";
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -26,20 +27,53 @@ pub fn format_idl_file(path: &Path) -> IdlcResult<String> {
 }
 
 pub fn format_idl_source(source: &str) -> IdlcResult<String> {
+    format_with_query(
+        source,
+        tree_sitter_idl::language(),
+        IDL_QUERY,
+        "idl",
+        false,
+        true,
+        true,
+    )
+}
+
+pub fn format_rust_source(source: &str) -> IdlcResult<String> {
+    let output = format_with_query(
+        source,
+        tree_sitter_rust::LANGUAGE.into(),
+        RUST_QUERY,
+        "rust",
+        true,
+        false,
+        false,
+    )?;
+    Ok(normalize_blank_lines(&output))
+}
+
+fn format_with_query(
+    source: &str,
+    language: tree_sitter::Language,
+    query_source: &str,
+    label: &str,
+    preserve_inline_ws: bool,
+    indent_parens: bool,
+    normalize_indent: bool,
+) -> IdlcResult<String> {
     let mut parser = Parser::new();
     parser
-        .set_language(&tree_sitter_idl::language())
-        .map_err(|err| IdlcError::fmt(format!("set idl language: {err}")))?;
+        .set_language(&language)
+        .map_err(|err| IdlcError::fmt(format!("set {label} language: {err}")))?;
 
     let tree = parser
         .parse(source, None)
-        .ok_or_else(|| IdlcError::fmt("failed to parse idl".to_string()))?;
+        .ok_or_else(|| IdlcError::fmt(format!("failed to parse {label}")))?;
     let root = tree.root_node();
     if root.has_error() {
-        return Err(IdlcError::fmt("idl parse error".to_string()));
+        return Err(IdlcError::fmt(format!("{label} parse error")));
     }
 
-    let query = Query::new(&tree_sitter_idl::language(), IDL_QUERY)
+    let query = Query::new(&language, query_source)
         .map_err(|err| IdlcError::fmt(format!("query error: {err}")))?;
     let mut cursor = QueryCursor::new();
 
@@ -85,6 +119,9 @@ pub fn format_idl_source(source: &str) -> IdlcResult<String> {
         &prepend_actions,
         &indent_pre,
         &indent_post,
+        preserve_inline_ws,
+        indent_parens,
+        normalize_indent,
     )
 }
 
@@ -123,6 +160,9 @@ fn rebuild_source(
     prepend_actions: &[(usize, InsertKind)],
     indent_pre: &HashMap<usize, i32>,
     indent_post: &HashMap<usize, i32>,
+    preserve_inline_ws: bool,
+    indent_parens: bool,
+    normalize_indent: bool,
 ) -> IdlcResult<String> {
     let mut output = String::with_capacity(source.len());
     let mut indent_level: i32 = 0;
@@ -174,7 +214,9 @@ fn rebuild_source(
         } else if gap.chars().all(|c| c.is_whitespace()) {
             let append = actions_for(append_actions, prev_end);
             let prepend = actions_for(prepend_actions, token.start);
-            if append.is_empty() && prepend.is_empty() && gap.contains('\n') {
+            if append.is_empty() && prepend.is_empty() && preserve_inline_ws {
+                output.push_str(gap);
+            } else if append.is_empty() && prepend.is_empty() && gap.contains('\n') {
                 let count = gap.chars().filter(|c| *c == '\n').count();
                 output.push_str(&"\n".repeat(count));
                 for _ in 0..indent_level {
@@ -219,7 +261,11 @@ fn rebuild_source(
         output.push_str(tail);
     }
 
-    Ok(normalize_indentation(&output))
+    if normalize_indent {
+        Ok(normalize_indentation(&output, indent_parens))
+    } else {
+        Ok(output)
+    }
 }
 
 fn apply_indent(current: i32, delta: Option<&i32>) -> i32 {
@@ -266,7 +312,7 @@ fn actions_for(actions: &[(usize, InsertKind)], pos: usize) -> Vec<InsertKind> {
         .collect()
 }
 
-fn normalize_indentation(input: &str) -> String {
+fn normalize_indentation(input: &str, indent_parens: bool) -> String {
     let mut out = String::with_capacity(input.len());
     let mut brace_depth: i32 = 0;
     let mut paren_depth: i32 = 0;
@@ -293,7 +339,7 @@ fn normalize_indentation(input: &str) -> String {
             line_paren_depth = (line_paren_depth - 1).max(0);
         }
 
-        let mut indent = line_brace_depth + line_paren_depth;
+        let mut indent = line_brace_depth + if indent_parens { line_paren_depth } else { 0 };
         if !is_case_label {
             if let Some(depth) = case_depth {
                 if line_brace_depth >= depth {
@@ -386,6 +432,42 @@ fn normalize_indentation(input: &str) -> String {
     }
 
     if out.ends_with('\n') {
+        out.pop();
+    }
+    out
+}
+
+fn normalize_blank_lines(input: &str) -> String {
+    let mut out = String::with_capacity(input.len());
+    let mut started = false;
+    let mut blank_run = 0usize;
+    let mut pending_blank = false;
+
+    for line in input.lines() {
+        let trimmed = line.trim_end_matches('\r');
+        if trimmed.trim().is_empty() {
+            if !started {
+                continue;
+            }
+            blank_run += 1;
+            if blank_run > 1 {
+                continue;
+            }
+            pending_blank = true;
+            continue;
+        }
+
+        if pending_blank && trimmed.trim() != "}" {
+            out.push('\n');
+        }
+        pending_blank = false;
+        started = true;
+        blank_run = 0;
+        out.push_str(trimmed);
+        out.push('\n');
+    }
+
+    while out.ends_with('\n') {
         out.pop();
     }
     out
