@@ -1,24 +1,29 @@
 # IDL4 to Rust mapping
 
-## Core Data Types
+This document describes how xidlc maps IDL types to Rust types. The mapping
+reflects the current Rust generator behavior (including JSON-RPC output) and
+does not rely on template definitions.
 
-### Modules
+## General
+
+- IDL identifiers map directly to Rust identifiers.
+- Rust keywords are escaped using raw identifiers (e.g., `type` becomes `r#type`).
+- IDL modules map to Rust modules of the same name.
 
 ```idl
 module my_math {
-
 }
 ```
-
-Would map to the following Rust code:
 
 ```rust
 mod my_math {
-
 }
 ```
 
-### Constants
+## Constants
+
+- Numeric constants map to Rust numeric constants with the mapped type.
+- `string` and `wstring` constants map to `&'static str`.
 
 ```idl
 module my_math {
@@ -27,22 +32,18 @@ module my_math {
 }
 ```
 
-become:
-
 ```rust
 mod my_math {
     const my_string: &'static str = "My String Value";
-    cosnt PI: f64 = 3.141592;
+    const PI: f64 = 3.141592;
 }
 ```
 
-Don't support wstring.
+Wide string literals are rendered without the leading `L` in Rust.
 
-## Data Types
+## Core Data Types
 
-### Basic Types
-
-#### Integer Types
+### Integer Types
 
 | IDL Type           | Rust Type |
 | ------------------ | --------- |
@@ -52,67 +53,100 @@ Don't support wstring.
 | unsigned long      | u32       |
 | long long          | i64       |
 | unsigned long long | u64       |
+| char               | i8        |
+| unsigned char      | u8        |
+| int8               | i8        |
+| uint8              | u8        |
+| int16              | i16       |
+| uint16             | u16       |
+| int32              | i32       |
+| uint32             | u32       |
+| int64              | i64       |
+| uint64             | u64       |
 
-#### Floating Point Types
+### Floating-Point Types
 
 | IDL Type    | Rust Type |
 | ----------- | --------- |
-| float       | f32       |
+| float       | f64       |
 | double      | f64       |
 | long double | f64       |
 
-#### char type
+### Character Types
 
-The IDL `char` type shall be mapped to the Rust `char` type.
+- IDL `char` and `wchar` map to Rust `char` for literals and to `i8` for
+  `IntegerType::Char` in integer mappings. In type specifications, `char` and
+  `wchar` map to Rust `char`.
 
-#### wchar type
+### Boolean Type
 
-DON'T SUPPORT YET
+- IDL `boolean` maps to Rust `bool`. IDL `TRUE`/`FALSE` map to `true`/`false`.
 
-#### Boolean type
+### Octet Type
 
-The IDL `boolean` type shall be mapped to the Rust `bool` type. the IDL
-constants `TRUE` and `FALSE` shall be mapped to the Rust constants `true` and
-`false`.
+- IDL `octet` maps to Rust `u8`.
 
-#### octet type
+### Any/Object/ValueBase
 
-The IDL `octet` type shall be mapped to the Rust `u8` type.
+- IDL `any`, `object`, and `valuebase` map to raw pointers: `*mut c_void`.
 
-### Template types
+## Template Types
 
-TODO
+### Sequences
 
-### Strings
+- `sequence<T>` maps to `Vec<T>`.
 
-The IDL `string` type shall be mapped to the Rust `String` type.
+```idl
+typedef sequence<long> V1;
+```
 
-The IDL `string<N>` DON'T SUPPORT YET.
+```rust
+type V1 = Vec<i32>;
+```
 
-### Wstrings
+### Maps
 
-DON'T SUPPORT YET.
+- `map<K, V>` maps to `BTreeMap<K, V>`.
 
-### Fixed Type
+```idl
+typedef map<string, long> M;
+```
 
-DON'T SUPPORT YET.
+```rust
+type M = BTreeMap<String, i32>;
+```
 
-### Constructed types
+### Arrays
 
-#### Structures
+- IDL arrays map to Rust fixed-size arrays using declarator dimensions.
 
-An IDL struct shall be mapped to a Rust struct with the same name. The mapped
-struct shall provide:
+```idl
+typedef long Matrix[3][2];
+```
 
-- A default constructor that initializes all built-in data types to their
-  default value as specified in Clause 7.2.4.1, enumerators to their first
-  value, and the rest of members using their default constructor. constructed
-  type with strong type safety.
-- A set of comparison operators, including at least "equal to" and "not equal
-  to."
-- A `Debug` trait would be implemented.
+```rust
+type Matrix = [[i32; 2]; 3];
+```
 
-For Example:
+### Strings and Wstrings
+
+- `string` and `wstring` map to Rust `String`.
+- Bounded strings are currently treated as unbounded `String`.
+
+### Fixed
+
+- IDL `fixed` maps to Rust `f64`.
+
+## Constructed Types
+
+### Structures
+
+- IDL `struct` maps to a Rust `struct` with the same name.
+- Field names are mapped using Rust identifier escaping.
+- Array declarators inside structs follow the same array mapping rules.
+- No inherent methods are generated for structs. Access is via public fields.
+- If `@derive(...)` annotations are present, the generated struct includes the
+  corresponding `#[derive(...)]` list.
 
 ```idl
 struct MyStruct {
@@ -121,85 +155,122 @@ struct MyStruct {
 };
 ```
 
-would map to the following Rust struct:
-
 ```rust
-#[derive(Default, PartialEq, Eq, Clone, Debug)]
 pub struct MyStruct {
     pub a_long: i32,
     pub a_short: i16,
 }
 ```
 
-#### Unions
+### Unions
 
-An IDL union shall be mapped to a Rust struct with the same name. The structure
-shall provide the same constructors, destructors, and operators for mapped
-structures defined in Clause 7.2.4.3.1.
+- IDL `union` maps to a Rust `struct` that stores a discriminator tag and a
+  union payload. The discriminator type uses the same mapping rules as other
+  types.
+- The generated struct provides constructors for each case, a tag accessor, and
+  unsafe accessors to the active payload. A `Drop` implementation releases the
+  active union field.
+- When `Serialize`/`Deserialize` are derived, unions are encoded as externally
+  tagged variants keyed by the discriminator case.
 
-Moreover, the mapped class shall provide:
+Member functions generated per case `case_x`:
 
-- A public accessor constant method named _d() that returns the value of the
-  discriminator, with the following signature:
+- `new_case_x(value: T) -> Self`
+- `is_case_x(&self) -> bool`
+- `unsafe fn as_case_x(&self) -> &T`
+- `unsafe fn as_case_x_mut(&mut self) -> &mut T`
+- `unsafe fn into_case_x(self) -> T`
 
-  ```rust
-  fn _d(&self) <DiscriminatorType>;
-  ```
+Common member function:
 
-- A public modifier method named _d() that sets the value of the discriminator
-  with the following signature:
-  ```rust
-  fn _d(&mut self, value: <DiscriminatorType>);
-  ```
-  Setting the discriminator to an invalid value (e.g., to a value that changes
-  the union member that is currently selected) may result in an error
-- For each union member:
-  - A public accessor method with the name of the union member:
-    ```rust
-    fn <member_name>(&self) -> &<member_type>;
-    fn <member_name>_mut(&mut self) -> &mut <member_type>;
-    ```
-    Accessing an invalid union member may result in an undefined error.
-- If the union has a default case, the default constructor shall initialize the
-  discriminator, and the selected member field following the initialization
-  rules described in Clause 7.2.4.3.1. If it does not, the default constructor
-  shall initialize the union to the first discriminant value specified in the
-  IDL definition
-- If the IDL union definition has an implicit default member (i.e., if the union
-  does not have a default case and not all permissive discriminator values are
-  listed), the class shall provide a method named _default() that explicitly
-  sets the discriminator value to a legal default value. void _default();
+- `tag(&self) -> &DiscriminatorType`
 
-For example, the IDL `union` declaration below:
-
-```idl
-union AUnion switch (octet) {
-    case 1:
-        long a_long;
-    case 2:
-    case 3:
-        short a_short;
-    case 4:
-        AStruct a_struct;
-    default:
-        octet a_byte_default;
-    };
-```
-
-would map to the following Rust code:
+Example shape (simplified):
 
 ```rust
-pub struct AUnion {
+pub enum ExampleKind {
+    CaseA,
+    CaseB,
 }
 
-impl Default for AUnion {
-    fn default() -> Self {
-        //
-    }
+pub struct Example {
+    tag: ExampleKind,
+    data: ExampleData,
 }
 
-impl AUnion {
-    pub fn _d(&self);
-    pub fn a_long(&);
+union ExampleData {
+    case_a: core::mem::ManuallyDrop<i32>,
+    case_b: core::mem::ManuallyDrop<String>,
+}
+
+impl Example {
+    pub fn new_case_a(value: i32) -> Self { /* ... */ }
+    pub fn new_case_b(value: String) -> Self { /* ... */ }
+    pub fn tag(&self) -> &ExampleKind { /* ... */ }
+    pub unsafe fn as_case_a(&self) -> &i32 { /* ... */ }
+    pub unsafe fn as_case_b(&self) -> &String { /* ... */ }
+}
+```
+
+### Enums
+
+- IDL `enum` maps to a Rust `enum` with the same member names.
+- No inherent methods are generated for enums.
+
+### Bitsets
+
+- IDL `bitset` maps to a Rust struct representation with fields and widths.
+- Bitfield types map as follows: `bool`, `octet` -> `u8`, signed -> `i32`,
+  unsigned -> `u32`.
+- No inherent methods are generated; fields are stored in the generated struct.
+- If `@derive(...)` annotations are present, the generated struct includes the
+  corresponding `#[derive(...)]` list.
+
+### Bitmasks
+
+- IDL `bitmask` maps to a Rust type with generated constant flags.
+- No inherent methods are generated.
+- If `@derive(...)` annotations are present, the generated type includes the
+  corresponding `#[derive(...)]` list.
+
+### Exceptions
+
+- IDL `exception` maps to a Rust `struct` with the same member layout.
+- No inherent methods are generated for exceptions. Access is via public fields.
+
+## Interfaces
+
+IDL interfaces are rendered into Rust traits with method signatures derived
+from operation and attribute declarations.
+
+- `in` parameters are passed by value for value types (integers, floats, char,
+  wchar, bool) and by reference for others.
+- `out` and `inout` parameters are passed as `&mut T`.
+- `raises` clauses on operations are currently ignored by the Rust generator and
+  do not change the generated method signatures.
+- Attribute accessors are generated as methods. Readonly attributes generate a
+  getter only. Read/write attributes generate a getter and a setter named
+  `set_<name>`.
+- `raises` clauses on attributes are currently ignored by the Rust generator and
+  do not change the generated method signatures.
+
+Example:
+
+```idl
+interface Calc {
+    long add(in long a, in long b);
+    void fill(out sequence<long> data);
+    readonly attribute long version;
+    attribute string name;
+};
+```
+
+```rust
+trait Calc {
+    fn add(&self, a: i32, b: i32) -> i32;
+    fn fill(&self, data: &mut Vec<i32>) -> ();
+    fn version(&self) -> i32;
+    fn name(&self) -> &String;
+    fn set_name(&self, value: &String) -> ();
 }
 ```
