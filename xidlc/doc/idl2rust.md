@@ -9,6 +9,7 @@ does not rely on template definitions.
 - IDL identifiers map directly to Rust identifiers.
 - Rust keywords are escaped using raw identifiers (e.g., `type` becomes `r#type`).
 - IDL modules map to Rust modules of the same name.
+- IDL declarations outside any module map to Rust items at module root.
 
 ```idl
 module my_math {
@@ -24,6 +25,7 @@ mod my_math {
 
 - Numeric constants map to Rust numeric constants with the mapped type.
 - `string` and `wstring` constants map to `&'static str`.
+- Wide string and wide character literals drop the leading `L`.
 
 ```idl
 module my_math {
@@ -39,7 +41,13 @@ mod my_math {
 }
 ```
 
-Wide string literals are rendered without the leading `L` in Rust.
+```idl
+const wstring ws = "Hello World";
+```
+
+```rust
+const ws: &'static str = "Hello World";
+```
 
 ## Core Data Types
 
@@ -74,9 +82,8 @@ Wide string literals are rendered without the leading `L` in Rust.
 
 ### Character Types
 
-- IDL `char` and `wchar` map to Rust `char` for literals and to `i8` for
-  `IntegerType::Char` in integer mappings. In type specifications, `char` and
-  `wchar` map to Rust `char`.
+- IDL `char` and `wchar` map to Rust `char` in type specifications.
+- IDL integer types `char` and `unsigned char` map to `i8` and `u8` (see table).
 
 ### Boolean Type
 
@@ -90,30 +97,38 @@ Wide string literals are rendered without the leading `L` in Rust.
 
 - IDL `any`, `object`, and `valuebase` map to raw pointers: `*mut c_void`.
 
+### Native Types
+
+- IDL `native` declarations map to `*mut c_void`.
+
 ## Template Types
 
 ### Sequences
 
-- `sequence<T>` maps to `Vec<T>`.
+- `sequence<T>` maps to `Vec<T>`. Bounds are currently ignored.
 
 ```idl
 typedef sequence<long> V1;
+typedef sequence<long, 3> V2;
 ```
 
 ```rust
 type V1 = Vec<i32>;
+type V2 = Vec<i32>;
 ```
 
 ### Maps
 
-- `map<K, V>` maps to `BTreeMap<K, V>`.
+- `map<K, V>` maps to `BTreeMap<K, V>`. Bounds are currently ignored.
 
 ```idl
 typedef map<string, long> M;
+typedef map<string, long, 10> M2;
 ```
 
 ```rust
 type M = BTreeMap<String, i32>;
+type M2 = BTreeMap<String, i32>;
 ```
 
 ### Arrays
@@ -147,6 +162,7 @@ type Matrix = [[i32; 2]; 3];
 - No inherent methods are generated for structs. Access is via public fields.
 - If `@derive(...)` annotations are present, the generated struct includes the
   corresponding `#[derive(...)]` list.
+- Struct inheritance is represented as a `base: <Parent>` field.
 
 ```idl
 struct MyStruct {
@@ -162,6 +178,19 @@ pub struct MyStruct {
 }
 ```
 
+```idl
+struct ChildStruct : MyStruct {
+    float a_float;
+};
+```
+
+```rust
+pub struct ChildStruct {
+    pub base: MyStruct,
+    pub a_float: f64,
+}
+```
+
 ### Unions
 
 - IDL `union` maps to a Rust `struct` that stores a discriminator tag and a
@@ -172,6 +201,7 @@ pub struct MyStruct {
   active union field.
 - When `Serialize`/`Deserialize` are derived, unions are encoded as externally
   tagged variants keyed by the discriminator case.
+- `default` case constructors use `SwitchType::default()` for the tag.
 
 Member functions generated per case `case_x`:
 
@@ -215,9 +245,8 @@ impl Example {
 ### Enums
 
 - IDL `enum` maps to a Rust `enum` with the same member names.
-- No inherent methods are generated for enums.
-- If `@derive(...)` annotations are present, the generated enum includes the
-  corresponding `#[derive(...)]` list.
+- Enums always derive `Debug`, `Clone`, `Copy`, `PartialEq`, and `Eq`.
+- `@derive(...)` annotations are not currently applied to enums.
 
 ```idl
 enum Color {
@@ -237,12 +266,14 @@ pub enum Color {
 
 ### Bitsets
 
-- IDL `bitset` maps to a Rust struct representation with fields and widths.
+- IDL `bitset` maps to a Rust struct with fields for each named bitfield.
+- Bitfield widths are currently ignored in the Rust type layout.
 - Bitfield types map as follows: `bool`, `octet` -> `u8`, signed -> `i32`,
   unsigned -> `u32`.
 - No inherent methods are generated; fields are stored in the generated struct.
 - If `@derive(...)` annotations are present, the generated struct includes the
   corresponding `#[derive(...)]` list.
+- Bitset inheritance is represented as a `base: <Parent>` field.
 
 ```idl
 bitset Flags {
@@ -265,8 +296,9 @@ Required methods:
 
 ### Bitmasks
 
-- IDL `bitmask` maps to a Rust type with generated constant flags.
-- No inherent methods are generated.
+- IDL `bitmask` maps to a Rust struct with a `value: u32` field.
+- Flags are generated as `const` values in declaration order. `@position` and
+  `@bit_bound` are currently ignored.
 - If `@derive(...)` annotations are present, the generated type includes the
   corresponding `#[derive(...)]` list.
 
@@ -280,7 +312,7 @@ bitmask Perms {
 
 ```rust
 pub struct Perms {
-    // generated flag constants
+    pub value: u32,
 }
 ```
 
@@ -327,6 +359,7 @@ from operation and attribute declarations.
   `set_<name>`.
 - `raises` clauses on attributes are currently ignored by the Rust generator and
   do not change the generated method signatures.
+- `readonly` attributes with `raises` are currently skipped in output.
 
 Example:
 
@@ -343,7 +376,7 @@ interface Calc {
 
 xidlc supports a builtin `@derive(...)` annotation to attach Rust `#[derive(...)]`
 attributes to generated types. This annotation is collected from the IDL element
-and applied to structs, unions, enums, bitsets, and bitmasks.
+and applied to structs, unions, bitsets, and bitmasks (not enums).
 
 Examples:
 
@@ -371,6 +404,12 @@ pub struct Payload {
     // union layout and methods
 }
 ```
+
+## Other Annotations
+
+- Annotations other than `@derive(...)` are currently ignored by the Rust
+  generator, including `@optional`, `@default`, `@range`, `@min`, `@max`,
+  `@bit_bound`, `@value`, `@position`, and `@external`.
 
 ```rust
 trait Calc {
