@@ -14,13 +14,6 @@ pub struct JsonRpcRenderOutput {
     pub source: Vec<String>,
 }
 
-impl JsonRpcRenderOutput {
-    pub fn push_source(mut self, value: String) -> Self {
-        self.source.push(value);
-        self
-    }
-}
-
 pub trait JsonRpcRender {
     fn render(&self, renderer: &JsonRpcRenderer) -> IdlcResult<JsonRpcRenderOutput>;
 }

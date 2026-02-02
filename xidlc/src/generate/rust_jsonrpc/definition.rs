@@ -1,6 +1,8 @@
 use crate::error::IdlcResult;
+use crate::generate::rust::util::rust_ident;
 use crate::generate::rust_jsonrpc::interface::render_interface_with_path;
 use crate::generate::rust_jsonrpc::{JsonRpcRender, JsonRpcRenderOutput, JsonRpcRenderer};
+use serde_json::json;
 use std::collections::HashMap;
 use xidl_parser::hir;
 
@@ -11,12 +13,14 @@ impl JsonRpcRender for hir::ModuleDcl {
         let body = render_module_body_with_path(&defs, renderer, &module_path)?;
         let rendered = renderer.render_template(
             "module.rs.j2",
-            &serde_json::json!({
-                "ident": crate::generate::rust::util::rust_ident(&self.ident),
+            &json!({
+                "ident": rust_ident(&self.ident),
                 "body": body,
             }),
         )?;
-        Ok(JsonRpcRenderOutput::default().push_source(rendered))
+        Ok(JsonRpcRenderOutput {
+            source: vec![rendered],
+        })
     }
 }
 
@@ -30,14 +34,6 @@ impl JsonRpcRender for hir::Definition {
             _ => Ok(JsonRpcRenderOutput::default()),
         }
     }
-}
-
-pub(crate) fn indent_lines(value: &str, prefix: &str) -> String {
-    value
-        .lines()
-        .map(|line| format!("{prefix}{line}"))
-        .collect::<Vec<_>>()
-        .join("\n")
 }
 
 pub(crate) fn render_module_body(
@@ -84,7 +80,7 @@ fn render_module_body_with_path(
             "module.rs.j2",
             &serde_json::json!({
                 "ident": crate::generate::rust::util::rust_ident(&name),
-                "body": indent_lines(&body, "    "),
+                "body": &body,
             }),
         )?;
         out.push(rendered);
