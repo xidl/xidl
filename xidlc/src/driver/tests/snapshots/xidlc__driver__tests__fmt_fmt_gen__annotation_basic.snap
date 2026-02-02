@@ -1,0 +1,45 @@
+---
+source: xidlc/src/driver/tests/mod.rs
+expression: output
+---
+
+@id(1)
+struct S {
+    @id(10)
+    long a; //@id(11)
+    @optional
+    short b;
+};
+
+@my::anno(abc = 1)
+enum E {
+    @id(0)
+    A,
+    @id(1)
+    B
+};
+
+@id(2)
+bitmask BM {
+    @id(0)
+    A,
+    @id(1)
+    B
+};
+
+@id(3)
+union U switch (long) {
+    case 0:
+        @id(100)
+        long a;
+    default:
+        long b;
+};
+
+@id(4)
+interface I {
+    @oneway
+    void ping();
+    @key
+    attribute long value;
+};

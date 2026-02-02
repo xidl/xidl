@@ -1,0 +1,12 @@
+---
+source: xidlc/src/driver/tests/mod.rs
+expression: output
+---
+
+@derive(Debug)
+struct A {
+};
+
+@derive(Debug, Serialize)
+struct A {
+};

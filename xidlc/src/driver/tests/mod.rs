@@ -32,7 +32,11 @@ fn render_lang_output(lang: &str, input_name: &str, source: &str) -> String {
 fn assert_cases(lang: &str, prefix: &str, cases: &[(&str, &str)]) {
     for (name, text) in cases {
         let input_name = format!("{name}.idl");
-        let output = render_lang_output(lang, &input_name, text);
+        let output = if lang == "fmt" {
+            crate::fmt::format_idl_source(text).unwrap()
+        } else {
+            render_lang_output(lang, &input_name, text)
+        };
         let snapshot = format!("{lang}_{prefix}__{name}");
         insta::assert_snapshot!(snapshot, output);
     }
@@ -57,7 +61,7 @@ fn test_code_gen() {
         testcases::UNION_CASES,
     ];
 
-    let langs = ["c", "cpp", "rs"];
+    let langs = ["c", "cpp", "rs", "fmt"];
 
     for case in test_case {
         for lang in langs {

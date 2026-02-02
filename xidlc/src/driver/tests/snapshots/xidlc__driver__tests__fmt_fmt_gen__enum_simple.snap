@@ -1,0 +1,8 @@
+---
+source: xidlc/src/driver/tests/mod.rs
+expression: output
+---
+enum A {
+    B,
+    C
+};

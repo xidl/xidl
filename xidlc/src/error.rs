@@ -12,6 +12,8 @@ pub enum IdlcError {
     Template(String),
     #[error("{0}")]
     Rpc(String),
+    #[error("{0}")]
+    Fmt(String),
 }
 
 pub type IdlcResult<T> = std::result::Result<T, IdlcError>;
@@ -23,5 +25,9 @@ impl IdlcError {
 
     pub fn rpc(message: impl Into<String>) -> Self {
         Self::Rpc(message.into())
+    }
+
+    pub fn fmt(message: impl Into<String>) -> Self {
+        Self::Fmt(message.into())
     }
 }

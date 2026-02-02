@@ -1,6 +1,7 @@
 mod cli;
 mod driver;
 mod error;
+mod fmt;
 mod generate;
 mod jsonrpc;
 mod macros;

@@ -1,0 +1,15 @@
+---
+source: xidlc/src/driver/tests/mod.rs
+expression: output
+---
+
+bitset A {
+};
+
+bitset A: B {
+};
+
+bitset A: B {
+    bitfield<1> a;
+    bitfield<1> abc;
+};

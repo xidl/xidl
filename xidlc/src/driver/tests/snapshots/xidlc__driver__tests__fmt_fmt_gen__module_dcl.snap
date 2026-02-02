@@ -1,0 +1,14 @@
+---
+source: xidlc/src/driver/tests/mod.rs
+expression: output
+---
+
+module A {
+};
+
+module B {
+    const u8 a = 10;
+
+    struct B;
+
+};

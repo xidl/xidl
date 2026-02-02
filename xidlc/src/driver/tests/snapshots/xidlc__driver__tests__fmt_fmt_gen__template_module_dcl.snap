@@ -1,0 +1,17 @@
+---
+source: xidlc/src/driver/tests/mod.rs
+expression: output
+---
+
+module MyTemplModule<typename T, struct S> {
+};
+
+module MyTemplModule<typename T, struct S, ::A a, A::B::C::D a> {
+};
+
+module MyTemplModule<typename T, struct S, long m> {
+    alias MyTemplModule<T2, S2, m> MyTemplModule;
+    interface Bar: A::Foo {
+    };
+
+};

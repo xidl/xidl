@@ -1,21 +1,104 @@
 use crate::driver;
-use crate::error::IdlcResult;
-use clap::Parser;
-use std::path::PathBuf;
+use crate::error::{IdlcError, IdlcResult};
+use clap::{Args, Parser, Subcommand};
+use std::path::{Path, PathBuf};
 
 #[derive(Debug, Parser)]
 #[command(name = "idlc", about = "IDL Compiler", version)]
-pub struct CliArgs {
+pub struct Cli {
+    #[command(subcommand)]
+    command: Option<Command>,
+    #[command(flatten)]
+    generate: GenerateArgs,
+}
+
+#[derive(Debug, Args)]
+struct GenerateArgs {
     #[arg(long = "lang", short = 'l')]
-    pub lang: String,
+    lang: Option<String>,
     #[arg(long = "out-dir", short = 'o')]
-    pub out_dir: String,
+    out_dir: Option<String>,
+    inputs: Vec<PathBuf>,
+}
+
+#[derive(Debug, Subcommand)]
+enum Command {
+    Format(FormatArgs),
+}
+
+#[derive(Debug, Args)]
+struct FormatArgs {
+    #[arg(long = "out-dir", short = 'o', default_value = "-")]
+    out_dir: String,
+    #[arg(long)]
+    write: bool,
     #[arg(required = true)]
+    inputs: Vec<PathBuf>,
+}
+
+#[derive(Debug)]
+pub struct CliArgs {
+    pub lang: String,
+    pub out_dir: String,
     pub inputs: Vec<PathBuf>,
 }
 
 pub fn run() -> IdlcResult<()> {
-    let mut args = CliArgs::parse();
-    args.lang = args.lang.to_ascii_lowercase();
-    driver::run(args)
+    let cli = Cli::parse();
+    match cli.command {
+        Some(Command::Format(args)) => run_format(args),
+        None => {
+            if cli.generate.inputs.is_empty() {
+                return Err(IdlcError::fmt("missing input files".to_string()));
+            }
+            let mut args = CliArgs {
+                lang: cli
+                    .generate
+                    .lang
+                    .ok_or_else(|| IdlcError::fmt("missing --lang".to_string()))?,
+                out_dir: cli
+                    .generate
+                    .out_dir
+                    .ok_or_else(|| IdlcError::fmt("missing --out-dir".to_string()))?,
+                inputs: cli.generate.inputs,
+            };
+            args.lang = args.lang.to_ascii_lowercase();
+            driver::run(args)
+        }
+    }
+}
+
+fn run_format(args: FormatArgs) -> IdlcResult<()> {
+    if args.inputs.len() > 1 && args.out_dir == "-" && !args.write {
+        return Err(IdlcError::fmt(
+            "multiple inputs require --write or --out-dir".to_string(),
+        ));
+    }
+
+    for (idx, input) in args.inputs.iter().enumerate() {
+        let formatted = crate::fmt::format_idl_file(input)?;
+        if args.write {
+            std::fs::write(input, formatted)?;
+        } else if args.out_dir == "-" {
+            if idx > 0 {
+                println!();
+            }
+            print!("{formatted}");
+        } else {
+            let out_path = format_output_path(&args.out_dir, input);
+            if let Some(parent) = out_path.parent() {
+                std::fs::create_dir_all(parent)?;
+            }
+            std::fs::write(out_path, formatted)?;
+        }
+    }
+
+    Ok(())
+}
+
+fn format_output_path(out_dir: &str, input: &Path) -> PathBuf {
+    let file_name = input
+        .file_name()
+        .unwrap_or_else(|| std::ffi::OsStr::new("output.idl"));
+    Path::new(out_dir).join(file_name)
 }

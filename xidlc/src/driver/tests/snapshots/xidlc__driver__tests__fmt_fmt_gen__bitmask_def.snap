@@ -1,0 +1,20 @@
+---
+source: xidlc/src/driver/tests/mod.rs
+expression: output
+---
+
+bitmask A {
+};
+
+bitmask A {
+    A,
+    B,
+    C
+};
+
+bitmask A {
+    A,
+    B,
+    C,
+
+};

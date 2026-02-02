@@ -1,0 +1,5 @@
+---
+source: xidlc/src/driver/tests/mod.rs
+expression: output
+---
+const int32 a = 10;

@@ -1,0 +1,18 @@
+---
+source: xidlc/src/driver/tests/mod.rs
+expression: output
+---
+
+#include "aaaa"
+
+#ifdef BASIC
+
+module A {
+};
+
+#program once
+
+module A {
+};
+
+#endif
