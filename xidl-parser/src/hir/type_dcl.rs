@@ -8,6 +8,7 @@ pub struct TypeDcl {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[allow(clippy::large_enum_variant)]
 pub enum TypeDclInner {
     ConstrTypeDcl(ConstrTypeDcl),
     TypedefDcl(TypedefDcl),

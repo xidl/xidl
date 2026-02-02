@@ -8,6 +8,8 @@ mod macros;
 
 extern crate self as xidlc;
 
+use clap::Parser;
+
 fn main() {
     let env_filter = tracing_subscriber::EnvFilter::try_from_default_env()
         .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info"));
@@ -16,7 +18,7 @@ fn main() {
         .with_writer(std::io::stderr)
         .init();
 
-    if let Err(err) = cli::run() {
+    if let Err(err) = cli::Cli::parse().run() {
         tracing::error!("idlc: {err}");
         std::process::exit(1);
     }

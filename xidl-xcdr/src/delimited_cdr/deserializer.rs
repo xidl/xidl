@@ -80,10 +80,10 @@ impl<'a> DelimitedCdrDeserializer<'a> {
 
 impl XcdrDeserializer for DelimitedCdrDeserializer<'_> {
     fn enter_struct(&mut self) -> crate::error::XcdrResult<()> {
-        if let Some(end) = self.end_pos {
-            if self.pos < end {
-                self.pos = end;
-            }
+        if let Some(end) = self.end_pos
+            && self.pos < end
+        {
+            self.pos = end;
         }
         self.end_pos = None;
         if self.pos >= self.buf.len() {

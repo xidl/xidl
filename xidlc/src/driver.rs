@@ -16,192 +16,246 @@ pub struct File {
     content: String,
 }
 
-pub fn run(args: CliArgs) -> IdlcResult<()> {
-    if args.out_dir != "-" {
-        fs::create_dir_all(&args.out_dir)?;
-    }
-
-    for input in args.inputs {
-        let source = fs::read_to_string(&input)?;
-        let files = generate_from_idl(&source, &input, &args.lang, Default::default())?;
-        write_files(&args.out_dir, files)?;
-    }
-
-    Ok(())
+pub struct Driver {
+    args: CliArgs,
 }
 
-fn generate_from_idl(
+impl Driver {
+    pub fn run(args: CliArgs) -> IdlcResult<()> {
+        Self { args }.execute()
+    }
+
+    fn execute(self) -> IdlcResult<()> {
+        let output = OutputTarget::new(&self.args.out_dir)?;
+        let mut generator = Generator::new(&self.args.lang);
+
+        for input in self.args.inputs {
+            let source = fs::read_to_string(&input)?;
+            let files = generator.generate_from_idl(&source, &input, Default::default())?;
+            output.write_files(files)?;
+        }
+
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+pub fn generate_from_idl(
     source: &str,
     path: &Path,
     lang: &str,
-    mut props: HashMap<String, serde_json::Value>,
-) -> IdlcResult<Vec<File>> {
-    props.insert("idl".into(), source.into());
-    props.insert("target_lang".into(), lang.into());
-
-    let empty = xidl_parser::hir::Specification(vec![]);
-
-    let target_props = get_properties_for_lang(lang)?;
-    props.extend(target_props);
-
-    generate_for_lang("hir", empty, path, props)
-}
-
-fn generate_for_lang(
-    lang: &str,
-    hir: xidl_parser::hir::Specification,
-    input: &Path,
     props: HashMap<String, serde_json::Value>,
 ) -> IdlcResult<Vec<File>> {
-    let input_str = input.to_string_lossy();
+    let mut generator = Generator::new(lang);
+    generator.generate_from_idl(source, path, props)
+}
 
-    let (stdout_tx, stdout_rx) = interprocess::unnamed_pipe::pipe()?;
-    let (stdin_tx, stdin_rx) = interprocess::unnamed_pipe::pipe()?;
+pub struct Generator {
+    lang: String,
+    properties: HashMap<String, serde_json::Value>,
+}
 
-    let server = spawn_codegen_server(lang, stdout_rx, stdin_tx)?;
-
-    let reader = BufReader::new(stdin_rx);
-    let writer = stdout_tx;
-
-    let client = CodegenClient::new(reader, writer);
-    let mut properties = client
-        .get_properties()
-        .map_err(|err| IdlcError::rpc(err.to_string()))?;
-
-    properties.extend(props);
-
-    let artifacts = client
-        .generate(hir, input_str.to_string(), properties)
-        .map_err(|err| IdlcError::rpc(err.to_string()))?;
-
-    let mut ret: Vec<File> = vec![];
-
-    drop(client);
-    if let Err(err) = server.join().unwrap() {
-        eprintln!("codegen server failed: {}", err);
-    }
-
-    for file in artifacts {
-        match file.tag() {
-            crate::jsonrpc::ArtifactKind::Hir => {
-                let data = unsafe { file.into_hir() };
-                ret.extend(generate_for_lang(
-                    &data.lang,
-                    data.hir,
-                    input,
-                    data.props.clone(),
-                )?);
-            }
-            crate::jsonrpc::ArtifactKind::File => {
-                let data = unsafe { file.into_file() };
-                ret.push(File {
-                    path: data.path.clone(),
-                    content: data.content.clone(),
-                })
-            }
+impl Generator {
+    pub fn new(lang: &str) -> Self {
+        Self {
+            lang: lang.to_string(),
+            properties: HashMap::new(),
         }
     }
 
-    Ok(ret)
+    pub fn generate_from_idl(
+        &mut self,
+        source: &str,
+        path: &Path,
+        mut props: HashMap<String, serde_json::Value>,
+    ) -> IdlcResult<Vec<File>> {
+        props.insert("idl".into(), source.into());
+        props.insert("target_lang".into(), self.lang.clone().into());
+        let target_props = self.get_properties_for_lang()?;
+        props.extend(target_props);
+        let empty = xidl_parser::hir::Specification(vec![]);
+        self.generate_for_lang("hir", empty, path, props)
+    }
+
+    fn generate_for_lang(
+        &mut self,
+        lang: &str,
+        hir: xidl_parser::hir::Specification,
+        input: &Path,
+        props: HashMap<String, serde_json::Value>,
+    ) -> IdlcResult<Vec<File>> {
+        let input_str = input.to_string_lossy();
+        let session = CodegenSession::spawn(lang)?;
+        let mut properties = session
+            .client
+            .get_properties()
+            .map_err(|err| IdlcError::rpc(err.to_string()))?;
+        properties.extend(props);
+
+        let artifacts = session
+            .client
+            .generate(hir, input_str.to_string(), properties)
+            .map_err(|err| IdlcError::rpc(err.to_string()))?;
+
+        let mut ret: Vec<File> = vec![];
+        for file in artifacts {
+            match file.tag() {
+                crate::jsonrpc::ArtifactKind::Hir => {
+                    let data = unsafe { file.into_hir() };
+                    ret.extend(self.generate_for_lang(
+                        &data.lang,
+                        data.hir,
+                        input,
+                        data.props.clone(),
+                    )?);
+                }
+                crate::jsonrpc::ArtifactKind::File => {
+                    let data = unsafe { file.into_file() };
+                    ret.push(File {
+                        path: data.path.clone(),
+                        content: data.content.clone(),
+                    })
+                }
+            }
+        }
+        session.finish();
+        Ok(ret)
+    }
+
+    fn get_properties_for_lang(&mut self) -> IdlcResult<HashMap<String, serde_json::Value>> {
+        if !self.properties.is_empty() {
+            return Ok(self.properties.clone());
+        }
+        let session = CodegenSession::spawn(&self.lang)?;
+        let props = session
+            .client
+            .get_properties()
+            .map_err(|err| IdlcError::rpc(err.to_string()))?;
+        session.finish();
+        self.properties = props.clone();
+        Ok(props)
+    }
 }
 
-fn get_properties_for_lang(lang: &str) -> IdlcResult<HashMap<String, serde_json::Value>> {
-    let (stdout_tx, stdout_rx) = interprocess::unnamed_pipe::pipe()?;
-    let (stdin_tx, stdin_rx) = interprocess::unnamed_pipe::pipe()?;
+struct CodegenSession {
+    client: CodegenClient<
+        BufReader<interprocess::unnamed_pipe::Recver>,
+        interprocess::unnamed_pipe::Sender,
+    >,
+    server: JoinHandle<IdlcResult<()>>,
+}
 
-    let server = spawn_codegen_server(lang, stdout_rx, stdin_tx)?;
-    scopeguard::defer! {
-        if let Err(err) = server.join().unwrap() {
+impl CodegenSession {
+    fn spawn(lang: &str) -> IdlcResult<Self> {
+        let (stdout_tx, stdout_rx) = interprocess::unnamed_pipe::pipe()?;
+        let (stdin_tx, stdin_rx) = interprocess::unnamed_pipe::pipe()?;
+        let server = Self::spawn_codegen_server(lang, stdout_rx, stdin_tx)?;
+        let reader = BufReader::new(stdin_rx);
+        let writer = stdout_tx;
+        let client = CodegenClient::new(reader, writer);
+        Ok(Self { client, server })
+    }
+
+    fn finish(self) {
+        drop(self.client);
+        if let Err(err) = self.server.join().unwrap() {
             eprintln!("codegen server failed: {}", err);
         }
     }
 
-    let reader = BufReader::new(stdin_rx);
-    let writer = stdout_tx;
-    let client = CodegenClient::new(reader, writer);
-    client
-        .get_properties()
-        .map_err(|err| IdlcError::rpc(err.to_string()))
-}
-
-pub fn spawn_codegen_server(
-    lang: &str,
-    stdout_rx: interprocess::unnamed_pipe::Recver,
-    stdin_tx: interprocess::unnamed_pipe::Sender,
-) -> IdlcResult<JoinHandle<IdlcResult<()>>> {
-    macro_rules! run_server {
-        ($obj:expr) => {
-            Ok(thread::spawn(move || {
-                let io = xidl_jsonrpc::Io::new(BufReader::new(stdout_rx), stdin_tx);
-                let handler = crate::jsonrpc::CodegenServer::new($obj);
-                xidl_jsonrpc::Server::builder()
-                    .with_io(io)
-                    .with_service(handler)
-                    .serve()
-                    .map_err(|err| crate::error::IdlcError::rpc(err.to_string()))
-            }))
-        };
-    }
-
-    match lang {
-        "hir" => run_server!(crate::generate::hir_gen::HirGen),
-        "c" => run_server!(crate::generate::c::CCodegen),
-        "cpp" => run_server!(crate::generate::cpp::CppCodegen),
-        "rust" | "rs" => run_server!(crate::generate::rust::RustCodegen),
-        "rs_jsonrpc" | "rust_jsonrpc" => {
-            run_server!(crate::generate::rust_jsonrpc::RustJsonRpcCodegen)
+    fn spawn_codegen_server(
+        lang: &str,
+        stdout_rx: interprocess::unnamed_pipe::Recver,
+        stdin_tx: interprocess::unnamed_pipe::Sender,
+    ) -> IdlcResult<JoinHandle<IdlcResult<()>>> {
+        macro_rules! run_server {
+            ($obj:expr) => {
+                Ok(thread::spawn(move || {
+                    let io = xidl_jsonrpc::Io::new(BufReader::new(stdout_rx), stdin_tx);
+                    let handler = crate::jsonrpc::CodegenServer::new($obj);
+                    xidl_jsonrpc::Server::builder()
+                        .with_io(io)
+                        .with_service(handler)
+                        .serve()
+                        .map_err(|err| crate::error::IdlcError::rpc(err.to_string()))
+                }))
+            };
         }
-        _ => {
-            let exe = format!("xidl-{lang}");
-            let mut child = Command::new(&exe)
-                .stdin(std::os::fd::OwnedFd::from(stdin_tx))
-                .stdout(std::os::fd::OwnedFd::from(stdout_rx))
-                .spawn()?;
 
-            let server = std::thread::spawn(move || {
-                child.wait()?;
-                Ok(())
-            });
-            Ok(server)
-        }
-    }
-}
+        match lang {
+            "hir" => run_server!(crate::generate::hir_gen::HirGen),
+            "c" => run_server!(crate::generate::c::CCodegen),
+            "cpp" => run_server!(crate::generate::cpp::CppCodegen),
+            "rust" | "rs" => run_server!(crate::generate::rust::RustCodegen),
+            "rs_jsonrpc" | "rust_jsonrpc" => {
+                run_server!(crate::generate::rust_jsonrpc::RustJsonRpcCodegen)
+            }
+            _ => {
+                let exe = format!("xidl-{lang}");
+                let mut child = Command::new(&exe)
+                    .stdin(std::os::fd::OwnedFd::from(stdin_tx))
+                    .stdout(std::os::fd::OwnedFd::from(stdout_rx))
+                    .spawn()?;
 
-fn write_files(out_dir: &str, files: Vec<File>) -> IdlcResult<()> {
-    let mut order = Vec::new();
-    let mut merged: HashMap<String, String> = HashMap::new();
-    for file in files {
-        let File { path, content } = file;
-        if let Some(existing) = merged.get_mut(&path) {
-            existing.push_str(&content);
-        } else {
-            order.push(path.clone());
-            merged.insert(path, content);
-        }
-    }
-
-    let out_dir_path = Path::new(out_dir);
-
-    for path in order {
-        let content = merged.remove(&path).unwrap_or_default();
-        let file_path = Path::new(&path);
-        let out_path = if file_path.is_absolute() {
-            file_path.to_path_buf()
-        } else {
-            out_dir_path.join(file_path)
-        };
-        if out_dir != "-" {
-            //
-            if let Some(parent) = out_path.parent() {
-                fs::create_dir_all(parent)?;
+                let server = std::thread::spawn(move || {
+                    child.wait()?;
+                    Ok(())
+                });
+                Ok(server)
             }
         }
-        tracing::info!("write file: {}", out_path.display());
-        if out_dir == "-" {
-            println!("{}", content);
-        } else {
-            fs::write(out_path, content)?;
-        }
     }
-    Ok(())
+}
+
+struct OutputTarget {
+    out_dir: String,
+}
+
+impl OutputTarget {
+    fn new(out_dir: &str) -> IdlcResult<Self> {
+        if out_dir != "-" {
+            fs::create_dir_all(out_dir)?;
+        }
+        Ok(Self {
+            out_dir: out_dir.to_string(),
+        })
+    }
+
+    fn write_files(&self, files: Vec<File>) -> IdlcResult<()> {
+        let mut order = Vec::new();
+        let mut merged: HashMap<String, String> = HashMap::new();
+        for file in files {
+            let File { path, content } = file;
+            if let Some(existing) = merged.get_mut(&path) {
+                existing.push_str(&content);
+            } else {
+                order.push(path.clone());
+                merged.insert(path, content);
+            }
+        }
+
+        let out_dir_path = Path::new(&self.out_dir);
+
+        for path in order {
+            let content = merged.remove(&path).unwrap_or_default();
+            let file_path = Path::new(&path);
+            let out_path = if file_path.is_absolute() {
+                file_path.to_path_buf()
+            } else {
+                out_dir_path.join(file_path)
+            };
+            if self.out_dir != "-"
+                && let Some(parent) = out_path.parent()
+            {
+                fs::create_dir_all(parent)?;
+            }
+            tracing::info!("write file: {}", out_path.display());
+            if self.out_dir == "-" {
+                println!("{}", content);
+            } else {
+                fs::write(out_path, content)?;
+            }
+        }
+        Ok(())
+    }
 }

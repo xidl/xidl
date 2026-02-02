@@ -58,6 +58,7 @@ pub struct OpDcl {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[allow(clippy::large_enum_variant)]
 pub enum OpTypeSpec {
     Void,
     TypeSpec(TypeSpec),

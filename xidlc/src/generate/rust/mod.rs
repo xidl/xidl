@@ -81,10 +81,7 @@ fn map_codegen_error(err: crate::error::IdlcError) -> xidl_jsonrpc::Error {
     }
 }
 
-fn maybe_format_rust(
-    source: String,
-    properties: &ParserProperties,
-) -> IdlcResult<String> {
+fn maybe_format_rust(source: String, properties: &ParserProperties) -> IdlcResult<String> {
     let format = properties
         .get("format_rust")
         .and_then(|value| value.as_bool())

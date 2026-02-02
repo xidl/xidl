@@ -91,6 +91,7 @@ impl<'a> crate::parser::FromTreeSitter<'a> for FormalParameterType {
 }
 
 #[derive(Debug, Parser)]
+#[allow(clippy::large_enum_variant)]
 pub enum TplDefinition {
     Definition(Definition),
     TemplateModuleRef(TemplateModuleRef),

@@ -57,6 +57,7 @@ pub struct TypeDcl {
 
 #[derive(Debug, Parser)]
 #[ts(transparent)]
+#[allow(clippy::large_enum_variant)]
 pub enum TypeDclInner {
     ConstrTypeDcl(ConstrTypeDcl),
     NativeDcl(NativeDcl),

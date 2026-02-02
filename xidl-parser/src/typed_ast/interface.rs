@@ -151,6 +151,7 @@ impl<'a> crate::parser::FromTreeSitter<'a> for OpDcl {
     }
 }
 #[derive(Debug)]
+#[allow(clippy::large_enum_variant)]
 pub enum OpTypeSpec {
     Void,
     TypeSpec(TypeSpec),

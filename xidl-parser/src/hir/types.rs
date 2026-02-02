@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use super::*;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[allow(clippy::large_enum_variant)]
 pub enum TypeSpec {
     SimpleTypeSpec(SimpleTypeSpec),
     TemplateTypeSpec(TemplateTypeSpec),

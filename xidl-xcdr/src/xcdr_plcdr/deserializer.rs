@@ -96,10 +96,10 @@ impl<'a> XcdrPlcdrDeserializer<'a> {
 
 impl XcdrDeserializer for XcdrPlcdrDeserializer<'_> {
     fn next_field(&mut self) -> crate::error::XcdrResult<Option<FieldId>> {
-        if let Some(end) = self.field_end {
-            if self.pos < end {
-                self.pos = end;
-            }
+        if let Some(end) = self.field_end
+            && self.pos < end
+        {
+            self.pos = end;
         }
         self.field_end = None;
         self.expecting_len = false;

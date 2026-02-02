@@ -46,63 +46,16 @@ pub struct CliArgs {
     pub inputs: Vec<PathBuf>,
 }
 
-pub fn run() -> IdlcResult<()> {
-    let cli = Cli::parse();
-    match cli.command {
-        Some(Command::Fmt(args)) => run_format(args),
-        None => {
-            if cli.generate.inputs.is_empty() {
-                return Err(IdlcError::fmt("missing input files".to_string()));
+impl Cli {
+    pub fn run(self) -> IdlcResult<()> {
+        match self.command {
+            Some(Command::Fmt(args)) => args.execute(),
+            None => {
+                let args = self.generate.into_cli_args()?;
+                driver::Driver::run(args)
             }
-            let mut args = CliArgs {
-                lang: cli
-                    .generate
-                    .lang
-                    .ok_or_else(|| IdlcError::fmt("missing --lang".to_string()))?,
-                out_dir: cli
-                    .generate
-                    .out_dir
-                    .ok_or_else(|| IdlcError::fmt("missing --out-dir".to_string()))?,
-                inputs: cli.generate.inputs,
-            };
-            args.lang = args.lang.to_ascii_lowercase();
-            driver::run(args)
         }
     }
-}
-
-fn run_format(args: FormatArgs) -> IdlcResult<()> {
-    if args.inputs.len() > 1 && args.out_dir == "-" && !args.write {
-        return Err(IdlcError::fmt(
-            "multiple inputs require --write or --out-dir".to_string(),
-        ));
-    }
-
-    for (idx, input) in args.inputs.iter().enumerate() {
-        let source = std::fs::read_to_string(input)?;
-        let formatted = match args.lang {
-            FormatLang::Idl => crate::fmt::format_idl_source(&source)?,
-            FormatLang::Rust => crate::fmt::format_rust_source(&source)?,
-            FormatLang::C => crate::fmt::format_c_source(&source)?,
-            FormatLang::Cpp => crate::fmt::format_c_source(&source)?,
-        };
-        if args.write {
-            std::fs::write(input, formatted)?;
-        } else if args.out_dir == "-" {
-            if idx > 0 {
-                println!();
-            }
-            print!("{formatted}");
-        } else {
-            let out_path = format_output_path(&args.out_dir, input);
-            if let Some(parent) = out_path.parent() {
-                std::fs::create_dir_all(parent)?;
-            }
-            std::fs::write(out_path, formatted)?;
-        }
-    }
-
-    Ok(())
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, clap::ValueEnum)]
@@ -115,9 +68,65 @@ enum FormatLang {
     Cpp,
 }
 
-fn format_output_path(out_dir: &str, input: &Path) -> PathBuf {
-    let file_name = input
-        .file_name()
-        .unwrap_or_else(|| std::ffi::OsStr::new("output.idl"));
-    Path::new(out_dir).join(file_name)
+impl GenerateArgs {
+    fn into_cli_args(self) -> IdlcResult<CliArgs> {
+        if self.inputs.is_empty() {
+            return Err(IdlcError::fmt("missing input files".to_string()));
+        }
+        let lang = self
+            .lang
+            .ok_or_else(|| IdlcError::fmt("missing --lang".to_string()))?
+            .to_ascii_lowercase();
+        let out_dir = self
+            .out_dir
+            .ok_or_else(|| IdlcError::fmt("missing --out-dir".to_string()))?;
+        Ok(CliArgs {
+            lang,
+            out_dir,
+            inputs: self.inputs,
+        })
+    }
+}
+
+impl FormatArgs {
+    fn execute(self) -> IdlcResult<()> {
+        if self.inputs.len() > 1 && self.out_dir == "-" && !self.write {
+            return Err(IdlcError::fmt(
+                "multiple inputs require --write or --out-dir".to_string(),
+            ));
+        }
+
+        for (idx, input) in self.inputs.iter().enumerate() {
+            let source = std::fs::read_to_string(input)?;
+            let formatted = match self.lang {
+                FormatLang::Idl => crate::fmt::format_idl_source(&source)?,
+                FormatLang::Rust => crate::fmt::format_rust_source(&source)?,
+                FormatLang::C => crate::fmt::format_c_source(&source)?,
+                FormatLang::Cpp => crate::fmt::format_c_source(&source)?,
+            };
+            if self.write {
+                std::fs::write(input, formatted)?;
+            } else if self.out_dir == "-" {
+                if idx > 0 {
+                    println!();
+                }
+                print!("{formatted}");
+            } else {
+                let out_path = self.format_output_path(input);
+                if let Some(parent) = out_path.parent() {
+                    std::fs::create_dir_all(parent)?;
+                }
+                std::fs::write(out_path, formatted)?;
+            }
+        }
+
+        Ok(())
+    }
+
+    fn format_output_path(&self, input: &Path) -> PathBuf {
+        let file_name = input
+            .file_name()
+            .unwrap_or_else(|| std::ffi::OsStr::new("output.idl"));
+        Path::new(&self.out_dir).join(file_name)
+    }
 }

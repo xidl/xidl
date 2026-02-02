@@ -261,10 +261,10 @@ impl XcdrDeserialize for String {
         }
         let mut buf = vec![0u8; len];
         deserializer.read_bytes(&mut buf)?;
-        if let Some(last) = buf.last() {
-            if *last == 0 {
-                buf.pop();
-            }
+        if let Some(last) = buf.last()
+            && *last == 0
+        {
+            buf.pop();
         }
         String::from_utf8(buf).map_err(|err| XcdrError::Message(err.to_string()))
     }

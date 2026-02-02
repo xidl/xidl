@@ -94,6 +94,7 @@ pub struct WideStringType {
 }
 
 #[derive(Debug, Parser)]
+#[allow(clippy::large_enum_variant)]
 pub enum TypeSpec {
     SimpleTypeSpec(SimpleTypeSpec),
     TemplateTypeSpec(TemplateTypeSpec),

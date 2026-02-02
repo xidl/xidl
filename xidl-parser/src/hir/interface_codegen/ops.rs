@@ -14,6 +14,7 @@ pub struct OperationInfo {
 }
 
 #[derive(Clone)]
+#[allow(clippy::large_enum_variant)]
 pub enum ReturnType {
     Void,
     Type(TypeSpec),
