@@ -497,7 +497,7 @@ impl From<crate::typed_ast::UnionForwardDcl> for UnionForwardDcl {
     fn from(value: crate::typed_ast::UnionForwardDcl) -> Self {
         Self {
             annotations: vec![],
-            ident: value.0 .0,
+            ident: value.0.0,
         }
     }
 }

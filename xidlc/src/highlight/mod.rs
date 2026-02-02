@@ -163,7 +163,6 @@ fn collect_capture_names(language: tree_sitter::Language) -> IdlcResult<Vec<&'st
     Ok(names)
 }
 
-
 pub fn highlight_idl(source: &str, name: &str) -> IdlcResult<HighlightedText> {
     IdlHighlighter::new()?.highlight(source, name)
 }

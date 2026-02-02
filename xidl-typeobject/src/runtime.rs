@@ -1,5 +1,5 @@
-use crate::XidlTypeObject;
 use crate::DDS::XTypes as xt;
+use crate::XidlTypeObject;
 use std::any::TypeId;
 use std::cell::RefCell;
 use xidl_xcdr::xcdr2::Xcdr2Serialize;

@@ -9,7 +9,7 @@ use super::*;
 use crate::error::ParserResult;
 use context::{ConstContext, TemplateContext};
 use hash::{exception_hash_const_name, hash_string, op_hash_const_name};
-use ops::{collect_operations, OperationInfo};
+use ops::{OperationInfo, collect_operations};
 use std::collections::HashSet;
 
 pub trait ToTemplateContext {
