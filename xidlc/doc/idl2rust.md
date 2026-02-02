@@ -216,6 +216,24 @@ impl Example {
 
 - IDL `enum` maps to a Rust `enum` with the same member names.
 - No inherent methods are generated for enums.
+- If `@derive(...)` annotations are present, the generated enum includes the
+  corresponding `#[derive(...)]` list.
+
+```idl
+enum Color {
+    Red,
+    Green,
+    Blue
+};
+```
+
+```rust
+pub enum Color {
+    Red,
+    Green,
+    Blue,
+}
+```
 
 ### Bitsets
 
@@ -226,6 +244,25 @@ impl Example {
 - If `@derive(...)` annotations are present, the generated struct includes the
   corresponding `#[derive(...)]` list.
 
+```idl
+bitset Flags {
+    bool enabled: 1;
+    unsigned int mode: 3;
+};
+```
+
+```rust
+pub struct Flags {
+    pub enabled: bool,
+    pub mode: u32,
+}
+```
+
+Required methods:
+
+- No inherent methods are generated for bitsets.
+- Optional `@derive(...)` annotations may add derived trait impls.
+
 ### Bitmasks
 
 - IDL `bitmask` maps to a Rust type with generated constant flags.
@@ -233,10 +270,47 @@ impl Example {
 - If `@derive(...)` annotations are present, the generated type includes the
   corresponding `#[derive(...)]` list.
 
+```idl
+bitmask Perms {
+    Read,
+    Write,
+    Execute
+};
+```
+
+```rust
+pub struct Perms {
+    // generated flag constants
+}
+```
+
+Required methods:
+
+- No inherent methods are generated for bitmasks.
+- Optional `@derive(...)` annotations may add derived trait impls.
+
 ### Exceptions
 
 - IDL `exception` maps to a Rust `struct` with the same member layout.
 - No inherent methods are generated for exceptions. Access is via public fields.
+
+```idl
+exception Error {
+    long code;
+    string message;
+};
+```
+
+```rust
+pub struct Error {
+    pub code: i32,
+    pub message: String,
+}
+```
+
+Required methods:
+
+- No inherent methods are generated for exceptions.
 
 ## Interfaces
 
@@ -263,6 +337,39 @@ interface Calc {
     readonly attribute long version;
     attribute string name;
 };
+```
+
+## Derive Annotations
+
+xidlc supports a builtin `@derive(...)` annotation to attach Rust `#[derive(...)]`
+attributes to generated types. This annotation is collected from the IDL element
+and applied to structs, unions, enums, bitsets, and bitmasks.
+
+Examples:
+
+```idl
+@derive(Debug, Clone, PartialEq)
+struct Foo {
+    long value;
+};
+
+@derive(Serialize, Deserialize)
+union Payload switch (long) {
+    case 1: string text;
+    case 2: long number;
+};
+```
+
+```rust
+#[derive(Debug, Clone, PartialEq)]
+pub struct Foo {
+    pub value: i32,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Payload {
+    // union layout and methods
+}
 ```
 
 ```rust
