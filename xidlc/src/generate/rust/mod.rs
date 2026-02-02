@@ -13,6 +13,7 @@ mod type_dcl;
 mod union_def;
 pub(crate) mod util;
 
+use convert_case::{Case, Casing};
 pub use render::{RustRender, RustRenderOutput, RustRenderer};
 
 use crate::error::IdlcResult;
@@ -31,7 +32,7 @@ pub fn generate_with_properties(
         .file_stem()
         .and_then(|value| value.to_str())
         .unwrap_or("output");
-    let base = crate::generate::to_snake_case(stem);
+    let base = stem.to_case(Case::Snake);
     let filename = format!("{base}.rs");
 
     let typeobject_path = "xidl_typeobject";

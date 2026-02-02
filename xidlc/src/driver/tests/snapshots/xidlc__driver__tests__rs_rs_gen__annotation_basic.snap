@@ -22,11 +22,8 @@ use std::ffi::c_void;
     
 pub struct S {
 
-
     pub a: i32,
-
     pub b: i16,
-
 }
 
 impl S {
@@ -93,9 +90,7 @@ impl xidl_xcdr::XcdrDeserialize for S {
 pub enum E {
 
     A,
-
     B
-
 }
 
 
@@ -168,11 +163,8 @@ pub struct U {
 
 
 union UData {
-
     a: core::mem::ManuallyDrop<i32>,
-
     b: core::mem::ManuallyDrop<i32>,
-
 }
 
 impl Drop for U {
@@ -345,9 +337,7 @@ pub const I_set_attribute_value_Hash: i32 = 1976821110;
 
 pub struct I_ping_In {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl I_ping_In {
@@ -403,9 +393,7 @@ impl xidl_xcdr::XcdrDeserialize for I_ping_In {
 
 pub struct I_ping_Out {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl I_ping_Out {
@@ -466,9 +454,7 @@ pub struct I_ping_Result {
 
 
 union I_ping_ResultData {
-
     result: core::mem::ManuallyDrop<I_ping_Out>,
-
 }
 
 impl Drop for I_ping_Result {
@@ -591,9 +577,7 @@ impl xidl_xcdr::XcdrDeserialize for I_ping_Result {
 
 pub struct I_get_attribute_value_In {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl I_get_attribute_value_In {
@@ -649,9 +633,7 @@ impl xidl_xcdr::XcdrDeserialize for I_get_attribute_value_In {
 
 pub struct I_get_attribute_value_Out {
 
-
     pub return_: i32,
-
 }
 
 impl I_get_attribute_value_Out {
@@ -712,9 +694,7 @@ pub struct I_get_attribute_value_Result {
 
 
 union I_get_attribute_value_ResultData {
-
     result: core::mem::ManuallyDrop<I_get_attribute_value_Out>,
-
 }
 
 impl Drop for I_get_attribute_value_Result {
@@ -837,9 +817,7 @@ impl xidl_xcdr::XcdrDeserialize for I_get_attribute_value_Result {
 
 pub struct I_set_attribute_value_In {
 
-
     pub value: i32,
-
 }
 
 impl I_set_attribute_value_In {
@@ -895,9 +873,7 @@ impl xidl_xcdr::XcdrDeserialize for I_set_attribute_value_In {
 
 pub struct I_set_attribute_value_Out {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl I_set_attribute_value_Out {
@@ -958,9 +934,7 @@ pub struct I_set_attribute_value_Result {
 
 
 union I_set_attribute_value_ResultData {
-
     result: core::mem::ManuallyDrop<I_set_attribute_value_Out>,
-
 }
 
 impl Drop for I_set_attribute_value_Result {
@@ -1088,15 +1062,10 @@ pub struct I_Call {
 
 
 union I_CallData {
-
     unknownOp: core::mem::ManuallyDrop<dds::rpc::UnknownOperation>,
-
     ping: core::mem::ManuallyDrop<I_ping_In>,
-
     get_attribute_value: core::mem::ManuallyDrop<I_get_attribute_value_In>,
-
     set_attribute_value: core::mem::ManuallyDrop<I_set_attribute_value_In>,
-
 }
 
 impl Drop for I_Call {
@@ -1364,11 +1333,8 @@ impl xidl_xcdr::XcdrDeserialize for I_Call {
 
 pub struct I_Request {
 
-
     pub header: dds::rpc::RequestHeader,
-
     pub data: I_Call,
-
 }
 
 impl I_Request {
@@ -1439,15 +1405,10 @@ pub struct I_Return {
 
 
 union I_ReturnData {
-
     unknownOp: core::mem::ManuallyDrop<dds::rpc::UnknownOperation>,
-
     ping: core::mem::ManuallyDrop<I_ping_Result>,
-
     get_attribute_value: core::mem::ManuallyDrop<I_get_attribute_value_Result>,
-
     set_attribute_value: core::mem::ManuallyDrop<I_set_attribute_value_Result>,
-
 }
 
 impl Drop for I_Return {
@@ -1715,11 +1676,8 @@ impl xidl_xcdr::XcdrDeserialize for I_Return {
 
 pub struct I_Reply {
 
-
     pub header: dds::rpc::ReplyHeader,
-
     pub data: I_Return,
-
 }
 
 impl I_Reply {

@@ -1,6 +1,8 @@
 use crate::error::IdlcResult;
 use crate::generate::rust::util::rust_ident;
 use crate::generate::rust_jsonrpc::{JsonRpcRenderOutput, JsonRpcRenderer};
+use convert_case::{Case, Casing};
+use itertools::Itertools;
 use serde::Serialize;
 use xidl_parser::hir;
 
@@ -220,7 +222,7 @@ fn params_struct_name(interface_name: &str, method_name: &str) -> String {
     format!(
         "{}{}Params",
         rust_ident(interface_name),
-        to_camel_case(method_name)
+        method_name.to_case(Case::Camel)
     )
 }
 
@@ -256,12 +258,7 @@ fn jsonrpc_type(ty: &hir::TypeSpec) -> String {
 }
 
 fn render_scoped_name(value: &hir::ScopedName) -> String {
-    let path = value
-        .name
-        .iter()
-        .map(|part| rust_ident(part))
-        .collect::<Vec<_>>()
-        .join("::");
+    let path = value.name.iter().map(|part| rust_ident(part)).join("::");
     if value.is_root {
         format!("::{path}")
     } else {
@@ -282,24 +279,6 @@ fn rust_integer_type(value: &hir::IntegerType) -> String {
         hir::IntegerType::I32 => "i32".to_string(),
         hir::IntegerType::I64 => "i64".to_string(),
     }
-}
-
-fn to_camel_case(value: &str) -> String {
-    let mut out = String::new();
-    let mut uppercase = true;
-    for ch in value.chars() {
-        if ch == '_' {
-            uppercase = true;
-            continue;
-        }
-        if uppercase {
-            out.push(ch.to_ascii_uppercase());
-            uppercase = false;
-        } else {
-            out.push(ch);
-        }
-    }
-    out
 }
 
 fn rpc_method_name(module_path: &[String], interface_name: &str, method_name: &str) -> String {

@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::error::{IdlcError, IdlcResult};
 use minijinja::{Environment, Error, ErrorKind};
 use rust_embed::RustEmbed;
@@ -34,16 +36,18 @@ impl JsonRpcRenderer {
         Ok(Self { env })
     }
 
-    pub fn env(&mut self) -> &mut Environment<'static> {
-        &mut self.env
-    }
-
     pub fn render_template<T: Serialize>(&self, template: &str, ctx: &T) -> IdlcResult<String> {
         self.env
             .get_template(template)
             .map_err(|err| IdlcError::template(err.to_string()))?
             .render(ctx)
             .map_err(|err| IdlcError::template(err.to_string()))
+    }
+
+    pub fn extend(&mut self, props: HashMap<String, serde_json::Value>) {
+        for (k, v) in props {
+            self.env.add_global(k, minijinja::Value::from_serialize(v));
+        }
     }
 }
 

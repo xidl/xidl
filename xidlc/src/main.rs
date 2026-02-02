@@ -3,6 +3,7 @@ mod driver;
 mod error;
 mod generate;
 mod jsonrpc;
+mod macros;
 
 extern crate self as xidlc;
 

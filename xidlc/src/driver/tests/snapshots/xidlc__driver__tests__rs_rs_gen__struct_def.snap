@@ -22,7 +22,6 @@ use std::ffi::c_void;
     
 pub struct A {
 
-
 }
 
 impl A {
@@ -68,9 +67,7 @@ impl xidl_xcdr::XcdrDeserialize for A {
 
 pub struct A {
 
-
     pub a: i32,
-
 }
 
 impl A {
@@ -126,9 +123,7 @@ impl xidl_xcdr::XcdrDeserialize for A {
 
 pub struct A {
 
-
     pub a: ::A::b,
-
 }
 
 impl A {
@@ -186,7 +181,6 @@ pub struct A {
 
     pub base: B,
 
-
 }
 
 impl A {
@@ -238,7 +232,6 @@ impl xidl_xcdr::XcdrDeserialize for A {
 
 pub struct _A {
 
-
 }
 
 impl _A {
@@ -284,9 +277,7 @@ impl xidl_xcdr::XcdrDeserialize for _A {
 
 pub struct _Custom {
 
-
     pub var_inner: Inner,
-
 }
 
 impl _Custom {
@@ -342,21 +333,13 @@ impl xidl_xcdr::XcdrDeserialize for _Custom {
 
 pub struct HelloWorld {
 
-
     pub a: u8,
-
     pub b: [u16; 10],
-
     pub c: [[String; 20]; 10],
-
     pub c: Vec<u8>,
-
     pub d: String,
-
     pub d: String,
-
     pub d: *mut c_void,
-
 }
 
 impl HelloWorld {

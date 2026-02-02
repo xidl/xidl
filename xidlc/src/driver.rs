@@ -191,6 +191,7 @@ fn write_files(out_dir: &str, files: Vec<File>) -> IdlcResult<()> {
             out_dir_path.join(file_path)
         };
         if out_dir != "-" {
+            //
             if let Some(parent) = out_path.parent() {
                 fs::create_dir_all(parent)?;
             }

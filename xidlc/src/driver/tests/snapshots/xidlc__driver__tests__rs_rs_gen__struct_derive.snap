@@ -21,9 +21,7 @@ use std::ffi::c_void;
 
     
 #[derive(Debug)]
-
 pub struct A {
-
 
 }
 
@@ -69,9 +67,7 @@ impl xidl_xcdr::XcdrDeserialize for A {
 
 
 #[derive(Debug, Serialize)]
-
 pub struct A {
-
 
 }
 

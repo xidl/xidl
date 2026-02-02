@@ -27,7 +27,6 @@ pub struct B {
 
 
 union BData {
-
 }
 
 impl Drop for B {
@@ -106,11 +105,8 @@ pub struct C {
 
 
 union CData {
-
     a: core::mem::ManuallyDrop<i32>,
-
     b: core::mem::ManuallyDrop<String>,
-
 }
 
 impl Drop for C {

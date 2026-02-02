@@ -55,9 +55,7 @@ pub const A_set_attribute_attr1_Hash: i32 = 2553876227;
 
 pub struct A_func1_In {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl A_func1_In {
@@ -113,9 +111,7 @@ impl xidl_xcdr::XcdrDeserialize for A_func1_In {
 
 pub struct A_func1_Out {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl A_func1_Out {
@@ -176,9 +172,7 @@ pub struct A_func1_Result {
 
 
 union A_func1_ResultData {
-
     result: core::mem::ManuallyDrop<A_func1_Out>,
-
 }
 
 impl Drop for A_func1_Result {
@@ -301,9 +295,7 @@ impl xidl_xcdr::XcdrDeserialize for A_func1_Result {
 
 pub struct A_func1_In {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl A_func1_In {
@@ -359,9 +351,7 @@ impl xidl_xcdr::XcdrDeserialize for A_func1_In {
 
 pub struct A_func1_Out {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl A_func1_Out {
@@ -422,11 +412,8 @@ pub struct A_func1_Result {
 
 
 union A_func1_ResultData {
-
     result: core::mem::ManuallyDrop<A_func1_Out>,
-
     a_ex: core::mem::ManuallyDrop<A>,
-
 }
 
 impl Drop for A_func1_Result {
@@ -598,9 +585,7 @@ impl xidl_xcdr::XcdrDeserialize for A_func1_Result {
 
 pub struct A_func1_In {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl A_func1_In {
@@ -656,9 +641,7 @@ impl xidl_xcdr::XcdrDeserialize for A_func1_In {
 
 pub struct A_func1_Out {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl A_func1_Out {
@@ -719,15 +702,10 @@ pub struct A_func1_Result {
 
 
 union A_func1_ResultData {
-
     result: core::mem::ManuallyDrop<A_func1_Out>,
-
     a_ex: core::mem::ManuallyDrop<A>,
-
     b_ex: core::mem::ManuallyDrop<B>,
-
     c_ex: core::mem::ManuallyDrop<C>,
-
 }
 
 impl Drop for A_func1_Result {
@@ -997,9 +975,7 @@ impl xidl_xcdr::XcdrDeserialize for A_func1_Result {
 
 pub struct A_func1_In {
 
-
     pub attr: u8,
-
 }
 
 impl A_func1_In {
@@ -1055,9 +1031,7 @@ impl xidl_xcdr::XcdrDeserialize for A_func1_In {
 
 pub struct A_func1_Out {
 
-
     pub attr: u16,
-
 }
 
 impl A_func1_Out {
@@ -1118,9 +1092,7 @@ pub struct A_func1_Result {
 
 
 union A_func1_ResultData {
-
     result: core::mem::ManuallyDrop<A_func1_Out>,
-
 }
 
 impl Drop for A_func1_Result {
@@ -1243,9 +1215,7 @@ impl xidl_xcdr::XcdrDeserialize for A_func1_Result {
 
 pub struct A_func1_In {
 
-
     pub attr: u8,
-
 }
 
 impl A_func1_In {
@@ -1301,9 +1271,7 @@ impl xidl_xcdr::XcdrDeserialize for A_func1_In {
 
 pub struct A_func1_Out {
 
-
     pub attr: u16,
-
 }
 
 impl A_func1_Out {
@@ -1364,11 +1332,8 @@ pub struct A_func1_Result {
 
 
 union A_func1_ResultData {
-
     result: core::mem::ManuallyDrop<A_func1_Out>,
-
     a_ex: core::mem::ManuallyDrop<A>,
-
 }
 
 impl Drop for A_func1_Result {
@@ -1540,9 +1505,7 @@ impl xidl_xcdr::XcdrDeserialize for A_func1_Result {
 
 pub struct A_func1_In {
 
-
     pub attr: u8,
-
 }
 
 impl A_func1_In {
@@ -1598,9 +1561,7 @@ impl xidl_xcdr::XcdrDeserialize for A_func1_In {
 
 pub struct A_func1_Out {
 
-
     pub attr: u16,
-
 }
 
 impl A_func1_Out {
@@ -1661,15 +1622,10 @@ pub struct A_func1_Result {
 
 
 union A_func1_ResultData {
-
     result: core::mem::ManuallyDrop<A_func1_Out>,
-
     a_ex: core::mem::ManuallyDrop<A>,
-
     b_ex: core::mem::ManuallyDrop<B>,
-
     c_ex: core::mem::ManuallyDrop<C>,
-
 }
 
 impl Drop for A_func1_Result {
@@ -1939,9 +1895,7 @@ impl xidl_xcdr::XcdrDeserialize for A_func1_Result {
 
 pub struct A_get_attribute_attr1_In {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl A_get_attribute_attr1_In {
@@ -1997,9 +1951,7 @@ impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_In {
 
 pub struct A_get_attribute_attr1_Out {
 
-
     pub return_: u8,
-
 }
 
 impl A_get_attribute_attr1_Out {
@@ -2060,9 +2012,7 @@ pub struct A_get_attribute_attr1_Result {
 
 
 union A_get_attribute_attr1_ResultData {
-
     result: core::mem::ManuallyDrop<A_get_attribute_attr1_Out>,
-
 }
 
 impl Drop for A_get_attribute_attr1_Result {
@@ -2185,9 +2135,7 @@ impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_Result {
 
 pub struct A_get_attribute_attr1_In {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl A_get_attribute_attr1_In {
@@ -2243,9 +2191,7 @@ impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_In {
 
 pub struct A_get_attribute_attr1_Out {
 
-
     pub return_: u8,
-
 }
 
 impl A_get_attribute_attr1_Out {
@@ -2306,9 +2252,7 @@ pub struct A_get_attribute_attr1_Result {
 
 
 union A_get_attribute_attr1_ResultData {
-
     result: core::mem::ManuallyDrop<A_get_attribute_attr1_Out>,
-
 }
 
 impl Drop for A_get_attribute_attr1_Result {
@@ -2431,9 +2375,7 @@ impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_Result {
 
 pub struct A_get_attribute_attr1_In {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl A_get_attribute_attr1_In {
@@ -2489,9 +2431,7 @@ impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_In {
 
 pub struct A_get_attribute_attr1_Out {
 
-
     pub return_: u8,
-
 }
 
 impl A_get_attribute_attr1_Out {
@@ -2552,9 +2492,7 @@ pub struct A_get_attribute_attr1_Result {
 
 
 union A_get_attribute_attr1_ResultData {
-
     result: core::mem::ManuallyDrop<A_get_attribute_attr1_Out>,
-
 }
 
 impl Drop for A_get_attribute_attr1_Result {
@@ -2677,9 +2615,7 @@ impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_Result {
 
 pub struct A_get_attribute_attr1_In {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl A_get_attribute_attr1_In {
@@ -2735,9 +2671,7 @@ impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_In {
 
 pub struct A_get_attribute_attr1_Out {
 
-
     pub return_: u8,
-
 }
 
 impl A_get_attribute_attr1_Out {
@@ -2798,9 +2732,7 @@ pub struct A_get_attribute_attr1_Result {
 
 
 union A_get_attribute_attr1_ResultData {
-
     result: core::mem::ManuallyDrop<A_get_attribute_attr1_Out>,
-
 }
 
 impl Drop for A_get_attribute_attr1_Result {
@@ -2923,9 +2855,7 @@ impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_Result {
 
 pub struct A_set_attribute_attr1_In {
 
-
     pub attr1: u8,
-
 }
 
 impl A_set_attribute_attr1_In {
@@ -2981,9 +2911,7 @@ impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr1_In {
 
 pub struct A_set_attribute_attr1_Out {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl A_set_attribute_attr1_Out {
@@ -3044,9 +2972,7 @@ pub struct A_set_attribute_attr1_Result {
 
 
 union A_set_attribute_attr1_ResultData {
-
     result: core::mem::ManuallyDrop<A_set_attribute_attr1_Out>,
-
 }
 
 impl Drop for A_set_attribute_attr1_Result {
@@ -3169,9 +3095,7 @@ impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr1_Result {
 
 pub struct A_get_attribute_attr2_In {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl A_get_attribute_attr2_In {
@@ -3227,9 +3151,7 @@ impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr2_In {
 
 pub struct A_get_attribute_attr2_Out {
 
-
     pub return_: u8,
-
 }
 
 impl A_get_attribute_attr2_Out {
@@ -3290,9 +3212,7 @@ pub struct A_get_attribute_attr2_Result {
 
 
 union A_get_attribute_attr2_ResultData {
-
     result: core::mem::ManuallyDrop<A_get_attribute_attr2_Out>,
-
 }
 
 impl Drop for A_get_attribute_attr2_Result {
@@ -3415,9 +3335,7 @@ impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr2_Result {
 
 pub struct A_set_attribute_attr2_In {
 
-
     pub attr2: u8,
-
 }
 
 impl A_set_attribute_attr2_In {
@@ -3473,9 +3391,7 @@ impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr2_In {
 
 pub struct A_set_attribute_attr2_Out {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl A_set_attribute_attr2_Out {
@@ -3536,9 +3452,7 @@ pub struct A_set_attribute_attr2_Result {
 
 
 union A_set_attribute_attr2_ResultData {
-
     result: core::mem::ManuallyDrop<A_set_attribute_attr2_Out>,
-
 }
 
 impl Drop for A_set_attribute_attr2_Result {
@@ -3661,9 +3575,7 @@ impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr2_Result {
 
 pub struct A_get_attribute_attr3_In {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl A_get_attribute_attr3_In {
@@ -3719,9 +3631,7 @@ impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr3_In {
 
 pub struct A_get_attribute_attr3_Out {
 
-
     pub return_: u8,
-
 }
 
 impl A_get_attribute_attr3_Out {
@@ -3782,9 +3692,7 @@ pub struct A_get_attribute_attr3_Result {
 
 
 union A_get_attribute_attr3_ResultData {
-
     result: core::mem::ManuallyDrop<A_get_attribute_attr3_Out>,
-
 }
 
 impl Drop for A_get_attribute_attr3_Result {
@@ -3907,9 +3815,7 @@ impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr3_Result {
 
 pub struct A_set_attribute_attr3_In {
 
-
     pub attr3: u8,
-
 }
 
 impl A_set_attribute_attr3_In {
@@ -3965,9 +3871,7 @@ impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr3_In {
 
 pub struct A_set_attribute_attr3_Out {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl A_set_attribute_attr3_Out {
@@ -4028,9 +3932,7 @@ pub struct A_set_attribute_attr3_Result {
 
 
 union A_set_attribute_attr3_ResultData {
-
     result: core::mem::ManuallyDrop<A_set_attribute_attr3_Out>,
-
 }
 
 impl Drop for A_set_attribute_attr3_Result {
@@ -4153,9 +4055,7 @@ impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr3_Result {
 
 pub struct A_get_attribute_attr1_In {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl A_get_attribute_attr1_In {
@@ -4211,9 +4111,7 @@ impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_In {
 
 pub struct A_get_attribute_attr1_Out {
 
-
     pub return_: u8,
-
 }
 
 impl A_get_attribute_attr1_Out {
@@ -4274,11 +4172,8 @@ pub struct A_get_attribute_attr1_Result {
 
 
 union A_get_attribute_attr1_ResultData {
-
     result: core::mem::ManuallyDrop<A_get_attribute_attr1_Out>,
-
     a_ex: core::mem::ManuallyDrop<A>,
-
 }
 
 impl Drop for A_get_attribute_attr1_Result {
@@ -4450,9 +4345,7 @@ impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_Result {
 
 pub struct A_set_attribute_attr1_In {
 
-
     pub attr1: u8,
-
 }
 
 impl A_set_attribute_attr1_In {
@@ -4508,9 +4401,7 @@ impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr1_In {
 
 pub struct A_set_attribute_attr1_Out {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl A_set_attribute_attr1_Out {
@@ -4571,9 +4462,7 @@ pub struct A_set_attribute_attr1_Result {
 
 
 union A_set_attribute_attr1_ResultData {
-
     result: core::mem::ManuallyDrop<A_set_attribute_attr1_Out>,
-
 }
 
 impl Drop for A_set_attribute_attr1_Result {
@@ -4696,9 +4585,7 @@ impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr1_Result {
 
 pub struct A_get_attribute_attr1_In {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl A_get_attribute_attr1_In {
@@ -4754,9 +4641,7 @@ impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_In {
 
 pub struct A_get_attribute_attr1_Out {
 
-
     pub return_: u8,
-
 }
 
 impl A_get_attribute_attr1_Out {
@@ -4817,15 +4702,10 @@ pub struct A_get_attribute_attr1_Result {
 
 
 union A_get_attribute_attr1_ResultData {
-
     result: core::mem::ManuallyDrop<A_get_attribute_attr1_Out>,
-
     a_ex: core::mem::ManuallyDrop<A>,
-
     b_ex: core::mem::ManuallyDrop<B>,
-
     c_ex: core::mem::ManuallyDrop<C>,
-
 }
 
 impl Drop for A_get_attribute_attr1_Result {
@@ -5095,9 +4975,7 @@ impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_Result {
 
 pub struct A_set_attribute_attr1_In {
 
-
     pub attr1: u8,
-
 }
 
 impl A_set_attribute_attr1_In {
@@ -5153,9 +5031,7 @@ impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr1_In {
 
 pub struct A_set_attribute_attr1_Out {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl A_set_attribute_attr1_Out {
@@ -5216,11 +5092,8 @@ pub struct A_set_attribute_attr1_Result {
 
 
 union A_set_attribute_attr1_ResultData {
-
     result: core::mem::ManuallyDrop<A_set_attribute_attr1_Out>,
-
     a_ex: core::mem::ManuallyDrop<A>,
-
 }
 
 impl Drop for A_set_attribute_attr1_Result {
@@ -5392,9 +5265,7 @@ impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr1_Result {
 
 pub struct A_get_attribute_attr1_In {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl A_get_attribute_attr1_In {
@@ -5450,9 +5321,7 @@ impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_In {
 
 pub struct A_get_attribute_attr1_Out {
 
-
     pub return_: u8,
-
 }
 
 impl A_get_attribute_attr1_Out {
@@ -5513,9 +5382,7 @@ pub struct A_get_attribute_attr1_Result {
 
 
 union A_get_attribute_attr1_ResultData {
-
     result: core::mem::ManuallyDrop<A_get_attribute_attr1_Out>,
-
 }
 
 impl Drop for A_get_attribute_attr1_Result {
@@ -5638,9 +5505,7 @@ impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_Result {
 
 pub struct A_set_attribute_attr1_In {
 
-
     pub attr1: u8,
-
 }
 
 impl A_set_attribute_attr1_In {
@@ -5696,9 +5561,7 @@ impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr1_In {
 
 pub struct A_set_attribute_attr1_Out {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl A_set_attribute_attr1_Out {
@@ -5759,11 +5622,8 @@ pub struct A_set_attribute_attr1_Result {
 
 
 union A_set_attribute_attr1_ResultData {
-
     result: core::mem::ManuallyDrop<A_set_attribute_attr1_Out>,
-
     a_ex: core::mem::ManuallyDrop<A>,
-
 }
 
 impl Drop for A_set_attribute_attr1_Result {
@@ -5940,23 +5800,14 @@ pub struct A_Call {
 
 
 union A_CallData {
-
     unknownOp: core::mem::ManuallyDrop<dds::rpc::UnknownOperation>,
-
     func1: core::mem::ManuallyDrop<A_func1_In>,
-
     get_attribute_attr1: core::mem::ManuallyDrop<A_get_attribute_attr1_In>,
-
     set_attribute_attr1: core::mem::ManuallyDrop<A_set_attribute_attr1_In>,
-
     get_attribute_attr2: core::mem::ManuallyDrop<A_get_attribute_attr2_In>,
-
     set_attribute_attr2: core::mem::ManuallyDrop<A_set_attribute_attr2_In>,
-
     get_attribute_attr3: core::mem::ManuallyDrop<A_get_attribute_attr3_In>,
-
     set_attribute_attr3: core::mem::ManuallyDrop<A_set_attribute_attr3_In>,
-
 }
 
 impl Drop for A_Call {
@@ -6686,11 +6537,8 @@ impl xidl_xcdr::XcdrDeserialize for A_Call {
 
 pub struct A_Request {
 
-
     pub header: dds::rpc::RequestHeader,
-
     pub data: A_Call,
-
 }
 
 impl A_Request {
@@ -6761,23 +6609,14 @@ pub struct A_Return {
 
 
 union A_ReturnData {
-
     unknownOp: core::mem::ManuallyDrop<dds::rpc::UnknownOperation>,
-
     func1: core::mem::ManuallyDrop<A_func1_Result>,
-
     get_attribute_attr1: core::mem::ManuallyDrop<A_get_attribute_attr1_Result>,
-
     set_attribute_attr1: core::mem::ManuallyDrop<A_set_attribute_attr1_Result>,
-
     get_attribute_attr2: core::mem::ManuallyDrop<A_get_attribute_attr2_Result>,
-
     set_attribute_attr2: core::mem::ManuallyDrop<A_set_attribute_attr2_Result>,
-
     get_attribute_attr3: core::mem::ManuallyDrop<A_get_attribute_attr3_Result>,
-
     set_attribute_attr3: core::mem::ManuallyDrop<A_set_attribute_attr3_Result>,
-
 }
 
 impl Drop for A_Return {
@@ -7507,11 +7346,8 @@ impl xidl_xcdr::XcdrDeserialize for A_Return {
 
 pub struct A_Reply {
 
-
     pub header: dds::rpc::ReplyHeader,
-
     pub data: A_Return,
-
 }
 
 impl A_Reply {
@@ -7623,9 +7459,7 @@ pub const A_opA_Hash: i32 = 3927698569;
 
 pub struct A_opA_In {
 
-
     pub l_1: L1,
-
 }
 
 impl A_opA_In {
@@ -7681,9 +7515,7 @@ impl xidl_xcdr::XcdrDeserialize for A_opA_In {
 
 pub struct A_opA_Out {
 
-
     pub return_: i16,
-
 }
 
 impl A_opA_Out {
@@ -7744,9 +7576,7 @@ pub struct A_opA_Result {
 
 
 union A_opA_ResultData {
-
     result: core::mem::ManuallyDrop<A_opA_Out>,
-
 }
 
 impl Drop for A_opA_Result {
@@ -7874,11 +7704,8 @@ pub struct A_Call {
 
 
 union A_CallData {
-
     unknownOp: core::mem::ManuallyDrop<dds::rpc::UnknownOperation>,
-
     opA: core::mem::ManuallyDrop<A_opA_In>,
-
 }
 
 impl Drop for A_Call {
@@ -8048,11 +7875,8 @@ impl xidl_xcdr::XcdrDeserialize for A_Call {
 
 pub struct A_Request {
 
-
     pub header: dds::rpc::RequestHeader,
-
     pub data: A_Call,
-
 }
 
 impl A_Request {
@@ -8123,11 +7947,8 @@ pub struct A_Return {
 
 
 union A_ReturnData {
-
     unknownOp: core::mem::ManuallyDrop<dds::rpc::UnknownOperation>,
-
     opA: core::mem::ManuallyDrop<A_opA_Result>,
-
 }
 
 impl Drop for A_Return {
@@ -8297,11 +8118,8 @@ impl xidl_xcdr::XcdrDeserialize for A_Return {
 
 pub struct A_Reply {
 
-
     pub header: dds::rpc::ReplyHeader,
-
     pub data: A_Return,
-
 }
 
 impl A_Reply {

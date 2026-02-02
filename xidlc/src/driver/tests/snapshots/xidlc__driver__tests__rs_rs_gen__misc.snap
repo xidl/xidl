@@ -23,11 +23,8 @@ use std::ffi::c_void;
 pub enum Color {
 
     red,
-
     green,
-
     blue
-
 }
 
 
@@ -74,11 +71,8 @@ pub type FooSeq = Vec<Foo>;
 
 pub struct Foo {
 
-
     pub value: i32,
-
     pub chain: FooSeq,
-
 }
 
 impl Foo {
@@ -150,11 +144,8 @@ pub struct Bar {
 
 
 union BarData {
-
     l_mem: core::mem::ManuallyDrop<i32>,
-
     s_mem: core::mem::ManuallyDrop<Foo>,
-
 }
 
 impl Drop for Bar {
@@ -342,9 +333,7 @@ pub const A_make_it_so_Hash: i32 = 4027367364;
 
 pub struct A_make_it_so_In {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl A_make_it_so_In {
@@ -400,9 +389,7 @@ impl xidl_xcdr::XcdrDeserialize for A_make_it_so_In {
 
 pub struct A_make_it_so_Out {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl A_make_it_so_Out {
@@ -463,9 +450,7 @@ pub struct A_make_it_so_Result {
 
 
 union A_make_it_so_ResultData {
-
     result: core::mem::ManuallyDrop<A_make_it_so_Out>,
-
 }
 
 impl Drop for A_make_it_so_Result {
@@ -593,11 +578,8 @@ pub struct A_Call {
 
 
 union A_CallData {
-
     unknownOp: core::mem::ManuallyDrop<dds::rpc::UnknownOperation>,
-
     make_it_so: core::mem::ManuallyDrop<A_make_it_so_In>,
-
 }
 
 impl Drop for A_Call {
@@ -767,11 +749,8 @@ impl xidl_xcdr::XcdrDeserialize for A_Call {
 
 pub struct A_Request {
 
-
     pub header: dds::rpc::RequestHeader,
-
     pub data: A_Call,
-
 }
 
 impl A_Request {
@@ -842,11 +821,8 @@ pub struct A_Return {
 
 
 union A_ReturnData {
-
     unknownOp: core::mem::ManuallyDrop<dds::rpc::UnknownOperation>,
-
     make_it_so: core::mem::ManuallyDrop<A_make_it_so_Result>,
-
 }
 
 impl Drop for A_Return {
@@ -1016,11 +992,8 @@ impl xidl_xcdr::XcdrDeserialize for A_Return {
 
 pub struct A_Reply {
 
-
     pub header: dds::rpc::ReplyHeader,
-
     pub data: A_Return,
-
 }
 
 impl A_Reply {
@@ -1092,9 +1065,7 @@ pub const B_make_it_so_Hash: i32 = 4027367364;
 
 pub struct B_make_it_so_In {
 
-
     pub times: i32,
-
 }
 
 impl B_make_it_so_In {
@@ -1150,9 +1121,7 @@ impl xidl_xcdr::XcdrDeserialize for B_make_it_so_In {
 
 pub struct B_make_it_so_Out {
 
-
     pub return_: i16,
-
 }
 
 impl B_make_it_so_Out {
@@ -1213,9 +1182,7 @@ pub struct B_make_it_so_Result {
 
 
 union B_make_it_so_ResultData {
-
     result: core::mem::ManuallyDrop<B_make_it_so_Out>,
-
 }
 
 impl Drop for B_make_it_so_Result {
@@ -1343,11 +1310,8 @@ pub struct B_Call {
 
 
 union B_CallData {
-
     unknownOp: core::mem::ManuallyDrop<dds::rpc::UnknownOperation>,
-
     make_it_so: core::mem::ManuallyDrop<B_make_it_so_In>,
-
 }
 
 impl Drop for B_Call {
@@ -1517,11 +1481,8 @@ impl xidl_xcdr::XcdrDeserialize for B_Call {
 
 pub struct B_Request {
 
-
     pub header: dds::rpc::RequestHeader,
-
     pub data: B_Call,
-
 }
 
 impl B_Request {
@@ -1592,11 +1553,8 @@ pub struct B_Return {
 
 
 union B_ReturnData {
-
     unknownOp: core::mem::ManuallyDrop<dds::rpc::UnknownOperation>,
-
     make_it_so: core::mem::ManuallyDrop<B_make_it_so_Result>,
-
 }
 
 impl Drop for B_Return {
@@ -1766,11 +1724,8 @@ impl xidl_xcdr::XcdrDeserialize for B_Return {
 
 pub struct B_Reply {
 
-
     pub header: dds::rpc::ReplyHeader,
-
     pub data: B_Return,
-
 }
 
 impl B_Reply {
@@ -1842,9 +1797,7 @@ pub const A_opA_Hash: i32 = 3927698569;
 
 pub struct A_opA_In {
 
-
     pub l_1: L1,
-
 }
 
 impl A_opA_In {
@@ -1900,9 +1853,7 @@ impl xidl_xcdr::XcdrDeserialize for A_opA_In {
 
 pub struct A_opA_Out {
 
-
     pub return_: i16,
-
 }
 
 impl A_opA_Out {
@@ -1963,9 +1914,7 @@ pub struct A_opA_Result {
 
 
 union A_opA_ResultData {
-
     result: core::mem::ManuallyDrop<A_opA_Out>,
-
 }
 
 impl Drop for A_opA_Result {
@@ -2093,11 +2042,8 @@ pub struct A_Call {
 
 
 union A_CallData {
-
     unknownOp: core::mem::ManuallyDrop<dds::rpc::UnknownOperation>,
-
     opA: core::mem::ManuallyDrop<A_opA_In>,
-
 }
 
 impl Drop for A_Call {
@@ -2267,11 +2213,8 @@ impl xidl_xcdr::XcdrDeserialize for A_Call {
 
 pub struct A_Request {
 
-
     pub header: dds::rpc::RequestHeader,
-
     pub data: A_Call,
-
 }
 
 impl A_Request {
@@ -2342,11 +2285,8 @@ pub struct A_Return {
 
 
 union A_ReturnData {
-
     unknownOp: core::mem::ManuallyDrop<dds::rpc::UnknownOperation>,
-
     opA: core::mem::ManuallyDrop<A_opA_Result>,
-
 }
 
 impl Drop for A_Return {
@@ -2516,11 +2456,8 @@ impl xidl_xcdr::XcdrDeserialize for A_Return {
 
 pub struct A_Reply {
 
-
     pub header: dds::rpc::ReplyHeader,
-
     pub data: A_Return,
-
 }
 
 impl A_Reply {
@@ -2593,9 +2530,7 @@ pub const B_opB_Hash: i32 = 772252025;
 
 pub struct B_opB_In {
 
-
     pub l: i32,
-
 }
 
 impl B_opB_In {
@@ -2651,9 +2586,7 @@ impl xidl_xcdr::XcdrDeserialize for B_opB_In {
 
 pub struct B_opB_Out {
 
-
     pub return_: L1,
-
 }
 
 impl B_opB_Out {
@@ -2714,9 +2647,7 @@ pub struct B_opB_Result {
 
 
 union B_opB_ResultData {
-
     result: core::mem::ManuallyDrop<B_opB_Out>,
-
 }
 
 impl Drop for B_opB_Result {
@@ -2844,11 +2775,8 @@ pub struct B_Call {
 
 
 union B_CallData {
-
     unknownOp: core::mem::ManuallyDrop<dds::rpc::UnknownOperation>,
-
     opB: core::mem::ManuallyDrop<B_opB_In>,
-
 }
 
 impl Drop for B_Call {
@@ -3018,11 +2946,8 @@ impl xidl_xcdr::XcdrDeserialize for B_Call {
 
 pub struct B_Request {
 
-
     pub header: dds::rpc::RequestHeader,
-
     pub data: B_Call,
-
 }
 
 impl B_Request {
@@ -3093,11 +3018,8 @@ pub struct B_Return {
 
 
 union B_ReturnData {
-
     unknownOp: core::mem::ManuallyDrop<dds::rpc::UnknownOperation>,
-
     opB: core::mem::ManuallyDrop<B_opB_Result>,
-
 }
 
 impl Drop for B_Return {
@@ -3267,11 +3189,8 @@ impl xidl_xcdr::XcdrDeserialize for B_Return {
 
 pub struct B_Reply {
 
-
     pub header: dds::rpc::ReplyHeader,
-
     pub data: B_Return,
-
 }
 
 impl B_Reply {
@@ -3344,9 +3263,7 @@ pub const C_opC_Hash: i32 = 1200187224;
 
 pub struct C_opC_In {
 
-
     pub l_3: L3,
-
 }
 
 impl C_opC_In {
@@ -3402,9 +3319,7 @@ impl xidl_xcdr::XcdrDeserialize for C_opC_In {
 
 pub struct C_opC_Out {
 
-
     pub return_: B::L1,
-
 }
 
 impl C_opC_Out {
@@ -3465,9 +3380,7 @@ pub struct C_opC_Result {
 
 
 union C_opC_ResultData {
-
     result: core::mem::ManuallyDrop<C_opC_Out>,
-
 }
 
 impl Drop for C_opC_Result {
@@ -3595,11 +3508,8 @@ pub struct C_Call {
 
 
 union C_CallData {
-
     unknownOp: core::mem::ManuallyDrop<dds::rpc::UnknownOperation>,
-
     opC: core::mem::ManuallyDrop<C_opC_In>,
-
 }
 
 impl Drop for C_Call {
@@ -3769,11 +3679,8 @@ impl xidl_xcdr::XcdrDeserialize for C_Call {
 
 pub struct C_Request {
 
-
     pub header: dds::rpc::RequestHeader,
-
     pub data: C_Call,
-
 }
 
 impl C_Request {
@@ -3844,11 +3751,8 @@ pub struct C_Return {
 
 
 union C_ReturnData {
-
     unknownOp: core::mem::ManuallyDrop<dds::rpc::UnknownOperation>,
-
     opC: core::mem::ManuallyDrop<C_opC_Result>,
-
 }
 
 impl Drop for C_Return {
@@ -4018,11 +3922,8 @@ impl xidl_xcdr::XcdrDeserialize for C_Return {
 
 pub struct C_Reply {
 
-
     pub header: dds::rpc::ReplyHeader,
-
     pub data: C_Return,
-
 }
 
 impl C_Reply {
@@ -4097,9 +3998,7 @@ pub const A_f_Hash: i32 = 3712786831;
 
 pub struct A_f_In {
 
-
     pub s: coord,
-
 }
 
 impl A_f_In {
@@ -4155,9 +4054,7 @@ impl xidl_xcdr::XcdrDeserialize for A_f_In {
 
 pub struct A_f_Out {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl A_f_Out {
@@ -4218,9 +4115,7 @@ pub struct A_f_Result {
 
 
 union A_f_ResultData {
-
     result: core::mem::ManuallyDrop<A_f_Out>,
-
 }
 
 impl Drop for A_f_Result {
@@ -4348,11 +4243,8 @@ pub struct A_Call {
 
 
 union A_CallData {
-
     unknownOp: core::mem::ManuallyDrop<dds::rpc::UnknownOperation>,
-
     f: core::mem::ManuallyDrop<A_f_In>,
-
 }
 
 impl Drop for A_Call {
@@ -4522,11 +4414,8 @@ impl xidl_xcdr::XcdrDeserialize for A_Call {
 
 pub struct A_Request {
 
-
     pub header: dds::rpc::RequestHeader,
-
     pub data: A_Call,
-
 }
 
 impl A_Request {
@@ -4597,11 +4486,8 @@ pub struct A_Return {
 
 
 union A_ReturnData {
-
     unknownOp: core::mem::ManuallyDrop<dds::rpc::UnknownOperation>,
-
     f: core::mem::ManuallyDrop<A_f_Result>,
-
 }
 
 impl Drop for A_Return {
@@ -4771,11 +4657,8 @@ impl xidl_xcdr::XcdrDeserialize for A_Return {
 
 pub struct A_Reply {
 
-
     pub header: dds::rpc::ReplyHeader,
-
     pub data: A_Return,
-
 }
 
 impl A_Reply {
@@ -4868,9 +4751,7 @@ pub const C_set_attribute_City_Hash: i32 = 1017480313;
 
 pub struct C_get_attribute_Title_In {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl C_get_attribute_Title_In {
@@ -4926,9 +4807,7 @@ impl xidl_xcdr::XcdrDeserialize for C_get_attribute_Title_In {
 
 pub struct C_get_attribute_Title_Out {
 
-
     pub return_: string_t,
-
 }
 
 impl C_get_attribute_Title_Out {
@@ -4989,9 +4868,7 @@ pub struct C_get_attribute_Title_Result {
 
 
 union C_get_attribute_Title_ResultData {
-
     result: core::mem::ManuallyDrop<C_get_attribute_Title_Out>,
-
 }
 
 impl Drop for C_get_attribute_Title_Result {
@@ -5114,9 +4991,7 @@ impl xidl_xcdr::XcdrDeserialize for C_get_attribute_Title_Result {
 
 pub struct C_set_attribute_Title_In {
 
-
     pub Title: string_t,
-
 }
 
 impl C_set_attribute_Title_In {
@@ -5172,9 +5047,7 @@ impl xidl_xcdr::XcdrDeserialize for C_set_attribute_Title_In {
 
 pub struct C_set_attribute_Title_Out {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl C_set_attribute_Title_Out {
@@ -5235,9 +5108,7 @@ pub struct C_set_attribute_Title_Result {
 
 
 union C_set_attribute_Title_ResultData {
-
     result: core::mem::ManuallyDrop<C_set_attribute_Title_Out>,
-
 }
 
 impl Drop for C_set_attribute_Title_Result {
@@ -5360,9 +5231,7 @@ impl xidl_xcdr::XcdrDeserialize for C_set_attribute_Title_Result {
 
 pub struct C_get_attribute_Name_In {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl C_get_attribute_Name_In {
@@ -5418,9 +5287,7 @@ impl xidl_xcdr::XcdrDeserialize for C_get_attribute_Name_In {
 
 pub struct C_get_attribute_Name_Out {
 
-
     pub return_: A::string_t,
-
 }
 
 impl C_get_attribute_Name_Out {
@@ -5481,9 +5348,7 @@ pub struct C_get_attribute_Name_Result {
 
 
 union C_get_attribute_Name_ResultData {
-
     result: core::mem::ManuallyDrop<C_get_attribute_Name_Out>,
-
 }
 
 impl Drop for C_get_attribute_Name_Result {
@@ -5606,9 +5471,7 @@ impl xidl_xcdr::XcdrDeserialize for C_get_attribute_Name_Result {
 
 pub struct C_set_attribute_Name_In {
 
-
     pub Name: A::string_t,
-
 }
 
 impl C_set_attribute_Name_In {
@@ -5664,9 +5527,7 @@ impl xidl_xcdr::XcdrDeserialize for C_set_attribute_Name_In {
 
 pub struct C_set_attribute_Name_Out {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl C_set_attribute_Name_Out {
@@ -5727,9 +5588,7 @@ pub struct C_set_attribute_Name_Result {
 
 
 union C_set_attribute_Name_ResultData {
-
     result: core::mem::ManuallyDrop<C_set_attribute_Name_Out>,
-
 }
 
 impl Drop for C_set_attribute_Name_Result {
@@ -5852,9 +5711,7 @@ impl xidl_xcdr::XcdrDeserialize for C_set_attribute_Name_Result {
 
 pub struct C_get_attribute_City_In {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl C_get_attribute_City_In {
@@ -5910,9 +5767,7 @@ impl xidl_xcdr::XcdrDeserialize for C_get_attribute_City_In {
 
 pub struct C_get_attribute_City_Out {
 
-
     pub return_: B::string_t,
-
 }
 
 impl C_get_attribute_City_Out {
@@ -5973,9 +5828,7 @@ pub struct C_get_attribute_City_Result {
 
 
 union C_get_attribute_City_ResultData {
-
     result: core::mem::ManuallyDrop<C_get_attribute_City_Out>,
-
 }
 
 impl Drop for C_get_attribute_City_Result {
@@ -6098,9 +5951,7 @@ impl xidl_xcdr::XcdrDeserialize for C_get_attribute_City_Result {
 
 pub struct C_set_attribute_City_In {
 
-
     pub City: B::string_t,
-
 }
 
 impl C_set_attribute_City_In {
@@ -6156,9 +6007,7 @@ impl xidl_xcdr::XcdrDeserialize for C_set_attribute_City_In {
 
 pub struct C_set_attribute_City_Out {
 
-
     pub dummy: dds::rpc::UnusedMember,
-
 }
 
 impl C_set_attribute_City_Out {
@@ -6219,9 +6068,7 @@ pub struct C_set_attribute_City_Result {
 
 
 union C_set_attribute_City_ResultData {
-
     result: core::mem::ManuallyDrop<C_set_attribute_City_Out>,
-
 }
 
 impl Drop for C_set_attribute_City_Result {
@@ -6349,21 +6196,13 @@ pub struct C_Call {
 
 
 union C_CallData {
-
     unknownOp: core::mem::ManuallyDrop<dds::rpc::UnknownOperation>,
-
     get_attribute_Title: core::mem::ManuallyDrop<C_get_attribute_Title_In>,
-
     set_attribute_Title: core::mem::ManuallyDrop<C_set_attribute_Title_In>,
-
     get_attribute_Name: core::mem::ManuallyDrop<C_get_attribute_Name_In>,
-
     set_attribute_Name: core::mem::ManuallyDrop<C_set_attribute_Name_In>,
-
     get_attribute_City: core::mem::ManuallyDrop<C_get_attribute_City_In>,
-
     set_attribute_City: core::mem::ManuallyDrop<C_set_attribute_City_In>,
-
 }
 
 impl Drop for C_Call {
@@ -6778,11 +6617,8 @@ impl xidl_xcdr::XcdrDeserialize for C_Call {
 
 pub struct C_Request {
 
-
     pub header: dds::rpc::RequestHeader,
-
     pub data: C_Call,
-
 }
 
 impl C_Request {
@@ -6853,21 +6689,13 @@ pub struct C_Return {
 
 
 union C_ReturnData {
-
     unknownOp: core::mem::ManuallyDrop<dds::rpc::UnknownOperation>,
-
     get_attribute_Title: core::mem::ManuallyDrop<C_get_attribute_Title_Result>,
-
     set_attribute_Title: core::mem::ManuallyDrop<C_set_attribute_Title_Result>,
-
     get_attribute_Name: core::mem::ManuallyDrop<C_get_attribute_Name_Result>,
-
     set_attribute_Name: core::mem::ManuallyDrop<C_set_attribute_Name_Result>,
-
     get_attribute_City: core::mem::ManuallyDrop<C_get_attribute_City_Result>,
-
     set_attribute_City: core::mem::ManuallyDrop<C_set_attribute_City_Result>,
-
 }
 
 impl Drop for C_Return {
@@ -7282,11 +7110,8 @@ impl xidl_xcdr::XcdrDeserialize for C_Return {
 
 pub struct C_Reply {
 
-
     pub header: dds::rpc::ReplyHeader,
-
     pub data: C_Return,
-
 }
 
 impl C_Reply {
@@ -7369,11 +7194,8 @@ pub mod M {
     pub enum Size {
     
         small,
-    
         medium,
-    
         large
-    
     }
     
     

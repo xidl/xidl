@@ -12,9 +12,7 @@ simple_union.rs
 pub enum Tag {
 
     A,
-
     B
-
 }
 
 
@@ -28,11 +26,8 @@ pub struct SimpleUnion {
 
 
 union SimpleUnionData {
-
     a: core::mem::ManuallyDrop<int>,
-
     b: core::mem::ManuallyDrop<int>,
-
 }
 
 impl Drop for SimpleUnion {

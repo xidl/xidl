@@ -5,6 +5,7 @@ mod spec;
 
 use crate::error::IdlcResult;
 use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactHir};
+use crate::macros::hashmap;
 use serde_json::json;
 use std::collections::HashMap;
 use std::path::Path;
@@ -18,24 +19,14 @@ pub fn generate(
     input_path: &Path,
     props: HashMap<String, serde_json::Value>,
 ) -> IdlcResult<Vec<Artifact>> {
-    let stem = input_path
-        .file_stem()
-        .and_then(|value| value.to_str())
-        .unwrap_or("output");
-    let _base = crate::generate::to_snake_case(stem);
-
     let file_name = input_path.file_stem().unwrap().to_str().unwrap();
     let filename = format!("{file_name}.rs");
 
     let mut renderer = JsonRpcRenderer::new()?;
-    for (k, v) in props {
-        renderer
-            .env()
-            .add_global(k, minijinja::Value::from_serialize(v));
-    }
+    renderer.extend(props);
     let output = spec.render(&renderer)?;
 
-    let source = renderer.render_template(
+    let content = renderer.render_template(
         "spec.rs.j2",
         &json!({
             "definitions": output.source,
@@ -44,23 +35,24 @@ pub fn generate(
 
     let mut artifacts = vec![Artifact::new_file(ArtifactFile {
         path: filename,
-        content: source,
+        content,
     })];
-    if let Some(non_interface) = strip_interfaces(spec) {
-        let mut properties = ParserProperties::default();
-        properties.insert(
-            "skip_render_header".to_string(),
-            serde_json::Value::Bool(true),
-        );
-        properties.insert("skip_serialize".into(), true.into());
-        properties.insert("skip_deserialize".into(), true.into());
+
+    let non_interface = strip_interfaces(spec);
+    if !non_interface.0.is_empty() {
+        let props = hashmap! {
+            "skip_render_header" => true,
+            "skip_serialize" => true,
+            "skip_deserialize" => true
+        };
 
         artifacts.push(Artifact::new_hir(ArtifactHir {
             lang: "rs".into(),
             hir: non_interface,
-            props: properties,
+            props,
         }));
     }
+
     Ok(artifacts)
 }
 
@@ -68,9 +60,9 @@ pub(crate) struct RustJsonRpcCodegen;
 
 impl crate::jsonrpc::Codegen for RustJsonRpcCodegen {
     fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
-        let mut props = ParserProperties::default();
-        props.insert("expand_interface".into(), false.into());
-        Ok(props)
+        Ok(hashmap! {
+            "expand_interface" => false
+        })
     }
 
     fn generate(
@@ -79,11 +71,15 @@ impl crate::jsonrpc::Codegen for RustJsonRpcCodegen {
         path: String,
         props: ::xidl_parser::hir::ParserProperties,
     ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
-        generate(hir, Path::new(&path), props).map_err(map_codegen_error)
+        generate(hir, Path::new(&path), props).map_err(|err| xidl_jsonrpc::Error::Rpc {
+            code: xidl_jsonrpc::ErrorCode::ServerError,
+            message: err.to_string(),
+            data: None,
+        })
     }
 }
 
-fn strip_interfaces(spec: hir::Specification) -> Option<hir::Specification> {
+fn strip_interfaces(spec: hir::Specification) -> hir::Specification {
     fn strip_defs(defs: Vec<hir::Definition>) -> Vec<hir::Definition> {
         let mut out = Vec::new();
         for def in defs {
@@ -101,18 +97,5 @@ fn strip_interfaces(spec: hir::Specification) -> Option<hir::Specification> {
         out
     }
 
-    let defs = strip_defs(spec.0);
-    if defs.is_empty() {
-        None
-    } else {
-        Some(hir::Specification(defs))
-    }
-}
-
-fn map_codegen_error(err: crate::error::IdlcError) -> xidl_jsonrpc::Error {
-    xidl_jsonrpc::Error::Rpc {
-        code: xidl_jsonrpc::ErrorCode::ServerError,
-        message: err.to_string(),
-        data: None,
-    }
+    hir::Specification(strip_defs(spec.0))
 }

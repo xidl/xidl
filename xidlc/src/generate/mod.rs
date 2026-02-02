@@ -7,27 +7,6 @@ mod utils;
 
 use xidl_parser::hir;
 
-pub fn to_snake_case(input: &str) -> String {
-    let mut out = String::new();
-    let mut prev_lower = false;
-    for ch in input.chars() {
-        if ch.is_ascii_uppercase() {
-            if prev_lower {
-                out.push('_');
-            }
-            out.push(ch.to_ascii_lowercase());
-            prev_lower = false;
-        } else if ch == '-' || ch == ' ' {
-            out.push('_');
-            prev_lower = false;
-        } else {
-            out.push(ch.to_ascii_lowercase());
-            prev_lower = ch.is_ascii_lowercase() || ch.is_ascii_digit();
-        }
-    }
-    out
-}
-
 pub fn render_const_expr<FScoped, FLit>(
     expr: &hir::ConstExpr,
     scoped_name: &FScoped,
