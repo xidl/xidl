@@ -1,0 +1,4 @@
+interface HelloWorld {
+  @post(path="/hello")
+  void sayHello(in string name);
+};

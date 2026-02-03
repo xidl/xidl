@@ -190,6 +190,7 @@ impl CodegenSession {
             "rs_jsonrpc" | "rust_jsonrpc" => {
                 run_server!(crate::generate::rust_jsonrpc::RustJsonRpcCodegen)
             }
+            "rs_axum" | "rust_axum" => run_server!(crate::generate::rust_axum::RustAxumCodegen),
             _ => {
                 let exe = format!("xidl-{lang}");
                 let mut child = Command::new(&exe)

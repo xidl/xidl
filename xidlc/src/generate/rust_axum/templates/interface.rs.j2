@@ -1,0 +1,188 @@
+pub trait {{ ident }} {
+{% for method in methods %}
+    async fn {{ method.name }}(&self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.ret }}, xidl_rust_axum::Error>;
+{% endfor %}
+}
+
+use xidl_rust_axum::axum::{
+    extract::{Path, Query},
+    http::StatusCode,
+    response::IntoResponse,
+    routing::{delete, get, head, options, patch, post, put},
+    Json, Router,
+};
+use xidl_rust_axum::serde::{Deserialize, Serialize};
+use std::sync::Arc;
+
+{% for method in methods %}
+{% if method.path_params | length > 0 %}
+#[derive(Serialize, Deserialize)]
+struct {{ method.struct_prefix }}Path {
+{% for param in method.path_params %}
+{% if param.serde_rename is defined and param.serde_rename %}
+    #[serde(rename = "{{ param.serde_rename }}")]
+{% endif %}
+    {{ param.name }}: {{ param.ty }},
+{% endfor %}
+}
+
+{% endif %}
+{% if method.query_params | length > 0 %}
+#[derive(Serialize, Deserialize)]
+struct {{ method.struct_prefix }}Query {
+{% for param in method.query_params %}
+{% if param.serde_rename is defined and param.serde_rename %}
+    #[serde(rename = "{{ param.serde_rename }}")]
+{% endif %}
+    {{ param.name }}: {{ param.ty }},
+{% endfor %}
+}
+
+{% endif %}
+{% if method.body_params | length > 0 %}
+#[derive(Serialize, Deserialize)]
+struct {{ method.struct_prefix }}Body {
+{% for param in method.body_params %}
+{% if param.serde_rename is defined and param.serde_rename %}
+    #[serde(rename = "{{ param.serde_rename }}")]
+{% endif %}
+    {{ param.name }}: {{ param.ty }},
+{% endfor %}
+}
+
+{% endif %}
+{% endfor %}
+
+pub struct {{ ident }}Server<T> {
+    inner: Arc<T>,
+}
+
+impl<T> {{ ident }}Server<T>
+where
+    T: {{ ident }} + Send + Sync + 'static,
+{
+    pub fn new(inner: T) -> Self {
+        Self {
+            inner: Arc::new(inner),
+        }
+    }
+
+    pub fn router(self) -> Router {
+        let mut router = Router::new();
+        let svc = self.inner;
+{% for method in methods %}
+        router = router.route(
+            "{{ method.path }}",
+            {{ method.http_method_fn }}({
+                let svc = svc.clone();
+                move |{% if method.path_params | length > 0 %}Path(path): Path<{{ method.struct_prefix }}Path>{% endif %}{% if method.query_params | length > 0 %}{% if method.path_params | length > 0 %}, {% endif %}Query(query): Query<{{ method.struct_prefix }}Query>{% endif %}{% if method.body_params | length > 0 %}{% if method.path_params | length > 0 or method.query_params | length > 0 %}, {% endif %}Json(body): Json<{{ method.struct_prefix }}Body>{% endif %}| async move {
+{% if method.path_params | length > 0 %}
+                    let {{ method.struct_prefix }}Path {
+{% for param in method.path_params %}
+                        {{ param.name }},
+{% endfor %}
+                    } = path;
+{% endif %}
+{% if method.query_params | length > 0 %}
+                    let {{ method.struct_prefix }}Query {
+{% for param in method.query_params %}
+                        {{ param.name }},
+{% endfor %}
+                    } = query;
+{% endif %}
+{% if method.body_params | length > 0 %}
+                    let {{ method.struct_prefix }}Body {
+{% for param in method.body_params %}
+                        {{ param.name }},
+{% endfor %}
+                    } = body;
+{% endif %}
+                    let result = svc.{{ method.name }}({% if method.param_names | length > 0 %}{{ method.param_names | join(", ") }}{% endif %}).await;
+                    match result {
+                        Ok(value) => (StatusCode::OK, Json(value)).into_response(),
+                        Err(err) => err.into_response(),
+                    }
+                }
+            }),
+        );
+{% endfor %}
+        router
+    }
+}
+
+impl<T> xidl_rust_axum::Service for {{ ident }}Server<T>
+where
+    T: {{ ident }} + Send + Sync + 'static,
+{
+    fn into_router(self) -> Router {
+        self.router()
+    }
+}
+
+pub fn service<T>(inner: T) -> {{ ident }}Server<T>
+where
+    T: {{ ident }} + Send + Sync + 'static,
+{
+    {{ ident }}Server::new(inner)
+}
+
+pub struct {{ ident }}Client {
+    client: xidl_rust_axum::Client,
+}
+
+impl {{ ident }}Client {
+    pub fn new(base_url: impl Into<String>) -> Self {
+        Self {
+            client: xidl_rust_axum::Client::new(base_url),
+        }
+    }
+}
+
+impl {{ ident }} for {{ ident }}Client {
+{% for method in methods %}
+    async fn {{ method.name }}(&self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.ret }}, xidl_rust_axum::Error> {
+        let mut path = "{{ method.path }}".to_string();
+{% for param in method.path_params %}
+        path = path.replace("{\u007b}{{ param.raw_name }}{\u007d}", &{{ param.name }}.to_string());
+{% endfor %}
+        let url = self.client.url(&path);
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::{{ method.reqwest_method }}, url);
+{% if method.query_params | length > 0 %}
+        let query = {{ method.struct_prefix }}Query {
+{% for param in method.query_params %}
+            {{ param.name }},
+{% endfor %}
+        };
+        req = req.query(&query);
+{% endif %}
+{% if method.body_params | length > 0 %}
+        let body = {{ method.struct_prefix }}Body {
+{% for param in method.body_params %}
+            {{ param.name }},
+{% endfor %}
+        };
+        req = req.json(&body);
+{% endif %}
+        let resp = req
+            .send()
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, err.to_string()))?;
+        if resp.status().is_success() {
+            resp.json::<{{ method.ret }}>()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, err.to_string()))
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            let err = match body {
+                Some(body) => xidl_rust_axum::Error::new(body.code, body.msg),
+                None => xidl_rust_axum::Error::new(500, format!("http error: {}", status.as_u16())),
+            };
+            Err(err)
+        }
+    }
+{% endfor %}
+}

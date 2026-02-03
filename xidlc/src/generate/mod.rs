@@ -2,6 +2,7 @@ pub mod c;
 pub mod cpp;
 pub mod hir_gen;
 pub mod rust;
+pub mod rust_axum;
 pub mod rust_jsonrpc;
 mod utils;
 
