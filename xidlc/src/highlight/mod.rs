@@ -56,14 +56,7 @@ impl IdlHighlighter {
     }
 
     pub fn highlight(&self, source: &str, name: &str) -> IdlcResult<HighlightedText> {
-        let mut parser = Parser::new();
-        parser
-            .set_language(&self.language)
-            .map_err(|err| IdlcError::fmt(format!("set idl language: {err}")))?;
-
-        let tree = parser
-            .parse(source, None)
-            .ok_or_else(|| IdlcError::fmt("failed to parse idl".to_string()))?;
+        let tree = self.parse_tree(source)?;
         let root = tree.root_node();
         if root.has_error() {
             let nodes = self.collect_nodes(root, source)?;
@@ -84,13 +77,7 @@ impl IdlHighlighter {
             match event.map_err(|err| IdlcError::fmt(format!("highlight error: {err}")))? {
                 HighlightEvent::Source { start, end } => {
                     let span = &source[start..end];
-                    if stack.is_empty() {
-                        styled.push_str(self.colors.default_color());
-                        styled.push_str(span);
-                        styled.push_str(ANSI_RESET);
-                    } else {
-                        styled.push_str(span);
-                    }
+                    self.push_source_span(&mut styled, span, &stack);
                 }
                 HighlightEvent::HighlightStart(highlight) => {
                     let name = self.capture_name(highlight.0);
@@ -111,6 +98,27 @@ impl IdlHighlighter {
             text: styled,
             nodes,
         })
+    }
+
+    fn parse_tree(&self, source: &str) -> IdlcResult<tree_sitter::Tree> {
+        let mut parser = Parser::new();
+        parser
+            .set_language(&self.language)
+            .map_err(|err| IdlcError::fmt(format!("set idl language: {err}")))?;
+
+        parser
+            .parse(source, None)
+            .ok_or_else(|| IdlcError::fmt("failed to parse idl".to_string()))
+    }
+
+    fn push_source_span(&self, styled: &mut String, span: &str, stack: &[&str]) {
+        if stack.is_empty() {
+            styled.push_str(self.colors.default_color());
+            styled.push_str(span);
+            styled.push_str(ANSI_RESET);
+        } else {
+            styled.push_str(span);
+        }
     }
 
     fn collect_nodes(
