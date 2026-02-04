@@ -5,7 +5,19 @@ use std::collections::HashSet;
 use xidl_parser::hir;
 
 pub fn rust_scoped_name(value: &hir::ScopedName) -> String {
-    let mut name = value.name.iter().map(|v| rust_ident(v)).join("::");
+    let mut iter = value.name.iter();
+    let mut parts = Vec::new();
+    if let Some(first) = iter.next() {
+        if !value.is_root && first == "crate" {
+            parts.push("crate".to_string());
+        } else {
+            parts.push(rust_ident(first));
+        }
+    }
+    for part in iter {
+        parts.push(rust_ident(part));
+    }
+    let mut name = parts.join("::");
     if value.is_root {
         name = "::".to_string() + &name;
     }

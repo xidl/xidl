@@ -404,7 +404,19 @@ fn axum_type(ty: &hir::TypeSpec) -> String {
 }
 
 fn render_scoped_name(value: &hir::ScopedName) -> String {
-    let path = value.name.iter().map(|part| rust_ident(part)).join("::");
+    let mut iter = value.name.iter();
+    let mut parts = Vec::new();
+    if let Some(first) = iter.next() {
+        if !value.is_root && first == "crate" {
+            parts.push("crate".to_string());
+        } else {
+            parts.push(rust_ident(first));
+        }
+    }
+    for part in iter {
+        parts.push(rust_ident(part));
+    }
+    let path = parts.join("::");
     if value.is_root {
         format!("::{path}")
     } else {
