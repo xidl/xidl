@@ -439,7 +439,9 @@ fn schema_for_type(ty: &hir::TypeSpec) -> Value {
                     "items": schema_for_type(&seq.ty)
                 });
                 if let Some(len) = &seq.len {
+                    //
                     if let Some(size) = xidl_parser::hir::const_expr_to_i64(&len.0) {
+                        //
                         if let Some(obj) = schema.as_object_mut() {
                             obj.insert("minItems".to_string(), Value::Number(size.into()));
                             obj.insert("maxItems".to_string(), Value::Number(size.into()));
@@ -544,7 +546,7 @@ fn route_from_annotations(
         };
         let mut path = None;
         if let Some(params) = annotation_params(annotation) {
-            let params = normalize_params(&params);
+            let params = normalize_params(params);
             path = params.get("path").cloned();
         }
         return (method, path.unwrap_or(default_path));

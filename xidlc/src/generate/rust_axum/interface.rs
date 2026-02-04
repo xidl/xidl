@@ -445,7 +445,7 @@ fn route_from_annotations(
         };
         let mut path = None;
         if let Some(params) = annotation_params(annotation) {
-            let params = normalize_params(&params);
+            let params = normalize_params(params);
             path = params.get("path").cloned();
         }
         return (method, path.unwrap_or(default_path));
