@@ -10,7 +10,9 @@ impl crate::jsonrpc::Codegen for TypedAstGen {
     }
 
     fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
-        Ok(Default::default())
+        Ok(crate::macros::hashmap! {
+            "enable_metadata" => true
+        })
     }
 
     fn generate(

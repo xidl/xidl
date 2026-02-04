@@ -81,10 +81,14 @@ impl Generator {
         props.insert("idl".into(), source.into());
         props.insert("target_lang".into(), self.lang.clone().into());
         props.insert("xidlc_version".into(), env!("CARGO_PKG_VERSION").into());
-        let ts = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap_or_default()
-            .as_secs();
+        let ts = if cfg!(test) {
+            0
+        } else {
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap_or_default()
+                .as_secs()
+        };
         props.insert("xidlc_timestamp".into(), ts.into());
         let target_props = self.get_properties_for_lang()?;
         merge_properties(&mut props, target_props);
@@ -99,6 +103,20 @@ impl Generator {
         input: &Path,
         mut props: HashMap<String, serde_json::Value>,
     ) -> IdlcResult<Vec<File>> {
+        if !props.contains_key("xidlc_version") {
+            props.insert("xidlc_version".into(), env!("CARGO_PKG_VERSION").into());
+        }
+        if !props.contains_key("xidlc_timestamp") {
+            let ts = if cfg!(test) {
+                0
+            } else {
+                SystemTime::now()
+                    .duration_since(UNIX_EPOCH)
+                    .unwrap_or_default()
+                    .as_secs()
+            };
+            props.insert("xidlc_timestamp".into(), ts.into());
+        }
         let input_str = input.to_string_lossy();
         let session = CodegenSession::spawn(lang)?;
         let properties = session

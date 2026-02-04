@@ -66,7 +66,8 @@ impl crate::jsonrpc::Codegen for RustCodegen {
             "format_rust" => true,
             "enable_render_header" => true,
             "enable_serialize" => true,
-            "enable_deserialize" => true
+            "enable_deserialize" => true,
+            "enable_metadata" => true
         })
     }
 

@@ -29,6 +29,7 @@ tree-sitter-cpp = "0.23.3"
 
 utoipa = "5.4.0"
 semver = "1.0"
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
 
 [dev-dependencies]
 insta = "1.44"

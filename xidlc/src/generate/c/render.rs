@@ -1,6 +1,6 @@
 use crate::{
     error::{IdlcError, IdlcResult},
-    generate::utils::to_case,
+    generate::utils::{format_timestamp_filter, to_case},
 };
 use minijinja::{Environment, Error, ErrorKind};
 use rust_embed::RustEmbed;
@@ -61,6 +61,7 @@ impl CRenderer {
         env.set_loader(|name| load_template(name).map(Some));
         env.add_filter("to_case", to_case);
         env.add_filter("clang-format", clang_format_filter);
+        env.add_filter("fmt_timestamp", format_timestamp_filter);
         Ok(Self { env })
     }
 

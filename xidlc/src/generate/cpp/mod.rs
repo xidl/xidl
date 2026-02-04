@@ -81,7 +81,8 @@ impl crate::jsonrpc::Codegen for CppCodegen {
 
     fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
         Ok(crate::macros::hashmap! {
-            "format_c" => true
+            "format_c" => true,
+            "enable_metadata" => true
         })
     }
 

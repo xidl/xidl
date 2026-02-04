@@ -43,6 +43,7 @@ pub fn generate(
     if !non_interface.0.is_empty() {
         let props = hashmap! {
             "enable_render_header" => false,
+            "enable_metadata" => false,
             "enable_serialize" => false,
             "enable_deserialize" => false
         };
@@ -70,7 +71,8 @@ impl crate::jsonrpc::Codegen for RustJsonRpcCodegen {
             "format_rust" => true,
             "enable_render_header" => true,
             "enable_serialize" => true,
-            "enable_deserialize" => true
+            "enable_deserialize" => true,
+            "enable_metadata" => true
         })
     }
 
