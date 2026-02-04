@@ -35,8 +35,9 @@ struct FormatArgs {
     lang: FormatLang,
     #[arg(long = "out-dir", short = 'o', default_value = "-")]
     out_dir: String,
-    #[arg(long)]
-    write: bool,
+    /// Format inplace.
+    #[arg(long, short = 'i')]
+    inplace: bool,
     #[arg(required = true)]
     inputs: Vec<PathBuf>,
 }
@@ -103,7 +104,7 @@ impl GenerateArgs {
 
 impl FormatArgs {
     fn execute(self) -> IdlcResult<()> {
-        if self.inputs.len() > 1 && self.out_dir == "-" && !self.write {
+        if self.inputs.len() > 1 && self.out_dir == "-" && !self.inplace {
             return Err(IdlcError::fmt(
                 "multiple inputs require --write or --out-dir".to_string(),
             ));
@@ -117,7 +118,7 @@ impl FormatArgs {
                 FormatLang::C => crate::fmt::format_c_source(&source)?,
                 FormatLang::Cpp => crate::fmt::format_c_source(&source)?,
             };
-            if self.write {
+            if self.inplace {
                 std::fs::write(input, formatted)?;
             } else if self.out_dir == "-" {
                 if idx > 0 {
