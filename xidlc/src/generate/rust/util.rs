@@ -1,5 +1,4 @@
 use crate::generate::render_const_expr;
-use itertools::Itertools;
 use serde_json::json;
 use std::collections::HashSet;
 use xidl_parser::hir;

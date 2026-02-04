@@ -2,7 +2,6 @@ use crate::error::IdlcResult;
 use crate::generate::rust::util::rust_ident;
 use crate::generate::rust_axum::{RustAxumRenderOutput, RustAxumRenderer};
 use convert_case::{Case, Casing};
-use itertools::Itertools;
 use serde::Serialize;
 use std::collections::{HashMap, HashSet};
 use xidl_parser::hir;

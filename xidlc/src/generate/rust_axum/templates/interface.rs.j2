@@ -34,7 +34,7 @@ struct {{ method.struct_prefix }}Path {
 
 {% endif %}
 {% if method.query_params | length > 0 %}
-#[derive(Serialize, Deserialize)]
+#[derive(::serde::Serialize, ::serde::Deserialize)]
 struct {{ method.struct_prefix }}Query {
 {% for param in method.query_params %}
 {% if param.serde_rename is defined and param.serde_rename %}
@@ -46,7 +46,7 @@ struct {{ method.struct_prefix }}Query {
 
 {% endif %}
 {% if method.body_params | length > 0 %}
-#[derive(Serialize, Deserialize)]
+#[derive(::serde::Serialize, ::serde::Deserialize)]
 struct {{ method.struct_prefix }}Body {
 {% for param in method.body_params %}
 {% if param.serde_rename is defined and param.serde_rename %}
@@ -58,6 +58,7 @@ struct {{ method.struct_prefix }}Body {
 
 {% endif %}
 {% if method.request_struct is defined and method.request_struct %}
+#[derive(::serde::Serialize, ::serde::Deserialize)]
 pub struct {{ method.request_struct }} {
 {% for param in method.request_params %}
     pub {{ param.name }}: {{ param.ty }},

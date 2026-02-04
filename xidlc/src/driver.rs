@@ -194,10 +194,12 @@ impl CodegenSession {
             "c" => run_server!(crate::generate::c::CCodegen),
             "cpp" => run_server!(crate::generate::cpp::CppCodegen),
             "rust" | "rs" => run_server!(crate::generate::rust::RustCodegen),
-            "rs_jsonrpc" | "rust_jsonrpc" => {
+            "rs_jsonrpc" | "rust_jsonrpc" | "rs-jsonrpc" | "rust-jsonrpc" => {
                 run_server!(crate::generate::rust_jsonrpc::RustJsonRpcCodegen)
             }
-            "rs_axum" | "rust_axum" => run_server!(crate::generate::rust_axum::RustAxumCodegen),
+            "rs_axum" | "rust_axum" | "rs-axum" | "rust-axum" => {
+                run_server!(crate::generate::rust_axum::RustAxumCodegen)
+            }
             _ => {
                 let exe = format!("xidl-{lang}");
                 let mut child = Command::new(&exe)
