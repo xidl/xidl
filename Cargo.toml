@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
+  "xidl-build",
   "xidl-parser-derive",
   "xidl-jsonrpc",
   "xidl-rust-axum",

@@ -1,15 +1,6 @@
-mod cli;
-mod driver;
-mod error;
-mod fmt;
-mod generate;
-mod highlight;
-mod jsonrpc;
-mod macros;
-
-extern crate self as xidlc;
-
 use clap::Parser;
+use xidlc::cli::Cli;
+use xidlc::error::IdlcError;
 
 fn main() {
     let env_filter = tracing_subscriber::EnvFilter::try_from_default_env()
@@ -19,8 +10,8 @@ fn main() {
         .with_writer(std::io::stderr)
         .init();
 
-    if let Err(err) = cli::Cli::parse().run() {
-        if let crate::error::IdlcError::Diagnostic(report) = err {
+    if let Err(err) = Cli::parse().run() {
+        if let IdlcError::Diagnostic(report) = err {
             eprintln!("{report:?}");
         } else {
             tracing::error!("idlc: {err}");
