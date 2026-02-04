@@ -1,13 +1,16 @@
 #[async_trait::async_trait]
 pub trait {{ ident }} {
 {% for method in methods %}
-    async fn {{ method.name }}(&self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.ret }}, xidl_rust_axum::Error>;
+    async fn {{ method.name }}(
+        &self,
+        req: xidl_rust_axum::Request<{{ method.request_ty }}>
+    ) -> Result<{{ method.ret }}, xidl_rust_axum::Error>;
 {% endfor %}
 }
 
 use xidl_rust_axum::axum::{
     extract::{Path, Query, State},
-    http::StatusCode,
+    http::{HeaderMap, StatusCode},
     response::IntoResponse,
     routing::{delete, get, head, options, patch, post, put},
     Json, Router,
@@ -52,6 +55,14 @@ struct {{ method.struct_prefix }}Body {
 }
 
 {% endif %}
+{% if method.request_struct is defined and method.request_struct %}
+pub struct {{ method.request_struct }} {
+{% for param in method.request_params %}
+    pub {{ param.name }}: {{ param.ty }},
+{% endfor %}
+}
+
+{% endif %}
 {% endfor %}
 
 pub struct {{ ident }}Server<T> {
@@ -79,7 +90,8 @@ where
 
 {% for method in methods %}
     async fn {{ method.name }}(
-        State(svc): State<Arc<T>>{% if method.path_params | length > 0 %},
+        State(svc): State<Arc<T>>,
+        headers: HeaderMap{% if method.path_params | length > 0 %},
         Path(path): Path<{{ method.struct_prefix }}Path>{% endif %}{% if method.query_params | length > 0 %},
         Query(query): Query<{{ method.struct_prefix }}Query>{% endif %}{% if method.body_params | length > 0 %},
         Json(body): Json<{{ method.struct_prefix }}Body>{% endif %}
@@ -105,7 +117,17 @@ where
                 {% endfor %}
             } = body;
         {% endif %}
-        Ok(Json(svc.{{ method.name }}({% if method.param_names | length > 0 %}{{ method.param_names | join(", ") }}{% endif %}).await?))
+        {% if method.request_struct is defined and method.request_struct %}
+            let data = {{ method.request_struct }} {
+                {% for param in method.request_params %}
+                    {{ param.name }},
+                {% endfor %}
+            };
+        {% else %}
+            let data = ();
+        {% endif %}
+        let req = ::xidl_rust_axum::Request::new(headers, data);
+        Ok(Json(svc.{{ method.name }}(req).await?))
     }
 {% endfor %}
 }

@@ -40,9 +40,12 @@ struct MethodContext {
     path_params: Vec<ParamContext>,
     query_params: Vec<ParamContext>,
     body_params: Vec<ParamContext>,
+    request_ty: String,
+    request_struct: Option<String>,
+    request_params: Vec<ParamContext>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 struct ParamContext {
     name: String,
     raw_name: String,
@@ -110,6 +113,7 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
     let mut path_params = Vec::new();
     let mut query_params = Vec::new();
     let mut body_params = Vec::new();
+    let mut request_params = Vec::new();
 
     let (method, path) = route_from_annotations(
         &op.annotations,
@@ -136,6 +140,7 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
             source: param_source_code(source),
             serde_rename: serde_rename(&param.declarator.0, &name),
         };
+        request_params.push(ctx.clone());
         match source {
             ParamSource::Path => path_params.push(ctx),
             ParamSource::Query => query_params.push(ctx),
@@ -144,6 +149,15 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
     }
 
     let method_name = rust_ident(&op.ident);
+    let request_struct = if request_params.is_empty() {
+        None
+    } else {
+        Some(format!(
+            "{}Request",
+            method_struct_prefix(interface_name, &op.ident)
+        ))
+    };
+    let request_ty = request_struct.clone().unwrap_or_else(|| "()".to_string());
     MethodContext {
         name: method_name,
         raw_name: op.ident.clone(),
@@ -158,6 +172,9 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
         path_params,
         query_params,
         body_params,
+        request_ty,
+        request_struct,
+        request_params,
     }
 }
 
@@ -173,6 +190,7 @@ fn render_attr(
                 let ret = attr_return_type(&spec.ty);
                 let raw = names.raw.clone();
                 let path = default_path(module_path, interface_name, &raw);
+                let request_struct = None;
                 MethodContext {
                     name: names.rust.clone(),
                     raw_name: raw.clone(),
@@ -187,6 +205,9 @@ fn render_attr(
                     path_params: Vec::new(),
                     query_params: Vec::new(),
                     body_params: Vec::new(),
+                    request_ty: "()".to_string(),
+                    request_struct,
+                    request_params: Vec::new(),
                 }
             })
             .collect(),
@@ -199,6 +220,7 @@ fn render_attr(
                         let raw_name = decl.0.clone();
                         let ret = attr_return_type(&spec.ty);
                         let path = default_path(module_path, interface_name, &raw_name);
+                        let request_struct = None;
                         out.push(MethodContext {
                             name: name.clone(),
                             raw_name: raw_name.clone(),
@@ -213,11 +235,25 @@ fn render_attr(
                             path_params: Vec::new(),
                             query_params: Vec::new(),
                             body_params: Vec::new(),
+                            request_ty: "()".to_string(),
+                            request_struct,
+                            request_params: Vec::new(),
                         });
                         let raw_setter = format!("set_{raw_name}");
                         let setter = rust_ident(&raw_setter);
                         let param = render_param_type(&spec.ty, None);
                         let setter_path = default_path(module_path, interface_name, &raw_setter);
+                        let request_struct = Some(format!(
+                            "{}Request",
+                            method_struct_prefix(interface_name, &raw_setter)
+                        ));
+                        let request_param = ParamContext {
+                            name: "value".to_string(),
+                            raw_name: "value".to_string(),
+                            ty: param.clone(),
+                            source: param_source_code(ParamSource::Body),
+                            serde_rename: None,
+                        };
                         out.push(MethodContext {
                             name: setter.clone(),
                             raw_name: raw_setter.clone(),
@@ -231,13 +267,10 @@ fn render_attr(
                             struct_prefix: method_struct_prefix(interface_name, &raw_setter),
                             path_params: Vec::new(),
                             query_params: Vec::new(),
-                            body_params: vec![ParamContext {
-                                name: "value".to_string(),
-                                raw_name: "value".to_string(),
-                                ty: param,
-                                source: param_source_code(ParamSource::Body),
-                                serde_rename: None,
-                            }],
+                            body_params: vec![request_param.clone()],
+                            request_ty: request_struct.clone().unwrap_or_else(|| "()".to_string()),
+                            request_struct,
+                            request_params: vec![request_param],
                         });
                     }
                 }
@@ -247,6 +280,7 @@ fn render_attr(
                     let ret = attr_return_type(&spec.ty);
                     let path = default_path(module_path, interface_name, &raw_name);
                     let param = render_param_type(&spec.ty, None);
+                    let request_struct = None;
                     out.push(MethodContext {
                         name: name.clone(),
                         raw_name: raw_name.clone(),
@@ -261,10 +295,24 @@ fn render_attr(
                         path_params: Vec::new(),
                         query_params: Vec::new(),
                         body_params: Vec::new(),
+                        request_ty: "()".to_string(),
+                        request_struct,
+                        request_params: Vec::new(),
                     });
                     let raw_setter = format!("set_{raw_name}");
                     let setter = rust_ident(&raw_setter);
                     let setter_path = default_path(module_path, interface_name, &raw_setter);
+                    let request_struct = Some(format!(
+                        "{}Request",
+                        method_struct_prefix(interface_name, &raw_setter)
+                    ));
+                    let request_param = ParamContext {
+                        name: "value".to_string(),
+                        raw_name: "value".to_string(),
+                        ty: param.clone(),
+                        source: param_source_code(ParamSource::Body),
+                        serde_rename: None,
+                    };
                     out.push(MethodContext {
                         name: setter.clone(),
                         raw_name: raw_setter.clone(),
@@ -278,13 +326,10 @@ fn render_attr(
                         struct_prefix: method_struct_prefix(interface_name, &raw_setter),
                         path_params: Vec::new(),
                         query_params: Vec::new(),
-                        body_params: vec![ParamContext {
-                            name: "value".to_string(),
-                            raw_name: "value".to_string(),
-                            ty: param,
-                            source: param_source_code(ParamSource::Body),
-                            serde_rename: None,
-                        }],
+                        body_params: vec![request_param.clone()],
+                        request_ty: request_struct.clone().unwrap_or_else(|| "()".to_string()),
+                        request_struct,
+                        request_params: vec![request_param],
                     });
                 }
             }

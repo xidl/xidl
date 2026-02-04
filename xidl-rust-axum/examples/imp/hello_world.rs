@@ -11,13 +11,16 @@
 use std::collections::BTreeMap;
 #[async_trait::async_trait]
 pub trait HelloWorld {
-    async fn sayHello(&self, name: String) -> Result<(), xidl_rust_axum::Error>;
+    async fn sayHello(
+        &self,
+        req: xidl_rust_axum::Request<HelloWorldSayHelloRequest>,
+    ) -> Result<(), xidl_rust_axum::Error>;
 }
 
 use std::sync::Arc;
 use xidl_rust_axum::axum::{
     extract::{Path, Query, State},
-    http::StatusCode,
+    http::{HeaderMap, StatusCode},
     response::IntoResponse,
     routing::{delete, get, head, options, patch, post, put},
     Json, Router,
@@ -26,6 +29,10 @@ use xidl_rust_axum::serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize)]
 struct HelloWorldSayHelloBody {
     name: String,
+}
+
+pub struct HelloWorldSayHelloRequest {
+    pub name: String,
 }
 
 pub struct HelloWorldServer<T> {
@@ -51,10 +58,13 @@ where
 
     async fn sayHello(
         State(svc): State<Arc<T>>,
+        headers: HeaderMap,
         Json(body): Json<HelloWorldSayHelloBody>,
     ) -> ::xidl_rust_axum::Result<Json<()>> {
         let HelloWorldSayHelloBody { name } = body;
-        Ok(Json(svc.sayHello(name).await?))
+        let data = HelloWorldSayHelloRequest { name };
+        let req = ::xidl_rust_axum::Request::new(headers, data);
+        Ok(Json(svc.sayHello(req).await?))
     }
 }
 
