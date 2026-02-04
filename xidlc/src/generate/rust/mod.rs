@@ -57,6 +57,10 @@ pub fn generate_with_properties(
 pub(crate) struct RustCodegen;
 
 impl crate::jsonrpc::Codegen for RustCodegen {
+    fn get_engine_version(&self) -> Result<String, xidl_jsonrpc::Error> {
+        Ok(crate::generate::compatible_xidlc_version())
+    }
+
     fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
         Ok(crate::macros::hashmap! {
             "format_rust" => true,

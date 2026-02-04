@@ -24,6 +24,7 @@ union Artifact switch (ArtifactKind) {
 };
 
 interface Codegen {
+    string get_engine_version();
     ::xidl_parser::hir::ParserProperties get_properties();
     sequence<Artifact> generate(
         in ::xidl_parser::hir::Specification hir,

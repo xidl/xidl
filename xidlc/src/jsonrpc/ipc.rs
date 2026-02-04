@@ -5,17 +5,17 @@
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
 #![allow(unreachable_patterns)]
+#![allow(clippy::let_unit_value)]
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::ffi::c_void;
-use std::io::{BufRead, Write};
-
+use std::io::{BufReader, Read, Write};
 pub trait Codegen {
+    fn get_engine_version(&self) -> Result<String, xidl_jsonrpc::Error>;
     fn get_properties(&self) -> Result<::xidl_parser::hir::ParserProperties, xidl_jsonrpc::Error>;
-
     fn generate(
         &self,
         hir: ::xidl_parser::hir::Specification,
@@ -25,14 +25,15 @@ pub trait Codegen {
 }
 
 #[derive(Serialize, Deserialize)]
-struct CodegenGetPropertiesParams {}
+struct CodegengetEngineVersionParams {}
 
 #[derive(Serialize, Deserialize)]
-struct CodegenGenerateParams {
+struct CodegengetPropertiesParams {}
+
+#[derive(Serialize, Deserialize)]
+struct CodegengenerateParams {
     hir: ::xidl_parser::hir::Specification,
-
     path: String,
-
     props: ::xidl_parser::hir::ParserProperties,
 }
 
@@ -52,52 +53,59 @@ where
 {
     fn handle(&self, method: &str, params: Value) -> Result<Value, xidl_jsonrpc::Error> {
         match method {
+            "Codegen.get_engine_version" => {
+                let params: CodegengetEngineVersionParams = serde_json::from_value(params)
+                    .map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
+                let result = self.inner.get_engine_version()?;
+                Ok(serde_json::to_value(result)?)
+            }
             "Codegen.get_properties" => {
-                let params: CodegenGetPropertiesParams = serde_json::from_value(params)
+                let params: CodegengetPropertiesParams = serde_json::from_value(params)
                     .map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
-
                 let result = self.inner.get_properties()?;
-
                 Ok(serde_json::to_value(result)?)
             }
-
             "Codegen.generate" => {
-                let params: CodegenGenerateParams = serde_json::from_value(params)
+                let params: CodegengenerateParams = serde_json::from_value(params)
                     .map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
-
                 let result = self.inner.generate(params.hir, params.path, params.props)?;
-
                 Ok(serde_json::to_value(result)?)
             }
-
             _ => Err(xidl_jsonrpc::Error::method_not_found(method)),
         }
     }
 }
 
 pub struct CodegenClient<R, W> {
-    client: RefCell<xidl_jsonrpc::Client<R, W>>,
+    client: RefCell<xidl_jsonrpc::Client<BufReader<R>, W>>,
 }
 
 impl<R, W> CodegenClient<R, W>
 where
-    R: BufRead,
+    R: Read,
     W: Write,
 {
     pub fn new(reader: R, writer: W) -> Self {
         Self {
-            client: RefCell::new(xidl_jsonrpc::Client::new(reader, writer)),
+            client: RefCell::new(xidl_jsonrpc::Client::new(BufReader::new(reader), writer)),
         }
     }
 }
 
 impl<R, W> Codegen for CodegenClient<R, W>
 where
-    R: BufRead,
+    R: Read,
     W: Write,
 {
+    fn get_engine_version(&self) -> Result<String, xidl_jsonrpc::Error> {
+        let params = CodegengetEngineVersionParams {};
+        self.client
+            .borrow_mut()
+            .call("Codegen.get_engine_version", params)
+    }
+
     fn get_properties(&self) -> Result<::xidl_parser::hir::ParserProperties, xidl_jsonrpc::Error> {
-        let params = CodegenGetPropertiesParams {};
+        let params = CodegengetPropertiesParams {};
         self.client
             .borrow_mut()
             .call("Codegen.get_properties", params)
@@ -109,11 +117,10 @@ where
         path: String,
         props: ::xidl_parser::hir::ParserProperties,
     ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
-        let params = CodegenGenerateParams { hir, path, props };
+        let params = CodegengenerateParams { hir, path, props };
         self.client.borrow_mut().call("Codegen.generate", params)
     }
 }
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ArtifactHir {
     pub lang: String,
@@ -153,7 +160,6 @@ impl Drop for Artifact {
             ArtifactKind::Hir => unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.hir);
             },
-
             ArtifactKind::File => unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.file);
             },
@@ -245,7 +251,6 @@ impl serde::Serialize for Artifact {
                 )?;
                 serde::ser::SerializeStructVariant::end(s)
             }
-
             ArtifactKind::File => {
                 let mut s = serde::Serializer::serialize_struct_variant(
                     __serializer,
@@ -272,10 +277,8 @@ impl<'de> serde::Deserialize<'de> for Artifact {
         D: serde::Deserializer<'de>,
     {
         const VARIANTS: &[&str] = &["ArtifactKind::Hir", "ArtifactKind::File"];
-
         enum __Variant {
             __Case0,
-
             __Case1,
         }
 
@@ -285,10 +288,8 @@ impl<'de> serde::Deserialize<'de> for Artifact {
                 D: serde::Deserializer<'de>,
             {
                 struct __VariantVisitor;
-
                 impl serde::de::Visitor<'_> for __VariantVisitor {
                     type Value = __Variant;
-
                     fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
                         formatter.write_str("union variant")
                     }
@@ -299,9 +300,7 @@ impl<'de> serde::Deserialize<'de> for Artifact {
                     {
                         match value {
                             "ArtifactKind::Hir" => Ok(__Variant::__Case0),
-
                             "ArtifactKind::File" => Ok(__Variant::__Case1),
-
                             _ => Err(E::unknown_variant(value, VARIANTS)),
                         }
                     }
@@ -312,10 +311,8 @@ impl<'de> serde::Deserialize<'de> for Artifact {
         }
 
         struct __Visitor;
-
         impl<'de> serde::de::Visitor<'de> for __Visitor {
             type Value = Artifact;
-
             fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
                 formatter.write_str("externally tagged union Artifact")
             }
@@ -328,10 +325,8 @@ impl<'de> serde::Deserialize<'de> for Artifact {
                 match variant {
                     __Variant::__Case0 => {
                         struct __CaseVisitor;
-
                         impl<'de> serde::de::Visitor<'de> for __CaseVisitor {
                             type Value = ArtifactHir;
-
                             fn expecting(
                                 &self,
                                 formatter: &mut core::fmt::Formatter,
@@ -367,9 +362,7 @@ impl<'de> serde::Deserialize<'de> for Artifact {
                             &["ArtifactKind::Hir"],
                             __CaseVisitor,
                         )?;
-
                         let tag = ArtifactKind::Hir;
-
                         Ok(Artifact {
                             tag,
                             data: ArtifactData {
@@ -377,13 +370,10 @@ impl<'de> serde::Deserialize<'de> for Artifact {
                             },
                         })
                     }
-
                     __Variant::__Case1 => {
                         struct __CaseVisitor;
-
                         impl<'de> serde::de::Visitor<'de> for __CaseVisitor {
                             type Value = ArtifactFile;
-
                             fn expecting(
                                 &self,
                                 formatter: &mut core::fmt::Formatter,
@@ -419,9 +409,7 @@ impl<'de> serde::Deserialize<'de> for Artifact {
                             &["ArtifactKind::File"],
                             __CaseVisitor,
                         )?;
-
                         let tag = ArtifactKind::File;
-
                         Ok(Artifact {
                             tag,
                             data: ArtifactData {

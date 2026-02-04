@@ -5,6 +5,10 @@ use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactHir};
 pub struct TypedAstGen;
 
 impl crate::jsonrpc::Codegen for TypedAstGen {
+    fn get_engine_version(&self) -> Result<String, xidl_jsonrpc::Error> {
+        Ok(crate::generate::compatible_xidlc_version())
+    }
+
     fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
         Ok(Default::default())
     }

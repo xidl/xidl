@@ -4,12 +4,14 @@ mod tests;
 use crate::cli::CliArgs;
 use crate::error::{IdlcError, IdlcResult};
 use crate::jsonrpc::{Codegen, CodegenClient};
+use semver::{Version, VersionReq};
 use std::collections::HashMap;
 use std::fs;
 use std::io::BufReader;
 use std::path::Path;
 use std::process::Command;
 use std::thread::{self, JoinHandle};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 pub struct File {
     path: String,
@@ -78,6 +80,12 @@ impl Generator {
     ) -> IdlcResult<Vec<File>> {
         props.insert("idl".into(), source.into());
         props.insert("target_lang".into(), self.lang.clone().into());
+        props.insert("xidlc_version".into(), env!("CARGO_PKG_VERSION").into());
+        let ts = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs();
+        props.insert("xidlc_timestamp".into(), ts.into());
         let target_props = self.get_properties_for_lang()?;
         merge_properties(&mut props, target_props);
         let empty = xidl_parser::hir::Specification(vec![]);
@@ -169,6 +177,7 @@ impl CodegenSession {
         let reader = BufReader::new(stdin_rx);
         let writer = stdout_tx;
         let client = CodegenClient::new(reader, writer);
+        Self::verify_engine_version(&client)?;
         Ok(Self { client, server })
     }
 
@@ -224,6 +233,34 @@ impl CodegenSession {
                 Ok(server)
             }
         }
+    }
+
+    fn verify_engine_version(
+        client: &CodegenClient<
+            BufReader<interprocess::unnamed_pipe::Recver>,
+            interprocess::unnamed_pipe::Sender,
+        >,
+    ) -> IdlcResult<()> {
+        let engine_req = client
+            .get_engine_version()
+            .map_err(|err| IdlcError::rpc(err.to_string()))?;
+        let req = VersionReq::parse(&engine_req).map_err(|err| {
+            IdlcError::rpc(format!(
+                "invalid engine version requirement \"{engine_req}\": {err}"
+            ))
+        })?;
+        let version = Version::parse(env!("CARGO_PKG_VERSION")).map_err(|err| {
+            IdlcError::rpc(format!(
+                "invalid xidlc version \"{}\": {err}",
+                env!("CARGO_PKG_VERSION")
+            ))
+        })?;
+        if !req.matches(&version) {
+            return Err(IdlcError::rpc(format!(
+                "xidlc {version} is not compatible with engine requirement {engine_req}"
+            )));
+        }
+        Ok(())
     }
 }
 

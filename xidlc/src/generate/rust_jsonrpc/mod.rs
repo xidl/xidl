@@ -60,6 +60,10 @@ pub fn generate(
 pub(crate) struct RustJsonRpcCodegen;
 
 impl crate::jsonrpc::Codegen for RustJsonRpcCodegen {
+    fn get_engine_version(&self) -> Result<String, xidl_jsonrpc::Error> {
+        Ok(crate::generate::compatible_xidlc_version())
+    }
+
     fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
         Ok(hashmap! {
             "expand_interface" => false,

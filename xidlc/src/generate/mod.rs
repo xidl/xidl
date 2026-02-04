@@ -9,6 +9,10 @@ mod utils;
 
 use xidl_parser::hir;
 
+pub(crate) fn compatible_xidlc_version() -> String {
+    format!("^{}", env!("CARGO_PKG_VERSION"))
+}
+
 pub fn render_const_expr<FScoped, FLit>(
     expr: &hir::ConstExpr,
     scoped_name: &FScoped,

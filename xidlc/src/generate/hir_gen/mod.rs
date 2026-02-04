@@ -5,6 +5,10 @@ use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactHir};
 pub struct HirGen;
 
 impl crate::jsonrpc::Codegen for HirGen {
+    fn get_engine_version(&self) -> Result<String, xidl_jsonrpc::Error> {
+        Ok(crate::generate::compatible_xidlc_version())
+    }
+
     fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
         Ok(Default::default())
     }
