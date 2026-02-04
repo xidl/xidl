@@ -1,7 +1,8 @@
 use super::*;
+use serde::{Deserialize, Serialize};
 use xidl_derive::Parser;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AnnotationAppl {
     pub name: AnnotationName,
     pub params: Option<AnnotationParams>,
@@ -9,20 +10,20 @@ pub struct AnnotationAppl {
     pub extra: Vec<AnnotationAppl>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum AnnotationName {
     ScopedName(ScopedName),
     Builtin(String),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum AnnotationParams {
     ConstExpr(ConstExpr),
     Params(Vec<AnnotationApplParam>),
     Raw(String),
 }
 
-#[derive(Debug, Clone, Parser)]
+#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
 pub struct AnnotationApplParam {
     pub ident: Identifier,
     pub value: Option<ConstExpr>,

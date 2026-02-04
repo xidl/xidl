@@ -1,15 +1,16 @@
 use crate::typed_ast::ScopedName;
+use serde::{Deserialize, Serialize};
 
 use super::{AnnotationAppl, ConstDcl, ExceptDcl, Identifier, SimpleDeclarator, TypeDcl, TypeSpec};
 use xidl_derive::Parser;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct InterfaceDcl {
     pub annotations: Vec<AnnotationAppl>,
     pub decl: InterfaceDclInner,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 #[ts(transparent)]
 pub enum InterfaceDclInner {
     InterfaceForwardDcl(InterfaceForwardDcl),
@@ -49,39 +50,39 @@ impl<'a> crate::parser::FromTreeSitter<'a> for InterfaceDcl {
     }
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct InterfaceForwardDcl {
     pub kind: InterfaceKind,
     pub ident: Identifier,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 #[ts(mark)]
 pub struct InterfaceKind;
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct InterfaceDef {
     pub header: InterfaceHeader,
     pub interface_body: Option<InterfaceBody>,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct InterfaceHeader {
     pub kind: InterfaceKind,
     pub ident: Identifier,
     pub parent: Option<InterfaceInheritanceSpec>,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct InterfaceInheritanceSpec(pub Vec<InterfaceName>);
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct InterfaceName(pub ScopedName);
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct InterfaceBody(pub Vec<Export>);
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub enum Export {
     OpDcl(OpDcl),
     AttrDcl(AttrDcl),
@@ -90,7 +91,7 @@ pub enum Export {
     ExceptDcl(ExceptDcl),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct OpDcl {
     pub annotations: Vec<AnnotationAppl>,
     pub ty: OpTypeSpec,
@@ -150,7 +151,7 @@ impl<'a> crate::parser::FromTreeSitter<'a> for OpDcl {
         })
     }
 }
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 #[allow(clippy::large_enum_variant)]
 pub enum OpTypeSpec {
     Void,
@@ -183,17 +184,17 @@ impl<'a> crate::parser::FromTreeSitter<'a> for OpTypeSpec {
     }
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct ParameterDcls(pub Vec<ParamDcl>);
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct ParamDcl {
     pub attr: Option<ParamAttribute>,
     pub ty: TypeSpec,
     pub declarator: SimpleDeclarator,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ParamAttribute(pub String);
 
 impl<'a> crate::parser::FromTreeSitter<'a> for ParamAttribute {
@@ -207,16 +208,16 @@ impl<'a> crate::parser::FromTreeSitter<'a> for ParamAttribute {
     }
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct RaisesExpr(pub Vec<ScopedName>);
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct AttrDcl {
     pub annotations: Vec<AnnotationAppl>,
     pub decl: AttrDclInner,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 #[ts(transparent)]
 pub enum AttrDclInner {
     ReadonlyAttrSpec(ReadonlyAttrSpec),
@@ -256,25 +257,25 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AttrDcl {
     }
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct ReadonlyAttrSpec {
     pub ty: TypeSpec,
     pub declarator: ReadonlyAttrDeclarator,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub enum ReadonlyAttrDeclarator {
     SimpleDeclarator(SimpleDeclarator),
     RaisesExpr(RaisesExpr),
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct AttrSpec {
     pub type_spec: TypeSpec,
     pub declarator: AttrDeclarator,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum AttrDeclarator {
     SimpleDeclarator(Vec<SimpleDeclarator>),
     WithRaises {
@@ -323,23 +324,23 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AttrDeclarator {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum AttrRaisesExpr {
     Case1(GetExcepExpr, Option<SetExcepExpr>),
     SetExcepExpr(SetExcepExpr),
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct GetExcepExpr {
     pub expr: ExceptionList,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct SetExcepExpr {
     pub expr: ExceptionList,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct ExceptionList(pub Vec<ScopedName>);
 
 impl<'a> crate::parser::FromTreeSitter<'a> for AttrRaisesExpr {

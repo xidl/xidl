@@ -1,12 +1,13 @@
 use super::*;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct EnumDcl {
     pub ident: Identifier,
     pub member: Vec<Enumerator>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Enumerator {
     pub annotations: Vec<AnnotationAppl>,
     pub ident: Identifier,
@@ -44,28 +45,28 @@ impl<'a> crate::parser::FromTreeSitter<'a> for Enumerator {
     }
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub enum UnionDcl {
     UnionDef(UnionDef),
     UnionForwardDcl(UnionForwardDcl),
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct UnionDef {
     pub ident: Identifier,
     pub switch_type_spec: SwitchTypeSpec,
     pub case: Vec<Case>,
 }
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct UnionForwardDcl(pub Identifier);
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct Case {
     pub label: Vec<CaseLabel>,
     pub element: ElementSpec,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum CaseLabel {
     Case(ConstExpr),
     Default,
@@ -95,7 +96,7 @@ impl<'a> crate::parser::FromTreeSitter<'a> for CaseLabel {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ElementSpec {
     pub annotations: Vec<AnnotationAppl>,
     pub ty: ElementSpecTy,
@@ -134,14 +135,14 @@ impl<'a> crate::parser::FromTreeSitter<'a> for ElementSpec {
     }
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 #[ts(transparent)]
 pub enum ElementSpecTy {
     TypeSpec(TypeSpec),
     ConstrTypeDcl(ConstrTypeDcl),
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub enum SwitchTypeSpec {
     IntegerType(IntegerType),
     CharType(CharType),

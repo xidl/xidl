@@ -1,20 +1,21 @@
+use serde::{Deserialize, Serialize};
 use xidl_derive::Parser;
 
 use super::*;
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 #[ts(mark)]
 pub struct SignedShortInt;
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 #[ts(mark)]
 pub struct SignedLongInt;
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 #[ts(id = "signed_longlong_int")]
 pub struct SignedLongLongInt;
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub enum UnsignedInt {
     UnsignedShortInt(UnsignedShortInt),
     UnsignedLongInt(UnsignedLongInt),
@@ -23,29 +24,29 @@ pub enum UnsignedInt {
     UnsignedTinyInt(UnsignedTinyInt),
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 #[ts(mark)]
 pub struct UnsignedTinyInt;
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 #[ts(name = "boolean")]
 pub struct BooleanType;
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 #[ts(name = "fixed")]
 pub struct FixedPtConstType;
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 #[ts(name = "octet")]
 pub struct OctetType;
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub enum IntegerType {
     SignedInt(SignedInt),
     UnsignedInt(UnsignedInt),
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub enum SignedInt {
     SignedShortInt(SignedShortInt),
     SignedLongInt(SignedLongInt),
@@ -54,59 +55,59 @@ pub enum SignedInt {
     SignedTinyInt(SignedTinyInt),
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 #[ts(name = "int8")]
 pub struct SignedTinyInt;
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 #[ts(mark)]
 pub struct UnsignedShortInt;
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 #[ts(mark)]
 pub struct UnsignedLongInt;
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 #[ts(mark)]
 #[ts(id = "unsigned_longlong_int")]
 pub struct UnsignedLongLongInt;
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 #[ts(mark)]
 pub struct FloatingPtType;
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 #[ts(name = "char")]
 pub struct CharType;
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 #[ts(name = "wchar")]
 pub struct WideCharType;
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct StringType {
     pub bound: Option<PositiveIntConst>,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct WideStringType {
     pub bound: Option<PositiveIntConst>,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 #[allow(clippy::large_enum_variant)]
 pub enum TypeSpec {
     SimpleTypeSpec(SimpleTypeSpec),
     TemplateTypeSpec(TemplateTypeSpec),
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub enum SimpleTypeSpec {
     BaseTypeSpec(BaseTypeSpec),
     ScopedName(ScopedName),
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub enum BaseTypeSpec {
     IntegerType(IntegerType),
     FloatingPtType(FloatingPtType),
@@ -119,17 +120,17 @@ pub enum BaseTypeSpec {
     ValueBaseType(ValueBaseType),
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 #[ts(name = "any")]
 pub struct AnyType;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct FixedPtType {
     pub integer: PositiveIntConst,
     pub fraction: PositiveIntConst,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub enum TemplateTypeSpec {
     SequenceType(SequenceType),
     StringType(StringType),
@@ -138,23 +139,23 @@ pub enum TemplateTypeSpec {
     MapType(MapType),
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct SequenceType {
     pub ty: Box<TypeSpec>,
     pub len: Option<PositiveIntConst>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct MapType {
     pub key: Box<TypeSpec>,
     pub value: Box<TypeSpec>,
     pub len: Option<PositiveIntConst>,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct ObjectType;
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct ValueBaseType;
 
 impl<'a> crate::parser::FromTreeSitter<'a> for FixedPtType {

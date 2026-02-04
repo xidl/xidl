@@ -1,7 +1,8 @@
 use super::*;
+use serde::{Deserialize, Serialize};
 use xidl_derive::Parser;
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct TemplateModuleDcl {
     pub ident: Identifier,
     pub parameter: FormalParameters,
@@ -9,23 +10,23 @@ pub struct TemplateModuleDcl {
     pub definition: Vec<TplDefinition>,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct TemplateModuleInst {
     pub name: ScopedName,
     pub parameter: ActualParameters,
     pub ident: Identifier,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct FormalParameters(pub Vec<FormalParameter>);
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct FormalParameter {
     pub ty: FormalParameterType,
     pub ident: Identifier,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum FormalParameterType {
     Typename,
     Interface,
@@ -90,27 +91,27 @@ impl<'a> crate::parser::FromTreeSitter<'a> for FormalParameterType {
     }
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 #[allow(clippy::large_enum_variant)]
 pub enum TplDefinition {
     Definition(Definition),
     TemplateModuleRef(TemplateModuleRef),
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct TemplateModuleRef {
     pub name: ScopedName,
     pub parameter: FormalParameterNames,
     pub ident: Identifier,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct FormalParameterNames(pub Vec<Identifier>);
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct ActualParameters(pub Vec<ActualParameter>);
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Serialize, Deserialize)]
 pub enum ActualParameter {
     TypeSpec(TypeSpec),
     ConstExpr(ConstExpr),
