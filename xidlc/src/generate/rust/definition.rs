@@ -58,7 +58,7 @@ pub(crate) fn render_module_body(
     for def in defs {
         match def {
             hir::Definition::Pragma(pragma) => {
-                config.apply_pragma(*pragma);
+                config.apply_pragma(pragma.clone());
             }
             hir::Definition::ModuleDcl(module) => {
                 let mut module_config = config;
@@ -114,7 +114,7 @@ fn render_module_body_with_config(
     for def in defs {
         match def {
             hir::Definition::Pragma(pragma) => {
-                config.apply_pragma(*pragma);
+                config.apply_pragma(pragma.clone());
             }
             hir::Definition::ModuleDcl(module) => {
                 let mut module_config = *config;
@@ -164,7 +164,7 @@ fn render_definition_with_config(
 ) -> IdlcResult<RustRenderOutput> {
     match def {
         hir::Definition::Pragma(pragma) => {
-            config.apply_pragma(*pragma);
+            config.apply_pragma(pragma.clone());
             Ok(RustRenderOutput::default())
         }
         hir::Definition::ConstrTypeDcl(constr) => {

@@ -79,10 +79,12 @@ pub struct SerializeConfig {
     pub version: Option<SerializeVersion>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum Pragma {
     XidlcSerialize(SerializeKind),
     XidlcVersion(SerializeVersion),
+    XidlcPackage(String),
+    XidlcOpenApiVersion(String),
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Copy)]
@@ -103,6 +105,7 @@ impl SerializeConfig {
                 self.version = Some(version);
                 self.explicit_kind = None;
             }
+            Pragma::XidlcPackage(_) | Pragma::XidlcOpenApiVersion(_) => {}
         }
     }
 
@@ -409,12 +412,25 @@ fn parse_xidlc_pragma(call: &crate::typed_ast::PreprocCall) -> Option<Pragma> {
         return None;
     }
     let token = parts.next()?;
+    let rest = parts.collect::<Vec<_>>().join(" ");
 
     if token.eq_ignore_ascii_case("XCDR1") {
         return Some(Pragma::XidlcVersion(SerializeVersion::Xcdr1));
     }
     if token.eq_ignore_ascii_case("XCDR2") {
         return Some(Pragma::XidlcVersion(SerializeVersion::Xcdr2));
+    }
+    if token.eq_ignore_ascii_case("package") {
+        if !rest.is_empty() {
+            return Some(Pragma::XidlcPackage(trim_pragma_value(&rest)));
+        }
+        return None;
+    }
+    if token.eq_ignore_ascii_case("version") {
+        if !rest.is_empty() {
+            return Some(Pragma::XidlcOpenApiVersion(trim_pragma_value(&rest)));
+        }
+        return None;
     }
 
     if let Some(inner) = token
@@ -434,6 +450,18 @@ fn parse_xidlc_pragma(call: &crate::typed_ast::PreprocCall) -> Option<Pragma> {
     }
 
     None
+}
+
+fn trim_pragma_value(value: &str) -> String {
+    let value = value.trim();
+    if value.len() >= 2 {
+        let first = value.chars().next().unwrap();
+        let last = value.chars().last().unwrap();
+        if (first == '"' && last == '"') || (first == '\'' && last == '\'') {
+            return value[1..value.len() - 1].to_string();
+        }
+    }
+    value.to_string()
 }
 
 fn parse_serialize_kind(value: &str) -> Option<SerializeKind> {

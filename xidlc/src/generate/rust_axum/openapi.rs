@@ -24,8 +24,11 @@ pub fn render_openapi(spec: &hir::Specification) -> OpenApi {
         components = components.schema(name, schema);
     }
 
+    let title = ctx.info_title.as_deref().unwrap_or("xidl");
+    let version = ctx.info_version.as_deref().unwrap_or("0.1.0");
+
     OpenApiBuilder::new()
-        .info(InfoBuilder::new().title("xidl").version("0.1.0").build())
+        .info(InfoBuilder::new().title(title).version(version).build())
         .paths(ctx.paths.build())
         .components(Some(components.build()))
         .build()
@@ -35,9 +38,27 @@ pub fn render_openapi(spec: &hir::Specification) -> OpenApi {
 struct OpenApiContext {
     schemas: BTreeMap<String, RefOr<Schema>>,
     paths: PathsBuilder,
+    info_title: Option<String>,
+    info_version: Option<String>,
 }
 
 impl OpenApiContext {
+    fn apply_pragma(&mut self, pragma: &hir::Pragma) {
+        match pragma {
+            hir::Pragma::XidlcPackage(value) => {
+                if !value.is_empty() {
+                    self.info_title = Some(value.clone());
+                }
+            }
+            hir::Pragma::XidlcOpenApiVersion(value) => {
+                if !value.is_empty() {
+                    self.info_version = Some(value.clone());
+                }
+            }
+            _ => {}
+        }
+    }
+
     fn collect_spec(&mut self, spec: &hir::Specification, module_path: &[String]) {
         for def in &spec.0 {
             self.collect_def(def, module_path);
@@ -58,6 +79,9 @@ impl OpenApiContext {
             hir::Definition::ExceptDcl(except) => self.collect_exception(except, module_path),
             hir::Definition::InterfaceDcl(interface) => {
                 self.collect_interface(interface, module_path)
+            }
+            hir::Definition::Pragma(pragma) => {
+                self.apply_pragma(pragma);
             }
             _ => {}
         }
