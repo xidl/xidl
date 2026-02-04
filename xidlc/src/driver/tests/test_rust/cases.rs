@@ -15,9 +15,9 @@ pub(super) fn get_test_cases() -> Vec<(&'static str, &'static str, serde_json::V
             };
         "#,
             json!({
-                "skip_serialize": true,
-                "skip_deserialize": true,
-                "skip_render_header": true
+                "enable_serialize": false,
+                "enable_deserialize": false,
+                "enable_render_header": false
             }),
         ),
         //

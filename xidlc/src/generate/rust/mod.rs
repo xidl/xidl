@@ -59,7 +59,10 @@ pub(crate) struct RustCodegen;
 impl crate::jsonrpc::Codegen for RustCodegen {
     fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
         Ok(crate::macros::hashmap! {
-            "format_rust" => true
+            "format_rust" => true,
+            "enable_render_header" => true,
+            "enable_serialize" => true,
+            "enable_deserialize" => true
         })
     }
 

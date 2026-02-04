@@ -39,11 +39,9 @@ pub fn generate(
     let xcdr_header_name = format!("{base}_xcdr.h");
 
     let mut renderer = CRenderer::new()?;
-    for (k, v) in &props {
-        renderer
-            .env()
-            .add_global(k.clone(), minijinja::Value::from_serialize(v));
-    }
+    renderer
+        .env()
+        .add_global("opt".to_string(), minijinja::Value::from_serialize(&props));
     let output = spec.render(&renderer)?;
 
     let header = renderer.render_template(

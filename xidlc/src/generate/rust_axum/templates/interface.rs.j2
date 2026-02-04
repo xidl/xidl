@@ -8,7 +8,7 @@ pub trait {{ ident }} {
 {% endfor %}
 }
 
-{% if not skip_server %}
+{% if opt.enable_server %}
 use xidl_rust_axum::axum::{
     extract::{Path, Query, State},
     http::{HeaderMap, StatusCode},
@@ -68,7 +68,7 @@ pub struct {{ method.request_struct }} {
 {% endif %}
 {% endfor %}
 
-{% if not skip_server %}
+{% if opt.enable_server %}
 pub struct {{ ident }}Server<T> {
     inner: Arc<T>,
 }
@@ -150,7 +150,7 @@ where
 }
 {% endif %}
 
-{% if not skip_client %}
+{% if opt.enable_client %}
 pub struct {{ ident }}Client {
     client: xidl_rust_axum::Client,
 }

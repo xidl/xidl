@@ -17,7 +17,7 @@ impl {{ ident }} {
         xidl_xcdr::SerializeKind::{{ serialize_kind }};
 }
 
-{% if not skip_serialize %}
+{% if opt.enable_serialize %}
 impl xidl_xcdr::XcdrSerialize for {{ ident }} {
     fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
         Self::SERIALIZE_KIND
@@ -46,7 +46,7 @@ impl xidl_xcdr::XcdrSerialize for {{ ident }} {
 }
 {% endif %}
 
-{% if not skip_deserialize %}
+{% if opt.enable_deserialize %}
 impl xidl_xcdr::XcdrDeserialize for {{ ident }} {
     fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
         deserializer: &mut D,

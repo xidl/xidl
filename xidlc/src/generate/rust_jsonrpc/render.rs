@@ -40,10 +40,8 @@ impl JsonRpcRenderer {
     }
 
     pub fn extend(&mut self, props: &HashMap<String, serde_json::Value>) {
-        for (k, v) in props {
-            self.env
-                .add_global(k.clone(), minijinja::Value::from_serialize(v));
-        }
+        self.env
+            .add_global("opt", minijinja::Value::from_serialize(props));
     }
 }
 

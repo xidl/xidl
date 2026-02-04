@@ -30,10 +30,10 @@ impl Driver {
         let mut generator = Generator::new(&self.args.lang);
         let mut props: HashMap<String, serde_json::Value> = HashMap::new();
         if self.args.skip_client {
-            props.insert("skip_client".into(), true.into());
+            props.insert("enable_client".into(), false.into());
         }
         if self.args.skip_server {
-            props.insert("skip_server".into(), true.into());
+            props.insert("enable_server".into(), false.into());
         }
 
         for input in self.args.inputs {
@@ -79,7 +79,7 @@ impl Generator {
         props.insert("idl".into(), source.into());
         props.insert("target_lang".into(), self.lang.clone().into());
         let target_props = self.get_properties_for_lang()?;
-        props.extend(target_props);
+        merge_properties(&mut props, target_props);
         let empty = xidl_parser::hir::Specification(vec![]);
         self.generate_for_lang("hir", empty, path, props)
     }
@@ -89,19 +89,19 @@ impl Generator {
         lang: &str,
         hir: xidl_parser::hir::Specification,
         input: &Path,
-        props: HashMap<String, serde_json::Value>,
+        mut props: HashMap<String, serde_json::Value>,
     ) -> IdlcResult<Vec<File>> {
         let input_str = input.to_string_lossy();
         let session = CodegenSession::spawn(lang)?;
-        let mut properties = session
+        let properties = session
             .client
             .get_properties()
             .map_err(|err| IdlcError::rpc(err.to_string()))?;
-        properties.extend(props);
+        merge_properties(&mut props, properties);
 
         let artifacts = session
             .client
-            .generate(hir, input_str.to_string(), properties)
+            .generate(hir, input_str.to_string(), props)
             .map_err(|err| IdlcError::rpc(err.to_string()))?;
 
         let mut ret: Vec<File> = vec![];
@@ -141,6 +141,15 @@ impl Generator {
         session.finish();
         self.properties = props.clone();
         Ok(props)
+    }
+}
+
+fn merge_properties(
+    props: &mut HashMap<String, serde_json::Value>,
+    incoming: HashMap<String, serde_json::Value>,
+) {
+    for (k, v) in incoming {
+        props.entry(k).or_insert(v);
     }
 }
 

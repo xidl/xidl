@@ -46,9 +46,7 @@ impl RustRenderer {
         env.add_function("name_hash", |value: String| md5_prefix(value.as_bytes(), 4));
         env.add_filter("rust", rust_format_filter);
         env.add_filter("rustfmt", rust_format_filter);
-        for (k, v) in attribute {
-            env.add_global(k, minijinja::Value::from_serialize(v));
-        }
+        env.add_global("opt", minijinja::Value::from_serialize(&attribute));
         Ok(Self {
             env,
             typeobject_path,

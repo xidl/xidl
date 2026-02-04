@@ -42,9 +42,9 @@ pub fn generate(
     let non_interface = strip_interfaces(spec);
     if !non_interface.0.is_empty() {
         let props = hashmap! {
-            "skip_render_header" => true,
-            "skip_serialize" => true,
-            "skip_deserialize" => true
+            "enable_render_header" => false,
+            "enable_serialize" => false,
+            "enable_deserialize" => false
         };
 
         artifacts.push(Artifact::new_hir(ArtifactHir {
@@ -63,7 +63,10 @@ impl crate::jsonrpc::Codegen for RustJsonRpcCodegen {
     fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
         Ok(hashmap! {
             "expand_interface" => false,
-            "format_rust" => true
+            "format_rust" => true,
+            "enable_render_header" => true,
+            "enable_serialize" => true,
+            "enable_deserialize" => true
         })
     }
 

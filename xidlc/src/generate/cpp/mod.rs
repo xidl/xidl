@@ -37,11 +37,9 @@ pub fn generate(
     let header_name = format!("{base}.h");
 
     let mut renderer = CppRenderer::new()?;
-    for (k, v) in &props {
-        renderer
-            .env()
-            .add_global(k.clone(), minijinja::Value::from_serialize(v));
-    }
+    renderer
+        .env()
+        .add_global("opt".to_string(), minijinja::Value::from_serialize(&props));
 
     let output = spec.render(&renderer)?;
 
