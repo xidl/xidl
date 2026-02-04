@@ -200,6 +200,7 @@ impl CodegenSession {
 
         match lang {
             "hir" => run_server!(crate::generate::hir_gen::HirGen),
+            "typed_ast" | "typed-ast" => run_server!(crate::generate::typed_ast_gen::TypedAstGen),
             "c" => run_server!(crate::generate::c::CCodegen),
             "cpp" => run_server!(crate::generate::cpp::CppCodegen),
             "rust" | "rs" => run_server!(crate::generate::rust::RustCodegen),
