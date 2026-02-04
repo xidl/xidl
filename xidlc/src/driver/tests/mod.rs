@@ -1,6 +1,7 @@
 mod testcases;
 
 mod test_rust;
+mod test_rust_axum;
 mod test_rust_jsonrpc;
 
 use crate::driver::generate_from_idl;

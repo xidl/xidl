@@ -1,0 +1,62 @@
+#progma xidlc package xidlc
+#progma xidlc version v1.0.0
+
+interface HttpService {
+    @get(path = "/api/v1/health")
+    HealthResponse get_health();
+    @get(path = "/api/v1/app/version")
+    VersionResponse get_version();
+    @get(path = "/api/v1/app/memory")
+    MemoryResponse get_memory_info();
+    @get(path = "/api/v1/app/restart")
+    void restart();
+    @get(path = "/api/v1/proxy/state")
+    crate::api::state::StateResponse get_state();
+    @get(path = "/api/v1/stats/udp")
+    UdpStatsResponse get_udp_stats();
+    @post(path = "/api/v1/simple")
+    CreateSimpleResponse create_simple(
+        string local_addr,
+        uint16 remote_port
+    );
+    @delete(path = "/api/v1/simple/{id}")
+    void stop_simple(
+        uint32 id
+    );
+};
+
+@derive(Debug, Serialize, Deserialize)
+struct HealthResponse {
+    boolean healthy;
+    uint64 rtt_ms;
+    string message;
+};
+
+@derive(Debug, Serialize, Deserialize)
+struct VersionResponse {
+    string short;
+    string long;
+};
+
+@derive(Debug, Serialize, Deserialize)
+struct MemoryResponse {
+    uint64 allocated;
+    uint64 active;
+};
+
+@derive(Debug, Serialize, Deserialize)
+struct UdpStatsResponse {
+    uint64 tx;
+    uint64 rx;
+};
+
+@derive(Debug, Serialize, Deserialize)
+struct CreateTcpReverseRequest {
+    string local_addr;
+    uint16 remote_port;
+};
+
+@derive(Debug, Serialize, Deserialize)
+struct CreateSimpleResponse {
+    uint32 id;
+};

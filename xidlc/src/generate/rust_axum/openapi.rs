@@ -462,6 +462,7 @@ fn schema_for_decl(ty: &hir::TypeSpec, decl: &hir::Declarator) -> RefOr<Schema> 
             let size = xidl_parser::hir::const_expr_to_i64(&len.0);
             let mut array_schema = ArrayBuilder::new().items(schema);
             if let Some(size) = size {
+                //
                 if size >= 0 {
                     let size = size as usize;
                     array_schema = array_schema.min_items(Some(size)).max_items(Some(size));
@@ -497,7 +498,9 @@ fn schema_for_type(ty: &hir::TypeSpec) -> RefOr<Schema> {
             hir::TemplateTypeSpec::SequenceType(seq) => {
                 let mut schema = ArrayBuilder::new().items(schema_for_type(&seq.ty));
                 if let Some(len) = &seq.len {
+                    //
                     if let Some(size) = xidl_parser::hir::const_expr_to_i64(&len.0) {
+                        //
                         if size >= 0 {
                             let size = size as usize;
                             schema = schema.min_items(Some(size)).max_items(Some(size));
