@@ -1,33 +1,40 @@
-use serde_json::{Map, Value, json};
+use serde_json::Value;
 use std::collections::{BTreeMap, HashMap, HashSet};
+use std::mem;
+use utoipa::openapi::path::{
+    HttpMethod as OpenApiHttpMethod, OperationBuilder, ParameterBuilder, ParameterIn, PathItem,
+    PathsBuilder,
+};
+use utoipa::openapi::request_body::RequestBody;
+use utoipa::openapi::response::ResponseBuilder;
+use utoipa::openapi::schema::{
+    ArrayBuilder, KnownFormat, ObjectBuilder, OneOf, Schema, SchemaFormat, Type,
+};
+use utoipa::openapi::{
+    Content, InfoBuilder, OpenApi, OpenApiBuilder, Ref, RefOr, Required, ResponsesBuilder,
+};
 use xidl_parser::hir;
 
-pub fn render_openapi(spec: &hir::Specification) -> Value {
+pub fn render_openapi(spec: &hir::Specification) -> OpenApi {
     let mut ctx = OpenApiContext::default();
     ctx.collect_spec(spec, &[]);
 
-    let mut schemas = Map::new();
+    let mut components = utoipa::openapi::ComponentsBuilder::new();
     for (name, schema) in ctx.schemas {
-        schemas.insert(name, schema);
+        components = components.schema(name, schema);
     }
 
-    json!({
-        "openapi": "3.1.0",
-        "info": {
-            "title": "xidl",
-            "version": "0.1.0"
-        },
-        "paths": ctx.paths,
-        "components": {
-            "schemas": schemas,
-        }
-    })
+    OpenApiBuilder::new()
+        .info(InfoBuilder::new().title("xidl").version("0.1.0").build())
+        .paths(ctx.paths.build())
+        .components(Some(components.build()))
+        .build()
 }
 
 #[derive(Default)]
 struct OpenApiContext {
-    schemas: BTreeMap<String, Value>,
-    paths: Map<String, Value>,
+    schemas: BTreeMap<String, RefOr<Schema>>,
+    paths: PathsBuilder,
 }
 
 impl OpenApiContext {
@@ -88,10 +95,11 @@ impl OpenApiContext {
             hir::ConstrTypeDcl::EnumDcl(def) => {
                 let name = scoped_name(module_path, &def.ident);
                 let values = def.member.iter().map(|v| Value::String(v.ident.clone()));
-                let schema = json!({
-                    "type": "string",
-                    "enum": values.collect::<Vec<_>>()
-                });
+                let schema = RefOr::T(Schema::from(
+                    ObjectBuilder::new()
+                        .schema_type(Type::String)
+                        .enum_values(Some(values.collect::<Vec<_>>())),
+                ));
                 self.schemas.insert(name, schema);
             }
             hir::ConstrTypeDcl::UnionDef(def) => {
@@ -101,11 +109,21 @@ impl OpenApiContext {
             }
             hir::ConstrTypeDcl::BitsetDcl(def) => {
                 let name = scoped_name(module_path, &def.ident);
-                self.schemas.insert(name, json!({"type": "integer"}));
+                self.schemas.insert(
+                    name,
+                    RefOr::T(Schema::from(
+                        ObjectBuilder::new().schema_type(Type::Integer),
+                    )),
+                );
             }
             hir::ConstrTypeDcl::BitmaskDcl(def) => {
                 let name = scoped_name(module_path, &def.ident);
-                self.schemas.insert(name, json!({"type": "integer"}));
+                self.schemas.insert(
+                    name,
+                    RefOr::T(Schema::from(
+                        ObjectBuilder::new().schema_type(Type::Integer),
+                    )),
+                );
             }
             hir::ConstrTypeDcl::StructForwardDcl(_) | hir::ConstrTypeDcl::UnionForwardDcl(_) => {}
         }
@@ -138,74 +156,73 @@ impl OpenApiContext {
         }
 
         for method in methods {
-            let entry = self
-                .paths
-                .entry(method.path.clone())
-                .or_insert_with(|| json!({}));
-            let mut operation = json!({
-                "operationId": method.operation_id,
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "application/json": {
-                                "schema": method.response_schema
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Error",
-                        "content": {
-                            "application/json": {
-                                "schema": error_schema_ref()
-                            }
-                        }
-                    }
-                }
-            });
+            let MethodInfo {
+                http_method,
+                path,
+                operation_id,
+                parameters,
+                request_body,
+                response_schema,
+            } = method;
+            let mut operation = OperationBuilder::new()
+                .operation_id(Some(operation_id))
+                .responses(
+                    ResponsesBuilder::new()
+                        .response(
+                            "200",
+                            ResponseBuilder::new()
+                                .description("OK")
+                                .content("application/json", Content::new(Some(response_schema)))
+                                .build(),
+                        )
+                        .response(
+                            "500",
+                            ResponseBuilder::new()
+                                .description("Error")
+                                .content("application/json", Content::new(Some(error_schema_ref())))
+                                .build(),
+                        )
+                        .build(),
+                );
 
-            if !method.parameters.is_empty() {
-                operation
-                    .as_object_mut()
-                    .unwrap()
-                    .insert("parameters".to_string(), Value::Array(method.parameters));
+            for parameter in parameters {
+                operation = operation.parameter(parameter);
             }
-            if let Some(request_body) = method.request_body {
-                operation
-                    .as_object_mut()
-                    .unwrap()
-                    .insert("requestBody".to_string(), request_body);
+            if let Some(request_body) = request_body {
+                operation = operation.request_body(Some(request_body));
             }
 
-            let entry = entry.as_object_mut().unwrap();
-            entry.insert(method.http_method, operation);
+            let paths = mem::take(&mut self.paths);
+            self.paths = paths.path(path, PathItem::new(http_method, operation));
         }
 
         self.schemas.entry("Error".to_string()).or_insert_with(|| {
-            json!({
-                "type": "object",
-                "properties": {
-                    "code": { "type": "integer" },
-                    "msg": { "type": "string" }
-                },
-                "required": ["code", "msg"]
-            })
+            RefOr::T(Schema::from(
+                ObjectBuilder::new()
+                    .schema_type(Type::Object)
+                    .property("code", ObjectBuilder::new().schema_type(Type::Integer))
+                    .required("code")
+                    .property("msg", ObjectBuilder::new().schema_type(Type::String))
+                    .required("msg"),
+            ))
         });
     }
 }
 
 struct MethodInfo {
-    http_method: String,
+    http_method: OpenApiHttpMethod,
     path: String,
     operation_id: String,
-    parameters: Vec<Value>,
-    request_body: Option<Value>,
-    response_schema: Value,
+    parameters: Vec<utoipa::openapi::path::Parameter>,
+    request_body: Option<RequestBody>,
+    response_schema: RefOr<Schema>,
 }
 
 fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> MethodInfo {
     let ret = match &op.ty {
-        hir::OpTypeSpec::Void => json!({ "type": "null" }),
+        hir::OpTypeSpec::Void => {
+            RefOr::T(Schema::from(ObjectBuilder::new().schema_type(Type::Null)))
+        }
         hir::OpTypeSpec::TypeSpec(ty) => schema_for_type(ty),
     };
 
@@ -224,7 +241,7 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
     let default_source = default_param_source(method);
 
     let mut parameters = Vec::new();
-    let mut body_props = Map::new();
+    let mut body_props = Vec::new();
     let mut body_required = Vec::new();
 
     for param in params {
@@ -236,13 +253,18 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
             default_source
         };
         match source {
-            ParamSource::Path => parameters.push(parameter_schema("path", &raw_name, schema, true)),
-            ParamSource::Query => {
-                parameters.push(parameter_schema("query", &raw_name, schema, true))
+            ParamSource::Path => {
+                parameters.push(parameter_schema(ParameterIn::Path, &raw_name, schema, true))
             }
+            ParamSource::Query => parameters.push(parameter_schema(
+                ParameterIn::Query,
+                &raw_name,
+                schema,
+                true,
+            )),
             ParamSource::Body => {
-                body_props.insert(raw_name.clone(), schema);
-                body_required.push(Value::String(raw_name));
+                body_props.push((raw_name.clone(), schema));
+                body_required.push(raw_name);
             }
         }
     }
@@ -289,16 +311,17 @@ fn render_attr(
                             response_schema: schema_for_type(&spec.ty),
                         });
                         let raw_setter = format!("set_{raw_name}");
-                        let mut props = Map::new();
-                        props.insert("value".to_string(), schema_for_type(&spec.ty));
-                        let required = vec![Value::String("value".to_string())];
+                        let props = vec![("value".to_string(), schema_for_type(&spec.ty))];
+                        let required = vec!["value".to_string()];
                         out.push(MethodInfo {
                             http_method: method_to_openapi(HttpMethod::Post),
                             path: default_path(module_path, interface_name, &raw_setter),
                             operation_id: operation_id(module_path, interface_name, &raw_setter),
                             parameters: Vec::new(),
                             request_body: body_schema(props, required),
-                            response_schema: json!({ "type": "null" }),
+                            response_schema: RefOr::T(Schema::from(
+                                ObjectBuilder::new().schema_type(Type::Null),
+                            )),
                         });
                     }
                 }
@@ -313,16 +336,17 @@ fn render_attr(
                         response_schema: schema_for_type(&spec.ty),
                     });
                     let raw_setter = format!("set_{raw_name}");
-                    let mut props = Map::new();
-                    props.insert("value".to_string(), schema_for_type(&spec.ty));
-                    let required = vec![Value::String("value".to_string())];
+                    let props = vec![("value".to_string(), schema_for_type(&spec.ty))];
+                    let required = vec!["value".to_string()];
                     out.push(MethodInfo {
                         http_method: method_to_openapi(HttpMethod::Post),
                         path: default_path(module_path, interface_name, &raw_setter),
                         operation_id: operation_id(module_path, interface_name, &raw_setter),
                         parameters: Vec::new(),
                         request_body: body_schema(props, required),
-                        response_schema: json!({ "type": "null" }),
+                        response_schema: RefOr::T(Schema::from(
+                            ObjectBuilder::new().schema_type(Type::Null),
+                        )),
                     });
                 }
             }
@@ -331,155 +355,178 @@ fn render_attr(
     }
 }
 
-fn body_schema(props: Map<String, Value>, required: Vec<Value>) -> Option<Value> {
+fn body_schema(props: Vec<(String, RefOr<Schema>)>, required: Vec<String>) -> Option<RequestBody> {
     if props.is_empty() {
         return None;
     }
-    Some(json!({
-        "required": required,
-        "content": {
-            "application/json": {
-                "schema": {
-                    "type": "object",
-                    "properties": props
-                }
-            }
-        }
-    }))
+    let mut object = ObjectBuilder::new().schema_type(Type::Object);
+    for (name, schema) in props {
+        object = object.property(name.clone(), schema);
+    }
+    for name in required {
+        object = object.required(name);
+    }
+
+    let mut request_body = RequestBody::new();
+    request_body.content.insert(
+        "application/json".to_string(),
+        Content::new(Some(RefOr::T(Schema::from(object)))),
+    );
+    Some(request_body)
 }
 
-fn parameter_schema(location: &str, name: &str, schema: Value, required: bool) -> Value {
-    json!({
-        "name": name,
-        "in": location,
-        "required": required,
-        "schema": schema,
-    })
+fn parameter_schema(
+    location: ParameterIn,
+    name: &str,
+    schema: RefOr<Schema>,
+    required: bool,
+) -> utoipa::openapi::path::Parameter {
+    let required = if required {
+        Required::True
+    } else {
+        Required::False
+    };
+    ParameterBuilder::new()
+        .name(name)
+        .parameter_in(location)
+        .required(required)
+        .schema(Some(schema))
+        .build()
 }
 
-fn schema_for_struct(members: &[hir::Member]) -> Value {
-    let mut props = Map::new();
-    let mut required = Vec::new();
+fn schema_for_struct(members: &[hir::Member]) -> RefOr<Schema> {
+    let mut object = ObjectBuilder::new().schema_type(Type::Object);
     for member in members {
         for decl in &member.ident {
             let name = declarator_name(decl);
             let schema = schema_for_decl(&member.ty, decl);
-            props.insert(name.clone(), schema);
-            required.push(Value::String(name));
+            object = object.property(name.clone(), schema);
+            object = object.required(name);
         }
     }
-    json!({
-        "type": "object",
-        "properties": props,
-        "required": required,
-    })
+    RefOr::T(Schema::from(object))
 }
 
-fn schema_for_union(def: &hir::UnionDef) -> Value {
+fn schema_for_union(def: &hir::UnionDef) -> RefOr<Schema> {
     let mut variants = Vec::new();
     for case in &def.case {
         let decl = &case.element.value;
         let name = declarator_name(decl);
         let schema = schema_for_element(&case.element.ty, decl);
-        let name_required = name.clone();
-        variants.push(json!({
-            "type": "object",
-            "properties": {
-                name: schema,
-            },
-            "required": [name_required],
-        }));
+        let object = ObjectBuilder::new()
+            .schema_type(Type::Object)
+            .property(name.clone(), schema)
+            .required(name);
+        variants.push(RefOr::T(Schema::from(object)));
     }
-    json!({ "oneOf": variants })
+    let mut one_of = OneOf::new();
+    one_of.items = variants;
+    RefOr::T(Schema::from(one_of))
 }
 
-fn schema_for_element(ty: &hir::ElementSpecTy, decl: &hir::Declarator) -> Value {
+fn schema_for_element(ty: &hir::ElementSpecTy, decl: &hir::Declarator) -> RefOr<Schema> {
     match ty {
         hir::ElementSpecTy::TypeSpec(spec) => schema_for_decl(spec, decl),
         hir::ElementSpecTy::ConstrTypeDcl(constr) => schema_for_constr_type(constr, &[]),
     }
 }
 
-fn schema_for_decl(ty: &hir::TypeSpec, decl: &hir::Declarator) -> Value {
+fn schema_for_decl(ty: &hir::TypeSpec, decl: &hir::Declarator) -> RefOr<Schema> {
     let mut schema = schema_for_type(ty);
     if let hir::Declarator::ArrayDeclarator(array) = decl {
         for len in &array.len {
             let size = xidl_parser::hir::const_expr_to_i64(&len.0);
-            let mut array_schema = Map::new();
-            array_schema.insert("type".to_string(), Value::String("array".to_string()));
-            array_schema.insert("items".to_string(), schema);
+            let mut array_schema = ArrayBuilder::new().items(schema);
             if let Some(size) = size {
-                array_schema.insert("minItems".to_string(), Value::Number(size.into()));
-                array_schema.insert("maxItems".to_string(), Value::Number(size.into()));
+                if size >= 0 {
+                    let size = size as usize;
+                    array_schema = array_schema.min_items(Some(size)).max_items(Some(size));
+                }
             }
-            schema = Value::Object(array_schema);
+            schema = RefOr::T(Schema::from(array_schema));
         }
     }
     schema
 }
 
-fn schema_for_type(ty: &hir::TypeSpec) -> Value {
+fn schema_for_type(ty: &hir::TypeSpec) -> RefOr<Schema> {
     match ty {
         hir::TypeSpec::SimpleTypeSpec(simple) => match simple {
             hir::SimpleTypeSpec::IntegerType(value) => integer_schema(value),
-            hir::SimpleTypeSpec::FloatingPtType => json!({ "type": "number", "format": "double" }),
+            hir::SimpleTypeSpec::FloatingPtType => RefOr::T(Schema::from(
+                ObjectBuilder::new()
+                    .schema_type(Type::Number)
+                    .format(Some(SchemaFormat::KnownFormat(KnownFormat::Double))),
+            )),
             hir::SimpleTypeSpec::CharType | hir::SimpleTypeSpec::WideCharType => {
-                json!({ "type": "string" })
+                RefOr::T(Schema::from(ObjectBuilder::new().schema_type(Type::String)))
             }
-            hir::SimpleTypeSpec::Boolean => json!({ "type": "boolean" }),
+            hir::SimpleTypeSpec::Boolean => RefOr::T(Schema::from(
+                ObjectBuilder::new().schema_type(Type::Boolean),
+            )),
             hir::SimpleTypeSpec::AnyType
             | hir::SimpleTypeSpec::ObjectType
-            | hir::SimpleTypeSpec::ValueBaseType => json!({}),
+            | hir::SimpleTypeSpec::ValueBaseType => RefOr::T(Schema::from(ObjectBuilder::new())),
             hir::SimpleTypeSpec::ScopedName(value) => schema_ref(&scoped_name_ref(value)),
         },
         hir::TypeSpec::TemplateTypeSpec(template) => match template {
             hir::TemplateTypeSpec::SequenceType(seq) => {
-                let mut schema = json!({
-                    "type": "array",
-                    "items": schema_for_type(&seq.ty)
-                });
+                let mut schema = ArrayBuilder::new().items(schema_for_type(&seq.ty));
                 if let Some(len) = &seq.len {
-                    //
                     if let Some(size) = xidl_parser::hir::const_expr_to_i64(&len.0) {
-                        //
-                        if let Some(obj) = schema.as_object_mut() {
-                            obj.insert("minItems".to_string(), Value::Number(size.into()));
-                            obj.insert("maxItems".to_string(), Value::Number(size.into()));
+                        if size >= 0 {
+                            let size = size as usize;
+                            schema = schema.min_items(Some(size)).max_items(Some(size));
                         }
                     }
                 }
-                schema
+                RefOr::T(Schema::from(schema))
             }
             hir::TemplateTypeSpec::StringType(_) | hir::TemplateTypeSpec::WideStringType(_) => {
-                json!({ "type": "string" })
+                RefOr::T(Schema::from(ObjectBuilder::new().schema_type(Type::String)))
             }
-            hir::TemplateTypeSpec::FixedPtType(_) => {
-                json!({ "type": "number", "format": "double" })
-            }
-            hir::TemplateTypeSpec::MapType(map) => json!({
-                "type": "object",
-                "additionalProperties": schema_for_type(&map.value)
-            }),
+            hir::TemplateTypeSpec::FixedPtType(_) => RefOr::T(Schema::from(
+                ObjectBuilder::new()
+                    .schema_type(Type::Number)
+                    .format(Some(SchemaFormat::KnownFormat(KnownFormat::Double))),
+            )),
+            hir::TemplateTypeSpec::MapType(map) => RefOr::T(Schema::from(
+                ObjectBuilder::new()
+                    .schema_type(Type::Object)
+                    .additional_properties(Some(schema_for_type(&map.value))),
+            )),
         },
     }
 }
 
-fn integer_schema(value: &hir::IntegerType) -> Value {
+fn integer_schema(value: &hir::IntegerType) -> RefOr<Schema> {
+    let mut object = ObjectBuilder::new().schema_type(Type::Integer);
     match value {
-        hir::IntegerType::U64 => json!({ "type": "integer", "format": "int64", "minimum": 0 }),
+        hir::IntegerType::U64 => {
+            object = object
+                .format(Some(SchemaFormat::KnownFormat(KnownFormat::Int64)))
+                .minimum(Some(0));
+        }
         hir::IntegerType::U32
         | hir::IntegerType::U16
         | hir::IntegerType::U8
         | hir::IntegerType::UChar => {
-            json!({ "type": "integer", "format": "int32", "minimum": 0 })
+            object = object
+                .format(Some(SchemaFormat::KnownFormat(KnownFormat::Int32)))
+                .minimum(Some(0));
         }
-        hir::IntegerType::I64 => json!({ "type": "integer", "format": "int64" }),
-        _ => json!({ "type": "integer", "format": "int32" }),
+        hir::IntegerType::I64 => {
+            object = object.format(Some(SchemaFormat::KnownFormat(KnownFormat::Int64)));
+        }
+        _ => {
+            object = object.format(Some(SchemaFormat::KnownFormat(KnownFormat::Int32)));
+        }
     }
+    RefOr::T(Schema::from(object))
 }
 
-fn schema_ref(name: &str) -> Value {
-    json!({ "$ref": format!("#/components/schemas/{name}") })
+fn schema_ref(name: &str) -> RefOr<Schema> {
+    RefOr::Ref(Ref::from_schema_name(name))
 }
 
 fn scoped_name_ref(value: &hir::ScopedName) -> String {
@@ -743,19 +790,19 @@ fn default_param_source(method: HttpMethod) -> ParamSource {
     }
 }
 
-fn method_to_openapi(method: HttpMethod) -> String {
+fn method_to_openapi(method: HttpMethod) -> OpenApiHttpMethod {
     match method {
-        HttpMethod::Get => "get".to_string(),
-        HttpMethod::Post => "post".to_string(),
-        HttpMethod::Put => "put".to_string(),
-        HttpMethod::Patch => "patch".to_string(),
-        HttpMethod::Delete => "delete".to_string(),
-        HttpMethod::Head => "head".to_string(),
-        HttpMethod::Options => "options".to_string(),
+        HttpMethod::Get => OpenApiHttpMethod::Get,
+        HttpMethod::Post => OpenApiHttpMethod::Post,
+        HttpMethod::Put => OpenApiHttpMethod::Put,
+        HttpMethod::Patch => OpenApiHttpMethod::Patch,
+        HttpMethod::Delete => OpenApiHttpMethod::Delete,
+        HttpMethod::Head => OpenApiHttpMethod::Head,
+        HttpMethod::Options => OpenApiHttpMethod::Options,
     }
 }
 
-fn error_schema_ref() -> Value {
+fn error_schema_ref() -> RefOr<Schema> {
     schema_ref("Error")
 }
 
@@ -766,7 +813,7 @@ fn readonly_attr_names(spec: &hir::ReadonlyAttrSpec) -> Vec<String> {
     }
 }
 
-fn schema_for_constr_type(constr: &hir::ConstrTypeDcl, module_path: &[String]) -> Value {
+fn schema_for_constr_type(constr: &hir::ConstrTypeDcl, module_path: &[String]) -> RefOr<Schema> {
     match constr {
         hir::ConstrTypeDcl::StructDcl(def) => {
             let name = scoped_name(module_path, &def.ident);
