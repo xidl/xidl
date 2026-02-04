@@ -12,7 +12,7 @@ impl DeriveInput {
         quote! {
             impl<'a> crate::parser::FromTreeSitter<'a> for #ident {
                 fn from_node(node: tree_sitter::Node<'a>, ctx: &mut crate::parser::ParseContext<'a>) -> crate::error::ParserResult<Self> {
-                    debug_assert_eq!(node.kind_id(), xidl_derive::node_id!(#ts_node_name));
+                    debug_assert_eq!(node.kind_id(), xidl_parser_derive::node_id!(#ts_node_name));
                     Ok(Self)
                 }
             }
@@ -26,7 +26,7 @@ impl DeriveInput {
         quote! {
             impl<'a> crate::parser::FromTreeSitter<'a> for #ident {
                 fn from_node(node: tree_sitter::Node<'a>, ctx: &mut crate::parser::ParseContext<'a>) -> crate::error::ParserResult<Self> {
-                    debug_assert_eq!(node.kind_id(), xidl_derive::node_id!(#ts_node_name));
+                    debug_assert_eq!(node.kind_id(), xidl_parser_derive::node_id!(#ts_node_name));
                     Ok(Self(crate::parser::FromTreeSitter::from_node(node, ctx)?))
                 }
             }
@@ -89,7 +89,7 @@ impl DeriveInput {
                     }
                 } else {
                     quote! {
-                        xidl_derive::node_id!(#ts_node_name)
+                        xidl_parser_derive::node_id!(#ts_node_name)
                     }
                 };
 
@@ -186,7 +186,7 @@ impl DeriveInput {
                 }
                 if field.is_text() {
                     gen_fields.extend(quote! {
-                        xidl_derive::node_id!(#ts_node_name) => {
+                        xidl_parser_derive::node_id!(#ts_node_name) => {
                             #name = Some(ctx.node_text(&ch)?.to_string());
                         }
                     });
@@ -194,13 +194,13 @@ impl DeriveInput {
                     #[allow(clippy::collapsible_else_if)]
                     if field.is_vec() {
                         gen_fields.extend(quote! {
-                            xidl_derive::node_id!(#ts_node_name) => {
+                            xidl_parser_derive::node_id!(#ts_node_name) => {
                                 #name.push(crate::parser::FromTreeSitter::from_node(ch, ctx)?);
                             }
                         });
                     } else {
                         gen_fields.extend(quote! {
-                            xidl_derive::node_id!(#ts_node_name) => {
+                            xidl_parser_derive::node_id!(#ts_node_name) => {
                                 #name = Some(crate::parser::FromTreeSitter::from_node(ch, ctx)?);
                             }
                         });
@@ -227,7 +227,7 @@ impl DeriveInput {
         quote! {
             impl<'a> crate::parser::FromTreeSitter<'a> for #ident {
                 fn from_node(node: tree_sitter::Node<'a>, ctx: &mut crate::parser::ParseContext<'a>) -> crate::error::ParserResult<Self> {
-                    assert_eq!(node.kind_id(), xidl_derive::node_id!(#ts_node_name));
+                    assert_eq!(node.kind_id(), xidl_parser_derive::node_id!(#ts_node_name));
                     #gen_declare
                     for ch in node.children(&mut node.walk()) {
                         match ch.kind_id() {

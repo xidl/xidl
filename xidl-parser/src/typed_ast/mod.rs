@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 mod expr;
 pub use expr::*;
-use xidl_derive::Parser;
+use xidl_parser_derive::Parser;
 
 mod annotation;
 pub use annotation::*;
@@ -70,18 +70,18 @@ impl<'a> crate::parser::FromTreeSitter<'a> for TypeDcl {
         node: tree_sitter::Node<'a>,
         ctx: &mut crate::parser::ParseContext<'a>,
     ) -> crate::error::ParserResult<Self> {
-        assert_eq!(node.kind_id(), xidl_derive::node_id!("type_dcl"));
+        assert_eq!(node.kind_id(), xidl_parser_derive::node_id!("type_dcl"));
         let mut annotations = Vec::new();
         let mut decl = None;
         for ch in node.children(&mut node.walk()) {
             match ch.kind_id() {
-                xidl_derive::node_id!("annotation_appl")
-                | xidl_derive::node_id!("extend_annotation_appl") => {
+                xidl_parser_derive::node_id!("annotation_appl")
+                | xidl_parser_derive::node_id!("extend_annotation_appl") => {
                     annotations.push(AnnotationAppl::from_node(ch, ctx)?);
                 }
-                xidl_derive::node_id!("constr_type_dcl")
-                | xidl_derive::node_id!("native_dcl")
-                | xidl_derive::node_id!("typedef_dcl") => {
+                xidl_parser_derive::node_id!("constr_type_dcl")
+                | xidl_parser_derive::node_id!("native_dcl")
+                | xidl_parser_derive::node_id!("typedef_dcl") => {
                     decl = Some(TypeDclInner::from_node(ch, ctx)?);
                 }
                 _ => {}
@@ -144,24 +144,24 @@ impl<'a> crate::parser::FromTreeSitter<'a> for Member {
         node: tree_sitter::Node<'a>,
         ctx: &mut crate::parser::ParseContext<'a>,
     ) -> crate::error::ParserResult<Self> {
-        assert_eq!(node.kind_id(), xidl_derive::node_id!("member"));
+        assert_eq!(node.kind_id(), xidl_parser_derive::node_id!("member"));
         let mut annotations = Vec::new();
         let mut ty = None;
         let mut ident = None;
         let mut default = None;
         for ch in node.children(&mut node.walk()) {
             match ch.kind_id() {
-                xidl_derive::node_id!("annotation_appl")
-                | xidl_derive::node_id!("extend_annotation_appl") => {
+                xidl_parser_derive::node_id!("annotation_appl")
+                | xidl_parser_derive::node_id!("extend_annotation_appl") => {
                     annotations.push(AnnotationAppl::from_node(ch, ctx)?);
                 }
-                xidl_derive::node_id!("type_spec") => {
+                xidl_parser_derive::node_id!("type_spec") => {
                     ty = Some(TypeSpec::from_node(ch, ctx)?);
                 }
-                xidl_derive::node_id!("declarators") => {
+                xidl_parser_derive::node_id!("declarators") => {
                     ident = Some(Declarators::from_node(ch, ctx)?);
                 }
-                xidl_derive::node_id!("default") => {
+                xidl_parser_derive::node_id!("default") => {
                     default = Some(Default::from_node(ch, ctx)?);
                 }
                 _ => {}

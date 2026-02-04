@@ -1,6 +1,6 @@
 use super::*;
 use serde::{Deserialize, Serialize};
-use xidl_derive::Parser;
+use xidl_parser_derive::Parser;
 
 #[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct PreprocDefine {
@@ -39,21 +39,24 @@ impl<'a> crate::parser::FromTreeSitter<'a> for PreprocInclude {
         node: tree_sitter::Node<'a>,
         ctx: &mut crate::parser::ParseContext<'a>,
     ) -> crate::error::ParserResult<Self> {
-        assert_eq!(node.kind_id(), xidl_derive::node_id!("preproc_include"));
+        assert_eq!(
+            node.kind_id(),
+            xidl_parser_derive::node_id!("preproc_include")
+        );
         let mut path = None;
         for ch in node.children(&mut node.walk()) {
             match ch.kind_id() {
-                xidl_derive::node_id!("string_literal") => {
+                xidl_parser_derive::node_id!("string_literal") => {
                     path = Some(PreprocIncludePath::StringLiteral(
                         ctx.node_text(&ch)?.to_string(),
                     ));
                 }
-                xidl_derive::node_id!("system_lib_string") => {
+                xidl_parser_derive::node_id!("system_lib_string") => {
                     path = Some(PreprocIncludePath::SystemLibString(
                         ctx.node_text(&ch)?.to_string(),
                     ));
                 }
-                xidl_derive::node_id!("identifier") => {
+                xidl_parser_derive::node_id!("identifier") => {
                     path = Some(PreprocIncludePath::Identifier(
                         crate::parser::FromTreeSitter::from_node(ch, ctx)?,
                     ));

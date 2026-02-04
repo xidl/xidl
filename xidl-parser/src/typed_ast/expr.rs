@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use xidl_derive::Parser;
+use xidl_parser_derive::Parser;
 
 use crate::typed_ast::Identifier;
 
@@ -129,16 +129,19 @@ impl<'a> crate::parser::FromTreeSitter<'a> for FloatingPtLiteral {
         node: tree_sitter::Node<'a>,
         ctx: &mut crate::parser::ParseContext<'a>,
     ) -> crate::error::ParserResult<Self> {
-        assert_eq!(node.kind_id(), xidl_derive::node_id!("floating_pt_literal"));
+        assert_eq!(
+            node.kind_id(),
+            xidl_parser_derive::node_id!("floating_pt_literal")
+        );
         let mut sign = None;
         let mut integer = None;
         let mut fraction = None;
         for ch in node.children(&mut node.walk()) {
             match ch.kind_id() {
-                xidl_derive::node_id!("integer_sign") => {
+                xidl_parser_derive::node_id!("integer_sign") => {
                     sign = Some(crate::parser::FromTreeSitter::from_node(ch, ctx)?);
                 }
-                xidl_derive::node_id!("dec_number") => {
+                xidl_parser_derive::node_id!("dec_number") => {
                     let inter = crate::parser::FromTreeSitter::from_node(ch, ctx)?;
                     if integer.is_none() {
                         integer = Some(inter);

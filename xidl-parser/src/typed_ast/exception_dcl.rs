@@ -1,6 +1,6 @@
 use super::*;
 use serde::{Deserialize, Serialize};
-use xidl_derive::Parser;
+use xidl_parser_derive::Parser;
 
 #[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct ExceptDcl {

@@ -21,7 +21,7 @@ impl DeriveInput {
             let variant_ident = &variant.ident;
             let ts_node_name = variant.ts_node_name();
             let ts_node_id = if using_id {
-                quote! { xidl_derive::node_id!(#ts_node_name) }
+                quote! { xidl_parser_derive::node_id!(#ts_node_name) }
             } else {
                 quote! { #ts_node_name }
             };

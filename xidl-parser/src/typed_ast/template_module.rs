@@ -1,6 +1,6 @@
 use super::*;
 use serde::{Deserialize, Serialize};
-use xidl_derive::Parser;
+use xidl_parser_derive::Parser;
 
 #[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct TemplateModuleDcl {
@@ -49,21 +49,21 @@ impl<'a> crate::parser::FromTreeSitter<'a> for FormalParameterType {
     ) -> crate::error::ParserResult<Self> {
         assert_eq!(
             node.kind_id(),
-            xidl_derive::node_id!("formal_parameter_type")
+            xidl_parser_derive::node_id!("formal_parameter_type")
         );
         for ch in node.children(&mut node.walk()) {
             match ch.kind_id() {
-                xidl_derive::node_id!("const_type") => {
+                xidl_parser_derive::node_id!("const_type") => {
                     return Ok(Self::ConstType(crate::parser::FromTreeSitter::from_node(
                         ch, ctx,
                     )?));
                 }
-                xidl_derive::node_id!("sequence_type") => {
+                xidl_parser_derive::node_id!("sequence_type") => {
                     return Ok(Self::SequenceType(
                         crate::parser::FromTreeSitter::from_node(ch, ctx)?,
                     ));
                 }
-                xidl_derive::node_id!("simple_type_spec") => {
+                xidl_parser_derive::node_id!("simple_type_spec") => {
                     return Ok(Self::SimpleTypeSpec(
                         crate::parser::FromTreeSitter::from_node(ch, ctx)?,
                     ));

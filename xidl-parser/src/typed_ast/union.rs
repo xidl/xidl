@@ -18,16 +18,16 @@ impl<'a> crate::parser::FromTreeSitter<'a> for Enumerator {
         node: tree_sitter::Node<'a>,
         ctx: &mut crate::parser::ParseContext<'a>,
     ) -> crate::error::ParserResult<Self> {
-        assert_eq!(node.kind_id(), xidl_derive::node_id!("enumerator"));
+        assert_eq!(node.kind_id(), xidl_parser_derive::node_id!("enumerator"));
         let mut annotations = Vec::new();
         let mut ident = None;
         for ch in node.children(&mut node.walk()) {
             match ch.kind_id() {
-                xidl_derive::node_id!("annotation_appl")
-                | xidl_derive::node_id!("extend_annotation_appl") => {
+                xidl_parser_derive::node_id!("annotation_appl")
+                | xidl_parser_derive::node_id!("extend_annotation_appl") => {
                     annotations.push(AnnotationAppl::from_node(ch, ctx)?);
                 }
-                xidl_derive::node_id!("identifier") => {
+                xidl_parser_derive::node_id!("identifier") => {
                     ident = Some(Identifier::from_node(ch, ctx)?);
                 }
                 _ => {}
@@ -77,9 +77,9 @@ impl<'a> crate::parser::FromTreeSitter<'a> for CaseLabel {
         node: tree_sitter::Node<'a>,
         ctx: &mut crate::parser::ParseContext<'a>,
     ) -> crate::error::ParserResult<Self> {
-        assert_eq!(node.kind_id(), xidl_derive::node_id!("case_label"));
+        assert_eq!(node.kind_id(), xidl_parser_derive::node_id!("case_label"));
         for ch in node.children(&mut node.walk()) {
-            if ch.kind_id() == xidl_derive::node_id!("const_expr") {
+            if ch.kind_id() == xidl_parser_derive::node_id!("const_expr") {
                 return Ok(Self::Case(ConstExpr::from_node(ch, ctx)?));
             }
         }
@@ -108,20 +108,21 @@ impl<'a> crate::parser::FromTreeSitter<'a> for ElementSpec {
         node: tree_sitter::Node<'a>,
         ctx: &mut crate::parser::ParseContext<'a>,
     ) -> crate::error::ParserResult<Self> {
-        assert_eq!(node.kind_id(), xidl_derive::node_id!("element_spec"));
+        assert_eq!(node.kind_id(), xidl_parser_derive::node_id!("element_spec"));
         let mut annotations = vec![];
         let mut ty = None;
         let mut value = None;
         for ch in node.children(&mut node.walk()) {
             match ch.kind_id() {
-                xidl_derive::node_id!("annotation_appl")
-                | xidl_derive::node_id!("extend_annotation_appl") => {
+                xidl_parser_derive::node_id!("annotation_appl")
+                | xidl_parser_derive::node_id!("extend_annotation_appl") => {
                     annotations.push(AnnotationAppl::from_node(ch, ctx)?);
                 }
-                xidl_derive::node_id!("type_spec") | xidl_derive::node_id!("constr_type_dcl") => {
+                xidl_parser_derive::node_id!("type_spec")
+                | xidl_parser_derive::node_id!("constr_type_dcl") => {
                     ty = Some(crate::parser::FromTreeSitter::from_node(ch, ctx)?);
                 }
-                xidl_derive::node_id!("declarator") => {
+                xidl_parser_derive::node_id!("declarator") => {
                     value = Some(crate::parser::FromTreeSitter::from_node(ch, ctx)?);
                 }
                 _ => {}

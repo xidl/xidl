@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
-  "xidl-derive",
+  "xidl-parser-derive",
   "xidl-jsonrpc",
   "xidl-rust-axum",
   "xidlc",
@@ -12,7 +12,7 @@ members = [
 
 [workspace.dependencies]
 xidl-parser = { path = "xidl-parser" }
-xidl-derive = { path = "xidl-derive" }
+xidl-parser-derive = { path = "xidl-parser-derive" }
 xidl-xcdr = { path = "xidl-xcdr" }
 xidl-jsonrpc = { path = "xidl-jsonrpc" }
 xidl-rust-axum = { path = "xidl-rust-axum" }

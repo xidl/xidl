@@ -1,5 +1,5 @@
 [package]
-name = "xidl-derive"
+name = "xidl-parser-derive"
 version = "0.1.0"
 edition = "2021"
 

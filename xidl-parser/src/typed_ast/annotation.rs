@@ -1,6 +1,6 @@
 use super::*;
 use serde::{Deserialize, Serialize};
-use xidl_derive::Parser;
+use xidl_parser_derive::Parser;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AnnotationAppl {
@@ -35,9 +35,9 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AnnotationAppl {
         ctx: &mut crate::parser::ParseContext<'a>,
     ) -> crate::error::ParserResult<Self> {
         let kind_id = node.kind_id();
-        let is_extend = kind_id == xidl_derive::node_id!("extend_annotation_appl");
+        let is_extend = kind_id == xidl_parser_derive::node_id!("extend_annotation_appl");
         if !is_extend {
-            assert_eq!(kind_id, xidl_derive::node_id!("annotation_appl"));
+            assert_eq!(kind_id, xidl_parser_derive::node_id!("annotation_appl"));
         }
         let raw = ctx.node_text(&node)?.to_string();
 
@@ -46,14 +46,14 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AnnotationAppl {
         let mut extra = Vec::new();
         for ch in node.children(&mut node.walk()) {
             match ch.kind_id() {
-                xidl_derive::node_id!("annotation_appl_custom_body") => {
+                xidl_parser_derive::node_id!("annotation_appl_custom_body") => {
                     custom_body = Some(ch);
                 }
-                xidl_derive::node_id!("annotation_appl_builtin_body") => {
+                xidl_parser_derive::node_id!("annotation_appl_builtin_body") => {
                     builtin_body = Some(ch);
                 }
-                xidl_derive::node_id!("annotation_appl")
-                | xidl_derive::node_id!("extend_annotation_appl") => {
+                xidl_parser_derive::node_id!("annotation_appl")
+                | xidl_parser_derive::node_id!("extend_annotation_appl") => {
                     extra.push(AnnotationAppl::from_node(ch, ctx)?);
                 }
                 _ => {}
@@ -65,10 +65,10 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AnnotationAppl {
             let mut params = None;
             for ch in custom_body.children(&mut custom_body.walk()) {
                 match ch.kind_id() {
-                    xidl_derive::node_id!("scoped_name") => {
+                    xidl_parser_derive::node_id!("scoped_name") => {
                         scoped_name = Some(ScopedName::from_node(ch, ctx)?);
                     }
-                    xidl_derive::node_id!("annotation_appl_params") => {
+                    xidl_parser_derive::node_id!("annotation_appl_params") => {
                         params = Some(AnnotationParams::from_node(ch, ctx)?);
                     }
                     _ => {}
@@ -117,17 +117,17 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AnnotationParams {
     ) -> crate::error::ParserResult<Self> {
         assert_eq!(
             node.kind_id(),
-            xidl_derive::node_id!("annotation_appl_params")
+            xidl_parser_derive::node_id!("annotation_appl_params")
         );
 
         let mut const_expr = None;
         let mut params = vec![];
         for ch in node.children(&mut node.walk()) {
             match ch.kind_id() {
-                xidl_derive::node_id!("const_expr") => {
+                xidl_parser_derive::node_id!("const_expr") => {
                     const_expr = Some(ConstExpr::from_node(ch, ctx)?);
                 }
-                xidl_derive::node_id!("annotation_appl_param") => {
+                xidl_parser_derive::node_id!("annotation_appl_param") => {
                     params.push(AnnotationApplParam::from_node(ch, ctx)?);
                 }
                 _ => {}

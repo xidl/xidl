@@ -12,20 +12,20 @@ impl<'a> crate::parser::FromTreeSitter<'a> for ModuleDcl {
         node: tree_sitter::Node<'a>,
         ctx: &mut crate::parser::ParseContext<'a>,
     ) -> crate::error::ParserResult<Self> {
-        assert_eq!(node.kind_id(), xidl_derive::node_id!("module_dcl"));
+        assert_eq!(node.kind_id(), xidl_parser_derive::node_id!("module_dcl"));
         let mut annotations = Vec::new();
         let mut ident = None;
         let mut definition = Vec::new();
         for ch in node.children(&mut node.walk()) {
             match ch.kind_id() {
-                xidl_derive::node_id!("annotation_appl")
-                | xidl_derive::node_id!("extend_annotation_appl") => {
+                xidl_parser_derive::node_id!("annotation_appl")
+                | xidl_parser_derive::node_id!("extend_annotation_appl") => {
                     annotations.push(AnnotationAppl::from_node(ch, ctx)?);
                 }
-                xidl_derive::node_id!("identifier") => {
+                xidl_parser_derive::node_id!("identifier") => {
                     ident = Some(Identifier::from_node(ch, ctx)?);
                 }
-                xidl_derive::node_id!("definition") => {
+                xidl_parser_derive::node_id!("definition") => {
                     definition.push(Definition::from_node(ch, ctx)?);
                 }
                 _ => {}

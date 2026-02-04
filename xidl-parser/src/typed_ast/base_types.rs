@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use xidl_derive::Parser;
+use xidl_parser_derive::Parser;
 
 use super::*;
 
@@ -163,10 +163,13 @@ impl<'a> crate::parser::FromTreeSitter<'a> for FixedPtType {
         node: tree_sitter::Node<'a>,
         ctx: &mut crate::parser::ParseContext<'a>,
     ) -> crate::error::ParserResult<Self> {
-        assert_eq!(node.kind_id(), xidl_derive::node_id!("fixed_pt_type"));
+        assert_eq!(
+            node.kind_id(),
+            xidl_parser_derive::node_id!("fixed_pt_type")
+        );
         let mut values = Vec::new();
         for ch in node.children(&mut node.walk()) {
-            if ch.kind_id() == xidl_derive::node_id!("positive_int_const") {
+            if ch.kind_id() == xidl_parser_derive::node_id!("positive_int_const") {
                 values.push(crate::parser::FromTreeSitter::from_node(ch, ctx)?);
             }
         }
@@ -192,15 +195,15 @@ impl<'a> crate::parser::FromTreeSitter<'a> for MapType {
         node: tree_sitter::Node<'a>,
         ctx: &mut crate::parser::ParseContext<'a>,
     ) -> crate::error::ParserResult<Self> {
-        assert_eq!(node.kind_id(), xidl_derive::node_id!("map_type"));
+        assert_eq!(node.kind_id(), xidl_parser_derive::node_id!("map_type"));
         let mut types = Vec::new();
         let mut len = None;
         for ch in node.children(&mut node.walk()) {
             match ch.kind_id() {
-                xidl_derive::node_id!("type_spec") => {
+                xidl_parser_derive::node_id!("type_spec") => {
                     types.push(crate::parser::FromTreeSitter::from_node(ch, ctx)?);
                 }
-                xidl_derive::node_id!("positive_int_const") => {
+                xidl_parser_derive::node_id!("positive_int_const") => {
                     len = Some(crate::parser::FromTreeSitter::from_node(ch, ctx)?);
                 }
                 _ => {}
