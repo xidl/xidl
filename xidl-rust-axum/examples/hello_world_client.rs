@@ -1,6 +1,6 @@
-mod rpc;
+mod imp;
 
-use rpc::HelloWorldClient;
+use imp::HelloWorldClient;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

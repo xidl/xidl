@@ -6,15 +6,17 @@
 #![allow(unused_variables)]
 #![allow(unreachable_patterns)]
 #![allow(clippy::let_unit_value)]
+#![allow(unused_mut)]
 
 use std::collections::BTreeMap;
+#[async_trait::async_trait]
 pub trait HelloWorld {
     async fn sayHello(&self, name: String) -> Result<(), xidl_rust_axum::Error>;
 }
 
 use std::sync::Arc;
 use xidl_rust_axum::axum::{
-    extract::{Path, Query},
+    extract::{Path, Query, State},
     http::StatusCode,
     response::IntoResponse,
     routing::{delete, get, head, options, patch, post, put},
@@ -41,23 +43,18 @@ where
     }
 
     pub fn router(self) -> Router {
-        let mut router = Router::new();
         let svc = self.inner;
-        router = router.route(
-            "/hello",
-            post({
-                let svc = svc.clone();
-                move |Json(body): Json<HelloWorldSayHelloBody>| async move {
-                    let HelloWorldSayHelloBody { name } = body;
-                    let result = svc.sayHello(name).await;
-                    match result {
-                        Ok(value) => (StatusCode::OK, Json(value)).into_response(),
-                        Err(err) => err.into_response(),
-                    }
-                }
-            }),
-        );
-        router
+        Router::new()
+            .route("/hello", post(Self::sayHello))
+            .with_state(svc)
+    }
+
+    async fn sayHello(
+        State(svc): State<Arc<T>>,
+        Json(body): Json<HelloWorldSayHelloBody>,
+    ) -> ::xidl_rust_axum::Result<Json<()>> {
+        let HelloWorldSayHelloBody { name } = body;
+        Ok(Json(svc.sayHello(name).await?))
     }
 }
 
@@ -68,13 +65,6 @@ where
     fn into_router(self) -> Router {
         self.router()
     }
-}
-
-pub fn service<T>(inner: T) -> HelloWorldServer<T>
-where
-    T: HelloWorld + Send + Sync + 'static,
-{
-    HelloWorldServer::new(inner)
 }
 
 pub struct HelloWorldClient {
@@ -89,8 +79,8 @@ impl HelloWorldClient {
     }
 }
 
-impl HelloWorld for HelloWorldClient {
-    async fn sayHello(&self, name: String) -> Result<(), xidl_rust_axum::Error> {
+impl HelloWorldClient {
+    pub async fn sayHello(&self, name: String) -> Result<(), xidl_rust_axum::Error> {
         let mut path = "/hello".to_string();
         let url = self.client.url(&path);
         let mut req = self

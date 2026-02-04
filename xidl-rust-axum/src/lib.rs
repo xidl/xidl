@@ -57,19 +57,19 @@ pub struct RouteInfo {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ErrorBody {
-    pub code: i32,
+    pub code: u16,
     pub msg: String,
 }
 
 #[derive(Debug, Clone, Error)]
 #[error("{message}")]
 pub struct Error {
-    pub code: i32,
+    pub code: u16,
     pub message: String,
 }
 
 impl Error {
-    pub fn new(code: i32, message: impl Into<String>) -> Self {
+    pub fn new(code: u16, message: impl Into<String>) -> Self {
         Self {
             code,
             message: message.into(),
@@ -93,11 +93,21 @@ impl From<Error> for ErrorBody {
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
         let body: ErrorBody = self.into();
-        (StatusCode::INTERNAL_SERVER_ERROR, axum::Json(body)).into_response()
+        (StatusCode::from_u16(body.code).unwrap(), axum::Json(body)).into_response()
     }
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
+
+pub fn result_to_response<T>(result: Result<T>) -> Response
+where
+    T: IntoResponse,
+{
+    match result {
+        Ok(value) => value.into_response(),
+        Err(err) => err.into_response(),
+    }
+}
 
 pub struct Client {
     base_url: String,
@@ -167,10 +177,7 @@ impl ServerBuilder {
         self
     }
 
-    pub fn with_service<S>(mut self, svc: S) -> Self
-    where
-        S: Service,
-    {
+    pub fn with_service<T: Service>(mut self, svc: T) -> Self {
         self.router = self.router.merge(svc.into_router());
         self
     }
@@ -184,7 +191,6 @@ impl ServerBuilder {
         };
         axum::serve(listener, self.router)
             .await
-            .map_err(|err| Error::new(500, err.to_string()))?;
-        Ok(())
+            .map_err(|err| Error::new(500, err.to_string()))
     }
 }

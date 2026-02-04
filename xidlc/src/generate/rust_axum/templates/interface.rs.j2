@@ -1,3 +1,4 @@
+#[async_trait::async_trait]
 pub trait {{ ident }} {
 {% for method in methods %}
     async fn {{ method.name }}(&self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.ret }}, xidl_rust_axum::Error>;
@@ -5,7 +6,7 @@ pub trait {{ ident }} {
 }
 
 use xidl_rust_axum::axum::{
-    extract::{Path, Query},
+    extract::{Path, Query, State},
     http::StatusCode,
     response::IntoResponse,
     routing::{delete, get, head, options, patch, post, put},
@@ -68,46 +69,45 @@ where
     }
 
     pub fn router(self) -> Router {
-        let mut router = Router::new();
         let svc = self.inner;
-{% for method in methods %}
-        router = router.route(
-            "{{ method.path }}",
-            {{ method.http_method_fn }}({
-                let svc = svc.clone();
-                move |{% if method.path_params | length > 0 %}Path(path): Path<{{ method.struct_prefix }}Path>{% endif %}{% if method.query_params | length > 0 %}{% if method.path_params | length > 0 %}, {% endif %}Query(query): Query<{{ method.struct_prefix }}Query>{% endif %}{% if method.body_params | length > 0 %}{% if method.path_params | length > 0 or method.query_params | length > 0 %}, {% endif %}Json(body): Json<{{ method.struct_prefix }}Body>{% endif %}| async move {
-{% if method.path_params | length > 0 %}
-                    let {{ method.struct_prefix }}Path {
-{% for param in method.path_params %}
-                        {{ param.name }},
-{% endfor %}
-                    } = path;
-{% endif %}
-{% if method.query_params | length > 0 %}
-                    let {{ method.struct_prefix }}Query {
-{% for param in method.query_params %}
-                        {{ param.name }},
-{% endfor %}
-                    } = query;
-{% endif %}
-{% if method.body_params | length > 0 %}
-                    let {{ method.struct_prefix }}Body {
-{% for param in method.body_params %}
-                        {{ param.name }},
-{% endfor %}
-                    } = body;
-{% endif %}
-                    let result = svc.{{ method.name }}({% if method.param_names | length > 0 %}{{ method.param_names | join(", ") }}{% endif %}).await;
-                    match result {
-                        Ok(value) => (StatusCode::OK, Json(value)).into_response(),
-                        Err(err) => err.into_response(),
-                    }
-                }
-            }),
-        );
-{% endfor %}
-        router
+        Router::new()
+        {% for method in methods %}
+            .route("{{ method.path }}", {{ method.http_method_fn }}(Self::{{ method.name }}))
+        {% endfor %}
+            .with_state(svc)
     }
+
+{% for method in methods %}
+    async fn {{ method.name }}(
+        State(svc): State<Arc<T>>{% if method.path_params | length > 0 %},
+        Path(path): Path<{{ method.struct_prefix }}Path>{% endif %}{% if method.query_params | length > 0 %},
+        Query(query): Query<{{ method.struct_prefix }}Query>{% endif %}{% if method.body_params | length > 0 %},
+        Json(body): Json<{{ method.struct_prefix }}Body>{% endif %}
+    ) -> ::xidl_rust_axum::Result<Json<{{ method.ret }}>> {
+        {% if method.path_params | length > 0 %}
+            let {{ method.struct_prefix }}Path {
+            {% for param in method.path_params %}
+                {{ param.name }},
+            {% endfor %}
+            } = path;
+        {% endif %}
+        {% if method.query_params | length > 0 %}
+            let {{ method.struct_prefix }}Query {
+                {% for param in method.query_params %}
+                    {{ param.name }},
+                {% endfor %}
+            } = query;
+        {% endif %}
+        {% if method.body_params | length > 0 %}
+            let {{ method.struct_prefix }}Body {
+                {% for param in method.body_params %}
+                    {{ param.name }},
+                {% endfor %}
+            } = body;
+        {% endif %}
+        Ok(Json(svc.{{ method.name }}({% if method.param_names | length > 0 %}{{ method.param_names | join(", ") }}{% endif %}).await?))
+    }
+{% endfor %}
 }
 
 impl<T> xidl_rust_axum::Service for {{ ident }}Server<T>
@@ -117,13 +117,6 @@ where
     fn into_router(self) -> Router {
         self.router()
     }
-}
-
-pub fn service<T>(inner: T) -> {{ ident }}Server<T>
-where
-    T: {{ ident }} + Send + Sync + 'static,
-{
-    {{ ident }}Server::new(inner)
 }
 
 pub struct {{ ident }}Client {
@@ -138,9 +131,9 @@ impl {{ ident }}Client {
     }
 }
 
-impl {{ ident }} for {{ ident }}Client {
+impl {{ ident }}Client {
 {% for method in methods %}
-    async fn {{ method.name }}(&self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.ret }}, xidl_rust_axum::Error> {
+    pub async fn {{ method.name }}(&self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.ret }}, xidl_rust_axum::Error> {
         let mut path = "{{ method.path }}".to_string();
 {% for param in method.path_params %}
         path = path.replace("{\u007b}{{ param.raw_name }}{\u007d}", &{{ param.name }}.to_string());
