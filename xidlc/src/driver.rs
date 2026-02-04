@@ -28,10 +28,17 @@ impl Driver {
     fn execute(self) -> IdlcResult<()> {
         let output = OutputTarget::new(&self.args.out_dir)?;
         let mut generator = Generator::new(&self.args.lang);
+        let mut props: HashMap<String, serde_json::Value> = HashMap::new();
+        if self.args.skip_client {
+            props.insert("skip_client".into(), true.into());
+        }
+        if self.args.skip_server {
+            props.insert("skip_server".into(), true.into());
+        }
 
         for input in self.args.inputs {
             let source = fs::read_to_string(&input)?;
-            let files = generator.generate_from_idl(&source, &input, Default::default())?;
+            let files = generator.generate_from_idl(&source, &input, props.clone())?;
             output.write_files(files)?;
         }
 

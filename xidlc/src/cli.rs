@@ -18,6 +18,10 @@ struct GenerateArgs {
     lang: Option<String>,
     #[arg(long = "out-dir", short = 'o')]
     out_dir: Option<String>,
+    #[arg(long = "skip-client")]
+    skip_client: bool,
+    #[arg(long = "skip-server")]
+    skip_server: bool,
     inputs: Vec<PathBuf>,
 }
 
@@ -57,6 +61,8 @@ pub struct CliArgs {
     pub lang: String,
     pub out_dir: String,
     pub inputs: Vec<PathBuf>,
+    pub skip_client: bool,
+    pub skip_server: bool,
 }
 
 impl Cli {
@@ -98,6 +104,8 @@ impl GenerateArgs {
             lang,
             out_dir,
             inputs: self.inputs,
+            skip_client: self.skip_client,
+            skip_server: self.skip_server,
         })
     }
 }

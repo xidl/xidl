@@ -8,6 +8,7 @@ pub trait {{ ident }} {
 {% endfor %}
 }
 
+{% if not skip_server %}
 use xidl_rust_axum::axum::{
     extract::{Path, Query, State},
     http::{HeaderMap, StatusCode},
@@ -15,6 +16,7 @@ use xidl_rust_axum::axum::{
     routing::{delete, get, head, options, patch, post, put},
     Json, Router,
 };
+{% endif %}
 use xidl_rust_axum::serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
@@ -65,6 +67,7 @@ pub struct {{ method.request_struct }} {
 {% endif %}
 {% endfor %}
 
+{% if not skip_server %}
 pub struct {{ ident }}Server<T> {
     inner: Arc<T>,
 }
@@ -77,6 +80,10 @@ where
         Self {
             inner: Arc::new(inner),
         }
+    }
+
+    pub fn from_arc(inner: Arc<T>) -> Self {
+        Self { inner }
     }
 
     pub fn router(self) -> Router {
@@ -140,7 +147,9 @@ where
         self.router()
     }
 }
+{% endif %}
 
+{% if not skip_client %}
 pub struct {{ ident }}Client {
     client: xidl_rust_axum::Client,
 }
@@ -201,3 +210,4 @@ impl {{ ident }}Client {
     }
 {% endfor %}
 }
+{% endif %}

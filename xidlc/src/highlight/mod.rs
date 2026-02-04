@@ -72,7 +72,6 @@ impl IdlHighlighter {
         let mut styled = String::with_capacity(source.len());
         let mut stack: Vec<&str> = Vec::new();
         let nodes = self.collect_nodes(root, source)?;
-
         for event in events {
             match event.map_err(|err| IdlcError::fmt(format!("highlight error: {err}")))? {
                 HighlightEvent::Source { start, end } => {
