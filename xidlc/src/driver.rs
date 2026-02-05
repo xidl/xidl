@@ -9,9 +9,13 @@ use std::collections::HashMap;
 use std::fs;
 use std::io::BufReader;
 use std::path::Path;
-use std::process::Command;
 use std::thread::{self, JoinHandle};
 use std::time::{SystemTime, UNIX_EPOCH};
+
+#[cfg(target_os = "emscripten")]
+use crate::mem_pipe as ipc_pipe;
+#[cfg(not(target_os = "emscripten"))]
+use interprocess::unnamed_pipe as ipc_pipe;
 
 pub struct File {
     path: String,
@@ -180,17 +184,14 @@ fn merge_properties(
 }
 
 struct CodegenSession {
-    client: CodegenClient<
-        BufReader<interprocess::unnamed_pipe::Recver>,
-        interprocess::unnamed_pipe::Sender,
-    >,
+    client: CodegenClient<BufReader<ipc_pipe::Recver>, ipc_pipe::Sender>,
     server: JoinHandle<IdlcResult<()>>,
 }
 
 impl CodegenSession {
     fn spawn(lang: &str) -> IdlcResult<Self> {
-        let (stdout_tx, stdout_rx) = interprocess::unnamed_pipe::pipe()?;
-        let (stdin_tx, stdin_rx) = interprocess::unnamed_pipe::pipe()?;
+        let (stdout_tx, stdout_rx) = ipc_pipe::pipe()?;
+        let (stdin_tx, stdin_rx) = ipc_pipe::pipe()?;
         let server = Self::spawn_codegen_server(lang, stdout_rx, stdin_tx)?;
         let reader = BufReader::new(stdin_rx);
         let writer = stdout_tx;
@@ -208,8 +209,8 @@ impl CodegenSession {
 
     fn spawn_codegen_server(
         lang: &str,
-        stdout_rx: interprocess::unnamed_pipe::Recver,
-        stdin_tx: interprocess::unnamed_pipe::Sender,
+        stdout_rx: ipc_pipe::Recver,
+        stdin_tx: ipc_pipe::Sender,
     ) -> IdlcResult<JoinHandle<IdlcResult<()>>> {
         macro_rules! run_server {
             ($obj:expr) => {
@@ -237,9 +238,14 @@ impl CodegenSession {
             "rs_axum" | "rust_axum" | "rs-axum" | "rust-axum" => {
                 run_server!(crate::generate::rust_axum::RustAxumCodegen)
             }
+            #[cfg(target_os = "emscripten")]
+            _ => {
+                unreachable!()
+            }
+            #[cfg(not(target_os = "emscripten"))]
             _ => {
                 let exe = format!("xidl-{lang}");
-                let mut child = Command::new(&exe)
+                let mut child = std::process::Command::new(&exe)
                     .stdin(std::os::fd::OwnedFd::from(stdin_tx))
                     .stdout(std::os::fd::OwnedFd::from(stdout_rx))
                     .spawn()?;
@@ -254,10 +260,7 @@ impl CodegenSession {
     }
 
     fn verify_engine_version(
-        client: &CodegenClient<
-            BufReader<interprocess::unnamed_pipe::Recver>,
-            interprocess::unnamed_pipe::Sender,
-        >,
+        client: &CodegenClient<BufReader<ipc_pipe::Recver>, ipc_pipe::Sender>,
     ) -> IdlcResult<()> {
         let engine_req = client
             .get_engine_version()

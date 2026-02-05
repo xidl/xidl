@@ -6,3 +6,4 @@ pub mod generate;
 pub mod highlight;
 pub mod jsonrpc;
 pub mod macros;
+pub mod mem_pipe;
