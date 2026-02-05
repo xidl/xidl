@@ -7,10 +7,10 @@ use crate::jsonrpc::{Codegen, CodegenClient};
 use semver::{Version, VersionReq};
 use std::collections::HashMap;
 use std::fs;
-use std::io::BufReader;
 use std::path::Path;
-use std::thread::{self, JoinHandle};
 use std::time::{SystemTime, UNIX_EPOCH};
+use tokio::io::{AsyncReadExt, AsyncWriteExt, BufReader, DuplexStream, ReadHalf, WriteHalf};
+use tokio::task::JoinHandle;
 
 #[cfg(target_os = "emscripten")]
 use crate::mem_pipe as ipc_pipe;
@@ -27,11 +27,11 @@ pub struct Driver {
 }
 
 impl Driver {
-    pub fn run(args: CliArgs) -> IdlcResult<()> {
-        Self { args }.execute()
+    pub async fn run(args: CliArgs) -> IdlcResult<()> {
+        Self { args }.execute().await
     }
 
-    fn execute(self) -> IdlcResult<()> {
+    async fn execute(self) -> IdlcResult<()> {
         let output = OutputTarget::new(&self.args.out_dir)?;
         let mut generator = Generator::new(&self.args.lang);
         let mut props: HashMap<String, serde_json::Value> = HashMap::new();
@@ -44,7 +44,9 @@ impl Driver {
 
         for input in self.args.inputs {
             let source = fs::read_to_string(&input)?;
-            let files = generator.generate_from_idl(&source, &input, props.clone())?;
+            let files = generator
+                .generate_from_idl(&source, &input, props.clone())
+                .await?;
             output.write_files(files)?;
         }
 
@@ -53,14 +55,14 @@ impl Driver {
 }
 
 #[cfg(test)]
-pub fn generate_from_idl(
+pub async fn generate_from_idl(
     source: &str,
     path: &Path,
     lang: &str,
     props: HashMap<String, serde_json::Value>,
 ) -> IdlcResult<Vec<File>> {
     let mut generator = Generator::new(lang);
-    generator.generate_from_idl(source, path, props)
+    generator.generate_from_idl(source, path, props).await
 }
 
 pub struct Generator {
@@ -76,7 +78,7 @@ impl Generator {
         }
     }
 
-    pub fn generate_from_idl(
+    pub async fn generate_from_idl(
         &mut self,
         source: &str,
         path: &Path,
@@ -94,13 +96,13 @@ impl Generator {
                 .as_secs()
         };
         props.insert("xidlc_timestamp".into(), ts.into());
-        let target_props = self.get_properties_for_lang()?;
+        let target_props = self.get_properties_for_lang().await?;
         merge_properties(&mut props, target_props);
         let empty = xidl_parser::hir::Specification(vec![]);
-        self.generate_for_lang("hir", empty, path, props)
+        self.generate_for_lang("hir", empty, path, props).await
     }
 
-    fn generate_for_lang(
+    async fn generate_for_lang(
         &mut self,
         lang: &str,
         hir: xidl_parser::hir::Specification,
@@ -122,16 +124,18 @@ impl Generator {
             props.insert("xidlc_timestamp".into(), ts.into());
         }
         let input_str = input.to_string_lossy();
-        let session = CodegenSession::spawn(lang)?;
-        let properties = session
+        let session = CodegenSession::spawn(lang).await?;
+        let properties: HashMap<String, serde_json::Value> = session
             .client
             .get_properties()
+            .await
             .map_err(|err| IdlcError::rpc(err.to_string()))?;
         merge_properties(&mut props, properties);
 
-        let artifacts = session
+        let artifacts: Vec<crate::jsonrpc::Artifact> = session
             .client
             .generate(hir, input_str.to_string(), props)
+            .await
             .map_err(|err| IdlcError::rpc(err.to_string()))?;
 
         let mut ret: Vec<File> = vec![];
@@ -139,12 +143,15 @@ impl Generator {
             match file.tag() {
                 crate::jsonrpc::ArtifactKind::Hir => {
                     let data = file.into_hir();
-                    ret.extend(self.generate_for_lang(
-                        &data.lang,
-                        data.hir,
-                        input,
-                        data.props.clone(),
-                    )?);
+                    ret.extend(
+                        Box::pin(self.generate_for_lang(
+                            &data.lang,
+                            data.hir,
+                            input,
+                            data.props.clone(),
+                        ))
+                        .await?,
+                    );
                 }
                 crate::jsonrpc::ArtifactKind::File => {
                     let data = file.into_file();
@@ -155,20 +162,21 @@ impl Generator {
                 }
             }
         }
-        session.finish();
+        session.finish().await;
         Ok(ret)
     }
 
-    fn get_properties_for_lang(&mut self) -> IdlcResult<HashMap<String, serde_json::Value>> {
+    async fn get_properties_for_lang(&mut self) -> IdlcResult<HashMap<String, serde_json::Value>> {
         if !self.properties.is_empty() {
             return Ok(self.properties.clone());
         }
-        let session = CodegenSession::spawn(&self.lang)?;
-        let props = session
+        let session = CodegenSession::spawn(&self.lang).await?;
+        let props: HashMap<String, serde_json::Value> = session
             .client
             .get_properties()
+            .await
             .map_err(|err| IdlcError::rpc(err.to_string()))?;
-        session.finish();
+        session.finish().await;
         self.properties = props.clone();
         Ok(props)
     }
@@ -183,27 +191,86 @@ fn merge_properties(
     }
 }
 
+fn async_reader_from_blocking<R>(mut reader: R) -> ReadHalf<DuplexStream>
+where
+    R: std::io::Read + Send + 'static,
+{
+    let (client_stream, mut bridge_stream) = tokio::io::duplex(64 * 1024);
+    let (client_read, _client_write) = tokio::io::split(client_stream);
+    let handle = tokio::runtime::Handle::current();
+
+    tokio::task::spawn_blocking(move || {
+        let mut buf = [0u8; 8192];
+        loop {
+            let n = match reader.read(&mut buf) {
+                Ok(0) => break,
+                Ok(n) => n,
+                Err(_) => break,
+            };
+            if handle.block_on(bridge_stream.write_all(&buf[..n])).is_err() {
+                break;
+            }
+        }
+    });
+
+    client_read
+}
+
+fn async_writer_from_blocking<W>(mut writer: W) -> WriteHalf<DuplexStream>
+where
+    W: std::io::Write + Send + 'static,
+{
+    let (client_stream, mut bridge_stream) = tokio::io::duplex(64 * 1024);
+    let (_client_read, client_write) = tokio::io::split(client_stream);
+    let handle = tokio::runtime::Handle::current();
+
+    tokio::task::spawn_blocking(move || {
+        let mut buf = [0u8; 8192];
+        loop {
+            let n = match handle.block_on(bridge_stream.read(&mut buf)) {
+                Ok(0) => break,
+                Ok(n) => n,
+                Err(_) => break,
+            };
+            if writer.write_all(&buf[..n]).is_err() {
+                break;
+            }
+            if writer.flush().is_err() {
+                break;
+            }
+        }
+    });
+
+    client_write
+}
+
 struct CodegenSession {
-    client: CodegenClient<BufReader<ipc_pipe::Recver>, ipc_pipe::Sender>,
+    client: CodegenClient<BufReader<ReadHalf<DuplexStream>>, WriteHalf<DuplexStream>>,
     server: JoinHandle<IdlcResult<()>>,
 }
 
 impl CodegenSession {
-    fn spawn(lang: &str) -> IdlcResult<Self> {
+    async fn spawn(lang: &str) -> IdlcResult<Self> {
         let (stdout_tx, stdout_rx) = ipc_pipe::pipe()?;
         let (stdin_tx, stdin_rx) = ipc_pipe::pipe()?;
         let server = Self::spawn_codegen_server(lang, stdout_rx, stdin_tx)?;
-        let reader = BufReader::new(stdin_rx);
-        let writer = stdout_tx;
+        let reader = BufReader::new(async_reader_from_blocking(stdin_rx));
+        let writer = async_writer_from_blocking(stdout_tx);
         let client = CodegenClient::new(reader, writer);
-        Self::verify_engine_version(&client)?;
+        Self::verify_engine_version(&client).await?;
         Ok(Self { client, server })
     }
 
-    fn finish(self) {
+    async fn finish(self) {
         drop(self.client);
-        if let Err(err) = self.server.join().unwrap() {
-            eprintln!("codegen server failed: {}", err);
+        match self.server.await {
+            Ok(Err(err)) => {
+                eprintln!("codegen server failed: {}", err);
+            }
+            Ok(Ok(())) => {}
+            Err(err) => {
+                eprintln!("codegen server task failed: {}", err);
+            }
         }
     }
 
@@ -214,13 +281,17 @@ impl CodegenSession {
     ) -> IdlcResult<JoinHandle<IdlcResult<()>>> {
         macro_rules! run_server {
             ($obj:expr) => {
-                Ok(thread::spawn(move || {
-                    let io = xidl_jsonrpc::Io::new(BufReader::new(stdout_rx), stdin_tx);
+                Ok(tokio::spawn(async move {
+                    let io = xidl_jsonrpc::Io::new(
+                        BufReader::new(async_reader_from_blocking(stdout_rx)),
+                        async_writer_from_blocking(stdin_tx),
+                    );
                     let handler = crate::jsonrpc::CodegenServer::new($obj);
                     xidl_jsonrpc::Server::builder()
                         .with_io(io)
                         .with_service(handler)
                         .serve()
+                        .await
                         .map_err(|err| crate::error::IdlcError::rpc(err.to_string()))
                 }))
             };
@@ -250,7 +321,7 @@ impl CodegenSession {
                     .stdout(std::os::fd::OwnedFd::from(stdout_rx))
                     .spawn()?;
 
-                let server = std::thread::spawn(move || {
+                let server = tokio::task::spawn_blocking(move || {
                     child.wait()?;
                     Ok(())
                 });
@@ -259,11 +330,12 @@ impl CodegenSession {
         }
     }
 
-    fn verify_engine_version(
-        client: &CodegenClient<BufReader<ipc_pipe::Recver>, ipc_pipe::Sender>,
+    async fn verify_engine_version(
+        client: &CodegenClient<BufReader<ReadHalf<DuplexStream>>, WriteHalf<DuplexStream>>,
     ) -> IdlcResult<()> {
-        let engine_req = client
+        let engine_req: String = client
             .get_engine_version()
+            .await
             .map_err(|err| IdlcError::rpc(err.to_string()))?;
         let req = VersionReq::parse(&engine_req).map_err(|err| {
             IdlcError::rpc(format!(

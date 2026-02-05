@@ -12,19 +12,22 @@
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::ffi::c_void;
-use std::io::{BufReader, Read, Write};
+use tokio::io::{AsyncRead, AsyncWrite, BufReader};
+use tokio::sync::Mutex;
+use xidl_jsonrpc::BoxFuture;
 pub trait Codegen {
-    fn get_engine_version(&self) -> Result<String, xidl_jsonrpc::Error>;
-    fn get_properties(&self) -> Result<::xidl_parser::hir::ParserProperties, xidl_jsonrpc::Error>;
-    fn generate(
-        &self,
+    fn get_engine_version<'a>(&'a self) -> BoxFuture<'a, Result<String, xidl_jsonrpc::Error>>;
+    fn get_properties<'a>(
+        &'a self,
+    ) -> BoxFuture<'a, Result<::xidl_parser::hir::ParserProperties, xidl_jsonrpc::Error>>;
+    fn generate<'a>(
+        &'a self,
         hir: ::xidl_parser::hir::Specification,
         path: String,
         props: ::xidl_parser::hir::ParserProperties,
-    ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error>;
+    ) -> BoxFuture<'a, Result<Vec<Artifact>, xidl_jsonrpc::Error>>;
 }
 
 #[derive(Serialize, Deserialize)]
@@ -52,76 +55,92 @@ impl<T> CodegenServer<T> {
 
 impl<T> xidl_jsonrpc::Handler for CodegenServer<T>
 where
-    T: Codegen,
+    T: Codegen + Send + Sync,
 {
-    fn handle(&self, method: &str, params: Value) -> Result<Value, xidl_jsonrpc::Error> {
-        match method {
-            "Codegen.get_engine_version" => {
-                let params: CodegengetEngineVersionParams = serde_json::from_value(params)
-                    .map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
-                let result = self.inner.get_engine_version()?;
-                Ok(serde_json::to_value(result)?)
+    fn handle<'a>(
+        &'a self,
+        method: &'a str,
+        params: Value,
+    ) -> BoxFuture<'a, Result<Value, xidl_jsonrpc::Error>> {
+        Box::pin(async move {
+            match method {
+                "Codegen.get_engine_version" => {
+                    let _params: CodegengetEngineVersionParams = serde_json::from_value(params)
+                        .map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
+                    let result = self.inner.get_engine_version().await?;
+                    Ok(serde_json::to_value(result)?)
+                }
+                "Codegen.get_properties" => {
+                    let _params: CodegengetPropertiesParams = serde_json::from_value(params)
+                        .map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
+                    let result = self.inner.get_properties().await?;
+                    Ok(serde_json::to_value(result)?)
+                }
+                "Codegen.generate" => {
+                    let params: CodegengenerateParams = serde_json::from_value(params)
+                        .map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
+                    let result = self
+                        .inner
+                        .generate(params.hir, params.path, params.props)
+                        .await?;
+                    Ok(serde_json::to_value(result)?)
+                }
+                _ => Err(xidl_jsonrpc::Error::method_not_found(method)),
             }
-            "Codegen.get_properties" => {
-                let params: CodegengetPropertiesParams = serde_json::from_value(params)
-                    .map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
-                let result = self.inner.get_properties()?;
-                Ok(serde_json::to_value(result)?)
-            }
-            "Codegen.generate" => {
-                let params: CodegengenerateParams = serde_json::from_value(params)
-                    .map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
-                let result = self.inner.generate(params.hir, params.path, params.props)?;
-                Ok(serde_json::to_value(result)?)
-            }
-            _ => Err(xidl_jsonrpc::Error::method_not_found(method)),
-        }
+        })
     }
 }
 
 pub struct CodegenClient<R, W> {
-    client: RefCell<xidl_jsonrpc::Client<BufReader<R>, W>>,
+    client: Mutex<xidl_jsonrpc::Client<BufReader<R>, W>>,
 }
 
 impl<R, W> CodegenClient<R, W>
 where
-    R: Read,
-    W: Write,
+    R: AsyncRead + Unpin + Send,
+    W: AsyncWrite + Unpin + Send,
 {
     pub fn new(reader: R, writer: W) -> Self {
         Self {
-            client: RefCell::new(xidl_jsonrpc::Client::new(BufReader::new(reader), writer)),
+            client: Mutex::new(xidl_jsonrpc::Client::new(BufReader::new(reader), writer)),
         }
     }
 }
 
 impl<R, W> Codegen for CodegenClient<R, W>
 where
-    R: Read,
-    W: Write,
+    R: AsyncRead + Unpin + Send,
+    W: AsyncWrite + Unpin + Send,
 {
-    fn get_engine_version(&self) -> Result<String, xidl_jsonrpc::Error> {
-        let params = CodegengetEngineVersionParams {};
-        self.client
-            .borrow_mut()
-            .call("Codegen.get_engine_version", params)
+    fn get_engine_version<'a>(&'a self) -> BoxFuture<'a, Result<String, xidl_jsonrpc::Error>> {
+        Box::pin(async move {
+            let params = CodegengetEngineVersionParams {};
+            let mut client = self.client.lock().await;
+            client.call("Codegen.get_engine_version", params).await
+        })
     }
 
-    fn get_properties(&self) -> Result<::xidl_parser::hir::ParserProperties, xidl_jsonrpc::Error> {
-        let params = CodegengetPropertiesParams {};
-        self.client
-            .borrow_mut()
-            .call("Codegen.get_properties", params)
+    fn get_properties<'a>(
+        &'a self,
+    ) -> BoxFuture<'a, Result<::xidl_parser::hir::ParserProperties, xidl_jsonrpc::Error>> {
+        Box::pin(async move {
+            let params = CodegengetPropertiesParams {};
+            let mut client = self.client.lock().await;
+            client.call("Codegen.get_properties", params).await
+        })
     }
 
-    fn generate(
-        &self,
+    fn generate<'a>(
+        &'a self,
         hir: ::xidl_parser::hir::Specification,
         path: String,
         props: ::xidl_parser::hir::ParserProperties,
-    ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
-        let params = CodegengenerateParams { hir, path, props };
-        self.client.borrow_mut().call("Codegen.generate", params)
+    ) -> BoxFuture<'a, Result<Vec<Artifact>, xidl_jsonrpc::Error>> {
+        Box::pin(async move {
+            let params = CodegengenerateParams { hir, path, props };
+            let mut client = self.client.lock().await;
+            client.call("Codegen.generate", params).await
+        })
     }
 }
 #[derive(Debug, Serialize, Deserialize)]

@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::future::Future;
+use std::pin::Pin;
 
 mod client;
 mod error;
@@ -10,6 +12,8 @@ pub use error::{Error, ErrorCode};
 pub use server::{serve, Handler, Io, Server, ServerBuilder};
 
 const JSONRPC_VERSION: &str = "2.0";
+
+pub type BoxFuture<'a, T> = Pin<Box<dyn Future<Output = T> + Send + 'a>>;
 
 #[derive(Serialize)]
 pub(crate) struct RpcRequest<'a, P> {

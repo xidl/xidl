@@ -66,13 +66,13 @@ pub struct CliArgs {
 }
 
 impl Cli {
-    pub fn run(self) -> IdlcResult<()> {
+    pub async fn run(self) -> IdlcResult<()> {
         match self.command {
             Some(Command::Fmt(args)) => args.execute(),
             Some(Command::Highlight(args)) => args.execute(),
             None => {
                 let args = self.generate.into_cli_args()?;
-                driver::Driver::run(args)
+                driver::Driver::run(args).await
             }
         }
     }

@@ -16,10 +16,10 @@
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::ffi::c_void;
-use std::io::{BufReader, Read, Write};
+use tokio::io::{AsyncRead, AsyncWrite, BufReader};
+use tokio::sync::Mutex;
 
 {% for def in definitions %}
     {{ def }}

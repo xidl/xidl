@@ -2,7 +2,7 @@ use crate::{Error, ErrorCode, RpcRequest, RpcResponse, JSONRPC_VERSION};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use serde_json::Value;
-use std::io::{BufRead, Write};
+use tokio::io::{AsyncBufRead, AsyncBufReadExt, AsyncWrite, AsyncWriteExt};
 
 pub struct Client<R, W> {
     reader: R,
@@ -12,8 +12,8 @@ pub struct Client<R, W> {
 
 impl<R, W> Client<R, W>
 where
-    R: BufRead,
-    W: Write,
+    R: AsyncBufRead + Unpin,
+    W: AsyncWrite + Unpin,
 {
     pub fn new(reader: R, writer: W) -> Self {
         Self {
@@ -23,7 +23,7 @@ where
         }
     }
 
-    pub fn call<P, T>(&mut self, method: &str, params: P) -> Result<T, Error>
+    pub async fn call<P, T>(&mut self, method: &str, params: P) -> Result<T, Error>
     where
         P: Serialize,
         T: DeserializeOwned,
@@ -38,11 +38,12 @@ where
             params,
         };
         let payload = serde_json::to_string(&request)?;
-        self.writer.write_all(payload.as_bytes())?;
-        self.writer.write_all(b"\n")?;
+        self.writer.write_all(payload.as_bytes()).await?;
+        self.writer.write_all(b"\n").await?;
+        self.writer.flush().await?;
 
         let mut line = String::new();
-        let bytes = self.reader.read_line(&mut line)?;
+        let bytes = self.reader.read_line(&mut line).await?;
         if bytes == 0 {
             return Err(Error::Protocol("no response"));
         }

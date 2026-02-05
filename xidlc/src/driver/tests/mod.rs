@@ -8,8 +8,9 @@ use crate::driver::generate_from_idl;
 
 use std::path::Path;
 
-fn render_lang_output(lang: &str, input_name: &str, source: &str) -> String {
+async fn render_lang_output(lang: &str, input_name: &str, source: &str) -> String {
     let mut files = generate_from_idl(source, Path::new(input_name), lang, Default::default())
+        .await
         .expect("generate");
     files.sort_by(|a, b| a.path.cmp(&b.path));
 
@@ -30,21 +31,21 @@ fn render_lang_output(lang: &str, input_name: &str, source: &str) -> String {
     out
 }
 
-fn assert_cases(lang: &str, prefix: &str, cases: &[(&str, &str)]) {
+async fn assert_cases(lang: &str, prefix: &str, cases: &[(&str, &str)]) {
     for (name, text) in cases {
         let input_name = format!("{name}.idl");
         let output = if lang == "fmt" {
             crate::fmt::format_idl_source(text).unwrap()
         } else {
-            render_lang_output(lang, &input_name, text)
+            render_lang_output(lang, &input_name, text).await
         };
         let snapshot = format!("{lang}_{prefix}__{name}");
         insta::assert_snapshot!(snapshot, output);
     }
 }
 
-#[test]
-fn test_code_gen() {
+#[tokio::test(flavor = "current_thread")]
+async fn test_code_gen() {
     let test_case = [
         testcases::ANNOTATION_CASES,
         testcases::BITMASK_CASES,
@@ -66,7 +67,7 @@ fn test_code_gen() {
 
     for case in test_case {
         for lang in langs {
-            assert_cases(lang, &format!("{lang}_gen"), case);
+            assert_cases(lang, &format!("{lang}_gen"), case).await;
         }
     }
 }

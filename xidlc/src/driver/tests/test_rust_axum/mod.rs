@@ -4,14 +4,15 @@ use crate::driver::generate_from_idl;
 
 use std::{collections::HashMap, path::Path};
 
-fn render_lang_output(
+async fn render_lang_output(
     lang: &str,
     input_name: &str,
     source: &str,
     props: HashMap<String, serde_json::Value>,
 ) -> String {
-    let mut files =
-        generate_from_idl(source, Path::new(input_name), lang, props).expect("generate");
+    let mut files = generate_from_idl(source, Path::new(input_name), lang, props)
+        .await
+        .expect("generate");
     files.sort_by(|a, b| a.path.cmp(&b.path));
 
     let mut out = String::new();
@@ -31,7 +32,7 @@ fn render_lang_output(
     out
 }
 
-fn assert_cases(
+async fn assert_cases(
     lang: &str,
     prefix: &str,
     name: &str,
@@ -39,18 +40,18 @@ fn assert_cases(
     props: HashMap<String, serde_json::Value>,
 ) {
     let input_name = format!("{name}.idl");
-    let output = render_lang_output(lang, &input_name, idl, props);
+    let output = render_lang_output(lang, &input_name, idl, props).await;
     let snapshot = format!("{lang}_{prefix}__{name}");
     insta::assert_snapshot!(snapshot, output);
 }
 
-#[test]
-fn test_code_gen() {
+#[tokio::test(flavor = "current_thread")]
+async fn test_code_gen() {
     let test_case = cases::get_test_cases();
 
     for (name, idl, attr) in test_case {
         let attr: HashMap<String, serde_json::Value> = serde_json::from_value(attr).unwrap();
 
-        assert_cases("rust_axum", "rust_gen", name, idl, attr);
+        assert_cases("rust_axum", "rust_gen", name, idl, attr).await;
     }
 }
