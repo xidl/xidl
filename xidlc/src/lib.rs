@@ -17,7 +17,15 @@ pub fn generate_from_source(
     props: HashMap<String, serde_json::Value>,
 ) -> Result<Vec<driver::File>, error::IdlcError> {
     let mut generator = driver::Generator::new(lang);
-    generator.generate_from_idl(idl, Path::new("input.idl"), props)
+    if let Ok(handle) = tokio::runtime::Handle::try_current() {
+        handle.block_on(generator.generate_from_idl(idl, Path::new("input.idl"), props))
+    } else {
+        let rt = tokio::runtime::Builder::new_current_thread()
+            .enable_time()
+            .build()
+            .map_err(|err| error::IdlcError::fmt(err.to_string()))?;
+        rt.block_on(generator.generate_from_idl(idl, Path::new("input.idl"), props))
+    }
 }
 
 #[cfg(target_os = "emscripten")]
