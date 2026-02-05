@@ -10,10 +10,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "code",
-          "msg"
-        ],
+        "required": ["code", "msg"],
         "type": "object"
       }
     }
@@ -40,9 +37,7 @@
               }
             }
           },
-          "required": [
-            "name"
-          ]
+          "required": ["name"]
         },
         "responses": {
           "200": {

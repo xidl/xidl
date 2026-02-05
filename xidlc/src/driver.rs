@@ -22,6 +22,16 @@ pub struct File {
     content: String,
 }
 
+impl File {
+    pub fn path(&self) -> &str {
+        self.path.as_str()
+    }
+
+    pub fn content(&self) -> &str {
+        self.content.as_str()
+    }
+}
+
 pub struct Driver {
     args: CliArgs,
 }

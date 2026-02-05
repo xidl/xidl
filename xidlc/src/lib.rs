@@ -7,3 +7,18 @@ pub mod highlight;
 pub mod jsonrpc;
 pub mod macros;
 pub mod mem_pipe;
+
+use std::collections::HashMap;
+use std::path::Path;
+
+pub fn generate_from_source(
+    lang: &str,
+    idl: &str,
+    props: HashMap<String, serde_json::Value>,
+) -> Result<Vec<driver::File>, error::IdlcError> {
+    let mut generator = driver::Generator::new(lang);
+    generator.generate_from_idl(idl, Path::new("input.idl"), props)
+}
+
+#[cfg(target_os = "emscripten")]
+pub mod wasm_api;

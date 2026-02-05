@@ -1,0 +1,68 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.0.0/schema.json",
+
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 4
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "jsxQuoteStyle": "double",
+      "arrowParentheses": "asNeeded",
+      "indentWidth": 2
+    }
+  },
+  "json": {
+    "formatter": {
+      "indentWidth": 2
+    }
+  },
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noUnusedImports": "off",
+        "noUnusedVariables": "off",
+        "useExhaustiveDependencies": "off",
+        "useHookAtTopLevel": "off"
+      },
+      "style": {
+        "useConst": "warn",
+        "useNamingConvention": {
+          "level": "off",
+          "options": {
+            "requireAscii": true,
+            "strictCase": false
+          }
+        }
+      },
+      "complexity": {
+        "noForEach": "off"
+      },
+      "suspicious": {
+        "noExplicitAny": "warn"
+      },
+      "security": {
+        "noDangerouslySetInnerHtml": "off"
+      },
+      "a11y": {
+        "useKeyWithClickEvents": "off"
+      },
+      "nursery": {
+        "useSortedClasses": {
+          "options": {},
+          "level": "warn",
+          "fix": "safe"
+        }
+      }
+    },
+    "includes": ["**/*.{js,jsx,ts,tsx,astro}"]
+  }
+}

@@ -26,3 +26,10 @@ repos:
         language: system
         types_or: [toml]
         entry: taplo format
+
+  - repo: https://github.com/biomejs/pre-commit
+    rev: "v0.4.0"
+    hooks:
+      - id: biome-check
+        additional_dependencies: ["@biomejs/biome@2.2.6"]
+        exclude: 'CHANGELOG.md'
