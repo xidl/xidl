@@ -26,7 +26,7 @@ impl Read for MemPipe {
             let mut inner = self
                 .inner
                 .lock()
-                .map_err(|_| io::Error::new(io::ErrorKind::Other, "mem pipe lock poisoned"))?;
+                .map_err(|_| io::Error::other("mem pipe lock poisoned"))?;
             if inner.is_empty() {
                 drop(inner);
                 std::thread::yield_now();
@@ -52,7 +52,7 @@ impl Write for MemPipe {
         let mut inner = self
             .inner
             .lock()
-            .map_err(|_| io::Error::new(io::ErrorKind::Other, "mem pipe lock poisoned"))?;
+            .map_err(|_| io::Error::other("mem pipe lock poisoned"))?;
         inner.extend(buf);
         Ok(buf.len())
     }

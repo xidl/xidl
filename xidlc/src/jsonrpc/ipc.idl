@@ -19,8 +19,10 @@ enum ArtifactKind {
 
 @derive(Serialize, Deserialize)
 union Artifact switch (ArtifactKind) {
-    case ArtifactKind::Hir: ArtifactHir hir;
-    case ArtifactKind::File: ArtifactFile file;
+    case ArtifactKind::Hir:
+        ArtifactHir hir;
+    case ArtifactKind::File:
+        ArtifactFile file;
 };
 
 interface Codegen {

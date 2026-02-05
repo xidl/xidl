@@ -53,15 +53,18 @@ impl {{ ident }} {
             matches!(self.tag, {{ cases[loop.index - 1].pattern }})
         }
 
-        pub unsafe fn as_{{ member.name }}(&self) -> &{{ member.ty }} {
+        pub fn as_{{ member.name }}(&self) -> &{{ member.ty }} {
+            debug_assert!(self.is_{{ member.name }}());
             unsafe { &self.data.{{ member.name }} }
         }
 
-        pub unsafe fn as_{{ member.name }}_mut(&mut self) -> &mut {{ member.ty }} {
+        pub fn as_{{ member.name }}_mut(&mut self) -> &mut {{ member.ty }} {
+            debug_assert!(self.is_{{ member.name }}());
             unsafe { &mut self.data.{{ member.name }} }
         }
 
-        pub unsafe fn into_{{ member.name }}(self) -> {{ member.ty }} {
+        pub fn into_{{ member.name }}(self) -> {{ member.ty }} {
+            debug_assert!(self.is_{{ member.name }}());
             unsafe {
                 let mut forget = core::mem::ManuallyDrop::new(self);
                 core::mem::ManuallyDrop::take(&mut forget.data.{{ member.name }})

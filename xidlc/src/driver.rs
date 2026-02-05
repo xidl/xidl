@@ -138,7 +138,7 @@ impl Generator {
         for file in artifacts {
             match file.tag() {
                 crate::jsonrpc::ArtifactKind::Hir => {
-                    let data = unsafe { file.into_hir() };
+                    let data = file.into_hir();
                     ret.extend(self.generate_for_lang(
                         &data.lang,
                         data.hir,
@@ -147,7 +147,7 @@ impl Generator {
                     )?);
                 }
                 crate::jsonrpc::ArtifactKind::File => {
-                    let data = unsafe { file.into_file() };
+                    let data = file.into_file();
                     ret.push(File {
                         path: data.path.clone(),
                         content: data.content.clone(),

@@ -16,7 +16,7 @@ pub struct Cli {
 struct GenerateArgs {
     #[arg(long = "lang", short = 'l')]
     lang: Option<String>,
-    #[arg(long = "out-dir", short = 'o')]
+    #[arg(long = "out-dir", short = 'o', default_value = ".")]
     out_dir: Option<String>,
     #[arg(long = "skip-client")]
     skip_client: bool,

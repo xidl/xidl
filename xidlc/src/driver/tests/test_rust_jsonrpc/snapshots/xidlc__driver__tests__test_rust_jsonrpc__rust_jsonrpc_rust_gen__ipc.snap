@@ -192,19 +192,22 @@ impl Artifact {
         matches!(self.tag, ArtifactKind::Hir)
     }
 
-        pub unsafe fn as_hir(&self) -> &ArtifactHir {
+        pub fn as_hir(&self) -> &ArtifactHir {
+        debug_assert!(self.is_hir());
         unsafe {
             &self.data.hir
         }
     }
 
-        pub unsafe fn as_hir_mut(&mut self) -> &mut ArtifactHir {
+        pub fn as_hir_mut(&mut self) -> &mut ArtifactHir {
+        debug_assert!(self.is_hir());
         unsafe {
             &mut self.data.hir
         }
     }
 
-        pub unsafe fn into_hir(self) -> ArtifactHir {
+        pub fn into_hir(self) -> ArtifactHir {
+        debug_assert!(self.is_hir());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.hir)
@@ -224,19 +227,22 @@ impl Artifact {
         matches!(self.tag, ArtifactKind::File)
     }
 
-        pub unsafe fn as_file(&self) -> &ArtifactFile {
+        pub fn as_file(&self) -> &ArtifactFile {
+        debug_assert!(self.is_file());
         unsafe {
             &self.data.file
         }
     }
 
-        pub unsafe fn as_file_mut(&mut self) -> &mut ArtifactFile {
+        pub fn as_file_mut(&mut self) -> &mut ArtifactFile {
+        debug_assert!(self.is_file());
         unsafe {
             &mut self.data.file
         }
     }
 
-        pub unsafe fn into_file(self) -> ArtifactFile {
+        pub fn into_file(self) -> ArtifactFile {
+        debug_assert!(self.is_file());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.file)

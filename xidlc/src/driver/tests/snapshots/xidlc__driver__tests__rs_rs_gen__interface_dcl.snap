@@ -158,19 +158,22 @@ impl A_func1_Result {
         matches!(self.tag, dds::RETCODE_OK)
     }
 
-        pub unsafe fn as_result(&self) -> &A_func1_Out {
+        pub fn as_result(&self) -> &A_func1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &self.data.result
         }
     }
 
-        pub unsafe fn as_result_mut(&mut self) -> &mut A_func1_Out {
+        pub fn as_result_mut(&mut self) -> &mut A_func1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &mut self.data.result
         }
     }
 
-        pub unsafe fn into_result(self) -> A_func1_Out {
+        pub fn into_result(self) -> A_func1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.result)
@@ -351,19 +354,22 @@ impl A_func1_Result {
         matches!(self.tag, dds::RETCODE_OK)
     }
 
-        pub unsafe fn as_result(&self) -> &A_func1_Out {
+        pub fn as_result(&self) -> &A_func1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &self.data.result
         }
     }
 
-        pub unsafe fn as_result_mut(&mut self) -> &mut A_func1_Out {
+        pub fn as_result_mut(&mut self) -> &mut A_func1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &mut self.data.result
         }
     }
 
-        pub unsafe fn into_result(self) -> A_func1_Out {
+        pub fn into_result(self) -> A_func1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.result)
@@ -383,19 +389,22 @@ impl A_func1_Result {
         matches!(self.tag, A_Ex_Hash)
     }
 
-        pub unsafe fn as_a_ex(&self) -> &A {
+        pub fn as_a_ex(&self) -> &A {
+        debug_assert!(self.is_a_ex());
         unsafe {
             &self.data.a_ex
         }
     }
 
-        pub unsafe fn as_a_ex_mut(&mut self) -> &mut A {
+        pub fn as_a_ex_mut(&mut self) -> &mut A {
+        debug_assert!(self.is_a_ex());
         unsafe {
             &mut self.data.a_ex
         }
     }
 
-        pub unsafe fn into_a_ex(self) -> A {
+        pub fn into_a_ex(self) -> A {
+        debug_assert!(self.is_a_ex());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.a_ex)
@@ -602,19 +611,22 @@ impl A_func1_Result {
         matches!(self.tag, dds::RETCODE_OK)
     }
 
-        pub unsafe fn as_result(&self) -> &A_func1_Out {
+        pub fn as_result(&self) -> &A_func1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &self.data.result
         }
     }
 
-        pub unsafe fn as_result_mut(&mut self) -> &mut A_func1_Out {
+        pub fn as_result_mut(&mut self) -> &mut A_func1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &mut self.data.result
         }
     }
 
-        pub unsafe fn into_result(self) -> A_func1_Out {
+        pub fn into_result(self) -> A_func1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.result)
@@ -634,19 +646,22 @@ impl A_func1_Result {
         matches!(self.tag, A_Ex_Hash)
     }
 
-        pub unsafe fn as_a_ex(&self) -> &A {
+        pub fn as_a_ex(&self) -> &A {
+        debug_assert!(self.is_a_ex());
         unsafe {
             &self.data.a_ex
         }
     }
 
-        pub unsafe fn as_a_ex_mut(&mut self) -> &mut A {
+        pub fn as_a_ex_mut(&mut self) -> &mut A {
+        debug_assert!(self.is_a_ex());
         unsafe {
             &mut self.data.a_ex
         }
     }
 
-        pub unsafe fn into_a_ex(self) -> A {
+        pub fn into_a_ex(self) -> A {
+        debug_assert!(self.is_a_ex());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.a_ex)
@@ -666,19 +681,22 @@ impl A_func1_Result {
         matches!(self.tag, B_Ex_Hash)
     }
 
-        pub unsafe fn as_b_ex(&self) -> &B {
+        pub fn as_b_ex(&self) -> &B {
+        debug_assert!(self.is_b_ex());
         unsafe {
             &self.data.b_ex
         }
     }
 
-        pub unsafe fn as_b_ex_mut(&mut self) -> &mut B {
+        pub fn as_b_ex_mut(&mut self) -> &mut B {
+        debug_assert!(self.is_b_ex());
         unsafe {
             &mut self.data.b_ex
         }
     }
 
-        pub unsafe fn into_b_ex(self) -> B {
+        pub fn into_b_ex(self) -> B {
+        debug_assert!(self.is_b_ex());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.b_ex)
@@ -698,19 +716,22 @@ impl A_func1_Result {
         matches!(self.tag, C_Ex_Hash)
     }
 
-        pub unsafe fn as_c_ex(&self) -> &C {
+        pub fn as_c_ex(&self) -> &C {
+        debug_assert!(self.is_c_ex());
         unsafe {
             &self.data.c_ex
         }
     }
 
-        pub unsafe fn as_c_ex_mut(&mut self) -> &mut C {
+        pub fn as_c_ex_mut(&mut self) -> &mut C {
+        debug_assert!(self.is_c_ex());
         unsafe {
             &mut self.data.c_ex
         }
     }
 
-        pub unsafe fn into_c_ex(self) -> C {
+        pub fn into_c_ex(self) -> C {
+        debug_assert!(self.is_c_ex());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.c_ex)
@@ -927,19 +948,22 @@ impl A_func1_Result {
         matches!(self.tag, dds::RETCODE_OK)
     }
 
-        pub unsafe fn as_result(&self) -> &A_func1_Out {
+        pub fn as_result(&self) -> &A_func1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &self.data.result
         }
     }
 
-        pub unsafe fn as_result_mut(&mut self) -> &mut A_func1_Out {
+        pub fn as_result_mut(&mut self) -> &mut A_func1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &mut self.data.result
         }
     }
 
-        pub unsafe fn into_result(self) -> A_func1_Out {
+        pub fn into_result(self) -> A_func1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.result)
@@ -1120,19 +1144,22 @@ impl A_func1_Result {
         matches!(self.tag, dds::RETCODE_OK)
     }
 
-        pub unsafe fn as_result(&self) -> &A_func1_Out {
+        pub fn as_result(&self) -> &A_func1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &self.data.result
         }
     }
 
-        pub unsafe fn as_result_mut(&mut self) -> &mut A_func1_Out {
+        pub fn as_result_mut(&mut self) -> &mut A_func1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &mut self.data.result
         }
     }
 
-        pub unsafe fn into_result(self) -> A_func1_Out {
+        pub fn into_result(self) -> A_func1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.result)
@@ -1152,19 +1179,22 @@ impl A_func1_Result {
         matches!(self.tag, A_Ex_Hash)
     }
 
-        pub unsafe fn as_a_ex(&self) -> &A {
+        pub fn as_a_ex(&self) -> &A {
+        debug_assert!(self.is_a_ex());
         unsafe {
             &self.data.a_ex
         }
     }
 
-        pub unsafe fn as_a_ex_mut(&mut self) -> &mut A {
+        pub fn as_a_ex_mut(&mut self) -> &mut A {
+        debug_assert!(self.is_a_ex());
         unsafe {
             &mut self.data.a_ex
         }
     }
 
-        pub unsafe fn into_a_ex(self) -> A {
+        pub fn into_a_ex(self) -> A {
+        debug_assert!(self.is_a_ex());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.a_ex)
@@ -1371,19 +1401,22 @@ impl A_func1_Result {
         matches!(self.tag, dds::RETCODE_OK)
     }
 
-        pub unsafe fn as_result(&self) -> &A_func1_Out {
+        pub fn as_result(&self) -> &A_func1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &self.data.result
         }
     }
 
-        pub unsafe fn as_result_mut(&mut self) -> &mut A_func1_Out {
+        pub fn as_result_mut(&mut self) -> &mut A_func1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &mut self.data.result
         }
     }
 
-        pub unsafe fn into_result(self) -> A_func1_Out {
+        pub fn into_result(self) -> A_func1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.result)
@@ -1403,19 +1436,22 @@ impl A_func1_Result {
         matches!(self.tag, A_Ex_Hash)
     }
 
-        pub unsafe fn as_a_ex(&self) -> &A {
+        pub fn as_a_ex(&self) -> &A {
+        debug_assert!(self.is_a_ex());
         unsafe {
             &self.data.a_ex
         }
     }
 
-        pub unsafe fn as_a_ex_mut(&mut self) -> &mut A {
+        pub fn as_a_ex_mut(&mut self) -> &mut A {
+        debug_assert!(self.is_a_ex());
         unsafe {
             &mut self.data.a_ex
         }
     }
 
-        pub unsafe fn into_a_ex(self) -> A {
+        pub fn into_a_ex(self) -> A {
+        debug_assert!(self.is_a_ex());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.a_ex)
@@ -1435,19 +1471,22 @@ impl A_func1_Result {
         matches!(self.tag, B_Ex_Hash)
     }
 
-        pub unsafe fn as_b_ex(&self) -> &B {
+        pub fn as_b_ex(&self) -> &B {
+        debug_assert!(self.is_b_ex());
         unsafe {
             &self.data.b_ex
         }
     }
 
-        pub unsafe fn as_b_ex_mut(&mut self) -> &mut B {
+        pub fn as_b_ex_mut(&mut self) -> &mut B {
+        debug_assert!(self.is_b_ex());
         unsafe {
             &mut self.data.b_ex
         }
     }
 
-        pub unsafe fn into_b_ex(self) -> B {
+        pub fn into_b_ex(self) -> B {
+        debug_assert!(self.is_b_ex());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.b_ex)
@@ -1467,19 +1506,22 @@ impl A_func1_Result {
         matches!(self.tag, C_Ex_Hash)
     }
 
-        pub unsafe fn as_c_ex(&self) -> &C {
+        pub fn as_c_ex(&self) -> &C {
+        debug_assert!(self.is_c_ex());
         unsafe {
             &self.data.c_ex
         }
     }
 
-        pub unsafe fn as_c_ex_mut(&mut self) -> &mut C {
+        pub fn as_c_ex_mut(&mut self) -> &mut C {
+        debug_assert!(self.is_c_ex());
         unsafe {
             &mut self.data.c_ex
         }
     }
 
-        pub unsafe fn into_c_ex(self) -> C {
+        pub fn into_c_ex(self) -> C {
+        debug_assert!(self.is_c_ex());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.c_ex)
@@ -1696,19 +1738,22 @@ impl A_get_attribute_attr1_Result {
         matches!(self.tag, dds::RETCODE_OK)
     }
 
-        pub unsafe fn as_result(&self) -> &A_get_attribute_attr1_Out {
+        pub fn as_result(&self) -> &A_get_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &self.data.result
         }
     }
 
-        pub unsafe fn as_result_mut(&mut self) -> &mut A_get_attribute_attr1_Out {
+        pub fn as_result_mut(&mut self) -> &mut A_get_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &mut self.data.result
         }
     }
 
-        pub unsafe fn into_result(self) -> A_get_attribute_attr1_Out {
+        pub fn into_result(self) -> A_get_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.result)
@@ -1883,19 +1928,22 @@ impl A_get_attribute_attr1_Result {
         matches!(self.tag, dds::RETCODE_OK)
     }
 
-        pub unsafe fn as_result(&self) -> &A_get_attribute_attr1_Out {
+        pub fn as_result(&self) -> &A_get_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &self.data.result
         }
     }
 
-        pub unsafe fn as_result_mut(&mut self) -> &mut A_get_attribute_attr1_Out {
+        pub fn as_result_mut(&mut self) -> &mut A_get_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &mut self.data.result
         }
     }
 
-        pub unsafe fn into_result(self) -> A_get_attribute_attr1_Out {
+        pub fn into_result(self) -> A_get_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.result)
@@ -2070,19 +2118,22 @@ impl A_get_attribute_attr1_Result {
         matches!(self.tag, dds::RETCODE_OK)
     }
 
-        pub unsafe fn as_result(&self) -> &A_get_attribute_attr1_Out {
+        pub fn as_result(&self) -> &A_get_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &self.data.result
         }
     }
 
-        pub unsafe fn as_result_mut(&mut self) -> &mut A_get_attribute_attr1_Out {
+        pub fn as_result_mut(&mut self) -> &mut A_get_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &mut self.data.result
         }
     }
 
-        pub unsafe fn into_result(self) -> A_get_attribute_attr1_Out {
+        pub fn into_result(self) -> A_get_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.result)
@@ -2257,19 +2308,22 @@ impl A_get_attribute_attr1_Result {
         matches!(self.tag, dds::RETCODE_OK)
     }
 
-        pub unsafe fn as_result(&self) -> &A_get_attribute_attr1_Out {
+        pub fn as_result(&self) -> &A_get_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &self.data.result
         }
     }
 
-        pub unsafe fn as_result_mut(&mut self) -> &mut A_get_attribute_attr1_Out {
+        pub fn as_result_mut(&mut self) -> &mut A_get_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &mut self.data.result
         }
     }
 
-        pub unsafe fn into_result(self) -> A_get_attribute_attr1_Out {
+        pub fn into_result(self) -> A_get_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.result)
@@ -2444,19 +2498,22 @@ impl A_set_attribute_attr1_Result {
         matches!(self.tag, dds::RETCODE_OK)
     }
 
-        pub unsafe fn as_result(&self) -> &A_set_attribute_attr1_Out {
+        pub fn as_result(&self) -> &A_set_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &self.data.result
         }
     }
 
-        pub unsafe fn as_result_mut(&mut self) -> &mut A_set_attribute_attr1_Out {
+        pub fn as_result_mut(&mut self) -> &mut A_set_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &mut self.data.result
         }
     }
 
-        pub unsafe fn into_result(self) -> A_set_attribute_attr1_Out {
+        pub fn into_result(self) -> A_set_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.result)
@@ -2631,19 +2688,22 @@ impl A_get_attribute_attr2_Result {
         matches!(self.tag, dds::RETCODE_OK)
     }
 
-        pub unsafe fn as_result(&self) -> &A_get_attribute_attr2_Out {
+        pub fn as_result(&self) -> &A_get_attribute_attr2_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &self.data.result
         }
     }
 
-        pub unsafe fn as_result_mut(&mut self) -> &mut A_get_attribute_attr2_Out {
+        pub fn as_result_mut(&mut self) -> &mut A_get_attribute_attr2_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &mut self.data.result
         }
     }
 
-        pub unsafe fn into_result(self) -> A_get_attribute_attr2_Out {
+        pub fn into_result(self) -> A_get_attribute_attr2_Out {
+        debug_assert!(self.is_result());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.result)
@@ -2818,19 +2878,22 @@ impl A_set_attribute_attr2_Result {
         matches!(self.tag, dds::RETCODE_OK)
     }
 
-        pub unsafe fn as_result(&self) -> &A_set_attribute_attr2_Out {
+        pub fn as_result(&self) -> &A_set_attribute_attr2_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &self.data.result
         }
     }
 
-        pub unsafe fn as_result_mut(&mut self) -> &mut A_set_attribute_attr2_Out {
+        pub fn as_result_mut(&mut self) -> &mut A_set_attribute_attr2_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &mut self.data.result
         }
     }
 
-        pub unsafe fn into_result(self) -> A_set_attribute_attr2_Out {
+        pub fn into_result(self) -> A_set_attribute_attr2_Out {
+        debug_assert!(self.is_result());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.result)
@@ -3005,19 +3068,22 @@ impl A_get_attribute_attr3_Result {
         matches!(self.tag, dds::RETCODE_OK)
     }
 
-        pub unsafe fn as_result(&self) -> &A_get_attribute_attr3_Out {
+        pub fn as_result(&self) -> &A_get_attribute_attr3_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &self.data.result
         }
     }
 
-        pub unsafe fn as_result_mut(&mut self) -> &mut A_get_attribute_attr3_Out {
+        pub fn as_result_mut(&mut self) -> &mut A_get_attribute_attr3_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &mut self.data.result
         }
     }
 
-        pub unsafe fn into_result(self) -> A_get_attribute_attr3_Out {
+        pub fn into_result(self) -> A_get_attribute_attr3_Out {
+        debug_assert!(self.is_result());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.result)
@@ -3192,19 +3258,22 @@ impl A_set_attribute_attr3_Result {
         matches!(self.tag, dds::RETCODE_OK)
     }
 
-        pub unsafe fn as_result(&self) -> &A_set_attribute_attr3_Out {
+        pub fn as_result(&self) -> &A_set_attribute_attr3_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &self.data.result
         }
     }
 
-        pub unsafe fn as_result_mut(&mut self) -> &mut A_set_attribute_attr3_Out {
+        pub fn as_result_mut(&mut self) -> &mut A_set_attribute_attr3_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &mut self.data.result
         }
     }
 
-        pub unsafe fn into_result(self) -> A_set_attribute_attr3_Out {
+        pub fn into_result(self) -> A_set_attribute_attr3_Out {
+        debug_assert!(self.is_result());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.result)
@@ -3385,19 +3454,22 @@ impl A_get_attribute_attr1_Result {
         matches!(self.tag, dds::RETCODE_OK)
     }
 
-        pub unsafe fn as_result(&self) -> &A_get_attribute_attr1_Out {
+        pub fn as_result(&self) -> &A_get_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &self.data.result
         }
     }
 
-        pub unsafe fn as_result_mut(&mut self) -> &mut A_get_attribute_attr1_Out {
+        pub fn as_result_mut(&mut self) -> &mut A_get_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &mut self.data.result
         }
     }
 
-        pub unsafe fn into_result(self) -> A_get_attribute_attr1_Out {
+        pub fn into_result(self) -> A_get_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.result)
@@ -3417,19 +3489,22 @@ impl A_get_attribute_attr1_Result {
         matches!(self.tag, A_Ex_Hash)
     }
 
-        pub unsafe fn as_a_ex(&self) -> &A {
+        pub fn as_a_ex(&self) -> &A {
+        debug_assert!(self.is_a_ex());
         unsafe {
             &self.data.a_ex
         }
     }
 
-        pub unsafe fn as_a_ex_mut(&mut self) -> &mut A {
+        pub fn as_a_ex_mut(&mut self) -> &mut A {
+        debug_assert!(self.is_a_ex());
         unsafe {
             &mut self.data.a_ex
         }
     }
 
-        pub unsafe fn into_a_ex(self) -> A {
+        pub fn into_a_ex(self) -> A {
+        debug_assert!(self.is_a_ex());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.a_ex)
@@ -3618,19 +3693,22 @@ impl A_set_attribute_attr1_Result {
         matches!(self.tag, dds::RETCODE_OK)
     }
 
-        pub unsafe fn as_result(&self) -> &A_set_attribute_attr1_Out {
+        pub fn as_result(&self) -> &A_set_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &self.data.result
         }
     }
 
-        pub unsafe fn as_result_mut(&mut self) -> &mut A_set_attribute_attr1_Out {
+        pub fn as_result_mut(&mut self) -> &mut A_set_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &mut self.data.result
         }
     }
 
-        pub unsafe fn into_result(self) -> A_set_attribute_attr1_Out {
+        pub fn into_result(self) -> A_set_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.result)
@@ -3823,19 +3901,22 @@ impl A_get_attribute_attr1_Result {
         matches!(self.tag, dds::RETCODE_OK)
     }
 
-        pub unsafe fn as_result(&self) -> &A_get_attribute_attr1_Out {
+        pub fn as_result(&self) -> &A_get_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &self.data.result
         }
     }
 
-        pub unsafe fn as_result_mut(&mut self) -> &mut A_get_attribute_attr1_Out {
+        pub fn as_result_mut(&mut self) -> &mut A_get_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &mut self.data.result
         }
     }
 
-        pub unsafe fn into_result(self) -> A_get_attribute_attr1_Out {
+        pub fn into_result(self) -> A_get_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.result)
@@ -3855,19 +3936,22 @@ impl A_get_attribute_attr1_Result {
         matches!(self.tag, A_Ex_Hash)
     }
 
-        pub unsafe fn as_a_ex(&self) -> &A {
+        pub fn as_a_ex(&self) -> &A {
+        debug_assert!(self.is_a_ex());
         unsafe {
             &self.data.a_ex
         }
     }
 
-        pub unsafe fn as_a_ex_mut(&mut self) -> &mut A {
+        pub fn as_a_ex_mut(&mut self) -> &mut A {
+        debug_assert!(self.is_a_ex());
         unsafe {
             &mut self.data.a_ex
         }
     }
 
-        pub unsafe fn into_a_ex(self) -> A {
+        pub fn into_a_ex(self) -> A {
+        debug_assert!(self.is_a_ex());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.a_ex)
@@ -3887,19 +3971,22 @@ impl A_get_attribute_attr1_Result {
         matches!(self.tag, B_Ex_Hash)
     }
 
-        pub unsafe fn as_b_ex(&self) -> &B {
+        pub fn as_b_ex(&self) -> &B {
+        debug_assert!(self.is_b_ex());
         unsafe {
             &self.data.b_ex
         }
     }
 
-        pub unsafe fn as_b_ex_mut(&mut self) -> &mut B {
+        pub fn as_b_ex_mut(&mut self) -> &mut B {
+        debug_assert!(self.is_b_ex());
         unsafe {
             &mut self.data.b_ex
         }
     }
 
-        pub unsafe fn into_b_ex(self) -> B {
+        pub fn into_b_ex(self) -> B {
+        debug_assert!(self.is_b_ex());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.b_ex)
@@ -3919,19 +4006,22 @@ impl A_get_attribute_attr1_Result {
         matches!(self.tag, C_Ex_Hash)
     }
 
-        pub unsafe fn as_c_ex(&self) -> &C {
+        pub fn as_c_ex(&self) -> &C {
+        debug_assert!(self.is_c_ex());
         unsafe {
             &self.data.c_ex
         }
     }
 
-        pub unsafe fn as_c_ex_mut(&mut self) -> &mut C {
+        pub fn as_c_ex_mut(&mut self) -> &mut C {
+        debug_assert!(self.is_c_ex());
         unsafe {
             &mut self.data.c_ex
         }
     }
 
-        pub unsafe fn into_c_ex(self) -> C {
+        pub fn into_c_ex(self) -> C {
+        debug_assert!(self.is_c_ex());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.c_ex)
@@ -4154,19 +4244,22 @@ impl A_set_attribute_attr1_Result {
         matches!(self.tag, dds::RETCODE_OK)
     }
 
-        pub unsafe fn as_result(&self) -> &A_set_attribute_attr1_Out {
+        pub fn as_result(&self) -> &A_set_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &self.data.result
         }
     }
 
-        pub unsafe fn as_result_mut(&mut self) -> &mut A_set_attribute_attr1_Out {
+        pub fn as_result_mut(&mut self) -> &mut A_set_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &mut self.data.result
         }
     }
 
-        pub unsafe fn into_result(self) -> A_set_attribute_attr1_Out {
+        pub fn into_result(self) -> A_set_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.result)
@@ -4186,19 +4279,22 @@ impl A_set_attribute_attr1_Result {
         matches!(self.tag, A_Ex_Hash)
     }
 
-        pub unsafe fn as_a_ex(&self) -> &A {
+        pub fn as_a_ex(&self) -> &A {
+        debug_assert!(self.is_a_ex());
         unsafe {
             &self.data.a_ex
         }
     }
 
-        pub unsafe fn as_a_ex_mut(&mut self) -> &mut A {
+        pub fn as_a_ex_mut(&mut self) -> &mut A {
+        debug_assert!(self.is_a_ex());
         unsafe {
             &mut self.data.a_ex
         }
     }
 
-        pub unsafe fn into_a_ex(self) -> A {
+        pub fn into_a_ex(self) -> A {
+        debug_assert!(self.is_a_ex());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.a_ex)
@@ -4387,19 +4483,22 @@ impl A_get_attribute_attr1_Result {
         matches!(self.tag, dds::RETCODE_OK)
     }
 
-        pub unsafe fn as_result(&self) -> &A_get_attribute_attr1_Out {
+        pub fn as_result(&self) -> &A_get_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &self.data.result
         }
     }
 
-        pub unsafe fn as_result_mut(&mut self) -> &mut A_get_attribute_attr1_Out {
+        pub fn as_result_mut(&mut self) -> &mut A_get_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &mut self.data.result
         }
     }
 
-        pub unsafe fn into_result(self) -> A_get_attribute_attr1_Out {
+        pub fn into_result(self) -> A_get_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.result)
@@ -4580,19 +4679,22 @@ impl A_set_attribute_attr1_Result {
         matches!(self.tag, dds::RETCODE_OK)
     }
 
-        pub unsafe fn as_result(&self) -> &A_set_attribute_attr1_Out {
+        pub fn as_result(&self) -> &A_set_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &self.data.result
         }
     }
 
-        pub unsafe fn as_result_mut(&mut self) -> &mut A_set_attribute_attr1_Out {
+        pub fn as_result_mut(&mut self) -> &mut A_set_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &mut self.data.result
         }
     }
 
-        pub unsafe fn into_result(self) -> A_set_attribute_attr1_Out {
+        pub fn into_result(self) -> A_set_attribute_attr1_Out {
+        debug_assert!(self.is_result());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.result)
@@ -4612,19 +4714,22 @@ impl A_set_attribute_attr1_Result {
         matches!(self.tag, A_Ex_Hash)
     }
 
-        pub unsafe fn as_a_ex(&self) -> &A {
+        pub fn as_a_ex(&self) -> &A {
+        debug_assert!(self.is_a_ex());
         unsafe {
             &self.data.a_ex
         }
     }
 
-        pub unsafe fn as_a_ex_mut(&mut self) -> &mut A {
+        pub fn as_a_ex_mut(&mut self) -> &mut A {
+        debug_assert!(self.is_a_ex());
         unsafe {
             &mut self.data.a_ex
         }
     }
 
-        pub unsafe fn into_a_ex(self) -> A {
+        pub fn into_a_ex(self) -> A {
+        debug_assert!(self.is_a_ex());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.a_ex)
@@ -4851,19 +4956,22 @@ impl A_Call {
         matches!(self.tag, _)
     }
 
-        pub unsafe fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
+        pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
+        debug_assert!(self.is_unknownOp());
         unsafe {
             &self.data.unknownOp
         }
     }
 
-        pub unsafe fn as_unknownOp_mut(&mut self) -> &mut dds::rpc::UnknownOperation {
+        pub fn as_unknownOp_mut(&mut self) -> &mut dds::rpc::UnknownOperation {
+        debug_assert!(self.is_unknownOp());
         unsafe {
             &mut self.data.unknownOp
         }
     }
 
-        pub unsafe fn into_unknownOp(self) -> dds::rpc::UnknownOperation {
+        pub fn into_unknownOp(self) -> dds::rpc::UnknownOperation {
+        debug_assert!(self.is_unknownOp());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.unknownOp)
@@ -4883,19 +4991,22 @@ impl A_Call {
         matches!(self.tag, A_func1_Hash)
     }
 
-        pub unsafe fn as_func1(&self) -> &A_func1_In {
+        pub fn as_func1(&self) -> &A_func1_In {
+        debug_assert!(self.is_func1());
         unsafe {
             &self.data.func1
         }
     }
 
-        pub unsafe fn as_func1_mut(&mut self) -> &mut A_func1_In {
+        pub fn as_func1_mut(&mut self) -> &mut A_func1_In {
+        debug_assert!(self.is_func1());
         unsafe {
             &mut self.data.func1
         }
     }
 
-        pub unsafe fn into_func1(self) -> A_func1_In {
+        pub fn into_func1(self) -> A_func1_In {
+        debug_assert!(self.is_func1());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.func1)
@@ -4915,19 +5026,22 @@ impl A_Call {
         matches!(self.tag, A_func1_Hash)
     }
 
-        pub unsafe fn as_get_attribute_attr1(&self) -> &A_get_attribute_attr1_In {
+        pub fn as_get_attribute_attr1(&self) -> &A_get_attribute_attr1_In {
+        debug_assert!(self.is_get_attribute_attr1());
         unsafe {
             &self.data.get_attribute_attr1
         }
     }
 
-        pub unsafe fn as_get_attribute_attr1_mut(&mut self) -> &mut A_get_attribute_attr1_In {
+        pub fn as_get_attribute_attr1_mut(&mut self) -> &mut A_get_attribute_attr1_In {
+        debug_assert!(self.is_get_attribute_attr1());
         unsafe {
             &mut self.data.get_attribute_attr1
         }
     }
 
-        pub unsafe fn into_get_attribute_attr1(self) -> A_get_attribute_attr1_In {
+        pub fn into_get_attribute_attr1(self) -> A_get_attribute_attr1_In {
+        debug_assert!(self.is_get_attribute_attr1());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.get_attribute_attr1)
@@ -4947,19 +5061,22 @@ impl A_Call {
         matches!(self.tag, A_func1_Hash)
     }
 
-        pub unsafe fn as_set_attribute_attr1(&self) -> &A_set_attribute_attr1_In {
+        pub fn as_set_attribute_attr1(&self) -> &A_set_attribute_attr1_In {
+        debug_assert!(self.is_set_attribute_attr1());
         unsafe {
             &self.data.set_attribute_attr1
         }
     }
 
-        pub unsafe fn as_set_attribute_attr1_mut(&mut self) -> &mut A_set_attribute_attr1_In {
+        pub fn as_set_attribute_attr1_mut(&mut self) -> &mut A_set_attribute_attr1_In {
+        debug_assert!(self.is_set_attribute_attr1());
         unsafe {
             &mut self.data.set_attribute_attr1
         }
     }
 
-        pub unsafe fn into_set_attribute_attr1(self) -> A_set_attribute_attr1_In {
+        pub fn into_set_attribute_attr1(self) -> A_set_attribute_attr1_In {
+        debug_assert!(self.is_set_attribute_attr1());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.set_attribute_attr1)
@@ -4979,19 +5096,22 @@ impl A_Call {
         matches!(self.tag, A_func1_Hash)
     }
 
-        pub unsafe fn as_get_attribute_attr2(&self) -> &A_get_attribute_attr2_In {
+        pub fn as_get_attribute_attr2(&self) -> &A_get_attribute_attr2_In {
+        debug_assert!(self.is_get_attribute_attr2());
         unsafe {
             &self.data.get_attribute_attr2
         }
     }
 
-        pub unsafe fn as_get_attribute_attr2_mut(&mut self) -> &mut A_get_attribute_attr2_In {
+        pub fn as_get_attribute_attr2_mut(&mut self) -> &mut A_get_attribute_attr2_In {
+        debug_assert!(self.is_get_attribute_attr2());
         unsafe {
             &mut self.data.get_attribute_attr2
         }
     }
 
-        pub unsafe fn into_get_attribute_attr2(self) -> A_get_attribute_attr2_In {
+        pub fn into_get_attribute_attr2(self) -> A_get_attribute_attr2_In {
+        debug_assert!(self.is_get_attribute_attr2());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.get_attribute_attr2)
@@ -5011,19 +5131,22 @@ impl A_Call {
         matches!(self.tag, A_func1_Hash)
     }
 
-        pub unsafe fn as_set_attribute_attr2(&self) -> &A_set_attribute_attr2_In {
+        pub fn as_set_attribute_attr2(&self) -> &A_set_attribute_attr2_In {
+        debug_assert!(self.is_set_attribute_attr2());
         unsafe {
             &self.data.set_attribute_attr2
         }
     }
 
-        pub unsafe fn as_set_attribute_attr2_mut(&mut self) -> &mut A_set_attribute_attr2_In {
+        pub fn as_set_attribute_attr2_mut(&mut self) -> &mut A_set_attribute_attr2_In {
+        debug_assert!(self.is_set_attribute_attr2());
         unsafe {
             &mut self.data.set_attribute_attr2
         }
     }
 
-        pub unsafe fn into_set_attribute_attr2(self) -> A_set_attribute_attr2_In {
+        pub fn into_set_attribute_attr2(self) -> A_set_attribute_attr2_In {
+        debug_assert!(self.is_set_attribute_attr2());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.set_attribute_attr2)
@@ -5043,19 +5166,22 @@ impl A_Call {
         matches!(self.tag, A_func1_Hash)
     }
 
-        pub unsafe fn as_get_attribute_attr3(&self) -> &A_get_attribute_attr3_In {
+        pub fn as_get_attribute_attr3(&self) -> &A_get_attribute_attr3_In {
+        debug_assert!(self.is_get_attribute_attr3());
         unsafe {
             &self.data.get_attribute_attr3
         }
     }
 
-        pub unsafe fn as_get_attribute_attr3_mut(&mut self) -> &mut A_get_attribute_attr3_In {
+        pub fn as_get_attribute_attr3_mut(&mut self) -> &mut A_get_attribute_attr3_In {
+        debug_assert!(self.is_get_attribute_attr3());
         unsafe {
             &mut self.data.get_attribute_attr3
         }
     }
 
-        pub unsafe fn into_get_attribute_attr3(self) -> A_get_attribute_attr3_In {
+        pub fn into_get_attribute_attr3(self) -> A_get_attribute_attr3_In {
+        debug_assert!(self.is_get_attribute_attr3());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.get_attribute_attr3)
@@ -5075,19 +5201,22 @@ impl A_Call {
         matches!(self.tag, A_get_attribute_attr1_Hash)
     }
 
-        pub unsafe fn as_set_attribute_attr3(&self) -> &A_set_attribute_attr3_In {
+        pub fn as_set_attribute_attr3(&self) -> &A_set_attribute_attr3_In {
+        debug_assert!(self.is_set_attribute_attr3());
         unsafe {
             &self.data.set_attribute_attr3
         }
     }
 
-        pub unsafe fn as_set_attribute_attr3_mut(&mut self) -> &mut A_set_attribute_attr3_In {
+        pub fn as_set_attribute_attr3_mut(&mut self) -> &mut A_set_attribute_attr3_In {
+        debug_assert!(self.is_set_attribute_attr3());
         unsafe {
             &mut self.data.set_attribute_attr3
         }
     }
 
-        pub unsafe fn into_set_attribute_attr3(self) -> A_set_attribute_attr3_In {
+        pub fn into_set_attribute_attr3(self) -> A_set_attribute_attr3_In {
+        debug_assert!(self.is_set_attribute_attr3());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.set_attribute_attr3)
@@ -5632,19 +5761,22 @@ impl A_Return {
         matches!(self.tag, _)
     }
 
-        pub unsafe fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
+        pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
+        debug_assert!(self.is_unknownOp());
         unsafe {
             &self.data.unknownOp
         }
     }
 
-        pub unsafe fn as_unknownOp_mut(&mut self) -> &mut dds::rpc::UnknownOperation {
+        pub fn as_unknownOp_mut(&mut self) -> &mut dds::rpc::UnknownOperation {
+        debug_assert!(self.is_unknownOp());
         unsafe {
             &mut self.data.unknownOp
         }
     }
 
-        pub unsafe fn into_unknownOp(self) -> dds::rpc::UnknownOperation {
+        pub fn into_unknownOp(self) -> dds::rpc::UnknownOperation {
+        debug_assert!(self.is_unknownOp());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.unknownOp)
@@ -5664,19 +5796,22 @@ impl A_Return {
         matches!(self.tag, A_func1_Hash)
     }
 
-        pub unsafe fn as_func1(&self) -> &A_func1_Result {
+        pub fn as_func1(&self) -> &A_func1_Result {
+        debug_assert!(self.is_func1());
         unsafe {
             &self.data.func1
         }
     }
 
-        pub unsafe fn as_func1_mut(&mut self) -> &mut A_func1_Result {
+        pub fn as_func1_mut(&mut self) -> &mut A_func1_Result {
+        debug_assert!(self.is_func1());
         unsafe {
             &mut self.data.func1
         }
     }
 
-        pub unsafe fn into_func1(self) -> A_func1_Result {
+        pub fn into_func1(self) -> A_func1_Result {
+        debug_assert!(self.is_func1());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.func1)
@@ -5696,19 +5831,22 @@ impl A_Return {
         matches!(self.tag, A_func1_Hash)
     }
 
-        pub unsafe fn as_get_attribute_attr1(&self) -> &A_get_attribute_attr1_Result {
+        pub fn as_get_attribute_attr1(&self) -> &A_get_attribute_attr1_Result {
+        debug_assert!(self.is_get_attribute_attr1());
         unsafe {
             &self.data.get_attribute_attr1
         }
     }
 
-        pub unsafe fn as_get_attribute_attr1_mut(&mut self) -> &mut A_get_attribute_attr1_Result {
+        pub fn as_get_attribute_attr1_mut(&mut self) -> &mut A_get_attribute_attr1_Result {
+        debug_assert!(self.is_get_attribute_attr1());
         unsafe {
             &mut self.data.get_attribute_attr1
         }
     }
 
-        pub unsafe fn into_get_attribute_attr1(self) -> A_get_attribute_attr1_Result {
+        pub fn into_get_attribute_attr1(self) -> A_get_attribute_attr1_Result {
+        debug_assert!(self.is_get_attribute_attr1());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.get_attribute_attr1)
@@ -5728,19 +5866,22 @@ impl A_Return {
         matches!(self.tag, A_func1_Hash)
     }
 
-        pub unsafe fn as_set_attribute_attr1(&self) -> &A_set_attribute_attr1_Result {
+        pub fn as_set_attribute_attr1(&self) -> &A_set_attribute_attr1_Result {
+        debug_assert!(self.is_set_attribute_attr1());
         unsafe {
             &self.data.set_attribute_attr1
         }
     }
 
-        pub unsafe fn as_set_attribute_attr1_mut(&mut self) -> &mut A_set_attribute_attr1_Result {
+        pub fn as_set_attribute_attr1_mut(&mut self) -> &mut A_set_attribute_attr1_Result {
+        debug_assert!(self.is_set_attribute_attr1());
         unsafe {
             &mut self.data.set_attribute_attr1
         }
     }
 
-        pub unsafe fn into_set_attribute_attr1(self) -> A_set_attribute_attr1_Result {
+        pub fn into_set_attribute_attr1(self) -> A_set_attribute_attr1_Result {
+        debug_assert!(self.is_set_attribute_attr1());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.set_attribute_attr1)
@@ -5760,19 +5901,22 @@ impl A_Return {
         matches!(self.tag, A_func1_Hash)
     }
 
-        pub unsafe fn as_get_attribute_attr2(&self) -> &A_get_attribute_attr2_Result {
+        pub fn as_get_attribute_attr2(&self) -> &A_get_attribute_attr2_Result {
+        debug_assert!(self.is_get_attribute_attr2());
         unsafe {
             &self.data.get_attribute_attr2
         }
     }
 
-        pub unsafe fn as_get_attribute_attr2_mut(&mut self) -> &mut A_get_attribute_attr2_Result {
+        pub fn as_get_attribute_attr2_mut(&mut self) -> &mut A_get_attribute_attr2_Result {
+        debug_assert!(self.is_get_attribute_attr2());
         unsafe {
             &mut self.data.get_attribute_attr2
         }
     }
 
-        pub unsafe fn into_get_attribute_attr2(self) -> A_get_attribute_attr2_Result {
+        pub fn into_get_attribute_attr2(self) -> A_get_attribute_attr2_Result {
+        debug_assert!(self.is_get_attribute_attr2());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.get_attribute_attr2)
@@ -5792,19 +5936,22 @@ impl A_Return {
         matches!(self.tag, A_func1_Hash)
     }
 
-        pub unsafe fn as_set_attribute_attr2(&self) -> &A_set_attribute_attr2_Result {
+        pub fn as_set_attribute_attr2(&self) -> &A_set_attribute_attr2_Result {
+        debug_assert!(self.is_set_attribute_attr2());
         unsafe {
             &self.data.set_attribute_attr2
         }
     }
 
-        pub unsafe fn as_set_attribute_attr2_mut(&mut self) -> &mut A_set_attribute_attr2_Result {
+        pub fn as_set_attribute_attr2_mut(&mut self) -> &mut A_set_attribute_attr2_Result {
+        debug_assert!(self.is_set_attribute_attr2());
         unsafe {
             &mut self.data.set_attribute_attr2
         }
     }
 
-        pub unsafe fn into_set_attribute_attr2(self) -> A_set_attribute_attr2_Result {
+        pub fn into_set_attribute_attr2(self) -> A_set_attribute_attr2_Result {
+        debug_assert!(self.is_set_attribute_attr2());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.set_attribute_attr2)
@@ -5824,19 +5971,22 @@ impl A_Return {
         matches!(self.tag, A_func1_Hash)
     }
 
-        pub unsafe fn as_get_attribute_attr3(&self) -> &A_get_attribute_attr3_Result {
+        pub fn as_get_attribute_attr3(&self) -> &A_get_attribute_attr3_Result {
+        debug_assert!(self.is_get_attribute_attr3());
         unsafe {
             &self.data.get_attribute_attr3
         }
     }
 
-        pub unsafe fn as_get_attribute_attr3_mut(&mut self) -> &mut A_get_attribute_attr3_Result {
+        pub fn as_get_attribute_attr3_mut(&mut self) -> &mut A_get_attribute_attr3_Result {
+        debug_assert!(self.is_get_attribute_attr3());
         unsafe {
             &mut self.data.get_attribute_attr3
         }
     }
 
-        pub unsafe fn into_get_attribute_attr3(self) -> A_get_attribute_attr3_Result {
+        pub fn into_get_attribute_attr3(self) -> A_get_attribute_attr3_Result {
+        debug_assert!(self.is_get_attribute_attr3());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.get_attribute_attr3)
@@ -5856,19 +6006,22 @@ impl A_Return {
         matches!(self.tag, A_get_attribute_attr1_Hash)
     }
 
-        pub unsafe fn as_set_attribute_attr3(&self) -> &A_set_attribute_attr3_Result {
+        pub fn as_set_attribute_attr3(&self) -> &A_set_attribute_attr3_Result {
+        debug_assert!(self.is_set_attribute_attr3());
         unsafe {
             &self.data.set_attribute_attr3
         }
     }
 
-        pub unsafe fn as_set_attribute_attr3_mut(&mut self) -> &mut A_set_attribute_attr3_Result {
+        pub fn as_set_attribute_attr3_mut(&mut self) -> &mut A_set_attribute_attr3_Result {
+        debug_assert!(self.is_set_attribute_attr3());
         unsafe {
             &mut self.data.set_attribute_attr3
         }
     }
 
-        pub unsafe fn into_set_attribute_attr3(self) -> A_set_attribute_attr3_Result {
+        pub fn into_set_attribute_attr3(self) -> A_set_attribute_attr3_Result {
+        debug_assert!(self.is_set_attribute_attr3());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.set_attribute_attr3)
@@ -6399,19 +6552,22 @@ impl A_opA_Result {
         matches!(self.tag, dds::RETCODE_OK)
     }
 
-        pub unsafe fn as_result(&self) -> &A_opA_Out {
+        pub fn as_result(&self) -> &A_opA_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &self.data.result
         }
     }
 
-        pub unsafe fn as_result_mut(&mut self) -> &mut A_opA_Out {
+        pub fn as_result_mut(&mut self) -> &mut A_opA_Out {
+        debug_assert!(self.is_result());
         unsafe {
             &mut self.data.result
         }
     }
 
-        pub unsafe fn into_result(self) -> A_opA_Out {
+        pub fn into_result(self) -> A_opA_Out {
+        debug_assert!(self.is_result());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.result)
@@ -6518,19 +6674,22 @@ impl A_Call {
         matches!(self.tag, _)
     }
 
-        pub unsafe fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
+        pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
+        debug_assert!(self.is_unknownOp());
         unsafe {
             &self.data.unknownOp
         }
     }
 
-        pub unsafe fn as_unknownOp_mut(&mut self) -> &mut dds::rpc::UnknownOperation {
+        pub fn as_unknownOp_mut(&mut self) -> &mut dds::rpc::UnknownOperation {
+        debug_assert!(self.is_unknownOp());
         unsafe {
             &mut self.data.unknownOp
         }
     }
 
-        pub unsafe fn into_unknownOp(self) -> dds::rpc::UnknownOperation {
+        pub fn into_unknownOp(self) -> dds::rpc::UnknownOperation {
+        debug_assert!(self.is_unknownOp());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.unknownOp)
@@ -6550,19 +6709,22 @@ impl A_Call {
         matches!(self.tag, A_opA_Hash)
     }
 
-        pub unsafe fn as_opA(&self) -> &A_opA_In {
+        pub fn as_opA(&self) -> &A_opA_In {
+        debug_assert!(self.is_opA());
         unsafe {
             &self.data.opA
         }
     }
 
-        pub unsafe fn as_opA_mut(&mut self) -> &mut A_opA_In {
+        pub fn as_opA_mut(&mut self) -> &mut A_opA_In {
+        debug_assert!(self.is_opA());
         unsafe {
             &mut self.data.opA
         }
     }
 
-        pub unsafe fn into_opA(self) -> A_opA_In {
+        pub fn into_opA(self) -> A_opA_In {
+        debug_assert!(self.is_opA());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.opA)
@@ -6721,19 +6883,22 @@ impl A_Return {
         matches!(self.tag, _)
     }
 
-        pub unsafe fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
+        pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
+        debug_assert!(self.is_unknownOp());
         unsafe {
             &self.data.unknownOp
         }
     }
 
-        pub unsafe fn as_unknownOp_mut(&mut self) -> &mut dds::rpc::UnknownOperation {
+        pub fn as_unknownOp_mut(&mut self) -> &mut dds::rpc::UnknownOperation {
+        debug_assert!(self.is_unknownOp());
         unsafe {
             &mut self.data.unknownOp
         }
     }
 
-        pub unsafe fn into_unknownOp(self) -> dds::rpc::UnknownOperation {
+        pub fn into_unknownOp(self) -> dds::rpc::UnknownOperation {
+        debug_assert!(self.is_unknownOp());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.unknownOp)
@@ -6753,19 +6918,22 @@ impl A_Return {
         matches!(self.tag, A_opA_Hash)
     }
 
-        pub unsafe fn as_opA(&self) -> &A_opA_Result {
+        pub fn as_opA(&self) -> &A_opA_Result {
+        debug_assert!(self.is_opA());
         unsafe {
             &self.data.opA
         }
     }
 
-        pub unsafe fn as_opA_mut(&mut self) -> &mut A_opA_Result {
+        pub fn as_opA_mut(&mut self) -> &mut A_opA_Result {
+        debug_assert!(self.is_opA());
         unsafe {
             &mut self.data.opA
         }
     }
 
-        pub unsafe fn into_opA(self) -> A_opA_Result {
+        pub fn into_opA(self) -> A_opA_Result {
+        debug_assert!(self.is_opA());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.opA)
