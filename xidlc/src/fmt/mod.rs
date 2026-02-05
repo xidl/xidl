@@ -34,8 +34,8 @@ struct FormatConfig<'a> {
 
 #[derive(Debug, Default)]
 struct QueryActions {
-    append: Vec<(usize, InsertKind)>,
-    prepend: Vec<(usize, InsertKind)>,
+    append: HashMap<usize, Vec<InsertKind>>,
+    prepend: HashMap<usize, Vec<InsertKind>>,
     indent_pre: HashMap<usize, i32>,
     indent_post: HashMap<usize, i32>,
 }
@@ -132,22 +132,30 @@ impl<'a> Formatter<'a> {
                     "append-space" => {
                         actions
                             .append
-                            .push((node.end_byte(), InsertKind::AppendSpace));
+                            .entry(node.end_byte())
+                            .or_default()
+                            .push(InsertKind::AppendSpace);
                     }
                     "prepend-space" => {
                         actions
                             .prepend
-                            .push((node.start_byte(), InsertKind::PrependSpace));
+                            .entry(node.start_byte())
+                            .or_default()
+                            .push(InsertKind::PrependSpace);
                     }
                     "append-newline" => {
                         actions
                             .append
-                            .push((node.end_byte(), InsertKind::AppendNewline));
+                            .entry(node.end_byte())
+                            .or_default()
+                            .push(InsertKind::AppendNewline);
                     }
                     "prepend-newline" => {
                         actions
                             .prepend
-                            .push((node.start_byte(), InsertKind::PrependNewline));
+                            .entry(node.start_byte())
+                            .or_default()
+                            .push(InsertKind::PrependNewline);
                     }
                     "add-ident" => {
                         Self::add_indent(&mut actions.indent_post, node.end_byte(), 1);
@@ -345,11 +353,8 @@ impl<'a> Formatter<'a> {
         }
     }
 
-    fn actions_for(actions: &[(usize, InsertKind)], pos: usize) -> Vec<InsertKind> {
-        actions
-            .iter()
-            .filter_map(|(p, action)| (*p == pos).then_some(*action))
-            .collect()
+    fn actions_for(actions: &HashMap<usize, Vec<InsertKind>>, pos: usize) -> Vec<InsertKind> {
+        actions.get(&pos).cloned().unwrap_or_default()
     }
 
     fn normalize_indentation(input: &str, indent_parens: bool) -> String {
