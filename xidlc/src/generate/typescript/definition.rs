@@ -1,22 +1,16 @@
 use crate::error::IdlcResult;
-use crate::generate::typescript::TypescriptRenderer;
+use crate::generate::typescript::{TsMode, TypescriptRenderOutput, TypescriptRenderer};
 use convert_case::{Case, Casing};
 use serde::Serialize;
 use std::collections::HashSet;
 use xidl_parser::hir;
-
-pub struct TsArtifacts {
-    pub types: String,
-    pub zod: String,
-    pub client: String,
-}
 
 pub fn render_typescript(
     spec: &hir::Specification,
     file_stem: &str,
     renderer: &TypescriptRenderer,
     mode: TsMode,
-) -> IdlcResult<TsArtifacts> {
+) -> IdlcResult<TypescriptRenderOutput> {
     let mut generator = TsGenerator::new(file_stem.to_string());
     generator.render(spec, renderer, mode)
 }
@@ -35,7 +29,7 @@ impl TsGenerator {
         spec: &hir::Specification,
         renderer: &TypescriptRenderer,
         mode: TsMode,
-    ) -> IdlcResult<TsArtifacts> {
+    ) -> IdlcResult<TypescriptRenderOutput> {
         let blocks = render_module_body(&spec.0, &[], renderer, mode)?;
 
         let types = renderer.render_template(
@@ -61,7 +55,7 @@ impl TsGenerator {
             String::new()
         };
 
-        Ok(TsArtifacts { types, zod, client })
+        Ok(TypescriptRenderOutput { types, zod, client })
     }
 }
 
@@ -176,23 +170,6 @@ fn render_module_body(
     }
 
     Ok(out)
-}
-
-#[derive(Clone, Copy)]
-pub enum TsMode {
-    All,
-    InterfaceOnly,
-    TypesOnly,
-}
-
-impl TsMode {
-    fn allows_interfaces(self) -> bool {
-        matches!(self, TsMode::All | TsMode::InterfaceOnly)
-    }
-
-    fn allows_types(self) -> bool {
-        matches!(self, TsMode::All | TsMode::TypesOnly)
-    }
 }
 
 fn merge_blocks(blocks: &[TsRenderOutput]) -> TsRenderOutput {

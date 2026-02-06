@@ -1,5 +1,7 @@
-mod render_typescript;
+mod definition;
+mod render;
 mod renderer;
+mod spec;
 
 use crate::error::IdlcResult;
 use crate::jsonrpc::{Artifact, ArtifactFile};
@@ -9,8 +11,7 @@ use std::path::Path;
 use xidl_parser::hir;
 use xidl_parser::hir::{ParserProperties, Specification};
 
-pub use render_typescript::{TsMode, render_typescript};
-pub use renderer::TypescriptRenderer;
+pub use render::{TsMode, TypescriptRender, TypescriptRenderOutput, TypescriptRenderer};
 
 pub fn generate(
     spec: hir::Specification,
@@ -22,7 +23,7 @@ pub fn generate(
     let mut renderer = TypescriptRenderer::new()?;
     renderer.extend(&props);
 
-    let ts = render_typescript(&spec, file_name, &renderer, TsMode::TypesOnly)?;
+    let ts = spec.render(file_name, &renderer, TsMode::TypesOnly)?;
 
     let mut artifacts = Vec::new();
     artifacts.push(Artifact::new_file(ArtifactFile {

@@ -40,7 +40,7 @@ pub fn generate(
         content,
     })];
 
-    let ts = crate::generate::typescript::render_typescript(
+    let ts = crate::generate::typescript::TypescriptRender::render(
         &spec,
         file_name,
         renderer.typescript(),
@@ -67,7 +67,7 @@ pub fn generate(
     }));
 
     let non_interface = strip_interfaces(spec);
-    let ts_types = crate::generate::typescript::render_typescript(
+    let ts_types = crate::generate::typescript::TypescriptRender::render(
         &non_interface,
         file_name,
         renderer.typescript(),
