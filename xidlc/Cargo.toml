@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 xidl-parser = { workspace = true }
-xidl-jsonrpc = { path="../xidl-jsonrpc", default-features = false, features = [
+xidl-jsonrpc = { path = "../xidl-jsonrpc", default-features = false, features = [
   "tokio",
 ] }
 xidl-xcdr = { workspace = true }
@@ -37,7 +37,7 @@ tokio = { version = "1.36", features = [
   "time",
 ] }
 semver = "1.0"
-chrono = { version = "0.4", default-features = false, features = ["clock"] }
+jiff = "0.2"
 
 [target.'cfg(not(target_os = "emscripten"))'.dependencies]
 interprocess = { version = "2.2.3", features = ["tokio"] }
