@@ -14,22 +14,26 @@ serde_json = "1.0"
 thiserror = "2.0"
 miette = { version = "7.6.0", features = ["fancy"] }
 minijinja = { version = "2.14", features = ["loader"] }
-convert_case = "0.10"
+convert_case = "0.11"
 clap = { version = "4.5", features = ["derive"] }
 rust-embed = "8.5"
-md5 = "0.7"
+md5 = "0.8"
 scopeguard = "1.2.0"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 itertools = "0.14.0"
 tree-sitter = "=0.25.0"
-tree-sitter-highlight = "0.25.0"
-tree-sitter-idl = "3.14.0"
-tree-sitter-rust = "0.23.3"
-tree-sitter-cpp = "0.23.3"
-tree-sitter-typescript = "0.23.2"
+tree-sitter-highlight = "=0.25.0"
+tree-sitter-idl = "=3.14.0"
+tree-sitter-rust = "=0.23.3"
+tree-sitter-cpp = "=0.23.4"
+tree-sitter-typescript = "=0.23.2"
 
 utoipa = "5.4.0"
+semver = "1.0"
+jiff = "0.2"
+
+[target.'cfg(target_os = "emscripten")'.dependencies]
 tokio = { version = "1.36", features = [
   "sync",
   "macros",
@@ -37,11 +41,10 @@ tokio = { version = "1.36", features = [
   "rt",
   "time",
 ] }
-semver = "1.0"
-jiff = "0.2"
 
 [target.'cfg(not(target_os = "emscripten"))'.dependencies]
 interprocess = { version = "2.2.3", features = ["tokio"] }
+tokio = { version = "1.36", features = ["full"] }
 
 [dev-dependencies]
 insta = "1.44"

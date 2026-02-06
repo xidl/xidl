@@ -16,7 +16,7 @@ pub fn generate_from_source(
     idl: &str,
     props: HashMap<String, serde_json::Value>,
 ) -> Result<Vec<driver::File>, error::IdlcError> {
-    let mut generator = driver::Generator::new(lang);
+    let mut generator = driver::Generator::new(lang.into());
     if let Ok(handle) = tokio::runtime::Handle::try_current() {
         handle.block_on(generator.generate_from_idl(idl, Path::new("input.idl"), props))
     } else {
