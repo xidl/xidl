@@ -5,6 +5,7 @@ use tree_sitter::{Parser, Query, QueryCursor, StreamingIterator};
 const IDL_QUERY: &str = include_str!("queries/idl.scm");
 const RUST_QUERY: &str = include_str!("queries/rust.scm");
 const CPP_QUERY: &str = include_str!("queries/cpp.scm");
+const TYPESCRIPT_QUERY: &str = include_str!("queries/typescript.scm");
 const INDENT: &str = "    ";
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -76,6 +77,20 @@ pub fn format_c_source(source: &str) -> IdlcResult<String> {
         language: tree_sitter_cpp::LANGUAGE.into(),
         query_source: CPP_QUERY,
         label: "c",
+        allow_parse_error: true,
+        preserve_inline_ws: true,
+        indent_parens: false,
+        normalize_indent: true,
+    })
+    .format(source)?;
+    Ok(Formatter::normalize_blank_lines(&output))
+}
+
+pub fn format_typescript_source(source: &str) -> IdlcResult<String> {
+    let output = Formatter::new(FormatConfig {
+        language: tree_sitter_typescript::LANGUAGE_TYPESCRIPT.into(),
+        query_source: TYPESCRIPT_QUERY,
+        label: "typescript",
         allow_parse_error: true,
         preserve_inline_ws: true,
         indent_parens: false,

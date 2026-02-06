@@ -115,6 +115,7 @@ impl crate::jsonrpc::Codegen for RustAxumCodegen {
             Ok(hashmap! {
                 "expand_interface" => false,
                 "format_rust" => true,
+                "format_typescript" => true,
                 "enable_client" => true,
                 "enable_server" => true,
                 "enable_render_header" => true,

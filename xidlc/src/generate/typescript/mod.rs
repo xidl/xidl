@@ -51,7 +51,8 @@ impl crate::jsonrpc::Codegen for TypescriptCodegen {
     ) -> xidl_jsonrpc::BoxFuture<'a, Result<ParserProperties, xidl_jsonrpc::Error>> {
         Box::pin(async move {
             Ok(hashmap! {
-                "expand_interface" => false
+                "expand_interface" => false,
+                "format_typescript" => true
             })
         })
     }

@@ -17,6 +17,8 @@ impl TypescriptRenderer {
     pub fn new() -> IdlcResult<Self> {
         let mut env = Environment::new();
         env.set_loader(|name| load_template(name).map(Some));
+        env.add_filter("ts", typescript_format_filter);
+        env.add_filter("tsfmt", typescript_format_filter);
         Ok(Self { env })
     }
 
@@ -49,4 +51,13 @@ fn load_template(name: &str) -> std::result::Result<String, Error> {
         )
     })?;
     Ok(content)
+}
+
+fn typescript_format_filter(value: String) -> std::result::Result<String, Error> {
+    crate::fmt::format_typescript_source(&value).map_err(|err| {
+        Error::new(
+            ErrorKind::InvalidOperation,
+            format!("typescript format failed: {err}"),
+        )
+    })
 }
