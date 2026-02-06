@@ -1,7 +1,7 @@
 use crate::{BoxFuture, Error, ErrorCode, RpcError, RpcRequestOwned, RpcResponse, JSONRPC_VERSION};
 use serde_json::Value;
 use std::sync::Arc;
-use tokio::io::{AsyncBufRead, AsyncBufReadExt, AsyncWrite, AsyncWriteExt, BufReader};
+use tokio::io::{AsyncBufRead, AsyncBufReadExt, AsyncWrite, AsyncWriteExt};
 #[cfg(feature = "tokio-net")]
 use tokio::net::{TcpListener, ToSocketAddrs};
 use tokio::sync::mpsc;
@@ -88,7 +88,7 @@ impl Listener for TcpListener {
             let (stream, _peer) = TcpListener::accept(self).await?;
             stream.set_nodelay(true)?;
             let (rx, tx) = tokio::io::split(stream);
-            let reader = BufReader::new(rx);
+            let reader = tokio::io::BufReader::new(rx);
             Ok(Some(box_io(Io::new(reader, tx))))
         })
     }

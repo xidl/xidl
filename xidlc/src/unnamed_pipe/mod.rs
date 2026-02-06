@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 mod emscripten;
 #[cfg(target_os = "emscripten")]
 pub use emscripten::*;
