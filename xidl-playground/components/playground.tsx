@@ -1,6 +1,10 @@
 'use client';
 
 import { Code2, FileCode, Plus, Settings, Trash2, X } from 'lucide-react';
+import {
+  compressToEncodedURIComponent,
+  decompressFromEncodedURIComponent,
+} from 'lz-string';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CodeViewer } from '@/components/code-viewer';
 import { ThemeToggle } from '@/components/theme-toggle';
@@ -32,6 +36,19 @@ const DEFAULT_IDL = `interface HelloWorld {
     in string name
   );
 };`;
+const DEFAULT_LANG = 'rust';
+const DEFAULT_METADATA = true;
+const DEFAULT_SKIP_CLIENT = false;
+const DEFAULT_SKIP_SERVER = false;
+const LANG_OPTIONS = [
+  'rust',
+  'rust-axum',
+  'rust-jsonrpc',
+  'c',
+  'cpp',
+  'hir',
+  'typed_ast',
+];
 
 type OutputFile = {
   path: string;
@@ -57,10 +74,10 @@ const BASE_PATH = (process.env.NEXT_PUBLIC_BASE_PATH ?? '').replace(/\/$/, '');
 const WASM_BASE = `${BASE_PATH}/wasm`;
 
 export function Playground() {
-  const [lang, setLang] = useState('rust');
-  const [skipClient, setSkipClient] = useState(false);
-  const [skipServer, setSkipServer] = useState(false);
-  const [enableMetadata, setEnableMetadata] = useState(true);
+  const [lang, setLang] = useState(DEFAULT_LANG);
+  const [skipClient, setSkipClient] = useState(DEFAULT_SKIP_CLIENT);
+  const [skipServer, setSkipServer] = useState(DEFAULT_SKIP_SERVER);
+  const [enableMetadata, setEnableMetadata] = useState(DEFAULT_METADATA);
   const [idl, setIdl] = useState(DEFAULT_IDL);
   const [propItems, setPropItems] = useState<PropItem[]>([
     { id: 'prop-1', key: '', value: '' },
@@ -72,8 +89,88 @@ export function Playground() {
   const [formatting, setFormatting] = useState(false);
   const [propsOpen, setPropsOpen] = useState(false);
   const moduleRef = useRef<WasmModule | null>(null);
+  const urlReadyRef = useRef(false);
 
   const selectedTab = selectedFile || files[0]?.path || 'empty';
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const idlParam = params.get('idl');
+    if (idlParam) {
+      const decoded = decompressFromEncodedURIComponent(idlParam);
+      if (typeof decoded === 'string') {
+        setIdl(decoded);
+      }
+    }
+
+    const urlLang = params.get('lang');
+    if (urlLang && LANG_OPTIONS.includes(urlLang)) {
+      setLang(urlLang);
+    }
+
+    const meta = parseUrlBoolean(params.get('meta'));
+    if (meta !== null) {
+      setEnableMetadata(meta);
+    }
+
+    const skipClientParam = parseUrlBoolean(params.get('skip_client'));
+    if (skipClientParam !== null) {
+      setSkipClient(skipClientParam);
+    }
+
+    const skipServerParam = parseUrlBoolean(params.get('skip_server'));
+    if (skipServerParam !== null) {
+      setSkipServer(skipServerParam);
+    }
+
+    urlReadyRef.current = true;
+  }, []);
+
+  const updateUrl = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+
+    if (idl !== DEFAULT_IDL) {
+      params.set('idl', compressToEncodedURIComponent(idl));
+    } else {
+      params.delete('idl');
+    }
+
+    if (lang !== DEFAULT_LANG) {
+      params.set('lang', lang);
+    } else {
+      params.delete('lang');
+    }
+
+    if (enableMetadata !== DEFAULT_METADATA) {
+      params.set('meta', enableMetadata ? '1' : '0');
+    } else {
+      params.delete('meta');
+    }
+
+    if (skipClient !== DEFAULT_SKIP_CLIENT) {
+      params.set('skip_client', skipClient ? '1' : '0');
+    } else {
+      params.delete('skip_client');
+    }
+
+    if (skipServer !== DEFAULT_SKIP_SERVER) {
+      params.set('skip_server', skipServer ? '1' : '0');
+    } else {
+      params.delete('skip_server');
+    }
+
+    const url = new URL(window.location.href);
+    url.search = params.toString();
+    window.history.replaceState({}, '', url.toString());
+  }, [enableMetadata, idl, lang, skipClient, skipServer]);
+
+  useEffect(() => {
+    if (!urlReadyRef.current) return;
+    const handle = window.setTimeout(updateUrl, 250);
+    return () => window.clearTimeout(handle);
+  }, [updateUrl]);
 
   useEffect(() => {
     if (files.length && !selectedFile) {
@@ -516,6 +613,13 @@ function buildProps(items: PropItem[]) {
     }
   }
   return props;
+}
+
+function parseUrlBoolean(value: string | null) {
+  if (value === null) return null;
+  if (value === '1' || value === 'true') return true;
+  if (value === '0' || value === 'false') return false;
+  return null;
 }
 
 function inferLanguage(language: string, path: string | undefined): string {
