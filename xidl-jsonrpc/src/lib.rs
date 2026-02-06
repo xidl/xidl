@@ -13,7 +13,10 @@ mod server;
 pub use client::Client;
 pub use error::{Error, ErrorCode};
 #[cfg(feature = "tokio")]
-pub use server::{serve, Handler, Io, Listener, MuxListener, MuxSender, Server, ServerBuilder};
+pub use server::{Handler, Io, Listener, MuxListener, Server, ServerBuilder};
+
+mod stream;
+pub use stream::AsyncStream;
 
 const JSONRPC_VERSION: &str = "2.0";
 
