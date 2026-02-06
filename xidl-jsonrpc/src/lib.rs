@@ -9,7 +9,7 @@ mod server;
 
 pub use client::Client;
 pub use error::{Error, ErrorCode};
-pub use server::{serve, Handler, Io, Server, ServerBuilder};
+pub use server::{serve, Handler, Io, Listener, MuxListener, MuxSender, Server, ServerBuilder};
 
 const JSONRPC_VERSION: &str = "2.0";
 

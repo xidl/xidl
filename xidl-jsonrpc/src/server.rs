@@ -1,9 +1,21 @@
 use crate::{BoxFuture, Error, ErrorCode, RpcError, RpcRequestOwned, RpcResponse, JSONRPC_VERSION};
 use serde_json::Value;
-use tokio::io::{AsyncBufRead, AsyncBufReadExt, AsyncWrite, AsyncWriteExt};
+use std::sync::Arc;
+use tokio::io::{AsyncBufRead, AsyncBufReadExt, AsyncWrite, AsyncWriteExt, BufReader};
+use tokio::net::{TcpListener, ToSocketAddrs};
+use tokio::sync::mpsc;
 
 pub trait Handler: Send + Sync {
     fn handle<'a>(&'a self, method: &'a str, params: Value) -> BoxFuture<'a, Result<Value, Error>>;
+}
+
+impl<T> Handler for Arc<T>
+where
+    T: Handler,
+{
+    fn handle<'a>(&'a self, method: &'a str, params: Value) -> BoxFuture<'a, Result<Value, Error>> {
+        (**self).handle(method, params)
+    }
 }
 
 pub struct Io<R, W> {
@@ -14,6 +26,69 @@ pub struct Io<R, W> {
 impl<R, W> Io<R, W> {
     pub fn new(reader: R, writer: W) -> Self {
         Self { reader, writer }
+    }
+}
+
+type BoxedReader = Box<dyn AsyncBufRead + Unpin + Send>;
+type BoxedWriter = Box<dyn AsyncWrite + Unpin + Send>;
+type BoxedIo = Io<BoxedReader, BoxedWriter>;
+
+pub trait Listener: Send {
+    fn accept<'a>(&'a mut self) -> BoxFuture<'a, Result<Option<BoxedIo>, Error>>;
+}
+
+pub struct MuxSender {
+    tx: mpsc::UnboundedSender<BoxedIo>,
+}
+
+impl MuxSender {
+    pub fn push<R, W>(&self, io: Io<R, W>) -> Result<(), Error>
+    where
+        R: AsyncBufRead + Unpin + Send + 'static,
+        W: AsyncWrite + Unpin + Send + 'static,
+    {
+        self.tx
+            .send(box_io(io))
+            .map_err(|_| Error::Protocol("listener channel closed"))
+    }
+}
+
+pub struct MuxListener {
+    rx: mpsc::UnboundedReceiver<BoxedIo>,
+}
+
+impl MuxListener {
+    pub fn channel() -> (MuxSender, Self) {
+        let (tx, rx) = mpsc::unbounded_channel();
+        (MuxSender { tx }, Self { rx })
+    }
+
+    pub fn from_io<R, W>(io: Io<R, W>) -> Self
+    where
+        R: AsyncBufRead + Unpin + Send + 'static,
+        W: AsyncWrite + Unpin + Send + 'static,
+    {
+        let (tx, rx) = mpsc::unbounded_channel();
+        let _ = tx.send(box_io(io));
+        Self { rx }
+    }
+}
+
+impl Listener for MuxListener {
+    fn accept<'a>(&'a mut self) -> BoxFuture<'a, Result<Option<BoxedIo>, Error>> {
+        Box::pin(async move { Ok(self.rx.recv().await) })
+    }
+}
+
+impl Listener for TcpListener {
+    fn accept<'a>(&'a mut self) -> BoxFuture<'a, Result<Option<BoxedIo>, Error>> {
+        Box::pin(async move {
+            let (stream, _peer) = TcpListener::accept(self).await?;
+            stream.set_nodelay(true)?;
+            let (rx, tx) = tokio::io::split(stream);
+            let reader = BufReader::new(rx);
+            Ok(Some(box_io(Io::new(reader, tx))))
+        })
     }
 }
 
@@ -41,28 +116,36 @@ impl Handler for MultiHandler {
 }
 
 pub struct ServerBuilder {
-    io: Option<Io<Box<dyn AsyncBufRead + Unpin + Send>, Box<dyn AsyncWrite + Unpin + Send>>>,
+    listener: Option<Box<dyn Listener>>,
     services: Vec<Box<dyn Handler>>,
 }
 
 pub struct Server {
-    io: Io<Box<dyn AsyncBufRead + Unpin + Send>, Box<dyn AsyncWrite + Unpin + Send>>,
+    listener: Box<dyn Listener>,
     services: Vec<Box<dyn Handler>>,
 }
 
 impl Server {
     pub fn builder() -> ServerBuilder {
         ServerBuilder {
-            io: None,
+            listener: None,
             services: Vec::new(),
         }
     }
 
-    pub async fn serve(self) -> Result<(), Error> {
-        let handler = MultiHandler {
+    pub async fn serve(mut self) -> Result<(), Error> {
+        let handler = Arc::new(MultiHandler {
             services: self.services,
-        };
-        serve(self.io.reader, self.io.writer, handler).await
+        });
+        loop {
+            let io = match self.listener.accept().await? {
+                Some(io) => io,
+                None => break,
+            };
+            let mut session = ServerSession::new(io.reader, io.writer, handler.clone());
+            session.run().await?;
+        }
+        Ok(())
     }
 }
 
@@ -72,7 +155,15 @@ impl ServerBuilder {
         R: AsyncBufRead + Unpin + Send + 'static,
         W: AsyncWrite + Unpin + Send + 'static,
     {
-        self.io = Some(Io::new(Box::new(io.reader), Box::new(io.writer)));
+        self.listener = Some(Box::new(MuxListener::from_io(io)));
+        self
+    }
+
+    pub fn with_listener<L>(mut self, listener: L) -> Self
+    where
+        L: Listener + 'static,
+    {
+        self.listener = Some(Box::new(listener));
         self
     }
 
@@ -85,12 +176,23 @@ impl ServerBuilder {
     }
 
     pub async fn serve(self) -> Result<(), Error> {
-        let io = self.io.ok_or(Error::Protocol("missing io"))?;
+        let listener = self.listener.ok_or(Error::Protocol("missing listener"))?;
         let server = Server {
-            io,
+            listener,
             services: self.services,
         };
         server.serve().await
+    }
+
+    pub async fn serve_on<A>(self, addr: A) -> Result<(), Error>
+    where
+        A: ToSocketAddrs,
+    {
+        if self.listener.is_some() {
+            return Err(Error::Protocol("listener already set"));
+        }
+        let listener = TcpListener::bind(addr).await?;
+        self.with_listener(listener).serve().await
     }
 }
 
@@ -102,6 +204,14 @@ where
 {
     let mut session = ServerSession::new(&mut reader, &mut writer, handler);
     session.run().await
+}
+
+fn box_io<R, W>(io: Io<R, W>) -> BoxedIo
+where
+    R: AsyncBufRead + Unpin + Send + 'static,
+    W: AsyncWrite + Unpin + Send + 'static,
+{
+    Io::new(Box::new(io.reader), Box::new(io.writer))
 }
 
 struct ServerSession<R, W, H> {

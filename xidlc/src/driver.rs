@@ -257,7 +257,7 @@ impl CodegenSession {
                     let io = xidl_jsonrpc::Io::new(BufReader::new(stdout_rx), stdin_tx);
                     let handler = crate::jsonrpc::CodegenServer::new($obj);
                     xidl_jsonrpc::Server::builder()
-                        .with_io(io)
+                        .with_listener(xidl_jsonrpc::MuxListener::from_io(io))
                         .with_service(handler)
                         .serve()
                         .await
@@ -316,7 +316,7 @@ impl CodegenSession {
                     let io = xidl_jsonrpc::Io::new(BufReader::new(reader), writer);
                     let handler = crate::jsonrpc::CodegenServer::new($obj);
                     xidl_jsonrpc::Server::builder()
-                        .with_io(io)
+                        .with_listener(xidl_jsonrpc::MuxListener::from_io(io))
                         .with_service(handler)
                         .serve()
                         .await
