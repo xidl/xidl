@@ -69,6 +69,7 @@ export function Playground() {
   const [selectedFile, setSelectedFile] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const [formatting, setFormatting] = useState(false);
   const [propsOpen, setPropsOpen] = useState(false);
   const moduleRef = useRef<WasmModule | null>(null);
 
@@ -155,6 +156,37 @@ export function Playground() {
       setLoading(false);
     }
   }, [enableMetadata, idl, lang, loadWasm, propItems, skipClient, skipServer]);
+
+  const runFormat = useCallback(async () => {
+    setFormatting(true);
+    setError('');
+    try {
+      const module = await loadWasm();
+      const format = module.cwrap('xidlc_format_json', 'number', ['string']);
+      const free = module.cwrap('xidlc_free_string', null, ['number']);
+
+      const payload = JSON.stringify({
+        source: idl,
+      });
+
+      const ptr = format(payload);
+      const resultText = module.UTF8ToString(ptr);
+      free(ptr);
+
+      const result = JSON.parse(resultText);
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      if (typeof result.formatted !== 'string') {
+        throw new Error('Invalid format response');
+      }
+      setIdl(result.formatted);
+    } catch (err: any) {
+      setError(err?.message ?? 'Format failed');
+    } finally {
+      setFormatting(false);
+    }
+  }, [idl, loadWasm]);
 
   const addProp = () => {
     setPropItems(items => [
@@ -253,6 +285,15 @@ export function Playground() {
                       <span className="font-medium text-sm">IDL Editor</span>
                     </div>
                     <div className="flex items-center gap-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={runFormat}
+                        disabled={formatting}
+                        className="h-7 px-2 text-xs"
+                      >
+                        {formatting ? 'Formatting…' : 'Format'}
+                      </Button>
                       <div className="flex items-center gap-2 text-xs">
                         <span className="text-muted-foreground">
                           skip_client

@@ -1,4 +1,5 @@
 use crate::error::IdlcError;
+use crate::fmt::format_idl_source;
 use crate::generate_from_source;
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -22,6 +23,16 @@ struct GenerateResponse {
 struct GeneratedFile {
     path: String,
     content: String,
+}
+
+#[derive(Deserialize)]
+struct FormatRequest {
+    source: String,
+}
+
+#[derive(serde::Serialize)]
+struct FormatResponse {
+    formatted: String,
 }
 
 fn json_error(err: impl ToString) -> *mut c_char {
@@ -61,6 +72,36 @@ pub extern "C" fn xidlc_generate_json(input: *const c_char) -> *mut c_char {
                 content: file.content().to_string(),
             })
             .collect(),
+    };
+
+    match serde_json::to_string(&out) {
+        Ok(text) => CString::new(text)
+            .unwrap_or_else(|_| CString::new("{\"error\":\"invalid output\"}").unwrap())
+            .into_raw(),
+        Err(err) => json_error(format!("serialize error: {err}")),
+    }
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn xidlc_format_json(input: *const c_char) -> *mut c_char {
+    if input.is_null() {
+        return json_error("input is null");
+    }
+    let cstr = unsafe { CStr::from_ptr(input) };
+    let input_str = match cstr.to_str() {
+        Ok(value) => value,
+        Err(err) => return json_error(format!("invalid utf-8 input: {err}")),
+    };
+    let req: FormatRequest = match serde_json::from_str(input_str) {
+        Ok(value) => value,
+        Err(err) => return json_error(format!("invalid json: {err}")),
+    };
+
+    let formatted = format_idl_source(&req.source);
+
+    let out = match formatted {
+        Ok(text) => FormatResponse { formatted: text },
+        Err(err) => return json_error(err.to_string()),
     };
 
     match serde_json::to_string(&out) {
