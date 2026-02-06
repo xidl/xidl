@@ -3,12 +3,16 @@ use serde_json::Value;
 use std::future::Future;
 use std::pin::Pin;
 
+#[cfg(feature = "tokio")]
 mod client;
 mod error;
+#[cfg(feature = "tokio")]
 mod server;
 
+#[cfg(feature = "tokio")]
 pub use client::Client;
 pub use error::{Error, ErrorCode};
+#[cfg(feature = "tokio")]
 pub use server::{serve, Handler, Io, Listener, MuxListener, MuxSender, Server, ServerBuilder};
 
 const JSONRPC_VERSION: &str = "2.0";

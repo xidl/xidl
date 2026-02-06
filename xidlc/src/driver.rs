@@ -208,28 +208,14 @@ struct CodegenSession {
 
 impl CodegenSession {
     async fn spawn(lang: &str) -> IdlcResult<Self> {
-        #[cfg(target_os = "emscripten")]
-        {
-            let (client_stream, server_stream) = tokio::io::duplex(64 * 1024);
-            let (client_read, client_write) = tokio::io::split(client_stream);
-            let (server_read, server_write) = tokio::io::split(server_stream);
-            let server = Self::spawn_inprocess_server(lang, server_read, server_write)?;
-            let client = CodegenClient::new(BufReader::new(client_read), client_write);
-            Self::verify_engine_version(&client).await?;
-            return Ok(Self { client, server });
-        }
-
-        #[cfg(not(target_os = "emscripten"))]
-        {
-            let (stdout_tx, stdout_rx) = crate::unnamed_pipe::pipe()?;
-            let (stdin_tx, stdin_rx) = crate::unnamed_pipe::pipe()?;
-            let server = Self::spawn_codegen_server(lang, stdout_rx, stdin_tx)?;
-            let reader = BufReader::new(stdin_rx);
-            let writer = stdout_tx;
-            let client = CodegenClient::new(reader, writer);
-            Self::verify_engine_version(&client).await?;
-            Ok(Self { client, server })
-        }
+        let (stdout_tx, stdout_rx) = crate::unnamed_pipe::pipe()?;
+        let (stdin_tx, stdin_rx) = crate::unnamed_pipe::pipe()?;
+        let server = Self::spawn_codegen_server(lang, stdout_rx, stdin_tx)?;
+        let reader = BufReader::new(stdin_rx);
+        let writer = stdout_tx;
+        let client = CodegenClient::new(reader, writer);
+        Self::verify_engine_version(&client).await?;
+        Ok(Self { client, server })
     }
 
     async fn finish(self) {
@@ -245,7 +231,6 @@ impl CodegenSession {
         }
     }
 
-    #[cfg(not(target_os = "emscripten"))]
     fn spawn_codegen_server(
         lang: &str,
         stdout_rx: crate::unnamed_pipe::Reader,

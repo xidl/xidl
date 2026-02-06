@@ -2,6 +2,7 @@ use crate::{BoxFuture, Error, ErrorCode, RpcError, RpcRequestOwned, RpcResponse,
 use serde_json::Value;
 use std::sync::Arc;
 use tokio::io::{AsyncBufRead, AsyncBufReadExt, AsyncWrite, AsyncWriteExt, BufReader};
+#[cfg(feature = "tokio-net")]
 use tokio::net::{TcpListener, ToSocketAddrs};
 use tokio::sync::mpsc;
 
@@ -80,6 +81,7 @@ impl Listener for MuxListener {
     }
 }
 
+#[cfg(feature = "tokio-net")]
 impl Listener for TcpListener {
     fn accept<'a>(&'a mut self) -> BoxFuture<'a, Result<Option<BoxedIo>, Error>> {
         Box::pin(async move {
@@ -184,6 +186,7 @@ impl ServerBuilder {
         server.serve().await
     }
 
+    #[cfg(feature = "tokio-net")]
     pub async fn serve_on<A>(self, addr: A) -> Result<(), Error>
     where
         A: ToSocketAddrs,
