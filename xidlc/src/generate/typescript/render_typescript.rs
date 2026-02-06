@@ -716,7 +716,6 @@ struct ParamInfo {
 #[derive(Clone)]
 struct MethodInfo {
     name: String,
-    raw_name: String,
     params: Vec<ParamInfo>,
     ret: ReturnType,
     http_method: String,
@@ -726,7 +725,6 @@ struct MethodInfo {
     path_params: Vec<ParamInfo>,
     query_params: Vec<ParamInfo>,
     body_params: Vec<ParamInfo>,
-    module_path: Vec<String>,
 }
 
 impl MethodInfo {
@@ -915,7 +913,6 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
     });
     MethodInfo {
         name: method_name,
-        raw_name: op.ident.clone(),
         params: param_list,
         ret,
         http_method: method_http_code(method),
@@ -925,7 +922,6 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
         path_params,
         query_params,
         body_params,
-        module_path: module_path.to_vec(),
     }
 }
 
@@ -939,7 +935,6 @@ fn render_attr(
             .into_iter()
             .map(|names| MethodInfo {
                 name: ts_ident(&names.raw),
-                raw_name: names.raw.clone(),
                 params: Vec::new(),
                 ret: ReturnType::new(spec.ty.clone()),
                 http_method: method_http_code(HttpMethod::Get),
@@ -949,7 +944,6 @@ fn render_attr(
                 path_params: Vec::new(),
                 query_params: Vec::new(),
                 body_params: Vec::new(),
-                module_path: module_path.to_vec(),
             })
             .collect(),
         hir::AttrDclInner::AttrSpec(spec) => {
@@ -960,7 +954,6 @@ fn render_attr(
                         let raw_name = decl.0.clone();
                         let getter = MethodInfo {
                             name: ts_ident(&raw_name),
-                            raw_name: raw_name.clone(),
                             params: Vec::new(),
                             ret: ReturnType::new(spec.ty.clone()),
                             http_method: method_http_code(HttpMethod::Get),
@@ -970,7 +963,6 @@ fn render_attr(
                             path_params: Vec::new(),
                             query_params: Vec::new(),
                             body_params: Vec::new(),
-                            module_path: module_path.to_vec(),
                         };
                         out.push(getter);
 
@@ -990,7 +982,6 @@ fn render_attr(
                         });
                         let setter = MethodInfo {
                             name: ts_ident(&setter_raw),
-                            raw_name: setter_raw.clone(),
                             params: vec![param.clone()],
                             ret: ReturnType::void(),
                             http_method: method_http_code(HttpMethod::Post),
@@ -1000,7 +991,6 @@ fn render_attr(
                             path_params: Vec::new(),
                             query_params: Vec::new(),
                             body_params: vec![param],
-                            module_path: module_path.to_vec(),
                         };
                         out.push(setter);
                     }
@@ -1009,7 +999,6 @@ fn render_attr(
                     let raw_name = declarator.0.clone();
                     let getter = MethodInfo {
                         name: ts_ident(&raw_name),
-                        raw_name: raw_name.clone(),
                         params: Vec::new(),
                         ret: ReturnType::new(spec.ty.clone()),
                         http_method: method_http_code(HttpMethod::Get),
@@ -1019,7 +1008,6 @@ fn render_attr(
                         path_params: Vec::new(),
                         query_params: Vec::new(),
                         body_params: Vec::new(),
-                        module_path: module_path.to_vec(),
                     };
                     out.push(getter);
 
@@ -1039,7 +1027,6 @@ fn render_attr(
                     });
                     let setter = MethodInfo {
                         name: ts_ident(&setter_raw),
-                        raw_name: setter_raw.clone(),
                         params: vec![param.clone()],
                         ret: ReturnType::void(),
                         http_method: method_http_code(HttpMethod::Post),
@@ -1049,7 +1036,6 @@ fn render_attr(
                         path_params: Vec::new(),
                         query_params: Vec::new(),
                         body_params: vec![param],
-                        module_path: module_path.to_vec(),
                     };
                     out.push(setter);
                 }
