@@ -2,8 +2,8 @@ mod rpc;
 
 use clap::Parser;
 use rpc::{HelloWorld, HelloWorldServer};
-use std::io::BufReader;
-use std::net::TcpListener;
+use tokio::io::BufReader;
+use tokio::net::TcpListener;
 
 #[derive(Parser)]
 struct Args {
@@ -20,22 +20,25 @@ impl HelloWorld for HelloWorldImpl {
     }
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
 
     eprintln!("jsonrpc hello_world server listening on {}", args.addr);
-    let listener = TcpListener::bind(&args.addr)?;
-    let (stream, peer) = listener.accept()?;
+    let listener = TcpListener::bind(&args.addr).await?;
+    let (stream, peer) = listener.accept().await?;
     eprintln!("client connected: {peer}");
     stream.set_nodelay(true)?;
 
-    let reader = BufReader::new(stream.try_clone()?);
-    let writer = stream;
+    let (rx, tx) = tokio::io::split(stream);
+    let reader = BufReader::new(rx);
+    let writer = tx;
 
     xidl_jsonrpc::Server::builder()
         .with_io(xidl_jsonrpc::Io::new(reader, writer))
         .with_service(HelloWorldServer::new(HelloWorldImpl))
-        .serve()?;
+        .serve()
+        .await?;
 
     Ok(())
 }

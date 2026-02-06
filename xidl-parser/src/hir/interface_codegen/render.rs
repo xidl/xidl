@@ -3,7 +3,7 @@ use crate::error::{ParseError, ParserResult};
 use minijinja::{Environment, Error, ErrorKind};
 use rust_embed::RustEmbed;
 
-#[derive(RustEmbed)]
+#[derive(RustEmbed, Clone)]
 #[folder = "src/hir/templates"]
 struct Templates;
 

@@ -4,18 +4,14 @@ mod tests;
 use crate::cli::CliArgs;
 use crate::error::{IdlcError, IdlcResult};
 use crate::jsonrpc::{Codegen, CodegenClient};
+use crate::unnamed_pipe::{Reader, Writer};
 use semver::{Version, VersionReq};
 use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 use std::time::{SystemTime, UNIX_EPOCH};
-use tokio::io::{AsyncReadExt, AsyncWriteExt, BufReader, DuplexStream, ReadHalf, WriteHalf};
+use tokio::io::BufReader;
 use tokio::task::JoinHandle;
-
-#[cfg(target_os = "emscripten")]
-use crate::mem_pipe as ipc_pipe;
-#[cfg(not(target_os = "emscripten"))]
-use interprocess::unnamed_pipe as ipc_pipe;
 
 pub struct File {
     path: String,
@@ -94,6 +90,7 @@ impl Generator {
         path: &Path,
         mut props: HashMap<String, serde_json::Value>,
     ) -> IdlcResult<Vec<File>> {
+        tracing::info!("generate for idl");
         props.insert("idl".into(), source.into());
         props.insert("target_lang".into(), self.lang.clone().into());
         props.insert("xidlc_version".into(), env!("CARGO_PKG_VERSION").into());
@@ -119,6 +116,7 @@ impl Generator {
         input: &Path,
         mut props: HashMap<String, serde_json::Value>,
     ) -> IdlcResult<Vec<File>> {
+        tracing::info!("generate for lang: {lang}");
         if !props.contains_key("xidlc_version") {
             props.insert("xidlc_version".into(), env!("CARGO_PKG_VERSION").into());
         }
@@ -177,6 +175,7 @@ impl Generator {
     }
 
     async fn get_properties_for_lang(&mut self) -> IdlcResult<HashMap<String, serde_json::Value>> {
+        tracing::info!("get properties for {}", self.lang);
         if !self.properties.is_empty() {
             return Ok(self.properties.clone());
         }
@@ -185,7 +184,8 @@ impl Generator {
             .client
             .get_properties()
             .await
-            .map_err(|err| IdlcError::rpc(err.to_string()))?;
+            .map_err(|err| IdlcError::rpc(err.to_string()))
+            .unwrap();
         session.finish().await;
         self.properties = props.clone();
         Ok(props)
@@ -201,63 +201,8 @@ fn merge_properties(
     }
 }
 
-#[cfg(not(target_os = "emscripten"))]
-fn async_reader_from_blocking<R>(mut reader: R) -> ReadHalf<DuplexStream>
-where
-    R: std::io::Read + Send + 'static,
-{
-    let (client_stream, mut bridge_stream) = tokio::io::duplex(64 * 1024);
-    let (client_read, _client_write) = tokio::io::split(client_stream);
-    let handle = tokio::runtime::Handle::current();
-
-    tokio::task::spawn_blocking(move || {
-        let mut buf = [0u8; 8192];
-        loop {
-            let n = match reader.read(&mut buf) {
-                Ok(0) => break,
-                Ok(n) => n,
-                Err(_) => break,
-            };
-            if handle.block_on(bridge_stream.write_all(&buf[..n])).is_err() {
-                break;
-            }
-        }
-    });
-
-    client_read
-}
-
-#[cfg(not(target_os = "emscripten"))]
-fn async_writer_from_blocking<W>(mut writer: W) -> WriteHalf<DuplexStream>
-where
-    W: std::io::Write + Send + 'static,
-{
-    let (client_stream, mut bridge_stream) = tokio::io::duplex(64 * 1024);
-    let (_client_read, client_write) = tokio::io::split(client_stream);
-    let handle = tokio::runtime::Handle::current();
-
-    tokio::task::spawn_blocking(move || {
-        let mut buf = [0u8; 8192];
-        loop {
-            let n = match handle.block_on(bridge_stream.read(&mut buf)) {
-                Ok(0) => break,
-                Ok(n) => n,
-                Err(_) => break,
-            };
-            if writer.write_all(&buf[..n]).is_err() {
-                break;
-            }
-            if writer.flush().is_err() {
-                break;
-            }
-        }
-    });
-
-    client_write
-}
-
 struct CodegenSession {
-    client: CodegenClient<BufReader<ReadHalf<DuplexStream>>, WriteHalf<DuplexStream>>,
+    client: CodegenClient<BufReader<Reader>, Writer>,
     server: JoinHandle<IdlcResult<()>>,
 }
 
@@ -276,11 +221,11 @@ impl CodegenSession {
 
         #[cfg(not(target_os = "emscripten"))]
         {
-            let (stdout_tx, stdout_rx) = ipc_pipe::pipe()?;
-            let (stdin_tx, stdin_rx) = ipc_pipe::pipe()?;
+            let (stdout_tx, stdout_rx) = crate::unnamed_pipe::pipe()?;
+            let (stdin_tx, stdin_rx) = crate::unnamed_pipe::pipe()?;
             let server = Self::spawn_codegen_server(lang, stdout_rx, stdin_tx)?;
-            let reader = BufReader::new(async_reader_from_blocking(stdin_rx));
-            let writer = async_writer_from_blocking(stdout_tx);
+            let reader = BufReader::new(stdin_rx);
+            let writer = stdout_tx;
             let client = CodegenClient::new(reader, writer);
             Self::verify_engine_version(&client).await?;
             Ok(Self { client, server })
@@ -303,16 +248,13 @@ impl CodegenSession {
     #[cfg(not(target_os = "emscripten"))]
     fn spawn_codegen_server(
         lang: &str,
-        stdout_rx: ipc_pipe::Recver,
-        stdin_tx: ipc_pipe::Sender,
+        stdout_rx: crate::unnamed_pipe::Reader,
+        stdin_tx: crate::unnamed_pipe::Writer,
     ) -> IdlcResult<JoinHandle<IdlcResult<()>>> {
         macro_rules! run_server {
             ($obj:expr) => {
                 Ok(tokio::spawn(async move {
-                    let io = xidl_jsonrpc::Io::new(
-                        BufReader::new(async_reader_from_blocking(stdout_rx)),
-                        async_writer_from_blocking(stdin_tx),
-                    );
+                    let io = xidl_jsonrpc::Io::new(BufReader::new(stdout_rx), stdin_tx);
                     let handler = crate::jsonrpc::CodegenServer::new($obj);
                     xidl_jsonrpc::Server::builder()
                         .with_io(io)
@@ -336,6 +278,7 @@ impl CodegenSession {
             "rs_axum" | "rust_axum" | "rs-axum" | "rust-axum" => {
                 run_server!(crate::generate::rust_axum::RustAxumCodegen)
             }
+            "ts" | "typescript" => run_server!(crate::generate::typescript::TypescriptCodegen),
             #[cfg(target_os = "emscripten")]
             _ => {
                 unreachable!()
@@ -344,8 +287,8 @@ impl CodegenSession {
             _ => {
                 let exe = format!("xidl-{lang}");
                 let mut child = std::process::Command::new(&exe)
-                    .stdin(std::os::fd::OwnedFd::from(stdin_tx))
-                    .stdout(std::os::fd::OwnedFd::from(stdout_rx))
+                    .stdin(stdin_tx.into_owned_fd())
+                    .stdout(stdout_rx.into_owned_fd())
                     .spawn()?;
 
                 let server = tokio::task::spawn_blocking(move || {
@@ -394,12 +337,13 @@ impl CodegenSession {
             "rs_axum" | "rust_axum" | "rs-axum" | "rust-axum" => {
                 run_server!(crate::generate::rust_axum::RustAxumCodegen)
             }
+            "ts" | "typescript" => run_server!(crate::generate::typescript::TypescriptCodegen),
             _ => unreachable!(),
         }
     }
 
     async fn verify_engine_version(
-        client: &CodegenClient<BufReader<ReadHalf<DuplexStream>>, WriteHalf<DuplexStream>>,
+        client: &CodegenClient<BufReader<Reader>, Writer>,
     ) -> IdlcResult<()> {
         let engine_req: String = client
             .get_engine_version()

@@ -1,0 +1,4 @@
+export const {{ schema_name }} = z.object({
+{% for param in params %}    {{ param.prop }}: {{ param.schema }},
+{% endfor %}});
+export type {{ name }} = z.infer<typeof {{ schema_name }}>;

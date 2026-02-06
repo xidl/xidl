@@ -1,0 +1,4 @@
+{% if variants | length == 0 %}export const {{ schema_name }} = z.never();
+{% elif variants | length == 1 %}export const {{ schema_name }} = {{ variants[0] }};
+{% else %}export const {{ schema_name }} = z.union([{{ variants | join(", ") }}]);
+{% endif %}export type {{ ident }} = z.infer<typeof {{ schema_name }}>;

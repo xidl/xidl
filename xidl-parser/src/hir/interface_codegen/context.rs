@@ -1,6 +1,6 @@
 use serde::Serialize;
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub struct TemplateContext {
     pub modules: Vec<String>,
     pub interface_name: String,
@@ -8,13 +8,13 @@ pub struct TemplateContext {
     pub operations: Vec<OperationContext>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub struct ConstContext {
     pub name: String,
     pub value: String,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub struct OperationContext {
     pub name: String,
     pub in_members: Vec<MemberContext>,
@@ -29,7 +29,7 @@ pub struct MemberContext {
     pub name: String,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub struct ExceptionContext {
     pub const_name: String,
     pub member_name: String,

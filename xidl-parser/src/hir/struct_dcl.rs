@@ -1,13 +1,13 @@
 use super::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct StructForwardDcl {
     pub annotations: Vec<Annotation>,
     pub ident: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct StructDcl {
     pub annotations: Vec<Annotation>,
     pub ident: String,
@@ -15,7 +15,7 @@ pub struct StructDcl {
     pub member: Vec<Member>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Member {
     pub annotations: Vec<Annotation>,
     pub ty: TypeSpec,
@@ -24,7 +24,7 @@ pub struct Member {
     pub field_id: Option<u32>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Default(pub ConstExpr);
 
 impl StructDcl {

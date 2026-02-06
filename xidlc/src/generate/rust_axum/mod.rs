@@ -3,6 +3,7 @@ mod interface;
 mod openapi;
 mod render;
 mod spec;
+pub(crate) mod typescript;
 
 use crate::error::IdlcResult;
 use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactHir};
@@ -40,6 +41,25 @@ pub fn generate(
         content,
     })];
 
+    let ts = typescript::render_typescript(
+        &spec,
+        file_name,
+        &renderer,
+        typescript::TsMode::InterfaceOnly,
+    )?;
+    artifacts.push(Artifact::new_file(ArtifactFile {
+        path: format!("{file_name}.iface.d.ts"),
+        content: ts.types,
+    }));
+    artifacts.push(Artifact::new_file(ArtifactFile {
+        path: format!("{file_name}.iface.zod.ts"),
+        content: ts.zod,
+    }));
+    artifacts.push(Artifact::new_file(ArtifactFile {
+        path: format!("{file_name}.client.ts"),
+        content: ts.client,
+    }));
+
     let openapi = openapi::render_openapi(&spec);
     let openapi_content = serde_json::to_string_pretty(&openapi)?;
     artifacts.push(Artifact::new_file(ArtifactFile {
@@ -48,6 +68,20 @@ pub fn generate(
     }));
 
     let non_interface = strip_interfaces(spec);
+    let ts_types = typescript::render_typescript(
+        &non_interface,
+        file_name,
+        &renderer,
+        typescript::TsMode::TypesOnly,
+    )?;
+    artifacts.push(Artifact::new_file(ArtifactFile {
+        path: format!("{file_name}.d.ts"),
+        content: ts_types.types,
+    }));
+    artifacts.push(Artifact::new_file(ArtifactFile {
+        path: format!("{file_name}.zod.ts"),
+        content: ts_types.zod,
+    }));
     if !non_interface.0.is_empty() {
         let props = hashmap! {
             "enable_render_header" => false,

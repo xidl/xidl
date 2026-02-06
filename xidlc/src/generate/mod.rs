@@ -5,6 +5,7 @@ pub mod rust;
 pub mod rust_axum;
 pub mod rust_jsonrpc;
 pub mod typed_ast_gen;
+pub mod typescript;
 mod utils;
 
 use xidl_parser::hir;

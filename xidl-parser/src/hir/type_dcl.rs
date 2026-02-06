@@ -1,13 +1,13 @@
 use super::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct TypeDcl {
     pub annotations: Vec<Annotation>,
     pub decl: TypeDclInner,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[allow(clippy::large_enum_variant)]
 pub enum TypeDclInner {
     ConstrTypeDcl(ConstrTypeDcl),
@@ -15,19 +15,19 @@ pub enum TypeDclInner {
     NativeDcl(NativeDcl),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct TypedefDcl {
     pub ty: TypedefType,
     pub decl: Vec<Declarator>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum TypedefType {
     TypeSpec(TypeSpec),
     ConstrTypeDcl(ConstrTypeDcl),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct NativeDcl {
     pub decl: SimpleDeclarator,
 }

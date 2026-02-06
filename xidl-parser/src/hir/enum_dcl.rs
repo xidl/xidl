@@ -1,14 +1,14 @@
 use super::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct EnumDcl {
     pub annotations: Vec<Annotation>,
     pub ident: String,
     pub member: Vec<Enumerator>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Enumerator {
     pub annotations: Vec<Annotation>,
     pub ident: String,

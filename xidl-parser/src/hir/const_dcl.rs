@@ -1,14 +1,14 @@
 use super::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ConstDcl {
     pub ty: ConstType,
     pub ident: String,
     pub value: ConstExpr,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum ConstType {
     IntegerType(IntegerType),
     FloatingPtType,

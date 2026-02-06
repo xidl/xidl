@@ -68,6 +68,11 @@ impl XidlBuild for Builder {
             skip_client: self.skip_client,
             skip_server: self.skip_server,
         };
-        xidlc::driver::Driver::run(args)
+
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .unwrap()
+            .block_on(async { xidlc::driver::Driver::run(args).await })
     }
 }

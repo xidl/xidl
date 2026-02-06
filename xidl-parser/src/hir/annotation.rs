@@ -1,7 +1,7 @@
 use super::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum Annotation {
     Id {
         value: ConstExpr,
@@ -17,14 +17,14 @@ pub enum Annotation {
     },
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum AnnotationParams {
     ConstExpr(ConstExpr),
     Params(Vec<AnnotationParam>),
     Raw(String),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AnnotationParam {
     pub ident: String,
     pub value: Option<ConstExpr>,

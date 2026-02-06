@@ -1,19 +1,19 @@
 use super::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum Declarator {
     SimpleDeclarator(SimpleDeclarator),
     ArrayDeclarator(ArrayDeclarator),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ArrayDeclarator {
     pub ident: String,
     pub len: Vec<PositiveIntConst>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SimpleDeclarator(pub String);
 
 impl From<crate::typed_ast::Declarator> for Declarator {

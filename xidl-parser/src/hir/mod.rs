@@ -34,12 +34,12 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Specification(pub Vec<Definition>);
 
 pub type ParserProperties = HashMap<String, Value>;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum Definition {
     ModuleDcl(ModuleDcl),
     Pragma(Pragma),
@@ -50,7 +50,7 @@ pub enum Definition {
     InterfaceDcl(InterfaceDcl),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ModuleDcl {
     pub annotations: Vec<Annotation>,
     pub ident: String,
@@ -176,7 +176,7 @@ pub fn extensibility_from_annotations(annotations: &[Annotation]) -> Extensibili
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum ConstrTypeDcl {
     StructForwardDcl(StructForwardDcl),
     StructDcl(StructDcl),
@@ -187,13 +187,13 @@ pub enum ConstrTypeDcl {
     BitmaskDcl(BitmaskDcl),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UnionForwardDcl {
     pub annotations: Vec<Annotation>,
     pub ident: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UnionDef {
     pub annotations: Vec<Annotation>,
     pub ident: String,
@@ -207,19 +207,19 @@ impl UnionDef {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Case {
     pub label: Vec<CaseLabel>,
     pub element: ElementSpec,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum CaseLabel {
     Value(ConstExpr),
     Default,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ElementSpec {
     pub annotations: Vec<Annotation>,
     pub ty: ElementSpecTy,
@@ -227,13 +227,13 @@ pub struct ElementSpec {
     pub field_id: Option<u32>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum ElementSpecTy {
     TypeSpec(TypeSpec),
     ConstrTypeDcl(ConstrTypeDcl),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum SwitchTypeSpec {
     IntegerType(IntegerType),
     CharType,
@@ -243,7 +243,7 @@ pub enum SwitchTypeSpec {
     OctetType,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct BitsetDcl {
     pub annotations: Vec<Annotation>,
     pub ident: String,
@@ -265,14 +265,14 @@ pub enum BitFieldType {
     UnsignedInt,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct BitField {
     pub ident: String,
     pub pos: PositiveIntConst,
     pub ty: Option<BitFieldType>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct BitmaskDcl {
     pub annotations: Vec<Annotation>,
     pub ident: String,
@@ -285,7 +285,7 @@ impl BitmaskDcl {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct BitValue {
     pub annotations: Vec<Annotation>,
     pub ident: String,

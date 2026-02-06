@@ -1,45 +1,45 @@
 use super::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct InterfaceDcl {
     pub annotations: Vec<Annotation>,
     pub decl: InterfaceDclInner,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum InterfaceDclInner {
     InterfaceForwardDcl(InterfaceForwardDcl),
     InterfaceDef(InterfaceDef),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct InterfaceForwardDcl {
     pub ident: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct InterfaceDef {
     pub header: InterfaceHeader,
     pub interface_body: Option<InterfaceBody>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct InterfaceHeader {
     pub ident: String,
     pub parent: Option<InterfaceInheritanceSpec>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct InterfaceInheritanceSpec(pub Vec<InterfaceName>);
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct InterfaceName(pub ScopedName);
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct InterfaceBody(pub Vec<Export>);
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum Export {
     OpDcl(OpDcl),
     AttrDcl(AttrDcl),
@@ -48,7 +48,7 @@ pub enum Export {
     ExceptDcl(ExceptDcl),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct OpDcl {
     pub annotations: Vec<Annotation>,
     pub ty: OpTypeSpec,
@@ -57,60 +57,60 @@ pub struct OpDcl {
     pub raises: Option<RaisesExpr>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[allow(clippy::large_enum_variant)]
 pub enum OpTypeSpec {
     Void,
     TypeSpec(TypeSpec),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ParameterDcls(pub Vec<ParamDcl>);
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ParamDcl {
     pub attr: Option<ParamAttribute>,
     pub ty: TypeSpec,
     pub declarator: SimpleDeclarator,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ParamAttribute(pub String);
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RaisesExpr(pub Vec<ScopedName>);
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AttrDcl {
     pub annotations: Vec<Annotation>,
     pub decl: AttrDclInner,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum AttrDclInner {
     ReadonlyAttrSpec(ReadonlyAttrSpec),
     AttrSpec(AttrSpec),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ReadonlyAttrSpec {
     pub ty: TypeSpec,
     pub declarator: ReadonlyAttrDeclarator,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum ReadonlyAttrDeclarator {
     SimpleDeclarator(SimpleDeclarator),
     RaisesExpr(RaisesExpr),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AttrSpec {
     pub ty: TypeSpec,
     pub declarator: AttrDeclarator,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum AttrDeclarator {
     SimpleDeclarator(Vec<SimpleDeclarator>),
     WithRaises {
@@ -119,23 +119,23 @@ pub enum AttrDeclarator {
     },
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum AttrRaisesExpr {
     Case1(GetExcepExpr, Option<SetExcepExpr>),
     SetExcepExpr(SetExcepExpr),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct GetExcepExpr {
     pub expr: ExceptionList,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SetExcepExpr {
     pub expr: ExceptionList,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ExceptionList(pub Vec<ScopedName>);
 
 impl From<crate::typed_ast::InterfaceDcl> for InterfaceDcl {

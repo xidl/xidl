@@ -1,0 +1,43 @@
+export class {{ client_name }} {
+    private readonly baseUrl: string;
+    private readonly fetchImpl: FetchLike;
+    private readonly defaultHeaders: Record<string, string>;
+
+    constructor(baseUrl: string, options: ClientOptions = {}) {
+        this.baseUrl = baseUrl;
+        this.fetchImpl = resolveFetch(options.fetch);
+        this.defaultHeaders = options.headers ?? {};
+    }
+{% for method in methods %}
+    async {{ method.name }}({% for param in method.params %}{{ param.name }}: {{ param.ty }}{% if not loop.last %}, {% endif %}{% endfor %}): Promise<{{ method.return_ty }}> {
+{% if method.request_schema_ref %}        const parsed = {{ method.request_schema_ref }}.parse({ {% for entry in method.request_payload %}"{{ entry.raw_name }}": {{ entry.name }}{% if not loop.last %}, {% endif %}{% endfor %} });
+{% endif %}        let path = "{{ method.path }}";
+{% for param in method.path_params %}        path = path.replace("{" + "{{ param.raw_name }}" + "}", encodePathSegment({{ param.access }}));
+{% endfor %}{% if method.query_params | length > 0 %}
+        const query = new URLSearchParams();
+{% for param in method.query_params %}        query.set("{{ param.raw_name }}", encodeQueryValue({{ param.access }}));
+{% endfor %}        const queryString = query.toString();
+        if (queryString.length > 0) {
+            path = `${path}?${queryString}`;
+        }
+{% endif %}{% if method.body_params | length > 0 %}
+        const body = {
+{% for param in method.body_params %}            "{{ param.raw_name }}": {{ param.access }},
+{% endfor %}        };
+{% endif %}{% if method.body_params | length > 0 %}
+        const headers = { ...this.defaultHeaders, "Content-Type": "application/json" };
+        const options = { method: "{{ method.http_method }}", headers, body: JSON.stringify(body) };
+{% else %}
+        const headers = { ...this.defaultHeaders };
+        const options = { method: "{{ method.http_method }}", headers };
+{% endif %}
+        const url = joinUrl(this.baseUrl, path);
+        const resp = await this.fetchImpl(url, options);
+        if (!resp.ok) {
+            throw await parseXidlError(resp);
+        }
+{% if method.return_ty == "void" %}        return;
+{% else %}        const data = await resp.json();
+        return data as {{ method.return_ty }};
+{% endif %}    }
+{% endfor %}}

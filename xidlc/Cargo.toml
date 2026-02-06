@@ -38,7 +38,7 @@ semver = "1.0"
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
 
 [target.'cfg(not(target_os = "emscripten"))'.dependencies]
-interprocess = { version = "2.2.3" }
+interprocess = { version = "2.2.3", features = ["tokio"] }
 
 [dev-dependencies]
 insta = "1.44"
