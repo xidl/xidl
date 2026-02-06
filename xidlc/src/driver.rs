@@ -4,7 +4,7 @@ mod tests;
 use crate::cli::CliArgs;
 use crate::error::{IdlcError, IdlcResult};
 use crate::jsonrpc::{Codegen, CodegenClient};
-use crate::unnamed_pipe::{Reader, Writer};
+use crate::transport::{Reader, Writer};
 use semver::{Version, VersionReq};
 use std::collections::HashMap;
 use std::fs;
@@ -208,8 +208,8 @@ struct CodegenSession {
 
 impl CodegenSession {
     async fn spawn(lang: &str) -> IdlcResult<Self> {
-        let (stdout_tx, stdout_rx) = crate::unnamed_pipe::pipe()?;
-        let (stdin_tx, stdin_rx) = crate::unnamed_pipe::pipe()?;
+        let (stdout_tx, stdout_rx) = crate::transport::pipe()?;
+        let (stdin_tx, stdin_rx) = crate::transport::pipe()?;
         let server = Self::spawn_codegen_server(lang, stdout_rx, stdin_tx)?;
         let reader = BufReader::new(stdin_rx);
         let writer = stdout_tx;
@@ -233,8 +233,8 @@ impl CodegenSession {
 
     fn spawn_codegen_server(
         lang: &str,
-        stdout_rx: crate::unnamed_pipe::Reader,
-        stdin_tx: crate::unnamed_pipe::Writer,
+        stdout_rx: crate::transport::Reader,
+        stdin_tx: crate::transport::Writer,
     ) -> IdlcResult<JoinHandle<IdlcResult<()>>> {
         macro_rules! run_server {
             ($obj:expr) => {
