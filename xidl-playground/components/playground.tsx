@@ -1,6 +1,15 @@
 'use client';
 
-import { Code2, FileCode, Plus, Settings, Trash2, X } from 'lucide-react';
+import {
+  Code2,
+  FileCode,
+  Github,
+  Plus,
+  Settings,
+  Share2,
+  Trash2,
+  X,
+} from 'lucide-react';
 import {
   compressToEncodedURIComponent,
   decompressFromEncodedURIComponent,
@@ -87,6 +96,7 @@ export function Playground() {
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [formatting, setFormatting] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
   const [propsOpen, setPropsOpen] = useState(false);
   const moduleRef = useRef<WasmModule | null>(null);
   const urlReadyRef = useRef(false);
@@ -285,6 +295,21 @@ export function Playground() {
     }
   }, [idl, loadWasm]);
 
+  const handleShare = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    const url = window.location.href;
+    navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000);
+      })
+      .catch(err => {
+        console.error('Failed to copy URL:', err);
+        setError('Failed to copy URL to clipboard');
+      });
+  }, []);
+
   const addProp = () => {
     setPropItems(items => [
       ...items,
@@ -359,6 +384,26 @@ export function Playground() {
           >
             <FileCode className="h-3.5 w-3.5" />
             {loading ? 'Generating...' : 'Generate'}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() =>
+              window.open('https://github.com/xidl/xidl', '_blank')
+            }
+            className="gap-2"
+          >
+            <Github className="h-4 w-4" />
+            GitHub
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleShare}
+            className="gap-2"
+          >
+            <Share2 className="h-4 w-4" />
+            {copySuccess ? 'Copied!' : 'Share'}
           </Button>
           <ThemeToggle />
         </div>
