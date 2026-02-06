@@ -15,7 +15,7 @@ enum FormatLang {
 }
 
 #[derive(Debug, Args)]
-pub struct FormatArgs {
+pub struct ArgsFormat {
     #[arg(long = "lang", short = 'l', value_enum, default_value_t = FormatLang::Idl)]
     lang: FormatLang,
     /// Format inplace.
@@ -25,7 +25,7 @@ pub struct FormatArgs {
     files: Vec<PathBuf>,
 }
 
-impl FormatArgs {
+impl ArgsFormat {
     pub fn execute(self) -> IdlcResult<()> {
         for file in self.files.iter() {
             let source = std::fs::read_to_string(file)?;

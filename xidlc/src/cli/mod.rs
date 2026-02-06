@@ -2,7 +2,7 @@ mod fmt;
 mod highlight;
 
 mod generate;
-pub use generate::CliArgs;
+pub use generate::ArgsGenerate;
 
 use crate::driver;
 use crate::error::IdlcResult;
@@ -14,15 +14,15 @@ pub struct Cli {
     #[command(subcommand)]
     command: Option<Command>,
     #[command(flatten)]
-    generate: generate::GenerateArgs,
+    generate: ArgsGenerate,
 }
 
 #[derive(Debug, Subcommand)]
 enum Command {
     #[command(alias = "format")]
-    Fmt(fmt::FormatArgs),
+    Fmt(fmt::ArgsFormat),
     #[command(hide = true)]
-    Highlight(highlight::HighlightArgs),
+    Highlight(highlight::ArgsHighlight),
 }
 
 impl Cli {
@@ -30,10 +30,7 @@ impl Cli {
         match self.command {
             Some(Command::Fmt(args)) => args.execute(),
             Some(Command::Highlight(args)) => args.execute(),
-            None => {
-                let args = self.generate.into_cli_args()?;
-                driver::Driver::run(args).await
-            }
+            None => driver::Driver::run(self.generate).await,
         }
     }
 }

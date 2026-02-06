@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests;
 
-use crate::cli::CliArgs;
+use crate::cli::ArgsGenerate;
 use crate::error::{IdlcError, IdlcResult};
 use crate::jsonrpc::{Codegen, CodegenClient};
 use crate::transport::{Reader, Writer};
@@ -29,11 +29,11 @@ impl File {
 }
 
 pub struct Driver {
-    args: CliArgs,
+    args: ArgsGenerate,
 }
 
 impl Driver {
-    pub async fn run(args: CliArgs) -> IdlcResult<()> {
+    pub async fn run(args: ArgsGenerate) -> IdlcResult<()> {
         Self { args }.execute().await
     }
 
@@ -48,7 +48,7 @@ impl Driver {
             props.insert("enable_server".into(), false.into());
         }
 
-        for input in self.args.inputs {
+        for input in self.args.files {
             let source = fs::read_to_string(&input)?;
             let files = generator
                 .generate_from_idl(&source, &input, props.clone())

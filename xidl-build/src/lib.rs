@@ -61,10 +61,10 @@ impl XidlBuild for Builder {
                     .map_err(|err| IdlcError::fmt(format!("OUT_DIR is not set: {err}")))?,
             ),
         };
-        let args = xidlc::cli::CliArgs {
+        let args = xidlc::cli::ArgsGenerate {
             lang: self.lang.clone(),
             out_dir: out_dir.to_string_lossy().to_string(),
-            inputs: inputs.iter().map(|p| p.as_ref().to_path_buf()).collect(),
+            files: inputs.iter().map(|p| p.as_ref().to_path_buf()).collect(),
             skip_client: self.skip_client,
             skip_server: self.skip_server,
         };

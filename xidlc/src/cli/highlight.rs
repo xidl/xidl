@@ -3,11 +3,11 @@ use clap::Args;
 use std::path::PathBuf;
 
 #[derive(Debug, Args)]
-pub struct HighlightArgs {
+pub struct ArgsHighlight {
     files: Vec<PathBuf>,
 }
 
-impl HighlightArgs {
+impl ArgsHighlight {
     pub fn execute(self) -> IdlcResult<()> {
         for (idx, input) in self.files.iter().enumerate() {
             let source = std::fs::read_to_string(input)?;
