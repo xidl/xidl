@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "next lint"
   },
+  "packageManager": "pnpm@10.13.1",
   "dependencies": {
     "@radix-ui/react-collapsible": "1.1.2",
     "@radix-ui/react-scroll-area": "^1.2.10",

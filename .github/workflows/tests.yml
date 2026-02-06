@@ -1,0 +1,53 @@
+name: tests
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  cargo-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.92.0
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install cross
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cross
+
+      - name: Cargo test
+        run: |
+          cargo test --all
+          sh scripts/build-wasm.sh
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: xidl-playground/pnpm-lock.yaml
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install playground deps
+        run: pnpm install --frozen-lockfile
+        working-directory: xidl-playground
+
+      - name: Build playground
+        run: pnpm build
+        working-directory: xidl-playground

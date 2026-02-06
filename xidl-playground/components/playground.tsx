@@ -53,6 +53,9 @@ type WasmModule = {
   UTF8ToString: (ptr: number) => string;
 };
 
+const BASE_PATH = (process.env.NEXT_PUBLIC_BASE_PATH ?? '').replace(/\/$/, '');
+const WASM_BASE = `${BASE_PATH}/wasm`;
+
 export function Playground() {
   const [lang, setLang] = useState('rust');
   const [skipClient, setSkipClient] = useState(false);
@@ -89,7 +92,7 @@ export function Playground() {
         return;
       }
       const script = document.createElement('script');
-      script.src = '/wasm/xidlc.js';
+      script.src = `${WASM_BASE}/xidlc.js`;
       script.async = true;
       script.dataset.xidlc = '1';
       script.onload = () => resolve();
@@ -105,7 +108,7 @@ export function Playground() {
     }
     // @ts-expect-error
     const module = await factory({
-      locateFile: (path: string) => `/wasm/${path}`,
+      locateFile: (path: string) => `${WASM_BASE}/${path}`,
     });
     moduleRef.current = module;
     return module;
