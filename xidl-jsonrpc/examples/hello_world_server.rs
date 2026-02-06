@@ -12,9 +12,14 @@ struct Args {
 struct HelloWorldImpl;
 
 impl HelloWorld for HelloWorldImpl {
-    fn sayHello(&self, name: String) -> Result<(), xidl_jsonrpc::Error> {
-        eprintln!("Hello, {name}!");
-        Ok(())
+    fn sayHello<'a>(
+        &'a self,
+        name: String,
+    ) -> xidl_jsonrpc::BoxFuture<'a, Result<(), xidl_jsonrpc::Error>> {
+        Box::pin(async move {
+            eprintln!("Hello, {name}!");
+            Ok(())
+        })
     }
 }
 

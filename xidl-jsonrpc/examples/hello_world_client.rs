@@ -2,7 +2,8 @@ mod rpc;
 
 use clap::Parser;
 use rpc::{HelloWorld, HelloWorldClient};
-use std::net::TcpStream;
+use tokio::io::split;
+use tokio::net::TcpStream;
 
 #[derive(Parser)]
 struct Args {
@@ -12,17 +13,16 @@ struct Args {
     name: String,
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
 
-    let stream = TcpStream::connect(&args.addr)?;
+    let stream = TcpStream::connect(&args.addr).await?;
     stream.set_nodelay(true)?;
-
-    let reader = stream.try_clone()?;
-    let writer = stream;
+    let (reader, writer) = split(stream);
 
     let client = HelloWorldClient::new(reader, writer);
-    client.sayHello(args.name)?;
+    client.sayHello(args.name).await?;
     eprintln!("request sent");
 
     Ok(())
