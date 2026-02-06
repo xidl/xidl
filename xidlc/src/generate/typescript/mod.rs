@@ -1,3 +1,6 @@
+mod render_typescript;
+mod renderer;
+
 use crate::error::IdlcResult;
 use crate::jsonrpc::{Artifact, ArtifactFile};
 use crate::macros::hashmap;
@@ -6,8 +9,8 @@ use std::path::Path;
 use xidl_parser::hir;
 use xidl_parser::hir::{ParserProperties, Specification};
 
-use crate::generate::rust_axum::RustAxumRenderer;
-use crate::generate::rust_axum::typescript::{TsMode, render_typescript};
+pub use render_typescript::{TsMode, render_typescript};
+pub use renderer::TypescriptRenderer;
 
 pub fn generate(
     spec: hir::Specification,
@@ -16,7 +19,7 @@ pub fn generate(
 ) -> IdlcResult<Vec<Artifact>> {
     let file_name = input_path.file_stem().unwrap().to_str().unwrap();
 
-    let mut renderer = RustAxumRenderer::new()?;
+    let mut renderer = TypescriptRenderer::new()?;
     renderer.extend(&props);
 
     let ts = render_typescript(&spec, file_name, &renderer, TsMode::TypesOnly)?;

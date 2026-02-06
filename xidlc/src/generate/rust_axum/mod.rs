@@ -3,7 +3,6 @@ mod interface;
 mod openapi;
 mod render;
 mod spec;
-pub(crate) mod typescript;
 
 use crate::error::IdlcResult;
 use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactHir};
@@ -41,11 +40,11 @@ pub fn generate(
         content,
     })];
 
-    let ts = typescript::render_typescript(
+    let ts = crate::generate::typescript::render_typescript(
         &spec,
         file_name,
-        &renderer,
-        typescript::TsMode::InterfaceOnly,
+        renderer.typescript(),
+        crate::generate::typescript::TsMode::InterfaceOnly,
     )?;
     artifacts.push(Artifact::new_file(ArtifactFile {
         path: format!("{file_name}.iface.d.ts"),
@@ -68,11 +67,11 @@ pub fn generate(
     }));
 
     let non_interface = strip_interfaces(spec);
-    let ts_types = typescript::render_typescript(
+    let ts_types = crate::generate::typescript::render_typescript(
         &non_interface,
         file_name,
-        &renderer,
-        typescript::TsMode::TypesOnly,
+        renderer.typescript(),
+        crate::generate::typescript::TsMode::TypesOnly,
     )?;
     artifacts.push(Artifact::new_file(ArtifactFile {
         path: format!("{file_name}.d.ts"),

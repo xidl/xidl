@@ -1,5 +1,5 @@
 use crate::error::IdlcResult;
-use crate::generate::rust_axum::RustAxumRenderer;
+use crate::generate::typescript::TypescriptRenderer;
 use convert_case::{Case, Casing};
 use serde::Serialize;
 use std::collections::HashSet;
@@ -14,7 +14,7 @@ pub struct TsArtifacts {
 pub fn render_typescript(
     spec: &hir::Specification,
     file_stem: &str,
-    renderer: &RustAxumRenderer,
+    renderer: &TypescriptRenderer,
     mode: TsMode,
 ) -> IdlcResult<TsArtifacts> {
     let mut generator = TsGenerator::new(file_stem.to_string());
@@ -33,7 +33,7 @@ impl TsGenerator {
     fn render(
         &mut self,
         spec: &hir::Specification,
-        renderer: &RustAxumRenderer,
+        renderer: &TypescriptRenderer,
         mode: TsMode,
     ) -> IdlcResult<TsArtifacts> {
         let blocks = render_module_body(&spec.0, &[], renderer, mode)?;
@@ -99,7 +99,7 @@ struct ClientFileContext {
 fn render_module_body(
     defs: &[hir::Definition],
     module_path: &[String],
-    renderer: &RustAxumRenderer,
+    renderer: &TypescriptRenderer,
     mode: TsMode,
 ) -> IdlcResult<TsRenderOutput> {
     let mut out = TsRenderOutput::default();
@@ -214,7 +214,7 @@ struct ModuleContext {
 fn render_constr_type(
     constr: &hir::ConstrTypeDcl,
     module_path: &[String],
-    renderer: &RustAxumRenderer,
+    renderer: &TypescriptRenderer,
 ) -> IdlcResult<TsRenderOutput> {
     let mut out = TsRenderOutput::default();
     match constr {
@@ -241,7 +241,7 @@ fn render_constr_type(
 fn render_exception(
     except: &hir::ExceptDcl,
     module_path: &[String],
-    renderer: &RustAxumRenderer,
+    renderer: &TypescriptRenderer,
 ) -> IdlcResult<TsRenderOutput> {
     let def = hir::StructDcl {
         annotations: Vec::new(),
@@ -255,7 +255,7 @@ fn render_exception(
 fn render_type_dcl(
     ty: &hir::TypeDcl,
     module_path: &[String],
-    renderer: &RustAxumRenderer,
+    renderer: &TypescriptRenderer,
 ) -> IdlcResult<TsRenderOutput> {
     let mut out = TsRenderOutput::default();
     match &ty.decl {
@@ -333,7 +333,7 @@ fn render_type_dcl(
 fn render_interface(
     interface: &hir::InterfaceDcl,
     module_path: &[String],
-    renderer: &RustAxumRenderer,
+    renderer: &TypescriptRenderer,
 ) -> IdlcResult<TsRenderOutput> {
     let def = match &interface.decl {
         hir::InterfaceDclInner::InterfaceDef(def) => def,
@@ -407,7 +407,7 @@ fn render_interface(
 fn render_struct(
     def: &hir::StructDcl,
     module_path: &[String],
-    renderer: &RustAxumRenderer,
+    renderer: &TypescriptRenderer,
 ) -> IdlcResult<TsRenderOutput> {
     let ident = ts_ident(&def.ident);
     let parents = def
@@ -459,7 +459,7 @@ fn render_struct(
     })
 }
 
-fn render_enum(def: &hir::EnumDcl, renderer: &RustAxumRenderer) -> IdlcResult<TsRenderOutput> {
+fn render_enum(def: &hir::EnumDcl, renderer: &TypescriptRenderer) -> IdlcResult<TsRenderOutput> {
     let ident = ts_ident(&def.ident);
     let members = def
         .member
@@ -498,7 +498,7 @@ fn render_enum(def: &hir::EnumDcl, renderer: &RustAxumRenderer) -> IdlcResult<Ts
 fn render_union(
     def: &hir::UnionDef,
     module_path: &[String],
-    renderer: &RustAxumRenderer,
+    renderer: &TypescriptRenderer,
 ) -> IdlcResult<TsRenderOutput> {
     let ident = ts_ident(&def.ident);
     let mut variants = Vec::new();
@@ -546,7 +546,7 @@ fn render_union(
     })
 }
 
-fn render_bit_number(ident: &str, renderer: &RustAxumRenderer) -> IdlcResult<TsRenderOutput> {
+fn render_bit_number(ident: &str, renderer: &TypescriptRenderer) -> IdlcResult<TsRenderOutput> {
     let name = ts_ident(ident);
     let types = renderer.render_template(
         "ts/typedef.d.ts.j2",
@@ -1266,7 +1266,9 @@ fn zod_schema_for_type_spec(ty: &hir::TypeSpec, module_path: &[String]) -> Strin
                 let inner = zod_schema_for_type_spec(&seq.ty, module_path);
                 let mut schema = format!("z.array({inner})");
                 if let Some(len) = &seq.len {
+                    //
                     if let Some(size) = xidl_parser::hir::const_expr_to_i64(&len.0) {
+                        //
                         if size >= 0 {
                             schema = format!("{schema}.length({size})");
                         }
@@ -1300,6 +1302,7 @@ fn apply_array_zod(mut base: String, decl: &hir::Declarator) -> String {
         for len in &array.len {
             let mut wrapped = format!("z.array({base})");
             if let Some(size) = xidl_parser::hir::const_expr_to_i64(&len.0) {
+                //
                 if size >= 0 {
                     wrapped = format!("{wrapped}.length({size})");
                 }
@@ -1315,7 +1318,7 @@ fn ts_scoped_name(
     _module_path: &[String],
     target: TypeRefTarget,
 ) -> String {
-    let mut parts = value
+    let parts = value
         .name
         .iter()
         .map(|part| ts_ident(part))
