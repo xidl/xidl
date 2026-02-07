@@ -37,6 +37,8 @@ pub fn generate(
     let base = stem.to_case(Case::Snake);
     let filename = format!("{base}.h");
     let xcdr_header_name = format!("{base}_xcdr.h");
+    let include_guard = format!("{}_H", base.to_case(Case::UpperSnake));
+    let xcdr_include_guard = format!("{}_XCDR_H", base.to_case(Case::UpperSnake));
 
     let mut renderer = CRenderer::new()?;
     renderer
@@ -49,6 +51,7 @@ pub fn generate(
         &json!({
             "definitions": output.header,
             "filename": filename,
+            "include_guard": include_guard,
         }),
     )?;
     let source = renderer.render_template(
@@ -63,6 +66,7 @@ pub fn generate(
         &json!({
             "definitions": output.xcdr_header,
             "filename": xcdr_header_name,
+            "include_guard": xcdr_include_guard,
         }),
     )?;
     let xcdr_source = renderer.render_template(

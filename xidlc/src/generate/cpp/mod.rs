@@ -35,6 +35,7 @@ pub fn generate(
         .unwrap_or("output");
     let base = stem.to_case(Case::Snake);
     let header_name = format!("{base}.h");
+    let include_guard = format!("{}_H", base.to_case(Case::UpperSnake));
 
     let mut renderer = CppRenderer::new()?;
     renderer
@@ -48,6 +49,7 @@ pub fn generate(
         &json!({
             "definitions": output.header,
             "filename": header_name,
+            "include_guard": include_guard,
         }),
     )?;
     let source = renderer.render_template(
