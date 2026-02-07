@@ -1,5 +1,5 @@
 {% if extends %}export interface {{ ident }} extends {{ extends }} {
-{% else %}export interface {{ ident }} {
-{% endif %}
-{% for field in fields %}    {{ field.prop }}: {{ field.ty }};
-{% endfor %}}
+    {% else %}export interface {{ ident }} {
+        {% endif %}
+        {% for field in fields %}    {{ field.prop }}: {{ field.ty }};
+        {% endfor %}}

@@ -1,7 +1,7 @@
 typedef struct {{ ident }} {
-{% for field in members %}
-  {{ field.ty }} {{ field.name }}{{ field.dims | join }};
-{% endfor %}
+    {% for field in members %}
+        {{ field.ty }} {{ field.name }}{{ field.dims | join }};
+    {% endfor %}
 } {{ ident }};
 
 {{ ident }} {{ ident }}_new(void);

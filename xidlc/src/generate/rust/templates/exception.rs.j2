@@ -1,6 +1,6 @@
 #[derive(Debug, Clone)]
 pub struct {{ ident }} {
-{% for member in members %}
-    pub {{ member.name }}: {{ member.ty }},
-{% endfor %}
+    {% for member in members %}
+        pub {{ member.name }}: {{ member.ty }},
+    {% endfor %}
 }

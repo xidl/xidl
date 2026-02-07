@@ -1,10 +1,10 @@
 class {{ ident }}{% if parents | length > 0 %} : public {{ parents | join(", public ") }}{% endif %} {
-public:
+    public:
     virtual ~{{ ident }}() = default;
-{% for method in methods %}
-    virtual {{ method.ret }} {{ method.name }}({{ method.params | join(", ") }}){% if method.is_const %} const{% endif %} = 0;
-{% endfor %}
-{% for line in nested_lines %}
-    {{ line }}
-{% endfor %}
+    {% for method in methods %}
+        virtual {{ method.ret }} {{ method.name }}({{ method.params | join(", ") }}){% if method.is_const %} const{% endif %} = 0;
+    {% endfor %}
+    {% for line in nested_lines %}
+        {{ line }}
+    {% endfor %}
 };

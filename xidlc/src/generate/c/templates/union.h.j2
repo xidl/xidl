@@ -1,10 +1,10 @@
 typedef struct {{ ident }} {
-  {{ switch_ty }} _d;
-  union {
-{% for case in cases %}
-    {{ case.ty }} {{ case.name }}{{ case.dims | join }};
-{% endfor %}
-  } _u;
+    {{ switch_ty }} _d;
+    union {
+        {% for case in cases %}
+            {{ case.ty }} {{ case.name }}{{ case.dims | join }};
+        {% endfor %}
+    } _u;
 } {{ ident }};
 
 {{ ident }} {{ ident }}_new(void);

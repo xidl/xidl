@@ -1,7 +1,7 @@
 typedef struct {{ ident }} {
-{% for field in fields %}
-  {{ field.ty }} {{ field.ident }}; /* pos {{ field.pos }} */
-{% endfor %}
+    {% for field in fields %}
+        {{ field.ty }} {{ field.ident }}; /* pos {{ field.pos }} */
+    {% endfor %}
 } {{ ident }};
 
 {{ ident }} {{ ident }}_new(void);

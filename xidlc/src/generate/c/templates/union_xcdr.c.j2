@@ -1,147 +1,147 @@
 XcdrBufferResult {{ ident }}_serialize({{ ident }} const* self, XcdrBuffer buf) {
-  uint8_t *ptr = buf.ptr;
-  size_t len = buf.len;
-  FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
-  XcdrFfiError err = Ok;
-  {% set ns = namespace(expr=xcdr_switch_field.expr) %}
-  {% for dim in xcdr_switch_field.dims %}
-  for (size_t i{{ loop.index0 }} = 0; i{{ loop.index0 }} < {{ dim }}; ++i{{ loop.index0 }}) {{ "{" }}
-  {% set ns.expr = ns.expr ~ "[i" ~ loop.index0 ~ "]" %}
-  {% endfor %}
-  {% if xcdr_switch_field.kind.kind == "primitive" %}
-  err = {{ xcdr_switch_field.kind.serialize_fn }}(&serializer, "{{ ns.expr }}");
-  if (err != Ok) {
-    return (XcdrBufferResult){ err, cdr_serializer_position(&serializer) };
-  }
-  {% elif xcdr_switch_field.kind.kind == "custom" %}
-  {
-    size_t before = cdr_serializer_position(&serializer);
-    XcdrBufferResult child = {{ xcdr_switch_field.kind.type_name }}_serialize(
-        &{{ ns.expr }},
-        (XcdrBuffer){ .ptr = ptr + before, .len = len - before, .pos = 0 });
-    if (child.err != Ok) {
-      return (XcdrBufferResult){ child.err, before + child.used };
-    }
-    serializer.pos = before + child.used;
-  }
-  {% else %}
-  /* {{ xcdr_switch_field.kind.reason }} */
-  {% endif %}
-  {% for dim in xcdr_switch_field.dims | reverse %}
-  }
-  {% endfor %}
-  switch (self->_d) {
-  {% for case in xcdr_cases %}
-  {% for label in case.labels %}
-  {% if label == "default" %}
-  default:
-  {% else %}
-  case {{ label }}:
-  {% endif %}
-  {% endfor %}
-  {% set ns = namespace(expr=case.field.expr) %}
-  {% for dim in case.field.dims %}
-  for (size_t i{{ loop.index0 }} = 0; i{{ loop.index0 }} < {{ dim }}; ++i{{ loop.index0 }}) {{ "{" }}
-  {% set ns.expr = ns.expr ~ "[i" ~ loop.index0 ~ "]" %}
-  {% endfor %}
-  {% if case.field.kind.kind == "primitive" %}
-  err = {{ case.field.kind.serialize_fn }}(&serializer, "{{ ns.expr }}");
-  if (err != Ok) {
-    return (XcdrBufferResult){ err, cdr_serializer_position(&serializer) };
-  }
-  {% elif case.field.kind.kind == "custom" %}
-  {
-    size_t before = cdr_serializer_position(&serializer);
-    XcdrBufferResult child = {{ case.field.kind.type_name }}_serialize(
-        &{{ ns.expr }},
-        (XcdrBuffer){ .ptr = ptr + before, .len = len - before, .pos = 0 });
-    if (child.err != Ok) {
-      return (XcdrBufferResult){ child.err, before + child.used };
-    }
-    serializer.pos = before + child.used;
-  }
-  {% else %}
-  /* {{ case.field.kind.reason }} */
-  {% endif %}
-  {% for dim in case.field.dims | reverse %}
-  }
-  {% endfor %}
-    break;
-  {% endfor %}
-  }
-  return (XcdrBufferResult){ Ok, cdr_serializer_position(&serializer) };
-}
+    uint8_t *ptr = buf.ptr;
+    size_t len = buf.len;
+    FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
+    XcdrFfiError err = Ok;
+    {% set ns = namespace(expr=xcdr_switch_field.expr) %}
+        {% for dim in xcdr_switch_field.dims %}
+            for (size_t i{{ loop.index0 }} = 0; i{{ loop.index0 }} < {{ dim }}; ++i{{ loop.index0 }}) {{ "{" }}
+            {% set ns.expr = ns.expr ~ "[i" ~ loop.index0 ~ "]" %}
+            {% endfor %}
+            {% if xcdr_switch_field.kind.kind == "primitive" %}
+                err = {{ xcdr_switch_field.kind.serialize_fn }}(&serializer, "{{ ns.expr }}");
+                if (err != Ok) {
+                    return (XcdrBufferResult){ err, cdr_serializer_position(&serializer) };
+                }
+            {% elif xcdr_switch_field.kind.kind == "custom" %}
+                {
+                    size_t before = cdr_serializer_position(&serializer);
+                    XcdrBufferResult child = {{ xcdr_switch_field.kind.type_name }}_serialize(
+                    &{{ ns.expr }},
+                    (XcdrBuffer){ .ptr = ptr + before, .len = len - before, .pos = 0 });
+                    if (child.err != Ok) {
+                        return (XcdrBufferResult){ child.err, before + child.used };
+                    }
+                    serializer.pos = before + child.used;
+                }
+            {% else %}
+                /* {{ xcdr_switch_field.kind.reason }} */
+            {% endif %}
+            {% for dim in xcdr_switch_field.dims | reverse %}
+            }
+        {% endfor %}
+        switch (self->_d) {
+            {% for case in xcdr_cases %}
+                {% for label in case.labels %}
+                    {% if label == "default" %}
+                        default:
+                    {% else %}
+                        case {{ label }}:
+                    {% endif %}
+                {% endfor %}
+                {% set ns = namespace(expr=case.field.expr) %}
+                    {% for dim in case.field.dims %}
+                        for (size_t i{{ loop.index0 }} = 0; i{{ loop.index0 }} < {{ dim }}; ++i{{ loop.index0 }}) {{ "{" }}
+                        {% set ns.expr = ns.expr ~ "[i" ~ loop.index0 ~ "]" %}
+                        {% endfor %}
+                        {% if case.field.kind.kind == "primitive" %}
+                            err = {{ case.field.kind.serialize_fn }}(&serializer, "{{ ns.expr }}");
+                            if (err != Ok) {
+                                return (XcdrBufferResult){ err, cdr_serializer_position(&serializer) };
+                            }
+                        {% elif case.field.kind.kind == "custom" %}
+                            {
+                                size_t before = cdr_serializer_position(&serializer);
+                                XcdrBufferResult child = {{ case.field.kind.type_name }}_serialize(
+                                &{{ ns.expr }},
+                                (XcdrBuffer){ .ptr = ptr + before, .len = len - before, .pos = 0 });
+                                if (child.err != Ok) {
+                                    return (XcdrBufferResult){ child.err, before + child.used };
+                                }
+                                serializer.pos = before + child.used;
+                            }
+                        {% else %}
+                            /* {{ case.field.kind.reason }} */
+                        {% endif %}
+                        {% for dim in case.field.dims | reverse %}
+                        }
+                    {% endfor %}
+                    break;
+                {% endfor %}
+                }
+                return (XcdrBufferResult){ Ok, cdr_serializer_position(&serializer) };
+                }
 
-XcdrBufferResult {{ ident }}_deserialize({{ ident }}* self, XcdrConstBuffer buf) {
-  const uint8_t *ptr = buf.ptr;
-  size_t len = buf.len;
-  FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
-  XcdrFfiError err = Ok;
-  {% set ns = namespace(expr=xcdr_switch_field.expr) %}
-  {% for dim in xcdr_switch_field.dims %}
-  for (size_t i{{ loop.index0 }} = 0; i{{ loop.index0 }} < {{ dim }}; ++i{{ loop.index0 }}) {{ "{" }}
-  {% set ns.expr = ns.expr ~ "[i" ~ loop.index0 ~ "]" %}
-  {% endfor %}
-  {% if xcdr_switch_field.kind.kind == "primitive" %}
-  err = {{ xcdr_switch_field.kind.deserialize_fn }}(&deserializer, "{{ ns.expr }}");
-  if (err != Ok) {
-    return (XcdrBufferResult){ err, cdr_deserializer_position(&deserializer) };
-  }
-  {% elif xcdr_switch_field.kind.kind == "custom" %}
-  {
-    size_t before = cdr_deserializer_position(&deserializer);
-    XcdrBufferResult child = {{ xcdr_switch_field.kind.type_name }}_deserialize(
-        &{{ ns.expr }},
-        (XcdrConstBuffer){ .ptr = ptr + before, .len = len - before, .pos = 0 });
-    if (child.err != Ok) {
-      return (XcdrBufferResult){ child.err, before + child.used };
-    }
-    deserializer.pos = before + child.used;
-  }
-  {% else %}
-  /* {{ xcdr_switch_field.kind.reason }} */
-  {% endif %}
-  {% for dim in xcdr_switch_field.dims | reverse %}
-  }
-  {% endfor %}
-  switch (self->_d) {
-  {% for case in xcdr_cases %}
-  {% for label in case.labels %}
-  {% if label == "default" %}
-  default:
-  {% else %}
-  case {{ label }}:
-  {% endif %}
-  {% endfor %}
-  {% set ns = namespace(expr=case.field.expr) %}
-  {% for dim in case.field.dims %}
-  for (size_t i{{ loop.index0 }} = 0; i{{ loop.index0 }} < {{ dim }}; ++i{{ loop.index0 }}) {{ "{" }}
-  {% set ns.expr = ns.expr ~ "[i" ~ loop.index0 ~ "]" %}
-  {% endfor %}
-  {% if case.field.kind.kind == "primitive" %}
-  err = {{ case.field.kind.deserialize_fn }}(&deserializer, "{{ ns.expr }}");
-  if (err != Ok) {
-    return (XcdrBufferResult){ err, cdr_deserializer_position(&deserializer) };
-  }
-  {% elif case.field.kind.kind == "custom" %}
-  {
-    size_t before = cdr_deserializer_position(&deserializer);
-    XcdrBufferResult child = {{ case.field.kind.type_name }}_deserialize(
-        &{{ ns.expr }},
-        (XcdrConstBuffer){ .ptr = ptr + before, .len = len - before, .pos = 0 });
-    if (child.err != Ok) {
-      return (XcdrBufferResult){ child.err, before + child.used };
-    }
-    deserializer.pos = before + child.used;
-  }
-  {% else %}
-  /* {{ case.field.kind.reason }} */
-  {% endif %}
-  {% for dim in case.field.dims | reverse %}
-  }
-  {% endfor %}
-    break;
-  {% endfor %}
-  }
-  return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
-}
+                XcdrBufferResult {{ ident }}_deserialize({{ ident }}* self, XcdrConstBuffer buf) {
+                    const uint8_t *ptr = buf.ptr;
+                    size_t len = buf.len;
+                    FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
+                    XcdrFfiError err = Ok;
+                    {% set ns = namespace(expr=xcdr_switch_field.expr) %}
+                        {% for dim in xcdr_switch_field.dims %}
+                            for (size_t i{{ loop.index0 }} = 0; i{{ loop.index0 }} < {{ dim }}; ++i{{ loop.index0 }}) {{ "{" }}
+                            {% set ns.expr = ns.expr ~ "[i" ~ loop.index0 ~ "]" %}
+                            {% endfor %}
+                            {% if xcdr_switch_field.kind.kind == "primitive" %}
+                                err = {{ xcdr_switch_field.kind.deserialize_fn }}(&deserializer, "{{ ns.expr }}");
+                                if (err != Ok) {
+                                    return (XcdrBufferResult){ err, cdr_deserializer_position(&deserializer) };
+                                }
+                            {% elif xcdr_switch_field.kind.kind == "custom" %}
+                                {
+                                    size_t before = cdr_deserializer_position(&deserializer);
+                                    XcdrBufferResult child = {{ xcdr_switch_field.kind.type_name }}_deserialize(
+                                    &{{ ns.expr }},
+                                    (XcdrConstBuffer){ .ptr = ptr + before, .len = len - before, .pos = 0 });
+                                    if (child.err != Ok) {
+                                        return (XcdrBufferResult){ child.err, before + child.used };
+                                    }
+                                    deserializer.pos = before + child.used;
+                                }
+                            {% else %}
+                                /* {{ xcdr_switch_field.kind.reason }} */
+                            {% endif %}
+                            {% for dim in xcdr_switch_field.dims | reverse %}
+                            }
+                        {% endfor %}
+                        switch (self->_d) {
+                            {% for case in xcdr_cases %}
+                                {% for label in case.labels %}
+                                    {% if label == "default" %}
+                                        default:
+                                    {% else %}
+                                        case {{ label }}:
+                                    {% endif %}
+                                {% endfor %}
+                                {% set ns = namespace(expr=case.field.expr) %}
+                                    {% for dim in case.field.dims %}
+                                        for (size_t i{{ loop.index0 }} = 0; i{{ loop.index0 }} < {{ dim }}; ++i{{ loop.index0 }}) {{ "{" }}
+                                        {% set ns.expr = ns.expr ~ "[i" ~ loop.index0 ~ "]" %}
+                                        {% endfor %}
+                                        {% if case.field.kind.kind == "primitive" %}
+                                            err = {{ case.field.kind.deserialize_fn }}(&deserializer, "{{ ns.expr }}");
+                                            if (err != Ok) {
+                                                return (XcdrBufferResult){ err, cdr_deserializer_position(&deserializer) };
+                                            }
+                                        {% elif case.field.kind.kind == "custom" %}
+                                            {
+                                                size_t before = cdr_deserializer_position(&deserializer);
+                                                XcdrBufferResult child = {{ case.field.kind.type_name }}_deserialize(
+                                                &{{ ns.expr }},
+                                                (XcdrConstBuffer){ .ptr = ptr + before, .len = len - before, .pos = 0 });
+                                                if (child.err != Ok) {
+                                                    return (XcdrBufferResult){ child.err, before + child.used };
+                                                }
+                                                deserializer.pos = before + child.used;
+                                            }
+                                        {% else %}
+                                            /* {{ case.field.kind.reason }} */
+                                        {% endif %}
+                                        {% for dim in case.field.dims | reverse %}
+                                        }
+                                    {% endfor %}
+                                    break;
+                                {% endfor %}
+                                }
+                                return (XcdrBufferResult){ Ok, cdr_deserializer_position(&deserializer) };
+                                }

@@ -1,5 +1,5 @@
 {% if is_extern %}
-extern const {{ ty }} {{ ident }};
+    extern const {{ ty }} {{ ident }};
 {% else %}
-constexpr {{ ty }} {{ ident }} = {{ value }};
+    constexpr {{ ty }} {{ ident }} = {{ value }};
 {% endif %}

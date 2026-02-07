@@ -1,5 +1,5 @@
 {% if derive and derive | length > 0 %}
-#[derive({{ derive | join(", ") }})]
+    #[derive({{ derive | join(", ") }})]
 {%- endif %}
 pub struct {{ ident }} {
     tag: {{ switch_ty }},
@@ -7,12 +7,12 @@ pub struct {{ ident }} {
 }
 
 {% if derive and derive | length > 0 %}
-#[derive({{ derive | join(", ") }})]
+    #[derive({{ derive | join(", ") }})]
 {% endif %}
 union {{ ident }}Data {
-{%- for member in members %}
-    {{ member.name }}: core::mem::ManuallyDrop<{{ member.ty }}>,
-{%- endfor %}
+    {%- for member in members %}
+        {{ member.name }}: core::mem::ManuallyDrop<{{ member.ty }}>,
+    {%- endfor %}
 }
 
 impl Drop for {{ ident }} {
@@ -32,258 +32,257 @@ impl Drop for {{ ident }} {
 impl {{ ident }} {
     {% if opt.enable_serialize and opt.enable_deserialize %}
         pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
-            xidl_xcdr::SerializeKind::{{ serialize_kind }};
+        xidl_xcdr::SerializeKind::{{ serialize_kind }};
     {% endif %}
 
     {% for member in members %}
         pub fn new_{{ member.name }}(value: {{ member.ty }}) -> Self {
             {% set case = cases[loop.index - 1].pattern %}
-            {% if case == "_" %}
-                {% set case = [switch_ty, "::default()"] | join %}
-            {% endif %}
-            Self {
-                tag: {{ case }},
-                data: {{ ident }}Data {
-                    {{ member.name }}: core::mem::ManuallyDrop::new(value),
-                }
-            }
-        }
-
-        pub fn is_{{ member.name }}(&self) -> bool {
-            matches!(self.tag, {{ cases[loop.index - 1].pattern }})
-        }
-
-        pub fn as_{{ member.name }}(&self) -> &{{ member.ty }} {
-            debug_assert!(self.is_{{ member.name }}());
-            unsafe { &self.data.{{ member.name }} }
-        }
-
-        pub fn as_{{ member.name }}_mut(&mut self) -> &mut {{ member.ty }} {
-            debug_assert!(self.is_{{ member.name }}());
-            unsafe { &mut self.data.{{ member.name }} }
-        }
-
-        pub fn into_{{ member.name }}(self) -> {{ member.ty }} {
-            debug_assert!(self.is_{{ member.name }}());
-            unsafe {
-                let mut forget = core::mem::ManuallyDrop::new(self);
-                core::mem::ManuallyDrop::take(&mut forget.data.{{ member.name }})
-            }
-        }
-    {% endfor %}
-
-
-    pub fn tag(&self) -> &{{ switch_ty }} {
-        &self.tag
-    }
-}
-
-{% if has_serde_serialize %}
-impl serde::Serialize for {{ ident }} {
-    fn serialize<__S>(&self, __serializer: __S) -> serde::__private228::Result<__S::Ok, __S::Error>
-    where
-        __S: serde::Serializer,
-    {
-        match self.tag {
-            {% for case in cases %}
-                {{ case.pattern }} => {
-                    let mut s = serde::Serializer::serialize_struct_variant(
-                        __serializer,
-                        "{{ ident }}",
-                        {{ loop.index - 1}},
-                        "{{ case.pattern }}",
-                        size_of::<{{ case.type }}>(),
-                    )?;
-                    let x = unsafe { std::ops::Deref::deref(&self.data.{{ case.member }}) };
-                    serde::ser::SerializeStructVariant::serialize_field(&mut s, "{{ case.pattern }}", x)?;
-                    serde::ser::SerializeStructVariant::end(s)
-                },
-            {% endfor %}
-        }
-    }
-}
-{% endif %}
-
-{% if has_serde_deserialize %}
-impl<'de> serde::Deserialize<'de> for {{ ident }} {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        const VARIANTS: &[&str] = &[
-            {% for case in cases %}
-                "{{ case.pattern }}",
-            {% endfor %}
-        ];
-
-        enum __Variant {
-            {% for case in cases %}
-                __Case{{ loop.index0 }},
-            {% endfor %}
-        }
-
-        impl<'de> serde::Deserialize<'de> for __Variant {
-            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-            where
-                D: serde::Deserializer<'de>,
-            {
-                struct __VariantVisitor;
-
-                impl serde::de::Visitor<'_> for __VariantVisitor {
-                    type Value = __Variant;
-
-                    fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
-                        formatter.write_str("union variant")
-                    }
-
-                    fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
-                    where
-                        E: serde::de::Error,
-                    {
-                        match value {
-                            {% for case in cases %}
-                                "{{ case.pattern }}" => Ok(__Variant::__Case{{ loop.index0 }}),
-                            {% endfor %}
-                            _ => Err(E::unknown_variant(value, VARIANTS)),
+                {% if case == "_" %}
+                    {% set case = [switch_ty, "::default()"] | join %}
+                    {% endif %}
+                    Self {
+                        tag: {{ case }},
+                        data: {{ ident }}Data {
+                            {{ member.name }}: core::mem::ManuallyDrop::new(value),
                         }
                     }
                 }
 
-                deserializer.deserialize_identifier(__VariantVisitor)
+                pub fn is_{{ member.name }}(&self) -> bool {
+                    matches!(self.tag, {{ cases[loop.index - 1].pattern }})
+                }
+
+                pub fn as_{{ member.name }}(&self) -> &{{ member.ty }} {
+                    debug_assert!(self.is_{{ member.name }}());
+                    unsafe { &self.data.{{ member.name }} }
+                }
+
+                pub fn as_{{ member.name }}_mut(&mut self) -> &mut {{ member.ty }} {
+                    debug_assert!(self.is_{{ member.name }}());
+                    unsafe { &mut self.data.{{ member.name }} }
+                }
+
+                pub fn into_{{ member.name }}(self) -> {{ member.ty }} {
+                    debug_assert!(self.is_{{ member.name }}());
+                    unsafe {
+                        let mut forget = core::mem::ManuallyDrop::new(self);
+                        core::mem::ManuallyDrop::take(&mut forget.data.{{ member.name }})
+                    }
+                }
+            {% endfor %}
+
+            pub fn tag(&self) -> &{{ switch_ty }} {
+                &self.tag
             }
         }
 
-        struct __Visitor;
-
-        impl<'de> serde::de::Visitor<'de> for __Visitor {
-            type Value = {{ ident }};
-
-            fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
-                formatter.write_str("externally tagged union {{ ident }}")
+        {% if has_serde_serialize %}
+            impl serde::Serialize for {{ ident }} {
+                fn serialize<__S>(&self, __serializer: __S) -> serde::__private228::Result<__S::Ok, __S::Error>
+                where
+                __S: serde::Serializer,
+                {
+                    match self.tag {
+                        {% for case in cases %}
+                            {{ case.pattern }} => {
+                                let mut s = serde::Serializer::serialize_struct_variant(
+                                __serializer,
+                                "{{ ident }}",
+                                {{ loop.index - 1}},
+                                "{{ case.pattern }}",
+                                size_of::<{{ case.type }}>(),
+                                )?;
+                                let x = unsafe { std::ops::Deref::deref(&self.data.{{ case.member }}) };
+                                serde::ser::SerializeStructVariant::serialize_field(&mut s, "{{ case.pattern }}", x)?;
+                                serde::ser::SerializeStructVariant::end(s)
+                            },
+                        {% endfor %}
+                    }
+                }
             }
+        {% endif %}
 
-            fn visit_enum<A>(self, data: A) -> Result<Self::Value, A::Error>
-            where
-                A: serde::de::EnumAccess<'de>,
-            {
-                let (variant, variant_access) = data.variant::<__Variant>()?;
-                match variant {
+        {% if has_serde_deserialize %}
+            impl<'de> serde::Deserialize<'de> for {{ ident }} {
+                fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+                where
+                D: serde::Deserializer<'de>,
+                {
+                    const VARIANTS: &[&str] = &[
                     {% for case in cases %}
-                        __Variant::__Case{{ loop.index0 }} => {
-                            struct __CaseVisitor;
+                        "{{ case.pattern }}",
+                    {% endfor %}
+                    ];
 
-                            impl<'de> serde::de::Visitor<'de> for __CaseVisitor {
-                                type Value = {{ case.type }};
+                    enum __Variant {
+                        {% for case in cases %}
+                            __Case{{ loop.index0 }},
+                        {% endfor %}
+                    }
 
-                                fn expecting(
-                                    &self,
-                                    formatter: &mut core::fmt::Formatter,
-                                ) -> core::fmt::Result {
-                                    formatter.write_str("struct variant {{ case.pattern }}")
-                                }
+                    impl<'de> serde::Deserialize<'de> for __Variant {
+                        fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+                        where
+                        D: serde::Deserializer<'de>,
+                        {
+                            struct __VariantVisitor;
 
-                                fn visit_map<M>(self, mut map: M) -> Result<Self::Value, M::Error>
-                                where
-                                    M: serde::de::MapAccess<'de>,
-                                {
-                                    let mut value = None;
-                                    while let Some(key) = map.next_key::<String>()? {
-                                        if key == "{{ case.pattern }}" {
-                                            if value.is_some() {
-                                                return Err(serde::de::Error::duplicate_field(
-                                                    "{{ case.pattern }}",
-                                                ));
-                                            }
-                                            value = Some(map.next_value()?);
-                                        } else {
-                                            let _: serde::de::IgnoredAny = map.next_value()?;
-                                        }
-                                    }
-                                    value.ok_or_else(|| {
-                                        serde::de::Error::missing_field("{{ case.pattern }}")
-                                    })
-                                }
+                            impl serde::de::Visitor<'_> for __VariantVisitor {
+                            type Value = __Variant;
+
+                            fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+                                formatter.write_str("union variant")
                             }
 
-                            let value = serde::de::VariantAccess::struct_variant(
-                                variant_access,
-                                &["{{ case.pattern }}"],
-                                __CaseVisitor,
-                            )?;
-                            {% if case.is_default %}
-                                let tag = {{ switch_ty }}::default();
-                            {% else %}
-                                let tag = {{ case.labels[0] }};
-                            {% endif %}
-                            Ok({{ ident }} {
-                                tag,
-                                data: {{ ident }}Data {
-                                    {{ case.member }}: core::mem::ManuallyDrop::new(value),
-                                },
-                            })
+                            fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+                            where
+                            E: serde::de::Error,
+                            {
+                                match value {
+                                    {% for case in cases %}
+                                        "{{ case.pattern }}" => Ok(__Variant::__Case{{ loop.index0 }}),
+                                    {% endfor %}
+                                    _ => Err(E::unknown_variant(value, VARIANTS)),
+                                }
+                            }
                         }
-                    {% endfor %}
-                }
-            }
-        }
 
-        deserializer.deserialize_enum("{{ ident }}", VARIANTS, __Visitor)
-    }
-}
-{% endif %}
-
-{% if opt.enable_serialize %}
-impl xidl_xcdr::XcdrSerialize for {{ ident }} {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
-        serializer.end_field()?;
-        match self.tag {
-            {% for case in cases %}
-                {{ case.pattern }} => {
-                    let value = unsafe { self.data.{{ case.member }}.as_ref() };
-                    serializer.begin_field(xidl_xcdr::FieldId({{ case.field_id }}), false, 0)?;
-                    xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                    serializer.end_field()?;
-                },
-            {% endfor %}
-            {% if not has_default %}
-                _ => {}
-            {% endif %}
-        }
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-{% endif %}
-
-{% if opt.enable_deserialize %}
-impl xidl_xcdr::XcdrDeserialize for {{ ident }} {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = match tag {
-            {% for case in cases %}
-                {{ case.pattern }} => {
-                    {{ ident }}Data {
-                        {{ case.member }}: core::mem::ManuallyDrop::new(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?),
+                        deserializer.deserialize_identifier(__VariantVisitor)
                     }
                 }
-            {% endfor %}
-            {% if not has_default %}
-                    _ => { todo!() }
-            {% endif %}
-        };
-        Ok(Self { tag, data } )
-    }
-}
-{% endif %}
+
+                struct __Visitor;
+
+                impl<'de> serde::de::Visitor<'de> for __Visitor {
+                    type Value = {{ ident }};
+
+                    fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+                        formatter.write_str("externally tagged union {{ ident }}")
+                    }
+
+                    fn visit_enum<A>(self, data: A) -> Result<Self::Value, A::Error>
+                    where
+                    A: serde::de::EnumAccess<'de>,
+                    {
+                        let (variant, variant_access) = data.variant::<__Variant>()?;
+                        match variant {
+                            {% for case in cases %}
+                                __Variant::__Case{{ loop.index0 }} => {
+                                    struct __CaseVisitor;
+
+                                    impl<'de> serde::de::Visitor<'de> for __CaseVisitor {
+                                        type Value = {{ case.type }};
+
+                                        fn expecting(
+                                        &self,
+                                        formatter: &mut core::fmt::Formatter,
+                                        ) -> core::fmt::Result {
+                                            formatter.write_str("struct variant {{ case.pattern }}")
+                                        }
+
+                                        fn visit_map<M>(self, mut map: M) -> Result<Self::Value, M::Error>
+                                        where
+                                        M: serde::de::MapAccess<'de>,
+                                        {
+                                            let mut value = None;
+                                            while let Some(key) = map.next_key::<String>()? {
+                                                if key == "{{ case.pattern }}" {
+                                                    if value.is_some() {
+                                                        return Err(serde::de::Error::duplicate_field(
+                                                        "{{ case.pattern }}",
+                                                        ));
+                                                    }
+                                                    value = Some(map.next_value()?);
+                                                } else {
+                                                    let _: serde::de::IgnoredAny = map.next_value()?;
+                                                }
+                                            }
+                                            value.ok_or_else(|| {
+                                                serde::de::Error::missing_field("{{ case.pattern }}")
+                                            })
+                                        }
+                                    }
+
+                                    let value = serde::de::VariantAccess::struct_variant(
+                                    variant_access,
+                                    &["{{ case.pattern }}"],
+                                    __CaseVisitor,
+                                    )?;
+                                    {% if case.is_default %}
+                                        let tag = {{ switch_ty }}::default();
+                                    {% else %}
+                                        let tag = {{ case.labels[0] }};
+                                    {% endif %}
+                                    Ok({{ ident }} {
+                                        tag,
+                                        data: {{ ident }}Data {
+                                            {{ case.member }}: core::mem::ManuallyDrop::new(value),
+                                        },
+                                    })
+                                }
+                            {% endfor %}
+                        }
+                    }
+                }
+
+                deserializer.deserialize_enum("{{ ident }}", VARIANTS, __Visitor)
+            }
+            }
+        {% endif %}
+
+        {% if opt.enable_serialize %}
+            impl xidl_xcdr::XcdrSerialize for {{ ident }} {
+                fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
+                    Self::SERIALIZE_KIND
+                }
+
+                fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
+                &self,
+                serializer: &mut S,
+                ) -> xidl_xcdr::error::XcdrResult<()> {
+                    serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
+                    serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
+                    xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
+                    serializer.end_field()?;
+                    match self.tag {
+                        {% for case in cases %}
+                            {{ case.pattern }} => {
+                                let value = unsafe { self.data.{{ case.member }}.as_ref() };
+                                serializer.begin_field(xidl_xcdr::FieldId({{ case.field_id }}), false, 0)?;
+                                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                                serializer.end_field()?;
+                            },
+                        {% endfor %}
+                        {% if not has_default %}
+                            _ => {}
+                        {% endif %}
+                    }
+                    serializer.end_struct()?;
+                    Ok(())
+                }
+            }
+        {% endif %}
+
+        {% if opt.enable_deserialize %}
+            impl xidl_xcdr::XcdrDeserialize for {{ ident }} {
+                fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
+                deserializer: &mut D,
+                ) -> xidl_xcdr::error::XcdrResult<Self> {
+                    let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+                    let data = match tag {
+                        {% for case in cases %}
+                            {{ case.pattern }} => {
+                                {{ ident }}Data {
+                                    {{ case.member }}: core::mem::ManuallyDrop::new(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?),
+                                }
+                            }
+                        {% endfor %}
+                        {% if not has_default %}
+                            _ => { todo!() }
+                        {% endif %}
+                    };
+                    Ok(Self { tag, data } )
+                }
+            }
+        {% endif %}

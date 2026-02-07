@@ -1,15 +1,15 @@
 using {{ name }} = {{ ty }};
 {% if emit_traits %}
-template <>
-struct xidl::xcdr::Traits<{{ name }}> {
-  template <typename Codec>
-  static inline xidl::xcdr::BufferResult serialize(xidl::xcdr::Serializer<Codec>& ser, const {{ name }}& value) {
-    return xidl::xcdr::Traits<{{ ty }}>::template serialize<Codec>(ser, value);
-  }
+    template <>
+    struct xidl::xcdr::Traits<{{ name }}> {
+        template <typename Codec>
+        static inline xidl::xcdr::BufferResult serialize(xidl::xcdr::Serializer<Codec>& ser, const {{ name }}& value) {
+            return xidl::xcdr::Traits<{{ ty }}>::template serialize<Codec>(ser, value);
+        }
 
-  template <typename Codec>
-  static inline xidl::xcdr::BufferResult deserialize(xidl::xcdr::Deserializer<Codec>& de, {{ name }}& value) {
-    return xidl::xcdr::Traits<{{ ty }}>::template deserialize<Codec>(de, value);
-  }
-};
+        template <typename Codec>
+        static inline xidl::xcdr::BufferResult deserialize(xidl::xcdr::Deserializer<Codec>& de, {{ name }}& value) {
+            return xidl::xcdr::Traits<{{ ty }}>::template deserialize<Codec>(de, value);
+        }
+    };
 {% endif %}

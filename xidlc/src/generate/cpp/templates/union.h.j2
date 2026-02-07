@@ -1,60 +1,60 @@
 class {{ ident }} {
-public:
+    public:
     {{ switch_ty }} _d{};
-{% for member in members %}
-    {{ member.ty }} {{ member.name }};
-{% endfor %}
+    {% for member in members %}
+        {{ member.ty }} {{ member.name }};
+    {% endfor %}
 };
 
 template <>
 struct xidl::xcdr::Traits<{{ ident }}> {
-  template <typename Codec>
-  static inline xidl::xcdr::BufferResult serialize(xidl::xcdr::Serializer<Codec>& ser, const {{ ident }}& value) {
-    xidl::xcdr::BufferResult res = ser.write(value._d);
-    if (!res.ok()) {
-      return res;
-    }
-    switch (value._d) {
-{% for case in cases %}
-{% for label in case.labels %}
-{% if label == "default" %}
-      default:
-{% else %}
-      case {{ label }}:
-{% endif %}
-{% endfor %}
-        res = ser.write(value.{{ case.member }});
+    template <typename Codec>
+    static inline xidl::xcdr::BufferResult serialize(xidl::xcdr::Serializer<Codec>& ser, const {{ ident }}& value) {
+        xidl::xcdr::BufferResult res = ser.write(value._d);
         if (!res.ok()) {
-          return res;
+            return res;
         }
-        break;
-{% endfor %}
+        switch (value._d) {
+            {% for case in cases %}
+                {% for label in case.labels %}
+                    {% if label == "default" %}
+                        default:
+                    {% else %}
+                        case {{ label }}:
+                    {% endif %}
+                {% endfor %}
+                res = ser.write(value.{{ case.member }});
+                if (!res.ok()) {
+                    return res;
+                }
+                break;
+            {% endfor %}
+        }
+        return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
     }
-    return xidl::xcdr::BufferResult{XcdrFfiError::Ok, ser.position()};
-  }
 
-  template <typename Codec>
-  static inline xidl::xcdr::BufferResult deserialize(xidl::xcdr::Deserializer<Codec>& de, {{ ident }}& value) {
-    xidl::xcdr::BufferResult res = de.read(value._d);
-    if (!res.ok()) {
-      return res;
-    }
-    switch (value._d) {
-{% for case in cases %}
-{% for label in case.labels %}
-{% if label == "default" %}
-      default:
-{% else %}
-      case {{ label }}:
-{% endif %}
-{% endfor %}
-        res = de.read(value.{{ case.member }});
+    template <typename Codec>
+    static inline xidl::xcdr::BufferResult deserialize(xidl::xcdr::Deserializer<Codec>& de, {{ ident }}& value) {
+        xidl::xcdr::BufferResult res = de.read(value._d);
         if (!res.ok()) {
-          return res;
+            return res;
         }
-        break;
-{% endfor %}
+        switch (value._d) {
+            {% for case in cases %}
+                {% for label in case.labels %}
+                    {% if label == "default" %}
+                        default:
+                    {% else %}
+                        case {{ label }}:
+                    {% endif %}
+                {% endfor %}
+                res = de.read(value.{{ case.member }});
+                if (!res.ok()) {
+                    return res;
+                }
+                break;
+            {% endfor %}
+        }
+        return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
     }
-    return xidl::xcdr::BufferResult{XcdrFfiError::Ok, de.position()};
-  }
 };

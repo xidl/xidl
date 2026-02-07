@@ -1,16 +1,16 @@
 pub trait {{ ident }} {
-{% for method in methods %}
-    fn {{ method.name }}<'a>(&'a self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> xidl_jsonrpc::BoxFuture<'a, Result<{{ method.ret }}, xidl_jsonrpc::Error>>;
-{% endfor %}
+    {% for method in methods %}
+        fn {{ method.name }}<'a>(&'a self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> xidl_jsonrpc::BoxFuture<'a, Result<{{ method.ret }}, xidl_jsonrpc::Error>>;
+    {% endfor %}
 }
 
 {% for method in methods %}
-#[derive(Serialize, Deserialize)]
-struct {{ method.params_struct }} {
-{% for field in method.params_fields %}
-    {{ field.name }}: {{ field.ty }},
-{% endfor %}
-}
+    #[derive(Serialize, Deserialize)]
+    struct {{ method.params_struct }} {
+        {% for field in method.params_fields %}
+            {{ field.name }}: {{ field.ty }},
+        {% endfor %}
+    }
 {% endfor %}
 
 pub struct {{ ident }}Server<T> {
@@ -25,24 +25,24 @@ impl<T> {{ ident }}Server<T> {
 
 impl<T> xidl_jsonrpc::Handler for {{ ident }}Server<T>
 where
-    T: {{ ident }} + Send + Sync,
+T: {{ ident }} + Send + Sync,
 {
     fn handle<'a>(&'a self, method: &'a str, params: Value) -> xidl_jsonrpc::BoxFuture<'a, Result<Value, xidl_jsonrpc::Error>> {
         Box::pin(async move {
             match method {
-{% for method in methods %}
-            "{{ method.rpc_name }}" => {
-                let params: {{ method.params_struct }} =
-                    serde_json::from_value(params).map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
-{% if method.args | length > 0 %}
-                let result = self.inner.{{ method.name }}({% for arg in method.args %}params.{{ arg }}{% if not loop.last %}, {% endif %}{% endfor %}).await?;
-{% else %}
-                let result = self.inner.{{ method.name }}().await?;
-{% endif %}
-                Ok(serde_json::to_value(result)?)
-            }
-{% endfor %}
-            _ => Err(xidl_jsonrpc::Error::method_not_found(method)),
+                {% for method in methods %}
+                    "{{ method.rpc_name }}" => {
+                        let params: {{ method.params_struct }} =
+                        serde_json::from_value(params).map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
+                        {% if method.args | length > 0 %}
+                            let result = self.inner.{{ method.name }}({% for arg in method.args %}params.{{ arg }}{% if not loop.last %}, {% endif %}{% endfor %}).await?;
+                        {% else %}
+                            let result = self.inner.{{ method.name }}().await?;
+                        {% endif %}
+                        Ok(serde_json::to_value(result)?)
+                    }
+                {% endfor %}
+                _ => Err(xidl_jsonrpc::Error::method_not_found(method)),
             }
         })
     }
@@ -54,8 +54,8 @@ pub struct {{ ident }}Client<R, W> {
 
 impl<R, W> {{ ident }}Client<R, W>
 where
-    R: AsyncRead + Unpin + Send,
-    W: AsyncWrite + Unpin + Send,
+R: AsyncRead + Unpin + Send,
+W: AsyncWrite + Unpin + Send,
 {
     pub fn new(reader: R, writer: W) -> Self {
         Self {
@@ -66,15 +66,15 @@ where
 
 impl<R, W> {{ ident }} for {{ ident }}Client<R, W>
 where
-    R: AsyncRead + Unpin + Send,
-    W: AsyncWrite + Unpin + Send,
+R: AsyncRead + Unpin + Send,
+W: AsyncWrite + Unpin + Send,
 {
-{% for method in methods %}
-    fn {{ method.name }}<'a>(&'a self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> xidl_jsonrpc::BoxFuture<'a, Result<{{ method.ret }}, xidl_jsonrpc::Error>> {
+    {% for method in methods %}
+        fn {{ method.name }}<'a>(&'a self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> xidl_jsonrpc::BoxFuture<'a, Result<{{ method.ret }}, xidl_jsonrpc::Error>> {
         let params = {{ method.params_struct }} {
-{% for field in method.params_fields %}
-            {{ field.name }},
-{% endfor %}
+            {% for field in method.params_fields %}
+                {{ field.name }},
+            {% endfor %}
         };
         Box::pin(async move {
             let mut client = self.client.lock().await;
