@@ -125,6 +125,9 @@ impl<'a> Formatter<'a> {
             .ok_or_else(|| IdlcError::fmt(format!("failed to parse {}", self.config.label)))?;
         let root = tree.root_node();
         if root.has_error() {
+            if cfg!(debug_assertions) {
+                unreachable!();
+            }
             if self.config.allow_parse_error {
                 return Ok(source.to_string());
             }
