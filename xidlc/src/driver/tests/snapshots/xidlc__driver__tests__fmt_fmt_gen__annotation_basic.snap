@@ -6,7 +6,8 @@ expression: output
 @id(1)
 struct S {
     @id(10)
-    long a; //@id(11)
+    long a;
+    //@id(11)
     @optional
     short b;
 };

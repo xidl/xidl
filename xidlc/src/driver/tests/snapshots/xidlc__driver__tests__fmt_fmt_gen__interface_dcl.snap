@@ -40,9 +40,12 @@ interface A: B, C, D {
 };
 
 interface A {
-    typedef long L1; // idl 7.4.4
-    const int a = 10; // idl 7.4.4
-    exception A { // idl 7.4.4
+    typedef long L1;
+    // idl 7.4.4
+    const int a = 10;
+    // idl 7.4.4
+    exception A {
+        // idl 7.4.4
         int a;
     };
     short opA(

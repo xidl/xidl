@@ -1,5 +1,8 @@
 ; Basic Rust formatting rules (tree-sitter-rust).
 
+(line_comment) @comment
+(block_comment) @comment
+
 ; Block-like structures
 (block "{" @append-newline @add-ident "}" @prepend-newline @dec-ident)
 (match_block "{" @append-newline @add-ident "}" @prepend-newline @dec-ident)

@@ -1,5 +1,7 @@
 ; Basic TypeScript formatting rules (tree-sitter-typescript).
 
+(comment) @comment
+
 (statement_block "{" @append-newline @add-ident "}" @prepend-newline @dec-ident)
 (object "{" @append-newline @add-ident "}" @prepend-newline @dec-ident)
 

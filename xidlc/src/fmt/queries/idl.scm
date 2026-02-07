@@ -1,5 +1,7 @@
 ; Basic IDL formatting rules.
 
+(comment) @comment
+
 (definition) @append-newline @append-newline
 (member) @append-newline
 (export) @append-newline

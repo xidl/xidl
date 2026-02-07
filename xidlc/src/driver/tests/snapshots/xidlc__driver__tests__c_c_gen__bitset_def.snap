@@ -9,230 +9,230 @@ bitset_def.c
 * xidlc_version: 0.1.0
 * xidlc_timestamp: 1970-01-01 00:00
 */
-#include "bitset_def.h"
+#include"bitset_def.h"
 
-A A_new(void) {
+A A_new(void){
     A value;
     A_init(&value);
     return value;
 }
 
-void A_init(A * self) {
+void A_init(A * self){
     * self = (A){
         0
     };
 }
 
-unsigned int A_bits(A const * self) {
+unsigned int A_bits(A const * self){
     unsigned int bits = 0u;
     return bits;
 }
 
-bool A_is_empty(A const * self) {
+bool A_is_empty(A const * self){
     return A_bits(self) == 0u;
 }
 
-bool A_is_all(A const * self) {
-    return (A_bits(self) & (0)) == (0);
+bool A_is_all(A const * self){
+    return(A_bits(self)&(0)) == (0);
 }
 
-bool A_contains(A const * self, A const * other) {
+bool A_contains(A const * self, A const * other){
     unsigned int other_bits = A_bits(other);
-    return (A_bits(self) & other_bits) == other_bits;
+    return(A_bits(self)&other_bits) == other_bits;
 }
 
-bool A_intersects(A const * self, A const * other) {
-    return (A_bits(self) & A_bits(other)) != 0u;
+bool A_intersects(A const * self, A const * other){
+    return(A_bits(self)&A_bits(other)) != 0u;
 }
 
-void A_insert(A * self, A const * other) {
-    unsigned int other_bits = A_bits(other);
-}
-
-void A_remove(A * self, A const * other) {
+void A_insert(A * self, A const * other){
     unsigned int other_bits = A_bits(other);
 }
 
-void A_toggle(A * self, A const * other) {
+void A_remove(A * self, A const * other){
     unsigned int other_bits = A_bits(other);
 }
 
-void A_set(A * self, A const * other, bool value) {
-    if (value) {
+void A_toggle(A * self, A const * other){
+    unsigned int other_bits = A_bits(other);
+}
+
+void A_set(A * self, A const * other, bool value){
+    if(value){
         A_insert(self, other);
 
-    } else {
+    }else{
         A_remove(self, other);
     }
 }
 
-A A_new(void) {
+A A_new(void){
     A value;
     A_init(&value);
     return value;
 }
 
-void A_init(A * self) {
+void A_init(A * self){
     * self = (A){
         0
     };
 }
 
-unsigned int A_bits(A const * self) {
+unsigned int A_bits(A const * self){
     unsigned int bits = 0u;
     return bits;
 }
 
-bool A_is_empty(A const * self) {
+bool A_is_empty(A const * self){
     return A_bits(self) == 0u;
 }
 
-bool A_is_all(A const * self) {
-    return (A_bits(self) & (0)) == (0);
+bool A_is_all(A const * self){
+    return(A_bits(self)&(0)) == (0);
 }
 
-bool A_contains(A const * self, A const * other) {
+bool A_contains(A const * self, A const * other){
     unsigned int other_bits = A_bits(other);
-    return (A_bits(self) & other_bits) == other_bits;
+    return(A_bits(self)&other_bits) == other_bits;
 }
 
-bool A_intersects(A const * self, A const * other) {
-    return (A_bits(self) & A_bits(other)) != 0u;
+bool A_intersects(A const * self, A const * other){
+    return(A_bits(self)&A_bits(other)) != 0u;
 }
 
-void A_insert(A * self, A const * other) {
-    unsigned int other_bits = A_bits(other);
-}
-
-void A_remove(A * self, A const * other) {
+void A_insert(A * self, A const * other){
     unsigned int other_bits = A_bits(other);
 }
 
-void A_toggle(A * self, A const * other) {
+void A_remove(A * self, A const * other){
     unsigned int other_bits = A_bits(other);
 }
 
-void A_set(A * self, A const * other, bool value) {
-    if (value) {
+void A_toggle(A * self, A const * other){
+    unsigned int other_bits = A_bits(other);
+}
+
+void A_set(A * self, A const * other, bool value){
+    if(value){
         A_insert(self, other);
 
-    } else {
+    }else{
         A_remove(self, other);
     }
 }
 
-A A_new(void) {
+A A_new(void){
     A value;
     A_init(&value);
     return value;
 }
 
-void A_init(A * self) {
+void A_init(A * self){
     * self = (A){
         0
     };
 }
 
-unsigned int A_bits(A const * self) {
+unsigned int A_bits(A const * self){
     unsigned int bits = 0u;
-    if (self->a) {
-        bits |= (1u << (1));
+    if(self->a){
+        bits|=(1u<<(1));
     }
 
-    if (self->a) {
-        bits |= (1u << (1));
+    if(self->a){
+        bits|=(1u<<(1));
     }
 
-    if (self->b) {
-        bits |= (1u << (1));
+    if(self->b){
+        bits|=(1u<<(1));
     }
 
-    if (self->c) {
-        bits |= (1u << (1));
+    if(self->c){
+        bits|=(1u<<(1));
     }
 
     return bits;
 }
 
-bool A_is_empty(A const * self) {
+bool A_is_empty(A const * self){
     return A_bits(self) == 0u;
 }
 
-bool A_is_all(A const * self) {
-    return (A_bits(self) & ((1u << (1)) | (1u << (1)) | (1u << (1)) | (1u << (1)))) == ((1u << (1)) | (1u << (1)) | (1u << (1)) | (1u << (1)));
+bool A_is_all(A const * self){
+    return(A_bits(self)&((1u<<(1))|(1u<<(1))|(1u<<(1))|(1u<<(1)))) == ((1u<<(1))|(1u<<(1))|(1u<<(1))|(1u<<(1)));
 }
 
-bool A_contains(A const * self, A const * other) {
+bool A_contains(A const * self, A const * other){
     unsigned int other_bits = A_bits(other);
-    return (A_bits(self) & other_bits) == other_bits;
+    return(A_bits(self)&other_bits) == other_bits;
 }
 
-bool A_intersects(A const * self, A const * other) {
-    return (A_bits(self) & A_bits(other)) != 0u;
+bool A_intersects(A const * self, A const * other){
+    return(A_bits(self)&A_bits(other)) != 0u;
 }
 
-void A_insert(A * self, A const * other) {
+void A_insert(A * self, A const * other){
     unsigned int other_bits = A_bits(other);
-    if (other_bits & (1u << (1))) {
+    if(other_bits&(1u<<(1))){
         self->a = 1;
     }
 
-    if (other_bits & (1u << (1))) {
+    if(other_bits&(1u<<(1))){
         self->a = 1;
     }
 
-    if (other_bits & (1u << (1))) {
+    if(other_bits&(1u<<(1))){
         self->b = 1;
     }
 
-    if (other_bits & (1u << (1))) {
+    if(other_bits&(1u<<(1))){
         self->c = 1;
     }
 }
 
-void A_remove(A * self, A const * other) {
+void A_remove(A * self, A const * other){
     unsigned int other_bits = A_bits(other);
-    if (other_bits & (1u << (1))) {
+    if(other_bits&(1u<<(1))){
         self->a = 0;
     }
 
-    if (other_bits & (1u << (1))) {
+    if(other_bits&(1u<<(1))){
         self->a = 0;
     }
 
-    if (other_bits & (1u << (1))) {
+    if(other_bits&(1u<<(1))){
         self->b = 0;
     }
 
-    if (other_bits & (1u << (1))) {
+    if(other_bits&(1u<<(1))){
         self->c = 0;
     }
 }
 
-void A_toggle(A * self, A const * other) {
+void A_toggle(A * self, A const * other){
     unsigned int other_bits = A_bits(other);
-    if (other_bits & (1u << (1))) {
-        self->a = self->a ? 0 : 1;
+    if(other_bits&(1u<<(1))){
+        self->a = self->a?0:1;
     }
 
-    if (other_bits & (1u << (1))) {
-        self->a = self->a ? 0 : 1;
+    if(other_bits&(1u<<(1))){
+        self->a = self->a?0:1;
     }
 
-    if (other_bits & (1u << (1))) {
-        self->b = self->b ? 0 : 1;
+    if(other_bits&(1u<<(1))){
+        self->b = self->b?0:1;
     }
 
-    if (other_bits & (1u << (1))) {
-        self->c = self->c ? 0 : 1;
+    if(other_bits&(1u<<(1))){
+        self->c = self->c?0:1;
     }
 }
 
-void A_set(A * self, A const * other, bool value) {
-    if (value) {
+void A_set(A * self, A const * other, bool value){
+    if(value){
         A_insert(self, other);
 
-    } else {
+    }else{
         A_remove(self, other);
     }
 }
@@ -240,72 +240,62 @@ void A_set(A * self, A const * other, bool value) {
 bitset_def.h
 ===============
 /* Generated by xidlc
- * xidlc_version: 0.1.0
- * xidlc_timestamp: 1970-01-01 00:00
- */
+* xidlc_version: 0.1.0
+* xidlc_timestamp: 1970-01-01 00:00
+*/
+#ifndef BITSET_DEF_H
+#define BITSET_DEF_H
+#include<stdbool.h>
+#include<stdint.h>
+#include<wchar.h>
 
-#ifndef BITSET_DEF.H
-#define BITSET_DEF.H
-#include <stdbool.h>
-#include <stdint.h>
-#include <wchar.h>
-
-typedef struct A {
-
-} A;
-
+typedef struct A{
+}A;
 A A_new(void);
-void A_init(A* self);
-unsigned int A_bits(A const* self);
-bool A_is_empty(A const* self);
-bool A_is_all(A const* self);
-bool A_contains(A const* self, A const* other);
-bool A_intersects(A const* self, A const* other);
-void A_insert(A* self, A const* other);
-void A_remove(A* self, A const* other);
-void A_toggle(A* self, A const* other);
-void A_set(A* self, A const* other, bool value);
-
-typedef struct A {
-
-} A;
-
+void A_init(A * self);
+unsigned int A_bits(A const * self);
+bool A_is_empty(A const * self);
+bool A_is_all(A const * self);
+bool A_contains(A const * self, A const * other);
+bool A_intersects(A const * self, A const * other);
+void A_insert(A * self, A const * other);
+void A_remove(A * self, A const * other);
+void A_toggle(A * self, A const * other);
+void A_set(A * self, A const * other, bool value);
+typedef struct A{
+}A;
 A A_new(void);
-void A_init(A* self);
-unsigned int A_bits(A const* self);
-bool A_is_empty(A const* self);
-bool A_is_all(A const* self);
-bool A_contains(A const* self, A const* other);
-bool A_intersects(A const* self, A const* other);
-void A_insert(A* self, A const* other);
-void A_remove(A* self, A const* other);
-void A_toggle(A* self, A const* other);
-void A_set(A* self, A const* other, bool value);
-
-typedef struct A {
-
-  uint32_t a; /* pos 1 */
-
-  uint32_t a; /* pos 1 */
-
-  uint32_t b; /* pos 1 */
-
-  uint32_t c; /* pos 1 */
-
-} A;
-
+void A_init(A * self);
+unsigned int A_bits(A const * self);
+bool A_is_empty(A const * self);
+bool A_is_all(A const * self);
+bool A_contains(A const * self, A const * other);
+bool A_intersects(A const * self, A const * other);
+void A_insert(A * self, A const * other);
+void A_remove(A * self, A const * other);
+void A_toggle(A * self, A const * other);
+void A_set(A * self, A const * other, bool value);
+typedef struct A{
+    uint32_t a;
+    /* pos 1 */
+    uint32_t a;
+    /* pos 1 */
+    uint32_t b;
+    /* pos 1 */
+    uint32_t c;
+    /* pos 1 */
+}A;
 A A_new(void);
-void A_init(A* self);
-unsigned int A_bits(A const* self);
-bool A_is_empty(A const* self);
-bool A_is_all(A const* self);
-bool A_contains(A const* self, A const* other);
-bool A_intersects(A const* self, A const* other);
-void A_insert(A* self, A const* other);
-void A_remove(A* self, A const* other);
-void A_toggle(A* self, A const* other);
-void A_set(A* self, A const* other, bool value);
-
+void A_init(A * self);
+unsigned int A_bits(A const * self);
+bool A_is_empty(A const * self);
+bool A_is_all(A const * self);
+bool A_contains(A const * self, A const * other);
+bool A_intersects(A const * self, A const * other);
+void A_insert(A * self, A const * other);
+void A_remove(A * self, A const * other);
+void A_toggle(A * self, A const * other);
+void A_set(A * self, A const * other, bool value);
 #endif
 ===============
 bitset_def_xcdr.c
@@ -314,124 +304,124 @@ bitset_def_xcdr.c
 * xidlc_version: 0.1.0
 * xidlc_timestamp: 1970-01-01 00:00
 */
-#include "bitset_def_xcdr.h"
+#include"bitset_def_xcdr.h"
 
-XcdrBufferResult A_serialize(A const * self, XcdrBuffer buf) {
+XcdrBufferResult A_serialize(A const * self, XcdrBuffer buf){
     uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
     XcdrFfiError err = Ok;
     (void)self;
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_serializer_position(&serializer)
     };
 }
 
-XcdrBufferResult A_deserialize(A * self, XcdrConstBuffer buf) {
+XcdrBufferResult A_deserialize(A * self, XcdrConstBuffer buf){
     const uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
     XcdrFfiError err = Ok;
     (void)self;
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_deserializer_position(&deserializer)
     };
 }
 
-XcdrBufferResult A_serialize(A const * self, XcdrBuffer buf) {
+XcdrBufferResult A_serialize(A const * self, XcdrBuffer buf){
     uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
     XcdrFfiError err = Ok;
     (void)self;
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_serializer_position(&serializer)
     };
 }
 
-XcdrBufferResult A_deserialize(A * self, XcdrConstBuffer buf) {
+XcdrBufferResult A_deserialize(A * self, XcdrConstBuffer buf){
     const uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
     XcdrFfiError err = Ok;
     (void)self;
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_deserializer_position(&deserializer)
     };
 }
 
-XcdrBufferResult A_serialize(A const * self, XcdrBuffer buf) {
+XcdrBufferResult A_serialize(A const * self, XcdrBuffer buf){
     uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
     XcdrFfiError err = Ok;
     err = cdr_serializer_write_u32(&serializer, "self->a");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_serializer_position(&serializer)
         };
     }
 
     err = cdr_serializer_write_u32(&serializer, "self->a");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_serializer_position(&serializer)
         };
     }
 
     err = cdr_serializer_write_u32(&serializer, "self->b");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_serializer_position(&serializer)
         };
     }
 
     err = cdr_serializer_write_u32(&serializer, "self->c");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_serializer_position(&serializer)
         };
     }
 
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_serializer_position(&serializer)
     };
 }
 
-XcdrBufferResult A_deserialize(A * self, XcdrConstBuffer buf) {
+XcdrBufferResult A_deserialize(A * self, XcdrConstBuffer buf){
     const uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
     XcdrFfiError err = Ok;
     err = cdr_deserializer_read_u32_le(&deserializer, "self->a");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_deserializer_position(&deserializer)
         };
     }
 
     err = cdr_deserializer_read_u32_le(&deserializer, "self->a");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_deserializer_position(&deserializer)
         };
     }
 
     err = cdr_deserializer_read_u32_le(&deserializer, "self->b");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_deserializer_position(&deserializer)
         };
     }
 
     err = cdr_deserializer_read_u32_le(&deserializer, "self->c");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_deserializer_position(&deserializer)
         };
     }
 
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_deserializer_position(&deserializer)
     };
 }
@@ -439,23 +429,19 @@ XcdrBufferResult A_deserialize(A * self, XcdrConstBuffer buf) {
 bitset_def_xcdr.h
 ===============
 /* Generated by xidlc
- * xidlc_version: 0.1.0
- * xidlc_timestamp: 1970-01-01 00:00
- */
+* xidlc_version: 0.1.0
+* xidlc_timestamp: 1970-01-01 00:00
+*/
+#ifndef BITSET_DEF_XCDR_H
+#define BITSET_DEF_XCDR_H
+#include<stdbool.h>
+#include<stdint.h>
+#include<wchar.h>
 
-#ifndef BITSET_DEF_XCDR.H
-#define BITSET_DEF_XCDR.H
-#include <stdbool.h>
-#include <stdint.h>
-#include <wchar.h>
-
-XcdrBufferResult A_serialize(A const* self, XcdrBuffer buf);
-XcdrBufferResult A_deserialize(A* self, XcdrConstBuffer buf);
-
-XcdrBufferResult A_serialize(A const* self, XcdrBuffer buf);
-XcdrBufferResult A_deserialize(A* self, XcdrConstBuffer buf);
-
-XcdrBufferResult A_serialize(A const* self, XcdrBuffer buf);
-XcdrBufferResult A_deserialize(A* self, XcdrConstBuffer buf);
-
+XcdrBufferResult A_serialize(A const * self, XcdrBuffer buf);
+XcdrBufferResult A_deserialize(A * self, XcdrConstBuffer buf);
+XcdrBufferResult A_serialize(A const * self, XcdrBuffer buf);
+XcdrBufferResult A_deserialize(A * self, XcdrConstBuffer buf);
+XcdrBufferResult A_serialize(A const * self, XcdrBuffer buf);
+XcdrBufferResult A_deserialize(A * self, XcdrConstBuffer buf);
 #endif

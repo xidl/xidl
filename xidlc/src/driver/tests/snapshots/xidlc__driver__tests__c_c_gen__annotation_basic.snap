@@ -9,493 +9,424 @@ annotation_basic.c
 * xidlc_version: 0.1.0
 * xidlc_timestamp: 1970-01-01 00:00
 */
-#include "annotation_basic.h"
+#include"annotation_basic.h"
 
-S S_new(void) {
+S S_new(void){
     S value;
     S_init(&value);
     return value;
 }
 
-void S_init(S * self) {
+void S_init(S * self){
     * self = (S){
         0
     };
 }
 
-E E_new(void) {
+E E_new(void){
     E value;
     E_init(&value);
     return value;
 }
 
-void E_init(E * self) {
+void E_init(E * self){
     * self = (E)0;
 }
 
-BM BM_new(void) {
+BM BM_new(void){
     BM value;
     BM_init(&value);
     return value;
 }
 
-void BM_init(BM * self) {
+void BM_init(BM * self){
     * self = (BM)0;
 }
 
-unsigned int BM_bits(BM const * self) {
-    return (unsigned int)( * self);
+unsigned int BM_bits(BM const * self){
+    return(unsigned int)( * self);
 }
 
-bool BM_is_empty(BM const * self) {
+bool BM_is_empty(BM const * self){
     return BM_bits(self) == 0u;
 }
 
-bool BM_is_all(BM const * self) {
-    return (BM_bits(self) & (A | B)) == (A | B);
+bool BM_is_all(BM const * self){
+    return(BM_bits(self)&(A|B)) == (A|B);
 }
 
-bool BM_contains(BM const * self, BM other) {
-    return (BM_bits(self) & (unsigned int)other) == (unsigned int)other;
+bool BM_contains(BM const * self, BM other){
+    return(BM_bits(self)&(unsigned int)other) == (unsigned int)other;
 }
 
-bool BM_intersects(BM const * self, BM other) {
-    return (BM_bits(self) & (unsigned int)other) != 0u;
+bool BM_intersects(BM const * self, BM other){
+    return(BM_bits(self)&(unsigned int)other) != 0u;
 }
 
-void BM_insert(BM * self, BM other) {
-    * self = (BM)(BM_bits(self) | (unsigned int)other);
+void BM_insert(BM * self, BM other){
+    * self = (BM)(BM_bits(self)|(unsigned int)other);
 }
 
-void BM_remove(BM * self, BM other) {
-    * self = (BM)( BM_bits(self) & ~(unsigned int)other);
+void BM_remove(BM * self, BM other){
+    * self = (BM)(BM_bits(self)&~(unsigned int)other);
 }
 
-void BM_toggle(BM * self, BM other) {
-    * self = (BM)(BM_bits(self) ^ (unsigned int)other);
+void BM_toggle(BM * self, BM other){
+    * self = (BM)(BM_bits(self)^(unsigned int)other);
 }
 
-void BM_set(BM * self, BM other, bool value) {
-    if (value) {
+void BM_set(BM * self, BM other, bool value){
+    if(value){
         BM_insert(self, other);
 
-    } else {
+    }else{
         BM_remove(self, other);
     }
 }
 
-U U_new(void) {
+U U_new(void){
     U value;
     U_init(&value);
     return value;
 }
 
-void U_init(U * self) {
+void U_init(U * self){
     * self = (U){
         0
     };
 }
 
-I_ping_In I_ping_In_new(void) {
+I_ping_In I_ping_In_new(void){
     I_ping_In value;
     I_ping_In_init(&value);
     return value;
 }
 
-void I_ping_In_init(I_ping_In * self) {
+void I_ping_In_init(I_ping_In * self){
     * self = (I_ping_In){
         0
     };
 }
 
-I_ping_Out I_ping_Out_new(void) {
+I_ping_Out I_ping_Out_new(void){
     I_ping_Out value;
     I_ping_Out_init(&value);
     return value;
 }
 
-void I_ping_Out_init(I_ping_Out * self) {
+void I_ping_Out_init(I_ping_Out * self){
     * self = (I_ping_Out){
         0
     };
 }
 
-I_ping_Result I_ping_Result_new(void) {
+I_ping_Result I_ping_Result_new(void){
     I_ping_Result value;
     I_ping_Result_init(&value);
     return value;
 }
 
-void I_ping_Result_init(I_ping_Result * self) {
+void I_ping_Result_init(I_ping_Result * self){
     * self = (I_ping_Result){
         0
     };
 }
 
-I_get_attribute_value_In I_get_attribute_value_In_new(void) {
+I_get_attribute_value_In I_get_attribute_value_In_new(void){
     I_get_attribute_value_In value;
     I_get_attribute_value_In_init(&value);
     return value;
 }
 
-void I_get_attribute_value_In_init(I_get_attribute_value_In * self) {
+void I_get_attribute_value_In_init(I_get_attribute_value_In * self){
     * self = (I_get_attribute_value_In){
         0
     };
 }
 
-I_get_attribute_value_Out I_get_attribute_value_Out_new(void) {
+I_get_attribute_value_Out I_get_attribute_value_Out_new(void){
     I_get_attribute_value_Out value;
     I_get_attribute_value_Out_init(&value);
     return value;
 }
 
-void I_get_attribute_value_Out_init(I_get_attribute_value_Out * self) {
+void I_get_attribute_value_Out_init(I_get_attribute_value_Out * self){
     * self = (I_get_attribute_value_Out){
         0
     };
 }
 
-I_get_attribute_value_Result I_get_attribute_value_Result_new(void) {
+I_get_attribute_value_Result I_get_attribute_value_Result_new(void){
     I_get_attribute_value_Result value;
     I_get_attribute_value_Result_init(&value);
     return value;
 }
 
-void I_get_attribute_value_Result_init(I_get_attribute_value_Result * self) {
+void I_get_attribute_value_Result_init(I_get_attribute_value_Result * self){
     * self = (I_get_attribute_value_Result){
         0
     };
 }
 
-I_set_attribute_value_In I_set_attribute_value_In_new(void) {
+I_set_attribute_value_In I_set_attribute_value_In_new(void){
     I_set_attribute_value_In value;
     I_set_attribute_value_In_init(&value);
     return value;
 }
 
-void I_set_attribute_value_In_init(I_set_attribute_value_In * self) {
+void I_set_attribute_value_In_init(I_set_attribute_value_In * self){
     * self = (I_set_attribute_value_In){
         0
     };
 }
 
-I_set_attribute_value_Out I_set_attribute_value_Out_new(void) {
+I_set_attribute_value_Out I_set_attribute_value_Out_new(void){
     I_set_attribute_value_Out value;
     I_set_attribute_value_Out_init(&value);
     return value;
 }
 
-void I_set_attribute_value_Out_init(I_set_attribute_value_Out * self) {
+void I_set_attribute_value_Out_init(I_set_attribute_value_Out * self){
     * self = (I_set_attribute_value_Out){
         0
     };
 }
 
-I_set_attribute_value_Result I_set_attribute_value_Result_new(void) {
+I_set_attribute_value_Result I_set_attribute_value_Result_new(void){
     I_set_attribute_value_Result value;
     I_set_attribute_value_Result_init(&value);
     return value;
 }
 
-void I_set_attribute_value_Result_init(I_set_attribute_value_Result * self) {
+void I_set_attribute_value_Result_init(I_set_attribute_value_Result * self){
     * self = (I_set_attribute_value_Result){
         0
     };
 }
 
-I_Call I_Call_new(void) {
+I_Call I_Call_new(void){
     I_Call value;
     I_Call_init(&value);
     return value;
 }
 
-void I_Call_init(I_Call * self) {
+void I_Call_init(I_Call * self){
     * self = (I_Call){
         0
     };
 }
 
-I_Request I_Request_new(void) {
+I_Request I_Request_new(void){
     I_Request value;
     I_Request_init(&value);
     return value;
 }
 
-void I_Request_init(I_Request * self) {
+void I_Request_init(I_Request * self){
     * self = (I_Request){
         0
     };
 }
 
-I_Return I_Return_new(void) {
+I_Return I_Return_new(void){
     I_Return value;
     I_Return_init(&value);
     return value;
 }
 
-void I_Return_init(I_Return * self) {
+void I_Return_init(I_Return * self){
     * self = (I_Return){
         0
     };
 }
 
-I_Reply I_Reply_new(void) {
+I_Reply I_Reply_new(void){
     I_Reply value;
     I_Reply_init(&value);
     return value;
 }
 
-void I_Reply_init(I_Reply * self) {
+void I_Reply_init(I_Reply * self){
     * self = (I_Reply){
         0
     };
 }
 
-void I_ping(void) {
+void I_ping(void){
 }
 
-int32_t I_get_attribute_value(void) {
+int32_t I_get_attribute_value(void){
     int32_t result = {
         0
     };
     return result;
 }
 
-void I_set_attribute_value(int32_t value) {
+void I_set_attribute_value(int32_t value){
 }
 ===============
 annotation_basic.h
 ===============
 /* Generated by xidlc
- * xidlc_version: 0.1.0
- * xidlc_timestamp: 1970-01-01 00:00
- */
+* xidlc_version: 0.1.0
+* xidlc_timestamp: 1970-01-01 00:00
+*/
+#ifndef ANNOTATION_BASIC_H
+#define ANNOTATION_BASIC_H
+#include<stdbool.h>
+#include<stdint.h>
+#include<wchar.h>
 
-#ifndef ANNOTATION_BASIC.H
-#define ANNOTATION_BASIC.H
-#include <stdbool.h>
-#include <stdint.h>
-#include <wchar.h>
-
-typedef struct S {
-
-  int32_t a;
-
-  int16_t b;
-
-} S;
-
-S S_new(void);
-void S_init(S* self);
-
-typedef enum E {
-
-  A,
-
-  B,
-
-} E;
-
-E E_new(void);
-void E_init(E* self);
-
-typedef enum BM {
-
-  A,
-
-  B,
-
-} BM;
-
-BM BM_new(void);
-void BM_init(BM* self);
-unsigned int BM_bits(BM const* self);
-bool BM_is_empty(BM const* self);
-bool BM_is_all(BM const* self);
-bool BM_contains(BM const* self, BM other);
-bool BM_intersects(BM const* self, BM other);
-void BM_insert(BM* self, BM other);
-void BM_remove(BM* self, BM other);
-void BM_toggle(BM* self, BM other);
-void BM_set(BM* self, BM other, bool value);
-
-typedef struct U {
-  int32_t _d;
-  union {
-
+typedef struct S{
     int32_t a;
+    int16_t b;
 
-    int32_t b;
+}S;
+S S_new(void);
+void S_init(S * self);
+typedef enum E{
+    A, B,
+}E;
+E E_new(void);
+void E_init(E * self);
+typedef enum BM{
+    A, B,
+}BM;
+BM BM_new(void);
+void BM_init(BM * self);
+unsigned int BM_bits(BM const * self);
+bool BM_is_empty(BM const * self);
+bool BM_is_all(BM const * self);
+bool BM_contains(BM const * self, BM other);
+bool BM_intersects(BM const * self, BM other);
+void BM_insert(BM * self, BM other);
+void BM_remove(BM * self, BM other);
+void BM_toggle(BM * self, BM other);
+void BM_set(BM * self, BM other, bool value);
+typedef struct U{
+    int32_t _d;
+    union{
+        int32_t a;
+        int32_t b;
 
-  } _u;
-} U;
+    }_u;
 
+}U;
 U U_new(void);
-void U_init(U* self);
-
+void U_init(U * self);
 static const int32_t I_ping_Hash = 18846175;
-
 static const int32_t I_get_attribute_value_Hash = 3881857402;
-
 static const int32_t I_set_attribute_value_Hash = 1976821110;
+typedef struct I_ping_In{
+    dds_rpc_UnusedMember dummy;
 
-typedef struct I_ping_In {
-
-  dds_rpc_UnusedMember dummy;
-
-} I_ping_In;
-
+}I_ping_In;
 I_ping_In I_ping_In_new(void);
-void I_ping_In_init(I_ping_In* self);
+void I_ping_In_init(I_ping_In * self);
+typedef struct I_ping_Out{
+    dds_rpc_UnusedMember dummy;
 
-typedef struct I_ping_Out {
-
-  dds_rpc_UnusedMember dummy;
-
-} I_ping_Out;
-
+}I_ping_Out;
 I_ping_Out I_ping_Out_new(void);
-void I_ping_Out_init(I_ping_Out* self);
+void I_ping_Out_init(I_ping_Out * self);
+typedef struct I_ping_Result{
+    int32_t _d;
+    union{
+        I_ping_Out result;
 
-typedef struct I_ping_Result {
-  int32_t _d;
-  union {
+    }_u;
 
-    I_ping_Out result;
-
-  } _u;
-} I_ping_Result;
-
+}I_ping_Result;
 I_ping_Result I_ping_Result_new(void);
-void I_ping_Result_init(I_ping_Result* self);
+void I_ping_Result_init(I_ping_Result * self);
+typedef struct I_get_attribute_value_In{
+    dds_rpc_UnusedMember dummy;
 
-typedef struct I_get_attribute_value_In {
-
-  dds_rpc_UnusedMember dummy;
-
-} I_get_attribute_value_In;
-
+}I_get_attribute_value_In;
 I_get_attribute_value_In I_get_attribute_value_In_new(void);
-void I_get_attribute_value_In_init(I_get_attribute_value_In* self);
+void I_get_attribute_value_In_init(I_get_attribute_value_In * self);
+typedef struct I_get_attribute_value_Out{
+    int32_t return_;
 
-typedef struct I_get_attribute_value_Out {
-
-  int32_t return_;
-
-} I_get_attribute_value_Out;
-
+}I_get_attribute_value_Out;
 I_get_attribute_value_Out I_get_attribute_value_Out_new(void);
-void I_get_attribute_value_Out_init(I_get_attribute_value_Out* self);
+void I_get_attribute_value_Out_init(I_get_attribute_value_Out * self);
+typedef struct I_get_attribute_value_Result{
+    int32_t _d;
+    union{
+        I_get_attribute_value_Out result;
 
-typedef struct I_get_attribute_value_Result {
-  int32_t _d;
-  union {
+    }_u;
 
-    I_get_attribute_value_Out result;
-
-  } _u;
-} I_get_attribute_value_Result;
-
+}I_get_attribute_value_Result;
 I_get_attribute_value_Result I_get_attribute_value_Result_new(void);
-void I_get_attribute_value_Result_init(I_get_attribute_value_Result* self);
+void I_get_attribute_value_Result_init(I_get_attribute_value_Result * self);
+typedef struct I_set_attribute_value_In{
+    int32_t value;
 
-typedef struct I_set_attribute_value_In {
-
-  int32_t value;
-
-} I_set_attribute_value_In;
-
+}I_set_attribute_value_In;
 I_set_attribute_value_In I_set_attribute_value_In_new(void);
-void I_set_attribute_value_In_init(I_set_attribute_value_In* self);
+void I_set_attribute_value_In_init(I_set_attribute_value_In * self);
+typedef struct I_set_attribute_value_Out{
+    dds_rpc_UnusedMember dummy;
 
-typedef struct I_set_attribute_value_Out {
-
-  dds_rpc_UnusedMember dummy;
-
-} I_set_attribute_value_Out;
-
+}I_set_attribute_value_Out;
 I_set_attribute_value_Out I_set_attribute_value_Out_new(void);
-void I_set_attribute_value_Out_init(I_set_attribute_value_Out* self);
+void I_set_attribute_value_Out_init(I_set_attribute_value_Out * self);
+typedef struct I_set_attribute_value_Result{
+    int32_t _d;
+    union{
+        I_set_attribute_value_Out result;
 
-typedef struct I_set_attribute_value_Result {
-  int32_t _d;
-  union {
+    }_u;
 
-    I_set_attribute_value_Out result;
-
-  } _u;
-} I_set_attribute_value_Result;
-
+}I_set_attribute_value_Result;
 I_set_attribute_value_Result I_set_attribute_value_Result_new(void);
-void I_set_attribute_value_Result_init(I_set_attribute_value_Result* self);
+void I_set_attribute_value_Result_init(I_set_attribute_value_Result * self);
+typedef struct I_Call{
+    int32_t _d;
+    union{
+        dds_rpc_UnknownOperation unknownOp;
+        I_ping_In ping;
+        I_get_attribute_value_In get_attribute_value;
+        I_set_attribute_value_In set_attribute_value;
 
-typedef struct I_Call {
-  int32_t _d;
-  union {
+    }_u;
 
-    dds_rpc_UnknownOperation unknownOp;
-
-    I_ping_In ping;
-
-    I_get_attribute_value_In get_attribute_value;
-
-    I_set_attribute_value_In set_attribute_value;
-
-  } _u;
-} I_Call;
-
+}I_Call;
 I_Call I_Call_new(void);
-void I_Call_init(I_Call* self);
+void I_Call_init(I_Call * self);
+typedef struct I_Request{
+    dds_rpc_RequestHeader header;
+    I_Call data;
 
-typedef struct I_Request {
-
-  dds_rpc_RequestHeader header;
-
-  I_Call data;
-
-} I_Request;
-
+}I_Request;
 I_Request I_Request_new(void);
-void I_Request_init(I_Request* self);
+void I_Request_init(I_Request * self);
+typedef struct I_Return{
+    int32_t _d;
+    union{
+        dds_rpc_UnknownOperation unknownOp;
+        I_ping_Result ping;
+        I_get_attribute_value_Result get_attribute_value;
+        I_set_attribute_value_Result set_attribute_value;
 
-typedef struct I_Return {
-  int32_t _d;
-  union {
+    }_u;
 
-    dds_rpc_UnknownOperation unknownOp;
-
-    I_ping_Result ping;
-
-    I_get_attribute_value_Result get_attribute_value;
-
-    I_set_attribute_value_Result set_attribute_value;
-
-  } _u;
-} I_Return;
-
+}I_Return;
 I_Return I_Return_new(void);
-void I_Return_init(I_Return* self);
+void I_Return_init(I_Return * self);
+typedef struct I_Reply{
+    dds_rpc_ReplyHeader header;
+    I_Return data;
 
-typedef struct I_Reply {
-
-  dds_rpc_ReplyHeader header;
-
-  I_Return data;
-
-} I_Reply;
-
+}I_Reply;
 I_Reply I_Reply_new(void);
-void I_Reply_init(I_Reply* self);
-
+void I_Reply_init(I_Reply * self);
 /* Interface I */
-
 void I_ping(void);
-
 int32_t I_get_attribute_value(void);
-
 void I_set_attribute_value(int32_t value);
-
 #endif
 ===============
 annotation_basic_xcdr.c
@@ -504,142 +435,142 @@ annotation_basic_xcdr.c
 * xidlc_version: 0.1.0
 * xidlc_timestamp: 1970-01-01 00:00
 */
-#include "annotation_basic_xcdr.h"
+#include"annotation_basic_xcdr.h"
 
-XcdrBufferResult S_serialize(S const * self, XcdrBuffer buf) {
+XcdrBufferResult S_serialize(S const * self, XcdrBuffer buf){
     uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
     XcdrFfiError err = Ok;
     err = cdr_serializer_write_i32(&serializer, "self->a");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_serializer_position(&serializer)
         };
     }
 
     err = cdr_serializer_write_i16(&serializer, "self->b");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_serializer_position(&serializer)
         };
     }
 
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_serializer_position(&serializer)
     };
 }
 
-XcdrBufferResult S_deserialize(S * self, XcdrConstBuffer buf) {
+XcdrBufferResult S_deserialize(S * self, XcdrConstBuffer buf){
     const uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
     XcdrFfiError err = Ok;
     err = cdr_deserializer_read_i32_le(&deserializer, "self->a");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_deserializer_position(&deserializer)
         };
     }
 
     err = cdr_deserializer_read_i16_le(&deserializer, "self->b");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_deserializer_position(&deserializer)
         };
     }
 
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_deserializer_position(&deserializer)
     };
 }
 
-XcdrBufferResult E_serialize(E const * self, XcdrBuffer buf) {
+XcdrBufferResult E_serialize(E const * self, XcdrBuffer buf){
     uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
     XcdrFfiError err = Ok;
     err = cdr_serializer_write_i32(&serializer, "(*self)");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_serializer_position(&serializer)
         };
     }
 
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_serializer_position(&serializer)
     };
 }
 
-XcdrBufferResult E_deserialize(E * self, XcdrConstBuffer buf) {
+XcdrBufferResult E_deserialize(E * self, XcdrConstBuffer buf){
     const uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
     XcdrFfiError err = Ok;
     err = cdr_deserializer_read_i32_le(&deserializer, "(*self)");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_deserializer_position(&deserializer)
         };
     }
 
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_deserializer_position(&deserializer)
     };
 }
 
-XcdrBufferResult BM_serialize(BM const * self, XcdrBuffer buf) {
+XcdrBufferResult BM_serialize(BM const * self, XcdrBuffer buf){
     uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
     XcdrFfiError err = Ok;
     err = cdr_serializer_write_u32(&serializer, "(*self)");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_serializer_position(&serializer)
         };
     }
 
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_serializer_position(&serializer)
     };
 }
 
-XcdrBufferResult BM_deserialize(BM * self, XcdrConstBuffer buf) {
+XcdrBufferResult BM_deserialize(BM * self, XcdrConstBuffer buf){
     const uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
     XcdrFfiError err = Ok;
     err = cdr_deserializer_read_u32_le(&deserializer, "(*self)");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_deserializer_position(&deserializer)
         };
     }
 
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_deserializer_position(&deserializer)
     };
 }
 
-XcdrBufferResult U_serialize(U const * self, XcdrBuffer buf) {
+XcdrBufferResult U_serialize(U const * self, XcdrBuffer buf){
     uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
     XcdrFfiError err = Ok;
     err = cdr_serializer_write_i32(&serializer, "self->_d");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_serializer_position(&serializer)
         };
     }
 
-    switch (self->_d) {
+    switch(self->_d){
         case 0:
 
             err = cdr_serializer_write_i32(&serializer, "self->_u.a");
-            if (err != Ok) {
-                return (XcdrBufferResult){
+            if(err != Ok){
+                return(XcdrBufferResult){
                     err, cdr_serializer_position(&serializer)
                 };
             }
@@ -648,37 +579,37 @@ XcdrBufferResult U_serialize(U const * self, XcdrBuffer buf) {
         default:
 
             err = cdr_serializer_write_i32(&serializer, "self->_u.b");
-            if (err != Ok) {
-                return (XcdrBufferResult){
+            if(err != Ok){
+                return(XcdrBufferResult){
                     err, cdr_serializer_position(&serializer)
                 };
             }
 
             break;
     }
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_serializer_position(&serializer)
     };
 }
 
-XcdrBufferResult U_deserialize(U * self, XcdrConstBuffer buf) {
+XcdrBufferResult U_deserialize(U * self, XcdrConstBuffer buf){
     const uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
     XcdrFfiError err = Ok;
     err = cdr_deserializer_read_i32_le(&deserializer, "self->_d");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_deserializer_position(&deserializer)
         };
     }
 
-    switch (self->_d) {
+    switch(self->_d){
         case 0:
 
             err = cdr_deserializer_read_i32_le(&deserializer, "self->_u.a");
-            if (err != Ok) {
-                return (XcdrBufferResult){
+            if(err != Ok){
+                return(XcdrBufferResult){
                     err, cdr_deserializer_position(&deserializer)
                 };
             }
@@ -687,20 +618,20 @@ XcdrBufferResult U_deserialize(U * self, XcdrConstBuffer buf) {
         default:
 
             err = cdr_deserializer_read_i32_le(&deserializer, "self->_u.b");
-            if (err != Ok) {
-                return (XcdrBufferResult){
+            if(err != Ok){
+                return(XcdrBufferResult){
                     err, cdr_deserializer_position(&deserializer)
                 };
             }
 
             break;
     }
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_deserializer_position(&deserializer)
     };
 }
 
-XcdrBufferResult I_ping_In_serialize(I_ping_In const * self, XcdrBuffer buf) {
+XcdrBufferResult I_ping_In_serialize(I_ping_In const * self, XcdrBuffer buf){
     uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
@@ -711,20 +642,20 @@ XcdrBufferResult I_ping_In_serialize(I_ping_In const * self, XcdrBuffer buf) {
         &self->dummy, (XcdrBuffer){
             .ptr = ptr + before, .len = len - before, .pos = 0
         });
-        if (child.err != Ok) {
-            return (XcdrBufferResult){
+        if(child.err != Ok){
+            return(XcdrBufferResult){
                 child.err, before + child.used
             };
         }
         serializer.pos = before + child.used;
     }
 
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_serializer_position(&serializer)
     };
 }
 
-XcdrBufferResult I_ping_In_deserialize(I_ping_In * self, XcdrConstBuffer buf) {
+XcdrBufferResult I_ping_In_deserialize(I_ping_In * self, XcdrConstBuffer buf){
     const uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
@@ -735,20 +666,20 @@ XcdrBufferResult I_ping_In_deserialize(I_ping_In * self, XcdrConstBuffer buf) {
         &self->dummy, (XcdrConstBuffer){
             .ptr = ptr + before, .len = len - before, .pos = 0
         });
-        if (child.err != Ok) {
-            return (XcdrBufferResult){
+        if(child.err != Ok){
+            return(XcdrBufferResult){
                 child.err, before + child.used
             };
         }
         deserializer.pos = before + child.used;
     }
 
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_deserializer_position(&deserializer)
     };
 }
 
-XcdrBufferResult I_ping_Out_serialize(I_ping_Out const * self, XcdrBuffer buf) {
+XcdrBufferResult I_ping_Out_serialize(I_ping_Out const * self, XcdrBuffer buf){
     uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
@@ -759,20 +690,20 @@ XcdrBufferResult I_ping_Out_serialize(I_ping_Out const * self, XcdrBuffer buf) {
         &self->dummy, (XcdrBuffer){
             .ptr = ptr + before, .len = len - before, .pos = 0
         });
-        if (child.err != Ok) {
-            return (XcdrBufferResult){
+        if(child.err != Ok){
+            return(XcdrBufferResult){
                 child.err, before + child.used
             };
         }
         serializer.pos = before + child.used;
     }
 
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_serializer_position(&serializer)
     };
 }
 
-XcdrBufferResult I_ping_Out_deserialize(I_ping_Out * self, XcdrConstBuffer buf) {
+XcdrBufferResult I_ping_Out_deserialize(I_ping_Out * self, XcdrConstBuffer buf){
     const uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
@@ -783,32 +714,32 @@ XcdrBufferResult I_ping_Out_deserialize(I_ping_Out * self, XcdrConstBuffer buf) 
         &self->dummy, (XcdrConstBuffer){
             .ptr = ptr + before, .len = len - before, .pos = 0
         });
-        if (child.err != Ok) {
-            return (XcdrBufferResult){
+        if(child.err != Ok){
+            return(XcdrBufferResult){
                 child.err, before + child.used
             };
         }
         deserializer.pos = before + child.used;
     }
 
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_deserializer_position(&deserializer)
     };
 }
 
-XcdrBufferResult I_ping_Result_serialize(I_ping_Result const * self, XcdrBuffer buf) {
+XcdrBufferResult I_ping_Result_serialize(I_ping_Result const * self, XcdrBuffer buf){
     uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
     XcdrFfiError err = Ok;
     err = cdr_serializer_write_i32(&serializer, "self->_d");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_serializer_position(&serializer)
         };
     }
 
-    switch (self->_d) {
+    switch(self->_d){
         case dds_RETCODE_OK:
 
             {
@@ -817,8 +748,8 @@ XcdrBufferResult I_ping_Result_serialize(I_ping_Result const * self, XcdrBuffer 
                 &self->_u.result, (XcdrBuffer){
                     .ptr = ptr + before, .len = len - before, .pos = 0
                 });
-                if (child.err != Ok) {
-                    return (XcdrBufferResult){
+                if(child.err != Ok){
+                    return(XcdrBufferResult){
                         child.err, before + child.used
                     };
                 }
@@ -827,24 +758,24 @@ XcdrBufferResult I_ping_Result_serialize(I_ping_Result const * self, XcdrBuffer 
 
             break;
     }
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_serializer_position(&serializer)
     };
 }
 
-XcdrBufferResult I_ping_Result_deserialize(I_ping_Result * self, XcdrConstBuffer buf) {
+XcdrBufferResult I_ping_Result_deserialize(I_ping_Result * self, XcdrConstBuffer buf){
     const uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
     XcdrFfiError err = Ok;
     err = cdr_deserializer_read_i32_le(&deserializer, "self->_d");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_deserializer_position(&deserializer)
         };
     }
 
-    switch (self->_d) {
+    switch(self->_d){
         case dds_RETCODE_OK:
 
             {
@@ -853,8 +784,8 @@ XcdrBufferResult I_ping_Result_deserialize(I_ping_Result * self, XcdrConstBuffer
                 &self->_u.result, (XcdrConstBuffer){
                     .ptr = ptr + before, .len = len - before, .pos = 0
                 });
-                if (child.err != Ok) {
-                    return (XcdrBufferResult){
+                if(child.err != Ok){
+                    return(XcdrBufferResult){
                         child.err, before + child.used
                     };
                 }
@@ -863,12 +794,12 @@ XcdrBufferResult I_ping_Result_deserialize(I_ping_Result * self, XcdrConstBuffer
 
             break;
     }
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_deserializer_position(&deserializer)
     };
 }
 
-XcdrBufferResult I_get_attribute_value_In_serialize(I_get_attribute_value_In const * self, XcdrBuffer buf) {
+XcdrBufferResult I_get_attribute_value_In_serialize(I_get_attribute_value_In const * self, XcdrBuffer buf){
     uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
@@ -879,20 +810,20 @@ XcdrBufferResult I_get_attribute_value_In_serialize(I_get_attribute_value_In con
         &self->dummy, (XcdrBuffer){
             .ptr = ptr + before, .len = len - before, .pos = 0
         });
-        if (child.err != Ok) {
-            return (XcdrBufferResult){
+        if(child.err != Ok){
+            return(XcdrBufferResult){
                 child.err, before + child.used
             };
         }
         serializer.pos = before + child.used;
     }
 
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_serializer_position(&serializer)
     };
 }
 
-XcdrBufferResult I_get_attribute_value_In_deserialize(I_get_attribute_value_In * self, XcdrConstBuffer buf) {
+XcdrBufferResult I_get_attribute_value_In_deserialize(I_get_attribute_value_In * self, XcdrConstBuffer buf){
     const uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
@@ -903,66 +834,66 @@ XcdrBufferResult I_get_attribute_value_In_deserialize(I_get_attribute_value_In *
         &self->dummy, (XcdrConstBuffer){
             .ptr = ptr + before, .len = len - before, .pos = 0
         });
-        if (child.err != Ok) {
-            return (XcdrBufferResult){
+        if(child.err != Ok){
+            return(XcdrBufferResult){
                 child.err, before + child.used
             };
         }
         deserializer.pos = before + child.used;
     }
 
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_deserializer_position(&deserializer)
     };
 }
 
-XcdrBufferResult I_get_attribute_value_Out_serialize(I_get_attribute_value_Out const * self, XcdrBuffer buf) {
+XcdrBufferResult I_get_attribute_value_Out_serialize(I_get_attribute_value_Out const * self, XcdrBuffer buf){
     uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
     XcdrFfiError err = Ok;
     err = cdr_serializer_write_i32(&serializer, "self->return_");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_serializer_position(&serializer)
         };
     }
 
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_serializer_position(&serializer)
     };
 }
 
-XcdrBufferResult I_get_attribute_value_Out_deserialize(I_get_attribute_value_Out * self, XcdrConstBuffer buf) {
+XcdrBufferResult I_get_attribute_value_Out_deserialize(I_get_attribute_value_Out * self, XcdrConstBuffer buf){
     const uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
     XcdrFfiError err = Ok;
     err = cdr_deserializer_read_i32_le(&deserializer, "self->return_");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_deserializer_position(&deserializer)
         };
     }
 
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_deserializer_position(&deserializer)
     };
 }
 
-XcdrBufferResult I_get_attribute_value_Result_serialize(I_get_attribute_value_Result const * self, XcdrBuffer buf) {
+XcdrBufferResult I_get_attribute_value_Result_serialize(I_get_attribute_value_Result const * self, XcdrBuffer buf){
     uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
     XcdrFfiError err = Ok;
     err = cdr_serializer_write_i32(&serializer, "self->_d");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_serializer_position(&serializer)
         };
     }
 
-    switch (self->_d) {
+    switch(self->_d){
         case dds_RETCODE_OK:
 
             {
@@ -971,8 +902,8 @@ XcdrBufferResult I_get_attribute_value_Result_serialize(I_get_attribute_value_Re
                 &self->_u.result, (XcdrBuffer){
                     .ptr = ptr + before, .len = len - before, .pos = 0
                 });
-                if (child.err != Ok) {
-                    return (XcdrBufferResult){
+                if(child.err != Ok){
+                    return(XcdrBufferResult){
                         child.err, before + child.used
                     };
                 }
@@ -981,24 +912,24 @@ XcdrBufferResult I_get_attribute_value_Result_serialize(I_get_attribute_value_Re
 
             break;
     }
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_serializer_position(&serializer)
     };
 }
 
-XcdrBufferResult I_get_attribute_value_Result_deserialize(I_get_attribute_value_Result * self, XcdrConstBuffer buf) {
+XcdrBufferResult I_get_attribute_value_Result_deserialize(I_get_attribute_value_Result * self, XcdrConstBuffer buf){
     const uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
     XcdrFfiError err = Ok;
     err = cdr_deserializer_read_i32_le(&deserializer, "self->_d");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_deserializer_position(&deserializer)
         };
     }
 
-    switch (self->_d) {
+    switch(self->_d){
         case dds_RETCODE_OK:
 
             {
@@ -1007,8 +938,8 @@ XcdrBufferResult I_get_attribute_value_Result_deserialize(I_get_attribute_value_
                 &self->_u.result, (XcdrConstBuffer){
                     .ptr = ptr + before, .len = len - before, .pos = 0
                 });
-                if (child.err != Ok) {
-                    return (XcdrBufferResult){
+                if(child.err != Ok){
+                    return(XcdrBufferResult){
                         child.err, before + child.used
                     };
                 }
@@ -1017,46 +948,46 @@ XcdrBufferResult I_get_attribute_value_Result_deserialize(I_get_attribute_value_
 
             break;
     }
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_deserializer_position(&deserializer)
     };
 }
 
-XcdrBufferResult I_set_attribute_value_In_serialize(I_set_attribute_value_In const * self, XcdrBuffer buf) {
+XcdrBufferResult I_set_attribute_value_In_serialize(I_set_attribute_value_In const * self, XcdrBuffer buf){
     uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
     XcdrFfiError err = Ok;
     err = cdr_serializer_write_i32(&serializer, "self->value");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_serializer_position(&serializer)
         };
     }
 
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_serializer_position(&serializer)
     };
 }
 
-XcdrBufferResult I_set_attribute_value_In_deserialize(I_set_attribute_value_In * self, XcdrConstBuffer buf) {
+XcdrBufferResult I_set_attribute_value_In_deserialize(I_set_attribute_value_In * self, XcdrConstBuffer buf){
     const uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
     XcdrFfiError err = Ok;
     err = cdr_deserializer_read_i32_le(&deserializer, "self->value");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_deserializer_position(&deserializer)
         };
     }
 
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_deserializer_position(&deserializer)
     };
 }
 
-XcdrBufferResult I_set_attribute_value_Out_serialize(I_set_attribute_value_Out const * self, XcdrBuffer buf) {
+XcdrBufferResult I_set_attribute_value_Out_serialize(I_set_attribute_value_Out const * self, XcdrBuffer buf){
     uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
@@ -1067,20 +998,20 @@ XcdrBufferResult I_set_attribute_value_Out_serialize(I_set_attribute_value_Out c
         &self->dummy, (XcdrBuffer){
             .ptr = ptr + before, .len = len - before, .pos = 0
         });
-        if (child.err != Ok) {
-            return (XcdrBufferResult){
+        if(child.err != Ok){
+            return(XcdrBufferResult){
                 child.err, before + child.used
             };
         }
         serializer.pos = before + child.used;
     }
 
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_serializer_position(&serializer)
     };
 }
 
-XcdrBufferResult I_set_attribute_value_Out_deserialize(I_set_attribute_value_Out * self, XcdrConstBuffer buf) {
+XcdrBufferResult I_set_attribute_value_Out_deserialize(I_set_attribute_value_Out * self, XcdrConstBuffer buf){
     const uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
@@ -1091,32 +1022,32 @@ XcdrBufferResult I_set_attribute_value_Out_deserialize(I_set_attribute_value_Out
         &self->dummy, (XcdrConstBuffer){
             .ptr = ptr + before, .len = len - before, .pos = 0
         });
-        if (child.err != Ok) {
-            return (XcdrBufferResult){
+        if(child.err != Ok){
+            return(XcdrBufferResult){
                 child.err, before + child.used
             };
         }
         deserializer.pos = before + child.used;
     }
 
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_deserializer_position(&deserializer)
     };
 }
 
-XcdrBufferResult I_set_attribute_value_Result_serialize(I_set_attribute_value_Result const * self, XcdrBuffer buf) {
+XcdrBufferResult I_set_attribute_value_Result_serialize(I_set_attribute_value_Result const * self, XcdrBuffer buf){
     uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
     XcdrFfiError err = Ok;
     err = cdr_serializer_write_i32(&serializer, "self->_d");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_serializer_position(&serializer)
         };
     }
 
-    switch (self->_d) {
+    switch(self->_d){
         case dds_RETCODE_OK:
 
             {
@@ -1125,8 +1056,8 @@ XcdrBufferResult I_set_attribute_value_Result_serialize(I_set_attribute_value_Re
                 &self->_u.result, (XcdrBuffer){
                     .ptr = ptr + before, .len = len - before, .pos = 0
                 });
-                if (child.err != Ok) {
-                    return (XcdrBufferResult){
+                if(child.err != Ok){
+                    return(XcdrBufferResult){
                         child.err, before + child.used
                     };
                 }
@@ -1135,24 +1066,24 @@ XcdrBufferResult I_set_attribute_value_Result_serialize(I_set_attribute_value_Re
 
             break;
     }
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_serializer_position(&serializer)
     };
 }
 
-XcdrBufferResult I_set_attribute_value_Result_deserialize(I_set_attribute_value_Result * self, XcdrConstBuffer buf) {
+XcdrBufferResult I_set_attribute_value_Result_deserialize(I_set_attribute_value_Result * self, XcdrConstBuffer buf){
     const uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
     XcdrFfiError err = Ok;
     err = cdr_deserializer_read_i32_le(&deserializer, "self->_d");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_deserializer_position(&deserializer)
         };
     }
 
-    switch (self->_d) {
+    switch(self->_d){
         case dds_RETCODE_OK:
 
             {
@@ -1161,8 +1092,8 @@ XcdrBufferResult I_set_attribute_value_Result_deserialize(I_set_attribute_value_
                 &self->_u.result, (XcdrConstBuffer){
                     .ptr = ptr + before, .len = len - before, .pos = 0
                 });
-                if (child.err != Ok) {
-                    return (XcdrBufferResult){
+                if(child.err != Ok){
+                    return(XcdrBufferResult){
                         child.err, before + child.used
                     };
                 }
@@ -1171,24 +1102,24 @@ XcdrBufferResult I_set_attribute_value_Result_deserialize(I_set_attribute_value_
 
             break;
     }
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_deserializer_position(&deserializer)
     };
 }
 
-XcdrBufferResult I_Call_serialize(I_Call const * self, XcdrBuffer buf) {
+XcdrBufferResult I_Call_serialize(I_Call const * self, XcdrBuffer buf){
     uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
     XcdrFfiError err = Ok;
     err = cdr_serializer_write_i32(&serializer, "self->_d");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_serializer_position(&serializer)
         };
     }
 
-    switch (self->_d) {
+    switch(self->_d){
         default:
 
             {
@@ -1197,8 +1128,8 @@ XcdrBufferResult I_Call_serialize(I_Call const * self, XcdrBuffer buf) {
                 &self->_u.unknownOp, (XcdrBuffer){
                     .ptr = ptr + before, .len = len - before, .pos = 0
                 });
-                if (child.err != Ok) {
-                    return (XcdrBufferResult){
+                if(child.err != Ok){
+                    return(XcdrBufferResult){
                         child.err, before + child.used
                     };
                 }
@@ -1214,8 +1145,8 @@ XcdrBufferResult I_Call_serialize(I_Call const * self, XcdrBuffer buf) {
                 &self->_u.ping, (XcdrBuffer){
                     .ptr = ptr + before, .len = len - before, .pos = 0
                 });
-                if (child.err != Ok) {
-                    return (XcdrBufferResult){
+                if(child.err != Ok){
+                    return(XcdrBufferResult){
                         child.err, before + child.used
                     };
                 }
@@ -1231,8 +1162,8 @@ XcdrBufferResult I_Call_serialize(I_Call const * self, XcdrBuffer buf) {
                 &self->_u.get_attribute_value, (XcdrBuffer){
                     .ptr = ptr + before, .len = len - before, .pos = 0
                 });
-                if (child.err != Ok) {
-                    return (XcdrBufferResult){
+                if(child.err != Ok){
+                    return(XcdrBufferResult){
                         child.err, before + child.used
                     };
                 }
@@ -1248,8 +1179,8 @@ XcdrBufferResult I_Call_serialize(I_Call const * self, XcdrBuffer buf) {
                 &self->_u.set_attribute_value, (XcdrBuffer){
                     .ptr = ptr + before, .len = len - before, .pos = 0
                 });
-                if (child.err != Ok) {
-                    return (XcdrBufferResult){
+                if(child.err != Ok){
+                    return(XcdrBufferResult){
                         child.err, before + child.used
                     };
                 }
@@ -1258,24 +1189,24 @@ XcdrBufferResult I_Call_serialize(I_Call const * self, XcdrBuffer buf) {
 
             break;
     }
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_serializer_position(&serializer)
     };
 }
 
-XcdrBufferResult I_Call_deserialize(I_Call * self, XcdrConstBuffer buf) {
+XcdrBufferResult I_Call_deserialize(I_Call * self, XcdrConstBuffer buf){
     const uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
     XcdrFfiError err = Ok;
     err = cdr_deserializer_read_i32_le(&deserializer, "self->_d");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_deserializer_position(&deserializer)
         };
     }
 
-    switch (self->_d) {
+    switch(self->_d){
         default:
 
             {
@@ -1284,8 +1215,8 @@ XcdrBufferResult I_Call_deserialize(I_Call * self, XcdrConstBuffer buf) {
                 &self->_u.unknownOp, (XcdrConstBuffer){
                     .ptr = ptr + before, .len = len - before, .pos = 0
                 });
-                if (child.err != Ok) {
-                    return (XcdrBufferResult){
+                if(child.err != Ok){
+                    return(XcdrBufferResult){
                         child.err, before + child.used
                     };
                 }
@@ -1301,8 +1232,8 @@ XcdrBufferResult I_Call_deserialize(I_Call * self, XcdrConstBuffer buf) {
                 &self->_u.ping, (XcdrConstBuffer){
                     .ptr = ptr + before, .len = len - before, .pos = 0
                 });
-                if (child.err != Ok) {
-                    return (XcdrBufferResult){
+                if(child.err != Ok){
+                    return(XcdrBufferResult){
                         child.err, before + child.used
                     };
                 }
@@ -1318,8 +1249,8 @@ XcdrBufferResult I_Call_deserialize(I_Call * self, XcdrConstBuffer buf) {
                 &self->_u.get_attribute_value, (XcdrConstBuffer){
                     .ptr = ptr + before, .len = len - before, .pos = 0
                 });
-                if (child.err != Ok) {
-                    return (XcdrBufferResult){
+                if(child.err != Ok){
+                    return(XcdrBufferResult){
                         child.err, before + child.used
                     };
                 }
@@ -1335,8 +1266,8 @@ XcdrBufferResult I_Call_deserialize(I_Call * self, XcdrConstBuffer buf) {
                 &self->_u.set_attribute_value, (XcdrConstBuffer){
                     .ptr = ptr + before, .len = len - before, .pos = 0
                 });
-                if (child.err != Ok) {
-                    return (XcdrBufferResult){
+                if(child.err != Ok){
+                    return(XcdrBufferResult){
                         child.err, before + child.used
                     };
                 }
@@ -1345,12 +1276,12 @@ XcdrBufferResult I_Call_deserialize(I_Call * self, XcdrConstBuffer buf) {
 
             break;
     }
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_deserializer_position(&deserializer)
     };
 }
 
-XcdrBufferResult I_Request_serialize(I_Request const * self, XcdrBuffer buf) {
+XcdrBufferResult I_Request_serialize(I_Request const * self, XcdrBuffer buf){
     uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
@@ -1361,8 +1292,8 @@ XcdrBufferResult I_Request_serialize(I_Request const * self, XcdrBuffer buf) {
         &self->header, (XcdrBuffer){
             .ptr = ptr + before, .len = len - before, .pos = 0
         });
-        if (child.err != Ok) {
-            return (XcdrBufferResult){
+        if(child.err != Ok){
+            return(XcdrBufferResult){
                 child.err, before + child.used
             };
         }
@@ -1375,20 +1306,20 @@ XcdrBufferResult I_Request_serialize(I_Request const * self, XcdrBuffer buf) {
         &self->data, (XcdrBuffer){
             .ptr = ptr + before, .len = len - before, .pos = 0
         });
-        if (child.err != Ok) {
-            return (XcdrBufferResult){
+        if(child.err != Ok){
+            return(XcdrBufferResult){
                 child.err, before + child.used
             };
         }
         serializer.pos = before + child.used;
     }
 
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_serializer_position(&serializer)
     };
 }
 
-XcdrBufferResult I_Request_deserialize(I_Request * self, XcdrConstBuffer buf) {
+XcdrBufferResult I_Request_deserialize(I_Request * self, XcdrConstBuffer buf){
     const uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
@@ -1399,8 +1330,8 @@ XcdrBufferResult I_Request_deserialize(I_Request * self, XcdrConstBuffer buf) {
         &self->header, (XcdrConstBuffer){
             .ptr = ptr + before, .len = len - before, .pos = 0
         });
-        if (child.err != Ok) {
-            return (XcdrBufferResult){
+        if(child.err != Ok){
+            return(XcdrBufferResult){
                 child.err, before + child.used
             };
         }
@@ -1413,32 +1344,32 @@ XcdrBufferResult I_Request_deserialize(I_Request * self, XcdrConstBuffer buf) {
         &self->data, (XcdrConstBuffer){
             .ptr = ptr + before, .len = len - before, .pos = 0
         });
-        if (child.err != Ok) {
-            return (XcdrBufferResult){
+        if(child.err != Ok){
+            return(XcdrBufferResult){
                 child.err, before + child.used
             };
         }
         deserializer.pos = before + child.used;
     }
 
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_deserializer_position(&deserializer)
     };
 }
 
-XcdrBufferResult I_Return_serialize(I_Return const * self, XcdrBuffer buf) {
+XcdrBufferResult I_Return_serialize(I_Return const * self, XcdrBuffer buf){
     uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
     XcdrFfiError err = Ok;
     err = cdr_serializer_write_i32(&serializer, "self->_d");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_serializer_position(&serializer)
         };
     }
 
-    switch (self->_d) {
+    switch(self->_d){
         default:
 
             {
@@ -1447,8 +1378,8 @@ XcdrBufferResult I_Return_serialize(I_Return const * self, XcdrBuffer buf) {
                 &self->_u.unknownOp, (XcdrBuffer){
                     .ptr = ptr + before, .len = len - before, .pos = 0
                 });
-                if (child.err != Ok) {
-                    return (XcdrBufferResult){
+                if(child.err != Ok){
+                    return(XcdrBufferResult){
                         child.err, before + child.used
                     };
                 }
@@ -1464,8 +1395,8 @@ XcdrBufferResult I_Return_serialize(I_Return const * self, XcdrBuffer buf) {
                 &self->_u.ping, (XcdrBuffer){
                     .ptr = ptr + before, .len = len - before, .pos = 0
                 });
-                if (child.err != Ok) {
-                    return (XcdrBufferResult){
+                if(child.err != Ok){
+                    return(XcdrBufferResult){
                         child.err, before + child.used
                     };
                 }
@@ -1481,8 +1412,8 @@ XcdrBufferResult I_Return_serialize(I_Return const * self, XcdrBuffer buf) {
                 &self->_u.get_attribute_value, (XcdrBuffer){
                     .ptr = ptr + before, .len = len - before, .pos = 0
                 });
-                if (child.err != Ok) {
-                    return (XcdrBufferResult){
+                if(child.err != Ok){
+                    return(XcdrBufferResult){
                         child.err, before + child.used
                     };
                 }
@@ -1498,8 +1429,8 @@ XcdrBufferResult I_Return_serialize(I_Return const * self, XcdrBuffer buf) {
                 &self->_u.set_attribute_value, (XcdrBuffer){
                     .ptr = ptr + before, .len = len - before, .pos = 0
                 });
-                if (child.err != Ok) {
-                    return (XcdrBufferResult){
+                if(child.err != Ok){
+                    return(XcdrBufferResult){
                         child.err, before + child.used
                     };
                 }
@@ -1508,24 +1439,24 @@ XcdrBufferResult I_Return_serialize(I_Return const * self, XcdrBuffer buf) {
 
             break;
     }
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_serializer_position(&serializer)
     };
 }
 
-XcdrBufferResult I_Return_deserialize(I_Return * self, XcdrConstBuffer buf) {
+XcdrBufferResult I_Return_deserialize(I_Return * self, XcdrConstBuffer buf){
     const uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
     XcdrFfiError err = Ok;
     err = cdr_deserializer_read_i32_le(&deserializer, "self->_d");
-    if (err != Ok) {
-        return (XcdrBufferResult){
+    if(err != Ok){
+        return(XcdrBufferResult){
             err, cdr_deserializer_position(&deserializer)
         };
     }
 
-    switch (self->_d) {
+    switch(self->_d){
         default:
 
             {
@@ -1534,8 +1465,8 @@ XcdrBufferResult I_Return_deserialize(I_Return * self, XcdrConstBuffer buf) {
                 &self->_u.unknownOp, (XcdrConstBuffer){
                     .ptr = ptr + before, .len = len - before, .pos = 0
                 });
-                if (child.err != Ok) {
-                    return (XcdrBufferResult){
+                if(child.err != Ok){
+                    return(XcdrBufferResult){
                         child.err, before + child.used
                     };
                 }
@@ -1551,8 +1482,8 @@ XcdrBufferResult I_Return_deserialize(I_Return * self, XcdrConstBuffer buf) {
                 &self->_u.ping, (XcdrConstBuffer){
                     .ptr = ptr + before, .len = len - before, .pos = 0
                 });
-                if (child.err != Ok) {
-                    return (XcdrBufferResult){
+                if(child.err != Ok){
+                    return(XcdrBufferResult){
                         child.err, before + child.used
                     };
                 }
@@ -1568,8 +1499,8 @@ XcdrBufferResult I_Return_deserialize(I_Return * self, XcdrConstBuffer buf) {
                 &self->_u.get_attribute_value, (XcdrConstBuffer){
                     .ptr = ptr + before, .len = len - before, .pos = 0
                 });
-                if (child.err != Ok) {
-                    return (XcdrBufferResult){
+                if(child.err != Ok){
+                    return(XcdrBufferResult){
                         child.err, before + child.used
                     };
                 }
@@ -1585,8 +1516,8 @@ XcdrBufferResult I_Return_deserialize(I_Return * self, XcdrConstBuffer buf) {
                 &self->_u.set_attribute_value, (XcdrConstBuffer){
                     .ptr = ptr + before, .len = len - before, .pos = 0
                 });
-                if (child.err != Ok) {
-                    return (XcdrBufferResult){
+                if(child.err != Ok){
+                    return(XcdrBufferResult){
                         child.err, before + child.used
                     };
                 }
@@ -1595,12 +1526,12 @@ XcdrBufferResult I_Return_deserialize(I_Return * self, XcdrConstBuffer buf) {
 
             break;
     }
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_deserializer_position(&deserializer)
     };
 }
 
-XcdrBufferResult I_Reply_serialize(I_Reply const * self, XcdrBuffer buf) {
+XcdrBufferResult I_Reply_serialize(I_Reply const * self, XcdrBuffer buf){
     uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
@@ -1611,8 +1542,8 @@ XcdrBufferResult I_Reply_serialize(I_Reply const * self, XcdrBuffer buf) {
         &self->header, (XcdrBuffer){
             .ptr = ptr + before, .len = len - before, .pos = 0
         });
-        if (child.err != Ok) {
-            return (XcdrBufferResult){
+        if(child.err != Ok){
+            return(XcdrBufferResult){
                 child.err, before + child.used
             };
         }
@@ -1625,20 +1556,20 @@ XcdrBufferResult I_Reply_serialize(I_Reply const * self, XcdrBuffer buf) {
         &self->data, (XcdrBuffer){
             .ptr = ptr + before, .len = len - before, .pos = 0
         });
-        if (child.err != Ok) {
-            return (XcdrBufferResult){
+        if(child.err != Ok){
+            return(XcdrBufferResult){
                 child.err, before + child.used
             };
         }
         serializer.pos = before + child.used;
     }
 
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_serializer_position(&serializer)
     };
 }
 
-XcdrBufferResult I_Reply_deserialize(I_Reply * self, XcdrConstBuffer buf) {
+XcdrBufferResult I_Reply_deserialize(I_Reply * self, XcdrConstBuffer buf){
     const uint8_t * ptr = buf.ptr;
     size_t len = buf.len;
     FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
@@ -1649,8 +1580,8 @@ XcdrBufferResult I_Reply_deserialize(I_Reply * self, XcdrConstBuffer buf) {
         &self->header, (XcdrConstBuffer){
             .ptr = ptr + before, .len = len - before, .pos = 0
         });
-        if (child.err != Ok) {
-            return (XcdrBufferResult){
+        if(child.err != Ok){
+            return(XcdrBufferResult){
                 child.err, before + child.used
             };
         }
@@ -1663,15 +1594,15 @@ XcdrBufferResult I_Reply_deserialize(I_Reply * self, XcdrConstBuffer buf) {
         &self->data, (XcdrConstBuffer){
             .ptr = ptr + before, .len = len - before, .pos = 0
         });
-        if (child.err != Ok) {
-            return (XcdrBufferResult){
+        if(child.err != Ok){
+            return(XcdrBufferResult){
                 child.err, before + child.used
             };
         }
         deserializer.pos = before + child.used;
     }
 
-    return (XcdrBufferResult){
+    return(XcdrBufferResult){
         Ok, cdr_deserializer_position(&deserializer)
     };
 }
@@ -1679,65 +1610,47 @@ XcdrBufferResult I_Reply_deserialize(I_Reply * self, XcdrConstBuffer buf) {
 annotation_basic_xcdr.h
 ===============
 /* Generated by xidlc
- * xidlc_version: 0.1.0
- * xidlc_timestamp: 1970-01-01 00:00
- */
+* xidlc_version: 0.1.0
+* xidlc_timestamp: 1970-01-01 00:00
+*/
+#ifndef ANNOTATION_BASIC_XCDR_H
+#define ANNOTATION_BASIC_XCDR_H
+#include<stdbool.h>
+#include<stdint.h>
+#include<wchar.h>
 
-#ifndef ANNOTATION_BASIC_XCDR.H
-#define ANNOTATION_BASIC_XCDR.H
-#include <stdbool.h>
-#include <stdint.h>
-#include <wchar.h>
-
-XcdrBufferResult S_serialize(S const* self, XcdrBuffer buf);
-XcdrBufferResult S_deserialize(S* self, XcdrConstBuffer buf);
-
-XcdrBufferResult E_serialize(E const* self, XcdrBuffer buf);
-XcdrBufferResult E_deserialize(E* self, XcdrConstBuffer buf);
-
-XcdrBufferResult BM_serialize(BM const* self, XcdrBuffer buf);
-XcdrBufferResult BM_deserialize(BM* self, XcdrConstBuffer buf);
-
-XcdrBufferResult U_serialize(U const* self, XcdrBuffer buf);
-XcdrBufferResult U_deserialize(U* self, XcdrConstBuffer buf);
-
-XcdrBufferResult I_ping_In_serialize(I_ping_In const* self, XcdrBuffer buf);
-XcdrBufferResult I_ping_In_deserialize(I_ping_In* self, XcdrConstBuffer buf);
-
-XcdrBufferResult I_ping_Out_serialize(I_ping_Out const* self, XcdrBuffer buf);
-XcdrBufferResult I_ping_Out_deserialize(I_ping_Out* self, XcdrConstBuffer buf);
-
-XcdrBufferResult I_ping_Result_serialize(I_ping_Result const* self, XcdrBuffer buf);
-XcdrBufferResult I_ping_Result_deserialize(I_ping_Result* self, XcdrConstBuffer buf);
-
-XcdrBufferResult I_get_attribute_value_In_serialize(I_get_attribute_value_In const* self, XcdrBuffer buf);
-XcdrBufferResult I_get_attribute_value_In_deserialize(I_get_attribute_value_In* self, XcdrConstBuffer buf);
-
-XcdrBufferResult I_get_attribute_value_Out_serialize(I_get_attribute_value_Out const* self, XcdrBuffer buf);
-XcdrBufferResult I_get_attribute_value_Out_deserialize(I_get_attribute_value_Out* self, XcdrConstBuffer buf);
-
-XcdrBufferResult I_get_attribute_value_Result_serialize(I_get_attribute_value_Result const* self, XcdrBuffer buf);
-XcdrBufferResult I_get_attribute_value_Result_deserialize(I_get_attribute_value_Result* self, XcdrConstBuffer buf);
-
-XcdrBufferResult I_set_attribute_value_In_serialize(I_set_attribute_value_In const* self, XcdrBuffer buf);
-XcdrBufferResult I_set_attribute_value_In_deserialize(I_set_attribute_value_In* self, XcdrConstBuffer buf);
-
-XcdrBufferResult I_set_attribute_value_Out_serialize(I_set_attribute_value_Out const* self, XcdrBuffer buf);
-XcdrBufferResult I_set_attribute_value_Out_deserialize(I_set_attribute_value_Out* self, XcdrConstBuffer buf);
-
-XcdrBufferResult I_set_attribute_value_Result_serialize(I_set_attribute_value_Result const* self, XcdrBuffer buf);
-XcdrBufferResult I_set_attribute_value_Result_deserialize(I_set_attribute_value_Result* self, XcdrConstBuffer buf);
-
-XcdrBufferResult I_Call_serialize(I_Call const* self, XcdrBuffer buf);
-XcdrBufferResult I_Call_deserialize(I_Call* self, XcdrConstBuffer buf);
-
-XcdrBufferResult I_Request_serialize(I_Request const* self, XcdrBuffer buf);
-XcdrBufferResult I_Request_deserialize(I_Request* self, XcdrConstBuffer buf);
-
-XcdrBufferResult I_Return_serialize(I_Return const* self, XcdrBuffer buf);
-XcdrBufferResult I_Return_deserialize(I_Return* self, XcdrConstBuffer buf);
-
-XcdrBufferResult I_Reply_serialize(I_Reply const* self, XcdrBuffer buf);
-XcdrBufferResult I_Reply_deserialize(I_Reply* self, XcdrConstBuffer buf);
-
+XcdrBufferResult S_serialize(S const * self, XcdrBuffer buf);
+XcdrBufferResult S_deserialize(S * self, XcdrConstBuffer buf);
+XcdrBufferResult E_serialize(E const * self, XcdrBuffer buf);
+XcdrBufferResult E_deserialize(E * self, XcdrConstBuffer buf);
+XcdrBufferResult BM_serialize(BM const * self, XcdrBuffer buf);
+XcdrBufferResult BM_deserialize(BM * self, XcdrConstBuffer buf);
+XcdrBufferResult U_serialize(U const * self, XcdrBuffer buf);
+XcdrBufferResult U_deserialize(U * self, XcdrConstBuffer buf);
+XcdrBufferResult I_ping_In_serialize(I_ping_In const * self, XcdrBuffer buf);
+XcdrBufferResult I_ping_In_deserialize(I_ping_In * self, XcdrConstBuffer buf);
+XcdrBufferResult I_ping_Out_serialize(I_ping_Out const * self, XcdrBuffer buf);
+XcdrBufferResult I_ping_Out_deserialize(I_ping_Out * self, XcdrConstBuffer buf);
+XcdrBufferResult I_ping_Result_serialize(I_ping_Result const * self, XcdrBuffer buf);
+XcdrBufferResult I_ping_Result_deserialize(I_ping_Result * self, XcdrConstBuffer buf);
+XcdrBufferResult I_get_attribute_value_In_serialize(I_get_attribute_value_In const * self, XcdrBuffer buf);
+XcdrBufferResult I_get_attribute_value_In_deserialize(I_get_attribute_value_In * self, XcdrConstBuffer buf);
+XcdrBufferResult I_get_attribute_value_Out_serialize(I_get_attribute_value_Out const * self, XcdrBuffer buf);
+XcdrBufferResult I_get_attribute_value_Out_deserialize(I_get_attribute_value_Out * self, XcdrConstBuffer buf);
+XcdrBufferResult I_get_attribute_value_Result_serialize(I_get_attribute_value_Result const * self, XcdrBuffer buf);
+XcdrBufferResult I_get_attribute_value_Result_deserialize(I_get_attribute_value_Result * self, XcdrConstBuffer buf);
+XcdrBufferResult I_set_attribute_value_In_serialize(I_set_attribute_value_In const * self, XcdrBuffer buf);
+XcdrBufferResult I_set_attribute_value_In_deserialize(I_set_attribute_value_In * self, XcdrConstBuffer buf);
+XcdrBufferResult I_set_attribute_value_Out_serialize(I_set_attribute_value_Out const * self, XcdrBuffer buf);
+XcdrBufferResult I_set_attribute_value_Out_deserialize(I_set_attribute_value_Out * self, XcdrConstBuffer buf);
+XcdrBufferResult I_set_attribute_value_Result_serialize(I_set_attribute_value_Result const * self, XcdrBuffer buf);
+XcdrBufferResult I_set_attribute_value_Result_deserialize(I_set_attribute_value_Result * self, XcdrConstBuffer buf);
+XcdrBufferResult I_Call_serialize(I_Call const * self, XcdrBuffer buf);
+XcdrBufferResult I_Call_deserialize(I_Call * self, XcdrConstBuffer buf);
+XcdrBufferResult I_Request_serialize(I_Request const * self, XcdrBuffer buf);
+XcdrBufferResult I_Request_deserialize(I_Request * self, XcdrConstBuffer buf);
+XcdrBufferResult I_Return_serialize(I_Return const * self, XcdrBuffer buf);
+XcdrBufferResult I_Return_deserialize(I_Return * self, XcdrConstBuffer buf);
+XcdrBufferResult I_Reply_serialize(I_Reply const * self, XcdrBuffer buf);
+XcdrBufferResult I_Reply_deserialize(I_Reply * self, XcdrConstBuffer buf);
 #endif

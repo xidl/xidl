@@ -42,6 +42,7 @@ struct QueryActions {
     prepend: HashMap<usize, Vec<InsertKind>>,
     indent_pre: HashMap<usize, i32>,
     indent_post: HashMap<usize, i32>,
+    comments: HashMap<usize, usize>,
 }
 
 struct Formatter<'a> {
@@ -67,7 +68,7 @@ pub fn format_rust_source(source: &str) -> IdlcResult<String> {
         query_source: RUST_QUERY,
         label: "rust",
         allow_parse_error: false,
-        preserve_inline_ws: true,
+        preserve_inline_ws: false,
         indent_parens: false,
         normalize_indent: false,
     })
@@ -81,7 +82,7 @@ pub fn format_c_source(source: &str) -> IdlcResult<String> {
         query_source: CPP_QUERY,
         label: "c",
         allow_parse_error: true,
-        preserve_inline_ws: true,
+        preserve_inline_ws: false,
         indent_parens: false,
         normalize_indent: true,
     })
@@ -95,7 +96,7 @@ pub fn format_typescript_source(source: &str) -> IdlcResult<String> {
         query_source: TYPESCRIPT_QUERY,
         label: "typescript",
         allow_parse_error: true,
-        preserve_inline_ws: true,
+        preserve_inline_ws: false,
         indent_parens: false,
         normalize_indent: true,
     })
@@ -190,6 +191,19 @@ impl<'a> Formatter<'a> {
                     "dec-ident" => {
                         Self::add_indent(&mut actions.indent_pre, node.start_byte(), -1);
                     }
+                    "comment" => {
+                        actions.comments.insert(node.start_byte(), node.end_byte());
+                        actions
+                            .prepend
+                            .entry(node.start_byte())
+                            .or_default()
+                            .push(InsertKind::PrependNewline);
+                        actions
+                            .append
+                            .entry(node.end_byte())
+                            .or_default()
+                            .push(InsertKind::AppendNewline);
+                    }
                     _ => {}
                 }
             }
@@ -239,49 +253,39 @@ impl<'a> Formatter<'a> {
         let mut prev_was_comment = false;
 
         for token in tokens {
+            if token.end <= prev_end {
+                continue;
+            }
+
             let gap = &source[prev_end..token.start];
             indent_level = Self::apply_indent(indent_level, actions.indent_post.get(&prev_end));
             indent_level = Self::apply_indent(indent_level, actions.indent_pre.get(&token.start));
 
             let token_text = &source[token.start..token.end];
-            let is_comment_token = token_text.starts_with("//") || token_text.starts_with("/*");
-            let has_comment = gap.contains("//") || gap.contains("/*");
+            let comment_end = actions.comments.get(&token.start).copied();
+            let is_comment_token = comment_end.is_some()
+                || token_text.starts_with("//")
+                || token_text.starts_with("/*");
 
-            if is_comment_token && !gap.contains('\n') && gap.chars().all(|c| c.is_whitespace()) {
-                if prev_token.is_some() {
-                    output.push(' ');
-                } else {
-                    for _ in 0..indent_level {
-                        output.push_str(INDENT);
-                    }
+            if let Some(comment_end) = comment_end {
+                if !output.is_empty() && !output.ends_with('\n') {
+                    output.push('\n');
                 }
-            } else if prev_was_comment
-                && gap.contains('\n')
-                && gap.chars().all(|c| c.is_whitespace())
-            {
-                output.push('\n');
                 for _ in 0..indent_level {
                     output.push_str(INDENT);
                 }
-            } else if has_comment && token_text == "}" {
-                let mut normalized = if Self::comment_is_inline(gap) {
-                    Self::normalize_inline_comment_gap(gap, indent_level)
-                } else {
-                    Self::normalize_comment_gap(gap, indent_level)
-                };
-                if !normalized.ends_with('\n') {
-                    normalized.push('\n');
-                }
-                for _ in 0..indent_level {
-                    normalized.push_str(INDENT);
-                }
-                output.push_str(&normalized);
-            } else if has_comment {
-                if Self::comment_is_inline(gap) {
-                    output.push_str(&Self::normalize_inline_comment_gap(gap, indent_level));
-                } else {
-                    output.push_str(&Self::normalize_comment_gap(gap, indent_level));
-                }
+                output.push_str(source[token.start..comment_end].trim());
+                output.push('\n');
+                prev_token = Some(Token {
+                    start: token.start,
+                    end: comment_end,
+                });
+                prev_was_comment = true;
+                prev_end = comment_end;
+                continue;
+            }
+
+            if prev_was_comment && gap.chars().all(|c| c.is_whitespace()) {
             } else if gap.chars().all(|c| c.is_whitespace()) {
                 let append = Self::actions_for(&actions.append, prev_end);
                 let prepend = Self::actions_for(&actions.prepend, token.start);
@@ -292,6 +296,12 @@ impl<'a> Formatter<'a> {
                     output.push_str(&"\n".repeat(count));
                     for _ in 0..indent_level {
                         output.push_str(INDENT);
+                    }
+                } else if append.is_empty() && prepend.is_empty() {
+                    if let Some(prev) = prev_token {
+                        if Self::needs_token_separator(&source[prev.start..prev.end], token_text) {
+                            output.push(' ');
+                        }
                     }
                 } else {
                     let empty_block = prev_token
@@ -313,14 +323,7 @@ impl<'a> Formatter<'a> {
 
         let tail = &source[prev_end..];
         indent_level = Self::apply_indent(indent_level, actions.indent_post.get(&prev_end));
-        let tail_has_comment = tail.contains("//") || tail.contains("/*");
-        if tail_has_comment {
-            if Self::comment_is_inline(tail) {
-                output.push_str(&Self::normalize_inline_comment_gap(tail, indent_level));
-            } else {
-                output.push_str(&Self::normalize_comment_gap(tail, indent_level));
-            }
-        } else if tail.chars().all(|c| c.is_whitespace()) {
+        if tail.chars().all(|c| c.is_whitespace()) {
             let insert = Self::build_gap(
                 Self::actions_for(&actions.append, prev_end),
                 Vec::new(),
@@ -381,6 +384,24 @@ impl<'a> Formatter<'a> {
 
     fn actions_for(actions: &HashMap<usize, Vec<InsertKind>>, pos: usize) -> Vec<InsertKind> {
         actions.get(&pos).cloned().unwrap_or_default()
+    }
+
+    fn needs_token_separator(prev: &str, next: &str) -> bool {
+        let Some(prev_char) = prev.chars().last() else {
+            return false;
+        };
+        let Some(next_char) = next.chars().next() else {
+            return false;
+        };
+
+        let prev_is_word = prev_char.is_ascii_alphanumeric() || prev_char == '_';
+        let next_is_word = next_char.is_ascii_alphanumeric() || next_char == '_';
+
+        if prev_is_word && next_is_word {
+            return true;
+        }
+
+        prev_char == ':' && next_char == ':'
     }
 
     fn normalize_indentation(input: &str, indent_parens: bool) -> String {
@@ -709,72 +730,5 @@ impl<'a> Formatter<'a> {
         }
 
         depth
-    }
-
-    fn comment_is_inline(gap: &str) -> bool {
-        let bytes = gap.as_bytes();
-        let mut i = 0;
-        let mut seen_non_ws = false;
-        while i + 1 < bytes.len() {
-            match bytes[i] {
-                b'\n' => {
-                    seen_non_ws = false;
-                    i += 1;
-                }
-                b'/' if bytes[i + 1] == b'/' || bytes[i + 1] == b'*' => {
-                    return seen_non_ws;
-                }
-                b' ' | b'\t' | b'\r' => i += 1,
-                _ => {
-                    seen_non_ws = true;
-                    i += 1;
-                }
-            }
-        }
-        false
-    }
-
-    fn normalize_comment_gap(gap: &str, indent_level: i32) -> String {
-        let mut out = String::new();
-        let lines: Vec<&str> = gap.split('\n').collect();
-        let ends_with_newline = gap.ends_with('\n');
-        for (idx, line) in lines.iter().enumerate() {
-            let line = line.trim_end_matches('\r');
-            let trimmed = line.trim();
-            if trimmed.is_empty() {
-                if idx + 1 == lines.len() {
-                    continue;
-                }
-                out.push('\n');
-                continue;
-            }
-            for _ in 0..indent_level {
-                out.push_str(INDENT);
-            }
-            out.push_str(trimmed);
-            out.push('\n');
-        }
-        if !ends_with_newline && out.ends_with('\n') {
-            out.pop();
-        }
-        out
-    }
-
-    fn normalize_inline_comment_gap(gap: &str, indent_level: i32) -> String {
-        if let Some(pos) = gap.find('\n') {
-            let prefix = gap[..pos].trim_end();
-            let suffix = &gap[pos + 1..];
-            let mut out = String::new();
-            if !prefix.is_empty() {
-                out.push_str(prefix);
-            }
-            out.push('\n');
-            if !suffix.trim().is_empty() {
-                out.push_str(&Self::normalize_comment_gap(suffix, indent_level));
-            }
-            out
-        } else {
-            gap.trim_end().to_string()
-        }
     }
 }

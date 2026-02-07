@@ -11,5 +11,5 @@ bitset A: B {
 
 bitset A: B {
     bitfield<1> a;
-    bitfield<1> abc;
+    bitfield<1> a b c;
 };
