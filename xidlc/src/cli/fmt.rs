@@ -12,6 +12,7 @@ enum FormatLang {
     Cpp,
     #[value(aliases = ["ts"])]
     TypeScript,
+    Jinja,
 }
 
 #[derive(Debug, Args)]
@@ -34,6 +35,7 @@ impl ArgsFormat {
                 FormatLang::Rust => crate::fmt::format_rust_source(&source)?,
                 FormatLang::C | FormatLang::Cpp => crate::fmt::format_c_source(&source)?,
                 FormatLang::TypeScript => crate::fmt::format_typescript_source(&source)?,
+                FormatLang::Jinja => crate::fmt::format_jinja_source(&source)?,
             };
 
             if self.inplace {
