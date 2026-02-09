@@ -1,8 +1,6 @@
 #[cfg(test)]
 mod tests;
 
-mod diagnostic;
-
 use crate::error::{IdlcError, IdlcResult};
 use std::collections::HashMap;
 use tree_sitter::{Parser, Query, QueryCursor, StreamingIterator};
@@ -52,6 +50,8 @@ struct Formatter<'a> {
 }
 
 pub fn format_idl_source(source: &str) -> IdlcResult<String> {
+    crate::diagnostic::run_idl_source(source, "fmt.idl")?;
+
     Formatter::new(FormatConfig {
         language: tree_sitter_idl::language(),
         query_source: IDL_QUERY,
@@ -128,12 +128,11 @@ impl<'a> Formatter<'a> {
             .ok_or_else(|| IdlcError::fmt(format!("failed to parse {}", self.config.label)))?;
         let root = tree.root_node();
         if root.has_error() {
-            if cfg!(test) {
-                unreachable!();
+            if self.config.allow_parse_error {
+                return Ok(source.to_string());
             }
 
-            diagnostic::diagnostic(root, source)?;
-            unreachable!();
+            return Err(IdlcError::fmt(format!("parse {} error", self.config.label)));
         }
 
         let query = Query::new(&self.config.language, self.config.query_source)

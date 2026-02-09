@@ -1,4 +1,5 @@
 use super::File;
+use crate::diagnostic;
 use crate::driver::generate_session::CodegenSession;
 use crate::error::{IdlcError, IdlcResult};
 use crate::jsonrpc::Codegen;
@@ -23,6 +24,8 @@ impl Generator {
         props: HashMap<String, serde_json::Value>,
     ) -> IdlcResult<Vec<File>> {
         tracing::info!("generate for idl");
+        diagnostic::run_idl_source(source, path.to_string_lossy().as_ref())?;
+
         let ts = if cfg!(test) || cfg!(target_os = "emscripten") {
             0
         } else {

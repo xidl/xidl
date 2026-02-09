@@ -1,10 +1,8 @@
 mod colors;
-mod diagnostics;
 mod theme;
 
 use crate::error::{IdlcError, IdlcResult};
 use colors::CaptureColors;
-use diagnostics::build_parse_diagnostic;
 use std::collections::BTreeMap;
 use std::ops::Range;
 use theme::Base16Theme;
@@ -56,12 +54,10 @@ impl IdlHighlighter {
     }
 
     pub fn highlight(&self, source: &str, name: &str) -> IdlcResult<HighlightedText> {
+        crate::diagnostic::run_idl_source(source, name)?;
+
         let tree = self.parse_tree(source)?;
         let root = tree.root_node();
-        if root.has_error() {
-            let report = build_parse_diagnostic(source, name, root);
-            return Err(IdlcError::diagnostic(report));
-        }
 
         let mut highlighter = Highlighter::new();
         let events = highlighter
