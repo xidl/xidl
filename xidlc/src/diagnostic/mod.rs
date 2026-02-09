@@ -3,7 +3,7 @@ mod theme;
 
 use crate::error::{DiagnosticError, IdlcError, IdlcResult};
 use colors::CaptureColors;
-use miette::NamedSource;
+use miette::LabeledSpan;
 use miette::highlighters::{
     Highlighter as MietteHighlighter, HighlighterState as MietteHighlighterState,
 };
@@ -15,6 +15,7 @@ use tree_sitter::{Language, Parser, Query, QueryCursor, StreamingIterator, Tree}
 use tree_sitter_highlight::{HighlightConfiguration, HighlightEvent, Highlighter};
 
 const IDL_HIGHLIGHT_QUERY: &str = tree_sitter_idl::HIGHLIGHTS_QUERY;
+const IDL_ERROR_QUERY: &str = "[(ERROR) (MISSING)] @error";
 const ANSI_RESET: &str = "\x1b[0m";
 
 #[derive(Clone, Debug)]
@@ -40,9 +41,7 @@ pub struct IdlHighlighter {
 #[derive(Debug, Clone, Copy, Default)]
 pub struct IdlMietteHighlighter;
 
-struct IdlMietteHighlighterState {
-    colors: CaptureColors,
-}
+struct IdlMietteHighlighterState;
 
 pub struct DiagnosticRunner {
     language: Language,
@@ -75,16 +74,64 @@ impl DiagnosticRunner {
 
     fn ensure_tree(&self, tree: Tree, source: &str, name: &str) -> IdlcResult<()> {
         let root = tree.root_node();
-        if root.has_error() {
-            let error_range = find_error_range(root).unwrap_or(0..0);
-            let err = DiagnosticError {
-                src: NamedSource::new(name, source.to_owned()).with_language("idl"),
-                bad_bit: (error_range.start, error_range.len()).into(),
-            };
-            return Err(IdlcError::diagnostic(err));
+        let mut labels = self.collect_error_labels(root, source);
+
+        if !labels.is_empty() {
+            labels.sort_by_key(|label| (label.offset(), label.len()));
+            labels.dedup_by_key(|label| (label.offset(), label.len()));
+
+            let diagnostics = labels
+                .into_iter()
+                .map(|label| DiagnosticError::from_label(name, source, label))
+                .collect();
+            return Err(IdlcError::diagnostics(diagnostics));
         }
 
         Ok(())
+    }
+
+    fn collect_error_labels(&self, root: tree_sitter::Node<'_>, source: &str) -> Vec<LabeledSpan> {
+        let Ok(query) = Query::new(&self.language, IDL_ERROR_QUERY) else {
+            return vec![];
+        };
+
+        let mut cursor = QueryCursor::new();
+        let mut matches = cursor.matches(&query, root, source.as_bytes());
+        let mut labels = vec![];
+
+        while let Some(matched) = matches.next() {
+            for capture in matched.captures {
+                let node = capture.node;
+                let start = node.start_byte();
+                let mut len = node.end_byte().saturating_sub(start);
+                let mut offset = start;
+                if len == 0 {
+                    if source.is_empty() {
+                        offset = 0;
+                        len = 0;
+                    } else if start >= source.len() {
+                        offset = source.len().saturating_sub(1);
+                        len = 1;
+                    } else {
+                        len = 1;
+                    }
+                }
+
+                let message = if node.is_missing() {
+                    let missing = node
+                        .utf8_text(source.as_bytes())
+                        .ok()
+                        .filter(|text| !text.trim().is_empty())
+                        .unwrap_or(node.kind());
+                    format!("missing {missing}")
+                } else {
+                    "syntax error".to_string()
+                };
+                labels.push(LabeledSpan::at(offset..offset + len, message));
+            }
+        }
+
+        labels
     }
 }
 
@@ -224,24 +271,7 @@ impl MietteHighlighter for IdlMietteHighlighter {
             return Box::new(miette::highlighters::BlankHighlighterState);
         }
 
-        let palette = Base16Theme::dracula();
-        let query = Query::new(&tree_sitter_idl::language(), IDL_HIGHLIGHT_QUERY);
-        let colors = if let Ok(query) = query {
-            let names: Vec<&'static str> = query
-                .capture_names()
-                .iter()
-                .map(|name| {
-                    let boxed: Box<str> = name.to_string().into_boxed_str();
-                    let leaked: &'static mut str = Box::leak(boxed);
-                    &*leaked
-                })
-                .collect();
-            CaptureColors::new(&palette, &names)
-        } else {
-            CaptureColors::new(&palette, &[])
-        };
-
-        Box::new(IdlMietteHighlighterState { colors })
+        Box::new(IdlMietteHighlighterState)
     }
 }
 
@@ -264,7 +294,6 @@ impl MietteHighlighterState for IdlMietteHighlighterState {
         let root = tree.root_node();
         let mut cursor = QueryCursor::new();
         let mut matches = cursor.matches(&query, root, line.as_bytes());
-        let mut styled: Vec<owo_colors::Styled<&'s str>> = Vec::new();
         let mut spans: Vec<(usize, usize, usize)> = Vec::new();
 
         while let Some(matched) = matches.next() {
@@ -280,13 +309,13 @@ impl MietteHighlighterState for IdlMietteHighlighterState {
         }
 
         if spans.is_empty() {
-            let _ = self.colors.default_color();
             return vec![Style::default().style(line)];
         }
 
         spans.sort_by(|a, b| a.0.cmp(&b.0).then_with(|| b.1.cmp(&a.1)));
-        let mut pos = 0usize;
 
+        let mut styled: Vec<owo_colors::Styled<&'s str>> = Vec::new();
+        let mut pos = 0usize;
         for (mut start, end, capture_index) in spans {
             if end <= pos {
                 continue;
@@ -336,30 +365,4 @@ pub fn highlight_idl(source: &str, name: &str) -> IdlcResult<HighlightedText> {
 pub fn parse_with_miette(source: &str, name: &str) -> IdlcResult<()> {
     let highlighter = IdlHighlighter::new()?;
     highlighter.highlight(source, name).map(|_| ())
-}
-
-fn find_error_range(root: tree_sitter::Node<'_>) -> Option<Range<usize>> {
-    let mut stack = vec![root];
-    let mut best: Option<Range<usize>> = None;
-
-    while let Some(node) = stack.pop() {
-        if node.is_error() || node.is_missing() {
-            let range = node.start_byte()..node.end_byte();
-            if best
-                .as_ref()
-                .is_none_or(|current| range.start < current.start)
-            {
-                best = Some(range);
-            }
-        }
-
-        if node.child_count() > 0 {
-            let mut cursor = node.walk();
-            for child in node.children(&mut cursor) {
-                stack.push(child);
-            }
-        }
-    }
-
-    best
 }

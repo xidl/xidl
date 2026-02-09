@@ -1,7 +1,7 @@
 use clap::Parser;
 use xidlc::cli::Cli;
 use xidlc::diagnostic::IdlMietteHighlighter;
-use xidlc::error::IdlcError;
+use xidlc::error::{DiagnosticListError, IdlcError};
 
 #[tokio::main]
 async fn main() {
@@ -20,11 +20,23 @@ async fn main() {
         .init();
 
     if let Err(err) = Cli::parse().run().await {
-        if let IdlcError::Diagnostic(report) = err {
-            let report: miette::Report = report.into();
-            eprintln!("{:?}", report)
-        } else {
-            tracing::error!("idlc: {err}");
+        match err {
+            IdlcError::Diagnostic(report) => {
+                let report: miette::Report = report.into();
+                eprintln!("{:?}", report)
+            }
+            IdlcError::Diagnostics(DiagnosticListError { diagnostics }) => {
+                for (index, diagnostic) in diagnostics.into_iter().enumerate() {
+                    if index > 0 {
+                        eprintln!();
+                    }
+                    let report: miette::Report = diagnostic.into();
+                    eprintln!("{:?}", report);
+                }
+            }
+            other => {
+                tracing::error!("idlc: {other}");
+            }
         }
         std::process::exit(1);
     }
