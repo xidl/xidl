@@ -31,7 +31,10 @@ impl ArgsFormat {
         for file in self.files.iter() {
             let source = std::fs::read_to_string(file)?;
             let formatted = match self.lang {
-                FormatLang::Idl => crate::fmt::format_idl_source(&source)?,
+                FormatLang::Idl => crate::fmt::format_idl_source_with_name(
+                    &source,
+                    file.to_string_lossy().as_ref(),
+                )?,
                 FormatLang::Rust => crate::fmt::format_rust_source(&source)?,
                 FormatLang::C | FormatLang::Cpp => crate::fmt::format_c_source(&source)?,
                 FormatLang::TypeScript => crate::fmt::format_typescript_source(&source)?,
