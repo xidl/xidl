@@ -1,37 +1,4 @@
 use crate::diagnostic::theme::{Base16Theme, Rgb};
-use std::collections::HashMap;
-
-pub struct CaptureColors {
-    map: HashMap<String, String>,
-    default_color: String,
-}
-
-impl CaptureColors {
-    pub fn new(palette: &Base16Theme, names: &[&'static str]) -> Self {
-        let mut map = HashMap::new();
-        for name in names {
-            let rgb = color_for_capture(palette, name);
-            map.insert((*name).to_string(), ansi_fg(rgb));
-        }
-        let default_color = ansi_fg(palette.base05);
-        Self { map, default_color }
-    }
-
-    pub fn color_for(&self, name: &str) -> &str {
-        self.map
-            .get(name)
-            .map(|s| s.as_str())
-            .unwrap_or(self.default_color.as_str())
-    }
-
-    pub fn default_color(&self) -> &str {
-        self.default_color.as_str()
-    }
-}
-
-fn ansi_fg(rgb: Rgb) -> String {
-    format!("\x1b[38;2;{};{};{}m", rgb.r, rgb.g, rgb.b)
-}
 
 pub(crate) fn color_for_capture(theme: &Base16Theme, name: &str) -> Rgb {
     match name {
