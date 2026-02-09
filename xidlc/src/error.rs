@@ -1,3 +1,4 @@
+use miette::{Diagnostic, NamedSource, SourceSpan};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -15,7 +16,20 @@ pub enum IdlcError {
     #[error("{0}")]
     Fmt(String),
     #[error("{0}")]
-    Diagnostic(miette::Report),
+    Diagnostic(#[from] DiagnosticError),
+}
+
+#[derive(Error, Debug, Diagnostic)]
+#[error("Parse source error:")]
+#[diagnostic()]
+pub struct DiagnosticError {
+    // The Source that we're gonna be printing snippets out of.
+    // This can be a String if you don't have or care about file names.
+    #[source_code]
+    pub src: NamedSource<String>,
+    // Snippets and highlights can be included in the diagnostic!
+    #[label("Error here")]
+    pub bad_bit: SourceSpan,
 }
 
 pub type IdlcResult<T> = std::result::Result<T, IdlcError>;
@@ -33,7 +47,7 @@ impl IdlcError {
         Self::Fmt(message.into())
     }
 
-    pub fn diagnostic(report: miette::Report) -> Self {
-        Self::Diagnostic(report)
+    pub fn diagnostic(err: DiagnosticError) -> Self {
+        Self::Diagnostic(err)
     }
 }

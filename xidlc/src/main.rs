@@ -11,7 +11,8 @@ async fn main() {
 
     if let Err(err) = Cli::parse().run().await {
         if let IdlcError::Diagnostic(report) = err {
-            eprintln!("{report:?}");
+            let report: miette::Report = report.into();
+            eprintln!("{:?}", report)
         } else {
             tracing::error!("idlc: {err}");
         }

@@ -59,8 +59,7 @@ impl IdlHighlighter {
         let tree = self.parse_tree(source)?;
         let root = tree.root_node();
         if root.has_error() {
-            let nodes = self.collect_nodes(root, source)?;
-            let report = build_parse_diagnostic(source, name, &nodes, root);
+            let report = build_parse_diagnostic(source, name, root);
             return Err(IdlcError::diagnostic(report));
         }
 
