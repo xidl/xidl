@@ -18,8 +18,6 @@ pub enum IdlcError {
     #[error("{0}")]
     Fmt(String),
     #[error("{0}")]
-    Diagnostic(#[from] DiagnosticError),
-    #[error("{0}")]
     Diagnostics(#[from] DiagnosticListError),
 }
 
@@ -73,7 +71,9 @@ impl IdlcError {
     }
 
     pub fn diagnostic(err: DiagnosticError) -> Self {
-        Self::Diagnostic(err)
+        Self::Diagnostics(DiagnosticListError {
+            diagnostics: vec![err],
+        })
     }
 
     pub fn diagnostics(diagnostics: Vec<DiagnosticError>) -> Self {

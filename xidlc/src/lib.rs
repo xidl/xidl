@@ -13,11 +13,13 @@ pub(crate) mod transport;
 use std::collections::HashMap;
 use std::path::Path;
 
+use crate::error::IdlcResult;
+
 pub fn generate_from_source(
     lang: &str,
     idl: &str,
     props: HashMap<String, serde_json::Value>,
-) -> Result<Vec<driver::File>, error::IdlcError> {
+) -> IdlcResult<Vec<driver::File>> {
     let mut generator = driver::Generator::new(lang.into());
     if let Ok(handle) = tokio::runtime::Handle::try_current() {
         handle.block_on(generator.generate_from_idl(idl, Path::new("input.idl"), props))

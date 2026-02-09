@@ -21,10 +21,6 @@ async fn main() {
 
     if let Err(err) = Cli::parse().run().await {
         match err {
-            IdlcError::Diagnostic(report) => {
-                let report: miette::Report = report.into();
-                eprintln!("{:?}", report)
-            }
             IdlcError::Diagnostics(DiagnosticListError { diagnostics }) => {
                 for (index, diagnostic) in diagnostics.into_iter().enumerate() {
                     if index > 0 {
