@@ -24,6 +24,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 itertools = "0.14.0"
 tree-sitter = "=0.25.0"
 tree-sitter-highlight = "=0.25.0"
+owo-colors = "4.2"
 tree-sitter-idl = "=3.14.0"
 tree-sitter-rust = "=0.23.3"
 tree-sitter-cpp = "=0.23.4"

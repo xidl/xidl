@@ -1,4 +1,4 @@
-use crate::highlight::theme::{Base16Theme, Rgb};
+use crate::diagnostic::theme::{Base16Theme, Rgb};
 use std::collections::HashMap;
 
 pub struct CaptureColors {
@@ -33,7 +33,7 @@ fn ansi_fg(rgb: Rgb) -> String {
     format!("\x1b[38;2;{};{};{}m", rgb.r, rgb.g, rgb.b)
 }
 
-fn color_for_capture(theme: &Base16Theme, name: &str) -> Rgb {
+pub(crate) fn color_for_capture(theme: &Base16Theme, name: &str) -> Rgb {
     match name {
         "comment.documentation" => theme.base04,
         "comment.error" => theme.base08,
