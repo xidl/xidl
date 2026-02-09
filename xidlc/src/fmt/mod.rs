@@ -583,7 +583,6 @@ impl<'a> Formatter<'a> {
             let control_stmt = Self::extract_jinja_control_statement(trimmed);
 
             if let Some(statement) = control_stmt {
-                //
                 if Self::is_jinja_control_end(statement) || Self::is_jinja_control_mid(statement) {
                     control_depth = (control_depth - 1).max(0);
                 }
@@ -603,9 +602,7 @@ impl<'a> Formatter<'a> {
             out.push('\n');
 
             if is_control {
-                //
                 if let Some(statement) = control_stmt {
-                    //
                     if Self::is_jinja_control_start(statement)
                         || Self::is_jinja_control_mid(statement)
                     {

@@ -1229,9 +1229,7 @@ fn zod_schema_for_type_spec(ty: &hir::TypeSpec, module_path: &[String]) -> Strin
                 let inner = zod_schema_for_type_spec(&seq.ty, module_path);
                 let mut schema = format!("z.array({inner})");
                 if let Some(len) = &seq.len {
-                    //
                     if let Some(size) = xidl_parser::hir::const_expr_to_i64(&len.0) {
-                        //
                         if size >= 0 {
                             schema = format!("{schema}.length({size})");
                         }
@@ -1265,7 +1263,6 @@ fn apply_array_zod(mut base: String, decl: &hir::Declarator) -> String {
         for len in &array.len {
             let mut wrapped = format!("z.array({base})");
             if let Some(size) = xidl_parser::hir::const_expr_to_i64(&len.0) {
-                //
                 if size >= 0 {
                     wrapped = format!("{wrapped}.length({size})");
                 }
