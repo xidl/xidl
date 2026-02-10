@@ -34,7 +34,7 @@ impl MietteHighlighter for TreeSitterMietteHighlighter {
             .map(|lang| lang.eq_ignore_ascii_case("idl"))
             .unwrap_or(false);
 
-        println!("language is idl: {:?}", source.language());
+        tracing::debug!("language is: {:?}", source.language());
         if !language_is_idl {
             return Box::new(miette::highlighters::BlankHighlighterState);
         }
