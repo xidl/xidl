@@ -43,12 +43,12 @@ pub struct DiagnosticError {
 }
 
 impl DiagnosticError {
-    pub fn from_label(name: &str, source: &str, label: LabeledSpan) -> Self {
+    pub fn from_label(filename: &str, source: &str, label: LabeledSpan) -> Self {
         let span: SourceSpan = (label.offset(), label.len()).into();
         let label_text = label.label().unwrap_or("error").to_string();
         Self {
             message: "Parse source error:".to_string(),
-            src: NamedSource::new(name, source.to_owned()).with_language("idl"),
+            src: NamedSource::new(filename, source.to_owned()).with_language("idl"),
             bad_bit: span,
             label: label_text,
         }

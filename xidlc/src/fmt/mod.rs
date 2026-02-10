@@ -1,7 +1,10 @@
 #[cfg(test)]
 mod tests;
 
-use crate::error::{IdlcError, IdlcResult};
+use crate::{
+    diagnostic::DiagnosticRunner,
+    error::{IdlcError, IdlcResult},
+};
 use std::collections::HashMap;
 use tree_sitter::{Parser, Query, QueryCursor, StreamingIterator};
 
@@ -53,8 +56,8 @@ pub fn format_idl_source(source: &str) -> IdlcResult<String> {
     format_idl_source_with_name(source, "input.idl")
 }
 
-pub fn format_idl_source_with_name(source: &str, name: &str) -> IdlcResult<String> {
-    crate::diagnostic::run_idl_source(source, name)?;
+pub fn format_idl_source_with_name(source: &str, filename: &str) -> IdlcResult<String> {
+    DiagnosticRunner::new_idl().run(source, filename)?;
 
     Formatter::new(FormatConfig {
         language: tree_sitter_idl::language(),

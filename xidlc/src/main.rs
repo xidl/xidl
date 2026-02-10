@@ -1,6 +1,6 @@
 use clap::Parser;
 use xidlc::cli::Cli;
-use xidlc::diagnostic::IdlMietteHighlighter;
+use xidlc::diagnostic::TreeSitterMietteHighlighter;
 use xidlc::error::{DiagnosticListError, IdlcError};
 
 #[tokio::main]
@@ -8,7 +8,7 @@ async fn main() {
     miette::set_hook(Box::new(|_| {
         Box::new(
             miette::MietteHandlerOpts::new()
-                .with_syntax_highlighting(IdlMietteHighlighter)
+                .with_syntax_highlighting(TreeSitterMietteHighlighter::new_idl())
                 .build(),
         )
     }))
