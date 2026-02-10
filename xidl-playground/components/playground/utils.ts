@@ -52,6 +52,7 @@ export function inferLanguage(
     toml: 'toml',
     yaml: 'yaml',
     yml: 'yaml',
+    ts: 'typescript',
   };
   return langMap[ext || ''] || 'text';
 }

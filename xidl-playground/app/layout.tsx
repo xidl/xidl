@@ -10,7 +10,7 @@ const display = Space_Grotesk({
 const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono' });
 
 export const metadata: Metadata = {
-  title: 'xidlc Playground',
+  title: 'XIDL Playground',
   description: 'Run xidlc in the browser',
 };
 

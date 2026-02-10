@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { getHighlighter } from 'shiki';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import './code-viewer.css';
 
 type CodeViewerProps = {
   code: string;
@@ -80,7 +81,7 @@ export function CodeViewer({ code, language, className }: CodeViewerProps) {
 
   return (
     <div
-      className={cn('font-mono [&_.shiki]:bg-transparent', className)}
+      className={cn('font-mono', className)}
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );
