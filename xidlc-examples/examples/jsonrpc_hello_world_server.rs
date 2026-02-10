@@ -1,7 +1,5 @@
-mod rpc;
-
 use clap::Parser;
-use rpc::{HelloWorld, HelloWorldServer};
+use xidlc_examples::hello_world_jsonrpc::{HelloWorld, HelloWorldServer};
 
 #[derive(Parser)]
 struct Args {

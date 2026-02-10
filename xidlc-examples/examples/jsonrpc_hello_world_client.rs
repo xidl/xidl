@@ -1,9 +1,7 @@
-mod rpc;
-
 use clap::Parser;
-use rpc::{HelloWorld, HelloWorldClient};
 use tokio::io::split;
 use tokio::net::TcpStream;
+use xidlc_examples::hello_world_jsonrpc::{HelloWorld, HelloWorldClient};
 
 #[derive(Parser)]
 struct Args {

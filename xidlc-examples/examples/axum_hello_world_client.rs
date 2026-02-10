@@ -1,6 +1,4 @@
-mod imp;
-
-use imp::HelloWorldClient;
+use xidlc_examples::hello_world::HelloWorldClient;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

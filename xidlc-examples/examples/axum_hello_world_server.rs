@@ -1,8 +1,6 @@
-mod imp;
-
-use imp::HelloWorld;
-
-use crate::imp::{HelloWorldSayHelloRequest, HelloWorldServer};
+use xidlc_examples::hello_world::HelloWorld;
+use xidlc_examples::hello_world::HelloWorldSayHelloRequest;
+use xidlc_examples::hello_world::HelloWorldServer;
 
 struct HelloWorldImpl;
 
@@ -10,7 +8,7 @@ struct HelloWorldImpl;
 impl HelloWorld for HelloWorldImpl {
     async fn sayHello(
         &self,
-        req: xidl_rust_axum::Request<imp::HelloWorldSayHelloRequest>,
+        req: xidl_rust_axum::Request<HelloWorldSayHelloRequest>,
     ) -> Result<(), xidl_rust_axum::Error> {
         let HelloWorldSayHelloRequest { name } = req.data;
         println!("Hello, {}!", name);

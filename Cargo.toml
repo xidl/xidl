@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
   "xidl-build",
+  "xidlc-examples",
   "xidl-parser-derive",
   "xidl-jsonrpc",
   "xidl-rust-axum",
@@ -17,3 +18,4 @@ xidl-parser-derive = { path = "xidl-parser-derive" }
 xidl-xcdr = { path = "xidl-xcdr" }
 xidl-jsonrpc = { path = "xidl-jsonrpc" }
 xidl-rust-axum = { path = "xidl-rust-axum" }
+xidl-build = { path = "xidl-build" }

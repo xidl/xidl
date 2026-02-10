@@ -23,11 +23,3 @@ tokio-net = ["tokio", "tokio/net"]
 [dev-dependencies]
 clap = { version = "4", features = ["derive"] }
 tokio = { version = "1.36", features = ["full"] }
-
-[[example]]
-name = "hello_world_server"
-required-features = ["tokio-net"]
-
-[[example]]
-name = "hello_world_client"
-required-features = ["tokio-net"]

@@ -1,0 +1,17 @@
+[package]
+name = "xidlc-examples"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+async-trait = "0.1"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+xidl-rust-axum = { workspace = true }
+xidl-jsonrpc = { workspace = true, features = ["tokio-net"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+clap = { version = "4", features = ["derive"] }
+
+[build-dependencies]
+xidl-build = { workspace = true }

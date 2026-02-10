@@ -24,11 +24,11 @@ interface HelloWorld {
 ```bash
 cargo run -p xidlc -- \
   --lang rust-axum \
-  --out-dir xidl-rust-axum/examples/imp \
-  xidl-rust-axum/examples/hello_world.idl
+  --out-dir xidlc-examples/examples/imp \
+  xidlc-examples/examples/hello_world.idl
 ```
 
-Example output: `xidl-rust-axum/examples/imp/hello_world.rs`.
+Example output: `xidlc-examples/examples/imp/hello_world.rs`.
 
 ### 3) Implement server
 
@@ -78,16 +78,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ## Run the example
 
-The repo already includes the same example:
+The repo includes this example in `xidlc-examples` (which also contains jsonrpc examples):
 
 ```bash
-cargo run -p xidl-rust-axum --example axum_hello_world_server
+cargo run -p xidlc-examples --example axum_hello_world_server
 ```
 
 In another terminal:
 
 ```bash
-cargo run -p xidl-rust-axum --example axum_hello_world_client
+cargo run -p xidlc-examples --example axum_hello_world_client
 ```
 
 ## More examples
