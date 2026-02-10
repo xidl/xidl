@@ -1,3 +1,5 @@
+use std::net::SocketAddr;
+
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -11,12 +13,30 @@ mod server;
 pub use client::Client;
 pub use error::{Error, ErrorCode};
 #[cfg(feature = "tokio")]
-pub use server::{Handler, Io, Listener, MuxListener, Server, ServerBuilder};
+pub use server::{Handler, Io, Server, ServerBuilder};
 
 mod stream;
 pub use stream::AsyncStream;
 
 const JSONRPC_VERSION: &str = "2.0";
+
+#[async_trait::async_trait]
+pub trait Listener: Send {
+    async fn accept(
+        &self,
+    ) -> std::io::Result<(Box<dyn AsyncStream + Unpin + Send + 'static>, SocketAddr)>;
+}
+
+#[cfg(feature = "tokio-net")]
+#[async_trait::async_trait]
+impl Listener for tokio::net::TcpListener {
+    async fn accept(
+        &self,
+    ) -> std::io::Result<(Box<dyn AsyncStream + Unpin + Send + 'static>, SocketAddr)> {
+        let (stream, peer) = tokio::net::TcpListener::accept(self).await?;
+        Ok((Box::new(stream), peer))
+    }
+}
 
 #[derive(Serialize)]
 pub(crate) struct RpcRequest<'a, P> {

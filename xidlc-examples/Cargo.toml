@@ -5,12 +5,13 @@ edition = "2021"
 publish = false
 
 [dependencies]
-async-trait = "0.1"
-tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+async-trait.workspace = true
+serde.workspace = true
 xidl-rust-axum = { workspace = true }
+serde_json.workspace = true
 xidl-jsonrpc = { workspace = true, features = ["tokio-net"] }
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
+
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 clap = { version = "4", features = ["derive"] }
 
 [build-dependencies]
