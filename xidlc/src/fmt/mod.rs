@@ -33,7 +33,6 @@ struct FormatConfig<'a> {
     language: tree_sitter::Language,
     query_source: &'a str,
     label: &'a str,
-    allow_parse_error: bool,
     preserve_inline_ws: bool,
     indent_parens: bool,
     normalize_indent: bool,
@@ -63,7 +62,6 @@ pub fn format_idl_source_with_name(source: &str, filename: &str) -> IdlcResult<S
         language: tree_sitter_idl::language(),
         query_source: IDL_QUERY,
         label: "idl",
-        allow_parse_error: false,
         preserve_inline_ws: false,
         indent_parens: true,
         normalize_indent: true,
@@ -76,7 +74,6 @@ pub fn format_rust_source(source: &str) -> IdlcResult<String> {
         language: tree_sitter_rust::LANGUAGE.into(),
         query_source: RUST_QUERY,
         label: "rust",
-        allow_parse_error: false,
         preserve_inline_ws: false,
         indent_parens: false,
         normalize_indent: false,
@@ -90,7 +87,6 @@ pub fn format_c_source(source: &str) -> IdlcResult<String> {
         language: tree_sitter_cpp::LANGUAGE.into(),
         query_source: CPP_QUERY,
         label: "c",
-        allow_parse_error: true,
         preserve_inline_ws: false,
         indent_parens: false,
         normalize_indent: true,
@@ -104,7 +100,6 @@ pub fn format_typescript_source(source: &str) -> IdlcResult<String> {
         language: tree_sitter_typescript::LANGUAGE_TYPESCRIPT.into(),
         query_source: TYPESCRIPT_QUERY,
         label: "typescript",
-        allow_parse_error: true,
         preserve_inline_ws: false,
         indent_parens: false,
         normalize_indent: true,
@@ -135,8 +130,8 @@ impl<'a> Formatter<'a> {
             .ok_or_else(|| IdlcError::fmt(format!("failed to parse {}", self.config.label)))?;
         let root = tree.root_node();
         if root.has_error() {
-            if self.config.allow_parse_error {
-                return Ok(source.to_string());
+            if cfg!(test) {
+                unreachable!()
             }
 
             return Err(IdlcError::fmt(format!("parse {} error", self.config.label)));
