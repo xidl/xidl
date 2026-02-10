@@ -1,10 +1,15 @@
-use clap::Parser;
-use xidlc::cli::Cli;
-use xidlc::diagnostic::TreeSitterMietteHighlighter;
-use xidlc::error::{DiagnosticListError, IdlcError};
+#[cfg(target_os = "emscripten")]
+fn main() {
+    use xidlc::*;
+}
 
+#[cfg(not(target_os = "emscripten"))]
 #[tokio::main]
 async fn main() {
+    use clap::Parser;
+    use xidlc::cli::Cli;
+    use xidlc::diagnostic::TreeSitterMietteHighlighter;
+    use xidlc::error::{DiagnosticListError, IdlcError};
     miette::set_hook(Box::new(|_| {
         Box::new(
             miette::MietteHandlerOpts::new()
