@@ -8,7 +8,7 @@ impl crate::jsonrpc::Codegen for TypedAstGen {
     fn get_engine_version<'a>(
         &'a self,
     ) -> xidl_jsonrpc::BoxFuture<'a, Result<String, xidl_jsonrpc::Error>> {
-        Box::pin(async move { Ok(crate::generate::compatible_xidlc_version()) })
+        Box::pin(async move { Ok("*".to_string()) })
     }
 
     fn get_properties<'a>(

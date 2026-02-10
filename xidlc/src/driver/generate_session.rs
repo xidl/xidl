@@ -50,8 +50,8 @@ impl CodegenSession {
         match lang {
             "hir" => run_server!(crate::generate::hir_gen::HirGen),
             "typed_ast" | "typed-ast" => run_server!(crate::generate::typed_ast_gen::TypedAstGen),
-            "c" => run_server!(crate::generate::c::CCodegen),
-            "cpp" => run_server!(crate::generate::cpp::CppCodegen),
+            "c" | "cc" => run_server!(crate::generate::c::CCodegen),
+            "cpp" | "cxx" | "c++" => run_server!(crate::generate::cpp::CppCodegen),
             "rust" | "rs" => run_server!(crate::generate::rust::RustCodegen),
             "rs_jsonrpc" | "rust_jsonrpc" | "rs-jsonrpc" | "rust-jsonrpc" => {
                 run_server!(crate::generate::rust_jsonrpc::RustJsonRpcCodegen)
@@ -67,6 +67,7 @@ impl CodegenSession {
             #[cfg(not(target_os = "emscripten"))]
             _ => {
                 let exe = format!("xidl-{lang}");
+                tracing::debug!("spawn {exe}");
                 let mut child = std::process::Command::new(&exe)
                     .stdin(stdin_tx.into_owned_fd())
                     .stdout(stdout_rx.into_owned_fd())
@@ -78,48 +79,6 @@ impl CodegenSession {
                 });
                 Ok(server)
             }
-        }
-    }
-
-    #[cfg(target_os = "emscripten")]
-    fn spawn_inprocess_server<R, W>(
-        lang: &str,
-        reader: R,
-        writer: W,
-    ) -> IdlcResult<JoinHandle<IdlcResult<()>>>
-    where
-        R: tokio::io::AsyncRead + Unpin + Send + 'static,
-        W: tokio::io::AsyncWrite + Unpin + Send + 'static,
-    {
-        macro_rules! run_server {
-            ($obj:expr) => {
-                Ok(tokio::spawn(async move {
-                    let io = xidl_jsonrpc::Io::new(BufReader::new(reader), writer);
-                    let handler = crate::jsonrpc::CodegenServer::new($obj);
-                    xidl_jsonrpc::Server::builder()
-                        .with_listener(xidl_jsonrpc::MuxListener::from_io(io))
-                        .with_service(handler)
-                        .serve()
-                        .await
-                        .map_err(|err| crate::error::IdlcError::rpc(err.to_string()))
-                }))
-            };
-        }
-
-        match lang {
-            "hir" => run_server!(crate::generate::hir_gen::HirGen),
-            "typed_ast" | "typed-ast" => run_server!(crate::generate::typed_ast_gen::TypedAstGen),
-            "c" => run_server!(crate::generate::c::CCodegen),
-            "cpp" => run_server!(crate::generate::cpp::CppCodegen),
-            "rust" | "rs" => run_server!(crate::generate::rust::RustCodegen),
-            "rs_jsonrpc" | "rust_jsonrpc" | "rs-jsonrpc" | "rust-jsonrpc" => {
-                run_server!(crate::generate::rust_jsonrpc::RustJsonRpcCodegen)
-            }
-            "rs_axum" | "rust_axum" | "rs-axum" | "rust-axum" => {
-                run_server!(crate::generate::rust_axum::RustAxumCodegen)
-            }
-            "ts" | "typescript" => run_server!(crate::generate::typescript::TypescriptCodegen),
-            _ => unreachable!(),
         }
     }
 
