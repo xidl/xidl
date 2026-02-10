@@ -1,12 +1,12 @@
-name: release
+name: publish-release
 
 on:
   push:
     branches:
       - master
     tags:
-      - 'v*'
-      - 'release-*'
+      - "v*"
+      - "release-*"
   workflow_dispatch:
 
 permissions:
@@ -14,8 +14,6 @@ permissions:
 
 jobs:
   build-cli:
-    name: build-cli-${{ matrix.platform.target }}
-    runs-on: ${{ matrix.platform.runner }}
     strategy:
       fail-fast: false
       matrix:
@@ -29,12 +27,14 @@ jobs:
           - runner: ubuntu-latest
             target: x86_64-pc-windows-gnu
             use_cross: true
-          - runner: ubuntu-latest
-            target: aarch64-pc-windows-gnu
-            use_cross: true
+          # - runner: ubuntu-latest
+          #   target: aarch64-pc-windows-gnullvm
+          #   use_cross: true
           - runner: macos-latest
             target: aarch64-apple-darwin
             use_cross: false
+    name: build-cli-${{ matrix.platform.target }}
+    runs-on: ${{ matrix.platform.runner }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

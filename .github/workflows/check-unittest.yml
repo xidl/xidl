@@ -1,9 +1,8 @@
-name: tests
+name: check-unittest
 
 on:
   push:
     branches:
-      - main
       - master
   pull_request:
   workflow_dispatch:
@@ -17,8 +16,6 @@ jobs:
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: 1.92.0
 
       - name: Cache Rust
         uses: Swatinem/rust-cache@v2
@@ -28,26 +25,29 @@ jobs:
         with:
           tool: cross
 
-      - name: Cargo test
-        run: |
-          cargo test --all
-          sh scripts/build-wasm.sh
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
           cache-dependency-path: xidl-playground/pnpm-lock.yaml
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: Install playground deps
         run: pnpm install --frozen-lockfile
         working-directory: xidl-playground
+
+      - name: Cargo test
+        run: |
+          cargo test --all
+
+      - name: Buld Wasm
+        run: |
+          sh scripts/build-wasm.sh
 
       - name: Build playground
         run: pnpm build
