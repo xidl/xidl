@@ -101,43 +101,36 @@ pub fn generate(
 
 pub(crate) struct RustAxumCodegen;
 
+#[async_trait::async_trait]
 impl crate::jsonrpc::Codegen for RustAxumCodegen {
-    fn get_engine_version<'a>(
-        &'a self,
-    ) -> xidl_jsonrpc::BoxFuture<'a, Result<String, xidl_jsonrpc::Error>> {
-        Box::pin(async move { Ok("*".to_string()) })
+    async fn get_engine_version(&self) -> Result<String, xidl_jsonrpc::Error> {
+        Ok("*".to_string())
     }
 
-    fn get_properties<'a>(
-        &'a self,
-    ) -> xidl_jsonrpc::BoxFuture<'a, Result<ParserProperties, xidl_jsonrpc::Error>> {
-        Box::pin(async move {
-            Ok(hashmap! {
-                "expand_interface" => false,
-                "format_rust" => true,
-                "format_typescript" => true,
-                "enable_client" => true,
-                "enable_server" => true,
-                "enable_render_header" => true,
-                "enable_serialize" => true,
-                "enable_deserialize" => true,
-                "enable_metadata" => true
-            })
+    async fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
+        Ok(hashmap! {
+            "expand_interface" => false,
+            "format_rust" => true,
+            "format_typescript" => true,
+            "enable_client" => true,
+            "enable_server" => true,
+            "enable_render_header" => true,
+            "enable_serialize" => true,
+            "enable_deserialize" => true,
+            "enable_metadata" => true
         })
     }
 
-    fn generate<'a>(
-        &'a self,
+    async fn generate(
+        &self,
         hir: Specification,
         path: String,
         props: ::xidl_parser::hir::ParserProperties,
-    ) -> xidl_jsonrpc::BoxFuture<'a, Result<Vec<Artifact>, xidl_jsonrpc::Error>> {
-        Box::pin(async move {
-            generate(hir, Path::new(&path), props).map_err(|err| xidl_jsonrpc::Error::Rpc {
-                code: xidl_jsonrpc::ErrorCode::ServerError,
-                message: err.to_string(),
-                data: None,
-            })
+    ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
+        generate(hir, Path::new(&path), props).map_err(|err| xidl_jsonrpc::Error::Rpc {
+            code: xidl_jsonrpc::ErrorCode::ServerError,
+            message: err.to_string(),
+            data: None,
         })
     }
 }

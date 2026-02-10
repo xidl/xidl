@@ -1,6 +1,7 @@
+#[async_trait::async_trait]
 pub trait {{ ident }} {
     {% for method in methods %}
-        fn {{ method.name }}<'a>(&'a self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> xidl_jsonrpc::BoxFuture<'a, Result<{{ method.ret }}, xidl_jsonrpc::Error>>;
+        async fn {{ method.name }}<'a>(&'a self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.ret }}, xidl_jsonrpc::Error>;
     {% endfor %}
 }
 
@@ -23,28 +24,27 @@ impl<T> {{ ident }}Server<T> {
     }
 }
 
+#[async_trait::async_trait]
 impl<T> xidl_jsonrpc::Handler for {{ ident }}Server<T>
 where
 T: {{ ident }} + Send + Sync,
 {
-    fn handle<'a>(&'a self, method: &'a str, params: Value) -> xidl_jsonrpc::BoxFuture<'a, Result<Value, xidl_jsonrpc::Error>> {
-        Box::pin(async move {
-            match method {
-                {% for method in methods %}
-                    "{{ method.rpc_name }}" => {
-                        let params: {{ method.params_struct }} =
-                        serde_json::from_value(params).map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
-                        {% if method.args | length > 0 %}
-                            let result = self.inner.{{ method.name }}({% for arg in method.args %}params.{{ arg }}{% if not loop.last %}, {% endif %}{% endfor %}).await?;
-                        {% else %}
-                            let result = self.inner.{{ method.name }}().await?;
-                        {% endif %}
-                        Ok(serde_json::to_value(result)?)
-                    }
-                {% endfor %}
-                _ => Err(xidl_jsonrpc::Error::method_not_found(method)),
-            }
-        })
+    async fn handle(&self, method: &str, params: Value) -> Result<Value, xidl_jsonrpc::Error> {
+        match method {
+            {% for method in methods %}
+                "{{ method.rpc_name }}" => {
+                    let params: {{ method.params_struct }} =
+                    serde_json::from_value(params).map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
+                    {% if method.args | length > 0 %}
+                        let result = self.inner.{{ method.name }}({% for arg in method.args %}params.{{ arg }}{% if not loop.last %}, {% endif %}{% endfor %}).await?;
+                    {% else %}
+                        let result = self.inner.{{ method.name }}().await?;
+                    {% endif %}
+                    Ok(serde_json::to_value(result)?)
+                }
+            {% endfor %}
+            _ => Err(xidl_jsonrpc::Error::method_not_found(method)),
+        }
     }
 }
 
@@ -64,22 +64,22 @@ W: AsyncWrite + Unpin + Send,
     }
 }
 
+#[async_trait::async_trait]
 impl<R, W> {{ ident }} for {{ ident }}Client<R, W>
 where
 R: AsyncRead + Unpin + Send,
 W: AsyncWrite + Unpin + Send,
 {
     {% for method in methods %}
-        fn {{ method.name }}<'a>(&'a self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> xidl_jsonrpc::BoxFuture<'a, Result<{{ method.ret }}, xidl_jsonrpc::Error>> {
+        async fn {{ method.name }}(& self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.ret }}, xidl_jsonrpc::Error> {
         let params = {{ method.params_struct }} {
             {% for field in method.params_fields %}
                 {{ field.name }},
             {% endfor %}
         };
-        Box::pin(async move {
-            let mut client = self.client.lock().await;
-            client.call("{{ method.rpc_name }}", params).await
-        })
+
+        let mut client = self.client.lock().await;
+        client.call("{{ method.rpc_name }}", params).await
     }
 {% endfor %}
 }

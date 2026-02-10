@@ -9,15 +9,11 @@ struct Args {
 
 struct HelloWorldImpl;
 
+#[async_trait::async_trait]
 impl HelloWorld for HelloWorldImpl {
-    fn sayHello<'a>(
-        &'a self,
-        name: String,
-    ) -> xidl_jsonrpc::BoxFuture<'a, Result<(), xidl_jsonrpc::Error>> {
-        Box::pin(async move {
-            eprintln!("Hello, {name}!");
-            Ok(())
-        })
+    async fn sayHello(&self, name: String) -> Result<(), xidl_jsonrpc::Error> {
+        eprintln!("Hello, {name}!");
+        Ok(())
     }
 }
 

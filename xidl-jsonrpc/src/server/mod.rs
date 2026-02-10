@@ -1,6 +1,6 @@
 mod session;
 
-use crate::{AsyncStream, BoxFuture, Error};
+use crate::{AsyncStream, Error};
 use serde_json::Value;
 use session::ServerSession;
 use std::{net::SocketAddr, sync::Arc};
@@ -9,16 +9,18 @@ use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 use tokio::net::{TcpListener, ToSocketAddrs};
 use tokio::sync::Mutex;
 
+#[async_trait::async_trait]
 pub trait Handler: Send + Sync {
-    fn handle<'a>(&'a self, method: &'a str, params: Value) -> BoxFuture<'a, Result<Value, Error>>;
+    async fn handle(&self, method: &str, params: Value) -> Result<Value, Error>;
 }
 
+#[async_trait::async_trait]
 impl<T> Handler for Arc<T>
 where
     T: Handler,
 {
-    fn handle<'a>(&'a self, method: &'a str, params: Value) -> BoxFuture<'a, Result<Value, Error>> {
-        (**self).handle(method, params)
+    async fn handle(&self, method: &str, params: Value) -> Result<Value, Error> {
+        (**self).handle(method, params).await
     }
 }
 
@@ -158,22 +160,21 @@ struct MultiHandler {
     services: Vec<Box<dyn Handler>>,
 }
 
+#[async_trait::async_trait]
 impl Handler for MultiHandler {
-    fn handle<'a>(&'a self, method: &'a str, params: Value) -> BoxFuture<'a, Result<Value, Error>> {
-        Box::pin(async move {
-            for service in &self.services {
-                match service.handle(method, params.clone()).await {
-                    Ok(value) => return Ok(value),
-                    Err(err) => {
-                        if err.is_method_not_found() {
-                            continue;
-                        }
-                        return Err(err);
+    async fn handle(&self, method: &str, params: Value) -> Result<Value, Error> {
+        for service in &self.services {
+            match service.handle(method, params.clone()).await {
+                Ok(value) => return Ok(value),
+                Err(err) => {
+                    if err.is_method_not_found() {
+                        continue;
                     }
+                    return Err(err);
                 }
             }
-            Err(Error::method_not_found(method))
-        })
+        }
+        Err(Error::method_not_found(method))
     }
 }
 

@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::future::Future;
-use std::pin::Pin;
 
 #[cfg(feature = "tokio")]
 mod client;
@@ -19,8 +17,6 @@ mod stream;
 pub use stream::AsyncStream;
 
 const JSONRPC_VERSION: &str = "2.0";
-
-pub type BoxFuture<'a, T> = Pin<Box<dyn Future<Output = T> + Send + 'a>>;
 
 #[derive(Serialize)]
 pub(crate) struct RpcRequest<'a, P> {

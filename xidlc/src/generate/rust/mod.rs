@@ -56,36 +56,29 @@ pub fn generate_with_properties(
 
 pub(crate) struct RustCodegen;
 
+#[async_trait::async_trait]
 impl crate::jsonrpc::Codegen for RustCodegen {
-    fn get_engine_version<'a>(
-        &'a self,
-    ) -> xidl_jsonrpc::BoxFuture<'a, Result<String, xidl_jsonrpc::Error>> {
-        Box::pin(async move { Ok("*".to_string()) })
+    async fn get_engine_version(&self) -> Result<String, xidl_jsonrpc::Error> {
+        Ok("*".to_string())
     }
 
-    fn get_properties<'a>(
-        &'a self,
-    ) -> xidl_jsonrpc::BoxFuture<'a, Result<ParserProperties, xidl_jsonrpc::Error>> {
-        Box::pin(async move {
-            Ok(crate::macros::hashmap! {
-                "format_rust" => true,
-                "enable_render_header" => true,
-                "enable_serialize" => true,
-                "enable_deserialize" => true,
-                "enable_metadata" => true
-            })
+    async fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
+        Ok(crate::macros::hashmap! {
+            "format_rust" => true,
+            "enable_render_header" => true,
+            "enable_serialize" => true,
+            "enable_deserialize" => true,
+            "enable_metadata" => true
         })
     }
 
-    fn generate<'a>(
-        &'a self,
+    async fn generate(
+        &self,
         hir: Specification,
         input: String,
         props: ::xidl_parser::hir::ParserProperties,
-    ) -> xidl_jsonrpc::BoxFuture<'a, Result<Vec<Artifact>, xidl_jsonrpc::Error>> {
-        Box::pin(async move {
-            generate_with_properties(&hir, Path::new(&input), &props).map_err(map_codegen_error)
-        })
+    ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
+        generate_with_properties(&hir, Path::new(&input), &props).map_err(map_codegen_error)
     }
 }
 
