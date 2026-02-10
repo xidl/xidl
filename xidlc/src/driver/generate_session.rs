@@ -24,15 +24,7 @@ impl CodegenSession {
 
     pub async fn finish(self) {
         drop(self.client);
-        match self.server.await {
-            Ok(Err(err)) => {
-                eprintln!("codegen server failed: {}", err);
-            }
-            Ok(Ok(())) => {}
-            Err(err) => {
-                eprintln!("codegen server task failed: {}", err);
-            }
-        }
+        self.server.abort();
     }
 
     fn spawn_codegen_server(
