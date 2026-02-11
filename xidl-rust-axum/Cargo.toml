@@ -10,12 +10,5 @@ thiserror.workspace = true
 async-trait.workspace = true
 
 axum = { version = "0.8", features = ["macros"] }
-reqwest = { version = "0.12.23", default-features = false, features = [
-  "json",
-  "charset",
-  "http2",
-  "rustls-tls",
-  "socks",
-  "stream",
-] }
+reqwest = { version = "0.13.2", features = ["json"] }
 tokio = { version = "1", features = ["net", "rt", "rt-multi-thread"] }
