@@ -1,4 +1,4 @@
-use std::{os::fd::FromRawFd, pin::pin};
+use std::{os::windows::io::FromRawHandle, pin::pin};
 
 use tokio::io::{AsyncRead, AsyncWrite};
 
@@ -10,17 +10,20 @@ pub fn pipe() -> Result<(Writer, Reader), std::io::Error> {
 pub struct Reader(interprocess::unnamed_pipe::tokio::Recver);
 
 impl Reader {
-    pub fn into_owned_fd(self) -> std::os::fd::OwnedFd {
-        let fd =
-            unsafe { std::os::fd::OwnedFd::from_raw_fd(std::os::fd::AsRawFd::as_raw_fd(&self.0)) };
+    pub fn into_owned_handle(self) -> std::os::windows::io::OwnedHandle {
+        let handle = unsafe {
+            std::os::windows::io::OwnedHandle::from_raw_handle(
+                std::os::windows::io::AsRawHandle::as_raw_handle(&self.0),
+            )
+        };
 
         std::mem::forget(self);
 
-        fd
+        handle
     }
 
     pub fn into_stdio(self) -> std::process::Stdio {
-        self.into_owned_fd().into()
+        self.into_owned_handle().into()
     }
 }
 
@@ -37,17 +40,20 @@ impl AsyncRead for Reader {
 pub struct Writer(interprocess::unnamed_pipe::tokio::Sender);
 
 impl Writer {
-    pub fn into_owned_fd(self) -> std::os::fd::OwnedFd {
-        let fd =
-            unsafe { std::os::fd::OwnedFd::from_raw_fd(std::os::fd::AsRawFd::as_raw_fd(&self.0)) };
+    pub fn into_owned_handle(self) -> std::os::windows::io::OwnedHandle {
+        let handle = unsafe {
+            std::os::windows::io::OwnedHandle::from_raw_handle(
+                std::os::windows::io::AsRawHandle::as_raw_handle(&self.0),
+            )
+        };
 
         std::mem::forget(self);
 
-        fd
+        handle
     }
 
     pub fn into_stdio(self) -> std::process::Stdio {
-        self.into_owned_fd().into()
+        self.into_owned_handle().into()
     }
 }
 
