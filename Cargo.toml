@@ -12,6 +12,9 @@ members = [
   "xidl-typeobject",
 ]
 
+[profile.release]
+strip = true
+
 [workspace.dependencies]
 xidl-parser = { path = "xidl-parser" }
 xidl-parser-derive = { path = "xidl-parser-derive" }
