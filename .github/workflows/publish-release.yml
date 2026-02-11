@@ -83,10 +83,13 @@ jobs:
         with:
           path: dist
 
-      - name: Flatten artifacts
+      - name: Pack artifacts to tar.xz
         run: |
           mkdir -p release
-          find dist -type f -maxdepth 3 -exec cp {} release/ \;
+          find dist -maxdepth 3 -type f -print0 | while IFS= read -r -d '' file; do
+            base="$(basename \"$file\")"
+            tar -cJf "release/${base}.tar.xz" -C "$(dirname \"$file\")" "$base"
+          done
 
       - name: Release nightly
         if: github.ref == 'refs/heads/master'
