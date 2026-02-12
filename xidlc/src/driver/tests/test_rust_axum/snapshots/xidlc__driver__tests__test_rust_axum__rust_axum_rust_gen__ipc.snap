@@ -515,7 +515,6 @@ response::IntoResponse,
 routing::{delete,get,head,options,patch,post,put},
 Json,Router,
 };
-use xidl_rust_axum::serde::{Deserialize,Serialize};
 use std::sync::Arc;
 #[derive(::serde::Serialize,::serde::Deserialize)]
 struct HttpServiceCreateSimpleBody{
@@ -529,7 +528,7 @@ pub struct HttpServiceCreateSimpleRequest{
     pub remote_port:u16,
 }
 
-#[derive(Serialize,Deserialize)]
+#[derive(::serde::Serialize,::serde::Deserialize)]
 struct HttpServiceStopSimplePath{
     id:u32,
 }
@@ -920,7 +919,7 @@ impl HttpServiceClient{
 ===============
 ipc.rs
 ===============
-#[derive(Debug,Serialize,Deserialize)]
+#[derive(Debug,::serde::Serialize,::serde::Deserialize)]
 pub struct HealthResponse{
     pub healthy:bool,
     pub rtt_ms:u64,
@@ -930,7 +929,7 @@ pub struct HealthResponse{
 impl HealthResponse{
 }
 
-#[derive(Debug,Serialize,Deserialize)]
+#[derive(Debug,::serde::Serialize,::serde::Deserialize)]
 pub struct VersionResponse{
     pub short:String,
     pub long:String,
@@ -939,7 +938,7 @@ pub struct VersionResponse{
 impl VersionResponse{
 }
 
-#[derive(Debug,Serialize,Deserialize)]
+#[derive(Debug,::serde::Serialize,::serde::Deserialize)]
 pub struct MemoryResponse{
     pub allocated:u64,
     pub active:u64,
@@ -948,7 +947,7 @@ pub struct MemoryResponse{
 impl MemoryResponse{
 }
 
-#[derive(Debug,Serialize,Deserialize)]
+#[derive(Debug,::serde::Serialize,::serde::Deserialize)]
 pub struct UdpStatsResponse{
     pub tx:u64,
     pub rx:u64,
@@ -957,7 +956,7 @@ pub struct UdpStatsResponse{
 impl UdpStatsResponse{
 }
 
-#[derive(Debug,Serialize,Deserialize)]
+#[derive(Debug,::serde::Serialize,::serde::Deserialize)]
 pub struct CreateTcpReverseRequest{
     pub local_addr:String,
     pub remote_port:u16,
@@ -966,7 +965,7 @@ pub struct CreateTcpReverseRequest{
 impl CreateTcpReverseRequest{
 }
 
-#[derive(Debug,Serialize,Deserialize)]
+#[derive(Debug,::serde::Serialize,::serde::Deserialize)]
 pub struct CreateSimpleResponse{
     pub id:u32,
 }

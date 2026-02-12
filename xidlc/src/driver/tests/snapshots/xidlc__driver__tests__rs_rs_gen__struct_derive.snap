@@ -46,7 +46,7 @@ impl xidl_xcdr::XcdrDeserialize for A{
     }
 }
 
-#[derive(Debug,Serialize)]
+#[derive(Debug,::serde::Serialize)]
 pub struct A{
 }
 

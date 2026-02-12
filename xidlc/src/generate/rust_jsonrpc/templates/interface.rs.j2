@@ -6,7 +6,7 @@ pub trait {{ ident }} {
 }
 
 {% for method in methods %}
-    #[derive(Serialize, Deserialize)]
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
     struct {{ method.params_struct }} {
         {% for field in method.params_fields %}
             {{ field.name }}: {{ field.ty }},
@@ -29,12 +29,12 @@ impl<T> xidl_jsonrpc::Handler for {{ ident }}Server<T>
 where
 T: {{ ident }} + Send + Sync,
 {
-    async fn handle(&self, method: &str, params: Value) -> Result<Value, xidl_jsonrpc::Error> {
+    async fn handle(&self, method: &str, params: ::serde_json::Value) -> Result<::serde_json::Value, xidl_jsonrpc::Error> {
         match method {
             {% for method in methods %}
                 "{{ method.rpc_name }}" => {
                     {% if method.params | length > 0 %}
-                        let params: {{ method.params_struct }} = serde_json::from_value(params)
+                        let params: {{ method.params_struct }} = ::serde_json::from_value(params)
                             .map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
                     {% endif %}
                     {% if method.args | length > 0 %}
@@ -42,7 +42,7 @@ T: {{ ident }} + Send + Sync,
                     {% else %}
                         let result = self.inner.{{ method.name }}().await?;
                     {% endif %}
-                    Ok(serde_json::to_value(result)?)
+                    Ok(::serde_json::to_value(result)?)
                 }
             {% endfor %}
             _ => Err(xidl_jsonrpc::Error::method_not_found(method)),
@@ -51,17 +51,17 @@ T: {{ ident }} + Send + Sync,
 }
 
 pub struct {{ ident }}Client<R, W> {
-    client: Mutex<xidl_jsonrpc::Client<BufReader<R>, W>>,
+    client: tokio::sync::Mutex<xidl_jsonrpc::Client<tokio::io::BufReader<R>, W>>,
 }
 
 impl<R, W> {{ ident }}Client<R, W>
 where
-R: AsyncRead + Unpin + Send,
-W: AsyncWrite + Unpin + Send,
+R: tokio::io::AsyncRead + Unpin + Send,
+W: tokio::io::AsyncWrite + Unpin + Send,
 {
     pub fn new(reader: R, writer: W) -> Self {
         Self {
-            client: Mutex::new(xidl_jsonrpc::Client::new(BufReader::new(reader), writer)),
+            client: tokio::sync::Mutex::new(xidl_jsonrpc::Client::new(tokio::io::BufReader::new(reader), writer)),
         }
     }
 }
@@ -69,8 +69,8 @@ W: AsyncWrite + Unpin + Send,
 #[async_trait::async_trait]
 impl<R, W> {{ ident }} for {{ ident }}Client<R, W>
 where
-R: AsyncRead + Unpin + Send,
-W: AsyncWrite + Unpin + Send,
+R: tokio::io::AsyncRead + Unpin + Send,
+W: tokio::io::AsyncWrite + Unpin + Send,
 {
     {% for method in methods %}
         async fn {{ method.name }}(& self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.ret }}, xidl_jsonrpc::Error> {

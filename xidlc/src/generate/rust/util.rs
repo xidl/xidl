@@ -286,5 +286,14 @@ pub fn rust_derives_from_annotations_with_extra(
             out.push(derive);
         }
     }
+
+    for d in out.iter_mut() {
+        if d == "Serialize" {
+            *d = "::serde::Serialize".to_string();
+        }
+        if d == "Deserialize" {
+            *d = "::serde::Deserialize".to_string();
+        }
+    }
     out
 }

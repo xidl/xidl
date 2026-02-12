@@ -17,12 +17,11 @@ pub trait {{ ident }} {
         Json, Router,
     };
 {% endif %}
-use xidl_rust_axum::serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
 {% for method in methods %}
     {% if method.path_params | length > 0 %}
-        #[derive(Serialize, Deserialize)]
+        #[derive(::serde::Serialize, ::serde::Deserialize)]
         struct {{ method.struct_prefix }}Path {
             {% for param in method.path_params %}
                 {% if param.serde_rename is defined and param.serde_rename %}

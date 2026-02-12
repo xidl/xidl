@@ -109,9 +109,9 @@ pub(crate) fn render_union_with_config(
         "cases": cases,
         "has_default": has_default,
         "serialize_kind": serialize_kind,
-        "has_serde_serialize": derive.iter().find(|v|*v=="Serialize"),
-        "has_serde_deserialize": derive.iter().find(|v|*v=="Deserialize"),
-        "derive": derive.into_iter().filter(|v| v != "Serialize" && v!="Deserialize").collect_vec(),
+        "has_serde_serialize": derive.iter().find(|v|*v=="::serde::Serialize"),
+        "has_serde_deserialize": derive.iter().find(|v|*v=="::serde::Deserialize"),
+        "derive": derive.into_iter().filter(|v| v != "::serde::Serialize" && v!="::serde::Deserialize").collect_vec(),
         "module_path": module_path,
         "typeobject_path": renderer.typeobject_path(),
     });
