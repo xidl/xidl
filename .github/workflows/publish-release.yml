@@ -66,7 +66,7 @@ jobs:
           if [ "${{ matrix.platform.target }}" = "x86_64-pc-windows-gnu" ] || [ "${{ matrix.platform.target }}" = "aarch64-pc-windows-gnu" ]; then
             BIN_NAME="xidlc.exe"
           fi
-          cp target/${{ matrix.platform.target }}/release/${BIN_NAME} dist/xidlc-${{ matrix.platform.target }}${BIN_NAME##xidlc}
+          cp target/${{ matrix.platform.target }}/release/${BIN_NAME} dist/${{ matrix.platform.target }}
       - name: Upload cli artifact
         uses: actions/upload-artifact@v4
         with:
@@ -78,18 +78,30 @@ jobs:
       - build-cli
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           path: dist
 
-      - name: Pack artifacts to tar.xz
+      - name: Generate release body
         run: |
           mkdir -p release
-          find dist -maxdepth 3 -type f -print0 | while IFS= read -r -d '' file; do
-            base="$(basename "$file")"
-            tar -cJf "release/${base}.tar.xz" -C "$(dirname "$file")" "$base"
-          done
+          if [ "${GITHUB_REF}" = "refs/heads/master" ]; then
+            RELEASE_TAG="nightly"
+          elif [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            RELEASE_TAG="${GITHUB_REF_NAME}"
+          else
+            echo "Skip release body for ref ${GITHUB_REF}"
+            exit 0
+          fi
+
+          sed \
+            -e "s|REPOSITORY|${GITHUB_REPOSITORY}|g" \
+            -e "s|RELEASE_TAG|${RELEASE_TAG}|g" \
+            ./.github/release_template.md > release/body.md
 
       - name: Release nightly
         if: github.ref == 'refs/heads/master'
@@ -98,7 +110,8 @@ jobs:
           tag_name: nightly
           name: nightly
           prerelease: true
-          files: release/*
+          files: dist/*/*.tar.xz
+          body_path: release/body.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -106,6 +119,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: release/*
+          files: dist/*/*.tar.xz
+          body_path: release/body.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
