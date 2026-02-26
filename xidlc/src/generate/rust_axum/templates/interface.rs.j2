@@ -8,17 +8,6 @@ pub trait {{ ident }} {
     {% endfor %}
 }
 
-{% if opt.enable_server %}
-    use xidl_rust_axum::axum::{
-        extract::{Path, Query, State},
-        http::{HeaderMap, StatusCode},
-        response::IntoResponse,
-        routing::{delete, get, head, options, patch, post, put},
-        Json, Router,
-    };
-{% endif %}
-use std::sync::Arc;
-
 {% for method in methods %}
     {% if method.path_params | length > 0 %}
         #[derive(::serde::Serialize, ::serde::Deserialize)]
@@ -69,7 +58,7 @@ use std::sync::Arc;
 
 {% if opt.enable_server %}
     pub struct {{ ident }}Server<T> {
-        inner: Arc<T>,
+        inner: ::std::sync::Arc<T>,
     }
 
     impl<T> {{ ident }}Server<T>
@@ -78,31 +67,31 @@ use std::sync::Arc;
     {
         pub fn new(inner: T) -> Self {
             Self {
-                inner: Arc::new(inner),
+                inner: ::std::sync::Arc::new(inner),
             }
         }
 
-        pub fn from_arc(inner: Arc<T>) -> Self {
+        pub fn from_arc(inner: ::std::sync::Arc<T>) -> Self {
             Self { inner }
         }
 
-        pub fn router(self) -> Router {
+        pub fn router(self) -> xidl_rust_axum::axum::Router {
             let svc = self.inner;
-            Router::new()
+            xidl_rust_axum::axum::Router::new()
             {% for method in methods %}
-                .route("{{ method.path }}", {{ method.http_method_fn }}(Self::{{ method.name }}))
+                .route("{{ method.path }}", xidl_rust_axum::axum::routing::{{ method.http_method_fn }}(Self::{{ method.name }}))
             {% endfor %}
             .with_state(svc)
         }
 
         {% for method in methods %}
             async fn {{ method.name }}(
-            State(svc): State<Arc<T>>,
-            headers: HeaderMap{% if method.path_params | length > 0 %},
-            Path(path): Path<{{ method.struct_prefix }}Path>{% endif %}{% if method.query_params | length > 0 %},
-            Query(query): Query<{{ method.struct_prefix }}Query>{% endif %}{% if method.body_params | length > 0 %},
-            Json(body): Json<{{ method.struct_prefix }}Body>{% endif %}
-            ) -> ::xidl_rust_axum::Result<Json<{{ method.ret }}>> {
+            ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+            headers: ::xidl_rust_axum::axum::http::HeaderMap{% if method.path_params | length > 0 %},
+            ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<{{ method.struct_prefix }}Path>{% endif %}{% if method.query_params | length > 0 %},
+            xidl_rust_axum::axum::extract::Query(query): xidl_rust_axum::axum::extract::Query<{{ method.struct_prefix }}Query>{% endif %}{% if method.body_params | length > 0 %},
+            xidl_rust_axum::axum::Json(body): xidl_rust_axum::axum::Json<{{ method.struct_prefix }}Body>{% endif %}
+            ) -> ::xidl_rust_axum::Result<xidl_rust_axum::axum::Json<{{ method.ret }}>> {
                 {% if method.path_params | length > 0 %}
                     let {{ method.struct_prefix }}Path {
                         {% for param in method.path_params %}
@@ -134,7 +123,7 @@ use std::sync::Arc;
                     let data = ();
                 {% endif %}
                 let req = ::xidl_rust_axum::Request::new(headers, data);
-                Ok(Json(svc.{{ method.name }}(req).await?))
+                Ok(xidl_rust_axum::axum::Json(svc.{{ method.name }}(req).await?))
             }
         {% endfor %}
     }
@@ -143,7 +132,7 @@ use std::sync::Arc;
     where
     T: {{ ident }} + Send + Sync + 'static,
     {
-        fn into_router(self) -> Router {
+        fn into_router(self) -> xidl_rust_axum::axum::Router {
             self.router()
         }
     }
@@ -165,12 +154,12 @@ use std::sync::Arc;
     impl {{ ident }}Client {
         {% for method in methods %}
             pub async fn {{ method.name }}(&self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.ret }}, xidl_rust_axum::Error> {
-                let mut path = "{{ method.path }}".to_string();
+                let path = "{{ method.path }}".to_string();
                 {% for param in method.path_params %}
-                    path = path.replace("{\u007b}{{ param.raw_name }}{\u007d}", &{{ param.name }}.to_string());
+                    let path = path.replace("{{ ['{{', param.raw_name, '}}'] | join}}", &{{ param.name }}.to_string());
                 {% endfor %}
                 let url = self.client.url(&path);
-                let mut req = self
+                let req = self
                 .client
                 .http()
                 .request(xidl_rust_axum::reqwest::Method::{{ method.reqwest_method }}, url);
@@ -180,7 +169,7 @@ use std::sync::Arc;
                             {{ param.name }},
                         {% endfor %}
                     };
-                    req = req.query(&query);
+                    let req = req.query(&query);
                 {% endif %}
                 {% if method.body_params | length > 0 %}
                     let body = {{ method.struct_prefix }}Body {
@@ -188,7 +177,7 @@ use std::sync::Arc;
                             {{ param.name }},
                         {% endfor %}
                     };
-                    req = req.json(&body);
+                    let req = req.json(&body);
                 {% endif %}
                 let resp = req
                 .send()
