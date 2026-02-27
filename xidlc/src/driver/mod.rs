@@ -40,12 +40,9 @@ impl Driver {
         let output = out_file::OutputTarget::new(&self.args.out_dir)?;
         let mut generator = generate::Generator::new(self.args.lang.clone());
         let mut props = HashMap::new();
-        if self.args.skip_client {
-            props.insert("enable_client".into(), false.into());
-        }
-        if self.args.skip_server {
-            props.insert("enable_server".into(), false.into());
-        }
+        props.insert("enable_client".into(), self.args.client.into());
+        props.insert("enable_server".into(), self.args.server.into());
+        props.insert("enable_ts".into(), self.args.ts.into());
 
         for input in self.args.files {
             let source = fs::read_to_string(&input)?;

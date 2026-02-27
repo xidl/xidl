@@ -40,24 +40,31 @@ pub fn generate(
         content,
     })];
 
-    let ts = crate::generate::typescript::TypescriptRender::render(
-        &spec,
-        file_name,
-        renderer.typescript(),
-        crate::generate::typescript::TsMode::InterfaceOnly,
-    )?;
-    artifacts.push(Artifact::new_file(ArtifactFile {
-        path: format!("{file_name}.iface.d.ts"),
-        content: ts.types,
-    }));
-    artifacts.push(Artifact::new_file(ArtifactFile {
-        path: format!("{file_name}.iface.zod.ts"),
-        content: ts.zod,
-    }));
-    artifacts.push(Artifact::new_file(ArtifactFile {
-        path: format!("{file_name}.client.ts"),
-        content: ts.client,
-    }));
+    let enable_ts = props
+        .get("enable_ts")
+        .and_then(|value| value.as_bool())
+        .unwrap_or(true);
+
+    if enable_ts {
+        let ts = crate::generate::typescript::TypescriptRender::render(
+            &spec,
+            file_name,
+            renderer.typescript(),
+            crate::generate::typescript::TsMode::InterfaceOnly,
+        )?;
+        artifacts.push(Artifact::new_file(ArtifactFile {
+            path: format!("{file_name}.iface.d.ts"),
+            content: ts.types,
+        }));
+        artifacts.push(Artifact::new_file(ArtifactFile {
+            path: format!("{file_name}.iface.zod.ts"),
+            content: ts.zod,
+        }));
+        artifacts.push(Artifact::new_file(ArtifactFile {
+            path: format!("{file_name}.client.ts"),
+            content: ts.client,
+        }));
+    }
 
     let openapi = openapi::render_openapi(&spec);
     let openapi_content = serde_json::to_string_pretty(&openapi)?;
@@ -67,20 +74,22 @@ pub fn generate(
     }));
 
     let non_interface = strip_interfaces(spec);
-    let ts_types = crate::generate::typescript::TypescriptRender::render(
-        &non_interface,
-        file_name,
-        renderer.typescript(),
-        crate::generate::typescript::TsMode::TypesOnly,
-    )?;
-    artifacts.push(Artifact::new_file(ArtifactFile {
-        path: format!("{file_name}.d.ts"),
-        content: ts_types.types,
-    }));
-    artifacts.push(Artifact::new_file(ArtifactFile {
-        path: format!("{file_name}.zod.ts"),
-        content: ts_types.zod,
-    }));
+    if enable_ts {
+        let ts_types = crate::generate::typescript::TypescriptRender::render(
+            &non_interface,
+            file_name,
+            renderer.typescript(),
+            crate::generate::typescript::TsMode::TypesOnly,
+        )?;
+        artifacts.push(Artifact::new_file(ArtifactFile {
+            path: format!("{file_name}.d.ts"),
+            content: ts_types.types,
+        }));
+        artifacts.push(Artifact::new_file(ArtifactFile {
+            path: format!("{file_name}.zod.ts"),
+            content: ts_types.zod,
+        }));
+    }
     if !non_interface.0.is_empty() {
         let props = hashmap! {
             "enable_render_header" => false,
@@ -114,6 +123,7 @@ impl crate::jsonrpc::Codegen for RustAxumCodegen {
             "format_typescript" => true,
             "enable_client" => true,
             "enable_server" => true,
+            "enable_ts" => true,
             "enable_render_header" => true,
             "enable_serialize" => true,
             "enable_deserialize" => true,

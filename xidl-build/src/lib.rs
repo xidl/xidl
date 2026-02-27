@@ -11,8 +11,9 @@ pub trait XidlBuild {
 pub struct Builder {
     lang: String,
     out_dir: Option<PathBuf>,
-    skip_client: bool,
-    skip_server: bool,
+    client: bool,
+    server: bool,
+    ts: bool,
 }
 
 impl Default for Builder {
@@ -20,8 +21,9 @@ impl Default for Builder {
         Self {
             lang: "rust".to_string(),
             out_dir: None,
-            skip_client: false,
-            skip_server: false,
+            client: true,
+            server: true,
+            ts: true,
         }
     }
 }
@@ -42,12 +44,12 @@ impl Builder {
     }
 
     pub fn skip_client(mut self, value: bool) -> Self {
-        self.skip_client = value;
+        self.client = value;
         self
     }
 
     pub fn skip_server(mut self, value: bool) -> Self {
-        self.skip_server = value;
+        self.server = value;
         self
     }
 }
@@ -65,8 +67,9 @@ impl XidlBuild for Builder {
             lang: self.lang.clone(),
             out_dir: out_dir.to_string_lossy().to_string(),
             files: inputs.iter().map(|p| p.as_ref().to_path_buf()).collect(),
-            skip_client: self.skip_client,
-            skip_server: self.skip_server,
+            client: self.client,
+            server: self.server,
+            ts: self.ts,
         };
 
         tokio::runtime::Builder::new_current_thread()

@@ -56,7 +56,7 @@ impl CodegenSession {
             "rs_jsonrpc" | "rust_jsonrpc" | "rs-jsonrpc" | "rust-jsonrpc" => {
                 run_server!(crate::generate::rust_jsonrpc::RustJsonRpcCodegen)
             }
-            "rs_axum" | "rust_axum" | "rs-axum" | "rust-axum" => {
+            "axum" | "rs_axum" | "rust_axum" | "rs-axum" | "rust-axum" => {
                 run_server!(crate::generate::rust_axum::RustAxumCodegen)
             }
             "ts" | "typescript" => run_server!(crate::generate::typescript::TypescriptCodegen),
