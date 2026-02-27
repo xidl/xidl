@@ -70,6 +70,7 @@ impl XidlBuild for Builder {
             client: self.client,
             server: self.server,
             ts: self.ts,
+            dry_run: false,
         };
 
         tokio::runtime::Builder::new_current_thread()

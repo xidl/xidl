@@ -7,11 +7,13 @@ pub struct ArgsGenerate {
     pub lang: String,
     #[arg(long = "out-dir", short = 'o', default_value = ".")]
     pub out_dir: String,
-    #[arg(long = "client")]
+    #[arg(long = "client", default_value_t = false)]
     pub client: bool,
-    #[arg(long = "server")]
+    #[arg(long = "server", default_value_t = false)]
     pub server: bool,
-    #[arg(long = "ts")]
+    #[arg(long = "ts", default_value_t = false)]
     pub ts: bool,
+    #[arg(long = "dry-run", default_value_t = false)]
+    pub dry_run: bool,
     pub files: Vec<PathBuf>,
 }

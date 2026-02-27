@@ -67,11 +67,12 @@ impl CodegenSession {
             #[cfg(not(target_os = "emscripten"))]
             _ => {
                 let exe = format!("xidl-{lang}");
-                tracing::debug!("spawn {exe}");
+                tracing::info!("{lang} is not a builtin supported language,try spawn {exe}");
                 let mut child = std::process::Command::new(&exe)
                     .stdin(stdin_tx.into_stdio())
                     .stdout(stdout_rx.into_stdio())
-                    .spawn()?;
+                    .spawn()
+                    .inspect_err(|_| tracing::error!("cannot find plugin: {lang}"))?;
 
                 let server = tokio::task::spawn_blocking(move || {
                     child.wait()?;

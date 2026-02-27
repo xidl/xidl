@@ -38,6 +38,7 @@ tree-sitter-typescript = "=0.23.2"
 utoipa = "5.4.0"
 semver = "1.0"
 jiff = "0.2"
+enum_dispatch = "0.3.13"
 
 [target.'cfg(target_os = "emscripten")'.dependencies]
 tokio = { version = "1.36", features = [

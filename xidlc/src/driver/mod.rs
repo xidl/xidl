@@ -8,6 +8,7 @@ mod generate_session;
 mod out_file;
 
 use crate::cli::ArgsGenerate;
+use crate::driver::out_file::OutputTargetTrait;
 use crate::error::IdlcResult;
 use std::collections::HashMap;
 use std::fs;
@@ -37,7 +38,11 @@ impl Driver {
     }
 
     async fn execute(self) -> IdlcResult<()> {
-        let output = out_file::OutputTarget::new(&self.args.out_dir)?;
+        let output = match self.args.dry_run {
+            true => out_file::OutputTarget::new_dummy(),
+            false => out_file::OutputTarget::new_real(&self.args.out_dir)?,
+        };
+
         let mut generator = generate::Generator::new(self.args.lang.clone());
         let mut props = HashMap::new();
         props.insert("enable_client".into(), self.args.client.into());
