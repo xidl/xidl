@@ -1,8 +1,8 @@
 # XIDL
 
-XIDL (eXtensible IDL) is an OMG IDL-based code generator.
-It supports targets such as `c`, `cpp`, `rust`, `rust-axum`, and `rust-jsonrpc`.
-XIDL is plugin-capable and uses JSON-RPC as the plugin communication protocol.
+XIDL (eXtensible IDL) is an OMG IDL-based code generator. It supports targets
+such as `c`, `cpp`, `rust`, `rust-axum`, and `rust-jsonrpc`. XIDL is
+plugin-capable and uses JSON-RPC as the plugin communication protocol.
 
 ## Features
 
@@ -21,7 +21,15 @@ cargo build
 cargo test
 
 # Generate code (example)
-cargo run -p xidlc -- -l rust -o out your.idl
+xidlc -l rust -o out your.idl
+```
+
+## Docs (Docusaurus)
+
+```bash
+cd website
+pnpm install
+pnpm start
 ```
 
 ## Built-in Targets (current)
@@ -35,14 +43,22 @@ cargo run -p xidlc -- -l rust -o out your.idl
 
 ## Plugin Model
 
-- During generation, `xidlc` starts a codegen engine based on the target language.
-- Built-in engines run in-process; unknown targets can be handled by external `xidl-<lang>` plugins.
-- Plugins communicate with the host via JSON-RPC; see `xidlc/src/jsonrpc/ipc.idl` for the core interface.
+- During generation, `xidlc` starts a codegen engine based on the target
+  language.
+- Built-in engines run in-process; unknown targets can be handled by external
+  `xidl-<lang>` plugins.
+- Plugins communicate with the host via JSON-RPC; see
+  `xidlc/src/jsonrpc/ipc.idl` for the core interface.
 
 ## Repository Layout
 
-- `xidlc/`: compiler CLI and language generators
-- `xidl-parser/`: IDL parsing, typed AST, and HIR
-- `xidl-jsonrpc/`: JSON-RPC communication library
-- `xidl-xcdr/`: XCDR-related implementation
-- `tree-sitter-idl/`: IDL grammar and queries
+- `xidl-parser-derive`: tree-sitter helper derive.
+- `xidl-parser`: tree-sitter parser.
+- `xidlc`: eXtensible IDL compiler.
+- `xidl-build`: xidlc builder derive.
+- `xidl-jsonrpc`: xidlc rust jsonrpc framework.
+- `xidl-playground`: xidlc playground.
+- `xidl-rust-axum`: xidlc rust axum codegen framework.
+- `xidl-typeobject`: omg dds typeobject.
+- `xidl-xcdr`: omg dds xcdr.
+- `xidlc-examples`: examples
