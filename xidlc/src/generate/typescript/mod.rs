@@ -23,16 +23,36 @@ pub fn generate(
     let mut renderer = TypescriptRenderer::new()?;
     renderer.extend(&props);
 
-    let ts = spec.render(file_name, &renderer, TsMode::TypesOnly)?;
+    let mode = props
+        .get("typescript_mode")
+        .map(|v| {
+            if let Some(s) = v.as_str() {
+                match s {
+                    "all" => TsMode::All,
+                    "interface_only" => TsMode::InterfaceOnly,
+                    "types_only" => TsMode::TypesOnly,
+                    _ => TsMode::All,
+                }
+            } else {
+                TsMode::All
+            }
+        })
+        .unwrap_or_default();
+
+    let ts = spec.render(file_name, &renderer, mode)?;
 
     let mut artifacts = Vec::new();
     artifacts.push(Artifact::new_file(ArtifactFile {
-        path: format!("{file_name}.d.ts"),
+        path: format!("{file_name}.iface.d.ts"),
         content: ts.types,
     }));
     artifacts.push(Artifact::new_file(ArtifactFile {
-        path: format!("{file_name}.zod.ts"),
+        path: format!("{file_name}.iface.zod.ts"),
         content: ts.zod,
+    }));
+    artifacts.push(Artifact::new_file(ArtifactFile {
+        path: format!("{file_name}.client.ts"),
+        content: ts.client,
     }));
 
     Ok(artifacts)

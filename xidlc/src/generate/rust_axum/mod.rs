@@ -46,23 +46,12 @@ pub fn generate(
         .unwrap_or(true);
 
     if enable_ts {
-        let ts = crate::generate::typescript::TypescriptRender::render(
-            &spec,
-            file_name,
-            renderer.typescript(),
-            crate::generate::typescript::TsMode::InterfaceOnly,
-        )?;
-        artifacts.push(Artifact::new_file(ArtifactFile {
-            path: format!("{file_name}.iface.d.ts"),
-            content: ts.types,
-        }));
-        artifacts.push(Artifact::new_file(ArtifactFile {
-            path: format!("{file_name}.iface.zod.ts"),
-            content: ts.zod,
-        }));
-        artifacts.push(Artifact::new_file(ArtifactFile {
-            path: format!("{file_name}.client.ts"),
-            content: ts.client,
+        let mut props = props.clone();
+        props.insert("typescript_mode".into(), "interface_only".into());
+        artifacts.push(Artifact::new_hir(ArtifactHir {
+            lang: "typescript".into(),
+            hir: spec.clone(),
+            props,
         }));
     }
 

@@ -9,8 +9,9 @@ pub struct TypescriptRenderOutput {
     pub client: String,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy, Default)]
 pub enum TsMode {
+    #[default]
     All,
     InterfaceOnly,
     TypesOnly,
