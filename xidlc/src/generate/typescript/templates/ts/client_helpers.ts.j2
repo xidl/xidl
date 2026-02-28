@@ -20,10 +20,8 @@ function resolveFetch(fetchImpl?: FetchLike): FetchLike {
     if (fetchImpl) {
         return fetchImpl;
     }
-    if (typeof fetch === "function") {
-        return fetch;
-    }
-    throw new Error("fetch is not available; pass a fetch implementation");
+
+    return window.fetch.bind(undefined);
 }
 
 function joinUrl(baseUrl: string, path: string): string {
