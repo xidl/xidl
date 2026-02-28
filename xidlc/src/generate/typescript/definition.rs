@@ -33,18 +33,18 @@ impl TsGenerator {
         let blocks = render_module_body(&spec.0, &[], renderer, mode)?;
 
         let types = renderer.render_template(
-            "ts/types.d.ts.j2",
+            "types.d.ts.j2",
             &TypesFileContext {
                 blocks: blocks.types,
             },
         )?;
         let zod =
-            renderer.render_template("ts/zod.ts.j2", &TypesFileContext { blocks: blocks.zod })?;
+            renderer.render_template("zod.ts.j2", &TypesFileContext { blocks: blocks.zod })?;
 
         let client = if mode.allows_interfaces() {
-            let helpers = renderer.render_template("ts/client_helpers.ts.j2", &())?;
+            let helpers = renderer.render_template("client_helpers.ts.j2", &())?;
             renderer.render_template(
-                "ts/client.ts.j2",
+                "client.ts.j2",
                 &ClientFileContext {
                     file_stem: self.file_stem.clone(),
                     helpers: vec![helpers],
@@ -144,21 +144,21 @@ fn render_module_body(
         let body = merge_blocks(&modules);
         let ident = ts_ident(&name);
         let types = renderer.render_template(
-            "ts/module.ts.j2",
+            "module.ts.j2",
             &ModuleContext {
                 ident: ident.clone(),
                 body: indent_block(&body.types.join("\n"), 1),
             },
         )?;
         let zod = renderer.render_template(
-            "ts/module.ts.j2",
+            "module.ts.j2",
             &ModuleContext {
                 ident: ident.clone(),
                 body: indent_block(&body.zod.join("\n"), 1),
             },
         )?;
         let client = renderer.render_template(
-            "ts/module.ts.j2",
+            "module.ts.j2",
             &ModuleContext {
                 ident,
                 body: indent_block(&body.client.join("\n"), 1),
@@ -253,7 +253,7 @@ fn render_type_dcl(
                     }
                 };
                 let types = renderer.render_template(
-                    "ts/typedef.d.ts.j2",
+                    "typedef.d.ts.j2",
                     &TypedefTypeContext {
                         name: name.clone(),
                         type_expr,
@@ -272,7 +272,7 @@ fn render_type_dcl(
                 };
                 let schema_name = format!("{name}Schema");
                 let zod = renderer.render_template(
-                    "ts/typedef.zod.ts.j2",
+                    "typedef.zod.ts.j2",
                     &TypedefZodContext {
                         name,
                         schema_name,
@@ -285,7 +285,7 @@ fn render_type_dcl(
         hir::TypeDclInner::NativeDcl(native) => {
             let name = ts_ident(&native.decl.0);
             let types = renderer.render_template(
-                "ts/typedef.d.ts.j2",
+                "typedef.d.ts.j2",
                 &TypedefTypeContext {
                     name: name.clone(),
                     type_expr: "unknown".to_string(),
@@ -294,7 +294,7 @@ fn render_type_dcl(
             out.types.push(types);
             let schema_name = format!("{name}Schema");
             let zod = renderer.render_template(
-                "ts/typedef.zod.ts.j2",
+                "typedef.zod.ts.j2",
                 &TypedefZodContext {
                     name,
                     schema_name,
@@ -346,7 +346,7 @@ fn render_interface(
                 })
                 .collect::<Vec<_>>();
             let types = renderer.render_template(
-                "ts/request.d.ts.j2",
+                "request.d.ts.j2",
                 &RequestContext {
                     name: request_name.clone(),
                     params: params.clone(),
@@ -354,7 +354,7 @@ fn render_interface(
             )?;
             let schema_name = format!("{request_name}Schema");
             let zod = renderer.render_template(
-                "ts/request.zod.ts.j2",
+                "request.zod.ts.j2",
                 &RequestZodContext {
                     name: request_name.clone(),
                     schema_name,
@@ -367,7 +367,7 @@ fn render_interface(
     }
 
     let client = renderer.render_template(
-        "ts/client_class.ts.j2",
+        "client_class.ts.j2",
         &ClientClassContext {
             client_name: format!("{}Client", ts_ident(&def.header.ident)),
             methods: methods
@@ -400,7 +400,7 @@ fn render_struct(
 
     let fields = struct_fields(&def.member, module_path);
     let types = renderer.render_template(
-        "ts/struct.d.ts.j2",
+        "struct.d.ts.j2",
         &StructTypeContext {
             ident: ident.clone(),
             extends,
@@ -415,7 +415,7 @@ fn render_struct(
     )?;
     let schema_name = format!("{ident}Schema");
     let zod = renderer.render_template(
-        "ts/struct.zod.ts.j2",
+        "struct.zod.ts.j2",
         &StructZodContext {
             ident,
             schema_name,
@@ -449,7 +449,7 @@ fn render_enum(def: &hir::EnumDcl, renderer: &TypescriptRenderer) -> IdlcResult<
         members.join(" | ")
     };
     let types = renderer.render_template(
-        "ts/enum.d.ts.j2",
+        "enum.d.ts.j2",
         &EnumTypeContext {
             ident: ident.clone(),
             union,
@@ -457,7 +457,7 @@ fn render_enum(def: &hir::EnumDcl, renderer: &TypescriptRenderer) -> IdlcResult<
     )?;
     let schema_name = format!("{ident}Schema");
     let zod = renderer.render_template(
-        "ts/enum.zod.ts.j2",
+        "enum.zod.ts.j2",
         &EnumZodContext {
             ident,
             schema_name,
@@ -500,7 +500,7 @@ fn render_union(
         variants.join(" | ")
     };
     let types = renderer.render_template(
-        "ts/union.d.ts.j2",
+        "union.d.ts.j2",
         &UnionTypeContext {
             ident: ident.clone(),
             union,
@@ -508,7 +508,7 @@ fn render_union(
     )?;
     let schema_name = format!("{ident}Schema");
     let zod = renderer.render_template(
-        "ts/union.zod.ts.j2",
+        "union.zod.ts.j2",
         &UnionZodContext {
             ident,
             schema_name,
@@ -526,7 +526,7 @@ fn render_union(
 fn render_bit_number(ident: &str, renderer: &TypescriptRenderer) -> IdlcResult<TsRenderOutput> {
     let name = ts_ident(ident);
     let types = renderer.render_template(
-        "ts/typedef.d.ts.j2",
+        "typedef.d.ts.j2",
         &TypedefTypeContext {
             name: name.clone(),
             type_expr: "number".to_string(),
@@ -534,7 +534,7 @@ fn render_bit_number(ident: &str, renderer: &TypescriptRenderer) -> IdlcResult<T
     )?;
     let schema_name = format!("{name}Schema");
     let zod = renderer.render_template(
-        "ts/typedef.zod.ts.j2",
+        "typedef.zod.ts.j2",
         &TypedefZodContext {
             name,
             schema_name,
