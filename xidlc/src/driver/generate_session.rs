@@ -1,3 +1,4 @@
+use crate::driver::lang::Plugin;
 use crate::error::{IdlcError, IdlcResult};
 use crate::jsonrpc::{Codegen, CodegenClient};
 use crate::transport::{Reader, Writer};
@@ -47,32 +48,36 @@ impl CodegenSession {
             };
         }
 
+        let lang = super::lang::Plugin::from(lang);
         match lang {
-            "hir" => run_server!(crate::generate::hir_gen::HirGen),
-            "typed_ast" | "typed-ast" => run_server!(crate::generate::typed_ast_gen::TypedAstGen),
-            "c" | "cc" => run_server!(crate::generate::c::CCodegen),
-            "cpp" | "cxx" | "c++" => run_server!(crate::generate::cpp::CppCodegen),
-            "rust" | "rs" => run_server!(crate::generate::rust::RustCodegen),
-            "rs_jsonrpc" | "rust_jsonrpc" | "rs-jsonrpc" | "rust-jsonrpc" => {
+            Plugin::Hir => run_server!(crate::generate::hir_gen::HirGen),
+            Plugin::TypedAst => run_server!(crate::generate::typed_ast_gen::TypedAstGen),
+            Plugin::C => run_server!(crate::generate::c::CCodegen),
+            Plugin::Cpp => run_server!(crate::generate::cpp::CppCodegen),
+            Plugin::Rust => run_server!(crate::generate::rust::RustCodegen),
+            Plugin::RustJsonRpc => {
                 run_server!(crate::generate::rust_jsonrpc::RustJsonRpcCodegen)
             }
-            "axum" | "rs_axum" | "rust_axum" | "rs-axum" | "rust-axum" => {
+            Plugin::Axum => {
                 run_server!(crate::generate::rust_axum::RustAxumCodegen)
             }
-            "ts" | "typescript" => run_server!(crate::generate::typescript::TypescriptCodegen),
+            Plugin::Typescript => run_server!(crate::generate::typescript::TypescriptCodegen),
             #[cfg(target_os = "emscripten")]
             _ => {
                 unreachable!()
             }
             #[cfg(not(target_os = "emscripten"))]
-            _ => {
+            Plugin::Custom(lang) => {
                 let exe = format!("xidl-{lang}");
+                eprintln!("{exe}");
                 tracing::info!("{lang} is not a builtin supported language,try spawn {exe}");
                 let mut child = std::process::Command::new(&exe)
                     .stdin(stdin_tx.into_stdio())
                     .stdout(stdout_rx.into_stdio())
                     .spawn()
-                    .inspect_err(|_| tracing::error!("cannot find plugin: {lang}"))?;
+                    .map_err(|err| {
+                        std::io::Error::other(format!("cannot find plugin: {lang}, {err}"))
+                    })?;
 
                 let server = tokio::task::spawn_blocking(move || {
                     child.wait()?;

@@ -2,6 +2,7 @@
 mod tests;
 
 mod generate;
+mod lang;
 pub use generate::Generator;
 
 mod generate_session;
@@ -59,15 +60,4 @@ impl Driver {
 
         Ok(())
     }
-}
-
-#[cfg(test)]
-pub async fn generate_from_idl(
-    source: &str,
-    path: &std::path::Path,
-    lang: &str,
-    props: HashMap<String, serde_json::Value>,
-) -> IdlcResult<Vec<File>> {
-    let mut generator = generate::Generator::new(lang.into());
-    generator.generate_from_idl(source, path, props).await
 }

@@ -4,9 +4,22 @@ mod test_rust;
 mod test_rust_axum;
 mod test_rust_jsonrpc;
 
-use crate::driver::generate_from_idl;
+use std::{collections::HashMap, path::Path};
 
-use std::path::Path;
+use crate::{
+    driver::{File, generate},
+    error::IdlcResult,
+};
+
+pub async fn generate_from_idl(
+    source: &str,
+    path: &std::path::Path,
+    lang: &str,
+    props: HashMap<String, serde_json::Value>,
+) -> IdlcResult<Vec<File>> {
+    let mut generator = generate::Generator::new(lang.into());
+    generator.generate_from_idl(source, path, props).await
+}
 
 async fn render_lang_output(lang: &str, input_name: &str, source: &str) -> String {
     let mut files = generate_from_idl(source, Path::new(input_name), lang, Default::default())

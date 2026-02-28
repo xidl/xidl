@@ -1,6 +1,6 @@
 mod cases;
 
-use crate::driver::generate_from_idl;
+use super::generate_from_idl;
 
 use std::{collections::HashMap, path::Path};
 
