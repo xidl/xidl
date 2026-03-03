@@ -16,12 +16,13 @@ members = [
 strip = true
 
 [workspace.dependencies]
-xidl-parser = { path = "xidl-parser" }
-xidl-parser-derive = { path = "xidl-parser-derive" }
-xidl-xcdr = { path = "xidl-xcdr" }
-xidl-jsonrpc = { path = "xidl-jsonrpc" }
-xidl-rust-axum = { path = "xidl-rust-axum" }
-xidl-build = { path = "xidl-build" }
+xidl-parser = { version = "0.1.0", path = "xidl-parser" }
+xidl-parser-derive = { version = "0.1.0", path = "xidl-parser-derive" }
+xidl-xcdr = { version = "0.1.0", path = "xidl-xcdr" }
+xidl-jsonrpc = { version = "0.1.0", path = "xidl-jsonrpc" }
+xidl-rust-axum = { version = "0.1.0", path = "xidl-rust-axum" }
+xidl-build = { version = "0.1.0", path = "xidl-build" }
+xidlc = { version = "0.1.0", path = "xidlc" }
 
 async-trait = "0.1.89"
 serde = { version = "1", features = ["derive"] }
