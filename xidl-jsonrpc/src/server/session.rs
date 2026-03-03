@@ -1,4 +1,4 @@
-use crate::{Error, ErrorCode, Handler, RpcError, RpcRequestOwned, RpcResponse, JSONRPC_VERSION};
+use crate::{Error, ErrorCode, Handler, JSONRPC_VERSION, RpcError, RpcRequestOwned, RpcResponse};
 use serde_json::Value;
 use tokio::io::{AsyncBufReadExt, AsyncRead, AsyncWrite, AsyncWriteExt, BufStream};
 

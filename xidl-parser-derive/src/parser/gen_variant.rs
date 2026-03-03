@@ -1,5 +1,5 @@
 use crate::parser::{DeriveInput, DerivedVariant};
-use quote::{quote, ToTokens};
+use quote::{ToTokens, quote};
 
 impl DeriveInput {
     pub fn generate_variant(&self, fields: &[DerivedVariant]) -> proc_macro2::TokenStream {
