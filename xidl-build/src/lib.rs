@@ -43,12 +43,12 @@ impl Builder {
         self
     }
 
-    pub fn skip_client(mut self, value: bool) -> Self {
+    pub fn with_client(mut self, value: bool) -> Self {
         self.client = value;
         self
     }
 
-    pub fn skip_server(mut self, value: bool) -> Self {
+    pub fn with_server(mut self, value: bool) -> Self {
         self.server = value;
         self
     }
