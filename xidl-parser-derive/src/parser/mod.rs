@@ -9,7 +9,7 @@ use darling::{FromDeriveInput, FromField, FromVariant};
 use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::ToTokens;
-use syn::{parse_macro_input, LitStr};
+use syn::{LitStr, parse_macro_input};
 
 pub fn tree_sitter_parser(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as syn::DeriveInput);
@@ -143,13 +143,13 @@ impl DeriveField {
             return self.ty.clone();
         }
         match &self.ty {
-            syn::Type::Path(ref path) => {
+            syn::Type::Path(path) => {
                 let args = &path.path.segments[0].arguments;
                 match args {
                     syn::PathArguments::AngleBracketed(angle_bracketed_generic_arguments) => {
                         let i = &angle_bracketed_generic_arguments.args[0];
                         match i {
-                            syn::GenericArgument::Type(ref ty) => ty.clone(),
+                            syn::GenericArgument::Type(ty) => ty.clone(),
                             _ => todo!(),
                         }
                     }
