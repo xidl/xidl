@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/xidl/xidl/compare/v0.2.0...v0.2.1) (2026-03-03)
+
+
+### Bug Fixes
+
+* **xidl-build:** fix method name ([87509cf](https://github.com/xidl/xidl/commit/87509cf16b4a952738fa47f20bc0e62535eae3ac))
+
 ## [0.2.0](https://github.com/xidl/xidl/compare/v0.1.0...v0.2.0) (2026-03-03)
 
 
