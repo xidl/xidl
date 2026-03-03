@@ -8,6 +8,12 @@ readme.workspace = true
 keywords.workspace = true
 categories.workspace = true
 repository.workspace = true
+exclude = [
+  "./src/driver/tests/snapshots",
+  "./src/driver/tests/test_rust/snapshots",
+  "./src/driver/tests/test_rust_axum/snapshots",
+  "./src/driver/tests/test_rust_jsonrpc/snapshots",
+]
 
 [lints]
 workspace = true

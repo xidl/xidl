@@ -9,6 +9,7 @@ use std::{collections::HashMap, path::Path};
 use crate::{
     driver::{File, generate},
     error::IdlcResult,
+    macros::hashmap,
 };
 
 pub async fn generate_from_idl(
@@ -22,7 +23,10 @@ pub async fn generate_from_idl(
 }
 
 async fn render_lang_output(lang: &str, input_name: &str, source: &str) -> String {
-    let mut files = generate_from_idl(source, Path::new(input_name), lang, Default::default())
+    let props = hashmap! {
+        "enable_metadata" => false
+    };
+    let mut files = generate_from_idl(source, Path::new(input_name), lang, props)
         .await
         .expect("generate");
     files.sort_by(|a, b| a.path.cmp(&b.path));
