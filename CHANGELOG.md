@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/xidl/xidl/compare/v0.2.1...v0.3.0) (2026-03-03)
+
+
+### Features
+
+* **xidlc:** make openapi as a single language ([6a6f2a1](https://github.com/xidl/xidl/commit/6a6f2a19ec8a7af5d67be9c323a811bbcb47c0f6))
+
 ## [0.2.1](https://github.com/xidl/xidl/compare/v0.2.0...v0.2.1) (2026-03-03)
 
 
