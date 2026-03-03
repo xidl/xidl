@@ -1,0 +1,107 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "include-v-in-tag": true,
+  "include-component-in-tag": false,
+  "packages": {
+    ".": {
+      "release-type": "simple",
+      "extra-files": [
+        {
+          "path": "xidl-build/Cargo.toml",
+          "type": "toml",
+          "jsonpath": "$.package.version"
+        },
+        {
+          "path": "xidlc-examples/Cargo.toml",
+          "type": "toml",
+          "jsonpath": "$.package.version"
+        },
+        {
+          "path": "xidl-parser-derive/Cargo.toml",
+          "type": "toml",
+          "jsonpath": "$.package.version"
+        },
+        {
+          "path": "xidl-jsonrpc/Cargo.toml",
+          "type": "toml",
+          "jsonpath": "$.package.version"
+        },
+        {
+          "path": "xidl-rust-axum/Cargo.toml",
+          "type": "toml",
+          "jsonpath": "$.package.version"
+        },
+        {
+          "path": "xidlc/Cargo.toml",
+          "type": "toml",
+          "jsonpath": "$.package.version"
+        },
+        {
+          "path": "xidl-parser/Cargo.toml",
+          "type": "toml",
+          "jsonpath": "$.package.version"
+        },
+        {
+          "path": "xidl-xcdr/Cargo.toml",
+          "type": "toml",
+          "jsonpath": "$.package.version"
+        },
+        {
+          "path": "xidl-typeobject/Cargo.toml",
+          "type": "toml",
+          "jsonpath": "$.package.version"
+        },
+        {
+          "path": "xidl-playground/package.json",
+          "type": "json",
+          "jsonpath": "$.version"
+        },
+        {
+          "path": "Cargo.lock",
+          "type": "toml",
+          "jsonpath": "$.package[?(@.name.value=='xidl-build')].version"
+        },
+        {
+          "path": "Cargo.lock",
+          "type": "toml",
+          "jsonpath": "$.package[?(@.name.value=='xidlc-examples')].version"
+        },
+        {
+          "path": "Cargo.lock",
+          "type": "toml",
+          "jsonpath": "$.package[?(@.name.value=='xidl-parser-derive')].version"
+        },
+        {
+          "path": "Cargo.lock",
+          "type": "toml",
+          "jsonpath": "$.package[?(@.name.value=='xidl-jsonrpc')].version"
+        },
+        {
+          "path": "Cargo.lock",
+          "type": "toml",
+          "jsonpath": "$.package[?(@.name.value=='xidl-rust-axum')].version"
+        },
+        {
+          "path": "Cargo.lock",
+          "type": "toml",
+          "jsonpath": "$.package[?(@.name.value=='xidlc')].version"
+        },
+        {
+          "path": "Cargo.lock",
+          "type": "toml",
+          "jsonpath": "$.package[?(@.name.value=='xidl-parser')].version"
+        },
+        {
+          "path": "Cargo.lock",
+          "type": "toml",
+          "jsonpath": "$.package[?(@.name.value=='xidl-xcdr')].version"
+        },
+        {
+          "path": "Cargo.lock",
+          "type": "toml",
+          "jsonpath": "$.package[?(@.name.value=='xidl-typeobject')].version"
+        }
+      ]
+    }
+  }
+}
