@@ -12,6 +12,16 @@ members = [
   "xidl-typeobject",
 ]
 
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+description = "A cryptographic library."
+license = "Apache-2.0"
+readme = "./README.md"
+keywords = ["cryptography", "crypto", "encryption", "hashing", "cuda"]
+categories = ["cryptography", "algorithms", "science"]
+repository = "https://github.com/xidl/xidl"
+
 [profile.release]
 strip = true
 
