@@ -14,12 +14,12 @@ members = [
 
 [workspace.package]
 version = "0.1.0"
-edition = "2021"
-description = "A cryptographic library."
+edition = "2024"
+description = "A IDL codegen."
 license = "Apache-2.0"
 readme = "./README.md"
-keywords = ["cryptography", "crypto", "encryption", "hashing", "cuda"]
-categories = ["cryptography", "algorithms", "science"]
+keywords = ["omg", "dds", "idl", "http", "jsonrpc"]
+categories = ["compilers", "parser-implementations", "network-programming"]
 repository = "https://github.com/xidl/xidl"
 
 [profile.release]
