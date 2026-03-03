@@ -61,6 +61,9 @@ impl CodegenSession {
             Plugin::Axum => {
                 run_server!(crate::generate::rust_axum::RustAxumCodegen)
             }
+            Plugin::Openapi => {
+                run_server!(crate::generate::openapi::OpenApiCodegen)
+            }
             Plugin::Typescript => run_server!(crate::generate::typescript::TypescriptCodegen),
             #[cfg(target_os = "emscripten")]
             _ => {

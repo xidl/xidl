@@ -1,6 +1,5 @@
 mod definition;
 mod interface;
-mod openapi;
 mod render;
 mod spec;
 
@@ -55,11 +54,10 @@ pub fn generate(
         }));
     }
 
-    let openapi = openapi::render_openapi(&spec);
-    let openapi_content = serde_json::to_string_pretty(&openapi)?;
-    artifacts.push(Artifact::new_file(ArtifactFile {
-        path: "openapi.json".to_string(),
-        content: openapi_content,
+    artifacts.push(Artifact::new_hir(ArtifactHir {
+        lang: "openapi".into(),
+        hir: spec.clone(),
+        props: HashMap::new(),
     }));
 
     let non_interface = strip_interfaces(spec);

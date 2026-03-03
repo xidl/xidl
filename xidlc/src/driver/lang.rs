@@ -29,6 +29,8 @@ pub enum Plugin {
     Axum,
     #[serde(alias = "ts", alias = "typescript")]
     Typescript,
+    #[serde(alias = "openapi")]
+    Openapi,
     Custom(String),
 }
 
@@ -63,6 +65,7 @@ mod tests {
             ("rs-axum", Plugin::Axum),
             ("ts", Plugin::Typescript),
             ("typescript", Plugin::Typescript),
+            ("openapi", Plugin::Openapi),
             ("custom_plugin", Plugin::Custom("custom_plugin".into())),
         ];
 

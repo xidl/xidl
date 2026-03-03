@@ -14,6 +14,36 @@ use utoipa::openapi::{
     Content, InfoBuilder, OpenApi, OpenApiBuilder, Ref, RefOr, Required, ResponsesBuilder,
 };
 use xidl_parser::hir;
+use xidl_parser::hir::{ParserProperties, Specification};
+
+use crate::jsonrpc::{Artifact, ArtifactFile};
+
+pub(crate) struct OpenApiCodegen;
+
+#[async_trait::async_trait]
+impl crate::jsonrpc::Codegen for OpenApiCodegen {
+    async fn get_engine_version(&self) -> Result<String, xidl_jsonrpc::Error> {
+        Ok("*".to_string())
+    }
+
+    async fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
+        Ok(HashMap::new())
+    }
+
+    async fn generate(
+        &self,
+        hir: Specification,
+        _path: String,
+        _props: ParserProperties,
+    ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
+        let openapi = render_openapi(&hir);
+        let content = serde_json::to_string_pretty(&openapi)?;
+        Ok(vec![Artifact::new_file(ArtifactFile {
+            path: "openapi.json".to_string(),
+            content,
+        })])
+    }
+}
 
 pub fn render_openapi(spec: &hir::Specification) -> OpenApi {
     let mut ctx = OpenApiContext::default();
