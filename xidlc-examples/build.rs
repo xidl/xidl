@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use xidl_build::{Builder, XidlBuild};
+use xidl_build::Builder;
 
 fn main() {
     let axum_idl = Path::new("examples/hello_world.idl");
@@ -12,12 +12,12 @@ fn main() {
     println!("cargo:rerun-if-changed=build.rs");
 
     Builder::new()
-        .lang("rust-axum")
+        .with_lang("rust-axum")
         .compile(&[axum_idl])
         .expect("failed to compile idl for rust-axum example");
 
     Builder::new()
-        .lang("rust-jsonrpc")
+        .with_lang("rust-jsonrpc")
         .compile(&[jsonrpc_idl])
         .expect("failed to compile idl for rust-jsonrpc example");
 }

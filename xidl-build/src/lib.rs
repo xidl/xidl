@@ -3,10 +3,6 @@ use std::path::{Path, PathBuf};
 
 pub use xidlc::error::IdlcError;
 
-pub trait XidlBuild {
-    fn compile(&self, inputs: &[impl AsRef<Path>]) -> Result<(), IdlcError>;
-}
-
 #[derive(Clone, Debug)]
 pub struct Builder {
     lang: String,
@@ -33,12 +29,12 @@ impl Builder {
         Self::default()
     }
 
-    pub fn lang(mut self, lang: impl Into<String>) -> Self {
+    pub fn with_lang(mut self, lang: impl Into<String>) -> Self {
         self.lang = lang.into();
         self
     }
 
-    pub fn out_dir(mut self, out_dir: impl Into<PathBuf>) -> Self {
+    pub fn with_out_dir(mut self, out_dir: impl Into<PathBuf>) -> Self {
         self.out_dir = Some(out_dir.into());
         self
     }
@@ -54,8 +50,8 @@ impl Builder {
     }
 }
 
-impl XidlBuild for Builder {
-    fn compile(&self, inputs: &[impl AsRef<Path>]) -> Result<(), IdlcError> {
+impl Builder {
+    pub fn compile(&self, inputs: &[impl AsRef<Path>]) -> Result<(), IdlcError> {
         let out_dir = match &self.out_dir {
             Some(path) => path.clone(),
             None => PathBuf::from(
