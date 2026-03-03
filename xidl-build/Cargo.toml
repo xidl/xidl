@@ -5,4 +5,4 @@ edition = "2024"
 
 [dependencies]
 tokio = "1.49.0"
-xidlc = { path = "../xidlc" }
+xidlc = { workspace = true }
