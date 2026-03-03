@@ -50,7 +50,8 @@ async fn test_code_gen() {
     let test_case = cases::get_test_cases();
 
     for (name, idl, attr) in test_case {
-        let attr: HashMap<String, serde_json::Value> = serde_json::from_value(attr).unwrap();
+        let mut attr: HashMap<String, serde_json::Value> = serde_json::from_value(attr).unwrap();
+        attr.insert("enable_metadata".to_string(), false.into());
 
         assert_cases("rust_jsonrpc", "rust_gen", name, idl, attr).await;
     }
