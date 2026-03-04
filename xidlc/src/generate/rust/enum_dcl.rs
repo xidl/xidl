@@ -5,7 +5,7 @@ use xidl_parser::hir;
 
 impl RustRender for hir::EnumDcl {
     fn render(&self, renderer: &RustRenderer) -> IdlcResult<RustRenderOutput> {
-        render_enum_with_config(self, renderer, &[], &[])
+        render_enum_with_config(self, renderer, &[])
     }
 }
 
@@ -13,7 +13,6 @@ pub(crate) fn render_enum_with_config(
     def: &hir::EnumDcl,
     renderer: &RustRenderer,
     module_path: &[String],
-    annotations: &[hir::Annotation],
 ) -> IdlcResult<RustRenderOutput> {
     let members = def
         .member
@@ -22,7 +21,7 @@ pub(crate) fn render_enum_with_config(
         .collect::<Vec<_>>();
     let derive = crate::generate::rust::util::rust_derives_from_annotations_with_extra(
         &def.annotations,
-        annotations,
+        &def.annotations,
     );
     let has_serde_serialize = derive.iter().any(|d| d == "::serde::Serialize");
     let has_serde_deserialize = derive.iter().any(|d| d == "::serde::Deserialize");

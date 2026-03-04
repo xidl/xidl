@@ -6,9 +6,9 @@ Specification(
     [
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: TypedefDcl(
                     TypedefDcl {
+                        annotations: [],
                         ty: TypeSpec(
                             TemplateTypeSpec(
                                 SequenceType(
@@ -41,9 +41,9 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: TypedefDcl(
                     TypedefDcl {
+                        annotations: [],
                         ty: TypeSpec(
                             SimpleTypeSpec(
                                 ScopedName(
@@ -69,9 +69,9 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: TypedefDcl(
                     TypedefDcl {
+                        annotations: [],
                         ty: TypeSpec(
                             TemplateTypeSpec(
                                 StringType(
@@ -94,9 +94,9 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: TypedefDcl(
                     TypedefDcl {
+                        annotations: [],
                         ty: TypeSpec(
                             TemplateTypeSpec(
                                 WideStringType(

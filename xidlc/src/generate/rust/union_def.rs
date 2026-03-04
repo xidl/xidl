@@ -17,7 +17,7 @@ impl RustRender for hir::UnionForwardDcl {
 
 impl RustRender for hir::UnionDef {
     fn render(&self, renderer: &RustRenderer) -> IdlcResult<RustRenderOutput> {
-        render_union_with_config(self, renderer, &hir::SerializeConfig::default(), &[], &[])
+        render_union_with_config(self, renderer, &hir::SerializeConfig::default(), &[])
     }
 }
 
@@ -26,7 +26,6 @@ pub(crate) fn render_union_with_config(
     renderer: &RustRenderer,
     config: &hir::SerializeConfig,
     module_path: &[String],
-    annotations: &[hir::Annotation],
 ) -> IdlcResult<RustRenderOutput> {
     let mut fields = Vec::new();
     let mut seen = BTreeSet::new();
@@ -98,7 +97,7 @@ pub(crate) fn render_union_with_config(
     let serialize_kind = serialize_kind_name(def.serialize_kind(config));
     let derive = crate::generate::rust::util::rust_derives_from_annotations_with_extra(
         &def.annotations,
-        annotations,
+        &def.annotations,
     );
     let module_path = module_path.to_vec();
 

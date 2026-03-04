@@ -6,20 +6,19 @@ Specification(
     [
         TypeDcl(
             TypeDcl {
-                annotations: [
-                    Builtin {
-                        name: "id",
-                        params: Some(
-                            Raw(
-                                "1",
-                            ),
-                        ),
-                    },
-                ],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
-                            annotations: [],
+                            annotations: [
+                                Builtin {
+                                    name: "id",
+                                    params: Some(
+                                        Raw(
+                                            "1",
+                                        ),
+                                    ),
+                                },
+                            ],
                             ident: "S",
                             parent: [],
                             member: [
@@ -99,33 +98,39 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [
-                    ScopedName {
-                        name: ScopedName {
-                            name: [
-                                "my",
-                                "anno",
-                            ],
-                            is_root: false,
-                        },
-                        params: Some(
-                            Params(
-                                [
-                                    AnnotationParam {
-                                        ident: "abc",
-                                        value: Some(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            Literal(
-                                                                                IntegerLiteral(
-                                                                                    DecNumber(
-                                                                                        "1",
+                decl: ConstrTypeDcl(
+                    EnumDcl(
+                        EnumDcl {
+                            annotations: [
+                                ScopedName {
+                                    name: ScopedName {
+                                        name: [
+                                            "my",
+                                            "anno",
+                                        ],
+                                        is_root: false,
+                                    },
+                                    params: Some(
+                                        Params(
+                                            [
+                                                AnnotationParam {
+                                                    ident: "abc",
+                                                    value: Some(
+                                                        ConstExpr(
+                                                            XorExpr(
+                                                                AndExpr(
+                                                                    ShiftExpr(
+                                                                        AddExpr(
+                                                                            MultExpr(
+                                                                                UnaryExpr(
+                                                                                    PrimaryExpr(
+                                                                                        Literal(
+                                                                                            IntegerLiteral(
+                                                                                                DecNumber(
+                                                                                                    "1",
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
                                                                                     ),
                                                                                 ),
                                                                             ),
@@ -135,19 +140,12 @@ Specification(
                                                             ),
                                                         ),
                                                     ),
-                                                ),
-                                            ),
+                                                },
+                                            ],
                                         ),
-                                    },
-                                ],
-                            ),
-                        ),
-                    },
-                ],
-                decl: ConstrTypeDcl(
-                    EnumDcl(
-                        EnumDcl {
-                            annotations: [],
+                                    ),
+                                },
+                            ],
                             ident: "E",
                             member: [
                                 Enumerator {
@@ -184,20 +182,19 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [
-                    Builtin {
-                        name: "id",
-                        params: Some(
-                            Raw(
-                                "2",
-                            ),
-                        ),
-                    },
-                ],
                 decl: ConstrTypeDcl(
                     BitmaskDcl(
                         BitmaskDcl {
-                            annotations: [],
+                            annotations: [
+                                Builtin {
+                                    name: "id",
+                                    params: Some(
+                                        Raw(
+                                            "2",
+                                        ),
+                                    ),
+                                },
+                            ],
                             ident: "BM",
                             value: [
                                 BitValue {
@@ -234,20 +231,19 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [
-                    Builtin {
-                        name: "id",
-                        params: Some(
-                            Raw(
-                                "3",
-                            ),
-                        ),
-                    },
-                ],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
-                            annotations: [],
+                            annotations: [
+                                Builtin {
+                                    name: "id",
+                                    params: Some(
+                                        Raw(
+                                            "3",
+                                        ),
+                                    ),
+                                },
+                            ],
                             ident: "U",
                             switch_type_spec: IntegerType(
                                 I32,
@@ -433,7 +429,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -475,7 +470,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -517,7 +511,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -589,7 +582,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -631,7 +623,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -666,7 +657,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -738,7 +728,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -773,7 +762,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -815,7 +803,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -887,7 +874,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -1094,7 +1080,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -1160,7 +1145,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -1367,7 +1351,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {

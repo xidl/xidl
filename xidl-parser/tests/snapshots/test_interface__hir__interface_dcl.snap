@@ -844,7 +844,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -886,7 +885,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -928,7 +926,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -1000,7 +997,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -1042,7 +1038,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -1084,679 +1079,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
-                decl: ConstrTypeDcl(
-                    UnionDef(
-                        UnionDef {
-                            annotations: [],
-                            ident: "A_func1_Result",
-                            switch_type_spec: IntegerType(
-                                I32,
-                            ),
-                            case: [
-                                Case {
-                                    label: [
-                                        Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "dds",
-                                                                                        "RETCODE_OK",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "A_func1_Out",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "result",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            1,
-                                        ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "A_Ex_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "A",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "a_ex",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            2,
-                                        ),
-                                    },
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                annotations: [],
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "A_func1_In",
-                            parent: [],
-                            member: [
-                                Member {
-                                    annotations: [],
-                                    ty: SimpleTypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "dds",
-                                                    "rpc",
-                                                    "UnusedMember",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "dummy",
-                                            ),
-                                        ),
-                                    ],
-                                    default: None,
-                                    field_id: Some(
-                                        1,
-                                    ),
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                annotations: [],
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "A_func1_Out",
-                            parent: [],
-                            member: [
-                                Member {
-                                    annotations: [],
-                                    ty: SimpleTypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "dds",
-                                                    "rpc",
-                                                    "UnusedMember",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "dummy",
-                                            ),
-                                        ),
-                                    ],
-                                    default: None,
-                                    field_id: Some(
-                                        1,
-                                    ),
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                annotations: [],
-                decl: ConstrTypeDcl(
-                    UnionDef(
-                        UnionDef {
-                            annotations: [],
-                            ident: "A_func1_Result",
-                            switch_type_spec: IntegerType(
-                                I32,
-                            ),
-                            case: [
-                                Case {
-                                    label: [
-                                        Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "dds",
-                                                                                        "RETCODE_OK",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "A_func1_Out",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "result",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            1,
-                                        ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "A_Ex_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "A",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "a_ex",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            2,
-                                        ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "B_Ex_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "B",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "b_ex",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            3,
-                                        ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "C_Ex_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "C",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "c_ex",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            4,
-                                        ),
-                                    },
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                annotations: [],
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "A_func1_In",
-                            parent: [],
-                            member: [
-                                Member {
-                                    annotations: [],
-                                    ty: SimpleTypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "u8",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "attr",
-                                            ),
-                                        ),
-                                    ],
-                                    default: None,
-                                    field_id: Some(
-                                        1,
-                                    ),
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                annotations: [],
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "A_func1_Out",
-                            parent: [],
-                            member: [
-                                Member {
-                                    annotations: [],
-                                    ty: SimpleTypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "u16",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "attr",
-                                            ),
-                                        ),
-                                    ],
-                                    default: None,
-                                    field_id: Some(
-                                        1,
-                                    ),
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                annotations: [],
-                decl: ConstrTypeDcl(
-                    UnionDef(
-                        UnionDef {
-                            annotations: [],
-                            ident: "A_func1_Result",
-                            switch_type_spec: IntegerType(
-                                I32,
-                            ),
-                            case: [
-                                Case {
-                                    label: [
-                                        Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "dds",
-                                                                                        "RETCODE_OK",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "A_func1_Out",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "result",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            1,
-                                        ),
-                                    },
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                annotations: [],
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "A_func1_In",
-                            parent: [],
-                            member: [
-                                Member {
-                                    annotations: [],
-                                    ty: SimpleTypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "u8",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "attr",
-                                            ),
-                                        ),
-                                    ],
-                                    default: None,
-                                    field_id: Some(
-                                        1,
-                                    ),
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                annotations: [],
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "A_func1_Out",
-                            parent: [],
-                            member: [
-                                Member {
-                                    annotations: [],
-                                    ty: SimpleTypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "u16",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "attr",
-                                            ),
-                                        ),
-                                    ],
-                                    default: None,
-                                    field_id: Some(
-                                        1,
-                                    ),
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -1881,7 +1203,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -1895,7 +1216,9 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "u8",
+                                                    "dds",
+                                                    "rpc",
+                                                    "UnusedMember",
                                                 ],
                                                 is_root: false,
                                             },
@@ -1904,7 +1227,7 @@ Specification(
                                     ident: [
                                         SimpleDeclarator(
                                             SimpleDeclarator(
-                                                "attr",
+                                                "dummy",
                                             ),
                                         ),
                                     ],
@@ -1921,7 +1244,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -1935,7 +1257,9 @@ Specification(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "u16",
+                                                    "dds",
+                                                    "rpc",
+                                                    "UnusedMember",
                                                 ],
                                                 is_root: false,
                                             },
@@ -1944,7 +1268,7 @@ Specification(
                                     ident: [
                                         SimpleDeclarator(
                                             SimpleDeclarator(
-                                                "attr",
+                                                "dummy",
                                             ),
                                         ),
                                     ],
@@ -1961,7 +1285,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -2192,7 +1515,665 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
+                            annotations: [],
+                            ident: "A_func1_In",
+                            parent: [],
+                            member: [
+                                Member {
+                                    annotations: [],
+                                    ty: SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "u8",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "attr",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
+                            annotations: [],
+                            ident: "A_func1_Out",
+                            parent: [],
+                            member: [
+                                Member {
+                                    annotations: [],
+                                    ty: SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "u16",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "attr",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    UnionDef(
+                        UnionDef {
+                            annotations: [],
+                            ident: "A_func1_Result",
+                            switch_type_spec: IntegerType(
+                                I32,
+                            ),
+                            case: [
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "dds",
+                                                                                        "RETCODE_OK",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "A_func1_Out",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "result",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            1,
+                                        ),
+                                    },
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
+                            annotations: [],
+                            ident: "A_func1_In",
+                            parent: [],
+                            member: [
+                                Member {
+                                    annotations: [],
+                                    ty: SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "u8",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "attr",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
+                            annotations: [],
+                            ident: "A_func1_Out",
+                            parent: [],
+                            member: [
+                                Member {
+                                    annotations: [],
+                                    ty: SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "u16",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "attr",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    UnionDef(
+                        UnionDef {
+                            annotations: [],
+                            ident: "A_func1_Result",
+                            switch_type_spec: IntegerType(
+                                I32,
+                            ),
+                            case: [
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "dds",
+                                                                                        "RETCODE_OK",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "A_func1_Out",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "result",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            1,
+                                        ),
+                                    },
+                                },
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "A_Ex_Hash",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "A",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "a_ex",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            2,
+                                        ),
+                                    },
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
+                            annotations: [],
+                            ident: "A_func1_In",
+                            parent: [],
+                            member: [
+                                Member {
+                                    annotations: [],
+                                    ty: SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "u8",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "attr",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
+                            annotations: [],
+                            ident: "A_func1_Out",
+                            parent: [],
+                            member: [
+                                Member {
+                                    annotations: [],
+                                    ty: SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "u16",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "attr",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    UnionDef(
+                        UnionDef {
+                            annotations: [],
+                            ident: "A_func1_Result",
+                            switch_type_spec: IntegerType(
+                                I32,
+                            ),
+                            case: [
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "dds",
+                                                                                        "RETCODE_OK",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "A_func1_Out",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "result",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            1,
+                                        ),
+                                    },
+                                },
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "A_Ex_Hash",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "A",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "a_ex",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            2,
+                                        ),
+                                    },
+                                },
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "B_Ex_Hash",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "B",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "b_ex",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            3,
+                                        ),
+                                    },
+                                },
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "C_Ex_Hash",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "C",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "c_ex",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            4,
+                                        ),
+                                    },
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -2234,7 +2215,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -2274,7 +2254,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -2346,7 +2325,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -2388,7 +2366,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -2428,7 +2405,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -2500,7 +2476,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -2542,7 +2517,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -2582,7 +2556,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -2654,7 +2627,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -2696,7 +2668,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -2736,7 +2707,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -2808,7 +2778,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -2848,7 +2817,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -2890,7 +2858,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -2962,7 +2929,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -3004,7 +2970,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -3044,7 +3009,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -3116,7 +3080,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -3156,7 +3119,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -3198,7 +3160,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -3270,7 +3231,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -3312,7 +3272,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -3352,7 +3311,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -3424,7 +3382,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -3464,7 +3421,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -3506,7 +3462,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -3578,7 +3533,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -3620,7 +3574,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -3660,7 +3613,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -3785,7 +3737,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -3825,7 +3776,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -3867,7 +3817,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -3939,7 +3888,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -3981,7 +3929,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -4021,7 +3968,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -4252,7 +4198,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -4292,7 +4237,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -4334,7 +4278,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -4459,7 +4402,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -4501,7 +4443,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -4541,7 +4482,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -4613,7 +4553,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -4653,7 +4592,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -4695,7 +4633,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -4820,7 +4757,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -5981,7 +5917,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -6047,7 +5982,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -7208,7 +7142,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -7855,7 +7788,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -7895,7 +7827,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -7930,7 +7861,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -8002,7 +7932,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -8103,7 +8032,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -8169,7 +8097,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -8270,7 +8197,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -8348,9 +8274,9 @@ Specification(
                                 [
                                     TypeDcl(
                                         TypeDcl {
-                                            annotations: [],
                                             decl: TypedefDcl(
                                                 TypedefDcl {
+                                                    annotations: [],
                                                     ty: TypeSpec(
                                                         SimpleTypeSpec(
                                                             IntegerType(

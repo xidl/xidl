@@ -6,7 +6,6 @@ Specification(
     [
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     BitmaskDcl(
                         BitmaskDcl {
@@ -20,7 +19,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     BitmaskDcl(
                         BitmaskDcl {
@@ -47,7 +45,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     BitmaskDcl(
                         BitmaskDcl {

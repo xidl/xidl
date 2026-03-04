@@ -6,7 +6,6 @@ Specification(
     [
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionForwardDcl(
                         UnionForwardDcl {
@@ -19,7 +18,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {
@@ -36,7 +34,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     UnionDef(
                         UnionDef {

@@ -6,7 +6,6 @@ Specification(
     [
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     BitsetDcl(
                         BitsetDcl {
@@ -21,7 +20,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     BitsetDcl(
                         BitsetDcl {
@@ -43,7 +41,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     BitsetDcl(
                         BitsetDcl {

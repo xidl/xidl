@@ -3,7 +3,6 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct TypeDcl {
-    pub annotations: Vec<Annotation>,
     pub decl: TypeDclInner,
 }
 
@@ -17,6 +16,7 @@ pub enum TypeDclInner {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct TypedefDcl {
+    pub annotations: Vec<Annotation>,
     pub ty: TypedefType,
     pub decl: Vec<Declarator>,
 }
@@ -29,15 +29,39 @@ pub enum TypedefType {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct NativeDcl {
+    pub annotations: Vec<Annotation>,
     pub decl: SimpleDeclarator,
 }
 
 impl From<crate::typed_ast::TypeDcl> for TypeDcl {
     fn from(value: crate::typed_ast::TypeDcl) -> Self {
-        Self {
-            annotations: expand_annotations(value.annotations),
-            decl: value.decl.into(),
-        }
+        let annotations = expand_annotations(value.annotations);
+        let decl = match value.decl {
+            crate::typed_ast::TypeDclInner::ConstrTypeDcl(constr) => {
+                let mut decl: ConstrTypeDcl = constr.into();
+                match &mut decl {
+                    ConstrTypeDcl::StructForwardDcl(value) => value.annotations.extend(annotations),
+                    ConstrTypeDcl::StructDcl(value) => value.annotations.extend(annotations),
+                    ConstrTypeDcl::EnumDcl(value) => value.annotations.extend(annotations),
+                    ConstrTypeDcl::UnionForwardDcl(value) => value.annotations.extend(annotations),
+                    ConstrTypeDcl::UnionDef(value) => value.annotations.extend(annotations),
+                    ConstrTypeDcl::BitsetDcl(value) => value.annotations.extend(annotations),
+                    ConstrTypeDcl::BitmaskDcl(value) => value.annotations.extend(annotations),
+                }
+                TypeDclInner::ConstrTypeDcl(decl)
+            }
+            crate::typed_ast::TypeDclInner::TypedefDcl(typedef) => {
+                let mut decl: TypedefDcl = typedef.into();
+                decl.annotations.extend(annotations);
+                TypeDclInner::TypedefDcl(decl)
+            }
+            crate::typed_ast::TypeDclInner::NativeDcl(native) => {
+                let mut decl: NativeDcl = native.into();
+                decl.annotations.extend(annotations);
+                TypeDclInner::NativeDcl(decl)
+            }
+        };
+        Self { decl }
     }
 }
 
@@ -82,13 +106,18 @@ impl From<crate::typed_ast::TypedefDcl> for TypedefDcl {
                 }
             })
             .collect();
-        Self { ty, decl }
+        Self {
+            annotations: vec![],
+            ty,
+            decl,
+        }
     }
 }
 
 impl From<crate::typed_ast::NativeDcl> for NativeDcl {
     fn from(value: crate::typed_ast::NativeDcl) -> Self {
         Self {
+            annotations: vec![],
             decl: value.decl.into(),
         }
     }

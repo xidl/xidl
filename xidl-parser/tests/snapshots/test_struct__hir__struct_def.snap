@@ -6,7 +6,6 @@ Specification(
     [
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -21,7 +20,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -56,7 +54,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -97,7 +94,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -119,7 +115,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -134,7 +129,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {
@@ -174,7 +168,6 @@ Specification(
         ),
         TypeDcl(
             TypeDcl {
-                annotations: [],
                 decl: ConstrTypeDcl(
                     StructDcl(
                         StructDcl {

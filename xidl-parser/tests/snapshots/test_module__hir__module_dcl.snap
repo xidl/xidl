@@ -54,7 +54,6 @@ Specification(
                     ),
                     TypeDcl(
                         TypeDcl {
-                            annotations: [],
                             decl: ConstrTypeDcl(
                                 StructForwardDcl(
                                     StructForwardDcl {

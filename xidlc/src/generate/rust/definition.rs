@@ -38,14 +38,6 @@ impl RustRender for hir::Definition {
     }
 }
 
-pub(crate) fn indent_lines(value: &str, prefix: &str) -> String {
-    value
-        .lines()
-        .map(|line| format!("{prefix}{line}"))
-        .collect::<Vec<_>>()
-        .join("\n")
-}
-
 pub(crate) fn render_module_body(
     defs: &[&hir::Definition],
     renderer: &RustRenderer,
@@ -92,7 +84,7 @@ pub(crate) fn render_module_body(
             "module.rs.j2",
             &serde_json::json!({
                 "ident": crate::generate::rust::util::rust_ident(&name),
-                "body": indent_lines(&body, "    "),
+                "body": &body,
             }),
         )?;
         out.push(rendered);
@@ -147,7 +139,7 @@ fn render_module_body_with_config(
             "module.rs.j2",
             &serde_json::json!({
                 "ident": crate::generate::rust::util::rust_ident(&name),
-                "body": indent_lines(&body, "    "),
+                "body": &body,
             }),
         )?;
         out.push(rendered);
@@ -168,7 +160,7 @@ fn render_definition_with_config(
             Ok(RustRenderOutput::default())
         }
         hir::Definition::ConstrTypeDcl(constr) => {
-            render_constr_with_config(constr, renderer, config, module_path, &[])
+            render_constr_with_config(constr, renderer, config, module_path)
         }
         hir::Definition::TypeDcl(type_dcl) => {
             render_type_dcl_with_config(type_dcl, renderer, config, module_path)
@@ -182,23 +174,20 @@ fn render_constr_with_config(
     renderer: &RustRenderer,
     config: &hir::SerializeConfig,
     module_path: &[String],
-    annotations: &[hir::Annotation],
 ) -> IdlcResult<RustRenderOutput> {
     match constr {
         hir::ConstrTypeDcl::StructDcl(def) => {
-            render_struct_with_config(def, renderer, config, module_path, annotations)
+            render_struct_with_config(def, renderer, config, module_path)
         }
         hir::ConstrTypeDcl::UnionDef(def) => {
-            render_union_with_config(def, renderer, config, module_path, annotations)
+            render_union_with_config(def, renderer, config, module_path)
         }
         hir::ConstrTypeDcl::BitsetDcl(def) => {
-            render_bitset_with_config(def, renderer, config, module_path, annotations)
+            render_bitset_with_config(def, renderer, config, module_path)
         }
-        hir::ConstrTypeDcl::EnumDcl(def) => {
-            render_enum_with_config(def, renderer, module_path, annotations)
-        }
+        hir::ConstrTypeDcl::EnumDcl(def) => render_enum_with_config(def, renderer, module_path),
         hir::ConstrTypeDcl::BitmaskDcl(def) => {
-            render_bitmask_with_config(def, renderer, module_path, annotations)
+            render_bitmask_with_config(def, renderer, module_path)
         }
         _ => constr.render(renderer),
     }
@@ -212,10 +201,10 @@ fn render_type_dcl_with_config(
 ) -> IdlcResult<RustRenderOutput> {
     match &def.decl {
         hir::TypeDclInner::ConstrTypeDcl(constr) => {
-            render_constr_with_config(constr, renderer, config, module_path, &def.annotations)
+            render_constr_with_config(constr, renderer, config, module_path)
         }
         hir::TypeDclInner::TypedefDcl(typedef) => {
-            render_typedef_with_config(typedef, renderer, module_path, &def.annotations)
+            render_typedef_with_config(typedef, renderer, module_path)
         }
         _ => def.render(renderer),
     }

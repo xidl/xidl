@@ -14,7 +14,7 @@ impl RustRender for hir::StructForwardDcl {
 
 impl RustRender for hir::StructDcl {
     fn render(&self, renderer: &RustRenderer) -> IdlcResult<RustRenderOutput> {
-        render_struct_with_config(self, renderer, &hir::SerializeConfig::default(), &[], &[])
+        render_struct_with_config(self, renderer, &hir::SerializeConfig::default(), &[])
     }
 }
 
@@ -23,7 +23,6 @@ pub(crate) fn render_struct_with_config(
     renderer: &RustRenderer,
     config: &hir::SerializeConfig,
     module_path: &[String],
-    annotations: &[hir::Annotation],
 ) -> IdlcResult<RustRenderOutput> {
     let parent = def.parent.first().map(rust_scoped_name);
     let members = def
@@ -41,7 +40,7 @@ pub(crate) fn render_struct_with_config(
     let serialize_kind = serialize_kind_name(def.serialize_kind(config));
     let derive = crate::generate::rust::util::rust_derives_from_annotations_with_extra(
         &def.annotations,
-        annotations,
+        &def.annotations,
     );
     let module_path = module_path.to_vec();
     let ctx = json!({
