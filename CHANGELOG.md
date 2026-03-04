@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/xidl/xidl/compare/v0.3.0...v0.4.0) (2026-03-04)
+
+
+### Features
+
+* **xidl-build:** add `with_` prefix for all method ([27979da](https://github.com/xidl/xidl/commit/27979dafc79d943d74cb5afdad5377827987ae7d))
+
 ## [0.3.0](https://github.com/xidl/xidl/compare/v0.2.1...v0.3.0) (2026-03-03)
 
 
