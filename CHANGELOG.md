@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.0](https://github.com/xidl/xidl/compare/v0.5.0...v0.6.0) (2026-03-04)
+
+
+### Features
+
+* **rust-axum:** add serve_with_listener ([a3bdcbc](https://github.com/xidl/xidl/commit/a3bdcbc4765394b5c962df46a8b4564972361d43))
+* **rust-axum:** make error as const ([fc5146b](https://github.com/xidl/xidl/commit/fc5146b9556a3fce5271b08e2103db3bbf5e87be))
+
 ## [0.5.0](https://github.com/xidl/xidl/compare/v0.4.0...v0.5.0) (2026-03-04)
 
 
