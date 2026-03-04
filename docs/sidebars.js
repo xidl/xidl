@@ -21,6 +21,11 @@ const sidebars = {
         },
         {
           type: 'doc',
+          id: 'http',
+          label: 'http',
+        },
+        {
+          type: 'doc',
           id: 'rust-jsonrpc',
           label: 'jsonrpc',
         },

@@ -19,4 +19,5 @@ xidlc -l rust -o out your.idl
 
 - [Plugin Development](plugin.md)
 - [xidlc / axum](rust-axum.md)
+- [xidlc / http](http.md)
 - [xidlc / jsonrpc](rust-jsonrpc.md)
