@@ -32,6 +32,21 @@ pub(super) fn get_test_cases() -> Vec<(&'static str, &'static str, serde_json::V
                 "enable_deserialize": false,
                 "enable_render_header": false
             }),
-        ), //
+        ),
+        (
+            "enum_serialize",
+            r#"
+            @derive(Serialize, Deserialize)
+            enum Tag {
+                A,
+                B,
+            };
+        "#,
+            json!({
+                "enable_serialize": false,
+                "enable_deserialize": false,
+                "enable_render_header": false
+            }),
+        ),
     ]
 }

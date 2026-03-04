@@ -194,7 +194,9 @@ fn render_constr_with_config(
         hir::ConstrTypeDcl::BitsetDcl(def) => {
             render_bitset_with_config(def, renderer, config, module_path, annotations)
         }
-        hir::ConstrTypeDcl::EnumDcl(def) => render_enum_with_config(def, renderer, module_path),
+        hir::ConstrTypeDcl::EnumDcl(def) => {
+            render_enum_with_config(def, renderer, module_path, annotations)
+        }
         hir::ConstrTypeDcl::BitmaskDcl(def) => {
             render_bitmask_with_config(def, renderer, module_path, annotations)
         }

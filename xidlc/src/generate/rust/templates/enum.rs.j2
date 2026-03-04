@@ -1,4 +1,12 @@
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq{% if has_serde_serialize %},
+    ::serde::Serialize{% endif %}{% if has_serde_deserialize %},
+    ::serde::Deserialize{% endif %}
+)]
 pub enum {{ ident }} {
     {% for member in members %}
         {{ member }}{% if not loop.last %},{% endif %}

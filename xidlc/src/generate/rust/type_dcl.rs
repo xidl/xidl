@@ -12,7 +12,12 @@ use xidl_parser::hir;
 impl RustRender for hir::TypeDcl {
     fn render(&self, renderer: &RustRenderer) -> IdlcResult<RustRenderOutput> {
         match &self.decl {
-            hir::TypeDclInner::ConstrTypeDcl(constr) => constr.render(renderer),
+            hir::TypeDclInner::ConstrTypeDcl(constr) => match constr {
+                hir::ConstrTypeDcl::EnumDcl(def) => {
+                    render_enum_with_config(def, renderer, &[], &self.annotations)
+                }
+                _ => constr.render(renderer),
+            },
             hir::TypeDclInner::TypedefDcl(typedef) => {
                 render_typedef_with_config(typedef, renderer, &[], &self.annotations)
             }
@@ -69,7 +74,7 @@ pub(crate) fn render_typedef_with_config(
                     render_union_with_config(def, renderer, &config, module_path, annotations)?
                 }
                 hir::ConstrTypeDcl::EnumDcl(def) => {
-                    render_enum_with_config(def, renderer, module_path)?
+                    render_enum_with_config(def, renderer, module_path, annotations)?
                 }
                 hir::ConstrTypeDcl::BitsetDcl(def) => {
                     render_bitset_with_config(def, renderer, &config, module_path, annotations)?

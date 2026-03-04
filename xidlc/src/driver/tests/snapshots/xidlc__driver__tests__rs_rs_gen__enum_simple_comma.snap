@@ -11,7 +11,13 @@ enum_simple_comma.rs
 #![allow(unused_variables)]
 #![allow(unreachable_patterns)]
 
-#[derive(Debug,Clone,Copy,PartialEq,Eq)]
+#[derive(
+Debug,
+Clone,
+Copy,
+PartialEq,
+Eq
+)]
 pub enum A{
     B,
     C

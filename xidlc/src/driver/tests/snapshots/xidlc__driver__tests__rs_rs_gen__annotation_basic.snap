@@ -54,7 +54,13 @@ impl xidl_xcdr::XcdrDeserialize for S{
     }
 }
 
-#[derive(Debug,Clone,Copy,PartialEq,Eq)]
+#[derive(
+Debug,
+Clone,
+Copy,
+PartialEq,
+Eq
+)]
 pub enum E{
     A,
     B
