@@ -65,6 +65,16 @@ pub fn cpp_type(ty: &hir::TypeSpec) -> String {
             hir::TemplateTypeSpec::MapType(map) => {
                 format!("std::map<{}, {}>", cpp_type(&map.key), cpp_type(&map.value))
             }
+            hir::TemplateTypeSpec::TemplateType(value) => format!(
+                "{}<{}>",
+                value.ident,
+                value
+                    .args
+                    .iter()
+                    .map(cpp_type)
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ),
         },
     }
 }

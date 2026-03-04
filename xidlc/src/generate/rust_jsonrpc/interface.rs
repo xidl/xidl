@@ -253,6 +253,16 @@ fn jsonrpc_type(ty: &hir::TypeSpec) -> String {
                     jsonrpc_type(&map.value)
                 )
             }
+            hir::TemplateTypeSpec::TemplateType(value) => format!(
+                "{}<{}>",
+                rust_ident(&value.ident),
+                value
+                    .args
+                    .iter()
+                    .map(jsonrpc_type)
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ),
         },
     }
 }

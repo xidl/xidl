@@ -42,6 +42,15 @@ pub fn idl_type_spec(ty: &TypeSpec) -> String {
                     None => format!("map<{}, {}>", key, value),
                 }
             }
+            TemplateTypeSpec::TemplateType(template) => {
+                let args = template
+                    .args
+                    .iter()
+                    .map(idl_type_spec)
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                format!("{}<{}>", template.ident, args)
+            }
         },
     }
 }

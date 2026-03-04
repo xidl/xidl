@@ -137,6 +137,7 @@ pub enum TemplateTypeSpec {
     WideStringType(WideStringType),
     FixedPtType(FixedPtType),
     MapType(MapType),
+    TemplateType(TemplateType),
 }
 
 #[derive(Debug, Parser, Serialize, Deserialize)]
@@ -150,6 +151,12 @@ pub struct MapType {
     pub key: Box<TypeSpec>,
     pub value: Box<TypeSpec>,
     pub len: Option<PositiveIntConst>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TemplateType {
+    pub ident: Identifier,
+    pub args: Vec<TypeSpec>,
 }
 
 #[derive(Debug, Parser, Serialize, Deserialize)]
@@ -227,5 +234,43 @@ impl<'a> crate::parser::FromTreeSitter<'a> for MapType {
             value: Box::new(value),
             len,
         })
+    }
+}
+
+impl<'a> crate::parser::FromTreeSitter<'a> for TemplateType {
+    fn from_node(
+        node: tree_sitter::Node<'a>,
+        ctx: &mut crate::parser::ParseContext<'a>,
+    ) -> crate::error::ParserResult<Self> {
+        assert_eq!(
+            node.kind_id(),
+            xidl_parser_derive::node_id!("template_type")
+        );
+        let mut ident = None;
+        let mut args = Vec::new();
+        for ch in node.children(&mut node.walk()) {
+            match ch.kind_id() {
+                xidl_parser_derive::node_id!("identifier") => {
+                    ident = Some(crate::parser::FromTreeSitter::from_node(ch, ctx)?);
+                }
+                xidl_parser_derive::node_id!("type_spec") => {
+                    args.push(crate::parser::FromTreeSitter::from_node(ch, ctx)?);
+                }
+                _ => {}
+            }
+        }
+        let ident = ident.ok_or_else(|| {
+            crate::error::ParseError::UnexpectedNode(format!(
+                "parent: {}, got: missing identifier",
+                node.kind()
+            ))
+        })?;
+        if args.is_empty() {
+            return Err(crate::error::ParseError::UnexpectedNode(format!(
+                "parent: {}, got: missing template arguments",
+                node.kind()
+            )));
+        }
+        Ok(Self { ident, args })
     }
 }

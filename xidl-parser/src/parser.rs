@@ -59,3 +59,50 @@ pub fn parser_text(text: &str) -> ParserResult<crate::typed_ast::Specification> 
 
     Specification::from_node(root_node, &mut context)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::parser_text;
+    use crate::typed_ast::{
+        Definition, TemplateTypeSpec, TypeDclInner, TypeDeclaratorInner, TypeSpec,
+    };
+
+    #[test]
+    fn parse_template_type_spec() {
+        let typed = parser_text(
+            r#"
+            module m {
+                typedef Vec<long> MyVec;
+            };
+            "#,
+        )
+        .expect("parse should succeed");
+
+        let module = match &typed.0[0] {
+            Definition::ModuleDcl(module) => module,
+            other => panic!("expected module, got {other:?}"),
+        };
+        let type_dcl = match &module.definition[0] {
+            Definition::TypeDcl(type_dcl) => type_dcl,
+            other => panic!("expected type declaration, got {other:?}"),
+        };
+        let typedef = match &type_dcl.decl {
+            TypeDclInner::TypedefDcl(typedef) => typedef,
+            other => panic!("expected typedef, got {other:?}"),
+        };
+        let template = match &typedef.decl.ty {
+            TypeDeclaratorInner::TemplateTypeSpec(TemplateTypeSpec::TemplateType(template)) => {
+                template
+            }
+            other => panic!("expected template_type, got {other:?}"),
+        };
+        assert_eq!(template.ident.0, "Vec");
+        assert_eq!(template.args.len(), 1);
+        assert!(matches!(
+            template.args[0],
+            TypeSpec::SimpleTypeSpec(crate::typed_ast::SimpleTypeSpec::BaseTypeSpec(
+                crate::typed_ast::BaseTypeSpec::IntegerType(_)
+            ))
+        ));
+    }
+}

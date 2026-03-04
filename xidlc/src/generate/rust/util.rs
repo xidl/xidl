@@ -97,6 +97,16 @@ pub fn rust_type(ty: &hir::TypeSpec) -> String {
                     rust_type(&map.value)
                 )
             }
+            hir::TemplateTypeSpec::TemplateType(value) => format!(
+                "{}<{}>",
+                rust_ident(&value.ident),
+                value
+                    .args
+                    .iter()
+                    .map(rust_type)
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ),
         },
     }
 }

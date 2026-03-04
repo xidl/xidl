@@ -1,0 +1,13 @@
+---
+source: xidlc/src/driver/tests/test_rust/mod.rs
+expression: output
+---
+===============
+option.rs
+===============
+pub struct A{
+    pub a:Option<String>,
+}
+
+impl A{
+}

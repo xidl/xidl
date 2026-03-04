@@ -29,6 +29,7 @@ pub enum TemplateTypeSpec {
     WideStringType(WideStringType),
     FixedPtType(FixedPtType),
     MapType(MapType),
+    TemplateType(TemplateType),
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -42,6 +43,12 @@ pub struct MapType {
     pub key: Box<TypeSpec>,
     pub value: Box<TypeSpec>,
     pub len: Option<PositiveIntConst>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct TemplateType {
+    pub ident: String,
+    pub args: Vec<TypeSpec>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -149,6 +156,9 @@ impl From<crate::typed_ast::TemplateTypeSpec> for TemplateTypeSpec {
                 Self::FixedPtType(fixed_pt_type.into())
             }
             crate::typed_ast::TemplateTypeSpec::MapType(map_type) => Self::MapType(map_type.into()),
+            crate::typed_ast::TemplateTypeSpec::TemplateType(template_type) => {
+                Self::TemplateType(template_type.into())
+            }
         }
     }
 }
@@ -168,6 +178,15 @@ impl From<crate::typed_ast::MapType> for MapType {
             key: Box::new((*value.key).into()),
             value: Box::new((*value.value).into()),
             len: value.len.map(Into::into),
+        }
+    }
+}
+
+impl From<crate::typed_ast::TemplateType> for TemplateType {
+    fn from(value: crate::typed_ast::TemplateType) -> Self {
+        Self {
+            ident: value.ident.0,
+            args: value.args.into_iter().map(Into::into).collect(),
         }
     }
 }

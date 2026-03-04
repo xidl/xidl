@@ -398,6 +398,16 @@ fn axum_type(ty: &hir::TypeSpec) -> String {
                     axum_type(&map.value)
                 )
             }
+            hir::TemplateTypeSpec::TemplateType(value) => format!(
+                "{}<{}>",
+                rust_ident(&value.ident),
+                value
+                    .args
+                    .iter()
+                    .map(axum_type)
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ),
         },
     }
 }

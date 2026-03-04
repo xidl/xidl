@@ -1206,6 +1206,9 @@ fn ts_type_for_type_spec(
                 let value = ts_type_for_type_spec(&map.value, module_path, target);
                 format!("Record<string, {value}>")
             }
+            hir::TemplateTypeSpec::TemplateType(value) => {
+                ts_template_type(value, module_path, target)
+            }
         },
     }
 }
@@ -1245,8 +1248,26 @@ fn zod_schema_for_type_spec(ty: &hir::TypeSpec, module_path: &[String]) -> Strin
                 let value = zod_schema_for_type_spec(&map.value, module_path);
                 format!("z.record({value})")
             }
+            hir::TemplateTypeSpec::TemplateType(value) => {
+                let ty = ts_template_type(value, module_path, TypeRefTarget::Types);
+                format!("z.custom<{ty}>()")
+            }
         },
     }
+}
+
+fn ts_template_type(
+    value: &hir::TemplateType,
+    module_path: &[String],
+    target: TypeRefTarget,
+) -> String {
+    let args = value
+        .args
+        .iter()
+        .map(|arg| ts_type_for_type_spec(arg, module_path, target))
+        .collect::<Vec<_>>()
+        .join(", ");
+    format!("{}<{args}>", ts_ident(&value.ident))
 }
 
 fn apply_array_ts(mut base: String, decl: &hir::Declarator) -> String {

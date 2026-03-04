@@ -549,6 +549,9 @@ fn schema_for_type(ty: &hir::TypeSpec) -> RefOr<Schema> {
                     .schema_type(Type::Object)
                     .additional_properties(Some(schema_for_type(&map.value))),
             )),
+            hir::TemplateTypeSpec::TemplateType(_) => {
+                RefOr::T(Schema::from(ObjectBuilder::new().schema_type(Type::Object)))
+            }
         },
     }
 }

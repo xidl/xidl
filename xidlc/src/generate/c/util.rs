@@ -70,6 +70,9 @@ pub fn c_type(ty: &hir::TypeSpec) -> String {
             hir::TemplateTypeSpec::WideStringType(_) => "wchar_t *".to_string(),
             hir::TemplateTypeSpec::FixedPtType(_) => "double".to_string(),
             hir::TemplateTypeSpec::MapType(_) => "void *".to_string(),
+            hir::TemplateTypeSpec::TemplateType(_) => {
+                unreachable!("template_type is rejected by C backend before rendering")
+            }
         },
     }
 }

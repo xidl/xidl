@@ -20,6 +20,18 @@ pub(super) fn get_test_cases() -> Vec<(&'static str, &'static str, serde_json::V
                 "enable_render_header": false
             }),
         ),
-        //
+        (
+            "option",
+            r#"
+            struct A {
+                Option<string> a;
+            };
+            "#,
+            json!({
+                "enable_serialize": false,
+                "enable_deserialize": false,
+                "enable_render_header": false
+            }),
+        ), //
     ]
 }
