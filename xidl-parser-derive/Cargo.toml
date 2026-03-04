@@ -18,4 +18,4 @@ darling = "0.21.0"
 proc-macro2 = "1.0"
 quote = "1.0"
 syn = { version = "2.0", features = ["full"] }
-tree-sitter-idl = "3.12.1"
+tree-sitter-idl = { workspace = true }
