@@ -18,8 +18,11 @@ macro_rules! status_codes {
         ($code:literal, $name:ident, $msg: literal);)*) => {
         $(
             $(#[$docs])*
-            pub fn $name() -> Self {
-                Self::new($code, $msg)
+            pub const fn $name() -> Self {
+                Self {
+                    code: $code,
+                    message: Cow::Borrowed($msg)
+                }
             }
         )*
     };
