@@ -413,19 +413,24 @@ fn body_schema(props: Vec<(String, RefOr<Schema>)>, required: Vec<String>) -> Op
     if props.is_empty() {
         return None;
     }
-    let mut object = ObjectBuilder::new().schema_type(Type::Object);
-    for (name, schema) in props {
-        object = object.property(name.clone(), schema);
-    }
-    for name in required {
-        object = object.required(name);
-    }
+    let schema = if props.len() == 1 {
+        let (_, schema) = props.into_iter().next()?;
+        schema
+    } else {
+        let mut object = ObjectBuilder::new().schema_type(Type::Object);
+        for (name, schema) in props {
+            object = object.property(name.clone(), schema);
+        }
+        for name in required {
+            object = object.required(name);
+        }
+        RefOr::T(Schema::from(object))
+    };
 
     let mut request_body = RequestBody::new();
-    request_body.content.insert(
-        "application/json".to_string(),
-        Content::new(Some(RefOr::T(Schema::from(object)))),
-    );
+    request_body
+        .content
+        .insert("application/json".to_string(), Content::new(Some(schema)));
     Some(request_body)
 }
 

@@ -34,15 +34,19 @@ pub trait {{ ident }} {
 
     {% endif %}
     {% if method.body_params | length > 0 %}
-        #[derive(::serde::Serialize, ::serde::Deserialize)]
-        struct {{ method.struct_prefix }}Body {
-            {% for param in method.body_params %}
-                {% if param.serde_rename is defined and param.serde_rename %}
-                    #[serde(rename = "{{ param.serde_rename }}")]
-                {% endif %}
-                {{ param.name }}: {{ param.ty }},
-            {% endfor %}
-        }
+        {% if method.body_params | length == 1 %}
+            type {{ method.struct_prefix }}Body = {{ method.body_params[0].ty }};
+        {% else %}
+            #[derive(::serde::Serialize, ::serde::Deserialize)]
+            struct {{ method.struct_prefix }}Body {
+                {% for param in method.body_params %}
+                    {% if param.serde_rename is defined and param.serde_rename %}
+                        #[serde(rename = "{{ param.serde_rename }}")]
+                    {% endif %}
+                    {{ param.name }}: {{ param.ty }},
+                {% endfor %}
+            }
+        {% endif %}
 
     {% endif %}
     {% if method.request_struct is defined and method.request_struct %}
@@ -107,11 +111,15 @@ pub trait {{ ident }} {
                     } = query;
                 {% endif %}
                 {% if method.body_params | length > 0 %}
-                    let {{ method.struct_prefix }}Body {
-                        {% for param in method.body_params %}
-                            {{ param.name }},
-                        {% endfor %}
-                    } = body;
+                    {% if method.body_params | length == 1 %}
+                        let {{ method.body_params[0].name }} = body;
+                    {% else %}
+                        let {{ method.struct_prefix }}Body {
+                            {% for param in method.body_params %}
+                                {{ param.name }},
+                            {% endfor %}
+                        } = body;
+                    {% endif %}
                 {% endif %}
                 {% if method.request_struct is defined and method.request_struct %}
                     let data = {{ method.request_struct }} {
@@ -172,11 +180,15 @@ pub trait {{ ident }} {
                     let req = req.query(&query);
                 {% endif %}
                 {% if method.body_params | length > 0 %}
-                    let body = {{ method.struct_prefix }}Body {
-                        {% for param in method.body_params %}
-                            {{ param.name }},
-                        {% endfor %}
-                    };
+                    {% if method.body_params | length == 1 %}
+                        let body = {{ method.body_params[0].name }};
+                    {% else %}
+                        let body = {{ method.struct_prefix }}Body {
+                            {% for param in method.body_params %}
+                                {{ param.name }},
+                            {% endfor %}
+                        };
+                    {% endif %}
                     let req = req.json(&body);
                 {% endif %}
                 let resp = req
