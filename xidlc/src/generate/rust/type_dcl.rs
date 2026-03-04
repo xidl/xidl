@@ -1,7 +1,5 @@
 use crate::error::IdlcResult;
-use crate::generate::rust::bitmask_dcl::render_bitmask_with_config;
 use crate::generate::rust::bitset_dcl::render_bitset_with_config;
-use crate::generate::rust::enum_dcl::render_enum_with_config;
 use crate::generate::rust::struct_dcl::render_struct_with_config;
 use crate::generate::rust::union_def::render_union_with_config;
 use crate::generate::rust::util::{rust_scoped_name, rust_type, typedef_json};
@@ -67,15 +65,11 @@ pub(crate) fn render_typedef_with_config(
                 hir::ConstrTypeDcl::UnionDef(def) => {
                     render_union_with_config(def, renderer, &config, module_path)?
                 }
-                hir::ConstrTypeDcl::EnumDcl(def) => {
-                    render_enum_with_config(def, renderer, module_path)?
-                }
+                hir::ConstrTypeDcl::EnumDcl(def) => def.render(renderer)?,
                 hir::ConstrTypeDcl::BitsetDcl(def) => {
-                    render_bitset_with_config(def, renderer, &config, module_path)?
+                    render_bitset_with_config(def, renderer, &config)?
                 }
-                hir::ConstrTypeDcl::BitmaskDcl(def) => {
-                    render_bitmask_with_config(def, renderer, module_path)?
-                }
+                hir::ConstrTypeDcl::BitmaskDcl(def) => def.render(renderer)?,
                 hir::ConstrTypeDcl::StructForwardDcl(_)
                 | hir::ConstrTypeDcl::UnionForwardDcl(_) => RustRenderOutput::default(),
             };

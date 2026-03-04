@@ -1,7 +1,5 @@
 use crate::error::IdlcResult;
-use crate::generate::rust::bitmask_dcl::render_bitmask_with_config;
 use crate::generate::rust::bitset_dcl::render_bitset_with_config;
-use crate::generate::rust::enum_dcl::render_enum_with_config;
 use crate::generate::rust::struct_dcl::render_struct_with_config;
 use crate::generate::rust::type_dcl::render_typedef_with_config;
 use crate::generate::rust::union_def::render_union_with_config;
@@ -182,13 +180,9 @@ fn render_constr_with_config(
         hir::ConstrTypeDcl::UnionDef(def) => {
             render_union_with_config(def, renderer, config, module_path)
         }
-        hir::ConstrTypeDcl::BitsetDcl(def) => {
-            render_bitset_with_config(def, renderer, config, module_path)
-        }
-        hir::ConstrTypeDcl::EnumDcl(def) => render_enum_with_config(def, renderer, module_path),
-        hir::ConstrTypeDcl::BitmaskDcl(def) => {
-            render_bitmask_with_config(def, renderer, module_path)
-        }
+        hir::ConstrTypeDcl::BitsetDcl(def) => render_bitset_with_config(def, renderer, config),
+        hir::ConstrTypeDcl::EnumDcl(def) => def.render(renderer),
+        hir::ConstrTypeDcl::BitmaskDcl(def) => def.render(renderer),
         _ => constr.render(renderer),
     }
 }

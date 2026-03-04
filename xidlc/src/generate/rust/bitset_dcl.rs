@@ -8,7 +8,7 @@ use xidl_parser::hir;
 
 impl RustRender for hir::BitsetDcl {
     fn render(&self, renderer: &RustRenderer) -> IdlcResult<RustRenderOutput> {
-        render_bitset_with_config(self, renderer, &hir::SerializeConfig::default(), &[])
+        render_bitset_with_config(self, renderer, &hir::SerializeConfig::default())
     }
 }
 
@@ -16,7 +16,6 @@ pub(crate) fn render_bitset_with_config(
     def: &hir::BitsetDcl,
     renderer: &RustRenderer,
     config: &hir::SerializeConfig,
-    module_path: &[String],
 ) -> IdlcResult<RustRenderOutput> {
     let parent = def.parent.as_ref().map(rust_scoped_name);
     let fields = def
@@ -41,14 +40,12 @@ pub(crate) fn render_bitset_with_config(
         &def.annotations,
         &def.annotations,
     );
-    let module_path = module_path.to_vec();
     let ctx = json!({
         "ident": crate::generate::rust::util::rust_ident(&def.ident),
         "parent": parent,
         "fields": fields,
         "serialize_kind": serialize_kind,
         "derive": derive,
-        "module_path": module_path,
         "typeobject_path": renderer.typeobject_path(),
     });
     let rendered = renderer.render_template("bitset.rs.j2", &ctx)?;

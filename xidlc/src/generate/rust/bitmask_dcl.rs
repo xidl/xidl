@@ -5,38 +5,28 @@ use xidl_parser::hir;
 
 impl RustRender for hir::BitmaskDcl {
     fn render(&self, renderer: &RustRenderer) -> IdlcResult<RustRenderOutput> {
-        render_bitmask_with_config(self, renderer, &[])
-    }
-}
-
-pub(crate) fn render_bitmask_with_config(
-    def: &hir::BitmaskDcl,
-    renderer: &RustRenderer,
-    module_path: &[String],
-) -> IdlcResult<RustRenderOutput> {
-    let values = def
-        .value
-        .iter()
-        .enumerate()
-        .map(|(idx, value)| {
-            json!({
-                "name": crate::generate::rust::util::rust_ident(&value.ident),
-                "index": idx,
+        let values = self
+            .value
+            .iter()
+            .enumerate()
+            .map(|(idx, value)| {
+                json!({
+                    "name": crate::generate::rust::util::rust_ident(&value.ident),
+                    "index": idx,
+                })
             })
-        })
-        .collect::<Vec<_>>();
-    let derive = crate::generate::rust::util::rust_derives_from_annotations_with_extra(
-        &def.annotations,
-        &def.annotations,
-    );
-    let module_path = module_path.to_vec();
-    let ctx = json!({
-        "ident": crate::generate::rust::util::rust_ident(&def.ident),
-        "values": values,
-        "derive": derive,
-        "module_path": module_path,
-        "typeobject_path": renderer.typeobject_path(),
-    });
-    let rendered = renderer.render_template("bitmask.rs.j2", &ctx)?;
-    Ok(RustRenderOutput::default().push_source(rendered))
+            .collect::<Vec<_>>();
+        let derive = crate::generate::rust::util::rust_derives_from_annotations_with_extra(
+            &self.annotations,
+            &self.annotations,
+        );
+        let ctx = json!({
+            "ident": crate::generate::rust::util::rust_ident(&self.ident),
+            "values": values,
+            "derive": derive,
+            "typeobject_path": renderer.typeobject_path(),
+        });
+        let rendered = renderer.render_template("bitmask.rs.j2", &ctx)?;
+        Ok(RustRenderOutput::default().push_source(rendered))
+    }
 }
