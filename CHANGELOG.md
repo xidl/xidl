@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/xidl/xidl/compare/v0.4.0...v0.5.0) (2026-03-04)
+
+
+### Features
+
+* **rust-axum:** add more error method ([63c0c15](https://github.com/xidl/xidl/commit/63c0c15afd2cc774bdbc47ab2003bb4b8f7619c6))
+
 ## [0.4.0](https://github.com/xidl/xidl/compare/v0.3.0...v0.4.0) (2026-03-04)
 
 
