@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.0](https://github.com/xidl/xidl/compare/v0.6.0...v0.7.0) (2026-03-04)
+
+
+### Features
+
+* bump tree-sitter-idl to 3.15.0 ([f2617c8](https://github.com/xidl/xidl/commit/f2617c85a197e7a7c648aa8f42f2505d05ac11f7))
+* **xidl:** support template type ([3e27c1a](https://github.com/xidl/xidl/commit/3e27c1a5d67c40135f80377866bd6115a514039e))
+
 ## [0.6.0](https://github.com/xidl/xidl/compare/v0.5.0...v0.6.0) (2026-03-04)
 
 
