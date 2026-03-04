@@ -66,12 +66,12 @@ jobs:
           if [ "${{ matrix.platform.target }}" = "x86_64-pc-windows-gnu" ] || [ "${{ matrix.platform.target }}" = "aarch64-pc-windows-gnu" ]; then
             BIN_NAME="xidlc.exe"
           fi
-          cp target/${{ matrix.platform.target }}/release/${BIN_NAME} dist/${{ matrix.platform.target }}
+          tar -cJf dist/xidlc-${{ matrix.platform.target }}.tar.xz -C target/${{ matrix.platform.target }}/release ${BIN_NAME}
       - name: Upload cli artifact
         uses: actions/upload-artifact@v4
         with:
           name: xidlc-${{ matrix.platform.target }}
-          path: dist/*
+          path: dist/*.tar.xz
 
   release:
     needs:
