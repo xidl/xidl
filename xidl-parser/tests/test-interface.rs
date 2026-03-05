@@ -11,7 +11,7 @@ const TEST_CASES: &[(&str, &str)] = &[(
             void func1();
             void func1() raises(A);
             void func1() raises(A,B,C);
-            void func1(in u8 attr, out u16 attr);
+            void func1(@key in u8 attr, out u16 attr);
             void func1(in u8 attr, out u16 attr) raises(A);
             void func1(in u8 attr, out u16 attr) raises(A,B,C);
             readonly attribute u8 attr1, attr2, attr3;

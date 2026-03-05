@@ -69,6 +69,7 @@ pub struct ParameterDcls(pub Vec<ParamDcl>);
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ParamDcl {
+    pub annotations: Vec<Annotation>,
     pub attr: Option<ParamAttribute>,
     pub ty: TypeSpec,
     pub declarator: SimpleDeclarator,
@@ -246,6 +247,7 @@ impl From<crate::typed_ast::ParameterDcls> for ParameterDcls {
 impl From<crate::typed_ast::ParamDcl> for ParamDcl {
     fn from(value: crate::typed_ast::ParamDcl) -> Self {
         Self {
+            annotations: expand_annotations(value.annotations),
             attr: value.attr.map(Into::into),
             ty: value.ty.into(),
             declarator: value.declarator.into(),

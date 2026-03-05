@@ -243,6 +243,16 @@ Specification(
                                                 ParameterDcls(
                                                     [
                                                         ParamDcl {
+                                                            annotations: [
+                                                                AnnotationAppl {
+                                                                    name: Builtin(
+                                                                        "key",
+                                                                    ),
+                                                                    params: None,
+                                                                    is_extend: false,
+                                                                    extra: [],
+                                                                },
+                                                            ],
                                                             attr: Some(
                                                                 ParamAttribute(
                                                                     "in",
@@ -266,6 +276,7 @@ Specification(
                                                             ),
                                                         },
                                                         ParamDcl {
+                                                            annotations: [],
                                                             attr: Some(
                                                                 ParamAttribute(
                                                                     "out",
@@ -305,6 +316,7 @@ Specification(
                                                 ParameterDcls(
                                                     [
                                                         ParamDcl {
+                                                            annotations: [],
                                                             attr: Some(
                                                                 ParamAttribute(
                                                                     "in",
@@ -328,6 +340,7 @@ Specification(
                                                             ),
                                                         },
                                                         ParamDcl {
+                                                            annotations: [],
                                                             attr: Some(
                                                                 ParamAttribute(
                                                                     "out",
@@ -379,6 +392,7 @@ Specification(
                                                 ParameterDcls(
                                                     [
                                                         ParamDcl {
+                                                            annotations: [],
                                                             attr: Some(
                                                                 ParamAttribute(
                                                                     "in",
@@ -402,6 +416,7 @@ Specification(
                                                             ),
                                                         },
                                                         ParamDcl {
+                                                            annotations: [],
                                                             attr: Some(
                                                                 ParamAttribute(
                                                                     "out",
@@ -884,6 +899,7 @@ Specification(
                                                 ParameterDcls(
                                                     [
                                                         ParamDcl {
+                                                            annotations: [],
                                                             attr: Some(
                                                                 ParamAttribute(
                                                                     "in",

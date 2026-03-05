@@ -1866,6 +1866,7 @@ Specification(
                                                 ParameterDcls(
                                                     [
                                                         ParamDcl {
+                                                            annotations: [],
                                                             attr: Some(
                                                                 ParamAttribute(
                                                                     "in",
@@ -2534,6 +2535,7 @@ Specification(
                                                 ParameterDcls(
                                                     [
                                                         ParamDcl {
+                                                            annotations: [],
                                                             attr: Some(
                                                                 ParamAttribute(
                                                                     "in",
@@ -3126,6 +3128,7 @@ Specification(
                                                 ParameterDcls(
                                                     [
                                                         ParamDcl {
+                                                            annotations: [],
                                                             attr: Some(
                                                                 ParamAttribute(
                                                                     "in",
@@ -3775,6 +3778,7 @@ Specification(
                                                 ParameterDcls(
                                                     [
                                                         ParamDcl {
+                                                            annotations: [],
                                                             attr: Some(
                                                                 ParamAttribute(
                                                                     "in",
@@ -4419,6 +4423,7 @@ Specification(
                                                 ParameterDcls(
                                                     [
                                                         ParamDcl {
+                                                            annotations: [],
                                                             attr: Some(
                                                                 ParamAttribute(
                                                                     "in",

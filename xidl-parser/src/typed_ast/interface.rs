@@ -190,11 +190,59 @@ impl<'a> crate::parser::FromTreeSitter<'a> for OpTypeSpec {
 #[derive(Debug, Parser, Serialize, Deserialize)]
 pub struct ParameterDcls(pub Vec<ParamDcl>);
 
-#[derive(Debug, Parser, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ParamDcl {
+    pub annotations: Vec<AnnotationAppl>,
     pub attr: Option<ParamAttribute>,
     pub ty: TypeSpec,
     pub declarator: SimpleDeclarator,
+}
+
+impl<'a> crate::parser::FromTreeSitter<'a> for ParamDcl {
+    fn from_node(
+        node: tree_sitter::Node<'a>,
+        ctx: &mut crate::parser::ParseContext<'a>,
+    ) -> crate::error::ParserResult<Self> {
+        assert_eq!(node.kind_id(), xidl_parser_derive::node_id!("param_dcl"));
+        let mut annotations = Vec::new();
+        let mut attr = None;
+        let mut ty = None;
+        let mut declarator = None;
+        for ch in node.children(&mut node.walk()) {
+            match ch.kind_id() {
+                xidl_parser_derive::node_id!("annotation_appl")
+                | xidl_parser_derive::node_id!("extend_annotation_appl") => {
+                    annotations.push(AnnotationAppl::from_node(ch, ctx)?);
+                }
+                xidl_parser_derive::node_id!("param_attribute") => {
+                    attr = Some(ParamAttribute::from_node(ch, ctx)?);
+                }
+                xidl_parser_derive::node_id!("type_spec") => {
+                    ty = Some(TypeSpec::from_node(ch, ctx)?);
+                }
+                xidl_parser_derive::node_id!("simple_declarator") => {
+                    declarator = Some(SimpleDeclarator::from_node(ch, ctx)?);
+                }
+                _ => {}
+            }
+        }
+        Ok(Self {
+            annotations,
+            attr,
+            ty: ty.ok_or_else(|| {
+                crate::error::ParseError::UnexpectedNode(format!(
+                    "parent: {}, got: missing type spec",
+                    node.kind()
+                ))
+            })?,
+            declarator: declarator.ok_or_else(|| {
+                crate::error::ParseError::UnexpectedNode(format!(
+                    "parent: {}, got: missing simple declarator",
+                    node.kind()
+                ))
+            })?,
+        })
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
