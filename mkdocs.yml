@@ -2,11 +2,12 @@ site_name: XIDL
 
 nav:
   - Home: index.md
-  - Plugin Development: plugin.md
-  - xidlc:
+  - RFC:
+      - HTTP: rfc/http.md
+  - XIDLC:
       - axum: rust-axum.md
-      - http: http.md
       - rust-jsonrpc: rust-jsonrpc.md
+  - Plugin Development: plugin.md
 
 theme:
   name: material
