@@ -16,10 +16,19 @@ interface HttpAnnoService {
         uint32 age
     );
 
+    string get_name(
+        @query string name
+    );
+
     @get
     string search_user(
         @query string keyword,
         uint32 page
+    );
+
+    string get_user_alias(
+        @path("id") uint32 user_id,
+        @query("lang") string locale
     );
 
     long add(

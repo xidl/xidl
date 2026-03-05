@@ -200,7 +200,7 @@ export class HttpAnnoServiceClient{
             "name" : name, "age" : age
         }
         );
-        let path = "/HttpAnnoService/create_user";
+        let path = "/create_user";
         const body = {
             "name" : parsed["name"], "age" : parsed["age"],
         };
@@ -229,6 +229,55 @@ export class HttpAnnoServiceClient{
         return data as string;
     }
 
+    async get_name(
+    name : string
+    ) : Promise<
+    string
+    >{
+        const parsed = zodSchemas.HttpAnnoServiceGetNameRequestSchema.parse(
+        {
+            "name" : name
+        }
+        );
+        let path = "/get_name";
+        const query = new URLSearchParams(
+
+        );
+        query.set(
+        "name", encodeQueryValue(
+        parsed["name"]
+        )
+        );
+        const queryString = query.toString(
+
+        );
+        if(queryString.length>0){
+            path = `${path}?${queryString}`;
+        }
+
+        const headers = {
+            ...this.defaultHeaders
+        };
+        const options = {
+            method : "POST", headers
+        };
+        const url = joinUrl(
+        this.baseUrl, path
+        );
+        const resp = await this.fetchImpl(
+        url, options
+        );
+        if(!resp.ok){
+            throw await parseXidlError(
+            resp
+            );
+        }
+        const data = await resp.json(
+
+        );
+        return data as string;
+    }
+
     async search_user(
     keyword : string, page : number
     ) : Promise<
@@ -239,7 +288,7 @@ export class HttpAnnoServiceClient{
             "keyword" : keyword, "page" : page
         }
         );
-        let path = "/HttpAnnoService/search_user";
+        let path = "/search_user";
         const query = new URLSearchParams(
 
         );
@@ -283,6 +332,60 @@ export class HttpAnnoServiceClient{
         return data as string;
     }
 
+    async get_user_alias(
+    user_id : number, locale : string
+    ) : Promise<
+    string
+    >{
+        const parsed = zodSchemas.HttpAnnoServiceGetUserAliasRequestSchema.parse(
+        {
+            "user_id" : user_id, "locale" : locale
+        }
+        );
+        let path = "/get_user_alias/{id}";
+        path = path.replace(
+        "{"+"id"+"}", encodePathSegment(
+        parsed["user_id"]
+        )
+        );
+        const query = new URLSearchParams(
+
+        );
+        query.set(
+        "lang", encodeQueryValue(
+        parsed["locale"]
+        )
+        );
+        const queryString = query.toString(
+
+        );
+        if(queryString.length>0){
+            path = `${path}?${queryString}`;
+        }
+
+        const headers = {
+            ...this.defaultHeaders
+        };
+        const options = {
+            method : "POST", headers
+        };
+        const url = joinUrl(
+        this.baseUrl, path
+        );
+        const resp = await this.fetchImpl(
+        url, options
+        );
+        if(!resp.ok){
+            throw await parseXidlError(
+            resp
+            );
+        }
+        const data = await resp.json(
+
+        );
+        return data as string;
+    }
+
     async add(
     a : number, b : number
     ) : Promise<
@@ -293,7 +396,7 @@ export class HttpAnnoServiceClient{
             "a" : a, "b" : b
         }
         );
-        let path = "/HttpAnnoService/add";
+        let path = "/add";
         const body = {
             "a" : parsed["a"], "b" : parsed["b"],
         };
@@ -332,7 +435,7 @@ export class HttpAnnoServiceClient{
             "value" : value
         }
         );
-        let path = "/HttpAnnoService/bump";
+        let path = "/bump";
         const body = parsed["value"];
         const headers = {
             ...this.defaultHeaders, "Content-Type" : "application/json"
@@ -364,7 +467,7 @@ export class HttpAnnoServiceClient{
     ) : Promise<
     void
     >{
-        let path = "/HttpAnnoService/ping";
+        let path = "/ping";
         const headers = {
             ...this.defaultHeaders
         };
@@ -405,9 +508,18 @@ export interface HttpAnnoServiceCreateUserRequest{
     age : number;
 }
 
+export interface HttpAnnoServiceGetNameRequest{
+    name : string;
+}
+
 export interface HttpAnnoServiceSearchUserRequest{
     keyword : string;
     page : number;
+}
+
+export interface HttpAnnoServiceGetUserAliasRequest{
+    user_id : number;
+    locale : string;
 }
 
 export interface HttpAnnoServiceAddRequest{
@@ -466,6 +578,16 @@ export const HttpAnnoServiceCreateUserRequestSchema = z.object(
 export type HttpAnnoServiceCreateUserRequest = z.infer<
 typeof HttpAnnoServiceCreateUserRequestSchema
 >;
+export const HttpAnnoServiceGetNameRequestSchema = z.object(
+{
+    name : z.string(
+
+    ),
+}
+);
+export type HttpAnnoServiceGetNameRequest = z.infer<
+typeof HttpAnnoServiceGetNameRequestSchema
+>;
 export const HttpAnnoServiceSearchUserRequestSchema = z.object(
 {
     keyword : z.string(
@@ -481,6 +603,22 @@ export const HttpAnnoServiceSearchUserRequestSchema = z.object(
 );
 export type HttpAnnoServiceSearchUserRequest = z.infer<
 typeof HttpAnnoServiceSearchUserRequestSchema
+>;
+export const HttpAnnoServiceGetUserAliasRequestSchema = z.object(
+{
+    user_id : z.number(
+
+    ).int(
+
+    ).nonnegative(
+
+    ), locale : z.string(
+
+    ),
+}
+);
+export type HttpAnnoServiceGetUserAliasRequest = z.infer<
+typeof HttpAnnoServiceGetUserAliasRequestSchema
 >;
 export const HttpAnnoServiceAddRequestSchema = z.object(
 {
@@ -555,9 +693,17 @@ pub trait HttpAnnoService{
     &self,
     req:xidl_rust_axum::Request<HttpAnnoServiceCreateUserRequest>
     )->Result<String,xidl_rust_axum::Error>;
+    async fn get_name(
+    &self,
+    req:xidl_rust_axum::Request<HttpAnnoServiceGetNameRequest>
+    )->Result<String,xidl_rust_axum::Error>;
     async fn search_user(
     &self,
     req:xidl_rust_axum::Request<HttpAnnoServiceSearchUserRequest>
+    )->Result<String,xidl_rust_axum::Error>;
+    async fn get_user_alias(
+    &self,
+    req:xidl_rust_axum::Request<HttpAnnoServiceGetUserAliasRequest>
     )->Result<String,xidl_rust_axum::Error>;
     async fn add(
     &self,
@@ -602,6 +748,16 @@ pub struct HttpAnnoServiceCreateUserRequest{
 }
 
 #[derive(::serde::Serialize,::serde::Deserialize)]
+struct HttpAnnoServiceGetNameQuery{
+    name:String,
+}
+
+#[derive(::serde::Serialize,::serde::Deserialize)]
+pub struct HttpAnnoServiceGetNameRequest{
+    pub name:String,
+}
+
+#[derive(::serde::Serialize,::serde::Deserialize)]
 struct HttpAnnoServiceSearchUserQuery{
     keyword:String,
     page:u32,
@@ -611,6 +767,26 @@ struct HttpAnnoServiceSearchUserQuery{
 pub struct HttpAnnoServiceSearchUserRequest{
     pub keyword:String,
     pub page:u32,
+}
+
+#[derive(::serde::Serialize,::serde::Deserialize)]
+struct HttpAnnoServiceGetUserAliasPath{
+    #[serde(rename = "id")]
+
+    user_id:u32,
+}
+
+#[derive(::serde::Serialize,::serde::Deserialize)]
+struct HttpAnnoServiceGetUserAliasQuery{
+    #[serde(rename = "lang")]
+
+    locale:String,
+}
+
+#[derive(::serde::Serialize,::serde::Deserialize)]
+pub struct HttpAnnoServiceGetUserAliasRequest{
+    pub user_id:u32,
+    pub locale:String,
 }
 
 #[derive(::serde::Serialize,::serde::Deserialize)]
@@ -672,15 +848,19 @@ T:HttpAnnoService+Send+Sync+'static,
 
         .route("/u/{id}",xidl_rust_axum::axum::routing::get(Self::get_user))
 
-        .route("/HttpAnnoService/create_user",xidl_rust_axum::axum::routing::post(Self::create_user))
+        .route("/create_user",xidl_rust_axum::axum::routing::post(Self::create_user))
 
-        .route("/HttpAnnoService/search_user",xidl_rust_axum::axum::routing::get(Self::search_user))
+        .route("/get_name",xidl_rust_axum::axum::routing::post(Self::get_name))
 
-        .route("/HttpAnnoService/add",xidl_rust_axum::axum::routing::post(Self::add))
+        .route("/search_user",xidl_rust_axum::axum::routing::get(Self::search_user))
 
-        .route("/HttpAnnoService/bump",xidl_rust_axum::axum::routing::post(Self::bump))
+        .route("/get_user_alias/{id}",xidl_rust_axum::axum::routing::post(Self::get_user_alias))
 
-        .route("/HttpAnnoService/ping",xidl_rust_axum::axum::routing::post(Self::ping))
+        .route("/add",xidl_rust_axum::axum::routing::post(Self::add))
+
+        .route("/bump",xidl_rust_axum::axum::routing::post(Self::bump))
+
+        .route("/ping",xidl_rust_axum::axum::routing::post(Self::ping))
 
         .with_state(svc)
     }
@@ -731,6 +911,24 @@ T:HttpAnnoService+Send+Sync+'static,
         Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
     }
 
+    async fn get_name(
+    ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+    headers: ::xidl_rust_axum::axum::http::HeaderMap,
+    xidl_rust_axum::axum::extract::Query(query):xidl_rust_axum::axum::extract::Query<HttpAnnoServiceGetNameQuery>
+    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        let HttpAnnoServiceGetNameQuery{
+
+        name,
+
+        } = query;
+        let data = HttpAnnoServiceGetNameRequest{
+            name,
+        };
+        let req = ::xidl_rust_axum::Request::new(headers,data);
+        let resp = svc.get_name(req).await?;
+        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+    }
+
     async fn search_user(
     ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
     headers: ::xidl_rust_axum::axum::http::HeaderMap,
@@ -749,6 +947,31 @@ T:HttpAnnoService+Send+Sync+'static,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
         let resp = svc.search_user(req).await?;
+        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+    }
+
+    async fn get_user_alias(
+    ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+    headers: ::xidl_rust_axum::axum::http::HeaderMap,
+    ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<HttpAnnoServiceGetUserAliasPath>,
+    xidl_rust_axum::axum::extract::Query(query):xidl_rust_axum::axum::extract::Query<HttpAnnoServiceGetUserAliasQuery>
+    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        let HttpAnnoServiceGetUserAliasPath{
+
+        user_id,
+
+        } = path;
+        let HttpAnnoServiceGetUserAliasQuery{
+
+        locale,
+
+        } = query;
+        let data = HttpAnnoServiceGetUserAliasRequest{
+            user_id,
+            locale,
+        };
+        let req = ::xidl_rust_axum::Request::new(headers,data);
+        let resp = svc.get_user_alias(req).await?;
         Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
     }
 
@@ -854,7 +1077,7 @@ impl HttpAnnoServiceClient{
     }
 
     pub async fn create_user(&self,name:String,age:u32)->Result<String,xidl_rust_axum::Error>{
-        let path = "/HttpAnnoService/create_user".to_string();
+        let path = "/create_user".to_string();
         let url = self.client.url(&path);
         let req = self
         .client
@@ -885,8 +1108,39 @@ impl HttpAnnoServiceClient{
         }
     }
 
+    pub async fn get_name(&self,name:String)->Result<String,xidl_rust_axum::Error>{
+        let path = "/get_name".to_string();
+        let url = self.client.url(&path);
+        let req = self
+        .client
+        .http()
+        .request(xidl_rust_axum::reqwest::Method::POST,url);
+        let query = HttpAnnoServiceGetNameQuery{
+            name,
+        };
+        let req = req.query(&query);
+        let resp = req
+        .send()
+        .await
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        if resp.status().is_success(){
+            resp.json::<String>()
+            .await
+            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+        }else{
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            let err = match body{
+                Some(body) => xidl_rust_axum::Error::new(body.code,body.msg),
+                None => xidl_rust_axum::Error::new(500,format!("http error: {}",status.as_u16())),
+
+            };
+            Err(err)
+        }
+    }
+
     pub async fn search_user(&self,keyword:String,page:u32)->Result<String,xidl_rust_axum::Error>{
-        let path = "/HttpAnnoService/search_user".to_string();
+        let path = "/search_user".to_string();
         let url = self.client.url(&path);
         let req = self
         .client
@@ -917,8 +1171,40 @@ impl HttpAnnoServiceClient{
         }
     }
 
+    pub async fn get_user_alias(&self,user_id:u32,locale:String)->Result<String,xidl_rust_axum::Error>{
+        let path = "/get_user_alias/{id}".to_string();
+        let path = path.replace("{{id}}",&user_id.to_string());
+        let url = self.client.url(&path);
+        let req = self
+        .client
+        .http()
+        .request(xidl_rust_axum::reqwest::Method::POST,url);
+        let query = HttpAnnoServiceGetUserAliasQuery{
+            locale,
+        };
+        let req = req.query(&query);
+        let resp = req
+        .send()
+        .await
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        if resp.status().is_success(){
+            resp.json::<String>()
+            .await
+            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+        }else{
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            let err = match body{
+                Some(body) => xidl_rust_axum::Error::new(body.code,body.msg),
+                None => xidl_rust_axum::Error::new(500,format!("http error: {}",status.as_u16())),
+
+            };
+            Err(err)
+        }
+    }
+
     pub async fn add(&self,a:i32,b:i32)->Result<HttpAnnoServiceAddResponse,xidl_rust_axum::Error>{
-        let path = "/HttpAnnoService/add".to_string();
+        let path = "/add".to_string();
         let url = self.client.url(&path);
         let req = self
         .client
@@ -950,7 +1236,7 @@ impl HttpAnnoServiceClient{
     }
 
     pub async fn bump(&self,value:i32)->Result<HttpAnnoServiceBumpResponse,xidl_rust_axum::Error>{
-        let path = "/HttpAnnoService/bump".to_string();
+        let path = "/bump".to_string();
         let url = self.client.url(&path);
         let req = self
         .client
@@ -979,7 +1265,7 @@ impl HttpAnnoServiceClient{
     }
 
     pub async fn ping(&self)->Result<(),xidl_rust_axum::Error>{
-        let path = "/HttpAnnoService/ping".to_string();
+        let path = "/ping".to_string();
         let url = self.client.url(&path);
         let req = self
         .client
@@ -1137,6 +1423,92 @@ openapi.json
                   },
                   "name": {
                     "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/HttpAnnoService/get_name": {
+      "post": {
+        "operationId": "HttpAnnoService.get_name",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/HttpAnnoService/get_user_alias": {
+      "post": {
+        "operationId": "HttpAnnoService.get_user_alias",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "user_id",
+                  "locale"
+                ],
+                "properties": {
+                  "locale": {
+                    "type": "string"
+                  },
+                  "user_id": {
+                    "type": "integer",
+                    "format": "int32",
+                    "minimum": 0
                   }
                 }
               }

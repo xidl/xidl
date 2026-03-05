@@ -61,6 +61,7 @@ struct MethodContext {
 struct ParamContext {
     name: String,
     raw_name: String,
+    wire_name: String,
     ty: String,
     source: String,
     serde_rename: Option<String>,
@@ -126,7 +127,7 @@ fn render_interface_def(
 fn render_op(
     op: &hir::OpDcl,
     interface_name: &str,
-    module_path: &[String],
+    _module_path: &[String],
 ) -> IdlcResult<MethodContext> {
     let ret = match &op.ty {
         hir::OpTypeSpec::Void => "()".to_string(),
@@ -146,12 +147,14 @@ fn render_op(
     let mut request_params = Vec::new();
     let mut response_params = Vec::new();
 
-    let default_route = default_path(module_path, interface_name, &op.ident);
-    let (method, paths) = route_from_annotations(&op.annotations, HttpMethod::Post, default_route)?;
+    let (method, mut paths) = route_from_annotations(&op.annotations, HttpMethod::Post)?;
+    if paths.is_empty() {
+        paths.push(auto_default_method_path(op, method)?);
+    }
     let path = paths
         .first()
         .cloned()
-        .unwrap_or_else(|| default_path(module_path, interface_name, &op.ident));
+        .unwrap_or_else(|| format!("/{}", op.ident));
     let all_path_param_names: HashSet<String> = paths
         .iter()
         .flat_map(|item| parse_path_params(item).into_iter())
@@ -160,17 +163,18 @@ fn render_op(
 
     for param in params {
         let direction = param_direction(param.attr.as_ref());
-        let explicit_source = explicit_param_source(param)?;
         if matches!(direction, ParamDirection::Out) {
             continue;
         }
-        if matches!(explicit_source, Some(ParamSource::Path))
-            && !all_path_param_names.contains(&param.declarator.0)
-        {
-            return Err(IdlcError::rpc(format!(
-                "parameter '{}' is annotated with @path but not present in any route template of method '{}'",
-                param.declarator.0, op.ident
-            )));
+        if let Some(binding) = explicit_param_binding(param)? {
+            if matches!(binding.source, ParamSource::Path)
+                && !all_path_param_names.contains(&binding.bound_name)
+            {
+                return Err(IdlcError::rpc(format!(
+                    "parameter '{}' is annotated with @path but '{}' is not present in any route template of method '{}'",
+                    param.declarator.0, binding.bound_name, op.ident
+                )));
+            }
         }
     }
 
@@ -182,6 +186,7 @@ fn render_op(
             response_params.push(ParamContext {
                 name: name.clone(),
                 raw_name: param.declarator.0.clone(),
+                wire_name: param.declarator.0.clone(),
                 ty: ty.clone(),
                 source: String::new(),
                 serde_rename: serde_rename(&param.declarator.0, &name),
@@ -192,17 +197,26 @@ fn render_op(
         }
         param_list.push(format!("{name}: {ty}"));
         param_names.push(name.clone());
-        let source = match explicit_param_source(param)? {
-            Some(value) => value,
-            None if all_path_param_names.contains(&param.declarator.0) => ParamSource::Path,
-            None => default_source,
+        let binding = explicit_param_binding(param)?;
+        let (source, wire_name) = match binding {
+            Some(binding) => (binding.source, binding.bound_name),
+            None if all_path_param_names.contains(&param.declarator.0) => {
+                (ParamSource::Path, param.declarator.0.clone())
+            }
+            None => (default_source, param.declarator.0.clone()),
+        };
+        let serde_name = if matches!(source, ParamSource::Body) {
+            param.declarator.0.clone()
+        } else {
+            wire_name.clone()
         };
         let ctx = ParamContext {
             name: name.clone(),
             raw_name: param.declarator.0.clone(),
+            wire_name,
             ty,
             source: param_source_code(source),
-            serde_rename: serde_rename(&param.declarator.0, &name),
+            serde_rename: serde_rename(&serde_name, &name),
         };
         request_params.push(ctx.clone());
         match source {
@@ -342,6 +356,7 @@ fn render_attr(
                         let request_param = ParamContext {
                             name: "value".to_string(),
                             raw_name: "value".to_string(),
+                            wire_name: "value".to_string(),
                             ty: param.clone(),
                             source: param_source_code(ParamSource::Body),
                             serde_rename: None,
@@ -413,6 +428,7 @@ fn render_attr(
                     let request_param = ParamContext {
                         name: "value".to_string(),
                         raw_name: "value".to_string(),
+                        wire_name: "value".to_string(),
                         ty: param.clone(),
                         source: param_source_code(ParamSource::Body),
                         serde_rename: None,
@@ -577,7 +593,6 @@ fn default_path(module_path: &[String], interface_name: &str, method_name: &str)
 fn route_from_annotations(
     annotations: &[hir::Annotation],
     default_method: HttpMethod,
-    default_path: String,
 ) -> IdlcResult<(HttpMethod, Vec<String>)> {
     let mut verb_method = None;
     let mut paths = Vec::new();
@@ -614,9 +629,6 @@ fn route_from_annotations(
         }
     }
 
-    if paths.is_empty() {
-        paths.push(normalize_path(&default_path));
-    }
     let mut dedup = HashSet::new();
     paths.retain(|path| dedup.insert(path.clone()));
     Ok((verb_method.unwrap_or(default_method), paths))
@@ -652,7 +664,12 @@ fn annotation_params(annotation: &hir::Annotation) -> Option<&hir::AnnotationPar
     }
 }
 
-fn explicit_param_source(param: &hir::ParamDcl) -> IdlcResult<Option<ParamSource>> {
+struct SourceBinding {
+    source: ParamSource,
+    bound_name: String,
+}
+
+fn explicit_param_binding(param: &hir::ParamDcl) -> IdlcResult<Option<SourceBinding>> {
     let mut found = None;
     for annotation in &param.annotations {
         let Some(name) = annotation_name(annotation) else {
@@ -668,9 +685,18 @@ fn explicit_param_source(param: &hir::ParamDcl) -> IdlcResult<Option<ParamSource
         let Some(current) = current else {
             continue;
         };
+        let bound_name = annotation_params(annotation)
+            .map(normalize_params)
+            .and_then(|params| params.get("value").cloned())
+            .unwrap_or_else(|| param.declarator.0.clone());
         match found {
-            None => found = Some(current),
-            Some(prev) if prev == current => {}
+            None => {
+                found = Some(SourceBinding {
+                    source: current,
+                    bound_name,
+                })
+            }
+            Some(ref prev) if prev.source == current && prev.bound_name == bound_name => {}
             Some(_) => {
                 return Err(IdlcError::rpc(format!(
                     "parameter '{}' has conflicting source annotations (@path/@query)",
@@ -680,6 +706,33 @@ fn explicit_param_source(param: &hir::ParamDcl) -> IdlcResult<Option<ParamSource
         }
     }
     Ok(found)
+}
+
+fn auto_default_method_path(op: &hir::OpDcl, method: HttpMethod) -> IdlcResult<String> {
+    let params = op
+        .parameter
+        .as_ref()
+        .map(|value| value.0.as_slice())
+        .unwrap_or(&[]);
+    let default_source = default_param_source(method);
+    let mut path = normalize_path(&op.ident);
+    for param in params {
+        if matches!(param_direction(param.attr.as_ref()), ParamDirection::Out) {
+            continue;
+        }
+        let binding = explicit_param_binding(param)?;
+        let (source, bound_name) = match binding {
+            Some(binding) => (binding.source, binding.bound_name),
+            None => (default_source, param.declarator.0.clone()),
+        };
+        if matches!(source, ParamSource::Path) {
+            path.push('/');
+            path.push('{');
+            path.push_str(&bound_name);
+            path.push('}');
+        }
+    }
+    Ok(path)
 }
 
 fn normalize_params(params: &hir::AnnotationParams) -> HashMap<String, String> {
