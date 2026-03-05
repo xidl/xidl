@@ -284,18 +284,18 @@ export class HttpAnnoServiceClient{
     }
 
     async add(
-    a : number, b : number, sum : number
+    a : number, b : number
     ) : Promise<
-    number
+    HttpAnnoServiceAddResponse
     >{
         const parsed = zodSchemas.HttpAnnoServiceAddRequestSchema.parse(
         {
-            "a" : a, "b" : b, "sum" : sum
+            "a" : a, "b" : b
         }
         );
         let path = "/HttpAnnoService/add";
         const body = {
-            "a" : parsed["a"], "b" : parsed["b"], "sum" : parsed["sum"],
+            "a" : parsed["a"], "b" : parsed["b"],
         };
         const headers = {
             ...this.defaultHeaders, "Content-Type" : "application/json"
@@ -319,13 +319,13 @@ export class HttpAnnoServiceClient{
         const data = await resp.json(
 
         );
-        return data as number;
+        return data as HttpAnnoServiceAddResponse;
     }
 
     async bump(
     value : number
     ) : Promise<
-    number
+    HttpAnnoServiceBumpResponse
     >{
         const parsed = zodSchemas.HttpAnnoServiceBumpRequestSchema.parse(
         {
@@ -333,9 +333,7 @@ export class HttpAnnoServiceClient{
         }
         );
         let path = "/HttpAnnoService/bump";
-        const body = {
-            "value" : parsed["value"],
-        };
+        const body = parsed["value"];
         const headers = {
             ...this.defaultHeaders, "Content-Type" : "application/json"
         };
@@ -358,7 +356,7 @@ export class HttpAnnoServiceClient{
         const data = await resp.json(
 
         );
-        return data as number;
+        return data as HttpAnnoServiceBumpResponse;
     }
 
     async ping(
@@ -415,10 +413,19 @@ export interface HttpAnnoServiceSearchUserRequest{
 export interface HttpAnnoServiceAddRequest{
     a : number;
     b : number;
+}
+
+export interface HttpAnnoServiceAddResponse{
+    "return" : number;
     sum : number;
 }
 
 export interface HttpAnnoServiceBumpRequest{
+    value : number;
+}
+
+export interface HttpAnnoServiceBumpResponse{
+    "return" : number;
     value : number;
 }
 ===============
@@ -485,6 +492,18 @@ export const HttpAnnoServiceAddRequestSchema = z.object(
 
     ).int(
 
+    ),
+}
+);
+export type HttpAnnoServiceAddRequest = z.infer<
+typeof HttpAnnoServiceAddRequestSchema
+>;
+export const HttpAnnoServiceAddResponseSchema = z.object(
+{
+    "return" : z.number(
+
+    ).int(
+
     ), sum : z.number(
 
     ).int(
@@ -492,8 +511,8 @@ export const HttpAnnoServiceAddRequestSchema = z.object(
     ),
 }
 );
-export type HttpAnnoServiceAddRequest = z.infer<
-typeof HttpAnnoServiceAddRequestSchema
+export type HttpAnnoServiceAddResponse = z.infer<
+typeof HttpAnnoServiceAddResponseSchema
 >;
 export const HttpAnnoServiceBumpRequestSchema = z.object(
 {
@@ -506,6 +525,22 @@ export const HttpAnnoServiceBumpRequestSchema = z.object(
 );
 export type HttpAnnoServiceBumpRequest = z.infer<
 typeof HttpAnnoServiceBumpRequestSchema
+>;
+export const HttpAnnoServiceBumpResponseSchema = z.object(
+{
+    "return" : z.number(
+
+    ).int(
+
+    ), value : z.number(
+
+    ).int(
+
+    ),
+}
+);
+export type HttpAnnoServiceBumpResponse = z.infer<
+typeof HttpAnnoServiceBumpResponseSchema
 >;
 ===============
 http_annotations.rs

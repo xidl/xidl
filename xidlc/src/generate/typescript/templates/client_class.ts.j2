@@ -21,9 +21,13 @@ export class {{ client_name }} {
             path = `${path}?${queryString}`;
         }
         {% endif %}{% if method.body_params | length > 0 %}
-        const body = {
-            {% for param in method.body_params %}            "{{ param.raw_name }}": {{ param.access }},
-            {% endfor %}        };
+        {% if method.body_params | length == 1 %}
+        const body = {{ method.body_single.access }};
+        {% else %}
+            const body = {
+                {% for param in method.body_params %}            "{{ param.raw_name }}": {{ param.access }},
+                {% endfor %}        };
+        {% endif %}
         {% endif %}{% if method.body_params | length > 0 %}
         const headers = { ...this.defaultHeaders, "Content-Type": "application/json" };
         const options = { method: "{{ method.http_method }}", headers, body: JSON.stringify(body) };

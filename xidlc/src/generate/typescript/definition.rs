@@ -1,4 +1,4 @@
-use crate::error::IdlcResult;
+use crate::error::{IdlcError, IdlcResult};
 use crate::generate::typescript::{TsMode, TypescriptRenderOutput, TypescriptRenderer};
 use convert_case::{Case, Casing};
 use serde::Serialize;
@@ -322,7 +322,7 @@ fn render_interface(
         for export in &body.0 {
             match export {
                 hir::Export::OpDcl(op) => {
-                    methods.push(render_op(op, &def.header.ident, module_path));
+                    methods.push(render_op(op, &def.header.ident, module_path)?);
                 }
                 hir::Export::AttrDcl(attr) => {
                     methods.extend(render_attr(attr, &def.header.ident, module_path));
@@ -357,6 +357,51 @@ fn render_interface(
                 "request.zod.ts.j2",
                 &RequestZodContext {
                     name: request_name.clone(),
+                    schema_name,
+                    params,
+                },
+            )?;
+            out.types.push(types);
+            out.zod.push(zod);
+        }
+        if let Some(response_name) = &method.response_name {
+            let mut params = vec![ParamDeclContext {
+                prop: ts_prop_name("return"),
+                ty: if method.ret.is_void {
+                    "void".to_string()
+                } else {
+                    ts_type_for_type_spec(
+                        method.ret.ty.as_ref().expect("return type"),
+                        module_path,
+                        TypeRefTarget::Types,
+                    )
+                },
+                schema: if method.ret.is_void {
+                    "z.void()".to_string()
+                } else {
+                    zod_schema_for_type_spec(
+                        method.ret.ty.as_ref().expect("return type"),
+                        module_path,
+                    )
+                },
+            }];
+            params.extend(method.output_params.iter().map(|param| ParamDeclContext {
+                prop: ts_prop_name(&param.raw_name),
+                ty: ts_type_for_type_spec(&param.ty, module_path, TypeRefTarget::Types),
+                schema: zod_schema_for_type_spec(&param.ty, module_path),
+            }));
+            let types = renderer.render_template(
+                "request.d.ts.j2",
+                &RequestContext {
+                    name: response_name.clone(),
+                    params: params.clone(),
+                },
+            )?;
+            let schema_name = format!("{response_name}Schema");
+            let zod = renderer.render_template(
+                "request.zod.ts.j2",
+                &RequestZodContext {
+                    name: response_name.clone(),
                     schema_name,
                     params,
                 },
@@ -651,6 +696,7 @@ struct ClientMethodContext {
     path_params: Vec<PathParamContext>,
     query_params: Vec<QueryParamContext>,
     body_params: Vec<BodyParamContext>,
+    body_single: Option<BodyParamContext>,
 }
 
 #[derive(Serialize)]
@@ -695,6 +741,7 @@ struct MethodInfo {
     name: String,
     params: Vec<ParamInfo>,
     ret: ReturnType,
+    response_name: Option<String>,
     http_method: String,
     path: String,
     request_name: Option<String>,
@@ -702,6 +749,7 @@ struct MethodInfo {
     path_params: Vec<ParamInfo>,
     query_params: Vec<ParamInfo>,
     body_params: Vec<ParamInfo>,
+    output_params: Vec<ParamInfo>,
 }
 
 impl MethodInfo {
@@ -714,7 +762,9 @@ impl MethodInfo {
                 ty: ts_type_for_type_spec(&param.ty, module_path, TypeRefTarget::Client),
             })
             .collect::<Vec<_>>();
-        let return_ty = if self.ret.is_void {
+        let return_ty = if let Some(response_name) = &self.response_name {
+            scoped_name(module_path, response_name)
+        } else if self.ret.is_void {
             "void".to_string()
         } else {
             ts_type_for_type_spec(
@@ -763,6 +813,10 @@ impl MethodInfo {
                     access: parsed_access(self, &param.raw_name),
                 })
                 .collect(),
+            body_single: self.body_params.first().map(|param| BodyParamContext {
+                raw_name: param.raw_name.clone(),
+                access: parsed_access(self, &param.raw_name),
+            }),
         }
     }
 }
@@ -795,7 +849,7 @@ enum TypeRefTarget {
     Client,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 enum HttpMethod {
     Get,
     Post,
@@ -806,11 +860,18 @@ enum HttpMethod {
     Options,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 enum ParamSource {
     Path,
     Query,
     Body,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum ParamDirection {
+    In,
+    Out,
+    InOut,
 }
 
 fn struct_fields(members: &[hir::Member], module_path: &[String]) -> Vec<FieldDecl> {
@@ -834,7 +895,11 @@ struct FieldDecl {
     schema: String,
 }
 
-fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> MethodInfo {
+fn render_op(
+    op: &hir::OpDcl,
+    interface_name: &str,
+    module_path: &[String],
+) -> IdlcResult<MethodInfo> {
     let ret = match &op.ty {
         hir::OpTypeSpec::Void => ReturnType::void(),
         hir::OpTypeSpec::TypeSpec(ty) => ReturnType::new(ty.clone()),
@@ -844,11 +909,8 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
         .as_ref()
         .map(|value| value.0.as_slice())
         .unwrap_or(&[]);
-    let (method, path) = route_from_annotations(
-        &op.annotations,
-        HttpMethod::Post,
-        default_path(module_path, interface_name, &op.ident),
-    );
+    let default_route = default_path(module_path, interface_name, &op.ident);
+    let (method, path) = route_from_annotations(&op.annotations, HttpMethod::Post, default_route)?;
     let path_param_names = parse_path_params(&path);
     let default_source = default_param_source(method);
 
@@ -856,17 +918,31 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
     let mut path_params = Vec::new();
     let mut query_params = Vec::new();
     let mut body_params = Vec::new();
+    let mut output_params = Vec::new();
 
     for param in params {
         let name = ts_ident(&param.declarator.0);
         let raw_name = param.declarator.0.clone();
         let ty = param.ty.clone();
-        let source = if path_param_names.contains(&param.declarator.0) {
-            ParamSource::Path
-        } else {
-            default_source
-        };
         let info = ParamInfo { name, raw_name, ty };
+        let direction = param_direction(param.attr.as_ref());
+        if matches!(direction, ParamDirection::Out | ParamDirection::InOut) {
+            output_params.push(info.clone());
+        }
+        if matches!(direction, ParamDirection::Out) {
+            continue;
+        }
+        let source = match explicit_param_source(param)? {
+            Some(value) => value,
+            None if path_param_names.contains(&param.declarator.0) => ParamSource::Path,
+            None => default_source,
+        };
+        if matches!(source, ParamSource::Path) && !path_param_names.contains(&param.declarator.0) {
+            return Err(IdlcError::rpc(format!(
+                "parameter '{}' is annotated with @path but not present in route template of method '{}'",
+                param.declarator.0, op.ident
+            )));
+        }
         param_list.push(info.clone());
         match source {
             ParamSource::Path => path_params.push(info),
@@ -888,10 +964,19 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
         let full = scoped_name(module_path, name);
         format!("zodSchemas.{full}Schema")
     });
-    MethodInfo {
+    let response_name = if output_params.is_empty() {
+        None
+    } else {
+        Some(format!(
+            "{}Response",
+            method_struct_prefix(interface_name, &op.ident)
+        ))
+    };
+    Ok(MethodInfo {
         name: method_name,
         params: param_list,
         ret,
+        response_name,
         http_method: method_http_code(method),
         path,
         request_name,
@@ -899,7 +984,8 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
         path_params,
         query_params,
         body_params,
-    }
+        output_params,
+    })
 }
 
 fn render_attr(
@@ -914,6 +1000,7 @@ fn render_attr(
                 name: ts_ident(&names.raw),
                 params: Vec::new(),
                 ret: ReturnType::new(spec.ty.clone()),
+                response_name: None,
                 http_method: method_http_code(HttpMethod::Get),
                 path: default_path(module_path, interface_name, &names.raw),
                 request_name: None,
@@ -921,6 +1008,7 @@ fn render_attr(
                 path_params: Vec::new(),
                 query_params: Vec::new(),
                 body_params: Vec::new(),
+                output_params: Vec::new(),
             })
             .collect(),
         hir::AttrDclInner::AttrSpec(spec) => {
@@ -933,6 +1021,7 @@ fn render_attr(
                             name: ts_ident(&raw_name),
                             params: Vec::new(),
                             ret: ReturnType::new(spec.ty.clone()),
+                            response_name: None,
                             http_method: method_http_code(HttpMethod::Get),
                             path: default_path(module_path, interface_name, &raw_name),
                             request_name: None,
@@ -940,6 +1029,7 @@ fn render_attr(
                             path_params: Vec::new(),
                             query_params: Vec::new(),
                             body_params: Vec::new(),
+                            output_params: Vec::new(),
                         };
                         out.push(getter);
 
@@ -961,6 +1051,7 @@ fn render_attr(
                             name: ts_ident(&setter_raw),
                             params: vec![param.clone()],
                             ret: ReturnType::void(),
+                            response_name: None,
                             http_method: method_http_code(HttpMethod::Post),
                             path: default_path(module_path, interface_name, &setter_raw),
                             request_name,
@@ -968,6 +1059,7 @@ fn render_attr(
                             path_params: Vec::new(),
                             query_params: Vec::new(),
                             body_params: vec![param],
+                            output_params: Vec::new(),
                         };
                         out.push(setter);
                     }
@@ -978,6 +1070,7 @@ fn render_attr(
                         name: ts_ident(&raw_name),
                         params: Vec::new(),
                         ret: ReturnType::new(spec.ty.clone()),
+                        response_name: None,
                         http_method: method_http_code(HttpMethod::Get),
                         path: default_path(module_path, interface_name, &raw_name),
                         request_name: None,
@@ -985,6 +1078,7 @@ fn render_attr(
                         path_params: Vec::new(),
                         query_params: Vec::new(),
                         body_params: Vec::new(),
+                        output_params: Vec::new(),
                     };
                     out.push(getter);
 
@@ -1006,6 +1100,7 @@ fn render_attr(
                         name: ts_ident(&setter_raw),
                         params: vec![param.clone()],
                         ret: ReturnType::void(),
+                        response_name: None,
                         http_method: method_http_code(HttpMethod::Post),
                         path: default_path(module_path, interface_name, &setter_raw),
                         request_name,
@@ -1013,6 +1108,7 @@ fn render_attr(
                         path_params: Vec::new(),
                         query_params: Vec::new(),
                         body_params: vec![param],
+                        output_params: Vec::new(),
                     };
                     out.push(setter);
                 }
@@ -1491,19 +1587,44 @@ fn route_from_annotations(
     annotations: &[hir::Annotation],
     default_method: HttpMethod,
     default_path: String,
-) -> (HttpMethod, String) {
+) -> IdlcResult<(HttpMethod, String)> {
+    let mut method = None;
+    let mut paths = Vec::new();
     for annotation in annotations {
-        let Some(method) = method_from_annotation(annotation) else {
+        let Some(name) = annotation_name(annotation) else {
             continue;
         };
-        let mut path = None;
-        if let Some(params) = annotation_params(annotation) {
-            let params = normalize_params(params);
-            path = params.get("path").cloned();
+        if let Some(current) = method_from_annotation(annotation) {
+            if let Some(prev) = method {
+                if prev != current {
+                    return Err(IdlcError::rpc(
+                        "more than one HTTP verb annotation is not allowed on a method",
+                    ));
+                }
+            }
+            method = Some(current);
+            if let Some(params) = annotation_params(annotation) {
+                let params = normalize_params(params);
+                if let Some(path) = params.get("path") {
+                    paths.push(normalize_path(path));
+                }
+            }
+            continue;
         }
-        return (method, path.unwrap_or(default_path));
+        if name.eq_ignore_ascii_case("path") {
+            if let Some(params) = annotation_params(annotation) {
+                let params = normalize_params(params);
+                if let Some(path) = params.get("value").or_else(|| params.get("path")) {
+                    paths.push(normalize_path(path));
+                }
+            }
+        }
     }
-    (default_method, default_path)
+    let path = paths
+        .into_iter()
+        .next()
+        .unwrap_or_else(|| normalize_path(&default_path));
+    Ok((method.unwrap_or(default_method), path))
 }
 
 fn method_from_annotation(annotation: &hir::Annotation) -> Option<HttpMethod> {
@@ -1534,6 +1655,36 @@ fn annotation_params(annotation: &hir::Annotation) -> Option<&hir::AnnotationPar
         hir::Annotation::ScopedName { params, .. } => params.as_ref(),
         _ => None,
     }
+}
+
+fn explicit_param_source(param: &hir::ParamDcl) -> IdlcResult<Option<ParamSource>> {
+    let mut found = None;
+    for annotation in &param.annotations {
+        let Some(name) = annotation_name(annotation) else {
+            continue;
+        };
+        let current = if name.eq_ignore_ascii_case("path") {
+            Some(ParamSource::Path)
+        } else if name.eq_ignore_ascii_case("query") {
+            Some(ParamSource::Query)
+        } else {
+            None
+        };
+        let Some(current) = current else {
+            continue;
+        };
+        match found {
+            None => found = Some(current),
+            Some(prev) if prev == current => {}
+            Some(_) => {
+                return Err(IdlcError::rpc(format!(
+                    "parameter '{}' has conflicting source annotations (@path/@query)",
+                    param.declarator.0
+                )));
+            }
+        }
+    }
+    Ok(found)
 }
 
 fn normalize_params(params: &hir::AnnotationParams) -> std::collections::HashMap<String, String> {
@@ -1648,6 +1799,23 @@ fn trim_quotes(value: &str) -> Option<String> {
         }
     }
     None
+}
+
+fn normalize_path(path: &str) -> String {
+    let path = path.trim();
+    if path.starts_with('/') {
+        path.to_string()
+    } else {
+        format!("/{path}")
+    }
+}
+
+fn param_direction(attr: Option<&hir::ParamAttribute>) -> ParamDirection {
+    match attr.map(|value| value.0.as_str()) {
+        Some("out") => ParamDirection::Out,
+        Some("inout") => ParamDirection::InOut,
+        _ => ParamDirection::In,
+    }
 }
 
 fn render_const_expr(expr: &hir::ConstExpr) -> String {
