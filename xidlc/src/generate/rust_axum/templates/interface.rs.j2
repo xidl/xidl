@@ -4,7 +4,7 @@ pub trait {{ ident }} {
         async fn {{ method.name }}(
         &self,
         req: xidl_rust_axum::Request<{{ method.request_ty }}>
-        ) -> Result<{{ method.ret }}, xidl_rust_axum::Error>;
+        ) -> Result<{{ method.response_ty }}, xidl_rust_axum::Error>;
     {% endfor %}
 }
 
@@ -58,6 +58,19 @@ pub trait {{ ident }} {
         }
 
     {% endif %}
+    {% if method.response_struct is defined and method.response_struct %}
+        #[derive(::serde::Serialize, ::serde::Deserialize)]
+        pub struct {{ method.response_struct }} {
+            pub r#return: {{ method.ret }},
+            {% for param in method.response_params %}
+                {% if param.serde_rename is defined and param.serde_rename %}
+                    #[serde(rename = "{{ param.serde_rename }}")]
+                {% endif %}
+                pub {{ param.name }}: {{ param.ty }},
+            {% endfor %}
+        }
+
+    {% endif %}
 {% endfor %}
 
 {% if opt.enable_server %}
@@ -83,7 +96,9 @@ pub trait {{ ident }} {
             let svc = self.inner;
             xidl_rust_axum::axum::Router::new()
             {% for method in methods %}
-                .route("{{ method.path }}", xidl_rust_axum::axum::routing::{{ method.http_method_fn }}(Self::{{ method.name }}))
+                {% for path in method.paths %}
+                    .route("{{ path }}", xidl_rust_axum::axum::routing::{{ method.http_method_fn }}(Self::{{ method.name }}))
+                {% endfor %}
             {% endfor %}
             .with_state(svc)
         }
@@ -95,7 +110,7 @@ pub trait {{ ident }} {
             ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<{{ method.struct_prefix }}Path>{% endif %}{% if method.query_params | length > 0 %},
             xidl_rust_axum::axum::extract::Query(query): xidl_rust_axum::axum::extract::Query<{{ method.struct_prefix }}Query>{% endif %}{% if method.body_params | length > 0 %},
             xidl_rust_axum::axum::Json(body): xidl_rust_axum::axum::Json<{{ method.struct_prefix }}Body>{% endif %}
-            ) -> ::xidl_rust_axum::Result<xidl_rust_axum::axum::Json<{{ method.ret }}>> {
+            ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
                 {% if method.path_params | length > 0 %}
                     let {{ method.struct_prefix }}Path {
                         {% for param in method.path_params %}
@@ -131,7 +146,13 @@ pub trait {{ ident }} {
                     let data = ();
                 {% endif %}
                 let req = ::xidl_rust_axum::Request::new(headers, data);
-                Ok(xidl_rust_axum::axum::Json(svc.{{ method.name }}(req).await?))
+                let resp = svc.{{ method.name }}(req).await?;
+                {% if method.return_is_unit and not method.has_output_params %}
+                    let _ = resp;
+                    Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT))
+                {% else %}
+                    Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+                {% endif %}
             }
         {% endfor %}
     }
@@ -161,7 +182,7 @@ pub trait {{ ident }} {
 
     impl {{ ident }}Client {
         {% for method in methods %}
-            pub async fn {{ method.name }}(&self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.ret }}, xidl_rust_axum::Error> {
+            pub async fn {{ method.name }}(&self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.response_ty }}, xidl_rust_axum::Error> {
                 let path = "{{ method.path }}".to_string();
                 {% for param in method.path_params %}
                     let path = path.replace("{{ ['{{', param.raw_name, '}}'] | join}}", &{{ param.name }}.to_string());
@@ -196,9 +217,13 @@ pub trait {{ ident }} {
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, err.to_string()))?;
                 if resp.status().is_success() {
-                    resp.json::<{{ method.ret }}>()
-                    .await
-                    .map_err(|err| xidl_rust_axum::Error::new(500, err.to_string()))
+                    {% if method.return_is_unit and not method.has_output_params %}
+                        Ok(())
+                    {% else %}
+                        resp.json::<{{ method.response_ty }}>()
+                        .await
+                        .map_err(|err| xidl_rust_axum::Error::new(500, err.to_string()))
+                    {% endif %}
                 } else {
                     let status = resp.status();
                     let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();

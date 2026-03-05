@@ -1,4 +1,4 @@
-use crate::error::IdlcResult;
+use crate::error::{IdlcError, IdlcResult};
 use crate::generate::rust::util::rust_ident;
 use crate::generate::rust_axum::{RustAxumRenderOutput, RustAxumRenderer};
 use convert_case::{Case, Casing};
@@ -6,7 +6,7 @@ use serde::Serialize;
 use std::collections::{HashMap, HashSet};
 use xidl_parser::hir;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 enum HttpMethod {
     Get,
     Post,
@@ -17,11 +17,18 @@ enum HttpMethod {
     Options,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 enum ParamSource {
     Path,
     Query,
     Body,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum ParamDirection {
+    In,
+    Out,
+    InOut,
 }
 
 #[derive(Serialize)]
@@ -31,10 +38,12 @@ struct MethodContext {
     params: Vec<String>,
     param_names: Vec<String>,
     ret: String,
+    response_ty: String,
     http_method: String,
     http_method_fn: String,
     reqwest_method: String,
     path: String,
+    paths: Vec<String>,
     struct_prefix: String,
     path_params: Vec<ParamContext>,
     query_params: Vec<ParamContext>,
@@ -42,6 +51,10 @@ struct MethodContext {
     request_ty: String,
     request_struct: Option<String>,
     request_params: Vec<ParamContext>,
+    response_struct: Option<String>,
+    response_params: Vec<ParamContext>,
+    has_output_params: bool,
+    return_is_unit: bool,
 }
 
 #[derive(Serialize, Clone)]
@@ -78,12 +91,25 @@ fn render_interface_def(
         for export in &body.0 {
             match export {
                 hir::Export::OpDcl(op) => {
-                    methods.push(render_op(op, &def.header.ident, module_path));
+                    methods.push(render_op(op, &def.header.ident, module_path)?);
                 }
                 hir::Export::AttrDcl(attr) => {
                     methods.extend(render_attr(attr, &def.header.ident, module_path));
                 }
                 _ => {}
+            }
+        }
+    }
+
+    let mut route_bindings = HashMap::new();
+    for method in &methods {
+        for path in &method.paths {
+            let key = format!("{} {}", method.reqwest_method, path);
+            if let Some(previous) = route_bindings.insert(key.clone(), method.raw_name.clone()) {
+                return Err(IdlcError::rpc(format!(
+                    "duplicate HTTP route binding: {key} (methods: {previous}, {})",
+                    method.raw_name
+                )));
             }
         }
     }
@@ -97,11 +123,16 @@ fn render_interface_def(
     Ok(out)
 }
 
-fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> MethodContext {
+fn render_op(
+    op: &hir::OpDcl,
+    interface_name: &str,
+    module_path: &[String],
+) -> IdlcResult<MethodContext> {
     let ret = match &op.ty {
         hir::OpTypeSpec::Void => "()".to_string(),
         hir::OpTypeSpec::TypeSpec(ty) => axum_type(ty),
     };
+    let return_is_unit = matches!(&op.ty, hir::OpTypeSpec::Void);
     let params = op
         .parameter
         .as_ref()
@@ -113,24 +144,58 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
     let mut query_params = Vec::new();
     let mut body_params = Vec::new();
     let mut request_params = Vec::new();
+    let mut response_params = Vec::new();
 
-    let (method, path) = route_from_annotations(
-        &op.annotations,
-        HttpMethod::Post,
-        default_path(module_path, interface_name, &op.ident),
-    );
-    let path_param_names = parse_path_params(&path);
+    let default_route = default_path(module_path, interface_name, &op.ident);
+    let (method, paths) = route_from_annotations(&op.annotations, HttpMethod::Post, default_route)?;
+    let path = paths
+        .first()
+        .cloned()
+        .unwrap_or_else(|| default_path(module_path, interface_name, &op.ident));
+    let all_path_param_names: HashSet<String> = paths
+        .iter()
+        .flat_map(|item| parse_path_params(item).into_iter())
+        .collect();
     let default_source = default_param_source(method);
+
+    for param in params {
+        let direction = param_direction(param.attr.as_ref());
+        let explicit_source = explicit_param_source(param)?;
+        if matches!(direction, ParamDirection::Out) {
+            continue;
+        }
+        if matches!(explicit_source, Some(ParamSource::Path))
+            && !all_path_param_names.contains(&param.declarator.0)
+        {
+            return Err(IdlcError::rpc(format!(
+                "parameter '{}' is annotated with @path but not present in any route template of method '{}'",
+                param.declarator.0, op.ident
+            )));
+        }
+    }
 
     for param in params {
         let ty = render_param_type(&param.ty, param.attr.as_ref());
         let name = rust_ident(&param.declarator.0);
+        let direction = param_direction(param.attr.as_ref());
+        if matches!(direction, ParamDirection::Out | ParamDirection::InOut) {
+            response_params.push(ParamContext {
+                name: name.clone(),
+                raw_name: param.declarator.0.clone(),
+                ty: ty.clone(),
+                source: String::new(),
+                serde_rename: serde_rename(&param.declarator.0, &name),
+            });
+        }
+        if matches!(direction, ParamDirection::Out) {
+            continue;
+        }
         param_list.push(format!("{name}: {ty}"));
         param_names.push(name.clone());
-        let source = if path_param_names.contains(&param.declarator.0) {
-            ParamSource::Path
-        } else {
-            default_source
+        let source = match explicit_param_source(param)? {
+            Some(value) => value,
+            None if all_path_param_names.contains(&param.declarator.0) => ParamSource::Path,
+            None => default_source,
         };
         let ctx = ParamContext {
             name: name.clone(),
@@ -157,16 +222,28 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
         ))
     };
     let request_ty = request_struct.clone().unwrap_or_else(|| "()".to_string());
-    MethodContext {
+    let has_output_params = !response_params.is_empty();
+    let response_struct = if !has_output_params {
+        None
+    } else {
+        Some(format!(
+            "{}Response",
+            method_struct_prefix(interface_name, &op.ident)
+        ))
+    };
+    let response_ty = response_struct.clone().unwrap_or_else(|| ret.clone());
+    Ok(MethodContext {
         name: method_name,
         raw_name: op.ident.clone(),
         params: param_list,
         param_names,
         ret,
+        response_ty,
         http_method: http_method_code(method),
         http_method_fn: http_method_fn(method),
         reqwest_method: reqwest_method_code(method),
         path,
+        paths,
         struct_prefix: method_struct_prefix(interface_name, &op.ident),
         path_params,
         query_params,
@@ -174,7 +251,11 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
         request_ty,
         request_struct,
         request_params,
-    }
+        response_struct,
+        response_params,
+        has_output_params,
+        return_is_unit,
+    })
 }
 
 fn render_attr(
@@ -195,10 +276,12 @@ fn render_attr(
                     raw_name: raw.clone(),
                     params: Vec::new(),
                     param_names: Vec::new(),
-                    ret,
+                    ret: ret.clone(),
+                    response_ty: ret,
                     http_method: http_method_code(HttpMethod::Get),
                     http_method_fn: http_method_fn(HttpMethod::Get),
                     reqwest_method: reqwest_method_code(HttpMethod::Get),
+                    paths: vec![path.clone()],
                     path,
                     struct_prefix: method_struct_prefix(interface_name, &raw),
                     path_params: Vec::new(),
@@ -207,6 +290,10 @@ fn render_attr(
                     request_ty: "()".to_string(),
                     request_struct,
                     request_params: Vec::new(),
+                    response_struct: None,
+                    response_params: Vec::new(),
+                    has_output_params: false,
+                    return_is_unit: false,
                 }
             })
             .collect(),
@@ -225,10 +312,12 @@ fn render_attr(
                             raw_name: raw_name.clone(),
                             params: Vec::new(),
                             param_names: Vec::new(),
-                            ret,
+                            ret: ret.clone(),
+                            response_ty: ret,
                             http_method: http_method_code(HttpMethod::Get),
                             http_method_fn: http_method_fn(HttpMethod::Get),
                             reqwest_method: reqwest_method_code(HttpMethod::Get),
+                            paths: vec![path.clone()],
                             path,
                             struct_prefix: method_struct_prefix(interface_name, &raw_name),
                             path_params: Vec::new(),
@@ -237,6 +326,10 @@ fn render_attr(
                             request_ty: "()".to_string(),
                             request_struct,
                             request_params: Vec::new(),
+                            response_struct: None,
+                            response_params: Vec::new(),
+                            has_output_params: false,
+                            return_is_unit: false,
                         });
                         let raw_setter = format!("set_{raw_name}");
                         let setter = rust_ident(&raw_setter);
@@ -259,9 +352,11 @@ fn render_attr(
                             params: vec![format!("value: {param}")],
                             param_names: vec!["value".to_string()],
                             ret: "()".to_string(),
+                            response_ty: "()".to_string(),
                             http_method: http_method_code(HttpMethod::Post),
                             http_method_fn: http_method_fn(HttpMethod::Post),
                             reqwest_method: reqwest_method_code(HttpMethod::Post),
+                            paths: vec![setter_path.clone()],
                             path: setter_path,
                             struct_prefix: method_struct_prefix(interface_name, &raw_setter),
                             path_params: Vec::new(),
@@ -270,6 +365,10 @@ fn render_attr(
                             request_ty: request_struct.clone().unwrap_or_else(|| "()".to_string()),
                             request_struct,
                             request_params: vec![request_param],
+                            response_struct: None,
+                            response_params: Vec::new(),
+                            has_output_params: false,
+                            return_is_unit: true,
                         });
                     }
                 }
@@ -285,10 +384,12 @@ fn render_attr(
                         raw_name: raw_name.clone(),
                         params: Vec::new(),
                         param_names: Vec::new(),
-                        ret,
+                        ret: ret.clone(),
+                        response_ty: ret,
                         http_method: http_method_code(HttpMethod::Get),
                         http_method_fn: http_method_fn(HttpMethod::Get),
                         reqwest_method: reqwest_method_code(HttpMethod::Get),
+                        paths: vec![path.clone()],
                         path,
                         struct_prefix: method_struct_prefix(interface_name, &raw_name),
                         path_params: Vec::new(),
@@ -297,6 +398,10 @@ fn render_attr(
                         request_ty: "()".to_string(),
                         request_struct,
                         request_params: Vec::new(),
+                        response_struct: None,
+                        response_params: Vec::new(),
+                        has_output_params: false,
+                        return_is_unit: false,
                     });
                     let raw_setter = format!("set_{raw_name}");
                     let setter = rust_ident(&raw_setter);
@@ -318,9 +423,11 @@ fn render_attr(
                         params: vec![format!("value: {param}")],
                         param_names: vec!["value".to_string()],
                         ret: "()".to_string(),
+                        response_ty: "()".to_string(),
                         http_method: http_method_code(HttpMethod::Post),
                         http_method_fn: http_method_fn(HttpMethod::Post),
                         reqwest_method: reqwest_method_code(HttpMethod::Post),
+                        paths: vec![setter_path.clone()],
                         path: setter_path,
                         struct_prefix: method_struct_prefix(interface_name, &raw_setter),
                         path_params: Vec::new(),
@@ -329,6 +436,10 @@ fn render_attr(
                         request_ty: request_struct.clone().unwrap_or_else(|| "()".to_string()),
                         request_struct,
                         request_params: vec![request_param],
+                        response_struct: None,
+                        response_params: Vec::new(),
+                        has_output_params: false,
+                        return_is_unit: true,
                     });
                 }
             }
@@ -359,6 +470,14 @@ fn attr_return_type(ty: &hir::TypeSpec) -> String {
 fn render_param_type(ty: &hir::TypeSpec, attr: Option<&hir::ParamAttribute>) -> String {
     let _ = attr;
     axum_type(ty)
+}
+
+fn param_direction(attr: Option<&hir::ParamAttribute>) -> ParamDirection {
+    match attr.map(|value| value.0.as_str()) {
+        Some("out") => ParamDirection::Out,
+        Some("inout") => ParamDirection::InOut,
+        _ => ParamDirection::In,
+    }
 }
 
 fn method_struct_prefix(interface_name: &str, method_name: &str) -> String {
@@ -459,19 +578,48 @@ fn route_from_annotations(
     annotations: &[hir::Annotation],
     default_method: HttpMethod,
     default_path: String,
-) -> (HttpMethod, String) {
+) -> IdlcResult<(HttpMethod, Vec<String>)> {
+    let mut verb_method = None;
+    let mut paths = Vec::new();
+
     for annotation in annotations {
-        let Some(method) = method_from_annotation(annotation) else {
+        let Some(name) = annotation_name(annotation) else {
             continue;
         };
-        let mut path = None;
-        if let Some(params) = annotation_params(annotation) {
-            let params = normalize_params(params);
-            path = params.get("path").cloned();
+        if let Some(method) = method_from_annotation(annotation) {
+            if let Some(prev) = verb_method {
+                if prev != method {
+                    return Err(IdlcError::rpc(
+                        "more than one HTTP verb annotation is not allowed on a method",
+                    ));
+                }
+            }
+            verb_method = Some(method);
+            if let Some(params) = annotation_params(annotation) {
+                let params = normalize_params(params);
+                if let Some(path) = params.get("path") {
+                    paths.push(normalize_path(path));
+                }
+            }
+            continue;
         }
-        return (method, path.unwrap_or(default_path));
+
+        if name.eq_ignore_ascii_case("path") {
+            if let Some(params) = annotation_params(annotation) {
+                let params = normalize_params(params);
+                if let Some(path) = params.get("value").or_else(|| params.get("path")) {
+                    paths.push(normalize_path(path));
+                }
+            }
+        }
     }
-    (default_method, default_path)
+
+    if paths.is_empty() {
+        paths.push(normalize_path(&default_path));
+    }
+    let mut dedup = HashSet::new();
+    paths.retain(|path| dedup.insert(path.clone()));
+    Ok((verb_method.unwrap_or(default_method), paths))
 }
 
 fn method_from_annotation(annotation: &hir::Annotation) -> Option<HttpMethod> {
@@ -502,6 +650,36 @@ fn annotation_params(annotation: &hir::Annotation) -> Option<&hir::AnnotationPar
         hir::Annotation::ScopedName { params, .. } => params.as_ref(),
         _ => None,
     }
+}
+
+fn explicit_param_source(param: &hir::ParamDcl) -> IdlcResult<Option<ParamSource>> {
+    let mut found = None;
+    for annotation in &param.annotations {
+        let Some(name) = annotation_name(annotation) else {
+            continue;
+        };
+        let current = if name.eq_ignore_ascii_case("path") {
+            Some(ParamSource::Path)
+        } else if name.eq_ignore_ascii_case("query") {
+            Some(ParamSource::Query)
+        } else {
+            None
+        };
+        let Some(current) = current else {
+            continue;
+        };
+        match found {
+            None => found = Some(current),
+            Some(prev) if prev == current => {}
+            Some(_) => {
+                return Err(IdlcError::rpc(format!(
+                    "parameter '{}' has conflicting source annotations (@path/@query)",
+                    param.declarator.0
+                )));
+            }
+        }
+    }
+    Ok(found)
 }
 
 fn normalize_params(params: &hir::AnnotationParams) -> HashMap<String, String> {
@@ -616,6 +794,15 @@ fn trim_quotes(value: &str) -> Option<String> {
         }
     }
     None
+}
+
+fn normalize_path(path: &str) -> String {
+    let path = path.trim();
+    if path.starts_with('/') {
+        path.to_string()
+    } else {
+        format!("/{path}")
+    }
 }
 
 fn render_const_expr(expr: &hir::ConstExpr) -> String {

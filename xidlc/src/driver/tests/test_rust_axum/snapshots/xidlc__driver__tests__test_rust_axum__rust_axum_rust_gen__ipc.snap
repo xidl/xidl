@@ -571,62 +571,69 @@ T:HttpService+Send+Sync+'static,
     async fn get_health(
     ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
     headers: ::xidl_rust_axum::axum::http::HeaderMap
-    )->::xidl_rust_axum::Result<xidl_rust_axum::axum::Json<HealthResponse>>{
+    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        Ok(xidl_rust_axum::axum::Json(svc.get_health(req).await?))
+        let resp = svc.get_health(req).await?;
+        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
     }
 
     async fn get_version(
     ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
     headers: ::xidl_rust_axum::axum::http::HeaderMap
-    )->::xidl_rust_axum::Result<xidl_rust_axum::axum::Json<VersionResponse>>{
+    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        Ok(xidl_rust_axum::axum::Json(svc.get_version(req).await?))
+        let resp = svc.get_version(req).await?;
+        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
     }
 
     async fn get_memory_info(
     ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
     headers: ::xidl_rust_axum::axum::http::HeaderMap
-    )->::xidl_rust_axum::Result<xidl_rust_axum::axum::Json<MemoryResponse>>{
+    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        Ok(xidl_rust_axum::axum::Json(svc.get_memory_info(req).await?))
+        let resp = svc.get_memory_info(req).await?;
+        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
     }
 
     async fn restart(
     ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
     headers: ::xidl_rust_axum::axum::http::HeaderMap
-    )->::xidl_rust_axum::Result<xidl_rust_axum::axum::Json<()>>{
+    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        Ok(xidl_rust_axum::axum::Json(svc.restart(req).await?))
+        let resp = svc.restart(req).await?;
+        let _ = resp;
+        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT))
     }
 
     async fn get_state(
     ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
     headers: ::xidl_rust_axum::axum::http::HeaderMap
-    )->::xidl_rust_axum::Result<xidl_rust_axum::axum::Json<crate::api::state::StateResponse>>{
+    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        Ok(xidl_rust_axum::axum::Json(svc.get_state(req).await?))
+        let resp = svc.get_state(req).await?;
+        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
     }
 
     async fn get_udp_stats(
     ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
     headers: ::xidl_rust_axum::axum::http::HeaderMap
-    )->::xidl_rust_axum::Result<xidl_rust_axum::axum::Json<UdpStatsResponse>>{
+    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        Ok(xidl_rust_axum::axum::Json(svc.get_udp_stats(req).await?))
+        let resp = svc.get_udp_stats(req).await?;
+        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
     }
 
     async fn create_simple(
     ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
     headers: ::xidl_rust_axum::axum::http::HeaderMap,
     xidl_rust_axum::axum::Json(body):xidl_rust_axum::axum::Json<HttpServiceCreateSimpleBody>
-    )->::xidl_rust_axum::Result<xidl_rust_axum::axum::Json<CreateSimpleResponse>>{
+    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
         let HttpServiceCreateSimpleBody{
 
         local_addr,
@@ -639,14 +646,15 @@ T:HttpService+Send+Sync+'static,
             remote_port,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        Ok(xidl_rust_axum::axum::Json(svc.create_simple(req).await?))
+        let resp = svc.create_simple(req).await?;
+        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
     }
 
     async fn stop_simple(
     ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
     headers: ::xidl_rust_axum::axum::http::HeaderMap,
     ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<HttpServiceStopSimplePath>
-    )->::xidl_rust_axum::Result<xidl_rust_axum::axum::Json<()>>{
+    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
         let HttpServiceStopSimplePath{
 
         id,
@@ -656,7 +664,9 @@ T:HttpService+Send+Sync+'static,
             id,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        Ok(xidl_rust_axum::axum::Json(svc.stop_simple(req).await?))
+        let resp = svc.stop_simple(req).await?;
+        let _ = resp;
+        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT))
     }
 }
 
@@ -775,9 +785,7 @@ impl HttpServiceClient{
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         if resp.status().is_success(){
-            resp.json::<()>()
-            .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+            Ok(())
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -889,9 +897,7 @@ impl HttpServiceClient{
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         if resp.status().is_success(){
-            resp.json::<()>()
-            .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+            Ok(())
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
