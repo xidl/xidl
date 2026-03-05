@@ -43,7 +43,9 @@ The following annotations are supported:
 Parameter annotations:
 
 - `@path` (parameter-level source declaration)
+- `@path("name")` (parameter-level source declaration with explicit route/query name)
 - `@query` (parameter-level source declaration)
+- `@query("name")` (parameter-level source declaration with explicit route/query name)
 
 Rules:
 
@@ -53,6 +55,7 @@ Rules:
     `@get/@post/@put/@patch/@delete/@head/@options`.
   - Using more than one verb annotation on the same method is invalid and
     should raise an error.
+- If no HTTP verb annotation is present, behavior is equivalent to `@post`.
 - Route path can come from a verb annotation `path` argument or from `@path(...)`.
 - A method may define multiple paths, and repeated path declarations are allowed:
   - Multiple `@path(...)`
@@ -66,8 +69,15 @@ Rules:
 
 ### 4.1 Defaults
 
-- Default HTTP method: `POST`
-- Default route: `/{module_path...}/{interface}/{method}`
+- Default HTTP method: `POST` (equivalent to `@post` when omitted).
+- Default route:
+  - If explicit method path is not provided, route is auto-generated from
+    method and parameter annotations.
+  - Base route is `/{method_name}`.
+  - `@path` parameters are appended as path template segments.
+  - `@query` parameters are appended as URI-template query expansion.
+  - Example:
+    `void get_name(@query string name)` -> `POST "/get_name{?name}"`.
 
 ### 4.2 Explicit Routes and Multi-Route
 
@@ -98,6 +108,71 @@ Route templates support placeholders, for example:
 
 Template variable names are used by parameter source resolution (see section 5).
 
+### 4.4 Auto Path Generation Algorithm
+
+This section defines the algorithm used when a method has no explicit method
+path (that is, no verb `path=...` and no method-level `@path(...)`).
+
+Inputs:
+
+- Method name
+- Parameter list (including parameter annotations and names)
+- Resolved HTTP method (from section 3/4.1)
+
+Algorithm:
+
+1. Start with base path `/{method_name}`.
+2. Resolve each parameter's source and bound name:
+   - Bound name uses section 5 rules:
+     - `@path("x")` / `@query("x")` -> bound name is `x`
+     - `@path` / `@query` -> bound name is parameter name
+   - Source resolution priority is section 5.
+3. Collect Path-bound parameter names in declaration order:
+   - Append each as `/{name}`.
+4. Collect Query-bound parameter names in declaration order:
+   - If non-empty, append URI-template query expansion:
+     `{?name1,name2,...}`.
+5. Normalize result:
+   - Ensure path starts with `/`.
+   - Preserve declaration order.
+   - If duplicate query names appear, keep first occurrence.
+
+Notes:
+
+- For `GET/DELETE/HEAD/OPTIONS`, unannotated parameters typically become query
+  parameters (section 5), so they appear in `{?...}`.
+- For `POST/PUT/PATCH`, unannotated parameters typically become body parameters,
+  so they do not contribute to generated URI path/query template.
+
+Examples:
+
+```idl
+// Example 1: query-only, default POST
+void get_name(@query string name);
+// => POST "/get_name{?name}"
+
+// Example 2: explicit query name
+void get_user(@query("id") uint32 user_id);
+// => POST "/get_user{?id}"
+
+// Example 3: path + query
+void find_user(@path uint32 id, @query string locale);
+// => POST "/find_user/{id}{?locale}"
+
+// Example 4: explicit path and query names
+void find_user2(@path("user_id") uint32 id, @query("lang") string locale);
+// => POST "/find_user2/{user_id}{?lang}"
+
+// Example 5: GET default source + one explicit path
+@get
+void list_orders(@path("uid") uint32 user_id, uint32 page, uint32 size);
+// => GET "/list_orders/{uid}{?page,size}"
+
+// Example 6: mixed in/out/inout (only request-side params affect path template)
+long add(in long a, in long b, out long sum);
+// => POST "/add"
+```
+
 ## 5. Parameter Source Resolution
 
 Each parameter is assigned to a source by the following priority:
@@ -109,9 +184,16 @@ Each parameter is assigned to a source by the following priority:
    - `GET/DELETE/HEAD/OPTIONS` -> Query
    - `POST/PUT/PATCH` -> Body
 
+Name binding rules for `@path` / `@query`:
+
+- Without argument (`@path`, `@query`): the bound name is the parameter name.
+- With argument (`@path("id")`, `@query("id")`): the bound name is the
+  annotation argument.
+- The bound name is used for route template variables and query keys.
+
 Constraints:
 
-- A Path parameter name should match a route template variable name.
+- A Path bound name should match a route template variable name.
   Non-matching cases are invalid and should raise an error.
 - A parameter can have only one source.
 
