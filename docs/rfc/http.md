@@ -37,8 +37,8 @@ The following annotations are supported:
 - `@head(path = "...")`
 - `@options(path = "...")`
 - `@path("...")` (method-level route declaration)
-- `@Consumes("mime/type")`
-- `@Produces("mime/type")`
+- `@Consumes("mime/type")` (interface-level or method-level)
+- `@Produces("mime/type")` (interface-level or method-level)
 
 Parameter annotations:
 
@@ -62,8 +62,24 @@ Rules:
   - Multiple path declarations in supported annotation forms
   - Mixed usage of both sources
 - Duplicate routes after normalization should be de-duplicated.
-- `Consumes/Produces` define request/response media types. Default is
-  `application/json` when unspecified.
+- `Consumes/Produces` define request/response media types (encoding format):
+  - `@Consumes`: request payload decoding format.
+  - `@Produces`: response payload encoding format.
+  - Default is `application/json` when unspecified.
+  - Scope and override:
+    - `interface`-level annotations define defaults for all methods.
+    - method-level annotations override interface-level defaults.
+    - if neither is specified, use `application/json`.
+  - This RFC defines the JSON mapping as the baseline profile. Other media
+    types may be added in future revisions without changing the core HTTP
+    source/route rules.
+- `@head` has additional constraints:
+  - return type MUST be `void`
+  - parameters MUST be request-side only (`in` or omitted direction)
+  - `out` and `inout` parameters are invalid
+  - response is always `204 No Content` with no response body
+  - request-side parameter source rules are unchanged (`@path` / `@query`
+    annotations are allowed and follow section 5)
 
 ## 4. Route Resolution
 
@@ -73,11 +89,12 @@ Rules:
 - Default route:
   - If explicit method path is not provided, route is auto-generated from
     method and parameter annotations.
-  - Base route is `/{method_name}`.
+  - Base route is exactly `/{method_name}` (no interface/module prefix).
   - `@path` parameters are appended as path template segments.
-  - `@query` parameters are appended as URI-template query expansion.
+  - `@query` parameters do not change the route path; they are resolved as
+    query parameters at request handling time.
   - Example:
-    `void get_name(@query string name)` -> `POST "/get_name{?name}"`.
+    `void get_name(@query string name)` -> `POST "/get_name"`.
 
 ### 4.2 Explicit Routes and Multi-Route
 
@@ -86,7 +103,8 @@ Rules:
   to multiple routes).
 - If both sources are present, they are merged.
 - If no explicit route is defined, use the default route (see 4.1).
-- Route strings should start with `/`.
+- Route strings are normalized by section 4.4 before binding and conflict
+  checks.
 
 Example (multiple routes for one method):
 
@@ -108,7 +126,27 @@ Route templates support placeholders, for example:
 
 Template variable names are used by parameter source resolution (see section 5).
 
-### 4.4 Auto Path Generation Algorithm
+### 4.4 Route Normalization
+
+Route normalization is applied to every explicit route and every auto-generated
+route before de-duplication and conflict checks.
+
+Normalization rules:
+
+1. Trim leading/trailing ASCII whitespace.
+2. Ensure the route starts with `/`.
+3. Collapse repeated `/` into a single `/`.
+4. Remove trailing `/` unless the full route is exactly `/`.
+5. Keep route path case as-is (case-sensitive match).
+6. Do not percent-decode or percent-rewrite path segments.
+
+Examples:
+
+- `" users/{id} "` -> `"/users/{id}"`
+- `"//users///{id}/"` -> `"/users/{id}"`
+- `"/"` -> `"/"`
+
+### 4.5 Auto Path Generation Algorithm
 
 This section defines the algorithm used when a method has no explicit method
 path (that is, no verb `path=...` and no method-level `@path(...)`).
@@ -129,44 +167,41 @@ Algorithm:
    - Source resolution priority is section 5.
 3. Collect Path-bound parameter names in declaration order:
    - Append each as `/{name}`.
-4. Collect Query-bound parameter names in declaration order:
-   - If non-empty, append URI-template query expansion:
-     `{?name1,name2,...}`.
+4. Query-bound parameters do not change the route path.
 5. Normalize result:
-   - Ensure path starts with `/`.
+   - Apply section 4.4 route normalization.
    - Preserve declaration order.
-   - If duplicate query names appear, keep first occurrence.
 
 Notes:
 
 - For `GET/DELETE/HEAD/OPTIONS`, unannotated parameters typically become query
-  parameters (section 5), so they appear in `{?...}`.
+  parameters (section 5), but they do not affect generated route path.
 - For `POST/PUT/PATCH`, unannotated parameters typically become body parameters,
-  so they do not contribute to generated URI path/query template.
+  so they do not contribute to generated route path.
 
 Examples:
 
 ```idl
 // Example 1: query-only, default POST
 void get_name(@query string name);
-// => POST "/get_name{?name}"
+// => POST "/get_name"
 
 // Example 2: explicit query name
 void get_user(@query("id") uint32 user_id);
-// => POST "/get_user{?id}"
+// => POST "/get_user"
 
 // Example 3: path + query
 void find_user(@path uint32 id, @query string locale);
-// => POST "/find_user/{id}{?locale}"
+// => POST "/find_user/{id}"
 
 // Example 4: explicit path and query names
 void find_user2(@path("user_id") uint32 id, @query("lang") string locale);
-// => POST "/find_user2/{user_id}{?lang}"
+// => POST "/find_user2/{user_id}"
 
 // Example 5: GET default source + one explicit path
 @get
 void list_orders(@path("uid") uint32 user_id, uint32 page, uint32 size);
-// => GET "/list_orders/{uid}{?page,size}"
+// => GET "/list_orders/{uid}"
 
 // Example 6: mixed in/out/inout (only request-side params affect path template)
 long add(in long a, in long b, out long sum);
@@ -203,12 +238,17 @@ Constraints:
 - A Path bound name should match a route template variable name.
   Non-matching cases are invalid and should raise an error.
 - A parameter can have only one source.
-- If a method has multiple bound routes, a Path bound name must appear in at
-  least one bound route template.
+- If a method has multiple bound routes, a Path bound name must appear in every
+  bound route template of that method.
+- Every route template variable `{name}` must be bound by exactly one
+  request-side parameter (`in`/`inout`) resolved to Path source.
 
 ## 6. Request Encoding
 
-Default media type: `application/json`.
+Encoding is selected by `@Consumes`, defaulting to `application/json`.
+This RFC specifies JSON request encoding behavior.
+When media-type negotiation cannot be satisfied, implementations MUST return an
+error response (see section 10).
 
 ### 6.1 Query Encoding
 
@@ -222,6 +262,8 @@ Body parameters are encoded by parameter count:
 - No Body parameters: no request body.
 - Exactly 1 Body parameter: encode that value directly.
 - 2+ Body parameters: encode an object keyed by parameter names.
+- `null`/empty-value encoding follows the selected `@Consumes` media type
+  semantics.
 
 Examples:
 
@@ -231,7 +273,10 @@ Examples:
 
 ## 7. Response Encoding
 
-Default media type: `application/json`.
+Encoding is selected by `@Produces`, defaulting to `application/json`.
+This RFC specifies JSON response encoding behavior.
+When response media-type negotiation cannot be satisfied, implementations MUST
+return an error response (see section 10).
 
 Response rules:
 
@@ -247,6 +292,9 @@ Response rules:
 - Status code and body contract:
   - output count `0` -> `204 No Content`, no response body
   - output count `>=1` -> `200 OK`, JSON body encoded by the rules above
+  - `HEAD` is a special case: always `204 No Content`, no response body
+- `null`/empty-value encoding follows the selected `@Produces` media type
+  semantics.
 
 Examples:
 
@@ -317,16 +365,35 @@ The following are invalid and should raise mapping errors before serving traffic
 
 - More than one HTTP verb annotation on one method.
 - `@path` parameter names that do not appear in any bound route template.
+- For multi-route methods, any `@path` parameter name missing from one or more
+  bound route templates.
+- Any route template variable that has no matching request-side parameter bound
+  to Path source.
 - Duplicate final route bindings (`HTTP method + normalized path`) across methods.
+- Any `@head` method with non-`void` return type.
+- Any `@head` method containing `out` or `inout` parameters.
 
 ### 10.2 Runtime Request Validation
 
 - Missing required Path/Query parameters: `400 Bad Request`.
 - Type conversion failures (for example `uint32` parse failure): `400 Bad Request`.
 - Unsupported request media type for `@Consumes`: `415 Unsupported Media Type`.
-- Response media type negotiation failure for `@Produces`: `406 Not Acceptable`.
+- Requested response media type not satisfiable for `@Produces`:
+  `406 Not Acceptable`.
 
-### 10.3 Recommended Status Codes
+### 10.3 Response Body Shape
+
+- Success response body:
+  - uses the output encoding rules from section 7.
+  - successful payload is business data (direct value or object, depending on
+    section 7 shaping rules).
+- Failure response body:
+  - MUST be an object with shape:
+    - `code`: machine-readable error code.
+    - `msg`: human-readable summary.
+    - `details`: optional structured error details.
+
+### 10.4 Recommended Status Codes
 
 - Successful read operations: `200 OK`.
 - Successful create operations: `201 Created` when a new resource is created,
@@ -335,19 +402,17 @@ The following are invalid and should raise mapping errors before serving traffic
 - Method not supported on an existing route: `405 Method Not Allowed`.
 - Route not found: `404 Not Found`.
 
-### 10.4 Error Response Body
+### 10.5 Error Response Example
 
-Unless overridden by project conventions, runtime errors should return a JSON
-object:
+Failure responses should follow section 10.3, for example:
 
 ```json
 {
   "code": "INVALID_ARGUMENT",
-  "message": "field 'age' must be >= 0"
+  "msg": "field 'age' must be >= 0",
+  "details": {
+    "field": "age",
+    "expected": ">= 0"
+  }
 }
 ```
-
-Where:
-
-- `code` is a stable, machine-readable error identifier.
-- `message` is a human-readable diagnostic.
