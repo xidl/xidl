@@ -462,6 +462,35 @@ export class HttpAnnoServiceClient{
         return data as HttpAnnoServiceBumpResponse;
     }
 
+    async get_count(
+
+    ) : Promise<
+    HttpAnnoServiceGetCountResponse
+    >{
+        let path = "/get_count";
+        const headers = {
+            ...this.defaultHeaders
+        };
+        const options = {
+            method : "POST", headers
+        };
+        const url = joinUrl(
+        this.baseUrl, path
+        );
+        const resp = await this.fetchImpl(
+        url, options
+        );
+        if(!resp.ok){
+            throw await parseXidlError(
+            resp
+            );
+        }
+        const data = await resp.json(
+
+        );
+        return data as HttpAnnoServiceGetCountResponse;
+    }
+
     async ping(
 
     ) : Promise<
@@ -539,6 +568,11 @@ export interface HttpAnnoServiceBumpRequest{
 export interface HttpAnnoServiceBumpResponse{
     "return" : number;
     value : number;
+}
+
+export interface HttpAnnoServiceGetCountResponse{
+    "return" : void;
+    count : number;
 }
 ===============
 http_annotations.iface.zod.ts
@@ -680,6 +714,20 @@ export const HttpAnnoServiceBumpResponseSchema = z.object(
 export type HttpAnnoServiceBumpResponse = z.infer<
 typeof HttpAnnoServiceBumpResponseSchema
 >;
+export const HttpAnnoServiceGetCountResponseSchema = z.object(
+{
+    "return" : z.void(
+
+    ), count : z.number(
+
+    ).int(
+
+    ),
+}
+);
+export type HttpAnnoServiceGetCountResponse = z.infer<
+typeof HttpAnnoServiceGetCountResponseSchema
+>;
 ===============
 http_annotations.rs
 ===============
@@ -713,6 +761,10 @@ pub trait HttpAnnoService{
     &self,
     req:xidl_rust_axum::Request<HttpAnnoServiceBumpRequest>
     )->Result<HttpAnnoServiceBumpResponse,xidl_rust_axum::Error>;
+    async fn get_count(
+    &self,
+    req:xidl_rust_axum::Request<()>
+    )->Result<i32,xidl_rust_axum::Error>;
     async fn ping(
     &self,
     req:xidl_rust_axum::Request<()>
@@ -859,6 +911,8 @@ T:HttpAnnoService+Send+Sync+'static,
         .route("/add",xidl_rust_axum::axum::routing::post(Self::add))
 
         .route("/bump",xidl_rust_axum::axum::routing::post(Self::bump))
+
+        .route("/get_count",xidl_rust_axum::axum::routing::post(Self::get_count))
 
         .route("/ping",xidl_rust_axum::axum::routing::post(Self::ping))
 
@@ -1007,6 +1061,16 @@ T:HttpAnnoService+Send+Sync+'static,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
         let resp = svc.bump(req).await?;
+        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+    }
+
+    async fn get_count(
+    ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+    headers: ::xidl_rust_axum::axum::http::HeaderMap
+    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        let data = ();
+        let req = ::xidl_rust_axum::Request::new(headers,data);
+        let resp = svc.get_count(req).await?;
         Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
     }
 
@@ -1264,6 +1328,33 @@ impl HttpAnnoServiceClient{
         }
     }
 
+    pub async fn get_count(&self)->Result<i32,xidl_rust_axum::Error>{
+        let path = "/get_count".to_string();
+        let url = self.client.url(&path);
+        let req = self
+        .client
+        .http()
+        .request(xidl_rust_axum::reqwest::Method::POST,url);
+        let resp = req
+        .send()
+        .await
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        if resp.status().is_success(){
+            resp.json::<i32>()
+            .await
+            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+        }else{
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            let err = match body{
+                Some(body) => xidl_rust_axum::Error::new(body.code,body.msg),
+                None => xidl_rust_axum::Error::new(500,format!("http error: {}",status.as_u16())),
+
+            };
+            Err(err)
+        }
+    }
+
     pub async fn ping(&self)->Result<(),xidl_rust_axum::Error>{
         let path = "/ping".to_string();
         let url = self.client.url(&path);
@@ -1309,7 +1400,7 @@ openapi.json
     "version": "v1.0.0"
   },
   "paths": {
-    "/HttpAnnoService/add": {
+    "/add": {
       "post": {
         "operationId": "HttpAnnoService.add",
         "requestBody": {
@@ -1319,8 +1410,7 @@ openapi.json
                 "type": "object",
                 "required": [
                   "a",
-                  "b",
-                  "sum"
+                  "b"
                 ],
                 "properties": {
                   "a": {
@@ -1328,10 +1418,6 @@ openapi.json
                     "format": "int32"
                   },
                   "b": {
-                    "type": "integer",
-                    "format": "int32"
-                  },
-                  "sum": {
                     "type": "integer",
                     "format": "int32"
                   }
@@ -1346,8 +1432,21 @@ openapi.json
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "integer",
-                  "format": "int32"
+                  "type": "object",
+                  "required": [
+                    "return",
+                    "sum"
+                  ],
+                  "properties": {
+                    "return": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "sum": {
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  }
                 }
               }
             }
@@ -1365,7 +1464,7 @@ openapi.json
         }
       }
     },
-    "/HttpAnnoService/bump": {
+    "/bump": {
       "post": {
         "operationId": "HttpAnnoService.bump",
         "requestBody": {
@@ -1384,8 +1483,21 @@ openapi.json
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "integer",
-                  "format": "int32"
+                  "type": "object",
+                  "required": [
+                    "return",
+                    "value"
+                  ],
+                  "properties": {
+                    "return": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "value": {
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  }
                 }
               }
             }
@@ -1403,7 +1515,7 @@ openapi.json
         }
       }
     },
-    "/HttpAnnoService/create_user": {
+    "/create_user": {
       "post": {
         "operationId": "HttpAnnoService.create_user",
         "requestBody": {
@@ -1453,18 +1565,47 @@ openapi.json
         }
       }
     },
-    "/HttpAnnoService/get_name": {
+    "/get_count": {
+      "post": {
+        "operationId": "HttpAnnoService.get_count",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get_name": {
       "post": {
         "operationId": "HttpAnnoService.get_name",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "string"
-              }
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           }
-        },
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1489,32 +1630,29 @@ openapi.json
         }
       }
     },
-    "/HttpAnnoService/get_user_alias": {
+    "/get_user_alias/{id}": {
       "post": {
         "operationId": "HttpAnnoService.get_user_alias",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "user_id",
-                  "locale"
-                ],
-                "properties": {
-                  "locale": {
-                    "type": "string"
-                  },
-                  "user_id": {
-                    "type": "integer",
-                    "format": "int32",
-                    "minimum": 0
-                  }
-                }
-              }
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           }
-        },
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1539,7 +1677,7 @@ openapi.json
         }
       }
     },
-    "/HttpAnnoService/ping": {
+    "/ping": {
       "post": {
         "operationId": "HttpAnnoService.ping",
         "responses": {
@@ -1559,7 +1697,7 @@ openapi.json
         }
       }
     },
-    "/HttpAnnoService/search_user": {
+    "/search_user": {
       "get": {
         "operationId": "HttpAnnoService.search_user",
         "parameters": [
@@ -1579,6 +1717,100 @@ openapi.json
               "type": "integer",
               "format": "int32",
               "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/u/{id}": {
+      "get": {
+        "operationId": "HttpAnnoService.get_user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "operationId": "HttpAnnoService.get_user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           }
         ],

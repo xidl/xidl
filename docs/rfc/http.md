@@ -184,6 +184,13 @@ Each parameter is assigned to a source by the following priority:
    - `GET/DELETE/HEAD/OPTIONS` -> Query
    - `POST/PUT/PATCH` -> Body
 
+Direction interaction (`in/out/inout`):
+
+- `out` parameters are response-only and MUST NOT participate in request-side
+  source resolution.
+- `in` and `inout` parameters participate in request-side source resolution
+  using the priority rules above.
+
 Name binding rules for `@path` / `@query`:
 
 - Without argument (`@path`, `@query`): the bound name is the parameter name.
@@ -196,6 +203,8 @@ Constraints:
 - A Path bound name should match a route template variable name.
   Non-matching cases are invalid and should raise an error.
 - A parameter can have only one source.
+- If a method has multiple bound routes, a Path bound name must appear in at
+  least one bound route template.
 
 ## 6. Request Encoding
 
@@ -226,20 +235,23 @@ Default media type: `application/json`.
 
 Response rules:
 
-- If there are no `out/inout` parameters, the response body is the method return
-  value directly.
-- If `out/inout` parameters exist, the response body is encoded as an object:
-  - Return value field name is fixed as `return`
-  - Each `out/inout` parameter uses its parameter name as field name
-- If the method return type is `void` and there are no `out/inout` parameters,
-  the response has no body (recommended status: `204 No Content`).
+- Build the response outputs set from:
+  - method return value (if return type is not `void`)
+  - all `out` and `inout` parameters
+- Output shaping:
+  - if output count is `0`: no response body
+  - if output count is `1`: return that value directly
+  - if output count is `>1`: return an object
+    - return value field name is fixed as `return` (when return value exists)
+    - each `out/inout` parameter uses its parameter name as field name
 - Status code and body contract:
-  - `void` and no `out/inout` -> `204 No Content`, no response body.
-  - Otherwise -> `200 OK`, response body is encoded by the rules above.
+  - output count `0` -> `204 No Content`, no response body
+  - output count `>=1` -> `200 OK`, JSON body encoded by the rules above
 
 Examples:
 
 - `string hello()` -> `"ok"`
+- `void get_count(out long count)` -> `3`
 - `long add(long a, long b, out long sum)` -> `{"return":0,"sum":3}`
 
 ## 8. Attribute Mapping

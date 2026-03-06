@@ -41,5 +41,9 @@ interface HttpAnnoService {
         inout long value
     );
 
+    void get_count(
+        out long count
+    );
+
     void ping();
 };

@@ -53,7 +53,8 @@ struct MethodContext {
     request_params: Vec<ParamContext>,
     response_struct: Option<String>,
     response_params: Vec<ParamContext>,
-    has_output_params: bool,
+    response_include_return: bool,
+    response_is_empty: bool,
     return_is_unit: bool,
 }
 
@@ -236,16 +237,26 @@ fn render_op(
         ))
     };
     let request_ty = request_struct.clone().unwrap_or_else(|| "()".to_string());
-    let has_output_params = !response_params.is_empty();
-    let response_struct = if !has_output_params {
-        None
-    } else {
+    let response_output_count = usize::from(!return_is_unit) + response_params.len();
+    let response_is_empty = response_output_count == 0;
+    let response_include_return = !return_is_unit;
+    let response_struct = if response_output_count > 1 {
         Some(format!(
             "{}Response",
             method_struct_prefix(interface_name, &op.ident)
         ))
+    } else {
+        None
     };
-    let response_ty = response_struct.clone().unwrap_or_else(|| ret.clone());
+    let response_ty = if let Some(response_struct) = &response_struct {
+        response_struct.clone()
+    } else if !return_is_unit {
+        ret.clone()
+    } else if let Some(param) = response_params.first() {
+        param.ty.clone()
+    } else {
+        "()".to_string()
+    };
     Ok(MethodContext {
         name: method_name,
         raw_name: op.ident.clone(),
@@ -267,7 +278,8 @@ fn render_op(
         request_params,
         response_struct,
         response_params,
-        has_output_params,
+        response_include_return,
+        response_is_empty,
         return_is_unit,
     })
 }
@@ -306,7 +318,8 @@ fn render_attr(
                     request_params: Vec::new(),
                     response_struct: None,
                     response_params: Vec::new(),
-                    has_output_params: false,
+                    response_include_return: true,
+                    response_is_empty: false,
                     return_is_unit: false,
                 }
             })
@@ -342,7 +355,8 @@ fn render_attr(
                             request_params: Vec::new(),
                             response_struct: None,
                             response_params: Vec::new(),
-                            has_output_params: false,
+                            response_include_return: true,
+                            response_is_empty: false,
                             return_is_unit: false,
                         });
                         let raw_setter = format!("set_{raw_name}");
@@ -382,7 +396,8 @@ fn render_attr(
                             request_params: vec![request_param],
                             response_struct: None,
                             response_params: Vec::new(),
-                            has_output_params: false,
+                            response_include_return: false,
+                            response_is_empty: true,
                             return_is_unit: true,
                         });
                     }
@@ -415,7 +430,8 @@ fn render_attr(
                         request_params: Vec::new(),
                         response_struct: None,
                         response_params: Vec::new(),
-                        has_output_params: false,
+                        response_include_return: true,
+                        response_is_empty: false,
                         return_is_unit: false,
                     });
                     let raw_setter = format!("set_{raw_name}");
@@ -454,7 +470,8 @@ fn render_attr(
                         request_params: vec![request_param],
                         response_struct: None,
                         response_params: Vec::new(),
-                        has_output_params: false,
+                        response_include_return: false,
+                        response_is_empty: true,
                         return_is_unit: true,
                     });
                 }

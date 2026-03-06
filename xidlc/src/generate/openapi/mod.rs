@@ -208,11 +208,12 @@ impl OpenApiContext {
                 }
             }
         }
+        let mut route_bindings = HashMap::new();
 
         for method in methods {
             let MethodInfo {
                 http_method,
-                path,
+                paths,
                 operation_id,
                 parameters,
                 request_body,
@@ -220,36 +221,46 @@ impl OpenApiContext {
                 response_schema,
             } = method;
 
-            let mut responses = ResponsesBuilder::new();
-            let mut ok_response = ResponseBuilder::new().description("OK");
-            if let Some(response_schema) = response_schema {
-                ok_response =
-                    ok_response.content("application/json", Content::new(Some(response_schema)));
+            for path in paths {
+                let key = format!("{} {path}", openapi_method_name(&http_method));
+                if let Some(previous) = route_bindings.insert(key.clone(), operation_id.clone()) {
+                    panic!(
+                        "duplicate HTTP route binding: {key} (operations: {previous}, {operation_id})"
+                    );
+                }
+                let mut responses = ResponsesBuilder::new();
+                let mut ok_response = ResponseBuilder::new().description("OK");
+                if let Some(schema) = &response_schema {
+                    ok_response =
+                        ok_response.content("application/json", Content::new(Some(schema.clone())));
+                }
+                responses = responses.response(response_status, ok_response.build());
+                let mut operation = OperationBuilder::new()
+                    .operation_id(Some(operation_id.clone()))
+                    .responses(
+                        responses
+                            .response(
+                                "500",
+                                ResponseBuilder::new()
+                                    .description("Error")
+                                    .content(
+                                        "application/json",
+                                        Content::new(Some(error_schema_ref())),
+                                    )
+                                    .build(),
+                            )
+                            .build(),
+                    );
+                for parameter in &parameters {
+                    operation = operation.parameter(parameter.clone());
+                }
+                if let Some(request_body) = &request_body {
+                    operation = operation.request_body(Some(request_body.clone()));
+                }
+                let paths_builder = mem::take(&mut self.paths);
+                self.paths =
+                    paths_builder.path(path, PathItem::new(http_method.clone(), operation));
             }
-            responses = responses.response(response_status, ok_response.build());
-            let mut operation = OperationBuilder::new()
-                .operation_id(Some(operation_id))
-                .responses(
-                    responses
-                        .response(
-                            "500",
-                            ResponseBuilder::new()
-                                .description("Error")
-                                .content("application/json", Content::new(Some(error_schema_ref())))
-                                .build(),
-                        )
-                        .build(),
-                );
-
-            for parameter in parameters {
-                operation = operation.parameter(parameter);
-            }
-            if let Some(request_body) = request_body {
-                operation = operation.request_body(Some(request_body));
-            }
-
-            let paths = mem::take(&mut self.paths);
-            self.paths = paths.path(path, PathItem::new(http_method, operation));
         }
 
         self.schemas.entry("Error".to_string()).or_insert_with(|| {
@@ -267,7 +278,7 @@ impl OpenApiContext {
 
 struct MethodInfo {
     http_method: OpenApiHttpMethod,
-    path: String,
+    paths: Vec<String>,
     operation_id: String,
     parameters: Vec<utoipa::openapi::path::Parameter>,
     request_body: Option<RequestBody>,
@@ -276,26 +287,9 @@ struct MethodInfo {
 }
 
 fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> MethodInfo {
-    let return_is_unit = matches!(&op.ty, hir::OpTypeSpec::Void);
-    let has_output_params =
-        op.parameter
-            .as_ref()
-            .map(|value| {
-                value.0.iter().any(|param| {
-                    !matches!(param_direction(param.attr.as_ref()), ParamDirection::In)
-                })
-            })
-            .unwrap_or(false);
-    let (response_status, response_schema) = if return_is_unit && !has_output_params {
-        ("204", None)
-    } else {
-        let schema = match &op.ty {
-            hir::OpTypeSpec::Void => {
-                RefOr::T(Schema::from(ObjectBuilder::new().schema_type(Type::Null)))
-            }
-            hir::OpTypeSpec::TypeSpec(ty) => schema_for_type(ty),
-        };
-        ("200", Some(schema))
+    let return_schema = match &op.ty {
+        hir::OpTypeSpec::Void => None,
+        hir::OpTypeSpec::TypeSpec(ty) => Some(schema_for_type(ty)),
     };
 
     let params = op
@@ -304,34 +298,67 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
         .map(|value| value.0.as_slice())
         .unwrap_or(&[]);
 
-    let (method, path) = route_from_annotations(
-        &op.annotations,
-        HttpMethod::Post,
-        default_path(module_path, interface_name, &op.ident),
-    );
-    let path_param_names = parse_path_params(&path);
+    let (method, mut paths) = route_from_annotations(&op.annotations, HttpMethod::Post);
+    if paths.is_empty() {
+        paths.push(auto_default_method_path(op, method));
+    }
+    let all_path_param_names: HashSet<String> = paths
+        .iter()
+        .flat_map(|item| parse_path_params(item).into_iter())
+        .collect();
     let default_source = default_param_source(method);
 
     let mut parameters = Vec::new();
     let mut body_props = Vec::new();
     let mut body_required = Vec::new();
+    let mut output_fields = Vec::new();
 
     for param in params {
+        let direction = param_direction(param.attr.as_ref());
+        if matches!(direction, ParamDirection::Out) {
+            continue;
+        }
+        if let Some(binding) = explicit_param_binding(param) {
+            if matches!(binding.source, ParamSource::Path)
+                && !all_path_param_names.contains(&binding.bound_name)
+            {
+                panic!(
+                    "parameter '{}' is annotated with @path but '{}' is not present in any route template of method '{}'",
+                    param.declarator.0, binding.bound_name, op.ident
+                );
+            }
+        }
+    }
+
+    for param in params {
+        let direction = param_direction(param.attr.as_ref());
         let raw_name = param.declarator.0.clone();
         let schema = schema_for_type(&param.ty);
+        if matches!(direction, ParamDirection::Out | ParamDirection::InOut) {
+            output_fields.push((raw_name.clone(), schema.clone()));
+        }
+        if matches!(direction, ParamDirection::Out) {
+            continue;
+        }
         let optional = has_optional_annotation(&param.annotations);
-        let source = if path_param_names.contains(&raw_name) {
-            ParamSource::Path
-        } else {
-            default_source
+        let binding = explicit_param_binding(param);
+        let (source, bound_name) = match binding {
+            Some(binding) => (binding.source, binding.bound_name),
+            None if all_path_param_names.contains(&raw_name) => {
+                (ParamSource::Path, raw_name.clone())
+            }
+            None => (default_source, raw_name.clone()),
         };
         match source {
-            ParamSource::Path => {
-                parameters.push(parameter_schema(ParameterIn::Path, &raw_name, schema, true))
-            }
+            ParamSource::Path => parameters.push(parameter_schema(
+                ParameterIn::Path,
+                &bound_name,
+                schema,
+                true,
+            )),
             ParamSource::Query => parameters.push(parameter_schema(
                 ParameterIn::Query,
-                &raw_name,
+                &bound_name,
                 schema,
                 !optional,
             )),
@@ -344,9 +371,30 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
         }
     }
 
+    let output_count = usize::from(return_schema.is_some()) + output_fields.len();
+    let (response_status, response_schema) = if output_count == 0 {
+        ("204", None)
+    } else if output_count == 1 {
+        if let Some(schema) = return_schema {
+            ("200", Some(schema))
+        } else {
+            let (_, schema) = output_fields.into_iter().next().unwrap();
+            ("200", Some(schema))
+        }
+    } else {
+        let mut object = ObjectBuilder::new().schema_type(Type::Object);
+        if let Some(schema) = return_schema {
+            object = object.property("return", schema).required("return");
+        }
+        for (name, schema) in output_fields {
+            object = object.property(name.clone(), schema).required(name);
+        }
+        ("200", Some(RefOr::T(Schema::from(object))))
+    };
+
     MethodInfo {
         http_method: method_to_openapi(method),
-        path,
+        paths,
         operation_id: operation_id(module_path, interface_name, &op.ident),
         parameters,
         request_body: body_schema(body_props, body_required),
@@ -365,7 +413,7 @@ fn render_attr(
             .into_iter()
             .map(|raw_name| MethodInfo {
                 http_method: method_to_openapi(HttpMethod::Get),
-                path: default_path(module_path, interface_name, &raw_name),
+                paths: vec![default_path(module_path, interface_name, &raw_name)],
                 operation_id: operation_id(module_path, interface_name, &raw_name),
                 parameters: Vec::new(),
                 request_body: None,
@@ -381,7 +429,7 @@ fn render_attr(
                         let raw_name = decl.0.clone();
                         out.push(MethodInfo {
                             http_method: method_to_openapi(HttpMethod::Get),
-                            path: default_path(module_path, interface_name, &raw_name),
+                            paths: vec![default_path(module_path, interface_name, &raw_name)],
                             operation_id: operation_id(module_path, interface_name, &raw_name),
                             parameters: Vec::new(),
                             request_body: None,
@@ -393,7 +441,7 @@ fn render_attr(
                         let required = vec!["value".to_string()];
                         out.push(MethodInfo {
                             http_method: method_to_openapi(HttpMethod::Post),
-                            path: default_path(module_path, interface_name, &raw_setter),
+                            paths: vec![default_path(module_path, interface_name, &raw_setter)],
                             operation_id: operation_id(module_path, interface_name, &raw_setter),
                             parameters: Vec::new(),
                             request_body: body_schema(props, required),
@@ -406,7 +454,7 @@ fn render_attr(
                     let raw_name = declarator.0.clone();
                     out.push(MethodInfo {
                         http_method: method_to_openapi(HttpMethod::Get),
-                        path: default_path(module_path, interface_name, &raw_name),
+                        paths: vec![default_path(module_path, interface_name, &raw_name)],
                         operation_id: operation_id(module_path, interface_name, &raw_name),
                         parameters: Vec::new(),
                         request_body: None,
@@ -418,7 +466,7 @@ fn render_attr(
                     let required = vec!["value".to_string()];
                     out.push(MethodInfo {
                         http_method: method_to_openapi(HttpMethod::Post),
-                        path: default_path(module_path, interface_name, &raw_setter),
+                        paths: vec![default_path(module_path, interface_name, &raw_setter)],
                         operation_id: operation_id(module_path, interface_name, &raw_setter),
                         parameters: Vec::new(),
                         request_body: body_schema(props, required),
@@ -652,7 +700,7 @@ fn default_path(module_path: &[String], interface_name: &str, method_name: &str)
     format!("/{}", parts.join("/"))
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 enum HttpMethod {
     Get,
     Post,
@@ -663,7 +711,7 @@ enum HttpMethod {
     Options,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 enum ParamSource {
     Path,
     Query,
@@ -680,20 +728,42 @@ enum ParamDirection {
 fn route_from_annotations(
     annotations: &[hir::Annotation],
     default_method: HttpMethod,
-    default_path: String,
-) -> (HttpMethod, String) {
+) -> (HttpMethod, Vec<String>) {
+    let mut verb_method = None;
+    let mut paths = Vec::new();
+
     for annotation in annotations {
-        let Some(method) = method_from_annotation(annotation) else {
+        let Some(name) = annotation_name(annotation) else {
             continue;
         };
-        let mut path = None;
-        if let Some(params) = annotation_params(annotation) {
-            let params = normalize_params(params);
-            path = params.get("path").cloned();
+        if let Some(method) = method_from_annotation(annotation) {
+            if let Some(prev) = verb_method {
+                if prev != method {
+                    panic!("more than one HTTP verb annotation is not allowed on a method");
+                }
+            }
+            verb_method = Some(method);
+            if let Some(params) = annotation_params(annotation) {
+                let params = normalize_params(params);
+                if let Some(path) = params.get("path") {
+                    paths.push(normalize_path(path));
+                }
+            }
+            continue;
         }
-        return (method, path.unwrap_or(default_path));
+        if name.eq_ignore_ascii_case("path") {
+            if let Some(params) = annotation_params(annotation) {
+                let params = normalize_params(params);
+                if let Some(path) = params.get("value").or_else(|| params.get("path")) {
+                    paths.push(normalize_path(path));
+                }
+            }
+        }
     }
-    (default_method, default_path)
+
+    let mut dedup = HashSet::new();
+    paths.retain(|path| dedup.insert(path.clone()));
+    (verb_method.unwrap_or(default_method), paths)
 }
 
 fn method_from_annotation(annotation: &hir::Annotation) -> Option<HttpMethod> {
@@ -884,6 +954,15 @@ fn parse_path_params(path: &str) -> HashSet<String> {
     out
 }
 
+fn normalize_path(path: &str) -> String {
+    let path = path.trim();
+    if path.starts_with('/') {
+        path.to_string()
+    } else {
+        format!("/{path}")
+    }
+}
+
 fn default_param_source(method: HttpMethod) -> ParamSource {
     match method {
         HttpMethod::Get | HttpMethod::Delete | HttpMethod::Head | HttpMethod::Options => {
@@ -901,6 +980,77 @@ fn param_direction(attr: Option<&hir::ParamAttribute>) -> ParamDirection {
     }
 }
 
+struct SourceBinding {
+    source: ParamSource,
+    bound_name: String,
+}
+
+fn explicit_param_binding(param: &hir::ParamDcl) -> Option<SourceBinding> {
+    let mut found = None;
+    for annotation in &param.annotations {
+        let Some(name) = annotation_name(annotation) else {
+            continue;
+        };
+        let current = if name.eq_ignore_ascii_case("path") {
+            Some(ParamSource::Path)
+        } else if name.eq_ignore_ascii_case("query") {
+            Some(ParamSource::Query)
+        } else {
+            None
+        };
+        let Some(current) = current else {
+            continue;
+        };
+        let bound_name = annotation_params(annotation)
+            .map(normalize_params)
+            .and_then(|params| params.get("value").cloned())
+            .unwrap_or_else(|| param.declarator.0.clone());
+        match found {
+            None => {
+                found = Some(SourceBinding {
+                    source: current,
+                    bound_name,
+                })
+            }
+            Some(ref prev) if prev.source == current && prev.bound_name == bound_name => {}
+            Some(_) => {
+                panic!(
+                    "parameter '{}' has conflicting source annotations (@path/@query)",
+                    param.declarator.0
+                );
+            }
+        }
+    }
+    found
+}
+
+fn auto_default_method_path(op: &hir::OpDcl, method: HttpMethod) -> String {
+    let params = op
+        .parameter
+        .as_ref()
+        .map(|value| value.0.as_slice())
+        .unwrap_or(&[]);
+    let default_source = default_param_source(method);
+    let mut path = normalize_path(&op.ident);
+    for param in params {
+        if matches!(param_direction(param.attr.as_ref()), ParamDirection::Out) {
+            continue;
+        }
+        let binding = explicit_param_binding(param);
+        let (source, bound_name) = match binding {
+            Some(binding) => (binding.source, binding.bound_name),
+            None => (default_source, param.declarator.0.clone()),
+        };
+        if matches!(source, ParamSource::Path) {
+            path.push('/');
+            path.push('{');
+            path.push_str(&bound_name);
+            path.push('}');
+        }
+    }
+    path
+}
+
 fn method_to_openapi(method: HttpMethod) -> OpenApiHttpMethod {
     match method {
         HttpMethod::Get => OpenApiHttpMethod::Get,
@@ -910,6 +1060,19 @@ fn method_to_openapi(method: HttpMethod) -> OpenApiHttpMethod {
         HttpMethod::Delete => OpenApiHttpMethod::Delete,
         HttpMethod::Head => OpenApiHttpMethod::Head,
         HttpMethod::Options => OpenApiHttpMethod::Options,
+    }
+}
+
+fn openapi_method_name(method: &OpenApiHttpMethod) -> &'static str {
+    match method {
+        OpenApiHttpMethod::Get => "GET",
+        OpenApiHttpMethod::Post => "POST",
+        OpenApiHttpMethod::Put => "PUT",
+        OpenApiHttpMethod::Patch => "PATCH",
+        OpenApiHttpMethod::Delete => "DELETE",
+        OpenApiHttpMethod::Head => "HEAD",
+        OpenApiHttpMethod::Options => "OPTIONS",
+        _ => "UNKNOWN",
     }
 }
 
