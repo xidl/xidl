@@ -1543,15 +1543,8 @@ openapi.json
       "post": {
         "operationId": "HttpAnnoService.ping",
         "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "null"
-                }
-              }
-            }
+          "204": {
+            "description": "OK"
           },
           "500": {
             "description": "Error",

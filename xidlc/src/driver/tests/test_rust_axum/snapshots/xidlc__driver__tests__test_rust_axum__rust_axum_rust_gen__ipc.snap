@@ -1113,15 +1113,8 @@ openapi.json
       "get": {
         "operationId": "HttpService.restart",
         "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "null"
-                }
-              }
-            }
+          "204": {
+            "description": "OK"
           },
           "500": {
             "description": "Error",
@@ -1283,15 +1276,8 @@ openapi.json
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "null"
-                }
-              }
-            }
+          "204": {
+            "description": "OK"
           },
           "500": {
             "description": "Error",

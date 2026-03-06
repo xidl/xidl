@@ -216,19 +216,21 @@ impl OpenApiContext {
                 operation_id,
                 parameters,
                 request_body,
+                response_status,
                 response_schema,
             } = method;
+
+            let mut responses = ResponsesBuilder::new();
+            let mut ok_response = ResponseBuilder::new().description("OK");
+            if let Some(response_schema) = response_schema {
+                ok_response =
+                    ok_response.content("application/json", Content::new(Some(response_schema)));
+            }
+            responses = responses.response(response_status, ok_response.build());
             let mut operation = OperationBuilder::new()
                 .operation_id(Some(operation_id))
                 .responses(
-                    ResponsesBuilder::new()
-                        .response(
-                            "200",
-                            ResponseBuilder::new()
-                                .description("OK")
-                                .content("application/json", Content::new(Some(response_schema)))
-                                .build(),
-                        )
+                    responses
                         .response(
                             "500",
                             ResponseBuilder::new()
@@ -269,15 +271,31 @@ struct MethodInfo {
     operation_id: String,
     parameters: Vec<utoipa::openapi::path::Parameter>,
     request_body: Option<RequestBody>,
-    response_schema: RefOr<Schema>,
+    response_status: &'static str,
+    response_schema: Option<RefOr<Schema>>,
 }
 
 fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> MethodInfo {
-    let ret = match &op.ty {
-        hir::OpTypeSpec::Void => {
-            RefOr::T(Schema::from(ObjectBuilder::new().schema_type(Type::Null)))
-        }
-        hir::OpTypeSpec::TypeSpec(ty) => schema_for_type(ty),
+    let return_is_unit = matches!(&op.ty, hir::OpTypeSpec::Void);
+    let has_output_params =
+        op.parameter
+            .as_ref()
+            .map(|value| {
+                value.0.iter().any(|param| {
+                    !matches!(param_direction(param.attr.as_ref()), ParamDirection::In)
+                })
+            })
+            .unwrap_or(false);
+    let (response_status, response_schema) = if return_is_unit && !has_output_params {
+        ("204", None)
+    } else {
+        let schema = match &op.ty {
+            hir::OpTypeSpec::Void => {
+                RefOr::T(Schema::from(ObjectBuilder::new().schema_type(Type::Null)))
+            }
+            hir::OpTypeSpec::TypeSpec(ty) => schema_for_type(ty),
+        };
+        ("200", Some(schema))
     };
 
     let params = op
@@ -332,7 +350,8 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
         operation_id: operation_id(module_path, interface_name, &op.ident),
         parameters,
         request_body: body_schema(body_props, body_required),
-        response_schema: ret,
+        response_status,
+        response_schema,
     }
 }
 
@@ -350,7 +369,8 @@ fn render_attr(
                 operation_id: operation_id(module_path, interface_name, &raw_name),
                 parameters: Vec::new(),
                 request_body: None,
-                response_schema: schema_for_type(&spec.ty),
+                response_status: "200",
+                response_schema: Some(schema_for_type(&spec.ty)),
             })
             .collect(),
         hir::AttrDclInner::AttrSpec(spec) => {
@@ -365,7 +385,8 @@ fn render_attr(
                             operation_id: operation_id(module_path, interface_name, &raw_name),
                             parameters: Vec::new(),
                             request_body: None,
-                            response_schema: schema_for_type(&spec.ty),
+                            response_status: "200",
+                            response_schema: Some(schema_for_type(&spec.ty)),
                         });
                         let raw_setter = format!("set_{raw_name}");
                         let props = vec![("value".to_string(), schema_for_type(&spec.ty))];
@@ -376,9 +397,8 @@ fn render_attr(
                             operation_id: operation_id(module_path, interface_name, &raw_setter),
                             parameters: Vec::new(),
                             request_body: body_schema(props, required),
-                            response_schema: RefOr::T(Schema::from(
-                                ObjectBuilder::new().schema_type(Type::Null),
-                            )),
+                            response_status: "204",
+                            response_schema: None,
                         });
                     }
                 }
@@ -390,7 +410,8 @@ fn render_attr(
                         operation_id: operation_id(module_path, interface_name, &raw_name),
                         parameters: Vec::new(),
                         request_body: None,
-                        response_schema: schema_for_type(&spec.ty),
+                        response_status: "200",
+                        response_schema: Some(schema_for_type(&spec.ty)),
                     });
                     let raw_setter = format!("set_{raw_name}");
                     let props = vec![("value".to_string(), schema_for_type(&spec.ty))];
@@ -401,9 +422,8 @@ fn render_attr(
                         operation_id: operation_id(module_path, interface_name, &raw_setter),
                         parameters: Vec::new(),
                         request_body: body_schema(props, required),
-                        response_schema: RefOr::T(Schema::from(
-                            ObjectBuilder::new().schema_type(Type::Null),
-                        )),
+                        response_status: "204",
+                        response_schema: None,
                     });
                 }
             }
@@ -650,6 +670,13 @@ enum ParamSource {
     Body,
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum ParamDirection {
+    In,
+    Out,
+    InOut,
+}
+
 fn route_from_annotations(
     annotations: &[hir::Annotation],
     default_method: HttpMethod,
@@ -863,6 +890,14 @@ fn default_param_source(method: HttpMethod) -> ParamSource {
             ParamSource::Query
         }
         HttpMethod::Post | HttpMethod::Put | HttpMethod::Patch => ParamSource::Body,
+    }
+}
+
+fn param_direction(attr: Option<&hir::ParamAttribute>) -> ParamDirection {
+    match attr.map(|value| value.0.as_str()) {
+        Some("out") => ParamDirection::Out,
+        Some("inout") => ParamDirection::InOut,
+        _ => ParamDirection::In,
     }
 }
 

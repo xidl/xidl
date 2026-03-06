@@ -233,6 +233,9 @@ Response rules:
   - Each `out/inout` parameter uses its parameter name as field name
 - If the method return type is `void` and there are no `out/inout` parameters,
   the response has no body (recommended status: `204 No Content`).
+- Status code and body contract:
+  - `void` and no `out/inout` -> `204 No Content`, no response body.
+  - Otherwise -> `200 OK`, response body is encoded by the rules above.
 
 Examples:
 
@@ -247,7 +250,8 @@ Examples:
   - `GET /.../x`, returns `T`
 - `attribute T x`
   - `GET /.../x`, returns `T`
-  - `POST /.../set_x`, request body is single parameter `value: T`
+  - `POST /.../set_x`, request body is single parameter `value: T`, and the
+    response is `204 No Content` with no body
 
 ## 9. Examples
 
