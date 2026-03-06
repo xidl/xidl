@@ -13,7 +13,7 @@ annotation_basic.rs
 
 pub struct S{
     pub a:i32,
-    pub b:i16,
+    pub b:Option<i16>,
 }
 
 impl S{
@@ -33,9 +33,12 @@ impl xidl_xcdr::XcdrSerialize for S{
         serializer.begin_field(xidl_xcdr::FieldId(1u32),false,0)?;
         xidl_xcdr::XcdrSerialize::serialize_with(&self.a,serializer)?;
         serializer.end_field()?;
-        serializer.begin_field(xidl_xcdr::FieldId(2u32),false,0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.b,serializer)?;
-        serializer.end_field()?;
+        if let Some(value) = &self.b{
+            serializer.begin_field(xidl_xcdr::FieldId(2u32),false,0)?;
+            xidl_xcdr::XcdrSerialize::serialize_with(value,serializer)?;
+            serializer.end_field()?;
+        }
+
         serializer.end_struct()?;
         Ok(())
     }
@@ -46,7 +49,7 @@ impl xidl_xcdr::XcdrDeserialize for S{
     deserializer:&mut D,
     )->xidl_xcdr::error::XcdrResult<Self>{
         let a = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let b = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+        let b = Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
         Ok(Self{
             a,
             b,

@@ -32,13 +32,25 @@ impl {{ ident }} {
                 xidl_xcdr::XcdrSerialize::serialize_with(&self.base, serializer)?;
             {% endif %}
             {% for member in members %}
-                {% if member.field_id is not none %}
-                    serializer.begin_field(xidl_xcdr::FieldId({{ member.field_id }}), false, 0)?;
+                {% if member.optional %}
+                    if let Some(value) = &self.{{ member.name }} {
+                        {% if member.field_id is not none %}
+                            serializer.begin_field(xidl_xcdr::FieldId({{ member.field_id }}), false, 0)?;
+                        {% else %}
+                            serializer.begin_field(xidl_xcdr::FieldId({{ loop.index }}u32), false, 0)?;
+                        {% endif %}
+                        xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
+                        serializer.end_field()?;
+                    }
                 {% else %}
-                    serializer.begin_field(xidl_xcdr::FieldId({{ loop.index }}u32), false, 0)?;
+                    {% if member.field_id is not none %}
+                        serializer.begin_field(xidl_xcdr::FieldId({{ member.field_id }}), false, 0)?;
+                    {% else %}
+                        serializer.begin_field(xidl_xcdr::FieldId({{ loop.index }}u32), false, 0)?;
+                    {% endif %}
+                    xidl_xcdr::XcdrSerialize::serialize_with(&self.{{ member.name }}, serializer)?;
+                    serializer.end_field()?;
                 {% endif %}
-                xidl_xcdr::XcdrSerialize::serialize_with(&self.{{ member.name }}, serializer)?;
-                serializer.end_field()?;
             {% endfor %}
             serializer.end_struct()?;
             Ok(())
@@ -55,7 +67,11 @@ impl {{ ident }} {
                 let base = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
             {% endif %}
             {% for member in members %}
-                let {{ member.name }} = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+                {% if member.optional %}
+                    let {{ member.name }} = Some(xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?);
+                {% else %}
+                    let {{ member.name }} = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+                {% endif %}
             {% endfor %}
             Ok(Self {
                 {% if parent %}

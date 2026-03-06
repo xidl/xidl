@@ -343,6 +343,7 @@ fn render_interface(
                     prop: ts_prop_name(&param.raw_name),
                     ty: ts_type_for_type_spec(&param.ty, module_path, TypeRefTarget::Types),
                     schema: zod_schema_for_type_spec(&param.ty, module_path),
+                    optional: param.optional,
                 })
                 .collect::<Vec<_>>();
             let types = renderer.render_template(
@@ -384,11 +385,13 @@ fn render_interface(
                         module_path,
                     )
                 },
+                optional: false,
             }];
             params.extend(method.output_params.iter().map(|param| ParamDeclContext {
                 prop: ts_prop_name(&param.raw_name),
                 ty: ts_type_for_type_spec(&param.ty, module_path, TypeRefTarget::Types),
                 schema: zod_schema_for_type_spec(&param.ty, module_path),
+                optional: param.optional,
             }));
             let types = renderer.render_template(
                 "request.d.ts.j2",
@@ -454,6 +457,7 @@ fn render_struct(
                 .map(|field| FieldTypeContext {
                     prop: field.prop.clone(),
                     ty: field.ty.clone(),
+                    optional: field.optional,
                 })
                 .collect(),
         },
@@ -469,6 +473,7 @@ fn render_struct(
                 .map(|field| FieldZodContext {
                     prop: field.prop,
                     schema: field.schema,
+                    optional: field.optional,
                 })
                 .collect(),
         },
@@ -597,12 +602,14 @@ fn render_bit_number(ident: &str, renderer: &TypescriptRenderer) -> IdlcResult<T
 struct FieldTypeContext {
     prop: String,
     ty: String,
+    optional: bool,
 }
 
 #[derive(Serialize)]
 struct FieldZodContext {
     prop: String,
     schema: String,
+    optional: bool,
 }
 
 #[derive(Serialize)]
@@ -663,6 +670,7 @@ struct ParamDeclContext {
     prop: String,
     ty: String,
     schema: String,
+    optional: bool,
 }
 
 #[derive(Serialize)]
@@ -735,6 +743,7 @@ struct ParamInfo {
     raw_name: String,
     wire_name: String,
     ty: hir::TypeSpec,
+    optional: bool,
 }
 
 #[derive(Clone)]
@@ -760,7 +769,14 @@ impl MethodInfo {
             .iter()
             .map(|param| ClientParamContext {
                 name: param.name.clone(),
-                ty: ts_type_for_type_spec(&param.ty, module_path, TypeRefTarget::Client),
+                ty: {
+                    let ty = ts_type_for_type_spec(&param.ty, module_path, TypeRefTarget::Client);
+                    if param.optional {
+                        format!("{ty} | undefined")
+                    } else {
+                        ty
+                    }
+                },
             })
             .collect::<Vec<_>>();
         let return_ty = if let Some(response_name) = &self.response_name {
@@ -878,12 +894,14 @@ enum ParamDirection {
 fn struct_fields(members: &[hir::Member], module_path: &[String]) -> Vec<FieldDecl> {
     let mut fields = Vec::new();
     for member in members {
+        let optional = has_optional_annotation(&member.annotations);
         for decl in &member.ident {
             let name = declarator_name(decl);
             fields.push(FieldDecl {
                 prop: ts_prop_name(name),
                 ty: ts_type_for_decl(&member.ty, decl, module_path, TypeRefTarget::Types),
                 schema: zod_schema_for_decl(&member.ty, decl, module_path),
+                optional,
             });
         }
     }
@@ -894,6 +912,7 @@ struct FieldDecl {
     prop: String,
     ty: String,
     schema: String,
+    optional: bool,
 }
 
 fn render_op(
@@ -947,6 +966,7 @@ fn render_op(
             raw_name,
             wire_name,
             ty,
+            optional: has_optional_annotation(&param.annotations),
         };
         let direction = param_direction(param.attr.as_ref());
         if matches!(direction, ParamDirection::Out | ParamDirection::InOut) {
@@ -1051,6 +1071,7 @@ fn render_attr(
                             raw_name: "value".to_string(),
                             wire_name: "value".to_string(),
                             ty: spec.ty.clone(),
+                            optional: false,
                         };
                         let request_name = Some(format!(
                             "{}Request",
@@ -1101,6 +1122,7 @@ fn render_attr(
                         raw_name: "value".to_string(),
                         wire_name: "value".to_string(),
                         ty: spec.ty.clone(),
+                        optional: false,
                     };
                     let request_name = Some(format!(
                         "{}Request",
@@ -1174,10 +1196,15 @@ fn ts_type_for_constr_inline(
         hir::ConstrTypeDcl::StructDcl(def) => {
             let mut fields = Vec::new();
             for member in &def.member {
+                let optional = has_optional_annotation(&member.annotations);
                 for decl in &member.ident {
                     let name = ts_prop_name(declarator_name(decl));
                     let ty = ts_type_for_decl(&member.ty, decl, module_path, target);
-                    fields.push(format!("{name}: {ty}"));
+                    if optional {
+                        fields.push(format!("{name}?: {ty}"));
+                    } else {
+                        fields.push(format!("{name}: {ty}"));
+                    }
                 }
             }
             format!("{{ {} }}", fields.join(", "))
@@ -1239,10 +1266,15 @@ fn zod_schema_for_constr_inline(constr: &hir::ConstrTypeDcl, module_path: &[Stri
         hir::ConstrTypeDcl::StructDcl(def) => {
             let mut fields = Vec::new();
             for member in &def.member {
+                let optional = has_optional_annotation(&member.annotations);
                 for decl in &member.ident {
                     let name = ts_prop_name(declarator_name(decl));
                     let schema = zod_schema_for_decl(&member.ty, decl, module_path);
-                    fields.push(format!("{name}: {schema}"));
+                    if optional {
+                        fields.push(format!("{name}: {schema}.optional()"));
+                    } else {
+                        fields.push(format!("{name}: {schema}"));
+                    }
                 }
             }
             format!("z.object({{ {} }})", fields.join(", "))
@@ -1664,6 +1696,14 @@ fn annotation_params(annotation: &hir::Annotation) -> Option<&hir::AnnotationPar
         hir::Annotation::ScopedName { params, .. } => params.as_ref(),
         _ => None,
     }
+}
+
+fn has_optional_annotation(annotations: &[hir::Annotation]) -> bool {
+    annotations.iter().any(|annotation| {
+        annotation_name(annotation)
+            .map(|name| name.eq_ignore_ascii_case("optional"))
+            .unwrap_or(false)
+    })
 }
 
 struct SourceBinding {

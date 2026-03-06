@@ -30,10 +30,19 @@ pub(crate) fn render_struct_with_config(
         .iter()
         .flat_map(|member| {
             let field_id = member.field_id.map(|value| format!("{value}u32"));
+            let optional = has_optional_annotation(&member.annotations);
             member.ident.iter().map(move |decl| {
                 let name = crate::generate::rust::util::rust_ident(&declarator_name(decl));
-                let ty = type_with_decl(&member.ty, decl);
-                json!({ "ty": ty, "name": name, "field_id": field_id.clone() })
+                let mut ty = type_with_decl(&member.ty, decl);
+                if optional {
+                    ty = format!("Option<{ty}>");
+                }
+                json!({
+                    "ty": ty,
+                    "name": name,
+                    "field_id": field_id.clone(),
+                    "optional": optional
+                })
             })
         })
         .collect::<Vec<_>>();
@@ -54,4 +63,13 @@ pub(crate) fn render_struct_with_config(
     });
     let rendered = renderer.render_template("struct.rs.j2", &ctx)?;
     Ok(RustRenderOutput::default().push_source(rendered))
+}
+
+fn has_optional_annotation(annotations: &[hir::Annotation]) -> bool {
+    annotations.iter().any(|annotation| {
+        matches!(
+            annotation,
+            hir::Annotation::Builtin { name, .. } if name.eq_ignore_ascii_case("optional")
+        )
+    })
 }

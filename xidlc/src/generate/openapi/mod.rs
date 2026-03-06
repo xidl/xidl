@@ -301,6 +301,7 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
     for param in params {
         let raw_name = param.declarator.0.clone();
         let schema = schema_for_type(&param.ty);
+        let optional = has_optional_annotation(&param.annotations);
         let source = if path_param_names.contains(&raw_name) {
             ParamSource::Path
         } else {
@@ -314,11 +315,13 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
                 ParameterIn::Query,
                 &raw_name,
                 schema,
-                true,
+                !optional,
             )),
             ParamSource::Body => {
                 body_props.push((raw_name.clone(), schema));
-                body_required.push(raw_name);
+                if !optional {
+                    body_required.push(raw_name);
+                }
             }
         }
     }
@@ -456,11 +459,14 @@ fn parameter_schema(
 fn schema_for_struct(members: &[hir::Member]) -> RefOr<Schema> {
     let mut object = ObjectBuilder::new().schema_type(Type::Object);
     for member in members {
+        let optional = has_optional_annotation(&member.annotations);
         for decl in &member.ident {
             let name = declarator_name(decl);
             let schema = schema_for_decl(&member.ty, decl);
             object = object.property(name.clone(), schema);
-            object = object.required(name);
+            if !optional {
+                object = object.required(name);
+            }
         }
     }
     RefOr::T(Schema::from(object))
@@ -691,6 +697,14 @@ fn annotation_params(annotation: &hir::Annotation) -> Option<&hir::AnnotationPar
         hir::Annotation::ScopedName { params, .. } => params.as_ref(),
         _ => None,
     }
+}
+
+fn has_optional_annotation(annotations: &[hir::Annotation]) -> bool {
+    annotations.iter().any(|annotation| {
+        annotation_name(annotation)
+            .map(|name| name.eq_ignore_ascii_case("optional"))
+            .unwrap_or(false)
+    })
 }
 
 fn normalize_params(params: &hir::AnnotationParams) -> HashMap<String, String> {
