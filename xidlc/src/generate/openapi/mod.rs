@@ -270,7 +270,8 @@ impl OpenApiContext {
                     .property("code", ObjectBuilder::new().schema_type(Type::Integer))
                     .required("code")
                     .property("msg", ObjectBuilder::new().schema_type(Type::String))
-                    .required("msg"),
+                    .required("msg")
+                    .property("details", ObjectBuilder::new().schema_type(Type::Object)),
             ))
         });
     }
@@ -302,9 +303,14 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
     if paths.is_empty() {
         paths.push(auto_default_method_path(op, method));
     }
-    let all_path_param_names: HashSet<String> = paths
+    validate_head_constraints(op, method);
+    let path_param_sets = paths
         .iter()
-        .flat_map(|item| parse_path_params(item).into_iter())
+        .map(|item| parse_path_params(item))
+        .collect::<Vec<_>>();
+    let all_path_param_names: HashSet<String> = path_param_sets
+        .iter()
+        .flat_map(|set| set.iter().cloned())
         .collect();
     let default_source = default_param_source(method);
 
@@ -312,6 +318,7 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
     let mut body_props = Vec::new();
     let mut body_required = Vec::new();
     let mut output_fields = Vec::new();
+    let mut path_binding_count = HashMap::<String, usize>::new();
 
     for param in params {
         let direction = param_direction(param.attr.as_ref());
@@ -349,13 +356,24 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
             }
             None => (default_source, raw_name.clone()),
         };
+        if matches!(source, ParamSource::Path)
+            && !path_name_in_all_routes(&bound_name, &path_param_sets)
+        {
+            panic!(
+                "parameter '{}' is bound to path variable '{}' but it is not present in every route template of method '{}'",
+                param.declarator.0, bound_name, op.ident
+            );
+        }
         match source {
-            ParamSource::Path => parameters.push(parameter_schema(
-                ParameterIn::Path,
-                &bound_name,
-                schema,
-                true,
-            )),
+            ParamSource::Path => {
+                *path_binding_count.entry(bound_name.clone()).or_insert(0) += 1;
+                parameters.push(parameter_schema(
+                    ParameterIn::Path,
+                    &bound_name,
+                    schema,
+                    true,
+                ));
+            }
             ParamSource::Query => parameters.push(parameter_schema(
                 ParameterIn::Query,
                 &bound_name,
@@ -370,9 +388,30 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
             }
         }
     }
+    for route_params in &path_param_sets {
+        for route_param in route_params {
+            match path_binding_count.get(route_param).copied().unwrap_or(0) {
+                0 => {
+                    panic!(
+                        "route template variable '{}' has no matching request-side path parameter in method '{}'",
+                        route_param, op.ident
+                    );
+                }
+                1 => {}
+                _ => {
+                    panic!(
+                        "route template variable '{}' is bound by multiple request-side path parameters in method '{}'",
+                        route_param, op.ident
+                    );
+                }
+            }
+        }
+    }
 
     let output_count = usize::from(return_schema.is_some()) + output_fields.len();
-    let (response_status, response_schema) = if output_count == 0 {
+    let (response_status, response_schema) = if matches!(method, HttpMethod::Head) {
+        ("204", None)
+    } else if output_count == 0 {
         ("204", None)
     } else if output_count == 1 {
         if let Some(schema) = return_schema {
@@ -956,10 +995,60 @@ fn parse_path_params(path: &str) -> HashSet<String> {
 
 fn normalize_path(path: &str) -> String {
     let path = path.trim();
-    if path.starts_with('/') {
+    let with_leading = if path.starts_with('/') {
         path.to_string()
     } else {
         format!("/{path}")
+    };
+    let mut collapsed = String::with_capacity(with_leading.len());
+    let mut prev_slash = false;
+    for ch in with_leading.chars() {
+        if ch == '/' {
+            if !prev_slash {
+                collapsed.push(ch);
+            }
+            prev_slash = true;
+        } else {
+            collapsed.push(ch);
+            prev_slash = false;
+        }
+    }
+    if collapsed.len() > 1 && collapsed.ends_with('/') {
+        collapsed.pop();
+    }
+    if collapsed.is_empty() {
+        "/".to_string()
+    } else {
+        collapsed
+    }
+}
+
+fn path_name_in_all_routes(name: &str, route_sets: &[HashSet<String>]) -> bool {
+    route_sets.iter().all(|set| set.contains(name))
+}
+
+fn validate_head_constraints(op: &hir::OpDcl, method: HttpMethod) {
+    if !matches!(method, HttpMethod::Head) {
+        return;
+    }
+    if !matches!(op.ty, hir::OpTypeSpec::Void) {
+        panic!("HEAD method '{}' must return void", op.ident);
+    }
+    let params = op
+        .parameter
+        .as_ref()
+        .map(|value| value.0.as_slice())
+        .unwrap_or(&[]);
+    for param in params {
+        if matches!(
+            param_direction(param.attr.as_ref()),
+            ParamDirection::Out | ParamDirection::InOut
+        ) {
+            panic!(
+                "HEAD method '{}' cannot contain out/inout parameter '{}'",
+                op.ident, param.declarator.0
+            );
+        }
     }
 }
 

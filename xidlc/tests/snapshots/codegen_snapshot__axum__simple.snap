@@ -292,6 +292,9 @@ openapi.json
           "code": {
             "type": "integer"
           },
+          "details": {
+            "type": "object"
+          },
           "msg": {
             "type": "string"
           }

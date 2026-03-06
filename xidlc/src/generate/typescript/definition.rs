@@ -2,7 +2,7 @@ use crate::error::{IdlcError, IdlcResult};
 use crate::generate::typescript::{TsMode, TypescriptRenderOutput, TypescriptRenderer};
 use convert_case::{Case, Casing};
 use serde::Serialize;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use xidl_parser::hir;
 
 pub fn render_typescript(
@@ -929,12 +929,23 @@ fn render_op(
         .as_ref()
         .map(|value| value.0.as_slice())
         .unwrap_or(&[]);
-    let (method, explicit_path) = route_from_annotations(&op.annotations, HttpMethod::Post)?;
-    let path = match explicit_path {
-        Some(path) => path,
-        None => auto_default_method_path(op, method)?,
-    };
-    let path_param_names = parse_path_params(&path);
+    let (method, mut paths) = route_from_annotations(&op.annotations, HttpMethod::Post)?;
+    if paths.is_empty() {
+        paths.push(auto_default_method_path(op, method)?);
+    }
+    validate_head_constraints(op, method)?;
+    let path = paths
+        .first()
+        .cloned()
+        .unwrap_or_else(|| format!("/{}", op.ident));
+    let path_param_sets = paths
+        .iter()
+        .map(|item| parse_path_params(item))
+        .collect::<Vec<_>>();
+    let all_path_param_names = path_param_sets
+        .iter()
+        .flat_map(|set| set.iter().cloned())
+        .collect::<HashSet<_>>();
     let default_source = default_param_source(method);
 
     let mut param_list = Vec::new();
@@ -942,6 +953,7 @@ fn render_op(
     let mut query_params = Vec::new();
     let mut body_params = Vec::new();
     let mut output_params = Vec::new();
+    let mut path_binding_count = HashMap::<String, usize>::new();
 
     for param in params {
         let name = ts_ident(&param.declarator.0);
@@ -950,14 +962,22 @@ fn render_op(
         let binding = explicit_param_binding(param)?;
         let (source, wire_name) = match binding {
             Some(binding) => (binding.source, binding.bound_name),
-            None if path_param_names.contains(&param.declarator.0) => {
+            None if all_path_param_names.contains(&param.declarator.0) => {
                 (ParamSource::Path, param.declarator.0.clone())
             }
             None => (default_source, param.declarator.0.clone()),
         };
-        if matches!(source, ParamSource::Path) && !path_param_names.contains(&wire_name) {
+        if matches!(source, ParamSource::Path) && !all_path_param_names.contains(&wire_name) {
             return Err(IdlcError::rpc(format!(
                 "parameter '{}' is annotated with @path but '{}' is not present in route template of method '{}'",
+                param.declarator.0, wire_name, op.ident
+            )));
+        }
+        if matches!(source, ParamSource::Path)
+            && !path_name_in_all_routes(&wire_name, &path_param_sets)
+        {
+            return Err(IdlcError::rpc(format!(
+                "parameter '{}' is bound to path variable '{}' but it is not present in every route template of method '{}'",
                 param.declarator.0, wire_name, op.ident
             )));
         }
@@ -977,9 +997,33 @@ fn render_op(
         }
         param_list.push(info.clone());
         match source {
-            ParamSource::Path => path_params.push(info),
+            ParamSource::Path => {
+                *path_binding_count
+                    .entry(info.wire_name.clone())
+                    .or_insert(0) += 1;
+                path_params.push(info);
+            }
             ParamSource::Query => query_params.push(info),
             ParamSource::Body => body_params.push(info),
+        }
+    }
+    for route_params in &path_param_sets {
+        for route_param in route_params {
+            match path_binding_count.get(route_param).copied().unwrap_or(0) {
+                0 => {
+                    return Err(IdlcError::rpc(format!(
+                        "route template variable '{}' has no matching request-side path parameter in method '{}'",
+                        route_param, op.ident
+                    )));
+                }
+                1 => {}
+                _ => {
+                    return Err(IdlcError::rpc(format!(
+                        "route template variable '{}' is bound by multiple request-side path parameters in method '{}'",
+                        route_param, op.ident
+                    )));
+                }
+            }
         }
     }
 
@@ -1632,7 +1676,7 @@ fn default_path(module_path: &[String], interface_name: &str, method_name: &str)
 fn route_from_annotations(
     annotations: &[hir::Annotation],
     default_method: HttpMethod,
-) -> IdlcResult<(HttpMethod, Option<String>)> {
+) -> IdlcResult<(HttpMethod, Vec<String>)> {
     let mut method = None;
     let mut paths = Vec::new();
     for annotation in annotations {
@@ -1665,7 +1709,9 @@ fn route_from_annotations(
             }
         }
     }
-    Ok((method.unwrap_or(default_method), paths.into_iter().next()))
+    let mut dedup = HashSet::new();
+    paths.retain(|path| dedup.insert(path.clone()));
+    Ok((method.unwrap_or(default_method), paths))
 }
 
 fn method_from_annotation(annotation: &hir::Annotation) -> Option<HttpMethod> {
@@ -1893,11 +1939,65 @@ fn trim_quotes(value: &str) -> Option<String> {
 
 fn normalize_path(path: &str) -> String {
     let path = path.trim();
-    if path.starts_with('/') {
+    let with_leading = if path.starts_with('/') {
         path.to_string()
     } else {
         format!("/{path}")
+    };
+    let mut collapsed = String::with_capacity(with_leading.len());
+    let mut prev_slash = false;
+    for ch in with_leading.chars() {
+        if ch == '/' {
+            if !prev_slash {
+                collapsed.push(ch);
+            }
+            prev_slash = true;
+        } else {
+            collapsed.push(ch);
+            prev_slash = false;
+        }
     }
+    if collapsed.len() > 1 && collapsed.ends_with('/') {
+        collapsed.pop();
+    }
+    if collapsed.is_empty() {
+        "/".to_string()
+    } else {
+        collapsed
+    }
+}
+
+fn path_name_in_all_routes(name: &str, route_sets: &[HashSet<String>]) -> bool {
+    route_sets.iter().all(|set| set.contains(name))
+}
+
+fn validate_head_constraints(op: &hir::OpDcl, method: HttpMethod) -> IdlcResult<()> {
+    if !matches!(method, HttpMethod::Head) {
+        return Ok(());
+    }
+    if !matches!(op.ty, hir::OpTypeSpec::Void) {
+        return Err(IdlcError::rpc(format!(
+            "HEAD method '{}' must return void",
+            op.ident
+        )));
+    }
+    let params = op
+        .parameter
+        .as_ref()
+        .map(|value| value.0.as_slice())
+        .unwrap_or(&[]);
+    for param in params {
+        if matches!(
+            param_direction(param.attr.as_ref()),
+            ParamDirection::Out | ParamDirection::InOut
+        ) {
+            return Err(IdlcError::rpc(format!(
+                "HEAD method '{}' cannot contain out/inout parameter '{}'",
+                op.ident, param.declarator.0
+            )));
+        }
+    }
+    Ok(())
 }
 
 fn param_direction(attr: Option<&hir::ParamAttribute>) -> ParamDirection {

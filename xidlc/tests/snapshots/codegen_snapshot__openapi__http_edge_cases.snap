@@ -12,152 +12,29 @@ openapi.json
     "version": "v1.0.0"
   },
   "paths": {
-    "/add": {
+    "/lookup": {
       "post": {
-        "operationId": "HttpResponseShapeService.add",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "a",
-                  "b"
-                ],
-                "properties": {
-                  "a": {
-                    "type": "integer",
-                    "format": "int32"
-                  },
-                  "b": {
-                    "type": "integer",
-                    "format": "int32"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "return",
-                    "sum"
-                  ],
-                  "properties": {
-                    "return": {
-                      "type": "integer",
-                      "format": "int32"
-                    },
-                    "sum": {
-                      "type": "integer",
-                      "format": "int32"
-                    }
-                  }
-                }
-              }
+        "operationId": "HttpEdgeCasesService.lookup",
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           },
-          "500": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
+          {
+            "name": "limit",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
             }
           }
-        }
-      }
-    },
-    "/bump": {
-      "post": {
-        "operationId": "HttpResponseShapeService.bump",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "integer",
-                "format": "int32"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "return",
-                    "value"
-                  ],
-                  "properties": {
-                    "return": {
-                      "type": "integer",
-                      "format": "int32"
-                    },
-                    "value": {
-                      "type": "integer",
-                      "format": "int32"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/get_count": {
-      "post": {
-        "operationId": "HttpResponseShapeService.get_count",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "integer",
-                  "format": "int32"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/hello": {
-      "post": {
-        "operationId": "HttpResponseShapeService.hello",
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -182,12 +59,165 @@ openapi.json
         }
       }
     },
-    "/ping": {
-      "post": {
-        "operationId": "HttpResponseShapeService.ping",
+    "/orders/{order_id}/items/{item_id}": {
+      "get": {
+        "operationId": "HttpEdgeCasesService.get_item",
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/health": {
+      "head": {
+        "operationId": "HttpEdgeCasesService.health",
+        "parameters": [
+          {
+            "name": "trace_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "204": {
             "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/users/{id}": {
+      "get": {
+        "operationId": "HttpEdgeCasesService.get_user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/users/{id}": {
+      "get": {
+        "operationId": "HttpEdgeCasesService.get_user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "500": {
             "description": "Error",
@@ -223,7 +253,7 @@ openapi.json
           }
         }
       },
-      "HttpResponseShapeService_Call": {
+      "HttpEdgeCasesService_Call": {
         "oneOf": [
           {
             "type": "object",
@@ -239,61 +269,50 @@ openapi.json
           {
             "type": "object",
             "required": [
-              "hello"
+              "health"
             ],
             "properties": {
-              "hello": {
-                "$ref": "#/components/schemas/HttpResponseShapeService_hello_In"
+              "health": {
+                "$ref": "#/components/schemas/HttpEdgeCasesService_health_In"
               }
             }
           },
           {
             "type": "object",
             "required": [
-              "get_count"
+              "get_user"
             ],
             "properties": {
-              "get_count": {
-                "$ref": "#/components/schemas/HttpResponseShapeService_get_count_In"
+              "get_user": {
+                "$ref": "#/components/schemas/HttpEdgeCasesService_get_user_In"
               }
             }
           },
           {
             "type": "object",
             "required": [
-              "add"
+              "get_item"
             ],
             "properties": {
-              "add": {
-                "$ref": "#/components/schemas/HttpResponseShapeService_add_In"
+              "get_item": {
+                "$ref": "#/components/schemas/HttpEdgeCasesService_get_item_In"
               }
             }
           },
           {
             "type": "object",
             "required": [
-              "bump"
+              "lookup"
             ],
             "properties": {
-              "bump": {
-                "$ref": "#/components/schemas/HttpResponseShapeService_bump_In"
-              }
-            }
-          },
-          {
-            "type": "object",
-            "required": [
-              "ping"
-            ],
-            "properties": {
-              "ping": {
-                "$ref": "#/components/schemas/HttpResponseShapeService_ping_In"
+              "lookup": {
+                "$ref": "#/components/schemas/HttpEdgeCasesService_lookup_In"
               }
             }
           }
         ]
       },
-      "HttpResponseShapeService_Reply": {
+      "HttpEdgeCasesService_Reply": {
         "type": "object",
         "required": [
           "header",
@@ -301,14 +320,14 @@ openapi.json
         ],
         "properties": {
           "data": {
-            "$ref": "#/components/schemas/HttpResponseShapeService_Return"
+            "$ref": "#/components/schemas/HttpEdgeCasesService_Return"
           },
           "header": {
             "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
           }
         }
       },
-      "HttpResponseShapeService_Request": {
+      "HttpEdgeCasesService_Request": {
         "type": "object",
         "required": [
           "header",
@@ -316,14 +335,14 @@ openapi.json
         ],
         "properties": {
           "data": {
-            "$ref": "#/components/schemas/HttpResponseShapeService_Call"
+            "$ref": "#/components/schemas/HttpEdgeCasesService_Call"
           },
           "header": {
             "$ref": "#/components/schemas/dds.rpc.RequestHeader"
           }
         }
       },
-      "HttpResponseShapeService_Return": {
+      "HttpEdgeCasesService_Return": {
         "oneOf": [
           {
             "type": "object",
@@ -339,203 +358,69 @@ openapi.json
           {
             "type": "object",
             "required": [
-              "hello"
+              "health"
             ],
             "properties": {
-              "hello": {
-                "$ref": "#/components/schemas/HttpResponseShapeService_hello_Result"
+              "health": {
+                "$ref": "#/components/schemas/HttpEdgeCasesService_health_Result"
               }
             }
           },
           {
             "type": "object",
             "required": [
-              "get_count"
+              "get_user"
             ],
             "properties": {
-              "get_count": {
-                "$ref": "#/components/schemas/HttpResponseShapeService_get_count_Result"
+              "get_user": {
+                "$ref": "#/components/schemas/HttpEdgeCasesService_get_user_Result"
               }
             }
           },
           {
             "type": "object",
             "required": [
-              "add"
+              "get_item"
             ],
             "properties": {
-              "add": {
-                "$ref": "#/components/schemas/HttpResponseShapeService_add_Result"
+              "get_item": {
+                "$ref": "#/components/schemas/HttpEdgeCasesService_get_item_Result"
               }
             }
           },
           {
             "type": "object",
             "required": [
-              "bump"
+              "lookup"
             ],
             "properties": {
-              "bump": {
-                "$ref": "#/components/schemas/HttpResponseShapeService_bump_Result"
-              }
-            }
-          },
-          {
-            "type": "object",
-            "required": [
-              "ping"
-            ],
-            "properties": {
-              "ping": {
-                "$ref": "#/components/schemas/HttpResponseShapeService_ping_Result"
+              "lookup": {
+                "$ref": "#/components/schemas/HttpEdgeCasesService_lookup_Result"
               }
             }
           }
         ]
       },
-      "HttpResponseShapeService_add_In": {
+      "HttpEdgeCasesService_get_item_In": {
         "type": "object",
         "required": [
-          "a",
-          "b"
+          "order_id",
+          "item_id"
         ],
         "properties": {
-          "a": {
+          "item_id": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "minimum": 0
           },
-          "b": {
+          "order_id": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "minimum": 0
           }
         }
       },
-      "HttpResponseShapeService_add_Out": {
-        "type": "object",
-        "required": [
-          "sum",
-          "return_"
-        ],
-        "properties": {
-          "return_": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "sum": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "HttpResponseShapeService_add_Result": {
-        "oneOf": [
-          {
-            "type": "object",
-            "required": [
-              "result"
-            ],
-            "properties": {
-              "result": {
-                "$ref": "#/components/schemas/HttpResponseShapeService_add_Out"
-              }
-            }
-          }
-        ]
-      },
-      "HttpResponseShapeService_bump_In": {
-        "type": "object",
-        "required": [
-          "value"
-        ],
-        "properties": {
-          "value": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "HttpResponseShapeService_bump_Out": {
-        "type": "object",
-        "required": [
-          "value",
-          "return_"
-        ],
-        "properties": {
-          "return_": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "value": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "HttpResponseShapeService_bump_Result": {
-        "oneOf": [
-          {
-            "type": "object",
-            "required": [
-              "result"
-            ],
-            "properties": {
-              "result": {
-                "$ref": "#/components/schemas/HttpResponseShapeService_bump_Out"
-              }
-            }
-          }
-        ]
-      },
-      "HttpResponseShapeService_get_count_In": {
-        "type": "object",
-        "required": [
-          "dummy"
-        ],
-        "properties": {
-          "dummy": {
-            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
-          }
-        }
-      },
-      "HttpResponseShapeService_get_count_Out": {
-        "type": "object",
-        "required": [
-          "count"
-        ],
-        "properties": {
-          "count": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "HttpResponseShapeService_get_count_Result": {
-        "oneOf": [
-          {
-            "type": "object",
-            "required": [
-              "result"
-            ],
-            "properties": {
-              "result": {
-                "$ref": "#/components/schemas/HttpResponseShapeService_get_count_Out"
-              }
-            }
-          }
-        ]
-      },
-      "HttpResponseShapeService_hello_In": {
-        "type": "object",
-        "required": [
-          "dummy"
-        ],
-        "properties": {
-          "dummy": {
-            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
-          }
-        }
-      },
-      "HttpResponseShapeService_hello_Out": {
+      "HttpEdgeCasesService_get_item_Out": {
         "type": "object",
         "required": [
           "return_"
@@ -546,7 +431,7 @@ openapi.json
           }
         }
       },
-      "HttpResponseShapeService_hello_Result": {
+      "HttpEdgeCasesService_get_item_Result": {
         "oneOf": [
           {
             "type": "object",
@@ -555,35 +440,41 @@ openapi.json
             ],
             "properties": {
               "result": {
-                "$ref": "#/components/schemas/HttpResponseShapeService_hello_Out"
+                "$ref": "#/components/schemas/HttpEdgeCasesService_get_item_Out"
               }
             }
           }
         ]
       },
-      "HttpResponseShapeService_ping_In": {
+      "HttpEdgeCasesService_get_user_In": {
         "type": "object",
         "required": [
-          "dummy"
+          "uid",
+          "locale"
         ],
         "properties": {
-          "dummy": {
-            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          "locale": {
+            "type": "string"
+          },
+          "uid": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
           }
         }
       },
-      "HttpResponseShapeService_ping_Out": {
+      "HttpEdgeCasesService_get_user_Out": {
         "type": "object",
         "required": [
-          "dummy"
+          "return_"
         ],
         "properties": {
-          "dummy": {
-            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          "return_": {
+            "type": "string"
           }
         }
       },
-      "HttpResponseShapeService_ping_Result": {
+      "HttpEdgeCasesService_get_user_Result": {
         "oneOf": [
           {
             "type": "object",
@@ -592,7 +483,87 @@ openapi.json
             ],
             "properties": {
               "result": {
-                "$ref": "#/components/schemas/HttpResponseShapeService_ping_Out"
+                "$ref": "#/components/schemas/HttpEdgeCasesService_get_user_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpEdgeCasesService_health_In": {
+        "type": "object",
+        "required": [
+          "trace"
+        ],
+        "properties": {
+          "trace": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpEdgeCasesService_health_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "HttpEdgeCasesService_health_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpEdgeCasesService_health_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpEdgeCasesService_lookup_In": {
+        "type": "object",
+        "required": [
+          "keyword",
+          "page_size"
+        ],
+        "properties": {
+          "keyword": {
+            "type": "string"
+          },
+          "page_size": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          }
+        }
+      },
+      "HttpEdgeCasesService_lookup_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpEdgeCasesService_lookup_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpEdgeCasesService_lookup_Out"
               }
             }
           }
