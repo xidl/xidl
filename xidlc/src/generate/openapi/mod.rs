@@ -459,7 +459,7 @@ fn parameter_schema(
 fn schema_for_struct(members: &[hir::Member]) -> RefOr<Schema> {
     let mut object = ObjectBuilder::new().schema_type(Type::Object);
     for member in members {
-        let optional = has_optional_annotation(&member.annotations);
+        let optional = member.is_optional();
         for decl in &member.ident {
             let name = declarator_name(decl);
             let schema = schema_for_decl(&member.ty, decl);

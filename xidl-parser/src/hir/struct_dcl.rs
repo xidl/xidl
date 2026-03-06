@@ -29,7 +29,25 @@ pub struct Default(pub ConstExpr);
 
 impl StructDcl {
     pub fn serialize_kind(&self, config: &SerializeConfig) -> SerializeKind {
-        config.resolve_for_annotations(&self.annotations)
+        if self.member.iter().any(Member::is_optional) {
+            config.resolve(Extensibility::Mutable)
+        } else {
+            config.resolve_for_annotations(&self.annotations)
+        }
+    }
+}
+
+impl Member {
+    pub fn is_optional(&self) -> bool {
+        self.annotations.iter().any(|annotation| match annotation {
+            Annotation::Builtin { name, .. } => name.eq_ignore_ascii_case("optional"),
+            Annotation::ScopedName { name, .. } => name
+                .name
+                .last()
+                .map(|value| value.eq_ignore_ascii_case("optional"))
+                .unwrap_or(false),
+            _ => false,
+        })
     }
 }
 

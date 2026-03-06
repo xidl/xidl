@@ -894,7 +894,7 @@ enum ParamDirection {
 fn struct_fields(members: &[hir::Member], module_path: &[String]) -> Vec<FieldDecl> {
     let mut fields = Vec::new();
     for member in members {
-        let optional = has_optional_annotation(&member.annotations);
+        let optional = member.is_optional();
         for decl in &member.ident {
             let name = declarator_name(decl);
             fields.push(FieldDecl {
@@ -1196,7 +1196,7 @@ fn ts_type_for_constr_inline(
         hir::ConstrTypeDcl::StructDcl(def) => {
             let mut fields = Vec::new();
             for member in &def.member {
-                let optional = has_optional_annotation(&member.annotations);
+                let optional = member.is_optional();
                 for decl in &member.ident {
                     let name = ts_prop_name(declarator_name(decl));
                     let ty = ts_type_for_decl(&member.ty, decl, module_path, target);
@@ -1266,7 +1266,7 @@ fn zod_schema_for_constr_inline(constr: &hir::ConstrTypeDcl, module_path: &[Stri
         hir::ConstrTypeDcl::StructDcl(def) => {
             let mut fields = Vec::new();
             for member in &def.member {
-                let optional = has_optional_annotation(&member.annotations);
+                let optional = member.is_optional();
                 for decl in &member.ident {
                     let name = ts_prop_name(declarator_name(decl));
                     let schema = zod_schema_for_decl(&member.ty, decl, module_path);
