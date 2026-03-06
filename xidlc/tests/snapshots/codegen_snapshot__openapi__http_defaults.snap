@@ -1,0 +1,774 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+openapi.json
+===============
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "xidlc",
+    "version": "v1.0.0"
+  },
+  "paths": {
+    "/get_name": {
+      "post": {
+        "operationId": "HttpDefaultsService.get_name",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get_user_alias/{id}": {
+      "post": {
+        "operationId": "HttpDefaultsService.get_user_alias",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/list_orders/{uid}": {
+      "get": {
+        "operationId": "HttpDefaultsService.list_orders",
+        "parameters": [
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "post": {
+        "operationId": "HttpDefaultsService.create_user",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/search": {
+      "post": {
+        "operationId": "HttpDefaultsService.search_user",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "age"
+                ],
+                "properties": {
+                  "age": {
+                    "type": "integer",
+                    "format": "int32",
+                    "minimum": 0
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/users/{id}": {
+      "get": {
+        "operationId": "HttpDefaultsService.get_user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateUserRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "age"
+        ],
+        "properties": {
+          "age": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": [
+          "code",
+          "msg"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "msg": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpDefaultsService_Call": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_name"
+            ],
+            "properties": {
+              "get_name": {
+                "$ref": "#/components/schemas/HttpDefaultsService_get_name_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "list_orders"
+            ],
+            "properties": {
+              "list_orders": {
+                "$ref": "#/components/schemas/HttpDefaultsService_list_orders_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "create_user"
+            ],
+            "properties": {
+              "create_user": {
+                "$ref": "#/components/schemas/HttpDefaultsService_create_user_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "search_user"
+            ],
+            "properties": {
+              "search_user": {
+                "$ref": "#/components/schemas/HttpDefaultsService_search_user_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_user"
+            ],
+            "properties": {
+              "get_user": {
+                "$ref": "#/components/schemas/HttpDefaultsService_get_user_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_user_alias"
+            ],
+            "properties": {
+              "get_user_alias": {
+                "$ref": "#/components/schemas/HttpDefaultsService_get_user_alias_In"
+              }
+            }
+          }
+        ]
+      },
+      "HttpDefaultsService_Reply": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/HttpDefaultsService_Return"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
+          }
+        }
+      },
+      "HttpDefaultsService_Request": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/HttpDefaultsService_Call"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
+          }
+        }
+      },
+      "HttpDefaultsService_Return": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_name"
+            ],
+            "properties": {
+              "get_name": {
+                "$ref": "#/components/schemas/HttpDefaultsService_get_name_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "list_orders"
+            ],
+            "properties": {
+              "list_orders": {
+                "$ref": "#/components/schemas/HttpDefaultsService_list_orders_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "create_user"
+            ],
+            "properties": {
+              "create_user": {
+                "$ref": "#/components/schemas/HttpDefaultsService_create_user_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "search_user"
+            ],
+            "properties": {
+              "search_user": {
+                "$ref": "#/components/schemas/HttpDefaultsService_search_user_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_user"
+            ],
+            "properties": {
+              "get_user": {
+                "$ref": "#/components/schemas/HttpDefaultsService_get_user_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_user_alias"
+            ],
+            "properties": {
+              "get_user_alias": {
+                "$ref": "#/components/schemas/HttpDefaultsService_get_user_alias_Result"
+              }
+            }
+          }
+        ]
+      },
+      "HttpDefaultsService_create_user_In": {
+        "type": "object",
+        "required": [
+          "req"
+        ],
+        "properties": {
+          "req": {
+            "$ref": "#/components/schemas/CreateUserRequest"
+          }
+        }
+      },
+      "HttpDefaultsService_create_user_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpDefaultsService_create_user_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpDefaultsService_create_user_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpDefaultsService_get_name_In": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpDefaultsService_get_name_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpDefaultsService_get_name_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpDefaultsService_get_name_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpDefaultsService_get_user_In": {
+        "type": "object",
+        "required": [
+          "id",
+          "lang"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "lang": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpDefaultsService_get_user_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpDefaultsService_get_user_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpDefaultsService_get_user_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpDefaultsService_get_user_alias_In": {
+        "type": "object",
+        "required": [
+          "user_id",
+          "locale"
+        ],
+        "properties": {
+          "locale": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          }
+        }
+      },
+      "HttpDefaultsService_get_user_alias_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpDefaultsService_get_user_alias_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpDefaultsService_get_user_alias_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpDefaultsService_list_orders_In": {
+        "type": "object",
+        "required": [
+          "user_id",
+          "page",
+          "size"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "user_id": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          }
+        }
+      },
+      "HttpDefaultsService_list_orders_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpDefaultsService_list_orders_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpDefaultsService_list_orders_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpDefaultsService_search_user_In": {
+        "type": "object",
+        "required": [
+          "name",
+          "age"
+        ],
+        "properties": {
+          "age": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpDefaultsService_search_user_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpDefaultsService_search_user_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpDefaultsService_search_user_Out"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

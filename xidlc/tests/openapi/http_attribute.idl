@@ -1,0 +1,7 @@
+#progma xidlc package xidlc
+#progma xidlc version v1.0.0
+
+interface HttpAttributeService {
+    readonly attribute string version;
+    attribute string name;
+};

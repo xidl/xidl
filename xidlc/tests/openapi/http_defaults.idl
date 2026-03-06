@@ -1,0 +1,49 @@
+#progma xidlc package xidlc
+#progma xidlc version v1.0.0
+
+@derive(Debug, Serialize, Deserialize)
+struct CreateUserRequest {
+    string name;
+    uint32 age;
+};
+
+interface HttpDefaultsService {
+    // default verb POST, explicit query source
+    string get_name(
+        @query string name
+    );
+
+    // default source for GET parameters -> query, except explicit path
+    @get
+    string list_orders(
+        @path("uid") uint32 user_id,
+        uint32 page,
+        uint32 size
+    );
+
+    // single body parameter -> encode the object directly
+    @post(path = "/users")
+    string create_user(
+        CreateUserRequest req
+    );
+
+    // multiple body parameters -> encode as object by parameter names
+    @post(path = "/users/search")
+    string search_user(
+        string name,
+        uint32 age
+    );
+
+    // route template source inference
+    @get(path = "/v1/users/{id}")
+    string get_user(
+        uint32 id,
+        @query string lang
+    );
+
+    // explicit bound names
+    string get_user_alias(
+        @path("id") uint32 user_id,
+        @query("lang") string locale
+    );
+};

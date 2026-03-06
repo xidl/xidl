@@ -1,0 +1,600 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+openapi.json
+===============
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "xidlc",
+    "version": "v1.0.0"
+  },
+  "paths": {
+    "/add": {
+      "post": {
+        "operationId": "HttpResponseShapeService.add",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "a",
+                  "b"
+                ],
+                "properties": {
+                  "a": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "b": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "return",
+                    "sum"
+                  ],
+                  "properties": {
+                    "return": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "sum": {
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bump": {
+      "post": {
+        "operationId": "HttpResponseShapeService.bump",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "return",
+                    "value"
+                  ],
+                  "properties": {
+                    "return": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "value": {
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get_count": {
+      "post": {
+        "operationId": "HttpResponseShapeService.get_count",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/hello": {
+      "post": {
+        "operationId": "HttpResponseShapeService.hello",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ping": {
+      "post": {
+        "operationId": "HttpResponseShapeService.ping",
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "code",
+          "msg"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "msg": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpResponseShapeService_Call": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "hello"
+            ],
+            "properties": {
+              "hello": {
+                "$ref": "#/components/schemas/HttpResponseShapeService_hello_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_count"
+            ],
+            "properties": {
+              "get_count": {
+                "$ref": "#/components/schemas/HttpResponseShapeService_get_count_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "add"
+            ],
+            "properties": {
+              "add": {
+                "$ref": "#/components/schemas/HttpResponseShapeService_add_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "bump"
+            ],
+            "properties": {
+              "bump": {
+                "$ref": "#/components/schemas/HttpResponseShapeService_bump_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "ping"
+            ],
+            "properties": {
+              "ping": {
+                "$ref": "#/components/schemas/HttpResponseShapeService_ping_In"
+              }
+            }
+          }
+        ]
+      },
+      "HttpResponseShapeService_Reply": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/HttpResponseShapeService_Return"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
+          }
+        }
+      },
+      "HttpResponseShapeService_Request": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/HttpResponseShapeService_Call"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
+          }
+        }
+      },
+      "HttpResponseShapeService_Return": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "hello"
+            ],
+            "properties": {
+              "hello": {
+                "$ref": "#/components/schemas/HttpResponseShapeService_hello_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_count"
+            ],
+            "properties": {
+              "get_count": {
+                "$ref": "#/components/schemas/HttpResponseShapeService_get_count_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "add"
+            ],
+            "properties": {
+              "add": {
+                "$ref": "#/components/schemas/HttpResponseShapeService_add_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "bump"
+            ],
+            "properties": {
+              "bump": {
+                "$ref": "#/components/schemas/HttpResponseShapeService_bump_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "ping"
+            ],
+            "properties": {
+              "ping": {
+                "$ref": "#/components/schemas/HttpResponseShapeService_ping_Result"
+              }
+            }
+          }
+        ]
+      },
+      "HttpResponseShapeService_add_In": {
+        "type": "object",
+        "required": [
+          "a",
+          "b"
+        ],
+        "properties": {
+          "a": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "b": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "HttpResponseShapeService_add_Out": {
+        "type": "object",
+        "required": [
+          "sum",
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sum": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "HttpResponseShapeService_add_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpResponseShapeService_add_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpResponseShapeService_bump_In": {
+        "type": "object",
+        "required": [
+          "value"
+        ],
+        "properties": {
+          "value": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "HttpResponseShapeService_bump_Out": {
+        "type": "object",
+        "required": [
+          "value",
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "value": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "HttpResponseShapeService_bump_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpResponseShapeService_bump_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpResponseShapeService_get_count_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "HttpResponseShapeService_get_count_Out": {
+        "type": "object",
+        "required": [
+          "count"
+        ],
+        "properties": {
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "HttpResponseShapeService_get_count_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpResponseShapeService_get_count_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpResponseShapeService_hello_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "HttpResponseShapeService_hello_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpResponseShapeService_hello_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpResponseShapeService_hello_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpResponseShapeService_ping_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "HttpResponseShapeService_ping_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "HttpResponseShapeService_ping_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpResponseShapeService_ping_Out"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
