@@ -7,6 +7,7 @@ nav:
   - XIDLC:
       - axum: rust-axum.md
       - rust-jsonrpc: rust-jsonrpc.md
+  - Compiler Extension: pragma.md
   - Plugin Development: plugin.md
 
 theme:
