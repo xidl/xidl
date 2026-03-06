@@ -1,0 +1,25 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+const_hex.cpp
+===============
+#include"const_hex.h"
+===============
+const_hex.h
+===============
+#ifndef CONST_HEX_H
+#define CONST_HEX_H
+#include"xidl_xcdr.hpp"
+#include<array>
+#include<cstddef>
+#include<cstdint>
+#include<exception>
+#include<map>
+#include<memory>
+#include<string>
+#include<vector>
+
+constexpr int32_t a = 0xff;
+#endif

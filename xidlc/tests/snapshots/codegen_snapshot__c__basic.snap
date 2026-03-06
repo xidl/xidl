@@ -1,0 +1,101 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+basic.c
+===============
+#include"basic.h"
+
+Point Point_new(void){
+    Point value;
+    Point_init(&value);
+    return value;
+}
+
+void Point_init(Point * self){
+    * self = (Point){
+        0
+    };
+}
+===============
+basic.h
+===============
+#ifndef BASIC_H
+#define BASIC_H
+#include<stdbool.h>
+#include<stdint.h>
+#include<wchar.h>
+
+typedef struct Point{
+    int32_t x;
+    int32_t y;
+
+}Point;
+Point Point_new(void);
+void Point_init(Point * self);
+#endif
+===============
+basic_xcdr.c
+===============
+#include"basic_xcdr.h"
+
+XcdrBufferResult Point_serialize(Point const * self, XcdrBuffer buf){
+    uint8_t * ptr = buf.ptr;
+    size_t len = buf.len;
+    FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
+    XcdrFfiError err = Ok;
+    err = cdr_serializer_write_i32(&serializer, "self->x");
+    if(err != Ok){
+        return(XcdrBufferResult){
+            err, cdr_serializer_position(&serializer)
+        };
+    }
+
+    err = cdr_serializer_write_i32(&serializer, "self->y");
+    if(err != Ok){
+        return(XcdrBufferResult){
+            err, cdr_serializer_position(&serializer)
+        };
+    }
+
+    return(XcdrBufferResult){
+        Ok, cdr_serializer_position(&serializer)
+    };
+}
+
+XcdrBufferResult Point_deserialize(Point * self, XcdrConstBuffer buf){
+    const uint8_t * ptr = buf.ptr;
+    size_t len = buf.len;
+    FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
+    XcdrFfiError err = Ok;
+    err = cdr_deserializer_read_i32_le(&deserializer, "self->x");
+    if(err != Ok){
+        return(XcdrBufferResult){
+            err, cdr_deserializer_position(&deserializer)
+        };
+    }
+
+    err = cdr_deserializer_read_i32_le(&deserializer, "self->y");
+    if(err != Ok){
+        return(XcdrBufferResult){
+            err, cdr_deserializer_position(&deserializer)
+        };
+    }
+
+    return(XcdrBufferResult){
+        Ok, cdr_deserializer_position(&deserializer)
+    };
+}
+===============
+basic_xcdr.h
+===============
+#ifndef BASIC_XCDR_H
+#define BASIC_XCDR_H
+#include<stdbool.h>
+#include<stdint.h>
+#include<wchar.h>
+
+XcdrBufferResult Point_serialize(Point const * self, XcdrBuffer buf);
+XcdrBufferResult Point_deserialize(Point * self, XcdrConstBuffer buf);
+#endif

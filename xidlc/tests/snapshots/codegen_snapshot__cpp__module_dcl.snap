@@ -1,0 +1,26 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+module_dcl.cpp
+===============
+#include"module_dcl.h"
+===============
+module_dcl.h
+===============
+#ifndef MODULE_DCL_H
+#define MODULE_DCL_H
+#include"xidl_xcdr.hpp"
+#include<array>
+#include<cstddef>
+#include<cstdint>
+#include<exception>
+#include<map>
+#include<memory>
+#include<string>
+#include<vector>
+
+constexpr u8 a = 10;
+struct B;
+#endif

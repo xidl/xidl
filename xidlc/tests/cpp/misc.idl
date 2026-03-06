@@ -1,0 +1,89 @@
+enum Color { red, green, blue };
+const Color FAVORITE_COLOR = red;
+
+module M {
+    enum Size { small, medium, large };
+};
+
+const M::Size MYSIZE = M::medium;
+const Color col = red;
+const Color another = M::medium;
+
+struct Foo;
+typedef sequence<Foo> FooSeq;
+typedef sequence<Foo, 12> FooSeq;
+typedef sequence<Foo, red> FooSeq;
+
+struct Foo {
+    long value;
+    FooSeq chain;
+};
+
+union Bar;
+typedef sequence<Bar> BarSeq;
+
+union Bar switch (long) {
+    case 0:
+        long l_mem;
+    case 1:
+        struct Foo {
+            double d_mem;
+            BarSeq nested;
+        } s_mem;
+};
+
+interface A { };
+interface B: A { };
+interface C: A { };
+interface D: B, C { };
+interface E: A, B { };
+
+interface A {
+    void make_it_so();
+};
+interface B: A {
+    short make_it_so(in long times);
+};
+
+module Example {
+    interface base;
+    interface derived : base {};
+    interface base {};
+    interface derived : base {};
+};
+
+interface A {
+    typedef long L1;
+    short opA (in L1 l_1);
+};
+interface B {
+    typedef short L1;
+    L1 opB (in long l);
+};
+interface C: B, A {
+    typedef L1 L2;
+    typedef A::L1 L3;
+    B::L1 opC (in L3 l_3);
+};
+
+const long L = 3;
+interface A {
+    typedef float coord[1];
+    void f (in coord s);
+};
+interface B {
+    const long L = 4;
+};
+interface C: B, A { };
+
+interface A {
+    typedef string<128> string_t;
+};
+interface B {
+    typedef string<256> string_t;
+};
+interface C: A, B {
+    attribute string_t Title;
+    attribute A::string_t Name;
+    attribute B::string_t City;
+};

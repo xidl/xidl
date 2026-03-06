@@ -1,0 +1,459 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+openapi.json
+===============
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "xidl",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/generate": {
+      "post": {
+        "operationId": "Codegen.generate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "hir",
+                  "path",
+                  "props"
+                ],
+                "properties": {
+                  "hir": {
+                    "$ref": "#/components/schemas/xidl_parser.hir.Specification"
+                  },
+                  "path": {
+                    "type": "string"
+                  },
+                  "props": {
+                    "$ref": "#/components/schemas/xidl_parser.hir.ParserProperties"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Artifact"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get_engine_version": {
+      "post": {
+        "operationId": "Codegen.get_engine_version",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get_properties": {
+      "post": {
+        "operationId": "Codegen.get_properties",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/xidl_parser.hir.ParserProperties"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Artifact": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "hir"
+            ],
+            "properties": {
+              "hir": {
+                "$ref": "#/components/schemas/ArtifactHir"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "file"
+            ],
+            "properties": {
+              "file": {
+                "$ref": "#/components/schemas/ArtifactFile"
+              }
+            }
+          }
+        ]
+      },
+      "ArtifactFile": {
+        "type": "object",
+        "required": [
+          "path",
+          "content"
+        ],
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          }
+        }
+      },
+      "ArtifactHir": {
+        "type": "object",
+        "required": [
+          "lang",
+          "hir",
+          "props"
+        ],
+        "properties": {
+          "hir": {
+            "$ref": "#/components/schemas/xidl_parser.hir.Specification"
+          },
+          "lang": {
+            "type": "string"
+          },
+          "props": {
+            "$ref": "#/components/schemas/xidl_parser.hir.ParserProperties"
+          }
+        }
+      },
+      "ArtifactKind": {
+        "type": "string",
+        "enum": [
+          "Hir",
+          "File"
+        ]
+      },
+      "Codegen_Call": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_engine_version"
+            ],
+            "properties": {
+              "get_engine_version": {
+                "$ref": "#/components/schemas/Codegen_get_engine_version_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_properties"
+            ],
+            "properties": {
+              "get_properties": {
+                "$ref": "#/components/schemas/Codegen_get_properties_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "generate"
+            ],
+            "properties": {
+              "generate": {
+                "$ref": "#/components/schemas/Codegen_generate_In"
+              }
+            }
+          }
+        ]
+      },
+      "Codegen_Reply": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Codegen_Return"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
+          }
+        }
+      },
+      "Codegen_Request": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Codegen_Call"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
+          }
+        }
+      },
+      "Codegen_Return": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_engine_version"
+            ],
+            "properties": {
+              "get_engine_version": {
+                "$ref": "#/components/schemas/Codegen_get_engine_version_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_properties"
+            ],
+            "properties": {
+              "get_properties": {
+                "$ref": "#/components/schemas/Codegen_get_properties_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "generate"
+            ],
+            "properties": {
+              "generate": {
+                "$ref": "#/components/schemas/Codegen_generate_Result"
+              }
+            }
+          }
+        ]
+      },
+      "Codegen_generate_In": {
+        "type": "object",
+        "required": [
+          "hir",
+          "path",
+          "props"
+        ],
+        "properties": {
+          "hir": {
+            "$ref": "#/components/schemas/xidl_parser.hir.Specification"
+          },
+          "path": {
+            "type": "string"
+          },
+          "props": {
+            "$ref": "#/components/schemas/xidl_parser.hir.ParserProperties"
+          }
+        }
+      },
+      "Codegen_generate_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Artifact"
+            }
+          }
+        }
+      },
+      "Codegen_generate_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/Codegen_generate_Out"
+              }
+            }
+          }
+        ]
+      },
+      "Codegen_get_engine_version_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "Codegen_get_engine_version_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "Codegen_get_engine_version_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/Codegen_get_engine_version_Out"
+              }
+            }
+          }
+        ]
+      },
+      "Codegen_get_properties_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "Codegen_get_properties_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "$ref": "#/components/schemas/xidl_parser.hir.ParserProperties"
+          }
+        }
+      },
+      "Codegen_get_properties_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/Codegen_get_properties_Out"
+              }
+            }
+          }
+        ]
+      },
+      "Error": {
+        "type": "object",
+        "required": [
+          "code",
+          "msg"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "msg": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

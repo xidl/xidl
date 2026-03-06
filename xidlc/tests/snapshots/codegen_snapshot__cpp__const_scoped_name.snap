@@ -1,0 +1,51 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+const_scoped_name.cpp
+===============
+#include"const_scoped_name.h"
+
+const std::string C3 = "aaa";
+const std::wstring C3 = L"aaa";
+===============
+const_scoped_name.h
+===============
+#ifndef CONST_SCOPED_NAME_H
+#define CONST_SCOPED_NAME_H
+#include"xidl_xcdr.hpp"
+#include<array>
+#include<cstddef>
+#include<cstdint>
+#include<exception>
+#include<map>
+#include<memory>
+#include<string>
+#include<vector>
+
+constexpr int a = 0;
+constexpr uint8_t a = 0;
+constexpr uint16_t a = 0;
+constexpr uint32_t a = 0;
+constexpr uint64_t a = 0;
+constexpr int8_t a = 0;
+constexpr int16_t a = 0;
+constexpr int32_t a = 0;
+constexpr int64_t a = 0;
+constexpr char8 a = 0;
+constexpr char16 a = 0;
+constexpr char C1 = 'X';
+constexpr wchar_t C2 = L'X';
+extern const std::string C3;
+extern const std::wstring C3;
+constexpr bool C3 = false;
+constexpr::A a = 0;
+constexpr A::B a = 0;
+constexpr A::B::C a = 0;
+constexpr A::B::C::D::E::F a = 0;
+constexpr M::Size MYSIZE = M::medium;
+constexpr double const_float = 13.1;
+constexpr double const_double = 84.1;
+constexpr double const_longdouble = 46.1;
+#endif

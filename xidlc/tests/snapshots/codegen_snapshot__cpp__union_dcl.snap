@@ -1,0 +1,117 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+union_dcl.cpp
+===============
+#include"union_dcl.h"
+===============
+union_dcl.h
+===============
+#ifndef UNION_DCL_H
+#define UNION_DCL_H
+#include"xidl_xcdr.hpp"
+#include<array>
+#include<cstddef>
+#include<cstdint>
+#include<exception>
+#include<map>
+#include<memory>
+#include<string>
+#include<vector>
+
+class A;
+class B{
+    public:
+    int32_t _d{
+    };
+
+};
+template < > struct xidl::xcdr::Traits < B > {
+    template < typename Codec > static inline xidl::xcdr::BufferResult serialize(xidl::xcdr::Serializer < Codec > &ser, const B&value){
+        xidl::xcdr::BufferResult res = ser.write(value._d);
+        if(!res.ok()){
+            return res;
+        }
+        switch(value._d){
+        }
+        return xidl::xcdr::BufferResult{
+            XcdrFfiError::Ok, ser.position()
+        };
+    }
+
+    template < typename Codec > static inline xidl::xcdr::BufferResult deserialize(xidl::xcdr::Deserializer < Codec > &de, B&value){
+        xidl::xcdr::BufferResult res = de.read(value._d);
+        if(!res.ok()){
+            return res;
+        }
+        switch(value._d){
+        }
+        return xidl::xcdr::BufferResult{
+            XcdrFfiError::Ok, de.position()
+        };
+    }
+};
+class C{
+    public:
+    int32_t _d{
+    };
+    int32_t a;
+    std::string b;
+
+};
+template < > struct xidl::xcdr::Traits < C > {
+    template < typename Codec > static inline xidl::xcdr::BufferResult serialize(xidl::xcdr::Serializer < Codec > &ser, const C&value){
+        xidl::xcdr::BufferResult res = ser.write(value._d);
+        if(!res.ok()){
+            return res;
+        }
+        switch(value._d){
+            case 0:
+
+                res = ser.write(value.a);
+                if(!res.ok()){
+                    return res;
+                }
+                break;
+            case 1:
+
+                res = ser.write(value.b);
+                if(!res.ok()){
+                    return res;
+                }
+                break;
+        }
+        return xidl::xcdr::BufferResult{
+            XcdrFfiError::Ok, ser.position()
+        };
+    }
+
+    template < typename Codec > static inline xidl::xcdr::BufferResult deserialize(xidl::xcdr::Deserializer < Codec > &de, C&value){
+        xidl::xcdr::BufferResult res = de.read(value._d);
+        if(!res.ok()){
+            return res;
+        }
+        switch(value._d){
+            case 0:
+
+                res = de.read(value.a);
+                if(!res.ok()){
+                    return res;
+                }
+                break;
+            case 1:
+
+                res = de.read(value.b);
+                if(!res.ok()){
+                    return res;
+                }
+                break;
+        }
+        return xidl::xcdr::BufferResult{
+            XcdrFfiError::Ok, de.position()
+        };
+    }
+};
+#endif

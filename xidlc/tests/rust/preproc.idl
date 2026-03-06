@@ -1,0 +1,9 @@
+#include "aaaa"
+
+#ifdef BASIC
+
+module A {};
+
+#program once
+
+module A {}; #endif

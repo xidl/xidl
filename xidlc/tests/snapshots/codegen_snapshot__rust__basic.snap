@@ -1,0 +1,55 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+basic.rs
+===============
+#![allow(unused_imports)]
+#![allow(non_upper_case_globals)]
+#![allow(non_snake_case)]
+#![allow(unused_variables)]
+#![allow(unreachable_patterns)]
+
+pub struct Point{
+    pub x:i32,
+    pub y:i32,
+}
+
+impl Point{
+    pub const SERIALIZE_KIND:xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
+}
+
+impl xidl_xcdr::XcdrSerialize for Point{
+    fn serialize_kind(&self)->xidl_xcdr::SerializeKind{
+        Self::SERIALIZE_KIND
+    }
+
+    fn serialize_with<S:xidl_xcdr::XcdrSerializer+?Sized>(
+    &self,
+    serializer:&mut S,
+    )->xidl_xcdr::error::XcdrResult<()>{
+        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
+        serializer.begin_field(xidl_xcdr::FieldId(1u32),false,0)?;
+        xidl_xcdr::XcdrSerialize::serialize_with(&self.x,serializer)?;
+        serializer.end_field()?;
+        serializer.begin_field(xidl_xcdr::FieldId(2u32),false,0)?;
+        xidl_xcdr::XcdrSerialize::serialize_with(&self.y,serializer)?;
+        serializer.end_field()?;
+        serializer.end_struct()?;
+        Ok(())
+    }
+}
+
+impl xidl_xcdr::XcdrDeserialize for Point{
+    fn deserialize<D:xidl_xcdr::XcdrDeserializer+?Sized>(
+    deserializer:&mut D,
+    )->xidl_xcdr::error::XcdrResult<Self>{
+        let x = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+        let y = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
+        Ok(Self{
+            x,
+            y,
+        })
+    }
+}

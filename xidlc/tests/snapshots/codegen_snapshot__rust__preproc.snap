@@ -1,0 +1,15 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+preproc.rs
+===============
+#![allow(unused_imports)]
+#![allow(non_upper_case_globals)]
+#![allow(non_snake_case)]
+#![allow(unused_variables)]
+#![allow(unreachable_patterns)]
+
+pub mod A{
+}

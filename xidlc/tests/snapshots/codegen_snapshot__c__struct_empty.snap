@@ -1,0 +1,32 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+struct_empty.c
+===============
+#include"struct_empty.h"
+===============
+struct_empty.h
+===============
+#ifndef STRUCT_EMPTY_H
+#define STRUCT_EMPTY_H
+#include<stdbool.h>
+#include<stdint.h>
+#include<wchar.h>
+
+#endif
+===============
+struct_empty_xcdr.c
+===============
+#include"struct_empty_xcdr.h"
+===============
+struct_empty_xcdr.h
+===============
+#ifndef STRUCT_EMPTY_XCDR_H
+#define STRUCT_EMPTY_XCDR_H
+#include<stdbool.h>
+#include<stdint.h>
+#include<wchar.h>
+
+#endif

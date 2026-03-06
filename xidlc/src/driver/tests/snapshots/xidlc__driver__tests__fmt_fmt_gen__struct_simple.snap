@@ -1,5 +1,0 @@
----
-source: xidlc/src/driver/tests/mod.rs
-expression: output
----
-struct A;

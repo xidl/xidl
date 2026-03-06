@@ -1,0 +1,32 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+template_module_dcl.c
+===============
+#include"template_module_dcl.h"
+===============
+template_module_dcl.h
+===============
+#ifndef TEMPLATE_MODULE_DCL_H
+#define TEMPLATE_MODULE_DCL_H
+#include<stdbool.h>
+#include<stdint.h>
+#include<wchar.h>
+
+#endif
+===============
+template_module_dcl_xcdr.c
+===============
+#include"template_module_dcl_xcdr.h"
+===============
+template_module_dcl_xcdr.h
+===============
+#ifndef TEMPLATE_MODULE_DCL_XCDR_H
+#define TEMPLATE_MODULE_DCL_XCDR_H
+#include<stdbool.h>
+#include<stdint.h>
+#include<wchar.h>
+
+#endif

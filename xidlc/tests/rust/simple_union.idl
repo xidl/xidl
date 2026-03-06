@@ -1,0 +1,8 @@
+enum Tag {
+    A,
+    B,
+};
+union SimpleUnion switch (Tag) {
+    case A: int a;
+    case B: int b;
+};

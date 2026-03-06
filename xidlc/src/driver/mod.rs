@@ -1,6 +1,3 @@
-#[cfg(test)]
-mod tests;
-
 mod generate;
 mod lang;
 pub use generate::Generator;

@@ -1,0 +1,32 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+preproc.c
+===============
+#include"preproc.h"
+===============
+preproc.h
+===============
+#ifndef PREPROC_H
+#define PREPROC_H
+#include<stdbool.h>
+#include<stdint.h>
+#include<wchar.h>
+
+#endif
+===============
+preproc_xcdr.c
+===============
+#include"preproc_xcdr.h"
+===============
+preproc_xcdr.h
+===============
+#ifndef PREPROC_XCDR_H
+#define PREPROC_XCDR_H
+#include<stdbool.h>
+#include<stdint.h>
+#include<wchar.h>
+
+#endif

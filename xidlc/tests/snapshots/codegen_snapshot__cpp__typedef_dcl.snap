@@ -1,0 +1,64 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+typedef_dcl.cpp
+===============
+#include"typedef_dcl.h"
+===============
+typedef_dcl.h
+===============
+#ifndef TYPEDEF_DCL_H
+#define TYPEDEF_DCL_H
+#include"xidl_xcdr.hpp"
+#include<array>
+#include<cstddef>
+#include<cstdint>
+#include<exception>
+#include<map>
+#include<memory>
+#include<string>
+#include<vector>
+
+using FooSeq = std::vector < Foo > ;
+template < > struct xidl::xcdr::Traits < FooSeq > {
+    template < typename Codec > static inline xidl::xcdr::BufferResult serialize(xidl::xcdr::Serializer < Codec > &ser, const FooSeq&value){
+        return xidl::xcdr::Traits < std::vector < Foo > > ::template serialize < Codec > (ser, value);
+    }
+
+    template < typename Codec > static inline xidl::xcdr::BufferResult deserialize(xidl::xcdr::Deserializer < Codec > &de, FooSeq&value){
+        return xidl::xcdr::Traits < std::vector < Foo > > ::template deserialize < Codec > (de, value);
+    }
+};
+using uint8_t = u8;
+template < > struct xidl::xcdr::Traits < uint8_t > {
+    template < typename Codec > static inline xidl::xcdr::BufferResult serialize(xidl::xcdr::Serializer < Codec > &ser, const uint8_t&value){
+        return xidl::xcdr::Traits < u8 > ::template serialize < Codec > (ser, value);
+    }
+
+    template < typename Codec > static inline xidl::xcdr::BufferResult deserialize(xidl::xcdr::Deserializer < Codec > &de, uint8_t&value){
+        return xidl::xcdr::Traits < u8 > ::template deserialize < Codec > (de, value);
+    }
+};
+using u8string = std::string;
+template < > struct xidl::xcdr::Traits < u8string > {
+    template < typename Codec > static inline xidl::xcdr::BufferResult serialize(xidl::xcdr::Serializer < Codec > &ser, const u8string&value){
+        return xidl::xcdr::Traits < std::string > ::template serialize < Codec > (ser, value);
+    }
+
+    template < typename Codec > static inline xidl::xcdr::BufferResult deserialize(xidl::xcdr::Deserializer < Codec > &de, u8string&value){
+        return xidl::xcdr::Traits < std::string > ::template deserialize < Codec > (de, value);
+    }
+};
+using u16string = std::wstring;
+template < > struct xidl::xcdr::Traits < u16string > {
+    template < typename Codec > static inline xidl::xcdr::BufferResult serialize(xidl::xcdr::Serializer < Codec > &ser, const u16string&value){
+        return xidl::xcdr::Traits < std::wstring > ::template serialize < Codec > (ser, value);
+    }
+
+    template < typename Codec > static inline xidl::xcdr::BufferResult deserialize(xidl::xcdr::Deserializer < Codec > &de, u16string&value){
+        return xidl::xcdr::Traits < std::wstring > ::template deserialize < Codec > (de, value);
+    }
+};
+#endif

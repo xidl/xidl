@@ -1,0 +1,334 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+bitmask_def.c
+===============
+#include"bitmask_def.h"
+
+A A_new(void){
+    A value;
+    A_init(&value);
+    return value;
+}
+
+void A_init(A * self){
+    * self = (A)0;
+}
+
+unsigned int A_bits(A const * self){
+    return(unsigned int)( * self);
+}
+
+bool A_is_empty(A const * self){
+    return A_bits(self) == 0u;
+}
+
+bool A_is_all(A const * self){
+    return(A_bits(self)&(0)) == (0);
+}
+
+bool A_contains(A const * self, A other){
+    return(A_bits(self)&(unsigned int)other) == (unsigned int)other;
+}
+
+bool A_intersects(A const * self, A other){
+    return(A_bits(self)&(unsigned int)other) != 0u;
+}
+
+void A_insert(A * self, A other){
+    * self = (A)(A_bits(self)|(unsigned int)other);
+}
+
+void A_remove(A * self, A other){
+    * self = (A)(A_bits(self)&~(unsigned int)other);
+}
+
+void A_toggle(A * self, A other){
+    * self = (A)(A_bits(self)^(unsigned int)other);
+}
+
+void A_set(A * self, A other, bool value){
+    if(value){
+        A_insert(self, other);
+
+    }else{
+        A_remove(self, other);
+    }
+}
+
+A A_new(void){
+    A value;
+    A_init(&value);
+    return value;
+}
+
+void A_init(A * self){
+    * self = (A)0;
+}
+
+unsigned int A_bits(A const * self){
+    return(unsigned int)( * self);
+}
+
+bool A_is_empty(A const * self){
+    return A_bits(self) == 0u;
+}
+
+bool A_is_all(A const * self){
+    return(A_bits(self)&(A|B|C)) == (A|B|C);
+}
+
+bool A_contains(A const * self, A other){
+    return(A_bits(self)&(unsigned int)other) == (unsigned int)other;
+}
+
+bool A_intersects(A const * self, A other){
+    return(A_bits(self)&(unsigned int)other) != 0u;
+}
+
+void A_insert(A * self, A other){
+    * self = (A)(A_bits(self)|(unsigned int)other);
+}
+
+void A_remove(A * self, A other){
+    * self = (A)(A_bits(self)&~(unsigned int)other);
+}
+
+void A_toggle(A * self, A other){
+    * self = (A)(A_bits(self)^(unsigned int)other);
+}
+
+void A_set(A * self, A other, bool value){
+    if(value){
+        A_insert(self, other);
+
+    }else{
+        A_remove(self, other);
+    }
+}
+
+A A_new(void){
+    A value;
+    A_init(&value);
+    return value;
+}
+
+void A_init(A * self){
+    * self = (A)0;
+}
+
+unsigned int A_bits(A const * self){
+    return(unsigned int)( * self);
+}
+
+bool A_is_empty(A const * self){
+    return A_bits(self) == 0u;
+}
+
+bool A_is_all(A const * self){
+    return(A_bits(self)&(A|B|C)) == (A|B|C);
+}
+
+bool A_contains(A const * self, A other){
+    return(A_bits(self)&(unsigned int)other) == (unsigned int)other;
+}
+
+bool A_intersects(A const * self, A other){
+    return(A_bits(self)&(unsigned int)other) != 0u;
+}
+
+void A_insert(A * self, A other){
+    * self = (A)(A_bits(self)|(unsigned int)other);
+}
+
+void A_remove(A * self, A other){
+    * self = (A)(A_bits(self)&~(unsigned int)other);
+}
+
+void A_toggle(A * self, A other){
+    * self = (A)(A_bits(self)^(unsigned int)other);
+}
+
+void A_set(A * self, A other, bool value){
+    if(value){
+        A_insert(self, other);
+
+    }else{
+        A_remove(self, other);
+    }
+}
+===============
+bitmask_def.h
+===============
+#ifndef BITMASK_DEF_H
+#define BITMASK_DEF_H
+#include<stdbool.h>
+#include<stdint.h>
+#include<wchar.h>
+
+typedef enum A{
+}A;
+A A_new(void);
+void A_init(A * self);
+unsigned int A_bits(A const * self);
+bool A_is_empty(A const * self);
+bool A_is_all(A const * self);
+bool A_contains(A const * self, A other);
+bool A_intersects(A const * self, A other);
+void A_insert(A * self, A other);
+void A_remove(A * self, A other);
+void A_toggle(A * self, A other);
+void A_set(A * self, A other, bool value);
+typedef enum A{
+    A, B, C,
+}A;
+A A_new(void);
+void A_init(A * self);
+unsigned int A_bits(A const * self);
+bool A_is_empty(A const * self);
+bool A_is_all(A const * self);
+bool A_contains(A const * self, A other);
+bool A_intersects(A const * self, A other);
+void A_insert(A * self, A other);
+void A_remove(A * self, A other);
+void A_toggle(A * self, A other);
+void A_set(A * self, A other, bool value);
+typedef enum A{
+    A, B, C,
+}A;
+A A_new(void);
+void A_init(A * self);
+unsigned int A_bits(A const * self);
+bool A_is_empty(A const * self);
+bool A_is_all(A const * self);
+bool A_contains(A const * self, A other);
+bool A_intersects(A const * self, A other);
+void A_insert(A * self, A other);
+void A_remove(A * self, A other);
+void A_toggle(A * self, A other);
+void A_set(A * self, A other, bool value);
+#endif
+===============
+bitmask_def_xcdr.c
+===============
+#include"bitmask_def_xcdr.h"
+
+XcdrBufferResult A_serialize(A const * self, XcdrBuffer buf){
+    uint8_t * ptr = buf.ptr;
+    size_t len = buf.len;
+    FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
+    XcdrFfiError err = Ok;
+    err = cdr_serializer_write_u32(&serializer, "(*self)");
+    if(err != Ok){
+        return(XcdrBufferResult){
+            err, cdr_serializer_position(&serializer)
+        };
+    }
+
+    return(XcdrBufferResult){
+        Ok, cdr_serializer_position(&serializer)
+    };
+}
+
+XcdrBufferResult A_deserialize(A * self, XcdrConstBuffer buf){
+    const uint8_t * ptr = buf.ptr;
+    size_t len = buf.len;
+    FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
+    XcdrFfiError err = Ok;
+    err = cdr_deserializer_read_u32_le(&deserializer, "(*self)");
+    if(err != Ok){
+        return(XcdrBufferResult){
+            err, cdr_deserializer_position(&deserializer)
+        };
+    }
+
+    return(XcdrBufferResult){
+        Ok, cdr_deserializer_position(&deserializer)
+    };
+}
+
+XcdrBufferResult A_serialize(A const * self, XcdrBuffer buf){
+    uint8_t * ptr = buf.ptr;
+    size_t len = buf.len;
+    FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
+    XcdrFfiError err = Ok;
+    err = cdr_serializer_write_u32(&serializer, "(*self)");
+    if(err != Ok){
+        return(XcdrBufferResult){
+            err, cdr_serializer_position(&serializer)
+        };
+    }
+
+    return(XcdrBufferResult){
+        Ok, cdr_serializer_position(&serializer)
+    };
+}
+
+XcdrBufferResult A_deserialize(A * self, XcdrConstBuffer buf){
+    const uint8_t * ptr = buf.ptr;
+    size_t len = buf.len;
+    FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
+    XcdrFfiError err = Ok;
+    err = cdr_deserializer_read_u32_le(&deserializer, "(*self)");
+    if(err != Ok){
+        return(XcdrBufferResult){
+            err, cdr_deserializer_position(&deserializer)
+        };
+    }
+
+    return(XcdrBufferResult){
+        Ok, cdr_deserializer_position(&deserializer)
+    };
+}
+
+XcdrBufferResult A_serialize(A const * self, XcdrBuffer buf){
+    uint8_t * ptr = buf.ptr;
+    size_t len = buf.len;
+    FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
+    XcdrFfiError err = Ok;
+    err = cdr_serializer_write_u32(&serializer, "(*self)");
+    if(err != Ok){
+        return(XcdrBufferResult){
+            err, cdr_serializer_position(&serializer)
+        };
+    }
+
+    return(XcdrBufferResult){
+        Ok, cdr_serializer_position(&serializer)
+    };
+}
+
+XcdrBufferResult A_deserialize(A * self, XcdrConstBuffer buf){
+    const uint8_t * ptr = buf.ptr;
+    size_t len = buf.len;
+    FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
+    XcdrFfiError err = Ok;
+    err = cdr_deserializer_read_u32_le(&deserializer, "(*self)");
+    if(err != Ok){
+        return(XcdrBufferResult){
+            err, cdr_deserializer_position(&deserializer)
+        };
+    }
+
+    return(XcdrBufferResult){
+        Ok, cdr_deserializer_position(&deserializer)
+    };
+}
+===============
+bitmask_def_xcdr.h
+===============
+#ifndef BITMASK_DEF_XCDR_H
+#define BITMASK_DEF_XCDR_H
+#include<stdbool.h>
+#include<stdint.h>
+#include<wchar.h>
+
+XcdrBufferResult A_serialize(A const * self, XcdrBuffer buf);
+XcdrBufferResult A_deserialize(A * self, XcdrConstBuffer buf);
+XcdrBufferResult A_serialize(A const * self, XcdrBuffer buf);
+XcdrBufferResult A_deserialize(A * self, XcdrConstBuffer buf);
+XcdrBufferResult A_serialize(A const * self, XcdrBuffer buf);
+XcdrBufferResult A_deserialize(A * self, XcdrConstBuffer buf);
+#endif

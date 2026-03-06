@@ -1,0 +1,4 @@
+typedef sequence<Foo> FooSeq;
+typedef u8 uint8_t;
+typedef string u8string;
+typedef wstring u16string;

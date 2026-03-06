@@ -1,0 +1,82 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+enum_empty.c
+===============
+#include"enum_empty.h"
+
+A A_new(void){
+    A value;
+    A_init(&value);
+    return value;
+}
+
+void A_init(A * self){
+    * self = (A)0;
+}
+===============
+enum_empty.h
+===============
+#ifndef ENUM_EMPTY_H
+#define ENUM_EMPTY_H
+#include<stdbool.h>
+#include<stdint.h>
+#include<wchar.h>
+
+typedef enum A{
+}A;
+A A_new(void);
+void A_init(A * self);
+#endif
+===============
+enum_empty_xcdr.c
+===============
+#include"enum_empty_xcdr.h"
+
+XcdrBufferResult A_serialize(A const * self, XcdrBuffer buf){
+    uint8_t * ptr = buf.ptr;
+    size_t len = buf.len;
+    FfiCdrSerializer serializer = cdr_serializer_new(ptr, len);
+    XcdrFfiError err = Ok;
+    err = cdr_serializer_write_i32(&serializer, "(*self)");
+    if(err != Ok){
+        return(XcdrBufferResult){
+            err, cdr_serializer_position(&serializer)
+        };
+    }
+
+    return(XcdrBufferResult){
+        Ok, cdr_serializer_position(&serializer)
+    };
+}
+
+XcdrBufferResult A_deserialize(A * self, XcdrConstBuffer buf){
+    const uint8_t * ptr = buf.ptr;
+    size_t len = buf.len;
+    FfiCdrDeserializer deserializer = cdr_deserializer_new(ptr, len);
+    XcdrFfiError err = Ok;
+    err = cdr_deserializer_read_i32_le(&deserializer, "(*self)");
+    if(err != Ok){
+        return(XcdrBufferResult){
+            err, cdr_deserializer_position(&deserializer)
+        };
+    }
+
+    return(XcdrBufferResult){
+        Ok, cdr_deserializer_position(&deserializer)
+    };
+}
+===============
+enum_empty_xcdr.h
+===============
+#ifndef ENUM_EMPTY_XCDR_H
+#define ENUM_EMPTY_XCDR_H
+#include<stdbool.h>
+#include<stdint.h>
+#include<wchar.h>
+
+XcdrBufferResult A_serialize(A const * self, XcdrBuffer buf);
+XcdrBufferResult A_deserialize(A * self, XcdrConstBuffer buf);
+#endif

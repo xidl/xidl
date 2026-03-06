@@ -1,0 +1,3 @@
+bitmask A {};
+bitmask A { A, B, C};
+bitmask A { A, B, C,};

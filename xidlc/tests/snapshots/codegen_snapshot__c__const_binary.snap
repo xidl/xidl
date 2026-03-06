@@ -1,0 +1,33 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+const_binary.c
+===============
+#include"const_binary.h"
+===============
+const_binary.h
+===============
+#ifndef CONST_BINARY_H
+#define CONST_BINARY_H
+#include<stdbool.h>
+#include<stdint.h>
+#include<wchar.h>
+
+static const int32_t a = 0b10;
+#endif
+===============
+const_binary_xcdr.c
+===============
+#include"const_binary_xcdr.h"
+===============
+const_binary_xcdr.h
+===============
+#ifndef CONST_BINARY_XCDR_H
+#define CONST_BINARY_XCDR_H
+#include<stdbool.h>
+#include<stdint.h>
+#include<wchar.h>
+
+#endif

@@ -1,0 +1,68 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+basic.cpp
+===============
+#include"basic.h"
+===============
+basic.h
+===============
+#ifndef BASIC_H
+#define BASIC_H
+#include"xidl_xcdr.hpp"
+#include<array>
+#include<cstddef>
+#include<cstdint>
+#include<exception>
+#include<map>
+#include<memory>
+#include<string>
+#include<vector>
+
+struct Point{
+    int32_t x;
+    int32_t y;
+
+};
+template < > struct xidl::xcdr::Traits < Point > {
+    template < typename Codec > static inline xidl::xcdr::BufferResult serialize(xidl::xcdr::Serializer < Codec > &ser, const Point&value){
+        xidl::xcdr::BufferResult res{
+            XcdrFfiError::Ok, 0
+        };
+        res = ser.write(value.x);
+        if(!res.ok()){
+            return res;
+        }
+
+        res = ser.write(value.y);
+        if(!res.ok()){
+            return res;
+        }
+
+        return xidl::xcdr::BufferResult{
+            XcdrFfiError::Ok, ser.position()
+        };
+    }
+
+    template < typename Codec > static inline xidl::xcdr::BufferResult deserialize(xidl::xcdr::Deserializer < Codec > &de, Point&value){
+        xidl::xcdr::BufferResult res{
+            XcdrFfiError::Ok, 0
+        };
+        res = de.read(value.x);
+        if(!res.ok()){
+            return res;
+        }
+
+        res = de.read(value.y);
+        if(!res.ok()){
+            return res;
+        }
+
+        return xidl::xcdr::BufferResult{
+            XcdrFfiError::Ok, de.position()
+        };
+    }
+};
+#endif
