@@ -1,0 +1,302 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+openapi.json
+===============
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "xidlc",
+    "version": "v1.0.0"
+  },
+  "paths": {
+    "/assets/{key}": {
+      "get": {
+        "operationId": "HttpCatchAllService.read_asset",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "v",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/files/{path}": {
+      "get": {
+        "operationId": "HttpCatchAllService.read_file",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "code",
+          "msg"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "details": {
+            "type": "object"
+          },
+          "msg": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpCatchAllService_Call": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "read_file"
+            ],
+            "properties": {
+              "read_file": {
+                "$ref": "#/components/schemas/HttpCatchAllService_read_file_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "read_asset"
+            ],
+            "properties": {
+              "read_asset": {
+                "$ref": "#/components/schemas/HttpCatchAllService_read_asset_In"
+              }
+            }
+          }
+        ]
+      },
+      "HttpCatchAllService_Reply": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/HttpCatchAllService_Return"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
+          }
+        }
+      },
+      "HttpCatchAllService_Request": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/HttpCatchAllService_Call"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
+          }
+        }
+      },
+      "HttpCatchAllService_Return": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "read_file"
+            ],
+            "properties": {
+              "read_file": {
+                "$ref": "#/components/schemas/HttpCatchAllService_read_file_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "read_asset"
+            ],
+            "properties": {
+              "read_asset": {
+                "$ref": "#/components/schemas/HttpCatchAllService_read_asset_Result"
+              }
+            }
+          }
+        ]
+      },
+      "HttpCatchAllService_read_asset_In": {
+        "type": "object",
+        "required": [
+          "key",
+          "version"
+        ],
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpCatchAllService_read_asset_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpCatchAllService_read_asset_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpCatchAllService_read_asset_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpCatchAllService_read_file_In": {
+        "type": "object",
+        "required": [
+          "rel_path"
+        ],
+        "properties": {
+          "rel_path": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpCatchAllService_read_file_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpCatchAllService_read_file_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpCatchAllService_read_file_Out"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

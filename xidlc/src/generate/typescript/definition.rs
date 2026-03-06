@@ -721,7 +721,8 @@ struct RequestPayloadEntry {
 
 #[derive(Serialize)]
 struct PathParamContext {
-    raw_name: String,
+    template_name: String,
+    catch_all: bool,
     access: String,
 }
 
@@ -810,7 +811,12 @@ impl MethodInfo {
                 .path_params
                 .iter()
                 .map(|param| PathParamContext {
-                    raw_name: param.wire_name.clone(),
+                    template_name: if path_param_is_catch_all(&self.path, &param.wire_name) {
+                        format!("*{}", param.wire_name)
+                    } else {
+                        param.wire_name.clone()
+                    },
+                    catch_all: path_param_is_catch_all(&self.path, &param.wire_name),
                     access: parsed_access(self, &param.raw_name),
                 })
                 .collect(),
@@ -1711,6 +1717,9 @@ fn route_from_annotations(
     }
     let mut dedup = HashSet::new();
     paths.retain(|path| dedup.insert(path.clone()));
+    for path in &paths {
+        validate_route_template(path)?;
+    }
     Ok((method.unwrap_or(default_method), paths))
 }
 
@@ -2029,7 +2038,7 @@ fn parse_path_params(path: &str) -> HashSet<String> {
             }
             '}' if in_param => {
                 if !buf.is_empty() {
-                    out.insert(buf.clone());
+                    out.insert(strip_path_param_prefix(&buf));
                 }
                 in_param = false;
             }
@@ -2042,6 +2051,51 @@ fn parse_path_params(path: &str) -> HashSet<String> {
     }
 
     out
+}
+
+fn strip_path_param_prefix(value: &str) -> String {
+    value.strip_prefix('*').unwrap_or(value).to_string()
+}
+
+fn path_param_is_catch_all(path: &str, name: &str) -> bool {
+    path.contains(&format!("{{*{name}}}"))
+}
+
+fn validate_route_template(path: &str) -> IdlcResult<()> {
+    let mut start = 0usize;
+    let mut catch_all_count = 0usize;
+    while let Some(open_rel) = path[start..].find('{') {
+        let open = start + open_rel;
+        let close = path[open + 1..]
+            .find('}')
+            .map(|value| open + 1 + value)
+            .ok_or_else(|| {
+                IdlcError::rpc(format!("route template has unmatched '{{' in '{path}'"))
+            })?;
+        let token = &path[open + 1..close];
+        let is_catch_all = token.starts_with('*');
+        let name = token.strip_prefix('*').unwrap_or(token);
+        if name.is_empty() {
+            return Err(IdlcError::rpc(format!(
+                "route template has empty path variable in '{path}'"
+            )));
+        }
+        if is_catch_all {
+            catch_all_count += 1;
+            if catch_all_count > 1 {
+                return Err(IdlcError::rpc(format!(
+                    "route template contains more than one catch-all variable: '{path}'"
+                )));
+            }
+            if close + 1 != path.len() {
+                return Err(IdlcError::rpc(format!(
+                    "catch-all variable must be at the end of route template: '{path}'"
+                )));
+            }
+        }
+        start = close + 1;
+    }
+    Ok(())
 }
 
 fn default_param_source(method: HttpMethod) -> ParamSource {

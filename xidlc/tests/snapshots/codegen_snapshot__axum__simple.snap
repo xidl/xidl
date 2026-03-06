@@ -454,6 +454,27 @@ value : unknown
     );
 }
 
+function encodePathCatchAll(
+value : unknown
+) : string{
+    return String(
+    value
+    )
+    .split(
+    "/"
+    )
+    .map(
+    (
+    segment
+    ) => encodeURIComponent(
+    segment
+    )
+    )
+    .join(
+    "/"
+    );
+}
+
 function encodeQueryValue(
 value : unknown
 ) : string{

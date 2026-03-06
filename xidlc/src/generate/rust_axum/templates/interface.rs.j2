@@ -187,7 +187,7 @@ pub trait {{ ident }} {
             pub async fn {{ method.name }}(&self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.response_ty }}, xidl_rust_axum::Error> {
                 let path = "{{ method.path }}".to_string();
                 {% for param in method.path_params %}
-                    let path = path.replace("{{ ['{{', param.wire_name, '}}'] | join}}", &{{ param.name }}.to_string());
+                    let path = path.replace("{{ ['{{', param.path_template_name, '}}'] | join}}", &{{ param.name }}.to_string());
                 {% endfor %}
                 let url = self.client.url(&path);
                 let req = self

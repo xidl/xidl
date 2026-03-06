@@ -123,8 +123,15 @@ Route templates support placeholders, for example:
 
 - `/users/{id}`
 - `/orders/{order_id}/items/{item_id}`
+- `/files/{*path}` (catch-all path variable)
 
 Template variable names are used by parameter source resolution (see section 5).
+
+`{*name}` means a catch-all path variable:
+
+- it matches one or more path segments
+- it is bound as Path source with bound name `name`
+- it is intended for trailing path capture (for example `/files/{*path}`)
 
 ### 4.4 Route Normalization
 
@@ -206,6 +213,11 @@ void list_orders(@path("uid") uint32 user_id, uint32 page, uint32 size);
 // Example 6: mixed in/out/inout (only request-side params affect path template)
 long add(in long a, in long b, out long sum);
 // => POST "/add"
+
+// Example 7: catch-all path variable
+@get(path="/files/{*path}")
+string get_file(@path("path") string rel_path);
+// => GET "/files/{*path}"
 ```
 
 ## 5. Parameter Source Resolution
@@ -242,6 +254,9 @@ Constraints:
   bound route template of that method.
 - Every route template variable `{name}` must be bound by exactly one
   request-side parameter (`in`/`inout`) resolved to Path source.
+- Catch-all template variable `{*name}` follows the same binding rule as `{name}`.
+- A route template may contain at most one catch-all variable.
+- Catch-all variable SHOULD appear at the end of route template.
 
 ## 6. Request Encoding
 
@@ -369,6 +384,7 @@ The following are invalid and should raise mapping errors before serving traffic
   bound route templates.
 - Any route template variable that has no matching request-side parameter bound
   to Path source.
+- A route template containing more than one catch-all variable.
 - Duplicate final route bindings (`HTTP method + normalized path`) across methods.
 - Any `@head` method with non-`void` return type.
 - Any `@head` method containing `out` or `inout` parameters.

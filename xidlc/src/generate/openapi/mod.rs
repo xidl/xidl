@@ -303,8 +303,13 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
     if paths.is_empty() {
         paths.push(auto_default_method_path(op, method));
     }
+    let raw_paths = paths.clone();
+    let paths = raw_paths
+        .iter()
+        .map(|item| openapi_path_template(item))
+        .collect::<Vec<_>>();
     validate_head_constraints(op, method);
-    let path_param_sets = paths
+    let path_param_sets = raw_paths
         .iter()
         .map(|item| parse_path_params(item))
         .collect::<Vec<_>>();
@@ -802,6 +807,9 @@ fn route_from_annotations(
 
     let mut dedup = HashSet::new();
     paths.retain(|path| dedup.insert(path.clone()));
+    for path in &paths {
+        validate_route_template(path);
+    }
     (verb_method.unwrap_or(default_method), paths)
 }
 
@@ -978,7 +986,7 @@ fn parse_path_params(path: &str) -> HashSet<String> {
             }
             '}' if in_param => {
                 if !buf.is_empty() {
-                    out.insert(buf.clone());
+                    out.insert(strip_path_param_prefix(&buf));
                 }
                 in_param = false;
             }
@@ -991,6 +999,64 @@ fn parse_path_params(path: &str) -> HashSet<String> {
     }
 
     out
+}
+
+fn strip_path_param_prefix(value: &str) -> String {
+    value.strip_prefix('*').unwrap_or(value).to_string()
+}
+
+fn openapi_path_template(path: &str) -> String {
+    let mut out = String::with_capacity(path.len());
+    let mut in_param = false;
+    let mut buf = String::new();
+    for ch in path.chars() {
+        match ch {
+            '{' if !in_param => {
+                in_param = true;
+                buf.clear();
+                out.push('{');
+            }
+            '}' if in_param => {
+                out.push_str(buf.strip_prefix('*').unwrap_or(&buf));
+                out.push('}');
+                in_param = false;
+            }
+            _ if in_param => buf.push(ch),
+            _ => out.push(ch),
+        }
+    }
+    out
+}
+
+fn validate_route_template(path: &str) {
+    let mut start = 0usize;
+    let mut catch_all_count = 0usize;
+    while let Some(open_rel) = path[start..].find('{') {
+        let open = start + open_rel;
+        let close = path[open + 1..]
+            .find('}')
+            .map(|value| open + 1 + value)
+            .unwrap_or_else(|| panic!("route template has unmatched '{{' in '{path}'"));
+        let token = &path[open + 1..close];
+        let is_catch_all = token.starts_with('*');
+        let name = token.strip_prefix('*').unwrap_or(token);
+        assert!(
+            !name.is_empty(),
+            "route template has empty path variable in '{path}'"
+        );
+        if is_catch_all {
+            catch_all_count += 1;
+            assert!(
+                catch_all_count <= 1,
+                "route template contains more than one catch-all variable: '{path}'"
+            );
+            assert!(
+                close + 1 == path.len(),
+                "catch-all variable must be at the end of route template: '{path}'"
+            );
+        }
+        start = close + 1;
+    }
 }
 
 fn normalize_path(path: &str) -> String {

@@ -38,6 +38,13 @@ function encodePathSegment(value: unknown): string {
     return encodeURIComponent(String(value));
 }
 
+function encodePathCatchAll(value: unknown): string {
+    return String(value)
+        .split("/")
+        .map((segment) => encodeURIComponent(segment))
+        .join("/");
+}
+
 function encodeQueryValue(value: unknown): string {
     if (value === null || value === undefined) {
         return "";

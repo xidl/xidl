@@ -1,0 +1,15 @@
+#progma xidlc package xidlc
+#progma xidlc version v1.0.0
+
+interface HttpCatchAllService {
+    @get(path = "/files/{*path}")
+    string read_file(
+        @path("path") string rel_path
+    );
+
+    @get(path = "/assets/{*key}")
+    string read_asset(
+        @path("key") string key,
+        @query("v") string version
+    );
+};
