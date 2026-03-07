@@ -1,3 +1,4 @@
+use xidlc_examples::city_http::SmartCityHttpApiClient;
 use xidlc_examples::city_http::SmartCityHttpApiServer;
 use xidlc_examples::example_services::SmartCityHttpService;
 
@@ -18,171 +19,86 @@ async fn http_client_calls_all_endpoints() {
     tokio::time::sleep(std::time::Duration::from_millis(100)).await;
 
     let base = format!("http://{}", addr);
-    let client = xidl_rust_axum::reqwest::Client::new();
+    let client = SmartCityHttpApiClient::new(base);
 
     let eta = client
-        .get(format!("{base}/v1/stops/S100?line=2&lang=en"))
-        .send()
+        .get_stop_eta("S100".to_string(), "2".to_string(), "en".to_string())
         .await
         .expect("call get_stop_eta");
-    assert_eq!(eta.status(), xidl_rust_axum::reqwest::StatusCode::OK);
-    let eta_json = eta
-        .json::<serde_json::Value>()
-        .await
-        .expect("decode get_stop_eta");
-    assert_eq!(
-        eta_json,
-        serde_json::json!({
-            "return": "S100",
-            "eta_seconds": 240,
-            "destination": "Central Station"
-        })
-    );
+    assert_eq!(eta.r#return, "S100");
+    assert_eq!(eta.eta_seconds, 240);
+    assert_eq!(eta.destination, "Central Station");
 
     let nearby = client
-        .get(format!("{base}/v1/stops/S100/nearby"))
-        .send()
+        .list_nearby_stops("S100".to_string())
         .await
         .expect("call list_nearby_stops");
-    assert_eq!(nearby.status(), xidl_rust_axum::reqwest::StatusCode::OK);
-    let nearby_json = nearby
-        .json::<serde_json::Value>()
-        .await
-        .expect("decode nearby");
-    assert_eq!(nearby_json, serde_json::json!(["S100-A", "S100-B"]));
+    assert_eq!(nearby, vec!["S100-A".to_string(), "S100-B".to_string()]);
 
     let asset = client
-        .get(format!("{base}/v1/assets/docs/readme.txt?version=v1"))
-        .send()
+        .download_asset("docs/readme.txt".to_string(), "v1".to_string())
         .await
         .expect("call download_asset");
-    assert_eq!(asset.status(), xidl_rust_axum::reqwest::StatusCode::OK);
-    let asset_json = asset
-        .json::<serde_json::Value>()
-        .await
-        .expect("decode download_asset");
     assert_eq!(
-        asset_json,
-        serde_json::json!({
-            "return": [97, 115, 115, 101, 116, 58, 100, 111, 99, 115, 47, 114, 101, 97, 100, 109, 101, 46, 116, 120, 116],
-            "content_type": "text/plain",
-            "etag": "etag-demo"
-        })
+        asset.r#return,
+        vec![
+            97, 115, 115, 101, 116, 58, 100, 111, 99, 115, 47, 114, 101, 97, 100, 109, 101, 46,
+            116, 120, 116
+        ]
     );
+    assert_eq!(asset.content_type, "text/plain");
+    assert_eq!(asset.etag, "etag-demo");
 
-    let probe = client
-        .head(format!("{base}/v1/parking/lots/P1?trace_id=t1"))
-        .send()
+    client
+        .probe_lot("P1".to_string(), "t1".to_string())
         .await
         .expect("call probe_lot");
-    assert_eq!(
-        probe.status(),
-        xidl_rust_axum::reqwest::StatusCode::NO_CONTENT
-    );
 
     let reserve = client
-        .post(format!("{base}/v1/parking/lots/P1/reserve"))
-        .json(&serde_json::json!({ "plate_number": "A-12345", "minutes": 30 }))
-        .send()
+        .reserve_lot("P1".to_string(), "A-12345".to_string(), 30)
         .await
         .expect("call reserve_lot");
-    assert_eq!(reserve.status(), xidl_rust_axum::reqwest::StatusCode::OK);
-    let reserve_json = reserve
-        .json::<serde_json::Value>()
-        .await
-        .expect("decode reserve_lot");
-    assert_eq!(
-        reserve_json,
-        serde_json::json!({
-            "return": "resv-P1",
-            "reservation_state": "CONFIRMED",
-            "expires_at": "2026-03-08T10:00:00Z"
-        })
-    );
+    assert_eq!(reserve.r#return, "resv-P1");
+    assert_eq!(reserve.reservation_state, "CONFIRMED");
+    assert_eq!(reserve.expires_at, "2026-03-08T10:00:00Z");
 
-    let cancel = client
-        .delete(format!("{base}/v1/parking/lots/P1/reservations/R1"))
-        .send()
+    client
+        .cancel_reservation("P1".to_string(), "R1".to_string())
         .await
         .expect("call cancel_reservation");
-    assert_eq!(
-        cancel.status(),
-        xidl_rust_axum::reqwest::StatusCode::NO_CONTENT
-    );
 
     let profile = client
-        .get(format!("{base}/v1/citizens/C100"))
-        .send()
+        .get_profile("C100".to_string())
         .await
         .expect("call get_profile");
-    assert_eq!(profile.status(), xidl_rust_axum::reqwest::StatusCode::OK);
-    let profile_json = profile
-        .json::<serde_json::Value>()
-        .await
-        .expect("decode get_profile");
-    assert_eq!(
-        profile_json,
-        serde_json::json!({
-            "return": "C100",
-            "display_name": "Taylor",
-            "phone_number": "+1-555-0101",
-            "language": "en-US"
-        })
-    );
+    assert_eq!(profile.r#return, "C100");
+    assert_eq!(profile.display_name, "Taylor");
+    assert_eq!(profile.phone_number, "+1-555-0101");
+    assert_eq!(profile.language, "en-US");
 
     let update = client
-        .patch(format!("{base}/v1/citizens/C100"))
-        .json(&serde_json::json!({ "display_name": "Taylor", "phone_number": "+1-555-0101" }))
-        .send()
+        .update_profile(
+            "C100".to_string(),
+            "Taylor".to_string(),
+            "+1-555-0101".to_string(),
+        )
         .await
         .expect("call update_profile");
-    assert_eq!(update.status(), xidl_rust_axum::reqwest::StatusCode::OK);
-    let update_json = update
-        .json::<serde_json::Value>()
-        .await
-        .expect("decode update_profile");
-    assert_eq!(update_json, serde_json::json!("audit-20260307-001"));
+    assert_eq!(update, "audit-20260307-001");
 
-    let api_version = client
-        .get(format!("{base}/SmartCityHttpApi/api_version"))
-        .send()
-        .await
-        .expect("call api_version");
-    assert_eq!(
-        api_version.status(),
-        xidl_rust_axum::reqwest::StatusCode::OK
-    );
-    let api_version_json = api_version
-        .json::<serde_json::Value>()
-        .await
-        .expect("decode api_version");
-    assert_eq!(api_version_json, serde_json::json!("v2.0.0"));
+    let api_version = client.api_version().await.expect("call api_version");
+    assert_eq!(api_version, "v2.0.0");
 
     let maintenance_mode = client
-        .get(format!("{base}/SmartCityHttpApi/maintenance_mode"))
-        .send()
+        .maintenance_mode()
         .await
         .expect("call maintenance_mode");
-    assert_eq!(
-        maintenance_mode.status(),
-        xidl_rust_axum::reqwest::StatusCode::OK
-    );
-    let maintenance_mode_json = maintenance_mode
-        .json::<serde_json::Value>()
-        .await
-        .expect("decode maintenance_mode");
-    assert_eq!(maintenance_mode_json, serde_json::json!(false));
+    assert!(!maintenance_mode);
 
-    let set_maintenance_mode = client
-        .post(format!("{base}/SmartCityHttpApi/set_maintenance_mode"))
-        .json(&serde_json::json!(true))
-        .send()
+    client
+        .set_maintenance_mode(true)
         .await
         .expect("call set_maintenance_mode");
-    assert_eq!(
-        set_maintenance_mode.status(),
-        xidl_rust_axum::reqwest::StatusCode::NO_CONTENT
-    );
 
     task.abort();
 }

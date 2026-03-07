@@ -187,20 +187,26 @@ pub trait {{ ident }} {
             pub async fn {{ method.name }}(&self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.response_ty }}, xidl_rust_axum::Error> {
                 let path = "{{ method.path }}".to_string();
                 {% for param in method.path_params %}
-                    let path = path.replace("{{ ['{{', param.path_template_name, '}}'] | join}}", &{{ param.name }}.to_string());
+                    let path = path.replace("{{ ['{', param.path_template_name, '}'] | join}}", &{{ param.name }}.to_string());
                 {% endfor %}
                 let url = self.client.url(&path);
-                let req = self
-                .client
-                .http()
-                .request(xidl_rust_axum::reqwest::Method::{{ method.reqwest_method }}, url);
+                let mut req = self
+                    .client
+                    .http()
+                    .request(xidl_rust_axum::reqwest::Method::{{ method.reqwest_method }}, url)
+                    .build()
+                    .map_err(|err| xidl_rust_axum::Error::new(500, err.to_string()))?;
                 {% if method.query_params | length > 0 %}
                     let query = {{ method.struct_prefix }}Query {
                         {% for param in method.query_params %}
                             {{ param.name }},
                         {% endfor %}
                     };
-                    let req = req.query(&query);
+                    let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+                        .map_err(|err| xidl_rust_axum::Error::new(500, err.to_string()))?;
+                    if !query.is_empty() {
+                        req.url_mut().set_query(Some(&query));
+                    }
                 {% endif %}
                 {% if method.body_params | length > 0 %}
                     {% if method.body_params | length == 1 %}
@@ -208,16 +214,24 @@ pub trait {{ ident }} {
                     {% else %}
                         let body = {{ method.struct_prefix }}Body {
                             {% for param in method.body_params %}
-                                {{ param.name }},
+                            {{ param.name }},
                             {% endfor %}
                         };
                     {% endif %}
-                    let req = req.json(&body);
+                    let body = xidl_rust_axum::serde_json::to_vec(&body)
+                        .map_err(|err| xidl_rust_axum::Error::new(500, err.to_string()))?;
+                    req.headers_mut().insert(
+                        xidl_rust_axum::reqwest::header::CONTENT_TYPE,
+                        xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/json"),
+                    );
+                    *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
                 {% endif %}
-                let resp = req
-                .send()
-                .await
-                .map_err(|err| xidl_rust_axum::Error::new(500, err.to_string()))?;
+                let resp = self
+                    .client
+                    .http()
+                    .execute(req)
+                    .await
+                    .map_err(|err| xidl_rust_axum::Error::new(500, err.to_string()))?;
                 if resp.status().is_success() {
                     {% if method.response_is_empty %}
                         Ok(())

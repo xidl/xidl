@@ -12,7 +12,6 @@ fn main() {
 
     Builder::new()
         .with_lang("rust-axum")
-        .with_client(false)
         .compile(&["./api/city_http.idl"])
         .expect("failed to compile city http idl for rust-axum example");
 
