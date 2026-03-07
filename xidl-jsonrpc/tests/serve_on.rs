@@ -1,4 +1,5 @@
 use tokio::io::{BufReader, split};
+#[cfg(feature = "tokio-net")]
 use tokio::net::TcpStream;
 use xidl_jsonrpc::Client;
 use xidl_jsonrpc::Error;
@@ -61,6 +62,34 @@ async fn serve_on_inproc_uri() {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn inproc_connect_before_bind() {
+    let endpoint = random_endpoint("connect-before-bind");
+    let stream = xidl_jsonrpc::transport::connect_inproc(&endpoint).expect("connect inproc");
+
+    let call_task = tokio::spawn(async move { call_echo_over_stream(stream).await });
+
+    tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+
+    let uri = format!("inproc://{endpoint}");
+    let server_task = tokio::spawn(async move {
+        xidl_jsonrpc::Server::builder()
+            .with_service(EchoHandler)
+            .serve_on(&uri)
+            .await
+    });
+
+    let result = tokio::time::timeout(std::time::Duration::from_secs(2), call_task)
+        .await
+        .expect("rpc call timed out")
+        .expect("join call task")
+        .expect("rpc call failed");
+    assert_eq!(result, "ok");
+
+    server_task.abort();
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+#[cfg(feature = "tokio-net")]
 async fn serve_on_tcp_uri() {
     let probe = std::net::TcpListener::bind("127.0.0.1:0").expect("bind probe");
     let addr = probe.local_addr().expect("probe addr");

@@ -1,11 +1,13 @@
 mod inproc;
 mod io;
+#[cfg(feature = "tokio-net")]
 mod tcp;
 
 use std::net::SocketAddr;
 
 pub use inproc::{InprocListener, connect_inproc};
 pub use io::IoListener;
+#[cfg(feature = "tokio-net")]
 pub use tcp::TcpListener;
 
 pub trait Stream: tokio::io::AsyncRead + tokio::io::AsyncWrite {}

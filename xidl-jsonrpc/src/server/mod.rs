@@ -1,7 +1,9 @@
 mod session;
 
 use crate::Error;
-use crate::transport::{InprocListener, IoListener, Listener, TcpListener};
+#[cfg(feature = "tokio-net")]
+use crate::transport::TcpListener;
+use crate::transport::{InprocListener, IoListener, Listener};
 use serde_json::Value;
 use session::ServerSession;
 use std::sync::Arc;
@@ -135,14 +137,33 @@ impl ServerBuilder {
         }
         let endpoint = endpoint.as_ref();
         let server = if let Some(addr) = endpoint.strip_prefix("tcp://") {
-            let listener = TcpListener::bind(addr).await?;
-            self.with_listener(listener)
+            #[cfg(feature = "tokio-net")]
+            {
+                let listener = TcpListener::bind(addr).await?;
+                self.with_listener(listener)
+            }
+            #[cfg(not(feature = "tokio-net"))]
+            {
+                let _ = addr;
+                return Err(Error::Protocol(
+                    "tcp transport requires `tokio-net` feature",
+                ));
+            }
         } else if let Some(endpoint) = endpoint.strip_prefix("inproc://") {
             let listener = InprocListener::bind(endpoint.to_string())?;
             self.with_listener(listener)
         } else {
-            let listener = TcpListener::bind(endpoint).await?;
-            self.with_listener(listener)
+            #[cfg(feature = "tokio-net")]
+            {
+                let listener = TcpListener::bind(endpoint).await?;
+                self.with_listener(listener)
+            }
+            #[cfg(not(feature = "tokio-net"))]
+            {
+                return Err(Error::Protocol(
+                    "tcp transport requires `tokio-net` feature",
+                ));
+            }
         };
         server.serve().await
     }

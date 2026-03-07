@@ -1,38 +1,82 @@
-use std::collections::HashMap;
+use std::collections::VecDeque;
 use std::net::SocketAddr;
-use std::sync::{Mutex, OnceLock};
+use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::{Arc, LazyLock, Mutex};
 
+use dashmap::DashMap;
 use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender, unbounded_channel};
 
 use super::{Listener, Stream};
 
-type InprocTx = UnboundedSender<tokio::io::DuplexStream>;
+type InprocStream = tokio::io::DuplexStream;
 
-fn registry() -> &'static Mutex<HashMap<String, InprocTx>> {
-    static REGISTRY: OnceLock<Mutex<HashMap<String, InprocTx>>> = OnceLock::new();
-    REGISTRY.get_or_init(|| Mutex::new(HashMap::new()))
+struct BoundSlot {
+    listener_id: u64,
+    tx: UnboundedSender<InprocStream>,
 }
 
+#[derive(Default)]
+struct EndpointEntry {
+    bound: Option<BoundSlot>,
+    pending: VecDeque<InprocStream>,
+}
+
+fn next_listener_id() -> u64 {
+    static NEXT_ID: AtomicU64 = AtomicU64::new(1);
+    NEXT_ID.fetch_add(1, Ordering::Relaxed)
+}
+
+type EndpointState = Arc<Mutex<EndpointEntry>>;
+type Registry = DashMap<String, EndpointState>;
+static REGISTRY: LazyLock<Registry> = LazyLock::new(DashMap::new);
+
 pub struct InprocListener {
+    listener_id: u64,
     endpoint: String,
-    rx: tokio::sync::Mutex<UnboundedReceiver<tokio::io::DuplexStream>>,
+    rx: tokio::sync::Mutex<UnboundedReceiver<InprocStream>>,
 }
 
 impl InprocListener {
     pub fn bind(endpoint: impl Into<String>) -> std::io::Result<Self> {
         let endpoint = endpoint.into();
+        let listener_id = next_listener_id();
         let (tx, rx) = unbounded_channel();
-        let mut map = registry()
+
+        let entry = REGISTRY
+            .entry(endpoint.clone())
+            .or_insert_with(|| Arc::new(Mutex::new(EndpointEntry::default())))
+            .clone();
+
+        let mut guard = entry
             .lock()
             .map_err(|err| std::io::Error::other(err.to_string()))?;
-        if map.contains_key(&endpoint) {
+        if guard.bound.is_some() {
             return Err(std::io::Error::new(
                 std::io::ErrorKind::AddrInUse,
                 format!("inproc endpoint already in use: {endpoint}"),
             ));
         }
-        map.insert(endpoint.clone(), tx);
+
+        guard.bound = Some(BoundSlot {
+            listener_id,
+            tx: tx.clone(),
+        });
+
+        while let Some(stream) = guard.pending.pop_front() {
+            if let Err(err) = tx.send(stream) {
+                let failed = err.0;
+                guard.bound = None;
+                guard.pending.push_front(failed);
+                return Err(std::io::Error::new(
+                    std::io::ErrorKind::BrokenPipe,
+                    format!("inproc listener channel closed for endpoint: {endpoint}"),
+                ));
+            }
+        }
+        drop(guard);
+
         Ok(Self {
+            listener_id,
             endpoint,
             rx: tokio::sync::Mutex::new(rx),
         })
@@ -41,31 +85,44 @@ impl InprocListener {
 
 impl Drop for InprocListener {
     fn drop(&mut self) {
-        if let Ok(mut map) = registry().lock() {
-            map.remove(&self.endpoint);
+        if let Some(state) = REGISTRY.get(&self.endpoint).map(|entry| entry.clone()) {
+            let mut should_remove = false;
+            if let Ok(mut entry) = state.lock() {
+                if entry
+                    .bound
+                    .as_ref()
+                    .map(|slot| slot.listener_id == self.listener_id)
+                    .unwrap_or(false)
+                {
+                    entry.bound = None;
+                }
+                should_remove = entry.bound.is_none() && entry.pending.is_empty();
+            }
+            if should_remove {
+                REGISTRY.remove(&self.endpoint);
+            }
         }
     }
 }
 
-pub fn connect_inproc(endpoint: &str) -> std::io::Result<tokio::io::DuplexStream> {
-    let map = registry()
+pub fn connect_inproc(endpoint: &str) -> std::io::Result<InprocStream> {
+    let (client, server) = tokio::io::duplex(64 * 1024);
+    let state = REGISTRY
+        .entry(endpoint.to_string())
+        .or_insert_with(|| Arc::new(Mutex::new(EndpointEntry::default())))
+        .clone();
+    let mut entry = state
         .lock()
         .map_err(|err| std::io::Error::other(err.to_string()))?;
-    let tx = map.get(endpoint).cloned().ok_or_else(|| {
-        std::io::Error::new(
-            std::io::ErrorKind::NotFound,
-            format!("inproc endpoint not found: {endpoint}"),
-        )
-    })?;
-    drop(map);
-
-    let (client, server) = tokio::io::duplex(64 * 1024);
-    tx.send(server).map_err(|_| {
-        std::io::Error::new(
-            std::io::ErrorKind::BrokenPipe,
-            format!("inproc endpoint closed: {endpoint}"),
-        )
-    })?;
+    if let Some(bound) = entry.bound.as_ref() {
+        if let Err(err) = bound.tx.send(server) {
+            let failed = err.0;
+            entry.bound = None;
+            entry.pending.push_back(failed);
+        }
+    } else {
+        entry.pending.push_back(server);
+    }
     Ok(client)
 }
 

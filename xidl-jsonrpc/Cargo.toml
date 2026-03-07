@@ -14,6 +14,7 @@ async-trait.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
+dashmap = "6"
 
 tokio = { version = "1.36", optional = true, features = [
   "sync",
@@ -24,8 +25,8 @@ tokio = { version = "1.36", optional = true, features = [
 
 [features]
 default = ["tokio"]
-tokio = ["dep:tokio", "tokio/net"]
-tokio-net = ["tokio"]
+tokio = ["dep:tokio"]
+tokio-net = ["tokio", "tokio/net"]
 
 [dev-dependencies]
 clap = { version = "4", features = ["derive"] }
