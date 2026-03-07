@@ -1,0 +1,66 @@
+#progma xidlc package Smart City Public APIs
+#progma xidlc version v2.0.0
+
+interface SmartCityHttpApi {
+    @get(path = "/v1/stops/{stop_id}{?line,lang}")
+    string get_stop_eta(
+        @path("stop_id") string stop_id,
+        @query("line") string line,
+        @query("lang") string locale,
+        out uint32 eta_seconds,
+        out string destination
+    );
+
+    @get(path = "/v1/stops/{stop_id}/nearby")
+    sequence<string> list_nearby_stops(
+        @path("stop_id") string stop_id
+    );
+
+    @get(path = "/v1/assets/{*path}")
+    sequence<uint8> download_asset(
+        @path("path") string asset_path,
+        @query("version") string version,
+        out string content_type,
+        out string etag
+    );
+
+    @head(path = "/v1/parking/lots/{lot_id}")
+    void probe_lot(
+        @path("lot_id") string lot_id,
+        @query("trace_id") string trace_id
+    );
+
+    @post(path = "/v1/parking/lots/{lot_id}/reserve")
+    string reserve_lot(
+        @path("lot_id") string lot_id,
+        string plate_number,
+        uint32 minutes,
+        out string reservation_state,
+        out string expires_at
+    );
+
+    @delete(path = "/v1/parking/lots/{lot_id}/reservations/{reservation_id}")
+    void cancel_reservation(
+        @path("lot_id") string lot_id,
+        @path("reservation_id") string reservation_id
+    );
+
+    @get(path = "/v1/citizens/{citizen_id}")
+    string get_profile(
+        @path("citizen_id") string citizen_id,
+        out string display_name,
+        out string phone_number,
+        out string language
+    );
+
+    @patch(path = "/v1/citizens/{citizen_id}")
+    void update_profile(
+        @path("citizen_id") string citizen_id,
+        string display_name,
+        string phone_number,
+        out string audit_id
+    );
+
+    readonly attribute string api_version;
+    attribute boolean maintenance_mode;
+};

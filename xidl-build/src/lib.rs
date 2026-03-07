@@ -90,11 +90,7 @@ impl Builder {
         Ok(())
     }
 
-    fn apply_output_filename(
-        &self,
-        out_dir: &Path,
-        custom_name: &Path,
-    ) -> Result<(), IdlcError> {
+    fn apply_output_filename(&self, out_dir: &Path, custom_name: &Path) -> Result<(), IdlcError> {
         if out_dir == Path::new("-") {
             return Err(IdlcError::fmt(
                 "with_output_filename is not supported when out_dir is '-'",

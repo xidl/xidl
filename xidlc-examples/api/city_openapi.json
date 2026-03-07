@@ -1,0 +1,1349 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Smart City Public APIs",
+    "version": "v2.0.0"
+  },
+  "paths": {
+    "/SmartCityHttpApi/api_version": {
+      "get": {
+        "operationId": "SmartCityHttpApi.api_version",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SmartCityHttpApi/maintenance_mode": {
+      "get": {
+        "operationId": "SmartCityHttpApi.maintenance_mode",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SmartCityHttpApi/set_maintenance_mode": {
+      "post": {
+        "operationId": "SmartCityHttpApi.set_maintenance_mode",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/assets/{path}": {
+      "get": {
+        "operationId": "SmartCityHttpApi.download_asset",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "return",
+                    "content_type",
+                    "etag"
+                  ],
+                  "properties": {
+                    "content_type": {
+                      "type": "string"
+                    },
+                    "etag": {
+                      "type": "string"
+                    },
+                    "return": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "format": "int32",
+                        "minimum": 0
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/citizens/{citizen_id}": {
+      "get": {
+        "operationId": "SmartCityHttpApi.get_profile",
+        "parameters": [
+          {
+            "name": "citizen_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "return",
+                    "display_name",
+                    "phone_number",
+                    "language"
+                  ],
+                  "properties": {
+                    "display_name": {
+                      "type": "string"
+                    },
+                    "language": {
+                      "type": "string"
+                    },
+                    "phone_number": {
+                      "type": "string"
+                    },
+                    "return": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "SmartCityHttpApi.update_profile",
+        "parameters": [
+          {
+            "name": "citizen_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "display_name",
+                  "phone_number"
+                ],
+                "properties": {
+                  "display_name": {
+                    "type": "string"
+                  },
+                  "phone_number": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/parking/lots/{lot_id}": {
+      "head": {
+        "operationId": "SmartCityHttpApi.probe_lot",
+        "parameters": [
+          {
+            "name": "lot_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "trace_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/parking/lots/{lot_id}/reservations/{reservation_id}": {
+      "delete": {
+        "operationId": "SmartCityHttpApi.cancel_reservation",
+        "parameters": [
+          {
+            "name": "lot_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reservation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/parking/lots/{lot_id}/reserve": {
+      "post": {
+        "operationId": "SmartCityHttpApi.reserve_lot",
+        "parameters": [
+          {
+            "name": "lot_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "plate_number",
+                  "minutes"
+                ],
+                "properties": {
+                  "minutes": {
+                    "type": "integer",
+                    "format": "int32",
+                    "minimum": 0
+                  },
+                  "plate_number": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "return",
+                    "reservation_state",
+                    "expires_at"
+                  ],
+                  "properties": {
+                    "expires_at": {
+                      "type": "string"
+                    },
+                    "reservation_state": {
+                      "type": "string"
+                    },
+                    "return": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/stops/{stop_id}": {
+      "get": {
+        "operationId": "SmartCityHttpApi.get_stop_eta",
+        "parameters": [
+          {
+            "name": "stop_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "line",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "return",
+                    "eta_seconds",
+                    "destination"
+                  ],
+                  "properties": {
+                    "destination": {
+                      "type": "string"
+                    },
+                    "eta_seconds": {
+                      "type": "integer",
+                      "format": "int32",
+                      "minimum": 0
+                    },
+                    "return": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/stops/{stop_id}/nearby": {
+      "get": {
+        "operationId": "SmartCityHttpApi.list_nearby_stops",
+        "parameters": [
+          {
+            "name": "stop_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "code",
+          "msg"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "details": {
+            "type": "object"
+          },
+          "msg": {
+            "type": "string"
+          }
+        }
+      },
+      "SmartCityHttpApi_Call": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_stop_eta"
+            ],
+            "properties": {
+              "get_stop_eta": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_get_stop_eta_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "list_nearby_stops"
+            ],
+            "properties": {
+              "list_nearby_stops": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_list_nearby_stops_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "download_asset"
+            ],
+            "properties": {
+              "download_asset": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_download_asset_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "probe_lot"
+            ],
+            "properties": {
+              "probe_lot": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_probe_lot_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "reserve_lot"
+            ],
+            "properties": {
+              "reserve_lot": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_reserve_lot_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "cancel_reservation"
+            ],
+            "properties": {
+              "cancel_reservation": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_cancel_reservation_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_profile"
+            ],
+            "properties": {
+              "get_profile": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_get_profile_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "update_profile"
+            ],
+            "properties": {
+              "update_profile": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_update_profile_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_api_version"
+            ],
+            "properties": {
+              "get_attribute_api_version": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_get_attribute_api_version_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_maintenance_mode"
+            ],
+            "properties": {
+              "get_attribute_maintenance_mode": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_get_attribute_maintenance_mode_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_maintenance_mode"
+            ],
+            "properties": {
+              "set_attribute_maintenance_mode": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_set_attribute_maintenance_mode_In"
+              }
+            }
+          }
+        ]
+      },
+      "SmartCityHttpApi_Reply": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/SmartCityHttpApi_Return"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
+          }
+        }
+      },
+      "SmartCityHttpApi_Request": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/SmartCityHttpApi_Call"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
+          }
+        }
+      },
+      "SmartCityHttpApi_Return": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_stop_eta"
+            ],
+            "properties": {
+              "get_stop_eta": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_get_stop_eta_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "list_nearby_stops"
+            ],
+            "properties": {
+              "list_nearby_stops": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_list_nearby_stops_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "download_asset"
+            ],
+            "properties": {
+              "download_asset": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_download_asset_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "probe_lot"
+            ],
+            "properties": {
+              "probe_lot": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_probe_lot_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "reserve_lot"
+            ],
+            "properties": {
+              "reserve_lot": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_reserve_lot_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "cancel_reservation"
+            ],
+            "properties": {
+              "cancel_reservation": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_cancel_reservation_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_profile"
+            ],
+            "properties": {
+              "get_profile": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_get_profile_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "update_profile"
+            ],
+            "properties": {
+              "update_profile": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_update_profile_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_api_version"
+            ],
+            "properties": {
+              "get_attribute_api_version": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_get_attribute_api_version_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_maintenance_mode"
+            ],
+            "properties": {
+              "get_attribute_maintenance_mode": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_get_attribute_maintenance_mode_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_maintenance_mode"
+            ],
+            "properties": {
+              "set_attribute_maintenance_mode": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_set_attribute_maintenance_mode_Result"
+              }
+            }
+          }
+        ]
+      },
+      "SmartCityHttpApi_cancel_reservation_In": {
+        "type": "object",
+        "required": [
+          "lot_id",
+          "reservation_id"
+        ],
+        "properties": {
+          "lot_id": {
+            "type": "string"
+          },
+          "reservation_id": {
+            "type": "string"
+          }
+        }
+      },
+      "SmartCityHttpApi_cancel_reservation_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "SmartCityHttpApi_cancel_reservation_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_cancel_reservation_Out"
+              }
+            }
+          }
+        ]
+      },
+      "SmartCityHttpApi_download_asset_In": {
+        "type": "object",
+        "required": [
+          "asset_path",
+          "version"
+        ],
+        "properties": {
+          "asset_path": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        }
+      },
+      "SmartCityHttpApi_download_asset_Out": {
+        "type": "object",
+        "required": [
+          "content_type",
+          "etag",
+          "return_"
+        ],
+        "properties": {
+          "content_type": {
+            "type": "string"
+          },
+          "etag": {
+            "type": "string"
+          },
+          "return_": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          }
+        }
+      },
+      "SmartCityHttpApi_download_asset_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_download_asset_Out"
+              }
+            }
+          }
+        ]
+      },
+      "SmartCityHttpApi_get_attribute_api_version_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "SmartCityHttpApi_get_attribute_api_version_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "SmartCityHttpApi_get_attribute_api_version_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_get_attribute_api_version_Out"
+              }
+            }
+          }
+        ]
+      },
+      "SmartCityHttpApi_get_attribute_maintenance_mode_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "SmartCityHttpApi_get_attribute_maintenance_mode_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SmartCityHttpApi_get_attribute_maintenance_mode_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_get_attribute_maintenance_mode_Out"
+              }
+            }
+          }
+        ]
+      },
+      "SmartCityHttpApi_get_profile_In": {
+        "type": "object",
+        "required": [
+          "citizen_id"
+        ],
+        "properties": {
+          "citizen_id": {
+            "type": "string"
+          }
+        }
+      },
+      "SmartCityHttpApi_get_profile_Out": {
+        "type": "object",
+        "required": [
+          "display_name",
+          "phone_number",
+          "language",
+          "return_"
+        ],
+        "properties": {
+          "display_name": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          },
+          "phone_number": {
+            "type": "string"
+          },
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "SmartCityHttpApi_get_profile_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_get_profile_Out"
+              }
+            }
+          }
+        ]
+      },
+      "SmartCityHttpApi_get_stop_eta_In": {
+        "type": "object",
+        "required": [
+          "stop_id",
+          "line",
+          "locale"
+        ],
+        "properties": {
+          "line": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "stop_id": {
+            "type": "string"
+          }
+        }
+      },
+      "SmartCityHttpApi_get_stop_eta_Out": {
+        "type": "object",
+        "required": [
+          "eta_seconds",
+          "destination",
+          "return_"
+        ],
+        "properties": {
+          "destination": {
+            "type": "string"
+          },
+          "eta_seconds": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "SmartCityHttpApi_get_stop_eta_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_get_stop_eta_Out"
+              }
+            }
+          }
+        ]
+      },
+      "SmartCityHttpApi_list_nearby_stops_In": {
+        "type": "object",
+        "required": [
+          "stop_id"
+        ],
+        "properties": {
+          "stop_id": {
+            "type": "string"
+          }
+        }
+      },
+      "SmartCityHttpApi_list_nearby_stops_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "SmartCityHttpApi_list_nearby_stops_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_list_nearby_stops_Out"
+              }
+            }
+          }
+        ]
+      },
+      "SmartCityHttpApi_probe_lot_In": {
+        "type": "object",
+        "required": [
+          "lot_id",
+          "trace_id"
+        ],
+        "properties": {
+          "lot_id": {
+            "type": "string"
+          },
+          "trace_id": {
+            "type": "string"
+          }
+        }
+      },
+      "SmartCityHttpApi_probe_lot_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "SmartCityHttpApi_probe_lot_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_probe_lot_Out"
+              }
+            }
+          }
+        ]
+      },
+      "SmartCityHttpApi_reserve_lot_In": {
+        "type": "object",
+        "required": [
+          "lot_id",
+          "plate_number",
+          "minutes"
+        ],
+        "properties": {
+          "lot_id": {
+            "type": "string"
+          },
+          "minutes": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "plate_number": {
+            "type": "string"
+          }
+        }
+      },
+      "SmartCityHttpApi_reserve_lot_Out": {
+        "type": "object",
+        "required": [
+          "reservation_state",
+          "expires_at",
+          "return_"
+        ],
+        "properties": {
+          "expires_at": {
+            "type": "string"
+          },
+          "reservation_state": {
+            "type": "string"
+          },
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "SmartCityHttpApi_reserve_lot_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_reserve_lot_Out"
+              }
+            }
+          }
+        ]
+      },
+      "SmartCityHttpApi_set_attribute_maintenance_mode_In": {
+        "type": "object",
+        "required": [
+          "maintenance_mode"
+        ],
+        "properties": {
+          "maintenance_mode": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SmartCityHttpApi_set_attribute_maintenance_mode_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "SmartCityHttpApi_set_attribute_maintenance_mode_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_set_attribute_maintenance_mode_Out"
+              }
+            }
+          }
+        ]
+      },
+      "SmartCityHttpApi_update_profile_In": {
+        "type": "object",
+        "required": [
+          "citizen_id",
+          "display_name",
+          "phone_number"
+        ],
+        "properties": {
+          "citizen_id": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "phone_number": {
+            "type": "string"
+          }
+        }
+      },
+      "SmartCityHttpApi_update_profile_Out": {
+        "type": "object",
+        "required": [
+          "audit_id"
+        ],
+        "properties": {
+          "audit_id": {
+            "type": "string"
+          }
+        }
+      },
+      "SmartCityHttpApi_update_profile_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_update_profile_Out"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

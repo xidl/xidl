@@ -11,9 +11,16 @@ fn main() {
         .expect("failed to compile idl for rust-axum example");
 
     Builder::new()
+        .with_lang("rust-axum")
+        .with_client(false)
+        .compile(&["./api/city_http.idl"])
+        .expect("failed to compile city http idl for rust-axum example");
+
+    Builder::new()
         .with_lang("openapi")
         .with_out_dir("./api/")
-        .compile(&["./api/hello_world.idl"])
+        .with_output_filename("city_openapi.json")
+        .compile(&["./api/city_http.idl"])
         .expect("failed to compile idl for rust-axum example");
 
     Builder::new()
@@ -22,8 +29,14 @@ fn main() {
         .expect("failed to compile idl for rust-jsonrpc example");
 
     Builder::new()
+        .with_lang("rust-jsonrpc")
+        .compile(&["./api/city_jsonrpc.idl"])
+        .expect("failed to compile city jsonrpc idl for rust-jsonrpc example");
+
+    Builder::new()
         .with_lang("openrpc")
         .with_out_dir("./api")
-        .compile(&["./api/hello_world_jsonrpc.idl"])
+        .with_output_filename("city_openrpc.json")
+        .compile(&["./api/city_jsonrpc.idl"])
         .expect("failed to compile idl for rust-jsonrpc example");
 }

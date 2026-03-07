@@ -1,0 +1,49 @@
+#progma xidlc package Smart City RPC APIs
+#progma xidlc version v2.0.0
+
+interface SmartCityRpcApi {
+    string quote_trip(
+        in string rider_id,
+        in string zone_id,
+        out long amount_cents,
+        out string currency
+    );
+
+    string create_invoice(
+        in string rider_id,
+        in long amount_cents,
+        in string currency,
+        out string invoice_id,
+        out string payment_url
+    );
+
+    void mark_paid(in string invoice_id);
+
+    void heartbeat();
+
+    void rotate_session(
+        inout string session_token,
+        out long expires_at_epoch_sec
+    );
+
+    long dispatch(
+        in string vehicle_id,
+        in string pickup_stop,
+        out string job_id
+    );
+
+    void report_trip(
+        in string order_id,
+        in string rider_id,
+        in string status
+    );
+
+    void summarize(
+        in string day,
+        out long trip_count,
+        out long gross_revenue_cents
+    );
+
+    readonly attribute string region;
+    attribute string firmware_channel;
+};
