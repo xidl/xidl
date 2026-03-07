@@ -69,6 +69,12 @@ struct ParamContext {
     serde_rename: Option<String>,
 }
 
+struct RouteTemplate {
+    path: String,
+    path_params: HashSet<String>,
+    query_params: HashSet<String>,
+}
+
 pub fn render_interface_with_path(
     interface: &hir::InterfaceDcl,
     renderer: &RustAxumRenderer,
@@ -154,20 +160,33 @@ fn render_op(
         paths.push(auto_default_method_path(op, method)?);
     }
     validate_head_constraints(op, method)?;
+    let route_templates = paths
+        .iter()
+        .map(|value| parse_route_template(value))
+        .collect::<IdlcResult<Vec<_>>>()?;
+    let paths = route_templates
+        .iter()
+        .map(|value| value.path.clone())
+        .collect::<Vec<_>>();
     let path = paths
         .first()
         .cloned()
         .unwrap_or_else(|| format!("/{}", op.ident));
-    let path_param_sets = paths
+    let path_param_sets = route_templates
         .iter()
-        .map(|item| parse_path_params(item))
+        .map(|value| value.path_params.clone())
         .collect::<Vec<_>>();
     let all_path_param_names: HashSet<String> = path_param_sets
         .iter()
         .flat_map(|set| set.iter().cloned())
         .collect();
+    let all_query_template_names: HashSet<String> = route_templates
+        .iter()
+        .flat_map(|value| value.query_params.iter().cloned())
+        .collect();
     let default_source = default_param_source(method);
     let mut path_binding_count = HashMap::<String, usize>::new();
+    let mut query_binding_count = HashMap::<String, usize>::new();
 
     for param in params {
         let direction = param_direction(param.attr.as_ref());
@@ -212,6 +231,9 @@ fn render_op(
             None if all_path_param_names.contains(&param.declarator.0) => {
                 (ParamSource::Path, param.declarator.0.clone())
             }
+            None if all_query_template_names.contains(&param.declarator.0) => {
+                (ParamSource::Query, param.declarator.0.clone())
+            }
             None => (default_source, param.declarator.0.clone()),
         };
         if matches!(source, ParamSource::Path)
@@ -248,7 +270,12 @@ fn render_op(
                 *path_binding_count.entry(ctx.wire_name.clone()).or_insert(0) += 1;
                 path_params.push(ctx);
             }
-            ParamSource::Query => query_params.push(ctx),
+            ParamSource::Query => {
+                *query_binding_count
+                    .entry(ctx.wire_name.clone())
+                    .or_insert(0) += 1;
+                query_params.push(ctx);
+            }
             ParamSource::Body => body_params.push(ctx),
         }
     }
@@ -266,6 +293,25 @@ fn render_op(
                     return Err(IdlcError::rpc(format!(
                         "route template variable '{}' is bound by multiple request-side path parameters in method '{}'",
                         route_param, op.ident
+                    )));
+                }
+            }
+        }
+    }
+    for route_template in &route_templates {
+        for query_param in &route_template.query_params {
+            match query_binding_count.get(query_param).copied().unwrap_or(0) {
+                0 => {
+                    return Err(IdlcError::rpc(format!(
+                        "query template variable '{}' has no matching request-side query parameter in method '{}'",
+                        query_param, op.ident
+                    )));
+                }
+                1 => {}
+                _ => {
+                    return Err(IdlcError::rpc(format!(
+                        "query template variable '{}' is bound by multiple request-side query parameters in method '{}'",
+                        query_param, op.ident
                     )));
                 }
             }
@@ -695,9 +741,6 @@ fn route_from_annotations(
 
     let mut dedup = HashSet::new();
     paths.retain(|path| dedup.insert(path.clone()));
-    for path in &paths {
-        validate_route_template(path)?;
-    }
     Ok((verb_method.unwrap_or(default_method), paths))
 }
 
@@ -1033,6 +1076,7 @@ fn path_param_is_catch_all(path: &str, name: &str) -> bool {
 }
 
 fn validate_route_template(path: &str) -> IdlcResult<()> {
+    let (path, _) = split_query_template(path)?;
     let mut start = 0usize;
     let mut catch_all_count = 0usize;
     while let Some(open_rel) = path[start..].find('{') {
@@ -1067,6 +1111,46 @@ fn validate_route_template(path: &str) -> IdlcResult<()> {
         start = close + 1;
     }
     Ok(())
+}
+
+fn split_query_template(path: &str) -> IdlcResult<(String, HashSet<String>)> {
+    let mut query_params = HashSet::new();
+    if let Some(pos) = path.find("{?") {
+        if !path.ends_with('}') {
+            return Err(IdlcError::rpc(format!(
+                "query template must terminate with '}}' in route '{path}'"
+            )));
+        }
+        let tail = &path[pos + 2..path.len() - 1];
+        if tail.trim().is_empty() {
+            return Err(IdlcError::rpc(format!(
+                "query template must include at least one variable in route '{path}'"
+            )));
+        }
+        for name in tail.split(',').map(|value| value.trim()) {
+            if name.is_empty() {
+                return Err(IdlcError::rpc(format!(
+                    "query template contains empty variable name in route '{path}'"
+                )));
+            }
+            query_params.insert(name.to_string());
+        }
+        Ok((path[..pos].to_string(), query_params))
+    } else {
+        Ok((path.to_string(), query_params))
+    }
+}
+
+fn parse_route_template(path: &str) -> IdlcResult<RouteTemplate> {
+    validate_route_template(path)?;
+    let (path, query_params) = split_query_template(path)?;
+    let normalized = normalize_path(&path);
+    let path_params = parse_path_params(&normalized);
+    Ok(RouteTemplate {
+        path: normalized,
+        path_params,
+        query_params,
+    })
 }
 
 fn default_param_source(method: HttpMethod) -> ParamSource {

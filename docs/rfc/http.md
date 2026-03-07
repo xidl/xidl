@@ -124,6 +124,7 @@ Route templates support placeholders, for example:
 - `/users/{id}`
 - `/orders/{order_id}/items/{item_id}`
 - `/files/{*path}` (catch-all path variable)
+- `/users/{id}{?lang,region}` (query-template variables)
 
 Template variable names are used by parameter source resolution (see section 5).
 
@@ -132,6 +133,13 @@ Template variable names are used by parameter source resolution (see section 5).
 - it matches one or more path segments
 - it is bound as Path source with bound name `name`
 - it is intended for trailing path capture (for example `/files/{*path}`)
+
+`{?name1,name2,...}` means query-template variables:
+
+- it declares Query-source variable names on the route template
+- it does not change the bound route path
+- each listed name must be bound by exactly one request-side Query parameter
+- example: `/users/{id}{?lang,region}` binds `lang` and `region` as query keys
 
 ### 4.4 Route Normalization
 
@@ -146,6 +154,8 @@ Normalization rules:
 4. Remove trailing `/` unless the full route is exactly `/`.
 5. Keep route path case as-is (case-sensitive match).
 6. Do not percent-decode or percent-rewrite path segments.
+7. If query-template suffix exists (`{?...}`), normalize only the path part;
+   query-template variable names are preserved as declared.
 
 Examples:
 
@@ -175,7 +185,8 @@ Algorithm:
 3. Collect Path-bound parameter names in declaration order:
    - Append each as `/{name}`.
 4. Query-bound parameters do not change the route path.
-5. Normalize result:
+5. Auto-generated routes do not include query-template suffix (`{?...}`).
+6. Normalize result:
    - Apply section 4.4 route normalization.
    - Preserve declaration order.
 
@@ -227,7 +238,9 @@ Each parameter is assigned to a source by the following priority:
 1. If the parameter is explicitly annotated with `@path`, source is Path.
 2. If the parameter is explicitly annotated with `@query`, source is Query.
 3. If the parameter name appears in a route template `{name}`, source is Path.
-4. Otherwise, apply HTTP-method defaults:
+4. If the parameter name appears in a query-template suffix `{?name,...}`,
+   source is Query.
+5. Otherwise, apply HTTP-method defaults:
    - `GET/DELETE/HEAD/OPTIONS` -> Query
    - `POST/PUT/PATCH` -> Body
 
@@ -257,6 +270,10 @@ Constraints:
 - Catch-all template variable `{*name}` follows the same binding rule as `{name}`.
 - A route template may contain at most one catch-all variable.
 - Catch-all variable SHOULD appear at the end of route template.
+- Query-template variable names in `{?name1,name2,...}` must be bound by
+  exactly one request-side parameter resolved to Query source.
+- A route template may contain at most one query-template suffix (`{?...}`),
+  and it SHOULD appear at the end of route template.
 
 ## 6. Request Encoding
 
@@ -385,6 +402,9 @@ The following are invalid and should raise mapping errors before serving traffic
 - Any route template variable that has no matching request-side parameter bound
   to Path source.
 - A route template containing more than one catch-all variable.
+- Any query-template variable that has no matching request-side parameter bound
+  to Query source.
+- A route template containing more than one query-template suffix (`{?...}`).
 - Duplicate final route bindings (`HTTP method + normalized path`) across methods.
 - Any `@head` method with non-`void` return type.
 - Any `@head` method containing `out` or `inout` parameters.
