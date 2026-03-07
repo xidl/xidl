@@ -697,6 +697,8 @@ struct ClientMethodContext {
     name: String,
     params: Vec<ClientParamContext>,
     return_ty: String,
+    stream_item_ty: Option<String>,
+    client_stream_item_ty: Option<String>,
     request_schema_ref: Option<String>,
     request_payload: Vec<RequestPayloadEntry>,
     path: String,
@@ -705,6 +707,8 @@ struct ClientMethodContext {
     query_params: Vec<QueryParamContext>,
     body_params: Vec<BodyParamContext>,
     body_single: Option<BodyParamContext>,
+    is_server_stream: bool,
+    is_client_stream: bool,
 }
 
 #[derive(Serialize)]
@@ -761,6 +765,8 @@ struct MethodInfo {
     query_params: Vec<ParamInfo>,
     body_params: Vec<ParamInfo>,
     output_params: Vec<ParamInfo>,
+    is_server_stream: bool,
+    is_client_stream: bool,
 }
 
 struct RouteTemplate {
@@ -771,22 +777,34 @@ struct RouteTemplate {
 
 impl MethodInfo {
     fn to_template(&self, module_path: &[String]) -> ClientMethodContext {
-        let params = self
-            .params
-            .iter()
-            .map(|param| ClientParamContext {
-                name: param.name.clone(),
-                ty: {
-                    let ty = ts_type_for_type_spec(&param.ty, module_path, TypeRefTarget::Client);
-                    if param.optional {
-                        format!("{ty} | undefined")
-                    } else {
-                        ty
-                    }
-                },
-            })
-            .collect::<Vec<_>>();
-        let return_ty = if let Some(response_name) = &self.response_name {
+        let params = if self.is_client_stream {
+            let item_ty = if let Some(request_name) = &self.request_name {
+                scoped_name(module_path, request_name)
+            } else {
+                "void".to_string()
+            };
+            vec![ClientParamContext {
+                name: "stream".to_string(),
+                ty: format!("AsyncIterable<{item_ty}>"),
+            }]
+        } else {
+            self.params
+                .iter()
+                .map(|param| ClientParamContext {
+                    name: param.name.clone(),
+                    ty: {
+                        let ty =
+                            ts_type_for_type_spec(&param.ty, module_path, TypeRefTarget::Client);
+                        if param.optional {
+                            format!("{ty} | undefined")
+                        } else {
+                            ty
+                        }
+                    },
+                })
+                .collect::<Vec<_>>()
+        };
+        let return_payload_ty = if let Some(response_name) = &self.response_name {
             scoped_name(module_path, response_name)
         } else if self.ret.is_void {
             "void".to_string()
@@ -796,6 +814,11 @@ impl MethodInfo {
                 module_path,
                 TypeRefTarget::Client,
             )
+        };
+        let return_ty = if self.is_server_stream {
+            format!("AsyncIterable<{return_payload_ty}>")
+        } else {
+            return_payload_ty
         };
         let request_payload = self
             .params
@@ -809,6 +832,30 @@ impl MethodInfo {
             name: self.name.clone(),
             params,
             return_ty,
+            stream_item_ty: if self.is_server_stream {
+                if let Some(response_name) = &self.response_name {
+                    Some(scoped_name(module_path, response_name))
+                } else if self.ret.is_void {
+                    Some("void".to_string())
+                } else {
+                    Some(ts_type_for_type_spec(
+                        self.ret.ty.as_ref().expect("return type"),
+                        module_path,
+                        TypeRefTarget::Client,
+                    ))
+                }
+            } else {
+                None
+            },
+            client_stream_item_ty: if self.is_client_stream {
+                if let Some(request_name) = &self.request_name {
+                    Some(scoped_name(module_path, request_name))
+                } else {
+                    Some("void".to_string())
+                }
+            } else {
+                None
+            },
             request_schema_ref: self.request_schema_ref.clone(),
             request_payload,
             path: self.path.clone(),
@@ -846,6 +893,8 @@ impl MethodInfo {
                 raw_name: param.raw_name.clone(),
                 access: parsed_access(self, &param.raw_name),
             }),
+            is_server_stream: self.is_server_stream,
+            is_client_stream: self.is_client_stream,
         }
     }
 }
@@ -903,6 +952,19 @@ enum ParamDirection {
     InOut,
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum StreamKind {
+    Server,
+    Client,
+    Bidi,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum StreamCodec {
+    Sse,
+    Ndjson,
+}
+
 fn struct_fields(members: &[hir::Member], module_path: &[String]) -> Vec<FieldDecl> {
     let mut fields = Vec::new();
     for member in members {
@@ -932,6 +994,34 @@ fn render_op(
     interface_name: &str,
     module_path: &[String],
 ) -> IdlcResult<MethodInfo> {
+    let stream_kind = stream_kind_from_annotations(&op.annotations)?;
+    let is_server_stream = matches!(stream_kind, Some(StreamKind::Server));
+    let is_client_stream = matches!(stream_kind, Some(StreamKind::Client));
+    if matches!(stream_kind, Some(StreamKind::Bidi)) {
+        return Err(IdlcError::rpc(format!(
+            "typescript currently does not support @bidi_stream methods: '{}'",
+            op.ident
+        )));
+    }
+    let stream_codec = stream_codec_from_annotations(&op.annotations)?;
+    if is_server_stream && !matches!(stream_codec, StreamCodec::Sse) {
+        return Err(IdlcError::rpc(format!(
+            "typescript currently supports only SSE for @server_stream methods: '{}'",
+            op.ident
+        )));
+    }
+    if !is_server_stream && matches!(stream_codec, StreamCodec::Sse) {
+        return Err(IdlcError::rpc(format!(
+            "@stream_codec(\"sse\") requires @server_stream on method '{}'",
+            op.ident
+        )));
+    }
+    if is_client_stream && !matches!(stream_codec, StreamCodec::Ndjson) {
+        return Err(IdlcError::rpc(format!(
+            "typescript currently supports only NDJSON for @client_stream methods: '{}'",
+            op.ident
+        )));
+    }
     let ret = match &op.ty {
         hir::OpTypeSpec::Void => ReturnType::void(),
         hir::OpTypeSpec::TypeSpec(ty) => ReturnType::new(ty.clone()),
@@ -941,7 +1031,24 @@ fn render_op(
         .as_ref()
         .map(|value| value.0.as_slice())
         .unwrap_or(&[]);
-    let (method, mut paths) = route_from_annotations(&op.annotations, HttpMethod::Post)?;
+    let default_method = if is_server_stream {
+        HttpMethod::Get
+    } else {
+        HttpMethod::Post
+    };
+    let (method, mut paths) = route_from_annotations(&op.annotations, default_method)?;
+    if is_server_stream && !matches!(method, HttpMethod::Get) {
+        return Err(IdlcError::rpc(format!(
+            "@server_stream method '{}' must use GET",
+            op.ident
+        )));
+    }
+    if is_client_stream && !matches!(method, HttpMethod::Post) {
+        return Err(IdlcError::rpc(format!(
+            "@client_stream method '{}' must use POST",
+            op.ident
+        )));
+    }
     if paths.is_empty() {
         paths.push(auto_default_method_path(op, method)?);
     }
@@ -1078,6 +1185,12 @@ fn render_op(
             }
         }
     }
+    if is_client_stream && (!path_params.is_empty() || !query_params.is_empty()) {
+        return Err(IdlcError::rpc(format!(
+            "@client_stream method '{}' currently supports body parameters only",
+            op.ident
+        )));
+    }
 
     let method_name = ts_ident(&op.ident);
     let request_name = if param_list.is_empty() {
@@ -1113,6 +1226,8 @@ fn render_op(
         query_params,
         body_params,
         output_params,
+        is_server_stream,
+        is_client_stream,
     })
 }
 
@@ -1121,22 +1236,47 @@ fn render_attr(
     interface_name: &str,
     module_path: &[String],
 ) -> Vec<MethodInfo> {
+    let emit_watch = has_annotation(&attr.annotations, "server_stream");
     match &attr.decl {
         hir::AttrDclInner::ReadonlyAttrSpec(spec) => readonly_attr_names(spec)
             .into_iter()
-            .map(|names| MethodInfo {
-                name: ts_ident(&names.raw),
-                params: Vec::new(),
-                ret: ReturnType::new(spec.ty.clone()),
-                response_name: None,
-                http_method: method_http_code(HttpMethod::Get),
-                path: default_path(module_path, interface_name, &names.raw),
-                request_name: None,
-                request_schema_ref: None,
-                path_params: Vec::new(),
-                query_params: Vec::new(),
-                body_params: Vec::new(),
-                output_params: Vec::new(),
+            .flat_map(|names| {
+                let mut methods = vec![MethodInfo {
+                    name: ts_ident(&names.raw),
+                    params: Vec::new(),
+                    ret: ReturnType::new(spec.ty.clone()),
+                    response_name: None,
+                    http_method: method_http_code(HttpMethod::Get),
+                    path: default_path(module_path, interface_name, &names.raw),
+                    request_name: None,
+                    request_schema_ref: None,
+                    path_params: Vec::new(),
+                    query_params: Vec::new(),
+                    body_params: Vec::new(),
+                    output_params: Vec::new(),
+                    is_server_stream: false,
+                    is_client_stream: false,
+                }];
+                if emit_watch {
+                    let raw_watch = format!("watch_attribute_{}", names.raw);
+                    methods.push(MethodInfo {
+                        name: ts_ident(&raw_watch),
+                        params: Vec::new(),
+                        ret: ReturnType::new(spec.ty.clone()),
+                        response_name: None,
+                        http_method: method_http_code(HttpMethod::Get),
+                        path: default_path(module_path, interface_name, &raw_watch),
+                        request_name: None,
+                        request_schema_ref: None,
+                        path_params: Vec::new(),
+                        query_params: Vec::new(),
+                        body_params: Vec::new(),
+                        output_params: Vec::new(),
+                        is_server_stream: true,
+                        is_client_stream: false,
+                    });
+                }
+                methods
             })
             .collect(),
         hir::AttrDclInner::AttrSpec(spec) => {
@@ -1158,6 +1298,8 @@ fn render_attr(
                             query_params: Vec::new(),
                             body_params: Vec::new(),
                             output_params: Vec::new(),
+                            is_server_stream: false,
+                            is_client_stream: false,
                         };
                         out.push(getter);
 
@@ -1190,8 +1332,29 @@ fn render_attr(
                             query_params: Vec::new(),
                             body_params: vec![param],
                             output_params: Vec::new(),
+                            is_server_stream: false,
+                            is_client_stream: false,
                         };
                         out.push(setter);
+                        if emit_watch {
+                            let watch_raw = format!("watch_attribute_{raw_name}");
+                            out.push(MethodInfo {
+                                name: ts_ident(&watch_raw),
+                                params: Vec::new(),
+                                ret: ReturnType::new(spec.ty.clone()),
+                                response_name: None,
+                                http_method: method_http_code(HttpMethod::Get),
+                                path: default_path(module_path, interface_name, &watch_raw),
+                                request_name: None,
+                                request_schema_ref: None,
+                                path_params: Vec::new(),
+                                query_params: Vec::new(),
+                                body_params: Vec::new(),
+                                output_params: Vec::new(),
+                                is_server_stream: true,
+                                is_client_stream: false,
+                            });
+                        }
                     }
                 }
                 hir::AttrDeclarator::WithRaises { declarator, .. } => {
@@ -1209,6 +1372,8 @@ fn render_attr(
                         query_params: Vec::new(),
                         body_params: Vec::new(),
                         output_params: Vec::new(),
+                        is_server_stream: false,
+                        is_client_stream: false,
                     };
                     out.push(getter);
 
@@ -1241,8 +1406,29 @@ fn render_attr(
                         query_params: Vec::new(),
                         body_params: vec![param],
                         output_params: Vec::new(),
+                        is_server_stream: false,
+                        is_client_stream: false,
                     };
                     out.push(setter);
+                    if emit_watch {
+                        let watch_raw = format!("watch_attribute_{raw_name}");
+                        out.push(MethodInfo {
+                            name: ts_ident(&watch_raw),
+                            params: Vec::new(),
+                            ret: ReturnType::new(spec.ty.clone()),
+                            response_name: None,
+                            http_method: method_http_code(HttpMethod::Get),
+                            path: default_path(module_path, interface_name, &watch_raw),
+                            request_name: None,
+                            request_schema_ref: None,
+                            path_params: Vec::new(),
+                            query_params: Vec::new(),
+                            body_params: Vec::new(),
+                            output_params: Vec::new(),
+                            is_server_stream: true,
+                            is_client_stream: false,
+                        });
+                    }
                 }
             }
             out
@@ -1794,6 +1980,71 @@ fn annotation_params(annotation: &hir::Annotation) -> Option<&hir::AnnotationPar
         hir::Annotation::ScopedName { params, .. } => params.as_ref(),
         _ => None,
     }
+}
+
+fn has_annotation(annotations: &[hir::Annotation], target: &str) -> bool {
+    annotations.iter().any(|annotation| {
+        annotation_name(annotation)
+            .map(|name| name.eq_ignore_ascii_case(target))
+            .unwrap_or(false)
+    })
+}
+
+fn stream_kind_from_annotations(annotations: &[hir::Annotation]) -> IdlcResult<Option<StreamKind>> {
+    let mut out = None;
+    for annotation in annotations {
+        let Some(name) = annotation_name(annotation) else {
+            continue;
+        };
+        let current = if name.eq_ignore_ascii_case("server_stream") {
+            Some(StreamKind::Server)
+        } else if name.eq_ignore_ascii_case("client_stream") {
+            Some(StreamKind::Client)
+        } else if name.eq_ignore_ascii_case("bidi_stream") {
+            Some(StreamKind::Bidi)
+        } else {
+            None
+        };
+        let Some(current) = current else {
+            continue;
+        };
+        match out {
+            None => out = Some(current),
+            Some(prev) if prev == current => {}
+            Some(_) => {
+                return Err(IdlcError::rpc(
+                    "@server_stream/@client_stream/@bidi_stream are mutually exclusive",
+                ));
+            }
+        }
+    }
+    Ok(out)
+}
+
+fn stream_codec_from_annotations(annotations: &[hir::Annotation]) -> IdlcResult<StreamCodec> {
+    let mut codec = StreamCodec::Ndjson;
+    for annotation in annotations {
+        let Some(name) = annotation_name(annotation) else {
+            continue;
+        };
+        if !name.eq_ignore_ascii_case("stream_codec") {
+            continue;
+        }
+        let value = annotation_params(annotation)
+            .map(normalize_params)
+            .and_then(|params| params.get("value").cloned())
+            .unwrap_or_else(|| "sse".to_string());
+        codec = match value.to_ascii_lowercase().as_str() {
+            "sse" => StreamCodec::Sse,
+            "ndjson" => StreamCodec::Ndjson,
+            other => {
+                return Err(IdlcError::rpc(format!(
+                    "unsupported @stream_codec value '{other}', expected 'sse' or 'ndjson'"
+                )));
+            }
+        };
+    }
+    Ok(codec)
 }
 
 fn has_optional_annotation(annotations: &[hir::Annotation]) -> bool {

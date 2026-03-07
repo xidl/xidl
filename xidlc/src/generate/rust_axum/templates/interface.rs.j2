@@ -3,8 +3,8 @@ pub trait {{ ident }} {
     {% for method in methods %}
         async fn {{ method.name }}(
         &self,
-        req: xidl_rust_axum::Request<{{ method.request_ty }}>
-        ) -> Result<{{ method.response_ty }}, xidl_rust_axum::Error>;
+        req: xidl_rust_axum::Request<{% if method.is_client_stream %}xidl_rust_axum::stream::NdjsonStream<{{ method.request_item_ty }}>{% else %}{{ method.request_ty }}{% endif %}>
+        ) -> Result<{% if method.is_server_stream %}xidl_rust_axum::stream::SseStream<{{ method.response_ty }}>{% else %}{{ method.response_ty }}{% endif %}, xidl_rust_axum::Error>;
     {% endfor %}
 }
 
@@ -110,7 +110,8 @@ pub trait {{ ident }} {
             ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
             headers: ::xidl_rust_axum::axum::http::HeaderMap{% if method.path_params | length > 0 %},
             ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<{{ method.struct_prefix }}Path>{% endif %}{% if method.query_params | length > 0 %},
-            xidl_rust_axum::axum::extract::Query(query): xidl_rust_axum::axum::extract::Query<{{ method.struct_prefix }}Query>{% endif %}{% if method.body_params | length > 0 %},
+            xidl_rust_axum::axum::extract::Query(query): xidl_rust_axum::axum::extract::Query<{{ method.struct_prefix }}Query>{% endif %}{% if method.is_client_stream %},
+            body: ::xidl_rust_axum::axum::body::Body{% elif method.body_params | length > 0 %},
             xidl_rust_axum::axum::Json(body): xidl_rust_axum::axum::Json<{{ method.struct_prefix }}Body>{% endif %}
             ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
                 {% if method.path_params | length > 0 %}
@@ -127,7 +128,7 @@ pub trait {{ ident }} {
                         {% endfor %}
                     } = query;
                 {% endif %}
-                {% if method.body_params | length > 0 %}
+                {% if method.body_params | length > 0 and not method.is_client_stream %}
                     {% if method.body_params | length == 1 %}
                         let {{ method.body_params[0].name }} = body;
                     {% else %}
@@ -138,7 +139,9 @@ pub trait {{ ident }} {
                         } = body;
                     {% endif %}
                 {% endif %}
-                {% if method.request_struct is defined and method.request_struct %}
+                {% if method.is_client_stream %}
+                    let data = xidl_rust_axum::stream::decode_ndjson_body::<{{ method.request_item_ty }}>(body);
+                {% elif method.request_struct is defined and method.request_struct %}
                     let data = {{ method.request_struct }} {
                         {% for param in method.request_params %}
                             {{ param.name }},
@@ -149,11 +152,15 @@ pub trait {{ ident }} {
                 {% endif %}
                 let req = ::xidl_rust_axum::Request::new(headers, data);
                 let resp = svc.{{ method.name }}(req).await?;
-                {% if method.response_is_empty %}
-                    let _ = resp;
-                    Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT))
+                {% if method.is_server_stream %}
+                    Ok(xidl_rust_axum::stream::sse_response(resp))
                 {% else %}
-                    Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+                    {% if method.response_is_empty %}
+                        let _ = resp;
+                        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT))
+                    {% else %}
+                        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+                    {% endif %}
                 {% endif %}
             }
         {% endfor %}
@@ -184,7 +191,7 @@ pub trait {{ ident }} {
 
     impl {{ ident }}Client {
         {% for method in methods %}
-            pub async fn {{ method.name }}(&self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.response_ty }}, xidl_rust_axum::Error> {
+            pub async fn {{ method.name }}(&self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{% if method.is_server_stream %}xidl_rust_axum::stream::SseClientStream<{{ method.response_ty }}>{% else %}{{ method.response_ty }}{% endif %}, xidl_rust_axum::Error> {
                 let path = "{{ method.path }}".to_string();
                 {% for param in method.path_params %}
                     let path = path.replace("{{ ['{', param.path_template_name, '}'] | join}}", &{{ param.name }}.to_string());
@@ -208,7 +215,13 @@ pub trait {{ ident }} {
                         req.url_mut().set_query(Some(&query));
                     }
                 {% endif %}
-                {% if method.body_params | length > 0 %}
+                {% if method.is_client_stream %}
+                    req.headers_mut().insert(
+                        xidl_rust_axum::reqwest::header::CONTENT_TYPE,
+                        xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/x-ndjson"),
+                    );
+                    *req.body_mut() = Some(xidl_rust_axum::stream::encode_ndjson_body(stream));
+                {% elif method.body_params | length > 0 %}
                     {% if method.body_params | length == 1 %}
                         let body = {{ method.body_params[0].name }};
                     {% else %}
@@ -226,6 +239,9 @@ pub trait {{ ident }} {
                     );
                     *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
                 {% endif %}
+                {% if method.is_server_stream %}
+                    xidl_rust_axum::stream::open_sse::<{{ method.response_ty }}>(self.client.http(), req).await
+                {% else %}
                 let resp = self
                     .client
                     .http()
@@ -249,6 +265,7 @@ pub trait {{ ident }} {
                     };
                     Err(err)
                 }
+                {% endif %}
             }
         {% endfor %}
     }

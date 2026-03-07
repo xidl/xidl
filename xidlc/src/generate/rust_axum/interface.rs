@@ -31,6 +31,19 @@ enum ParamDirection {
     InOut,
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum StreamKind {
+    Server,
+    Client,
+    Bidi,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum StreamCodec {
+    Sse,
+    Ndjson,
+}
+
 #[derive(Serialize)]
 struct MethodContext {
     name: String,
@@ -56,6 +69,9 @@ struct MethodContext {
     response_include_return: bool,
     response_is_empty: bool,
     return_is_unit: bool,
+    is_server_stream: bool,
+    is_client_stream: bool,
+    request_item_ty: String,
 }
 
 #[derive(Serialize, Clone)]
@@ -137,6 +153,34 @@ fn render_op(
     interface_name: &str,
     _module_path: &[String],
 ) -> IdlcResult<MethodContext> {
+    let stream_kind = stream_kind_from_annotations(&op.annotations)?;
+    let is_server_stream = matches!(stream_kind, Some(StreamKind::Server));
+    let is_client_stream = matches!(stream_kind, Some(StreamKind::Client));
+    if matches!(stream_kind, Some(StreamKind::Bidi)) {
+        return Err(IdlcError::rpc(format!(
+            "rust-axum currently does not support @bidi_stream methods: '{}'",
+            op.ident
+        )));
+    }
+    let stream_codec = stream_codec_from_annotations(&op.annotations)?;
+    if is_server_stream && !matches!(stream_codec, StreamCodec::Sse) {
+        return Err(IdlcError::rpc(format!(
+            "rust-axum currently supports only SSE for @server_stream methods: '{}'",
+            op.ident
+        )));
+    }
+    if is_client_stream && !matches!(stream_codec, StreamCodec::Ndjson) {
+        return Err(IdlcError::rpc(format!(
+            "rust-axum currently supports only NDJSON for @client_stream methods: '{}'",
+            op.ident
+        )));
+    }
+    if !is_server_stream && matches!(stream_codec, StreamCodec::Sse) {
+        return Err(IdlcError::rpc(format!(
+            "@stream_codec(\"sse\") requires @server_stream on method '{}'",
+            op.ident
+        )));
+    }
     let ret = match &op.ty {
         hir::OpTypeSpec::Void => "()".to_string(),
         hir::OpTypeSpec::TypeSpec(ty) => axum_type(ty),
@@ -155,7 +199,24 @@ fn render_op(
     let mut request_params = Vec::new();
     let mut response_params = Vec::new();
 
-    let (method, mut paths) = route_from_annotations(&op.annotations, HttpMethod::Post)?;
+    let default_method = if is_server_stream {
+        HttpMethod::Get
+    } else {
+        HttpMethod::Post
+    };
+    let (method, mut paths) = route_from_annotations(&op.annotations, default_method)?;
+    if is_server_stream && !matches!(method, HttpMethod::Get) {
+        return Err(IdlcError::rpc(format!(
+            "@server_stream method '{}' must use GET",
+            op.ident
+        )));
+    }
+    if is_client_stream && !matches!(method, HttpMethod::Post) {
+        return Err(IdlcError::rpc(format!(
+            "@client_stream method '{}' must use POST",
+            op.ident
+        )));
+    }
     if paths.is_empty() {
         paths.push(auto_default_method_path(op, method)?);
     }
@@ -328,6 +389,18 @@ fn render_op(
         ))
     };
     let request_ty = request_struct.clone().unwrap_or_else(|| "()".to_string());
+    if is_client_stream && (!path_params.is_empty() || !query_params.is_empty()) {
+        return Err(IdlcError::rpc(format!(
+            "@client_stream method '{}' currently supports body parameters only",
+            op.ident
+        )));
+    }
+    if is_client_stream {
+        param_list = vec![format!(
+            "stream: xidl_rust_axum::stream::NdjsonSendStream<{request_ty}>"
+        )];
+        param_names = vec!["stream".to_string()];
+    }
     let response_output_count = usize::from(!return_is_unit) + response_params.len();
     let response_is_empty = response_output_count == 0;
     let response_include_return = !return_is_unit;
@@ -364,7 +437,7 @@ fn render_op(
         path_params,
         query_params,
         body_params,
-        request_ty,
+        request_ty: request_ty.clone(),
         request_struct,
         request_params,
         response_struct,
@@ -372,6 +445,9 @@ fn render_op(
         response_include_return,
         response_is_empty,
         return_is_unit,
+        is_server_stream,
+        is_client_stream,
+        request_item_ty: request_ty,
     })
 }
 
@@ -380,21 +456,22 @@ fn render_attr(
     interface_name: &str,
     module_path: &[String],
 ) -> Vec<MethodContext> {
+    let emit_watch = has_annotation(&attr.annotations, "server_stream");
     match &attr.decl {
         hir::AttrDclInner::ReadonlyAttrSpec(spec) => readonly_attr_names(spec)
             .into_iter()
-            .map(|names| {
+            .flat_map(|names| {
                 let ret = attr_return_type(&spec.ty);
                 let raw = names.raw.clone();
                 let path = default_path(module_path, interface_name, &raw);
                 let request_struct = None;
-                MethodContext {
+                let mut methods = vec![MethodContext {
                     name: names.rust.clone(),
                     raw_name: raw.clone(),
                     params: Vec::new(),
                     param_names: Vec::new(),
                     ret: ret.clone(),
-                    response_ty: ret,
+                    response_ty: ret.clone(),
                     http_method: http_method_code(HttpMethod::Get),
                     http_method_fn: http_method_fn(HttpMethod::Get),
                     reqwest_method: reqwest_method_code(HttpMethod::Get),
@@ -412,7 +489,43 @@ fn render_attr(
                     response_include_return: true,
                     response_is_empty: false,
                     return_is_unit: false,
+                    is_server_stream: false,
+                    is_client_stream: false,
+                    request_item_ty: "()".to_string(),
+                }];
+                if emit_watch {
+                    let raw_watch = format!("watch_attribute_{raw}");
+                    let watch_path = default_path(module_path, interface_name, &raw_watch);
+                    methods.push(MethodContext {
+                        name: rust_ident(&raw_watch),
+                        raw_name: raw_watch.clone(),
+                        params: Vec::new(),
+                        param_names: Vec::new(),
+                        ret: ret.clone(),
+                        response_ty: ret.clone(),
+                        http_method: http_method_code(HttpMethod::Get),
+                        http_method_fn: http_method_fn(HttpMethod::Get),
+                        reqwest_method: reqwest_method_code(HttpMethod::Get),
+                        paths: vec![watch_path.clone()],
+                        path: watch_path,
+                        struct_prefix: method_struct_prefix(interface_name, &raw_watch),
+                        path_params: Vec::new(),
+                        query_params: Vec::new(),
+                        body_params: Vec::new(),
+                        request_ty: "()".to_string(),
+                        request_struct: None,
+                        request_params: Vec::new(),
+                        response_struct: None,
+                        response_params: Vec::new(),
+                        response_include_return: true,
+                        response_is_empty: false,
+                        return_is_unit: false,
+                        is_server_stream: true,
+                        is_client_stream: false,
+                        request_item_ty: "()".to_string(),
+                    });
                 }
+                methods
             })
             .collect(),
         hir::AttrDclInner::AttrSpec(spec) => {
@@ -431,7 +544,7 @@ fn render_attr(
                             params: Vec::new(),
                             param_names: Vec::new(),
                             ret: ret.clone(),
-                            response_ty: ret,
+                            response_ty: ret.clone(),
                             http_method: http_method_code(HttpMethod::Get),
                             http_method_fn: http_method_fn(HttpMethod::Get),
                             reqwest_method: reqwest_method_code(HttpMethod::Get),
@@ -449,6 +562,9 @@ fn render_attr(
                             response_include_return: true,
                             response_is_empty: false,
                             return_is_unit: false,
+                            is_server_stream: false,
+                            is_client_stream: false,
+                            request_item_ty: "()".to_string(),
                         });
                         let raw_setter = format!("set_{raw_name}");
                         let setter = rust_ident(&raw_setter);
@@ -491,7 +607,42 @@ fn render_attr(
                             response_include_return: false,
                             response_is_empty: true,
                             return_is_unit: true,
+                            is_server_stream: false,
+                            is_client_stream: false,
+                            request_item_ty: "()".to_string(),
                         });
+                        if emit_watch {
+                            let raw_watch = format!("watch_attribute_{raw_name}");
+                            let watch_path = default_path(module_path, interface_name, &raw_watch);
+                            out.push(MethodContext {
+                                name: rust_ident(&raw_watch),
+                                raw_name: raw_watch.clone(),
+                                params: Vec::new(),
+                                param_names: Vec::new(),
+                                ret: ret.clone(),
+                                response_ty: ret.clone(),
+                                http_method: http_method_code(HttpMethod::Get),
+                                http_method_fn: http_method_fn(HttpMethod::Get),
+                                reqwest_method: reqwest_method_code(HttpMethod::Get),
+                                paths: vec![watch_path.clone()],
+                                path: watch_path,
+                                struct_prefix: method_struct_prefix(interface_name, &raw_watch),
+                                path_params: Vec::new(),
+                                query_params: Vec::new(),
+                                body_params: Vec::new(),
+                                request_ty: "()".to_string(),
+                                request_struct: None,
+                                request_params: Vec::new(),
+                                response_struct: None,
+                                response_params: Vec::new(),
+                                response_include_return: true,
+                                response_is_empty: false,
+                                return_is_unit: false,
+                                is_server_stream: true,
+                                is_client_stream: false,
+                                request_item_ty: "()".to_string(),
+                            });
+                        }
                     }
                 }
                 hir::AttrDeclarator::WithRaises { declarator, .. } => {
@@ -507,7 +658,7 @@ fn render_attr(
                         params: Vec::new(),
                         param_names: Vec::new(),
                         ret: ret.clone(),
-                        response_ty: ret,
+                        response_ty: ret.clone(),
                         http_method: http_method_code(HttpMethod::Get),
                         http_method_fn: http_method_fn(HttpMethod::Get),
                         reqwest_method: reqwest_method_code(HttpMethod::Get),
@@ -525,6 +676,9 @@ fn render_attr(
                         response_include_return: true,
                         response_is_empty: false,
                         return_is_unit: false,
+                        is_server_stream: false,
+                        is_client_stream: false,
+                        request_item_ty: "()".to_string(),
                     });
                     let raw_setter = format!("set_{raw_name}");
                     let setter = rust_ident(&raw_setter);
@@ -566,7 +720,42 @@ fn render_attr(
                         response_include_return: false,
                         response_is_empty: true,
                         return_is_unit: true,
+                        is_server_stream: false,
+                        is_client_stream: false,
+                        request_item_ty: "()".to_string(),
                     });
+                    if emit_watch {
+                        let raw_watch = format!("watch_attribute_{raw_name}");
+                        let watch_path = default_path(module_path, interface_name, &raw_watch);
+                        out.push(MethodContext {
+                            name: rust_ident(&raw_watch),
+                            raw_name: raw_watch.clone(),
+                            params: Vec::new(),
+                            param_names: Vec::new(),
+                            ret: ret.clone(),
+                            response_ty: ret.clone(),
+                            http_method: http_method_code(HttpMethod::Get),
+                            http_method_fn: http_method_fn(HttpMethod::Get),
+                            reqwest_method: reqwest_method_code(HttpMethod::Get),
+                            paths: vec![watch_path.clone()],
+                            path: watch_path,
+                            struct_prefix: method_struct_prefix(interface_name, &raw_watch),
+                            path_params: Vec::new(),
+                            query_params: Vec::new(),
+                            body_params: Vec::new(),
+                            request_ty: "()".to_string(),
+                            request_struct: None,
+                            request_params: Vec::new(),
+                            response_struct: None,
+                            response_params: Vec::new(),
+                            response_include_return: true,
+                            response_is_empty: false,
+                            return_is_unit: false,
+                            is_server_stream: true,
+                            is_client_stream: false,
+                            request_item_ty: "()".to_string(),
+                        });
+                    }
                 }
             }
             out
@@ -772,6 +961,71 @@ fn annotation_params(annotation: &hir::Annotation) -> Option<&hir::AnnotationPar
         hir::Annotation::ScopedName { params, .. } => params.as_ref(),
         _ => None,
     }
+}
+
+fn has_annotation(annotations: &[hir::Annotation], target: &str) -> bool {
+    annotations.iter().any(|annotation| {
+        annotation_name(annotation)
+            .map(|name| name.eq_ignore_ascii_case(target))
+            .unwrap_or(false)
+    })
+}
+
+fn stream_kind_from_annotations(annotations: &[hir::Annotation]) -> IdlcResult<Option<StreamKind>> {
+    let mut out = None;
+    for annotation in annotations {
+        let Some(name) = annotation_name(annotation) else {
+            continue;
+        };
+        let current = if name.eq_ignore_ascii_case("server_stream") {
+            Some(StreamKind::Server)
+        } else if name.eq_ignore_ascii_case("client_stream") {
+            Some(StreamKind::Client)
+        } else if name.eq_ignore_ascii_case("bidi_stream") {
+            Some(StreamKind::Bidi)
+        } else {
+            None
+        };
+        let Some(current) = current else {
+            continue;
+        };
+        match out {
+            None => out = Some(current),
+            Some(prev) if prev == current => {}
+            Some(_) => {
+                return Err(IdlcError::rpc(
+                    "@server_stream/@client_stream/@bidi_stream are mutually exclusive",
+                ));
+            }
+        }
+    }
+    Ok(out)
+}
+
+fn stream_codec_from_annotations(annotations: &[hir::Annotation]) -> IdlcResult<StreamCodec> {
+    let mut codec = StreamCodec::Ndjson;
+    for annotation in annotations {
+        let Some(name) = annotation_name(annotation) else {
+            continue;
+        };
+        if !name.eq_ignore_ascii_case("stream_codec") {
+            continue;
+        }
+        let value = annotation_params(annotation)
+            .map(normalize_params)
+            .and_then(|params| params.get("value").cloned())
+            .unwrap_or_else(|| "sse".to_string());
+        codec = match value.to_ascii_lowercase().as_str() {
+            "sse" => StreamCodec::Sse,
+            "ndjson" => StreamCodec::Ndjson,
+            other => {
+                return Err(IdlcError::rpc(format!(
+                    "unsupported @stream_codec value '{other}', expected 'sse' or 'ndjson'"
+                )));
+            }
+        };
+    }
+    Ok(codec)
 }
 
 struct SourceBinding {

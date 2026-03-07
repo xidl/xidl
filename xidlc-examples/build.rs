@@ -16,11 +16,23 @@ fn main() {
         .expect("failed to compile city http idl for rust-axum example");
 
     Builder::new()
+        .with_lang("rust-axum")
+        .compile(&["./api/city_http_stream.idl"])
+        .expect("failed to compile city http stream idl for rust-axum example");
+
+    Builder::new()
         .with_lang("openapi")
         .with_out_dir("./api/")
         .with_output_filename("city_openapi.json")
         .compile(&["./api/city_http.idl"])
         .expect("failed to compile idl for rust-axum example");
+
+    Builder::new()
+        .with_lang("openapi")
+        .with_out_dir("./api/")
+        .with_output_filename("city_http_stream_openapi.json")
+        .compile(&["./api/city_http_stream.idl"])
+        .expect("failed to compile city http stream openapi");
 
     Builder::new()
         .with_lang("rust-jsonrpc")

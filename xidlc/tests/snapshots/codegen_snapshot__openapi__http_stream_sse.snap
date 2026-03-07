@@ -1,0 +1,407 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+openapi.json
+===============
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "xidl",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/HttpStreamSseService/online": {
+      "get": {
+        "operationId": "HttpStreamSseService.online",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/HttpStreamSseService/set_online": {
+      "post": {
+        "operationId": "HttpStreamSseService.set_online",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/HttpStreamSseService/watch_attribute_online": {
+      "get": {
+        "operationId": "HttpStreamSseService.watch_attribute_online",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/events/{topic}": {
+      "get": {
+        "operationId": "HttpStreamSseService.watch_topic",
+        "parameters": [
+          {
+            "name": "topic",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "code",
+          "msg"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "details": {
+            "type": "object"
+          },
+          "msg": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpStreamSseService_Call": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "watch_topic"
+            ],
+            "properties": {
+              "watch_topic": {
+                "$ref": "#/components/schemas/HttpStreamSseService_watch_topic_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_online"
+            ],
+            "properties": {
+              "get_attribute_online": {
+                "$ref": "#/components/schemas/HttpStreamSseService_get_attribute_online_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_online"
+            ],
+            "properties": {
+              "set_attribute_online": {
+                "$ref": "#/components/schemas/HttpStreamSseService_set_attribute_online_In"
+              }
+            }
+          }
+        ]
+      },
+      "HttpStreamSseService_Reply": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/HttpStreamSseService_Return"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
+          }
+        }
+      },
+      "HttpStreamSseService_Request": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/HttpStreamSseService_Call"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
+          }
+        }
+      },
+      "HttpStreamSseService_Return": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "watch_topic"
+            ],
+            "properties": {
+              "watch_topic": {
+                "$ref": "#/components/schemas/HttpStreamSseService_watch_topic_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_online"
+            ],
+            "properties": {
+              "get_attribute_online": {
+                "$ref": "#/components/schemas/HttpStreamSseService_get_attribute_online_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_online"
+            ],
+            "properties": {
+              "set_attribute_online": {
+                "$ref": "#/components/schemas/HttpStreamSseService_set_attribute_online_Result"
+              }
+            }
+          }
+        ]
+      },
+      "HttpStreamSseService_get_attribute_online_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "HttpStreamSseService_get_attribute_online_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "boolean"
+          }
+        }
+      },
+      "HttpStreamSseService_get_attribute_online_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpStreamSseService_get_attribute_online_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpStreamSseService_set_attribute_online_In": {
+        "type": "object",
+        "required": [
+          "online"
+        ],
+        "properties": {
+          "online": {
+            "type": "boolean"
+          }
+        }
+      },
+      "HttpStreamSseService_set_attribute_online_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "HttpStreamSseService_set_attribute_online_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpStreamSseService_set_attribute_online_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpStreamSseService_watch_topic_In": {
+        "type": "object",
+        "required": [
+          "topic",
+          "lang"
+        ],
+        "properties": {
+          "lang": {
+            "type": "string"
+          },
+          "topic": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpStreamSseService_watch_topic_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpStreamSseService_watch_topic_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpStreamSseService_watch_topic_Out"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

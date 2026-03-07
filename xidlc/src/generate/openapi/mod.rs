@@ -219,6 +219,8 @@ impl OpenApiContext {
                 request_body,
                 response_status,
                 response_schema,
+                is_server_stream,
+                is_client_stream: _,
             } = method;
 
             for path in paths {
@@ -231,8 +233,13 @@ impl OpenApiContext {
                 let mut responses = ResponsesBuilder::new();
                 let mut ok_response = ResponseBuilder::new().description("OK");
                 if let Some(schema) = &response_schema {
+                    let content_type = if is_server_stream {
+                        "text/event-stream"
+                    } else {
+                        "application/json"
+                    };
                     ok_response =
-                        ok_response.content("application/json", Content::new(Some(schema.clone())));
+                        ok_response.content(content_type, Content::new(Some(schema.clone())));
                 }
                 responses = responses.response(response_status, ok_response.build());
                 let mut operation = OperationBuilder::new()
@@ -285,6 +292,8 @@ struct MethodInfo {
     request_body: Option<RequestBody>,
     response_status: &'static str,
     response_schema: Option<RefOr<Schema>>,
+    is_server_stream: bool,
+    is_client_stream: bool,
 }
 
 struct RouteTemplate {
@@ -294,6 +303,34 @@ struct RouteTemplate {
 }
 
 fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> MethodInfo {
+    let stream_kind = stream_kind_from_annotations(&op.annotations);
+    let is_server_stream = matches!(stream_kind, Some(StreamKind::Server));
+    let is_client_stream = matches!(stream_kind, Some(StreamKind::Client));
+    if matches!(stream_kind, Some(StreamKind::Bidi)) {
+        panic!(
+            "openapi currently does not support @bidi_stream methods: '{}'",
+            op.ident
+        );
+    }
+    let stream_codec = stream_codec_from_annotations(&op.annotations);
+    if is_server_stream && !matches!(stream_codec, StreamCodec::Sse) {
+        panic!(
+            "openapi currently supports only SSE for @server_stream methods: '{}'",
+            op.ident
+        );
+    }
+    if is_client_stream && !matches!(stream_codec, StreamCodec::Ndjson) {
+        panic!(
+            "openapi currently supports only NDJSON for @client_stream methods: '{}'",
+            op.ident
+        );
+    }
+    if !is_server_stream && matches!(stream_codec, StreamCodec::Sse) {
+        panic!(
+            "@stream_codec(\"sse\") requires @server_stream on method '{}'",
+            op.ident
+        );
+    }
     let return_schema = match &op.ty {
         hir::OpTypeSpec::Void => None,
         hir::OpTypeSpec::TypeSpec(ty) => Some(schema_for_type(ty)),
@@ -305,7 +342,18 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
         .map(|value| value.0.as_slice())
         .unwrap_or(&[]);
 
-    let (method, mut paths) = route_from_annotations(&op.annotations, HttpMethod::Post);
+    let default_method = if is_server_stream {
+        HttpMethod::Get
+    } else {
+        HttpMethod::Post
+    };
+    let (method, mut paths) = route_from_annotations(&op.annotations, default_method);
+    if is_server_stream && !matches!(method, HttpMethod::Get) {
+        panic!("@server_stream method '{}' must use GET", op.ident);
+    }
+    if is_client_stream && !matches!(method, HttpMethod::Post) {
+        panic!("@client_stream method '{}' must use POST", op.ident);
+    }
     if paths.is_empty() {
         paths.push(auto_default_method_path(op, method));
     }
@@ -475,14 +523,21 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
         ("200", Some(RefOr::T(Schema::from(object))))
     };
 
+    let request_content_type = if is_client_stream {
+        "application/x-ndjson"
+    } else {
+        "application/json"
+    };
     MethodInfo {
         http_method: method_to_openapi(method),
         paths,
         operation_id: operation_id(module_path, interface_name, &op.ident),
         parameters,
-        request_body: body_schema(body_props, body_required),
+        request_body: body_schema(body_props, body_required, request_content_type),
         response_status,
         response_schema,
+        is_server_stream,
+        is_client_stream,
     }
 }
 
@@ -491,17 +546,37 @@ fn render_attr(
     interface_name: &str,
     module_path: &[String],
 ) -> Vec<MethodInfo> {
+    let emit_watch = has_annotation(&attr.annotations, "server_stream");
     match &attr.decl {
         hir::AttrDclInner::ReadonlyAttrSpec(spec) => readonly_attr_names(spec)
             .into_iter()
-            .map(|raw_name| MethodInfo {
-                http_method: method_to_openapi(HttpMethod::Get),
-                paths: vec![default_path(module_path, interface_name, &raw_name)],
-                operation_id: operation_id(module_path, interface_name, &raw_name),
-                parameters: Vec::new(),
-                request_body: None,
-                response_status: "200",
-                response_schema: Some(schema_for_type(&spec.ty)),
+            .flat_map(|raw_name| {
+                let mut methods = vec![MethodInfo {
+                    http_method: method_to_openapi(HttpMethod::Get),
+                    paths: vec![default_path(module_path, interface_name, &raw_name)],
+                    operation_id: operation_id(module_path, interface_name, &raw_name),
+                    parameters: Vec::new(),
+                    request_body: None,
+                    response_status: "200",
+                    response_schema: Some(schema_for_type(&spec.ty)),
+                    is_server_stream: false,
+                    is_client_stream: false,
+                }];
+                if emit_watch {
+                    let raw_watch = format!("watch_attribute_{raw_name}");
+                    methods.push(MethodInfo {
+                        http_method: method_to_openapi(HttpMethod::Get),
+                        paths: vec![default_path(module_path, interface_name, &raw_watch)],
+                        operation_id: operation_id(module_path, interface_name, &raw_watch),
+                        parameters: Vec::new(),
+                        request_body: None,
+                        response_status: "200",
+                        response_schema: Some(schema_for_type(&spec.ty)),
+                        is_server_stream: true,
+                        is_client_stream: false,
+                    });
+                }
+                methods
             })
             .collect(),
         hir::AttrDclInner::AttrSpec(spec) => {
@@ -518,6 +593,8 @@ fn render_attr(
                             request_body: None,
                             response_status: "200",
                             response_schema: Some(schema_for_type(&spec.ty)),
+                            is_server_stream: false,
+                            is_client_stream: false,
                         });
                         let raw_setter = format!("set_{raw_name}");
                         let props = vec![("value".to_string(), schema_for_type(&spec.ty))];
@@ -527,10 +604,26 @@ fn render_attr(
                             paths: vec![default_path(module_path, interface_name, &raw_setter)],
                             operation_id: operation_id(module_path, interface_name, &raw_setter),
                             parameters: Vec::new(),
-                            request_body: body_schema(props, required),
+                            request_body: body_schema(props, required, "application/json"),
                             response_status: "204",
                             response_schema: None,
+                            is_server_stream: false,
+                            is_client_stream: false,
                         });
+                        if emit_watch {
+                            let raw_watch = format!("watch_attribute_{raw_name}");
+                            out.push(MethodInfo {
+                                http_method: method_to_openapi(HttpMethod::Get),
+                                paths: vec![default_path(module_path, interface_name, &raw_watch)],
+                                operation_id: operation_id(module_path, interface_name, &raw_watch),
+                                parameters: Vec::new(),
+                                request_body: None,
+                                response_status: "200",
+                                response_schema: Some(schema_for_type(&spec.ty)),
+                                is_server_stream: true,
+                                is_client_stream: false,
+                            });
+                        }
                     }
                 }
                 hir::AttrDeclarator::WithRaises { declarator, .. } => {
@@ -543,6 +636,8 @@ fn render_attr(
                         request_body: None,
                         response_status: "200",
                         response_schema: Some(schema_for_type(&spec.ty)),
+                        is_server_stream: false,
+                        is_client_stream: false,
                     });
                     let raw_setter = format!("set_{raw_name}");
                     let props = vec![("value".to_string(), schema_for_type(&spec.ty))];
@@ -552,10 +647,26 @@ fn render_attr(
                         paths: vec![default_path(module_path, interface_name, &raw_setter)],
                         operation_id: operation_id(module_path, interface_name, &raw_setter),
                         parameters: Vec::new(),
-                        request_body: body_schema(props, required),
+                        request_body: body_schema(props, required, "application/json"),
                         response_status: "204",
                         response_schema: None,
+                        is_server_stream: false,
+                        is_client_stream: false,
                     });
+                    if emit_watch {
+                        let raw_watch = format!("watch_attribute_{raw_name}");
+                        out.push(MethodInfo {
+                            http_method: method_to_openapi(HttpMethod::Get),
+                            paths: vec![default_path(module_path, interface_name, &raw_watch)],
+                            operation_id: operation_id(module_path, interface_name, &raw_watch),
+                            parameters: Vec::new(),
+                            request_body: None,
+                            response_status: "200",
+                            response_schema: Some(schema_for_type(&spec.ty)),
+                            is_server_stream: true,
+                            is_client_stream: false,
+                        });
+                    }
                 }
             }
             out
@@ -563,7 +674,11 @@ fn render_attr(
     }
 }
 
-fn body_schema(props: Vec<(String, RefOr<Schema>)>, required: Vec<String>) -> Option<RequestBody> {
+fn body_schema(
+    props: Vec<(String, RefOr<Schema>)>,
+    required: Vec<String>,
+    content_type: &str,
+) -> Option<RequestBody> {
     if props.is_empty() {
         return None;
     }
@@ -584,7 +699,7 @@ fn body_schema(props: Vec<(String, RefOr<Schema>)>, required: Vec<String>) -> Op
     let mut request_body = RequestBody::new();
     request_body
         .content
-        .insert("application/json".to_string(), Content::new(Some(schema)));
+        .insert(content_type.to_string(), Content::new(Some(schema)));
     Some(request_body)
 }
 
@@ -808,6 +923,19 @@ enum ParamDirection {
     InOut,
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum StreamKind {
+    Server,
+    Client,
+    Bidi,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum StreamCodec {
+    Sse,
+    Ndjson,
+}
+
 fn route_from_annotations(
     annotations: &[hir::Annotation],
     default_method: HttpMethod,
@@ -877,6 +1005,63 @@ fn annotation_params(annotation: &hir::Annotation) -> Option<&hir::AnnotationPar
         hir::Annotation::ScopedName { params, .. } => params.as_ref(),
         _ => None,
     }
+}
+
+fn has_annotation(annotations: &[hir::Annotation], target: &str) -> bool {
+    annotations.iter().any(|annotation| {
+        annotation_name(annotation)
+            .map(|name| name.eq_ignore_ascii_case(target))
+            .unwrap_or(false)
+    })
+}
+
+fn stream_kind_from_annotations(annotations: &[hir::Annotation]) -> Option<StreamKind> {
+    let mut out = None;
+    for annotation in annotations {
+        let Some(name) = annotation_name(annotation) else {
+            continue;
+        };
+        let current = if name.eq_ignore_ascii_case("server_stream") {
+            Some(StreamKind::Server)
+        } else if name.eq_ignore_ascii_case("client_stream") {
+            Some(StreamKind::Client)
+        } else if name.eq_ignore_ascii_case("bidi_stream") {
+            Some(StreamKind::Bidi)
+        } else {
+            None
+        };
+        let Some(current) = current else {
+            continue;
+        };
+        match out {
+            None => out = Some(current),
+            Some(prev) if prev == current => {}
+            Some(_) => panic!("@server_stream/@client_stream/@bidi_stream are mutually exclusive"),
+        }
+    }
+    out
+}
+
+fn stream_codec_from_annotations(annotations: &[hir::Annotation]) -> StreamCodec {
+    let mut codec = StreamCodec::Ndjson;
+    for annotation in annotations {
+        let Some(name) = annotation_name(annotation) else {
+            continue;
+        };
+        if !name.eq_ignore_ascii_case("stream_codec") {
+            continue;
+        }
+        let value = annotation_params(annotation)
+            .map(normalize_params)
+            .and_then(|params| params.get("value").cloned())
+            .unwrap_or_else(|| "sse".to_string());
+        codec = match value.to_ascii_lowercase().as_str() {
+            "sse" => StreamCodec::Sse,
+            "ndjson" => StreamCodec::Ndjson,
+            other => panic!("unsupported @stream_codec value '{other}'"),
+        };
+    }
+    codec
 }
 
 fn has_optional_annotation(annotations: &[hir::Annotation]) -> bool {

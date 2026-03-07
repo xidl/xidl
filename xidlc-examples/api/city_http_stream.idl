@@ -1,0 +1,20 @@
+interface CityHttpStreamApi {
+  @server_stream
+  @stream_codec("sse")
+  @path("/alerts/{district}{?lang}")
+  string watch_alert(
+    @path("district") string district,
+    @query("lang") string lang
+  );
+
+  @server_stream
+  attribute boolean maintenance_mode;
+
+  @client_stream
+  @stream_codec("ndjson")
+  @path("/assets/upload")
+  string upload_asset(
+    in string asset_id,
+    in sequence<octet> chunk
+  );
+};

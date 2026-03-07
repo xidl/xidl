@@ -1,0 +1,521 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "xidl",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/CityHttpStreamApi/maintenance_mode": {
+      "get": {
+        "operationId": "CityHttpStreamApi.maintenance_mode",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/CityHttpStreamApi/set_maintenance_mode": {
+      "post": {
+        "operationId": "CityHttpStreamApi.set_maintenance_mode",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/CityHttpStreamApi/watch_attribute_maintenance_mode": {
+      "get": {
+        "operationId": "CityHttpStreamApi.watch_attribute_maintenance_mode",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alerts/{district}": {
+      "get": {
+        "operationId": "CityHttpStreamApi.watch_alert",
+        "parameters": [
+          {
+            "name": "district",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/assets/upload": {
+      "post": {
+        "operationId": "CityHttpStreamApi.upload_asset",
+        "requestBody": {
+          "content": {
+            "application/x-ndjson": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "asset_id",
+                  "chunk"
+                ],
+                "properties": {
+                  "asset_id": {
+                    "type": "string"
+                  },
+                  "chunk": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "format": "int32",
+                      "minimum": 0
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CityHttpStreamApi_Call": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "watch_alert"
+            ],
+            "properties": {
+              "watch_alert": {
+                "$ref": "#/components/schemas/CityHttpStreamApi_watch_alert_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_maintenance_mode"
+            ],
+            "properties": {
+              "get_attribute_maintenance_mode": {
+                "$ref": "#/components/schemas/CityHttpStreamApi_get_attribute_maintenance_mode_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_maintenance_mode"
+            ],
+            "properties": {
+              "set_attribute_maintenance_mode": {
+                "$ref": "#/components/schemas/CityHttpStreamApi_set_attribute_maintenance_mode_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "upload_asset"
+            ],
+            "properties": {
+              "upload_asset": {
+                "$ref": "#/components/schemas/CityHttpStreamApi_upload_asset_In"
+              }
+            }
+          }
+        ]
+      },
+      "CityHttpStreamApi_Reply": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/CityHttpStreamApi_Return"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
+          }
+        }
+      },
+      "CityHttpStreamApi_Request": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/CityHttpStreamApi_Call"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
+          }
+        }
+      },
+      "CityHttpStreamApi_Return": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "watch_alert"
+            ],
+            "properties": {
+              "watch_alert": {
+                "$ref": "#/components/schemas/CityHttpStreamApi_watch_alert_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_maintenance_mode"
+            ],
+            "properties": {
+              "get_attribute_maintenance_mode": {
+                "$ref": "#/components/schemas/CityHttpStreamApi_get_attribute_maintenance_mode_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_maintenance_mode"
+            ],
+            "properties": {
+              "set_attribute_maintenance_mode": {
+                "$ref": "#/components/schemas/CityHttpStreamApi_set_attribute_maintenance_mode_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "upload_asset"
+            ],
+            "properties": {
+              "upload_asset": {
+                "$ref": "#/components/schemas/CityHttpStreamApi_upload_asset_Result"
+              }
+            }
+          }
+        ]
+      },
+      "CityHttpStreamApi_get_attribute_maintenance_mode_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "CityHttpStreamApi_get_attribute_maintenance_mode_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CityHttpStreamApi_get_attribute_maintenance_mode_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/CityHttpStreamApi_get_attribute_maintenance_mode_Out"
+              }
+            }
+          }
+        ]
+      },
+      "CityHttpStreamApi_set_attribute_maintenance_mode_In": {
+        "type": "object",
+        "required": [
+          "maintenance_mode"
+        ],
+        "properties": {
+          "maintenance_mode": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CityHttpStreamApi_set_attribute_maintenance_mode_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "CityHttpStreamApi_set_attribute_maintenance_mode_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/CityHttpStreamApi_set_attribute_maintenance_mode_Out"
+              }
+            }
+          }
+        ]
+      },
+      "CityHttpStreamApi_upload_asset_In": {
+        "type": "object",
+        "required": [
+          "asset_id",
+          "chunk"
+        ],
+        "properties": {
+          "asset_id": {
+            "type": "string"
+          },
+          "chunk": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          }
+        }
+      },
+      "CityHttpStreamApi_upload_asset_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "CityHttpStreamApi_upload_asset_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/CityHttpStreamApi_upload_asset_Out"
+              }
+            }
+          }
+        ]
+      },
+      "CityHttpStreamApi_watch_alert_In": {
+        "type": "object",
+        "required": [
+          "district",
+          "lang"
+        ],
+        "properties": {
+          "district": {
+            "type": "string"
+          },
+          "lang": {
+            "type": "string"
+          }
+        }
+      },
+      "CityHttpStreamApi_watch_alert_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "CityHttpStreamApi_watch_alert_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/CityHttpStreamApi_watch_alert_Out"
+              }
+            }
+          }
+        ]
+      },
+      "Error": {
+        "type": "object",
+        "required": [
+          "code",
+          "msg"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "details": {
+            "type": "object"
+          },
+          "msg": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
