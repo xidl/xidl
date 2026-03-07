@@ -14,6 +14,18 @@ pub trait {{ ident }} {
     }
 {% endfor %}
 
+{% for method in methods %}
+    {% if method.response_kind != "empty" %}
+        #[derive(::serde::Serialize, ::serde::Deserialize)]
+        struct {{ method.response_struct }} {
+            {% for field in method.response_fields %}
+                #[serde(rename = "{{ field.json_name }}")]
+                {{ field.name }}: {{ field.ty }},
+            {% endfor %}
+        }
+    {% endif %}
+{% endfor %}
+
 pub struct {{ ident }}Server<T> {
     inner: T,
 }
@@ -33,16 +45,21 @@ T: {{ ident }} + Send + Sync,
         match method {
             {% for method in methods %}
                 "{{ method.rpc_name }}" => {
-                    {% if method.params | length > 0 %}
-                        let params: {{ method.params_struct }} = ::serde_json::from_value(params)
-                            .map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
-                    {% endif %}
+                    let params: {{ method.params_struct }} = ::serde_json::from_value(params)
+                        .map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
                     {% if method.args | length > 0 %}
                         let result = self.inner.{{ method.name }}({% for arg in method.args %}params.{{ arg }}{% if not loop.last %}, {% endif %}{% endfor %}).await?;
                     {% else %}
                         let result = self.inner.{{ method.name }}().await?;
                     {% endif %}
-                    Ok(::serde_json::to_value(result)?)
+                    {% if method.response_kind == "empty" %}
+                        Ok(::serde_json::json!({}))
+                    {% elif method.response_kind == "single_return" or method.response_kind == "single_output" %}
+                        let wire = {{ method.response_struct }} { {{ method.response_single_field }}: result };
+                        Ok(::serde_json::to_value(wire)?)
+                    {% else %}
+                        Ok(::serde_json::to_value(result)?)
+                    {% endif %}
                 }
             {% endfor %}
             _ => Err(xidl_jsonrpc::Error::method_not_found(method)),
@@ -70,18 +87,26 @@ W: tokio::io::AsyncWrite + Unpin + Send,
 impl<R, W> {{ ident }} for {{ ident }}Client<R, W>
 where
 R: tokio::io::AsyncRead + Unpin + Send,
-W: tokio::io::AsyncWrite + Unpin + Send,
+    W: tokio::io::AsyncWrite + Unpin + Send,
 {
     {% for method in methods %}
         async fn {{ method.name }}(& self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.ret }}, xidl_jsonrpc::Error> {
-        let params = {{ method.params_struct }} {
-            {% for field in method.params_fields %}
-                {{ field.name }},
-            {% endfor %}
-        };
+            let params = {{ method.params_struct }} {
+                {% for field in method.params_fields %}
+                    {{ field.name }},
+                {% endfor %}
+            };
 
-        let mut client = self.client.lock().await;
-        client.call("{{ method.rpc_name }}", params).await
+            let mut client = self.client.lock().await;
+            {% if method.response_kind == "empty" %}
+                let _: ::serde_json::Value = client.call("{{ method.rpc_name }}", params).await?;
+                Ok(())
+            {% elif method.response_kind == "single_return" or method.response_kind == "single_output" %}
+                let result: {{ method.response_struct }} = client.call("{{ method.rpc_name }}", params).await?;
+                Ok(result.{{ method.response_single_field }})
+            {% else %}
+                client.call("{{ method.rpc_name }}", params).await
+            {% endif %}
     }
 {% endfor %}
 }
