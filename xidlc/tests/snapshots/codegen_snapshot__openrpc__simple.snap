@@ -28,17 +28,6 @@ openrpc.json
         "oneOf": [
           {
             "properties": {
-              "unknownOp": {
-                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
-              }
-            },
-            "required": [
-              "unknownOp"
-            ],
-            "type": "object"
-          },
-          {
-            "properties": {
               "get_user": {
                 "$ref": "#/components/schemas/UserService_get_user_In"
               }
@@ -54,13 +43,9 @@ openrpc.json
         "properties": {
           "data": {
             "$ref": "#/components/schemas/UserService_Return"
-          },
-          "header": {
-            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
           }
         },
         "required": [
-          "header",
           "data"
         ],
         "type": "object"
@@ -69,30 +54,15 @@ openrpc.json
         "properties": {
           "data": {
             "$ref": "#/components/schemas/UserService_Call"
-          },
-          "header": {
-            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
           }
         },
         "required": [
-          "header",
           "data"
         ],
         "type": "object"
       },
       "demo.demo.UserService_Return": {
         "oneOf": [
-          {
-            "properties": {
-              "unknownOp": {
-                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
-              }
-            },
-            "required": [
-              "unknownOp"
-            ],
-            "type": "object"
-          },
           {
             "properties": {
               "get_user": {

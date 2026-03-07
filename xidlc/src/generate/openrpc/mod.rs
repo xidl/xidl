@@ -404,6 +404,9 @@ fn schema_for_struct(members: &[hir::Member]) -> Value {
     let mut required = Vec::new();
 
     for member in members {
+        if is_internal_rpc_marker_type(&member.ty) {
+            continue;
+        }
         for decl in &member.ident {
             let name = declarator_name(decl);
             let schema = schema_for_decl(&member.ty, decl);
@@ -428,6 +431,7 @@ fn schema_for_union(def: &hir::UnionDef) -> Value {
     let variants = def
         .case
         .iter()
+        .filter(|case| !is_internal_rpc_marker_element(&case.element.ty))
         .map(|case| {
             let name = declarator_name(&case.element.value);
             let schema = schema_for_element(&case.element.ty, &case.element.value);
@@ -510,7 +514,19 @@ fn schema_for_type(ty: &hir::TypeSpec) -> Value {
             hir::SimpleTypeSpec::AnyType
             | hir::SimpleTypeSpec::ObjectType
             | hir::SimpleTypeSpec::ValueBaseType => json!({}),
-            hir::SimpleTypeSpec::ScopedName(value) => schema_ref(&value.name.join(".")),
+            hir::SimpleTypeSpec::ScopedName(value) => {
+                let scoped = value.name.join(".");
+                match scoped.as_str() {
+                    "dds.rpc.UnusedMember" => {
+                        json!({ "type": "object", "properties": {}, "required": [] })
+                    }
+                    "dds.rpc.RequestHeader" | "dds.rpc.ReplyHeader" => {
+                        json!({ "type": "object", "additionalProperties": true })
+                    }
+                    "dds.rpc.UnknownOperation" => json!({ "type": "object" }),
+                    _ => schema_ref(&scoped),
+                }
+            }
         },
         hir::TypeSpec::TemplateTypeSpec(template) => match template {
             hir::TemplateTypeSpec::SequenceType(seq) => {
@@ -599,4 +615,25 @@ fn has_optional_annotation(annotations: &[hir::Annotation]) -> bool {
             .map(|name| name.eq_ignore_ascii_case("optional"))
             .unwrap_or(false)
     })
+}
+
+fn is_internal_rpc_marker_type(ty: &hir::TypeSpec) -> bool {
+    matches!(
+        ty,
+        hir::TypeSpec::SimpleTypeSpec(hir::SimpleTypeSpec::ScopedName(value))
+            if matches!(value.name.join(".").as_str(), "dds.rpc.UnusedMember" | "dds.rpc.RequestHeader" | "dds.rpc.ReplyHeader")
+    )
+}
+
+fn is_internal_rpc_marker_element(ty: &hir::ElementSpecTy) -> bool {
+    match ty {
+        hir::ElementSpecTy::TypeSpec(spec) => {
+            matches!(
+                spec,
+                hir::TypeSpec::SimpleTypeSpec(hir::SimpleTypeSpec::ScopedName(value))
+                    if value.name.join(".") == "dds.rpc.UnknownOperation"
+            )
+        }
+        hir::ElementSpecTy::ConstrTypeDcl(_) => false,
+    }
 }

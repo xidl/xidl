@@ -12,17 +12,6 @@ openrpc.json
         "oneOf": [
           {
             "properties": {
-              "unknownOp": {
-                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
-              }
-            },
-            "required": [
-              "unknownOp"
-            ],
-            "type": "object"
-          },
-          {
-            "properties": {
               "add": {
                 "$ref": "#/components/schemas/Calc_add_In"
               }
@@ -60,13 +49,9 @@ openrpc.json
         "properties": {
           "data": {
             "$ref": "#/components/schemas/Calc_Return"
-          },
-          "header": {
-            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
           }
         },
         "required": [
-          "header",
           "data"
         ],
         "type": "object"
@@ -75,30 +60,15 @@ openrpc.json
         "properties": {
           "data": {
             "$ref": "#/components/schemas/Calc_Call"
-          },
-          "header": {
-            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
           }
         },
         "required": [
-          "header",
           "data"
         ],
         "type": "object"
       },
       "calc.calc.Calc_Return": {
         "oneOf": [
-          {
-            "properties": {
-              "unknownOp": {
-                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
-              }
-            },
-            "required": [
-              "unknownOp"
-            ],
-            "type": "object"
-          },
           {
             "properties": {
               "add": {
@@ -223,25 +193,11 @@ openrpc.json
         ]
       },
       "calc.calc.Calc_ping_In": {
-        "properties": {
-          "dummy": {
-            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
-          }
-        },
-        "required": [
-          "dummy"
-        ],
+        "properties": {},
         "type": "object"
       },
       "calc.calc.Calc_ping_Out": {
-        "properties": {
-          "dummy": {
-            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
-          }
-        },
-        "required": [
-          "dummy"
-        ],
+        "properties": {},
         "type": "object"
       },
       "calc.calc.Calc_ping_Result": {

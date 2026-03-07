@@ -680,16 +680,25 @@ impl HttpEdgeCasesServiceClient{
     pub async fn health(&self,trace:String)->Result<(),xidl_rust_axum::Error>{
         let path = "/v1/health".to_string();
         let url = self.client.url(&path);
-        let req = self
+        let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::HEAD,url);
+        .request(xidl_rust_axum::reqwest::Method::HEAD,url)
+        .build()
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         let query = HttpEdgeCasesServiceHealthQuery{
             trace,
         };
-        let req = req.query(&query);
-        let resp = req
-        .send()
+        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        if!query.is_empty(){
+            req.url_mut().set_query(Some(&query));
+        }
+
+        let resp = self
+        .client
+        .http()
+        .execute(req)
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         if resp.status().is_success(){
@@ -708,18 +717,27 @@ impl HttpEdgeCasesServiceClient{
 
     pub async fn get_user(&self,uid:u32,locale:String)->Result<String,xidl_rust_axum::Error>{
         let path = "/v1/users/{id}".to_string();
-        let path = path.replace("{{id}}",&uid.to_string());
+        let path = path.replace("{id}",&uid.to_string());
         let url = self.client.url(&path);
-        let req = self
+        let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,url);
+        .request(xidl_rust_axum::reqwest::Method::GET,url)
+        .build()
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         let query = HttpEdgeCasesServiceGetUserQuery{
             locale,
         };
-        let req = req.query(&query);
-        let resp = req
-        .send()
+        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        if!query.is_empty(){
+            req.url_mut().set_query(Some(&query));
+        }
+
+        let resp = self
+        .client
+        .http()
+        .execute(req)
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         if resp.status().is_success(){
@@ -740,15 +758,19 @@ impl HttpEdgeCasesServiceClient{
 
     pub async fn get_item(&self,order_id:u32,item_id:u32)->Result<String,xidl_rust_axum::Error>{
         let path = "/orders/{order_id}/items/{item_id}".to_string();
-        let path = path.replace("{{order_id}}",&order_id.to_string());
-        let path = path.replace("{{item_id}}",&item_id.to_string());
+        let path = path.replace("{order_id}",&order_id.to_string());
+        let path = path.replace("{item_id}",&item_id.to_string());
         let url = self.client.url(&path);
-        let req = self
+        let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,url);
-        let resp = req
-        .send()
+        .request(xidl_rust_axum::reqwest::Method::GET,url)
+        .build()
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        let resp = self
+        .client
+        .http()
+        .execute(req)
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         if resp.status().is_success(){
@@ -770,17 +792,26 @@ impl HttpEdgeCasesServiceClient{
     pub async fn lookup(&self,keyword:String,page_size:u32)->Result<String,xidl_rust_axum::Error>{
         let path = "/lookup".to_string();
         let url = self.client.url(&path);
-        let req = self
+        let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,url);
+        .request(xidl_rust_axum::reqwest::Method::POST,url)
+        .build()
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         let query = HttpEdgeCasesServiceLookupQuery{
             keyword,
             page_size,
         };
-        let req = req.query(&query);
-        let resp = req
-        .send()
+        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        if!query.is_empty(){
+            req.url_mut().set_query(Some(&query));
+        }
+
+        let resp = self
+        .client
+        .http()
+        .execute(req)
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         if resp.status().is_success(){

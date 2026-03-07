@@ -323,17 +323,6 @@
           {
             "type": "object",
             "properties": {
-              "unknownOp": {
-                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
-              }
-            },
-            "required": [
-              "unknownOp"
-            ]
-          },
-          {
-            "type": "object",
-            "properties": {
               "quote_trip": {
                 "$ref": "#/components/schemas/SmartCityRpcApi_quote_trip_In"
               }
@@ -457,46 +446,27 @@
       "SmartCityRpcApi_Reply": {
         "type": "object",
         "properties": {
-          "header": {
-            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
-          },
           "data": {
             "$ref": "#/components/schemas/SmartCityRpcApi_Return"
           }
         },
         "required": [
-          "header",
           "data"
         ]
       },
       "SmartCityRpcApi_Request": {
         "type": "object",
         "properties": {
-          "header": {
-            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
-          },
           "data": {
             "$ref": "#/components/schemas/SmartCityRpcApi_Call"
           }
         },
         "required": [
-          "header",
           "data"
         ]
       },
       "SmartCityRpcApi_Return": {
         "oneOf": [
-          {
-            "type": "object",
-            "properties": {
-              "unknownOp": {
-                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
-              }
-            },
-            "required": [
-              "unknownOp"
-            ]
-          },
           {
             "type": "object",
             "properties": {
@@ -722,14 +692,7 @@
       },
       "SmartCityRpcApi_get_attribute_firmware_channel_In": {
         "type": "object",
-        "properties": {
-          "dummy": {
-            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
-          }
-        },
-        "required": [
-          "dummy"
-        ]
+        "properties": {}
       },
       "SmartCityRpcApi_get_attribute_firmware_channel_Out": {
         "type": "object",
@@ -759,14 +722,7 @@
       },
       "SmartCityRpcApi_get_attribute_region_In": {
         "type": "object",
-        "properties": {
-          "dummy": {
-            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
-          }
-        },
-        "required": [
-          "dummy"
-        ]
+        "properties": {}
       },
       "SmartCityRpcApi_get_attribute_region_Out": {
         "type": "object",
@@ -796,25 +752,11 @@
       },
       "SmartCityRpcApi_heartbeat_In": {
         "type": "object",
-        "properties": {
-          "dummy": {
-            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
-          }
-        },
-        "required": [
-          "dummy"
-        ]
+        "properties": {}
       },
       "SmartCityRpcApi_heartbeat_Out": {
         "type": "object",
-        "properties": {
-          "dummy": {
-            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
-          }
-        },
-        "required": [
-          "dummy"
-        ]
+        "properties": {}
       },
       "SmartCityRpcApi_heartbeat_Result": {
         "oneOf": [
@@ -844,14 +786,7 @@
       },
       "SmartCityRpcApi_mark_paid_Out": {
         "type": "object",
-        "properties": {
-          "dummy": {
-            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
-          }
-        },
-        "required": [
-          "dummy"
-        ]
+        "properties": {}
       },
       "SmartCityRpcApi_mark_paid_Result": {
         "oneOf": [
@@ -939,14 +874,7 @@
       },
       "SmartCityRpcApi_report_trip_Out": {
         "type": "object",
-        "properties": {
-          "dummy": {
-            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
-          }
-        },
-        "required": [
-          "dummy"
-        ]
+        "properties": {}
       },
       "SmartCityRpcApi_report_trip_Result": {
         "oneOf": [
@@ -1018,14 +946,7 @@
       },
       "SmartCityRpcApi_set_attribute_firmware_channel_Out": {
         "type": "object",
-        "properties": {
-          "dummy": {
-            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
-          }
-        },
-        "required": [
-          "dummy"
-        ]
+        "properties": {}
       },
       "SmartCityRpcApi_set_attribute_firmware_channel_Result": {
         "oneOf": [

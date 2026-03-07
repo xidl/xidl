@@ -899,16 +899,25 @@ impl HttpDefaultsServiceClient{
     pub async fn get_name(&self,name:String)->Result<String,xidl_rust_axum::Error>{
         let path = "/get_name".to_string();
         let url = self.client.url(&path);
-        let req = self
+        let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,url);
+        .request(xidl_rust_axum::reqwest::Method::POST,url)
+        .build()
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         let query = HttpDefaultsServiceGetNameQuery{
             name,
         };
-        let req = req.query(&query);
-        let resp = req
-        .send()
+        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        if!query.is_empty(){
+            req.url_mut().set_query(Some(&query));
+        }
+
+        let resp = self
+        .client
+        .http()
+        .execute(req)
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         if resp.status().is_success(){
@@ -929,19 +938,28 @@ impl HttpDefaultsServiceClient{
 
     pub async fn list_orders(&self,user_id:u32,page:u32,size:u32)->Result<String,xidl_rust_axum::Error>{
         let path = "/list_orders/{uid}".to_string();
-        let path = path.replace("{{uid}}",&user_id.to_string());
+        let path = path.replace("{uid}",&user_id.to_string());
         let url = self.client.url(&path);
-        let req = self
+        let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,url);
+        .request(xidl_rust_axum::reqwest::Method::GET,url)
+        .build()
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         let query = HttpDefaultsServiceListOrdersQuery{
             page,
             size,
         };
-        let req = req.query(&query);
-        let resp = req
-        .send()
+        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        if!query.is_empty(){
+            req.url_mut().set_query(Some(&query));
+        }
+
+        let resp = self
+        .client
+        .http()
+        .execute(req)
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         if resp.status().is_success(){
@@ -963,14 +981,24 @@ impl HttpDefaultsServiceClient{
     pub async fn create_user(&self,req:CreateUserRequest)->Result<String,xidl_rust_axum::Error>{
         let path = "/users".to_string();
         let url = self.client.url(&path);
-        let req = self
+        let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,url);
+        .request(xidl_rust_axum::reqwest::Method::POST,url)
+        .build()
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         let body = req;
-        let req = req.json(&body);
-        let resp = req
-        .send()
+        let body = xidl_rust_axum::serde_json::to_vec(&body)
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::CONTENT_TYPE,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/json"),
+        );
+        *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
+        let resp = self
+        .client
+        .http()
+        .execute(req)
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         if resp.status().is_success(){
@@ -992,17 +1020,27 @@ impl HttpDefaultsServiceClient{
     pub async fn search_user(&self,name:String,age:u32)->Result<String,xidl_rust_axum::Error>{
         let path = "/users/search".to_string();
         let url = self.client.url(&path);
-        let req = self
+        let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,url);
+        .request(xidl_rust_axum::reqwest::Method::POST,url)
+        .build()
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         let body = HttpDefaultsServiceSearchUserBody{
             name,
             age,
         };
-        let req = req.json(&body);
-        let resp = req
-        .send()
+        let body = xidl_rust_axum::serde_json::to_vec(&body)
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::CONTENT_TYPE,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/json"),
+        );
+        *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
+        let resp = self
+        .client
+        .http()
+        .execute(req)
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         if resp.status().is_success(){
@@ -1023,18 +1061,27 @@ impl HttpDefaultsServiceClient{
 
     pub async fn get_user(&self,id:u32,lang:String)->Result<String,xidl_rust_axum::Error>{
         let path = "/v1/users/{id}".to_string();
-        let path = path.replace("{{id}}",&id.to_string());
+        let path = path.replace("{id}",&id.to_string());
         let url = self.client.url(&path);
-        let req = self
+        let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,url);
+        .request(xidl_rust_axum::reqwest::Method::GET,url)
+        .build()
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         let query = HttpDefaultsServiceGetUserQuery{
             lang,
         };
-        let req = req.query(&query);
-        let resp = req
-        .send()
+        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        if!query.is_empty(){
+            req.url_mut().set_query(Some(&query));
+        }
+
+        let resp = self
+        .client
+        .http()
+        .execute(req)
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         if resp.status().is_success(){
@@ -1055,18 +1102,27 @@ impl HttpDefaultsServiceClient{
 
     pub async fn get_user_alias(&self,user_id:u32,locale:String)->Result<String,xidl_rust_axum::Error>{
         let path = "/get_user_alias/{id}".to_string();
-        let path = path.replace("{{id}}",&user_id.to_string());
+        let path = path.replace("{id}",&user_id.to_string());
         let url = self.client.url(&path);
-        let req = self
+        let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,url);
+        .request(xidl_rust_axum::reqwest::Method::POST,url)
+        .build()
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         let query = HttpDefaultsServiceGetUserAliasQuery{
             locale,
         };
-        let req = req.query(&query);
-        let resp = req
-        .send()
+        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        if!query.is_empty(){
+            req.url_mut().set_query(Some(&query));
+        }
+
+        let resp = self
+        .client
+        .http()
+        .execute(req)
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         if resp.status().is_success(){

@@ -439,14 +439,18 @@ impl HttpCatchAllServiceClient{
 impl HttpCatchAllServiceClient{
     pub async fn read_file(&self,rel_path:String)->Result<String,xidl_rust_axum::Error>{
         let path = "/files/{*path}".to_string();
-        let path = path.replace("{{*path}}",&rel_path.to_string());
+        let path = path.replace("{*path}",&rel_path.to_string());
         let url = self.client.url(&path);
-        let req = self
+        let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,url);
-        let resp = req
-        .send()
+        .request(xidl_rust_axum::reqwest::Method::GET,url)
+        .build()
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        let resp = self
+        .client
+        .http()
+        .execute(req)
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         if resp.status().is_success(){
@@ -467,18 +471,27 @@ impl HttpCatchAllServiceClient{
 
     pub async fn read_asset(&self,key:String,version:String)->Result<String,xidl_rust_axum::Error>{
         let path = "/assets/{*key}".to_string();
-        let path = path.replace("{{*key}}",&key.to_string());
+        let path = path.replace("{*key}",&key.to_string());
         let url = self.client.url(&path);
-        let req = self
+        let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,url);
+        .request(xidl_rust_axum::reqwest::Method::GET,url)
+        .build()
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         let query = HttpCatchAllServiceReadAssetQuery{
             version,
         };
-        let req = req.query(&query);
-        let resp = req
-        .send()
+        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        if!query.is_empty(){
+            req.url_mut().set_query(Some(&query));
+        }
+
+        let resp = self
+        .client
+        .http()
+        .execute(req)
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         if resp.status().is_success(){

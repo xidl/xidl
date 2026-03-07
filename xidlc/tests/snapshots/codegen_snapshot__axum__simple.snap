@@ -1091,12 +1091,16 @@ impl HttpServiceClient{
     pub async fn get_health(&self)->Result<HealthResponse,xidl_rust_axum::Error>{
         let path = "/api/v1/health".to_string();
         let url = self.client.url(&path);
-        let req = self
+        let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,url);
-        let resp = req
-        .send()
+        .request(xidl_rust_axum::reqwest::Method::GET,url)
+        .build()
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        let resp = self
+        .client
+        .http()
+        .execute(req)
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         if resp.status().is_success(){
@@ -1118,12 +1122,16 @@ impl HttpServiceClient{
     pub async fn get_version(&self)->Result<VersionResponse,xidl_rust_axum::Error>{
         let path = "/api/v1/app/version".to_string();
         let url = self.client.url(&path);
-        let req = self
+        let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,url);
-        let resp = req
-        .send()
+        .request(xidl_rust_axum::reqwest::Method::GET,url)
+        .build()
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        let resp = self
+        .client
+        .http()
+        .execute(req)
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         if resp.status().is_success(){
@@ -1145,12 +1153,16 @@ impl HttpServiceClient{
     pub async fn get_memory_info(&self)->Result<MemoryResponse,xidl_rust_axum::Error>{
         let path = "/api/v1/app/memory".to_string();
         let url = self.client.url(&path);
-        let req = self
+        let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,url);
-        let resp = req
-        .send()
+        .request(xidl_rust_axum::reqwest::Method::GET,url)
+        .build()
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        let resp = self
+        .client
+        .http()
+        .execute(req)
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         if resp.status().is_success(){
@@ -1172,12 +1184,16 @@ impl HttpServiceClient{
     pub async fn restart(&self)->Result<(),xidl_rust_axum::Error>{
         let path = "/api/v1/app/restart".to_string();
         let url = self.client.url(&path);
-        let req = self
+        let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,url);
-        let resp = req
-        .send()
+        .request(xidl_rust_axum::reqwest::Method::GET,url)
+        .build()
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        let resp = self
+        .client
+        .http()
+        .execute(req)
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         if resp.status().is_success(){
@@ -1197,12 +1213,16 @@ impl HttpServiceClient{
     pub async fn get_state(&self)->Result<crate::api::state::StateResponse,xidl_rust_axum::Error>{
         let path = "/api/v1/proxy/state".to_string();
         let url = self.client.url(&path);
-        let req = self
+        let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,url);
-        let resp = req
-        .send()
+        .request(xidl_rust_axum::reqwest::Method::GET,url)
+        .build()
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        let resp = self
+        .client
+        .http()
+        .execute(req)
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         if resp.status().is_success(){
@@ -1224,12 +1244,16 @@ impl HttpServiceClient{
     pub async fn get_udp_stats(&self)->Result<UdpStatsResponse,xidl_rust_axum::Error>{
         let path = "/api/v1/stats/udp".to_string();
         let url = self.client.url(&path);
-        let req = self
+        let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,url);
-        let resp = req
-        .send()
+        .request(xidl_rust_axum::reqwest::Method::GET,url)
+        .build()
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        let resp = self
+        .client
+        .http()
+        .execute(req)
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         if resp.status().is_success(){
@@ -1251,17 +1275,27 @@ impl HttpServiceClient{
     pub async fn create_simple(&self,local_addr:String,remote_port:u16)->Result<CreateSimpleResponse,xidl_rust_axum::Error>{
         let path = "/api/v1/simple".to_string();
         let url = self.client.url(&path);
-        let req = self
+        let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,url);
+        .request(xidl_rust_axum::reqwest::Method::POST,url)
+        .build()
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         let body = HttpServiceCreateSimpleBody{
             local_addr,
             remote_port,
         };
-        let req = req.json(&body);
-        let resp = req
-        .send()
+        let body = xidl_rust_axum::serde_json::to_vec(&body)
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::CONTENT_TYPE,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/json"),
+        );
+        *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
+        let resp = self
+        .client
+        .http()
+        .execute(req)
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         if resp.status().is_success(){
@@ -1282,14 +1316,18 @@ impl HttpServiceClient{
 
     pub async fn stop_simple(&self,id:u32)->Result<(),xidl_rust_axum::Error>{
         let path = "/api/v1/simple/{id}".to_string();
-        let path = path.replace("{{id}}",&id.to_string());
+        let path = path.replace("{id}",&id.to_string());
         let url = self.client.url(&path);
-        let req = self
+        let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::DELETE,url);
-        let resp = req
-        .send()
+        .request(xidl_rust_axum::reqwest::Method::DELETE,url)
+        .build()
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        let resp = self
+        .client
+        .http()
+        .execute(req)
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
         if resp.status().is_success(){

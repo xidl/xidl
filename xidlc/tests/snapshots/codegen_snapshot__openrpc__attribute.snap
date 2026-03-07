@@ -12,17 +12,6 @@ openrpc.json
         "oneOf": [
           {
             "properties": {
-              "unknownOp": {
-                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
-              }
-            },
-            "required": [
-              "unknownOp"
-            ],
-            "type": "object"
-          },
-          {
-            "properties": {
               "get_attribute_title": {
                 "$ref": "#/components/schemas/Shelf_get_attribute_title_In"
               }
@@ -60,13 +49,9 @@ openrpc.json
         "properties": {
           "data": {
             "$ref": "#/components/schemas/Shelf_Return"
-          },
-          "header": {
-            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
           }
         },
         "required": [
-          "header",
           "data"
         ],
         "type": "object"
@@ -75,30 +60,15 @@ openrpc.json
         "properties": {
           "data": {
             "$ref": "#/components/schemas/Shelf_Call"
-          },
-          "header": {
-            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
           }
         },
         "required": [
-          "header",
           "data"
         ],
         "type": "object"
       },
       "book.book.Shelf_Return": {
         "oneOf": [
-          {
-            "properties": {
-              "unknownOp": {
-                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
-              }
-            },
-            "required": [
-              "unknownOp"
-            ],
-            "type": "object"
-          },
           {
             "properties": {
               "get_attribute_title": {
@@ -135,14 +105,7 @@ openrpc.json
         ]
       },
       "book.book.Shelf_get_attribute_count_In": {
-        "properties": {
-          "dummy": {
-            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
-          }
-        },
-        "required": [
-          "dummy"
-        ],
+        "properties": {},
         "type": "object"
       },
       "book.book.Shelf_get_attribute_count_Out": {
@@ -173,14 +136,7 @@ openrpc.json
         ]
       },
       "book.book.Shelf_get_attribute_title_In": {
-        "properties": {
-          "dummy": {
-            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
-          }
-        },
-        "required": [
-          "dummy"
-        ],
+        "properties": {},
         "type": "object"
       },
       "book.book.Shelf_get_attribute_title_Out": {
@@ -222,14 +178,7 @@ openrpc.json
         "type": "object"
       },
       "book.book.Shelf_set_attribute_count_Out": {
-        "properties": {
-          "dummy": {
-            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
-          }
-        },
-        "required": [
-          "dummy"
-        ],
+        "properties": {},
         "type": "object"
       },
       "book.book.Shelf_set_attribute_count_Result": {
