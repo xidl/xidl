@@ -7,7 +7,6 @@ use crate::city_http::{
     SmartCityHttpApiReserveLotRequest, SmartCityHttpApiReserveLotResponse,
     SmartCityHttpApiSetMaintenanceModeRequest, SmartCityHttpApiUpdateProfileRequest,
 };
-use serde_json::json;
 
 pub struct SmartCityHttpService;
 
@@ -109,32 +108,5 @@ impl SmartCityHttpApi for SmartCityHttpService {
         _req: xidl_rust_axum::Request<SmartCityHttpApiSetMaintenanceModeRequest>,
     ) -> Result<(), xidl_rust_axum::Error> {
         Ok(())
-    }
-}
-
-pub struct SmartCityRpcService;
-
-#[async_trait::async_trait]
-impl xidl_jsonrpc::Handler for SmartCityRpcService {
-    async fn handle(
-        &self,
-        method: &str,
-        params: serde_json::Value,
-    ) -> Result<serde_json::Value, xidl_jsonrpc::Error> {
-        match method {
-            "SmartCityRpcApi.mark_paid" => Ok(json!({})),
-            "SmartCityRpcApi.heartbeat" => Ok(json!({})),
-            "SmartCityRpcApi.report_trip" => Ok(json!({})),
-            "SmartCityRpcApi.get_attribute_region" => Ok(json!({ "return": "cn-east" })),
-            "SmartCityRpcApi.get_attribute_firmware_channel" => Ok(json!({ "return": "stable" })),
-            "SmartCityRpcApi.set_attribute_firmware_channel" => {
-                let _channel = params
-                    .get("firmware_channel")
-                    .and_then(|value| value.as_str())
-                    .unwrap_or("stable");
-                Ok(json!({}))
-            }
-            _ => Err(xidl_jsonrpc::Error::method_not_found(method)),
-        }
     }
 }

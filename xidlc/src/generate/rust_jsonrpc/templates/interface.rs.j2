@@ -17,10 +17,10 @@ pub trait {{ ident }} {
 {% for method in methods %}
     {% if method.response_kind != "empty" %}
         #[derive(::serde::Serialize, ::serde::Deserialize)]
-        struct {{ method.response_struct }} {
+        pub struct {{ method.response_struct }} {
             {% for field in method.response_fields %}
                 #[serde(rename = "{{ field.json_name }}")]
-                {{ field.name }}: {{ field.ty }},
+                pub {{ field.name }}: {{ field.ty }},
             {% endfor %}
         }
     {% endif %}

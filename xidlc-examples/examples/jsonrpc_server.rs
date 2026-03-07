@@ -1,5 +1,5 @@
 use clap::Parser;
-use xidlc_examples::example_services::SmartCityRpcService;
+use xidlc_examples::city_jsonrpc::{SmartCityRpcApiServer, SmartCityRpcService};
 
 #[derive(Parser)]
 struct Args {
@@ -13,7 +13,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     eprintln!("smart city jsonrpc server listening on {}", args.addr);
     xidl_jsonrpc::Server::builder()
-        .with_service(SmartCityRpcService)
+        .with_service(SmartCityRpcApiServer::new(SmartCityRpcService::default()))
         .serve_on(&args.addr)
         .await?;
 

@@ -16,8 +16,6 @@ pub mod city_http {
     include!(concat!(env!("OUT_DIR"), "/city_http.rs"));
 }
 
-pub mod city_jsonrpc {
-    include!(concat!(env!("OUT_DIR"), "/city_jsonrpc.rs"));
-}
+pub mod city_jsonrpc;
 
 pub mod example_services;
