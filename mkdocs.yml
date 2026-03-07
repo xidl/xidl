@@ -4,6 +4,7 @@ nav:
   - Home: index.md
   - RFC:
       - HTTP: rfc/http.md
+      - HTTP Stream: rfc/http-stream.md
       - JSONRPC: rfc/jsonrpc.md
   - XIDLC:
       - axum: rust-axum.md
