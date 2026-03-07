@@ -39,7 +39,7 @@ impl CodegenSession {
                     let io = xidl_jsonrpc::Io::new(BufReader::new(stdout_rx), stdin_tx);
                     let handler = crate::jsonrpc::CodegenServer::new($obj);
                     xidl_jsonrpc::Server::builder()
-                        .with_listener(crate::transport::MuxListener::from_io(io))
+                        .with_io(io)
                         .with_service(handler)
                         .serve()
                         .await

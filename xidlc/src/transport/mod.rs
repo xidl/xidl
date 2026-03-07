@@ -13,6 +13,3 @@ pub use fallback::*;
 mod windows_pipe;
 #[cfg(all(not(target_os = "emscripten"), windows))]
 pub use windows_pipe::*;
-
-mod mux_listener;
-pub(crate) use mux_listener::MuxListener;

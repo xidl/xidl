@@ -24,8 +24,8 @@ tokio = { version = "1.36", optional = true, features = [
 
 [features]
 default = ["tokio"]
-tokio = ["dep:tokio"]
-tokio-net = ["tokio", "tokio/net"]
+tokio = ["dep:tokio", "tokio/net"]
+tokio-net = ["tokio"]
 
 [dev-dependencies]
 clap = { version = "4", features = ["derive"] }

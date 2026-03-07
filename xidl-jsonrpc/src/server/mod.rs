@@ -1,11 +1,11 @@
 mod session;
 
-use crate::{Error, Listener};
+use crate::Error;
+use crate::transport::{InprocListener, IoListener, Listener, TcpListener};
 use serde_json::Value;
 use session::ServerSession;
 use std::sync::Arc;
-#[cfg(feature = "tokio-net")]
-use tokio::net::{TcpListener, ToSocketAddrs};
+use tokio::io::{AsyncRead, AsyncWrite};
 
 #[async_trait::async_trait]
 pub trait Handler: Send + Sync {
@@ -83,9 +83,11 @@ impl Server {
                 Err(err) if err.kind() == std::io::ErrorKind::BrokenPipe => return Ok(()),
                 Err(err) => return Err(err.into()),
             };
-
-            let mut session = ServerSession::new(stream, handler.clone());
-            session.run().await?;
+            let handler = handler.clone();
+            tokio::spawn(async move {
+                let mut session = ServerSession::new(stream, handler);
+                let _ = session.run().await;
+            });
         }
     }
 }
@@ -107,6 +109,14 @@ impl ServerBuilder {
         self
     }
 
+    pub fn with_io<R, W>(self, io: Io<R, W>) -> Self
+    where
+        R: AsyncRead + Unpin + Send + 'static,
+        W: AsyncWrite + Unpin + Send + 'static,
+    {
+        self.with_listener(IoListener::from_io(io))
+    }
+
     pub async fn serve(self) -> Result<(), Error> {
         let listener = self.listener.ok_or(Error::Protocol("missing listener"))?;
         let server = Server {
@@ -116,15 +126,24 @@ impl ServerBuilder {
         server.serve().await
     }
 
-    #[cfg(feature = "tokio-net")]
-    pub async fn serve_on<A>(self, addr: A) -> Result<(), Error>
+    pub async fn serve_on<S>(self, endpoint: S) -> Result<(), Error>
     where
-        A: ToSocketAddrs,
+        S: AsRef<str>,
     {
         if self.listener.is_some() {
             return Err(Error::Protocol("listener already set"));
         }
-        let listener = TcpListener::bind(addr).await?;
-        self.with_listener(listener).serve().await
+        let endpoint = endpoint.as_ref();
+        let server = if let Some(addr) = endpoint.strip_prefix("tcp://") {
+            let listener = TcpListener::bind(addr).await?;
+            self.with_listener(listener)
+        } else if let Some(endpoint) = endpoint.strip_prefix("inproc://") {
+            let listener = InprocListener::bind(endpoint.to_string())?;
+            self.with_listener(listener)
+        } else {
+            let listener = TcpListener::bind(endpoint).await?;
+            self.with_listener(listener)
+        };
+        server.serve().await
     }
 }

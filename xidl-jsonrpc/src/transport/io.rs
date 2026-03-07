@@ -2,13 +2,16 @@ use std::net::SocketAddr;
 
 use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 use tokio::sync::Mutex;
-use xidl_jsonrpc::{AsyncStream, Io, Listener};
 
-pub struct MuxListener<R, W> {
+use crate::Io;
+
+use super::{Listener, Stream};
+
+pub struct IoListener<R, W> {
     io: Mutex<Option<Io<R, W>>>,
 }
 
-impl<R, W> MuxListener<R, W> {
+impl<R, W> IoListener<R, W> {
     pub fn from_io(io: Io<R, W>) -> Self {
         Self {
             io: Mutex::new(Some(io)),
@@ -16,12 +19,12 @@ impl<R, W> MuxListener<R, W> {
     }
 }
 
-struct MuxStream<R, W> {
+struct IoStream<R, W> {
     reader: R,
     writer: W,
 }
 
-impl<R, W> AsyncRead for MuxStream<R, W>
+impl<R, W> AsyncRead for IoStream<R, W>
 where
     R: AsyncRead + Unpin,
     W: Unpin,
@@ -36,7 +39,7 @@ where
     }
 }
 
-impl<R, W> AsyncWrite for MuxStream<R, W>
+impl<R, W> AsyncWrite for IoStream<R, W>
 where
     R: Unpin,
     W: AsyncWrite + Unpin,
@@ -81,24 +84,23 @@ where
 }
 
 #[async_trait::async_trait]
-impl<R, W> Listener for MuxListener<R, W>
+impl<R, W> Listener for IoListener<R, W>
 where
     R: AsyncRead + Unpin + Send + 'static,
     W: AsyncWrite + Unpin + Send + 'static,
 {
     async fn accept(
         &self,
-    ) -> std::io::Result<(Box<dyn AsyncStream + Unpin + Send + 'static>, SocketAddr)> {
+    ) -> std::io::Result<(Box<dyn Stream + Unpin + Send + 'static>, SocketAddr)> {
         let mut io = self.io.lock().await;
         let io = io.take().ok_or_else(|| {
             std::io::Error::new(
                 std::io::ErrorKind::BrokenPipe,
-                "mux listener already consumed",
+                "io listener already consumed",
             )
         })?;
-
         Ok((
-            Box::new(MuxStream {
+            Box::new(IoStream {
                 reader: io.reader,
                 writer: io.writer,
             }),
