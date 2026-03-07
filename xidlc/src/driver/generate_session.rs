@@ -64,6 +64,9 @@ impl CodegenSession {
             Plugin::Openapi => {
                 run_server!(crate::generate::openapi::OpenApiCodegen)
             }
+            Plugin::Openrpc => {
+                run_server!(crate::generate::openrpc::OpenRpcCodegen)
+            }
             Plugin::Typescript => run_server!(crate::generate::typescript::TypescriptCodegen),
             #[cfg(target_os = "emscripten")]
             _ => {

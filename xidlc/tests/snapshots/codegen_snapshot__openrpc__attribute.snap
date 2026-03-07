@@ -1,0 +1,316 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+openrpc.json
+===============
+{
+  "components": {
+    "schemas": {
+      "book.book.Shelf_Call": {
+        "oneOf": [
+          {
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            },
+            "required": [
+              "unknownOp"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "get_attribute_title": {
+                "$ref": "#/components/schemas/Shelf_get_attribute_title_In"
+              }
+            },
+            "required": [
+              "get_attribute_title"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "get_attribute_count": {
+                "$ref": "#/components/schemas/Shelf_get_attribute_count_In"
+              }
+            },
+            "required": [
+              "get_attribute_count"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "set_attribute_count": {
+                "$ref": "#/components/schemas/Shelf_set_attribute_count_In"
+              }
+            },
+            "required": [
+              "set_attribute_count"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "book.book.Shelf_Reply": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Shelf_Return"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
+          }
+        },
+        "required": [
+          "header",
+          "data"
+        ],
+        "type": "object"
+      },
+      "book.book.Shelf_Request": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Shelf_Call"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
+          }
+        },
+        "required": [
+          "header",
+          "data"
+        ],
+        "type": "object"
+      },
+      "book.book.Shelf_Return": {
+        "oneOf": [
+          {
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            },
+            "required": [
+              "unknownOp"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "get_attribute_title": {
+                "$ref": "#/components/schemas/Shelf_get_attribute_title_Result"
+              }
+            },
+            "required": [
+              "get_attribute_title"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "get_attribute_count": {
+                "$ref": "#/components/schemas/Shelf_get_attribute_count_Result"
+              }
+            },
+            "required": [
+              "get_attribute_count"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "set_attribute_count": {
+                "$ref": "#/components/schemas/Shelf_set_attribute_count_Result"
+              }
+            },
+            "required": [
+              "set_attribute_count"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "book.book.Shelf_get_attribute_count_In": {
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        },
+        "required": [
+          "dummy"
+        ],
+        "type": "object"
+      },
+      "book.book.Shelf_get_attribute_count_Out": {
+        "properties": {
+          "return_": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "return_"
+        ],
+        "type": "object"
+      },
+      "book.book.Shelf_get_attribute_count_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/Shelf_get_attribute_count_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "book.book.Shelf_get_attribute_title_In": {
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        },
+        "required": [
+          "dummy"
+        ],
+        "type": "object"
+      },
+      "book.book.Shelf_get_attribute_title_Out": {
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "return_"
+        ],
+        "type": "object"
+      },
+      "book.book.Shelf_get_attribute_title_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/Shelf_get_attribute_title_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "book.book.Shelf_set_attribute_count_In": {
+        "properties": {
+          "count": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "count"
+        ],
+        "type": "object"
+      },
+      "book.book.Shelf_set_attribute_count_Out": {
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        },
+        "required": [
+          "dummy"
+        ],
+        "type": "object"
+      },
+      "book.book.Shelf_set_attribute_count_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/Shelf_set_attribute_count_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "xidl",
+    "version": "0.1.0"
+  },
+  "methods": [
+    {
+      "name": "book.Shelf.get_attribute_count",
+      "params": [],
+      "result": {
+        "name": "result",
+        "schema": {
+          "properties": {
+            "return": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "return"
+          ],
+          "type": "object"
+        }
+      }
+    },
+    {
+      "name": "book.Shelf.get_attribute_title",
+      "params": [],
+      "result": {
+        "name": "result",
+        "schema": {
+          "properties": {
+            "return": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "return"
+          ],
+          "type": "object"
+        }
+      }
+    },
+    {
+      "name": "book.Shelf.set_attribute_count",
+      "params": [
+        {
+          "name": "count",
+          "required": true,
+          "schema": {
+            "format": "int32",
+            "type": "integer"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "properties": {},
+          "type": "object"
+        }
+      }
+    }
+  ],
+  "openrpc": "1.3.2"
+}

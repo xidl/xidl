@@ -1,0 +1,7 @@
+module calc {
+    interface Calc {
+        long add(in long a, in long b, out long sum);
+        void bump(inout long value);
+        void ping();
+    };
+};

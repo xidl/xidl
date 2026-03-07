@@ -10,6 +10,7 @@ fn lang_and_codegen(folder: &str) -> Option<&'static str> {
         "ts" => Some("ts"),
         "axum" => Some("axum"),
         "openapi" => Some("openapi"),
+        "openrpc" => Some("openrpc"),
         _ => None,
     }
 }

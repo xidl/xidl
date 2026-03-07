@@ -31,6 +31,8 @@ pub enum Plugin {
     Typescript,
     #[serde(alias = "openapi")]
     Openapi,
+    #[serde(alias = "openrpc", alias = "open-rpc")]
+    Openrpc,
     Custom(String),
 }
 
@@ -66,6 +68,8 @@ mod tests {
             ("ts", Plugin::Typescript),
             ("typescript", Plugin::Typescript),
             ("openapi", Plugin::Openapi),
+            ("openrpc", Plugin::Openrpc),
+            ("open-rpc", Plugin::Openrpc),
             ("custom_plugin", Plugin::Custom("custom_plugin".into())),
         ];
 

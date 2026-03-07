@@ -1,0 +1,6 @@
+module book {
+    interface Shelf {
+        readonly attribute string title;
+        attribute long count;
+    };
+};

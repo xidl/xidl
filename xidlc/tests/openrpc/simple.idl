@@ -1,0 +1,13 @@
+#progma xidlc package demo
+#progma xidlc version v0.2.0
+
+module demo {
+    struct User {
+        long id;
+        string name;
+    };
+
+    interface UserService {
+        User get_user(in long id);
+    };
+};
