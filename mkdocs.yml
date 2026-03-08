@@ -6,6 +6,7 @@ nav:
       - HTTP: rfc/http.md
       - HTTP Stream: rfc/http-stream.md
       - JSONRPC: rfc/jsonrpc.md
+      - JSONRPC Stream: rfc/jsonrpc-stream.md
   - XIDLC:
       - axum: rust-axum.md
       - rust-jsonrpc: rust-jsonrpc.md
