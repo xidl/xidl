@@ -1,6 +1,8 @@
 mod session;
 
 use crate::Error;
+#[cfg(feature = "quic-s2n")]
+use crate::transport::QuicListener;
 #[cfg(feature = "tokio-net")]
 use crate::transport::TcpListener;
 use crate::transport::{InprocListener, IoListener, Listener};
@@ -193,6 +195,18 @@ impl ServerBuilder {
                 let _ = addr;
                 return Err(Error::Protocol(
                     "tcp transport requires `tokio-net` feature",
+                ));
+            }
+        } else if endpoint.starts_with("quic://") {
+            #[cfg(feature = "quic-s2n")]
+            {
+                let listener = QuicListener::bind(endpoint)?;
+                self.with_listener(listener)
+            }
+            #[cfg(not(feature = "quic-s2n"))]
+            {
+                return Err(Error::Protocol(
+                    "quic transport requires `quic-s2n` feature",
                 ));
             }
         } else if let Some(endpoint) = endpoint.strip_prefix("inproc://") {

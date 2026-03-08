@@ -1,5 +1,7 @@
 mod inproc;
 mod io;
+#[cfg(feature = "quic-s2n")]
+mod quic;
 #[cfg(feature = "tokio-net")]
 mod tcp;
 
@@ -7,6 +9,8 @@ use std::net::SocketAddr;
 
 pub use inproc::{InprocListener, connect_inproc};
 pub use io::IoListener;
+#[cfg(feature = "quic-s2n")]
+pub use quic::{QuicListener, connect_quic};
 #[cfg(feature = "tokio-net")]
 pub use tcp::TcpListener;
 
@@ -24,6 +28,11 @@ pub trait Listener: Send + Sync {
 pub async fn connect(endpoint: &str) -> std::io::Result<Box<dyn Stream + Unpin + Send + 'static>> {
     if let Some(name) = endpoint.strip_prefix("inproc://") {
         return Ok(Box::new(connect_inproc(name)?));
+    }
+
+    #[cfg(feature = "quic-s2n")]
+    if endpoint.starts_with("quic://") {
+        return connect_quic(endpoint).await;
     }
 
     #[cfg(feature = "tokio-net")]
