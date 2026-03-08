@@ -2,12 +2,16 @@ interface CityHttpStreamApi {
   @server_stream
   @stream_codec("sse")
   @path("/alerts/{district}{?lang}")
-  string watch_alert(
+  string alerts(
     @path("district") string district,
     @query("lang") string lang
   );
 
   @server_stream
+  @stream_codec("sse")
+  @path("/ticker")
+  string ticker();
+
   attribute boolean maintenance_mode;
 
   @client_stream
@@ -16,5 +20,14 @@ interface CityHttpStreamApi {
   string upload_asset(
     in string asset_id,
     in sequence<octet> chunk
+  );
+
+  @bidi_stream
+  @path("/chat")
+  void chat(
+    in string room,
+    in string message,
+    out string from,
+    out string text
   );
 };

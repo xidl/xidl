@@ -71,6 +71,7 @@ struct MethodContext {
     return_is_unit: bool,
     is_server_stream: bool,
     is_client_stream: bool,
+    is_bidi_stream: bool,
     request_item_ty: String,
 }
 
@@ -156,12 +157,7 @@ fn render_op(
     let stream_kind = stream_kind_from_annotations(&op.annotations)?;
     let is_server_stream = matches!(stream_kind, Some(StreamKind::Server));
     let is_client_stream = matches!(stream_kind, Some(StreamKind::Client));
-    if matches!(stream_kind, Some(StreamKind::Bidi)) {
-        return Err(IdlcError::rpc(format!(
-            "rust-axum currently does not support @bidi_stream methods: '{}'",
-            op.ident
-        )));
-    }
+    let is_bidi_stream = matches!(stream_kind, Some(StreamKind::Bidi));
     let stream_codec = stream_codec_from_annotations(&op.annotations)?;
     if is_server_stream && !matches!(stream_codec, StreamCodec::Sse) {
         return Err(IdlcError::rpc(format!(
@@ -199,7 +195,7 @@ fn render_op(
     let mut request_params = Vec::new();
     let mut response_params = Vec::new();
 
-    let default_method = if is_server_stream {
+    let default_method = if is_server_stream || is_bidi_stream {
         HttpMethod::Get
     } else {
         HttpMethod::Post
@@ -214,6 +210,12 @@ fn render_op(
     if is_client_stream && !matches!(method, HttpMethod::Post) {
         return Err(IdlcError::rpc(format!(
             "@client_stream method '{}' must use POST",
+            op.ident
+        )));
+    }
+    if is_bidi_stream && !matches!(method, HttpMethod::Get) {
+        return Err(IdlcError::rpc(format!(
+            "@bidi_stream method '{}' must use GET",
             op.ident
         )));
     }
@@ -245,7 +247,11 @@ fn render_op(
         .iter()
         .flat_map(|value| value.query_params.iter().cloned())
         .collect();
-    let default_source = default_param_source(method);
+    let default_source = if is_bidi_stream {
+        ParamSource::Body
+    } else {
+        default_param_source(method)
+    };
     let mut path_binding_count = HashMap::<String, usize>::new();
     let mut query_binding_count = HashMap::<String, usize>::new();
 
@@ -395,7 +401,14 @@ fn render_op(
             op.ident
         )));
     }
-    if is_client_stream {
+    if (is_client_stream || is_bidi_stream) && (!path_params.is_empty() || !query_params.is_empty())
+    {
+        return Err(IdlcError::rpc(format!(
+            "@bidi_stream method '{}' currently supports body parameters only",
+            op.ident
+        )));
+    }
+    if is_client_stream || is_bidi_stream {
         param_list.clear();
         param_names.clear();
     }
@@ -445,6 +458,7 @@ fn render_op(
         return_is_unit,
         is_server_stream,
         is_client_stream,
+        is_bidi_stream,
         request_item_ty: request_ty,
     })
 }
@@ -489,6 +503,7 @@ fn render_attr(
                     return_is_unit: false,
                     is_server_stream: false,
                     is_client_stream: false,
+                    is_bidi_stream: false,
                     request_item_ty: "()".to_string(),
                 }];
                 if emit_watch {
@@ -520,6 +535,7 @@ fn render_attr(
                         return_is_unit: false,
                         is_server_stream: true,
                         is_client_stream: false,
+                        is_bidi_stream: false,
                         request_item_ty: "()".to_string(),
                     });
                 }
@@ -562,6 +578,7 @@ fn render_attr(
                             return_is_unit: false,
                             is_server_stream: false,
                             is_client_stream: false,
+                            is_bidi_stream: false,
                             request_item_ty: "()".to_string(),
                         });
                         let raw_setter = format!("set_{raw_name}");
@@ -607,6 +624,7 @@ fn render_attr(
                             return_is_unit: true,
                             is_server_stream: false,
                             is_client_stream: false,
+                            is_bidi_stream: false,
                             request_item_ty: "()".to_string(),
                         });
                         if emit_watch {
@@ -638,6 +656,7 @@ fn render_attr(
                                 return_is_unit: false,
                                 is_server_stream: true,
                                 is_client_stream: false,
+                                is_bidi_stream: false,
                                 request_item_ty: "()".to_string(),
                             });
                         }
@@ -676,6 +695,7 @@ fn render_attr(
                         return_is_unit: false,
                         is_server_stream: false,
                         is_client_stream: false,
+                        is_bidi_stream: false,
                         request_item_ty: "()".to_string(),
                     });
                     let raw_setter = format!("set_{raw_name}");
@@ -720,6 +740,7 @@ fn render_attr(
                         return_is_unit: true,
                         is_server_stream: false,
                         is_client_stream: false,
+                        is_bidi_stream: false,
                         request_item_ty: "()".to_string(),
                     });
                     if emit_watch {
@@ -751,6 +772,7 @@ fn render_attr(
                             return_is_unit: false,
                             is_server_stream: true,
                             is_client_stream: false,
+                            is_bidi_stream: false,
                             request_item_ty: "()".to_string(),
                         });
                     }

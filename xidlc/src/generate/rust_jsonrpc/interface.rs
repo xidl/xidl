@@ -273,8 +273,8 @@ fn render_stream_op(
             unary_ret,
         ),
         StreamKind::Bidi => (
-            vec!["stream: xidl_jsonrpc::stream::BoxStream<'a, serde_json::Value>".to_string()],
-            "xidl_jsonrpc::stream::BoxStream<'a, serde_json::Value>".to_string(),
+            Vec::new(),
+            "xidl_jsonrpc::stream::DuplexStream<serde_json::Value, serde_json::Value>".to_string(),
         ),
     };
     let response_single_field = response_fields

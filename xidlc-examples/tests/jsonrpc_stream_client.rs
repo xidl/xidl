@@ -34,15 +34,20 @@ async fn jsonrpc_client_calls_stream_endpoints() {
         .write(serde_json::json!({ "sensor_id": "sensor-1", "value": 42 }))
         .await
         .expect("write upload chunk");
-    let _ = upload.close().await;
+    upload.close().await.expect("close upload sensor writer");
 
-    let chat_in = async_stream::try_stream! {
-        yield serde_json::json!({ "room_id": "ops", "text": "hello" });
-    };
-    let chat_in = xidl_jsonrpc::stream::boxed(chat_in);
-    let _ = client.chat(chat_in).await;
+    let mut chat = client.chat().await.expect("open chat duplex");
+    chat.write(serde_json::json!({ "room_id": "ops", "text": "hello" }))
+        .await
+        .expect("write chat item");
+    let item = chat.read().await;
+    assert!(item.is_none());
+    chat.close().await.expect("close chat duplex");
 
-    let _ = client.subscribe_alert("pudong".to_string()).await;
+    assert!(
+        client.alerts("pudong".to_string()).await.is_err(),
+        "alerts client runtime is not implemented yet"
+    );
 
     let mut notice_stream = client
         .get_attribute_ops_notice()

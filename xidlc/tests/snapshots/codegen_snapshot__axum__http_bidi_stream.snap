@@ -1,0 +1,222 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+http_bidi_stream.rs
+===============
+#[async_trait::async_trait]
+pub trait HttpBidiStreamService{
+    async fn chat(
+    &self,
+    req:xidl_rust_axum::Request<xidl_rust_axum::stream::BidiServerStream<HttpBidiStreamServiceChatRequest,HttpBidiStreamServiceChatResponse>>
+    )->Result<(),xidl_rust_axum::Error>;
+}
+
+#[derive(::serde::Serialize,::serde::Deserialize)]
+struct HttpBidiStreamServiceChatBody{
+    room:String,
+    text:String,
+}
+
+#[derive(::serde::Serialize,::serde::Deserialize)]
+pub struct HttpBidiStreamServiceChatRequest{
+    pub room:String,
+    pub text:String,
+}
+
+#[derive(::serde::Serialize,::serde::Deserialize)]
+pub struct HttpBidiStreamServiceChatResponse{
+    pub from:String,
+    pub reply:String,
+}
+
+pub struct HttpBidiStreamServiceServer<T>{
+    inner: ::std::sync::Arc<T>,
+}
+
+impl<T>HttpBidiStreamServiceServer<T>
+where
+T:HttpBidiStreamService+Send+Sync+'static,
+{
+    pub fn new(inner:T)->Self{
+        Self{
+            inner: ::std::sync::Arc::new(inner),
+        }
+    }
+
+    pub fn from_arc(inner: ::std::sync::Arc<T>)->Self{
+        Self{
+            inner}
+    }
+
+    pub fn router(self)->xidl_rust_axum::axum::Router{
+        let svc = self.inner;
+        xidl_rust_axum::axum::Router::new()
+
+        .route("/chat",xidl_rust_axum::axum::routing::get(Self::chat))
+
+        .with_state(svc)
+    }
+
+    async fn chat(
+    ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+    headers: ::xidl_rust_axum::axum::http::HeaderMap,
+    ws: ::xidl_rust_axum::axum::extract::ws::WebSocketUpgrade
+    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        let req_headers = headers.clone();
+        let svc = svc.clone();
+        return Ok(ws.on_upgrade(move|socket|async move{
+            let bidi = xidl_rust_axum::stream::open_bidi_server::<HttpBidiStreamServiceChatRequest,HttpBidiStreamServiceChatResponse>(socket);
+            let req = ::xidl_rust_axum::Request::new(req_headers,bidi);
+            let _ = svc.chat(req).await;
+
+        }));
+    }
+}
+
+impl<T>xidl_rust_axum::Service for HttpBidiStreamServiceServer<T>
+where
+T:HttpBidiStreamService+Send+Sync+'static,
+{
+    fn into_router(self)->xidl_rust_axum::axum::Router{
+        self.router()
+    }
+}
+
+pub struct HttpBidiStreamServiceClient{
+    client:xidl_rust_axum::Client,
+}
+
+impl HttpBidiStreamServiceClient{
+    pub fn new(base_url:impl Into<String>)->Self{
+        Self{
+            client:xidl_rust_axum::Client::new(base_url),
+        }
+    }
+}
+
+impl HttpBidiStreamServiceClient{
+    pub async fn chat(&self)->Result<xidl_rust_axum::stream::BidiClientStream<HttpBidiStreamServiceChatRequest,HttpBidiStreamServiceChatResponse>,xidl_rust_axum::Error>{
+        let path = "/chat".to_string();
+        let url = self.client.url(&path);
+        let mut req = self
+        .client
+        .http()
+        .request(xidl_rust_axum::reqwest::Method::GET,url)
+        .build()
+        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        let mut ws_url = self.client.url(&path);
+        if let Some(rest) = ws_url.strip_prefix("https://"){
+            ws_url = format!("wss://{rest}");
+
+        }else if let Some(rest) = ws_url.strip_prefix("http://"){
+            ws_url = format!("ws://{rest}");
+
+        }else{
+            return Err(xidl_rust_axum::Error::new(500,"unsupported base_url scheme for websocket"));
+        }
+
+        return xidl_rust_axum::stream::open_bidi_client::<HttpBidiStreamServiceChatRequest,HttpBidiStreamServiceChatResponse>(&ws_url).await;
+    }
+}
+===============
+openapi.json
+===============
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "xidl",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/chat": {
+      "get": {
+        "operationId": "HttpBidiStreamService.chat",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "room",
+                    "text"
+                  ],
+                  "properties": {
+                    "room": {
+                      "type": "string"
+                    },
+                    "text": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "from",
+                      "reply"
+                    ],
+                    "properties": {
+                      "from": {
+                        "type": "string"
+                      },
+                      "reply": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "code",
+          "msg"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "details": {
+            "type": "object"
+          },
+          "msg": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

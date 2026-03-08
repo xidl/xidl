@@ -306,12 +306,7 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
     let stream_kind = stream_kind_from_annotations(&op.annotations);
     let is_server_stream = matches!(stream_kind, Some(StreamKind::Server));
     let is_client_stream = matches!(stream_kind, Some(StreamKind::Client));
-    if matches!(stream_kind, Some(StreamKind::Bidi)) {
-        panic!(
-            "openapi currently does not support @bidi_stream methods: '{}'",
-            op.ident
-        );
-    }
+    let is_bidi_stream = matches!(stream_kind, Some(StreamKind::Bidi));
     let stream_codec = stream_codec_from_annotations(&op.annotations);
     if is_server_stream && !matches!(stream_codec, StreamCodec::Sse) {
         panic!(
@@ -342,7 +337,7 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
         .map(|value| value.0.as_slice())
         .unwrap_or(&[]);
 
-    let default_method = if is_server_stream {
+    let default_method = if is_server_stream || is_bidi_stream {
         HttpMethod::Get
     } else {
         HttpMethod::Post
@@ -353,6 +348,9 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
     }
     if is_client_stream && !matches!(method, HttpMethod::Post) {
         panic!("@client_stream method '{}' must use POST", op.ident);
+    }
+    if is_bidi_stream && !matches!(method, HttpMethod::Get) {
+        panic!("@bidi_stream method '{}' must use GET", op.ident);
     }
     if paths.is_empty() {
         paths.push(auto_default_method_path(op, method));
@@ -378,7 +376,11 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
         .iter()
         .flat_map(|value| value.query_params.iter().cloned())
         .collect();
-    let default_source = default_param_source(method);
+    let default_source = if is_bidi_stream {
+        ParamSource::Body
+    } else {
+        default_param_source(method)
+    };
 
     let mut parameters = Vec::new();
     let mut body_props = Vec::new();
@@ -501,7 +503,7 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
     }
 
     let output_count = usize::from(return_schema.is_some()) + output_fields.len();
-    let (response_status, response_schema) = if matches!(method, HttpMethod::Head) {
+    let (response_status, mut response_schema) = if matches!(method, HttpMethod::Head) {
         ("204", None)
     } else if output_count == 0 {
         ("204", None)
@@ -523,6 +525,14 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
         ("200", Some(RefOr::T(Schema::from(object))))
     };
 
+    if is_bidi_stream {
+        response_schema = response_schema.map(array_schema);
+    }
+
+    let mut request_schema = body_payload_schema(body_props, body_required);
+    if is_bidi_stream {
+        request_schema = request_schema.map(array_schema);
+    }
     let request_content_type = if is_client_stream {
         "application/x-ndjson"
     } else {
@@ -533,7 +543,8 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
         paths,
         operation_id: operation_id(module_path, interface_name, &op.ident),
         parameters,
-        request_body: body_schema(body_props, body_required, request_content_type),
+        request_body: request_schema
+            .map(|schema| request_body_schema(schema, request_content_type)),
         response_status,
         response_schema,
         is_server_stream,
@@ -679,28 +690,41 @@ fn body_schema(
     required: Vec<String>,
     content_type: &str,
 ) -> Option<RequestBody> {
+    let schema = body_payload_schema(props, required)?;
+    Some(request_body_schema(schema, content_type))
+}
+
+fn body_payload_schema(
+    props: Vec<(String, RefOr<Schema>)>,
+    required: Vec<String>,
+) -> Option<RefOr<Schema>> {
     if props.is_empty() {
         return None;
     }
-    let schema = if props.len() == 1 {
+    if props.len() == 1 {
         let (_, schema) = props.into_iter().next()?;
-        schema
-    } else {
-        let mut object = ObjectBuilder::new().schema_type(Type::Object);
-        for (name, schema) in props {
-            object = object.property(name.clone(), schema);
-        }
-        for name in required {
-            object = object.required(name);
-        }
-        RefOr::T(Schema::from(object))
-    };
+        return Some(schema);
+    }
+    let mut object = ObjectBuilder::new().schema_type(Type::Object);
+    for (name, schema) in props {
+        object = object.property(name.clone(), schema);
+    }
+    for name in required {
+        object = object.required(name);
+    }
+    Some(RefOr::T(Schema::from(object)))
+}
 
+fn request_body_schema(schema: RefOr<Schema>, content_type: &str) -> RequestBody {
     let mut request_body = RequestBody::new();
     request_body
         .content
         .insert(content_type.to_string(), Content::new(Some(schema)));
-    Some(request_body)
+    request_body
+}
+
+fn array_schema(items: RefOr<Schema>) -> RefOr<Schema> {
+    RefOr::T(Schema::from(ArrayBuilder::new().items(items)))
 }
 
 fn parameter_schema(

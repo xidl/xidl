@@ -3,7 +3,7 @@
 
 interface CityJsonrpcStreamApi {
     @server_stream
-    void subscribe_alert(
+    void alerts(
         in string district,
         out string message
     );

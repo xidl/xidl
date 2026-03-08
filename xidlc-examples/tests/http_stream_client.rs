@@ -1,3 +1,4 @@
+use xidlc_examples::city_http_stream::CityHttpStreamApiChatRequest;
 use xidlc_examples::city_http_stream::CityHttpStreamApiClient;
 use xidlc_examples::city_http_stream::CityHttpStreamApiServer;
 use xidlc_examples::city_http_stream::CityHttpStreamApiUploadAssetRequest;
@@ -23,34 +24,35 @@ async fn http_stream_client_calls_stream_endpoints() {
     let client = CityHttpStreamApiClient::new(base);
 
     let mut alerts = client
-        .watch_alert("pudong".to_string(), "en".to_string())
+        .alerts("pudong".to_string(), "en".to_string())
         .await
-        .expect("call watch_alert");
-    let first = xidl_rust_axum::futures_util::StreamExt::next(&mut alerts)
+        .expect("call alerts");
+    let first = alerts
+        .read()
         .await
         .expect("first alert")
         .expect("first alert payload");
-    let second = xidl_rust_axum::futures_util::StreamExt::next(&mut alerts)
+    let second = alerts
+        .read()
         .await
         .expect("second alert")
         .expect("second alert payload");
     assert_eq!(first, "pudong:ALERT:1:en");
     assert_eq!(second, "pudong:ALERT:2:en");
 
-    let mut attr = client
-        .watch_attribute_maintenance_mode()
+    let mut ticker = client.ticker().await.expect("call ticker");
+    let t1 = ticker
+        .read()
         .await
-        .expect("call watch_attribute_maintenance_mode");
-    let m1 = xidl_rust_axum::futures_util::StreamExt::next(&mut attr)
+        .expect("first ticker")
+        .expect("first ticker payload");
+    let t2 = ticker
+        .read()
         .await
-        .expect("first attr")
-        .expect("first attr payload");
-    let m2 = xidl_rust_axum::futures_util::StreamExt::next(&mut attr)
-        .await
-        .expect("second attr")
-        .expect("second attr payload");
-    assert!(!m1);
-    assert!(m2);
+        .expect("second ticker")
+        .expect("second ticker payload");
+    assert_eq!(t1, "tick-1");
+    assert_eq!(t2, "tick-2");
 
     let mut upload = client.upload_asset().await.expect("open upload_asset");
     upload
@@ -69,6 +71,22 @@ async fn http_stream_client_calls_stream_endpoints() {
         .expect("write second chunk");
     let upload_resp = upload.close().await.expect("close upload_asset");
     assert_eq!(upload_resp, "uploaded:asset-1:5");
+
+    let mut chat = client.chat().await.expect("open chat");
+    chat.write(CityHttpStreamApiChatRequest {
+        room: "ops".to_string(),
+        message: "hello".to_string(),
+    })
+    .await
+    .expect("write chat request");
+    let reply = chat
+        .read()
+        .await
+        .expect("chat reply item")
+        .expect("chat reply payload");
+    assert_eq!(reply.from, "server");
+    assert_eq!(reply.text, "echo:ops:hello");
+    chat.close();
 
     task.abort();
 }

@@ -710,7 +710,7 @@ impl HttpStreamSseServiceClient{
 }
 
 impl HttpStreamSseServiceClient{
-    pub async fn watch_topic(&self,topic:String,lang:String)->Result<xidl_rust_axum::stream::SseClientStream<String>,xidl_rust_axum::Error>{
+    pub async fn watch_topic(&self,topic:String,lang:String)->Result<xidl_rust_axum::stream::Reader<String>,xidl_rust_axum::Error>{
         let path = "/events/{topic}".to_string();
         let path = path.replace("{topic}",&topic.to_string());
         let url = self.client.url(&path);
@@ -800,7 +800,7 @@ impl HttpStreamSseServiceClient{
         }
     }
 
-    pub async fn watch_attribute_online(&self)->Result<xidl_rust_axum::stream::SseClientStream<bool>,xidl_rust_axum::Error>{
+    pub async fn watch_attribute_online(&self)->Result<xidl_rust_axum::stream::Reader<bool>,xidl_rust_axum::Error>{
         let path = "/HttpStreamSseService/watch_attribute_online".to_string();
         let url = self.client.url(&path);
         let mut req = self

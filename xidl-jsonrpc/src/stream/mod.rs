@@ -1,5 +1,6 @@
 use crate::Error;
 use futures_core::Stream;
+use futures_util::StreamExt;
 use std::future::Future;
 use std::pin::Pin;
 use std::time::Duration;
@@ -77,5 +78,32 @@ impl<T, R> ClientStreamWriter<T, R> {
 impl<T, R> Drop for ClientStreamWriter<T, R> {
     fn drop(&mut self) {
         let _ = self.tx.take();
+    }
+}
+
+pub struct DuplexStream<TIn, TOut> {
+    writer: ClientStreamWriter<TIn, ()>,
+    reader: BoxStream<'static, TOut>,
+}
+
+impl<TIn, TOut> DuplexStream<TIn, TOut> {
+    pub fn new(writer: ClientStreamWriter<TIn, ()>, reader: BoxStream<'static, TOut>) -> Self {
+        Self { writer, reader }
+    }
+
+    pub async fn write(&mut self, item: TIn) -> Result<(), Error> {
+        self.writer.write(item).await
+    }
+
+    pub async fn read(&mut self) -> Option<Result<TOut, Error>> {
+        self.reader.next().await
+    }
+
+    pub async fn close(self) -> Result<(), Error> {
+        self.writer.close().await.map(|_| ())
+    }
+
+    pub async fn cancel(self) -> Result<(), Error> {
+        self.writer.cancel().await
     }
 }

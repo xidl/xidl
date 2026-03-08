@@ -6,6 +6,37 @@
   },
   "methods": [
     {
+      "name": "CityJsonrpcStreamApi.alerts",
+      "params": [
+        {
+          "name": "district",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "message": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "message"
+          ]
+        }
+      },
+      "x-xidl-stream": {
+        "mode": "server",
+        "codec": "json",
+        "delivery": "direct"
+      }
+    },
+    {
       "name": "CityJsonrpcStreamApi.chat",
       "params": [
         {
@@ -71,37 +102,6 @@
       }
     },
     {
-      "name": "CityJsonrpcStreamApi.subscribe_alert",
-      "params": [
-        {
-          "name": "district",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        }
-      ],
-      "result": {
-        "name": "result",
-        "schema": {
-          "type": "object",
-          "properties": {
-            "message": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "message"
-          ]
-        }
-      },
-      "x-xidl-stream": {
-        "mode": "server",
-        "codec": "json",
-        "delivery": "direct"
-      }
-    },
-    {
       "name": "CityJsonrpcStreamApi.upload_sensor",
       "params": [
         {
@@ -141,12 +141,12 @@
           {
             "type": "object",
             "properties": {
-              "subscribe_alert": {
-                "$ref": "#/components/schemas/CityJsonrpcStreamApi_subscribe_alert_In"
+              "alerts": {
+                "$ref": "#/components/schemas/CityJsonrpcStreamApi_alerts_In"
               }
             },
             "required": [
-              "subscribe_alert"
+              "alerts"
             ]
           },
           {
@@ -211,12 +211,12 @@
           {
             "type": "object",
             "properties": {
-              "subscribe_alert": {
-                "$ref": "#/components/schemas/CityJsonrpcStreamApi_subscribe_alert_Result"
+              "alerts": {
+                "$ref": "#/components/schemas/CityJsonrpcStreamApi_alerts_Result"
               }
             },
             "required": [
-              "subscribe_alert"
+              "alerts"
             ]
           },
           {
@@ -250,6 +250,43 @@
             },
             "required": [
               "get_attribute_ops_notice"
+            ]
+          }
+        ]
+      },
+      "CityJsonrpcStreamApi_alerts_In": {
+        "type": "object",
+        "properties": {
+          "district": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "district"
+        ]
+      },
+      "CityJsonrpcStreamApi_alerts_Out": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "CityJsonrpcStreamApi_alerts_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/CityJsonrpcStreamApi_alerts_Out"
+              }
+            },
+            "required": [
+              "result"
             ]
           }
         ]
@@ -321,43 +358,6 @@
             "properties": {
               "result": {
                 "$ref": "#/components/schemas/CityJsonrpcStreamApi_get_attribute_ops_notice_Out"
-              }
-            },
-            "required": [
-              "result"
-            ]
-          }
-        ]
-      },
-      "CityJsonrpcStreamApi_subscribe_alert_In": {
-        "type": "object",
-        "properties": {
-          "district": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "district"
-        ]
-      },
-      "CityJsonrpcStreamApi_subscribe_alert_Out": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "message"
-        ]
-      },
-      "CityJsonrpcStreamApi_subscribe_alert_Result": {
-        "oneOf": [
-          {
-            "type": "object",
-            "properties": {
-              "result": {
-                "$ref": "#/components/schemas/CityJsonrpcStreamApi_subscribe_alert_Out"
               }
             },
             "required": [

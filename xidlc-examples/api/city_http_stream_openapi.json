@@ -61,36 +61,9 @@
         }
       }
     },
-    "/CityHttpStreamApi/watch_attribute_maintenance_mode": {
-      "get": {
-        "operationId": "CityHttpStreamApi.watch_attribute_maintenance_mode",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/event-stream": {
-                "schema": {
-                  "type": "boolean"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/alerts/{district}": {
       "get": {
-        "operationId": "CityHttpStreamApi.watch_alert",
+        "operationId": "CityHttpStreamApi.alerts",
         "parameters": [
           {
             "name": "district",
@@ -185,6 +158,99 @@
           }
         }
       }
+    },
+    "/chat": {
+      "get": {
+        "operationId": "CityHttpStreamApi.chat",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "room",
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "room": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "from",
+                      "text"
+                    ],
+                    "properties": {
+                      "from": {
+                        "type": "string"
+                      },
+                      "text": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ticker": {
+      "get": {
+        "operationId": "CityHttpStreamApi.ticker",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -205,11 +271,22 @@
           {
             "type": "object",
             "required": [
-              "watch_alert"
+              "alerts"
             ],
             "properties": {
-              "watch_alert": {
-                "$ref": "#/components/schemas/CityHttpStreamApi_watch_alert_In"
+              "alerts": {
+                "$ref": "#/components/schemas/CityHttpStreamApi_alerts_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "ticker"
+            ],
+            "properties": {
+              "ticker": {
+                "$ref": "#/components/schemas/CityHttpStreamApi_ticker_In"
               }
             }
           },
@@ -243,6 +320,17 @@
             "properties": {
               "upload_asset": {
                 "$ref": "#/components/schemas/CityHttpStreamApi_upload_asset_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "chat"
+            ],
+            "properties": {
+              "chat": {
+                "$ref": "#/components/schemas/CityHttpStreamApi_chat_In"
               }
             }
           }
@@ -294,11 +382,22 @@
           {
             "type": "object",
             "required": [
-              "watch_alert"
+              "alerts"
             ],
             "properties": {
-              "watch_alert": {
-                "$ref": "#/components/schemas/CityHttpStreamApi_watch_alert_Result"
+              "alerts": {
+                "$ref": "#/components/schemas/CityHttpStreamApi_alerts_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "ticker"
+            ],
+            "properties": {
+              "ticker": {
+                "$ref": "#/components/schemas/CityHttpStreamApi_ticker_Result"
               }
             }
           },
@@ -332,6 +431,103 @@
             "properties": {
               "upload_asset": {
                 "$ref": "#/components/schemas/CityHttpStreamApi_upload_asset_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "chat"
+            ],
+            "properties": {
+              "chat": {
+                "$ref": "#/components/schemas/CityHttpStreamApi_chat_Result"
+              }
+            }
+          }
+        ]
+      },
+      "CityHttpStreamApi_alerts_In": {
+        "type": "object",
+        "required": [
+          "district",
+          "lang"
+        ],
+        "properties": {
+          "district": {
+            "type": "string"
+          },
+          "lang": {
+            "type": "string"
+          }
+        }
+      },
+      "CityHttpStreamApi_alerts_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "CityHttpStreamApi_alerts_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/CityHttpStreamApi_alerts_Out"
+              }
+            }
+          }
+        ]
+      },
+      "CityHttpStreamApi_chat_In": {
+        "type": "object",
+        "required": [
+          "room",
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "room": {
+            "type": "string"
+          }
+        }
+      },
+      "CityHttpStreamApi_chat_Out": {
+        "type": "object",
+        "required": [
+          "from",
+          "text"
+        ],
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      },
+      "CityHttpStreamApi_chat_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/CityHttpStreamApi_chat_Out"
               }
             }
           }
@@ -411,6 +607,43 @@
           }
         ]
       },
+      "CityHttpStreamApi_ticker_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "CityHttpStreamApi_ticker_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "CityHttpStreamApi_ticker_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/CityHttpStreamApi_ticker_Out"
+              }
+            }
+          }
+        ]
+      },
       "CityHttpStreamApi_upload_asset_In": {
         "type": "object",
         "required": [
@@ -452,47 +685,6 @@
             "properties": {
               "result": {
                 "$ref": "#/components/schemas/CityHttpStreamApi_upload_asset_Out"
-              }
-            }
-          }
-        ]
-      },
-      "CityHttpStreamApi_watch_alert_In": {
-        "type": "object",
-        "required": [
-          "district",
-          "lang"
-        ],
-        "properties": {
-          "district": {
-            "type": "string"
-          },
-          "lang": {
-            "type": "string"
-          }
-        }
-      },
-      "CityHttpStreamApi_watch_alert_Out": {
-        "type": "object",
-        "required": [
-          "return_"
-        ],
-        "properties": {
-          "return_": {
-            "type": "string"
-          }
-        }
-      },
-      "CityHttpStreamApi_watch_alert_Result": {
-        "oneOf": [
-          {
-            "type": "object",
-            "required": [
-              "result"
-            ],
-            "properties": {
-              "result": {
-                "$ref": "#/components/schemas/CityHttpStreamApi_watch_alert_Out"
               }
             }
           }

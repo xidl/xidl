@@ -1,8 +1,9 @@
 use crate::{Error, ErrorBody, Result};
 use axum::body::Body;
+use axum::extract::ws::{Message as AxumWsMessage, WebSocket as AxumWebSocket};
 use axum::response::{IntoResponse, Sse, sse::Event};
 use futures_util::stream;
-use futures_util::{Stream, StreamExt, TryStreamExt};
+use futures_util::{SinkExt, Stream, StreamExt, TryStreamExt};
 use reqwest::Request;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
@@ -11,6 +12,7 @@ use std::pin::Pin;
 use tokio::io::AsyncRead;
 use tokio::sync::mpsc;
 use tokio::task::JoinHandle;
+use tokio_tungstenite::tungstenite::Message as TungsteniteMessage;
 use tokio_util::codec::{FramedRead, LinesCodec};
 use tokio_util::io::StreamReader;
 
@@ -18,6 +20,86 @@ pub type SseStream<T> = Pin<Box<dyn Stream<Item = Result<T>> + Send + 'static>>;
 pub type SseClientStream<T> = Pin<Box<dyn Stream<Item = Result<T>> + Send + 'static>>;
 pub type NdjsonStream<T> = Pin<Box<dyn Stream<Item = Result<T>> + Send + 'static>>;
 pub type NdjsonSendStream<T> = Pin<Box<dyn Stream<Item = Result<T>> + Send + 'static>>;
+
+pub struct Reader<T> {
+    inner: SseClientStream<T>,
+}
+
+impl<T> Reader<T> {
+    pub fn new(inner: SseClientStream<T>) -> Self {
+        Self { inner }
+    }
+
+    pub async fn read(&mut self) -> Option<Result<T>> {
+        self.inner.next().await
+    }
+}
+
+pub struct BidiServerStream<TIn, TOut> {
+    inbound: mpsc::Receiver<Result<TIn>>,
+    outbound: Option<mpsc::Sender<Result<TOut>>>,
+}
+
+impl<TIn, TOut> BidiServerStream<TIn, TOut> {
+    pub async fn read(&mut self) -> Option<Result<TIn>> {
+        self.inbound.recv().await
+    }
+
+    pub async fn write(&mut self, item: TOut) -> Result<()> {
+        let tx = self
+            .outbound
+            .as_mut()
+            .ok_or_else(|| Error::new(500, "bidi stream is closed"))?;
+        tx.send(Ok(item))
+            .await
+            .map_err(|_| Error::new(500, "bidi stream is closed"))
+    }
+
+    pub fn close(&mut self) {
+        let _ = self.outbound.take();
+    }
+}
+
+impl<TIn, TOut> Drop for BidiServerStream<TIn, TOut> {
+    fn drop(&mut self) {
+        let _ = self.outbound.take();
+    }
+}
+
+pub struct BidiClientStream<TIn, TOut> {
+    writer: Option<mpsc::Sender<Result<TIn>>>,
+    reader: mpsc::Receiver<Result<TOut>>,
+}
+
+impl<TIn, TOut> BidiClientStream<TIn, TOut> {
+    pub async fn write(&mut self, item: TIn) -> Result<()> {
+        let tx = self
+            .writer
+            .as_mut()
+            .ok_or_else(|| Error::new(500, "bidi stream is closed"))?;
+        tx.send(Ok(item))
+            .await
+            .map_err(|_| Error::new(500, "bidi stream is closed"))
+    }
+
+    pub async fn read(&mut self) -> Option<Result<TOut>> {
+        self.reader.recv().await
+    }
+
+    pub fn close(&mut self) {
+        let _ = self.writer.take();
+    }
+
+    pub fn cancel(&mut self) {
+        let _ = self.writer.take();
+    }
+}
+
+impl<TIn, TOut> Drop for BidiClientStream<TIn, TOut> {
+    fn drop(&mut self) {
+        let _ = self.writer.take();
+    }
+}
 
 pub struct ClientStreamWriter<T, R> {
     tx: Option<mpsc::Sender<Result<T>>>,
@@ -82,6 +164,166 @@ where
     Box::pin(stream)
 }
 
+pub fn open_bidi_server<TIn, TOut>(socket: AxumWebSocket) -> BidiServerStream<TIn, TOut>
+where
+    TIn: DeserializeOwned + Send + 'static,
+    TOut: Serialize + Send + 'static,
+{
+    let (mut ws_tx, mut ws_rx) = socket.split();
+    let (in_tx, in_rx) = mpsc::channel::<Result<TIn>>(32);
+    let (out_tx, mut out_rx) = mpsc::channel::<Result<TOut>>(32);
+
+    tokio::spawn(async move {
+        while let Some(msg) = ws_rx.next().await {
+            let msg = match msg {
+                Ok(value) => value,
+                Err(err) => {
+                    let _ = in_tx.send(Err(Error::new(500, err.to_string()))).await;
+                    break;
+                }
+            };
+            match msg {
+                AxumWsMessage::Text(text) => match serde_json::from_str::<TIn>(&text) {
+                    Ok(value) => {
+                        if in_tx.send(Ok(value)).await.is_err() {
+                            break;
+                        }
+                    }
+                    Err(err) => {
+                        let _ = in_tx
+                            .send(Err(Error::new(400, format!("invalid ws payload: {err}"))))
+                            .await;
+                        break;
+                    }
+                },
+                AxumWsMessage::Close(_) => break,
+                _ => {}
+            }
+        }
+    });
+
+    tokio::spawn(async move {
+        while let Some(item) = out_rx.recv().await {
+            let item = match item {
+                Ok(value) => value,
+                Err(err) => {
+                    let _ = ws_tx.send(AxumWsMessage::Close(None)).await;
+                    let _ = ws_tx
+                        .send(AxumWsMessage::Text(
+                            serde_json::to_string(&ErrorBody::from(err))
+                                .unwrap_or_else(|_| r#"{"code":500,"msg":"stream error"}"#.into())
+                                .into(),
+                        ))
+                        .await;
+                    break;
+                }
+            };
+            let text = match serde_json::to_string(&item) {
+                Ok(value) => value,
+                Err(err) => {
+                    let _ = ws_tx
+                        .send(AxumWsMessage::Text(
+                            serde_json::to_string(&ErrorBody::from(Error::new(
+                                500,
+                                err.to_string(),
+                            )))
+                            .unwrap_or_else(|_| r#"{"code":500,"msg":"stream error"}"#.into())
+                            .into(),
+                        ))
+                        .await;
+                    break;
+                }
+            };
+            if ws_tx.send(AxumWsMessage::Text(text.into())).await.is_err() {
+                break;
+            }
+        }
+        let _ = ws_tx.send(AxumWsMessage::Close(None)).await;
+    });
+
+    BidiServerStream {
+        inbound: in_rx,
+        outbound: Some(out_tx),
+    }
+}
+
+pub async fn open_bidi_client<TIn, TOut>(ws_url: &str) -> Result<BidiClientStream<TIn, TOut>>
+where
+    TIn: Serialize + Send + 'static,
+    TOut: DeserializeOwned + Send + 'static,
+{
+    let (socket, _) = tokio_tungstenite::connect_async(ws_url)
+        .await
+        .map_err(|err| Error::new(500, err.to_string()))?;
+    let (mut ws_tx, mut ws_rx) = socket.split();
+    let (write_tx, mut write_rx) = mpsc::channel::<Result<TIn>>(32);
+    let (read_tx, read_rx) = mpsc::channel::<Result<TOut>>(32);
+    let read_tx_writer = read_tx.clone();
+
+    tokio::spawn(async move {
+        while let Some(item) = write_rx.recv().await {
+            let item = match item {
+                Ok(value) => value,
+                Err(err) => {
+                    let _ = read_tx_writer.send(Err(err)).await;
+                    break;
+                }
+            };
+            let text = match serde_json::to_string(&item) {
+                Ok(value) => value,
+                Err(err) => {
+                    let _ = read_tx_writer
+                        .send(Err(Error::new(500, err.to_string())))
+                        .await;
+                    break;
+                }
+            };
+            if ws_tx
+                .send(TungsteniteMessage::Text(text.into()))
+                .await
+                .is_err()
+            {
+                break;
+            }
+        }
+        let _ = ws_tx.send(TungsteniteMessage::Close(None)).await;
+    });
+
+    tokio::spawn(async move {
+        while let Some(msg) = ws_rx.next().await {
+            let msg = match msg {
+                Ok(value) => value,
+                Err(err) => {
+                    let _ = read_tx.send(Err(Error::new(500, err.to_string()))).await;
+                    break;
+                }
+            };
+            match msg {
+                TungsteniteMessage::Text(text) => match serde_json::from_str::<TOut>(&text) {
+                    Ok(value) => {
+                        if read_tx.send(Ok(value)).await.is_err() {
+                            break;
+                        }
+                    }
+                    Err(err) => {
+                        let _ = read_tx
+                            .send(Err(Error::new(400, format!("invalid ws payload: {err}"))))
+                            .await;
+                        break;
+                    }
+                },
+                TungsteniteMessage::Close(_) => break,
+                _ => {}
+            }
+        }
+    });
+
+    Ok(BidiClientStream {
+        writer: Some(write_tx),
+        reader: read_rx,
+    })
+}
+
 pub fn sse_response<T>(stream: SseStream<T>) -> axum::response::Response
 where
     T: Serialize + 'static,
@@ -105,7 +347,7 @@ where
     Sse::new(mapped.chain(complete)).into_response()
 }
 
-pub async fn open_sse<T>(http: &reqwest::Client, req: Request) -> Result<SseClientStream<T>>
+pub async fn open_sse<T>(http: &reqwest::Client, req: Request) -> Result<Reader<T>>
 where
     T: DeserializeOwned + Send + 'static,
 {
@@ -146,7 +388,7 @@ where
         },
     );
 
-    Ok(Box::pin(out))
+    Ok(Reader::new(Box::pin(out)))
 }
 
 pub fn decode_ndjson_body<T>(body: Body) -> NdjsonStream<T>

@@ -4,7 +4,7 @@ pub struct CityJsonrpcStreamService;
 
 #[async_trait::async_trait]
 impl CityJsonrpcStreamApi for CityJsonrpcStreamService {
-    async fn subscribe_alert<'a>(
+    async fn alerts<'a>(
         &'a self,
         district: String,
     ) -> Result<xidl_jsonrpc::stream::BoxStream<'a, serde_json::Value>, xidl_jsonrpc::Error> {
@@ -25,18 +25,15 @@ impl CityJsonrpcStreamApi for CityJsonrpcStreamService {
         Ok(())
     }
 
-    async fn chat<'a>(
-        &'a self,
-        mut stream: xidl_jsonrpc::stream::BoxStream<'a, serde_json::Value>,
-    ) -> Result<xidl_jsonrpc::stream::BoxStream<'a, serde_json::Value>, xidl_jsonrpc::Error> {
-        while let Some(item) = xidl_rust_axum::futures_util::StreamExt::next(&mut stream).await {
-            let _ = item?;
-        }
-        let outbound = async_stream::try_stream! {
-            yield serde_json::json!({ "from": "server", "message": "pong-1" });
-            yield serde_json::json!({ "from": "server", "message": "pong-2" });
-        };
-        Ok(xidl_jsonrpc::stream::boxed(outbound))
+    async fn chat(
+        &self,
+    ) -> Result<
+        xidl_jsonrpc::stream::DuplexStream<serde_json::Value, serde_json::Value>,
+        xidl_jsonrpc::Error,
+    > {
+        Err(xidl_jsonrpc::Error::Protocol(
+            "server-side bidi runtime is not implemented",
+        ))
     }
 
     async fn get_attribute_ops_notice(&self) -> Result<String, xidl_jsonrpc::Error> {

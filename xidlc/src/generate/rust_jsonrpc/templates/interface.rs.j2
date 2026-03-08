@@ -204,6 +204,23 @@ W: tokio::io::AsyncWrite + Unpin + Send + 'static,
                 });
                 Ok(xidl_jsonrpc::stream::ClientStreamWriter::new(tx, response))
             }
+        {% elif method.kind == "stream_op" and method.stream_mode == "bidi" %}
+            pub async fn {{ method.name }}(&self) -> Result<xidl_jsonrpc::stream::DuplexStream<serde_json::Value, serde_json::Value>, xidl_jsonrpc::Error> {
+                let (tx, mut rx) = tokio::sync::mpsc::channel(32);
+                let response = tokio::spawn(async move {
+                    while let Some(item) = rx.recv().await {
+                        let _ = item?;
+                    }
+                    Ok(())
+                });
+                let writer = xidl_jsonrpc::stream::ClientStreamWriter::new(tx, response);
+                let reader = xidl_jsonrpc::stream::boxed(async_stream::try_stream! {
+                    if false {
+                        yield serde_json::Value::Null;
+                    }
+                });
+                Ok(xidl_jsonrpc::stream::DuplexStream::new(writer, reader))
+            }
         {% endif %}
     {% endfor %}
 }

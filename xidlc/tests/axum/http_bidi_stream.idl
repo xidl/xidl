@@ -1,0 +1,10 @@
+interface HttpBidiStreamService {
+  @bidi_stream
+  @path("/chat")
+  void chat(
+    in string room,
+    in string text,
+    out string from,
+    out string reply
+  );
+};

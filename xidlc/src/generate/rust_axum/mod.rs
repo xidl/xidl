@@ -38,10 +38,12 @@ pub fn generate(
         content,
     })];
 
+    let has_bidi_stream = has_bidi_stream(&spec);
     let enable_ts = props
         .get("enable_ts")
         .and_then(|value| value.as_bool())
-        .unwrap_or(true);
+        .unwrap_or(true)
+        && !has_bidi_stream;
 
     if enable_ts {
         let mut props = props.clone();
@@ -92,6 +94,42 @@ pub fn generate(
     }
 
     Ok(artifacts)
+}
+
+fn has_bidi_stream(spec: &hir::Specification) -> bool {
+    fn annotation_name(annotation: &hir::Annotation) -> Option<&str> {
+        match annotation {
+            hir::Annotation::Builtin { name, .. } => Some(name.as_str()),
+            hir::Annotation::ScopedName { name, .. } => {
+                name.name.last().map(|value| value.as_str())
+            }
+            _ => None,
+        }
+    }
+
+    spec.0.iter().any(|def| match def {
+        hir::Definition::InterfaceDcl(interface) => match &interface.decl {
+            hir::InterfaceDclInner::InterfaceDef(def) => def
+                .interface_body
+                .as_ref()
+                .map(|body| {
+                    body.0.iter().any(|export| match export {
+                        hir::Export::OpDcl(op) => op.annotations.iter().any(|annotation| {
+                            annotation_name(annotation)
+                                .map(|name| name.eq_ignore_ascii_case("bidi_stream"))
+                                .unwrap_or(false)
+                        }),
+                        _ => false,
+                    })
+                })
+                .unwrap_or(false),
+            _ => false,
+        },
+        hir::Definition::ModuleDcl(module) => {
+            has_bidi_stream(&hir::Specification(module.definition.clone()))
+        }
+        _ => false,
+    })
 }
 
 pub(crate) struct RustAxumCodegen;

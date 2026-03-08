@@ -8,8 +8,9 @@ use crate::city_http::{
     SmartCityHttpApiSetMaintenanceModeRequest, SmartCityHttpApiUpdateProfileRequest,
 };
 use crate::city_http_stream::{
-    CityHttpStreamApi, CityHttpStreamApiSetMaintenanceModeRequest,
-    CityHttpStreamApiUploadAssetRequest, CityHttpStreamApiWatchAlertRequest,
+    CityHttpStreamApi, CityHttpStreamApiAlertsRequest, CityHttpStreamApiChatRequest,
+    CityHttpStreamApiChatResponse, CityHttpStreamApiSetMaintenanceModeRequest,
+    CityHttpStreamApiUploadAssetRequest,
 };
 
 pub struct SmartCityHttpService;
@@ -118,15 +119,26 @@ impl SmartCityHttpApi for SmartCityHttpService {
 
 #[async_trait::async_trait]
 impl CityHttpStreamApi for CityHttpStreamService {
-    async fn watch_alert(
+    async fn alerts(
         &self,
-        req: xidl_rust_axum::Request<CityHttpStreamApiWatchAlertRequest>,
+        req: xidl_rust_axum::Request<CityHttpStreamApiAlertsRequest>,
     ) -> Result<xidl_rust_axum::stream::SseStream<String>, xidl_rust_axum::Error> {
         let district = req.data.district;
         let lang = req.data.lang;
         let stream = xidl_rust_axum::futures_util::stream::iter(vec![
             Ok(format!("{district}:ALERT:1:{lang}")),
             Ok(format!("{district}:ALERT:2:{lang}")),
+        ]);
+        Ok(xidl_rust_axum::stream::boxed_sse(stream))
+    }
+
+    async fn ticker(
+        &self,
+        _req: xidl_rust_axum::Request<()>,
+    ) -> Result<xidl_rust_axum::stream::SseStream<String>, xidl_rust_axum::Error> {
+        let stream = xidl_rust_axum::futures_util::stream::iter(vec![
+            Ok("tick-1".to_string()),
+            Ok("tick-2".to_string()),
         ]);
         Ok(xidl_rust_axum::stream::boxed_sse(stream))
     }
@@ -143,14 +155,6 @@ impl CityHttpStreamApi for CityHttpStreamService {
         _req: xidl_rust_axum::Request<CityHttpStreamApiSetMaintenanceModeRequest>,
     ) -> Result<(), xidl_rust_axum::Error> {
         Ok(())
-    }
-
-    async fn watch_attribute_maintenance_mode(
-        &self,
-        _req: xidl_rust_axum::Request<()>,
-    ) -> Result<xidl_rust_axum::stream::SseStream<bool>, xidl_rust_axum::Error> {
-        let stream = xidl_rust_axum::futures_util::stream::iter(vec![Ok(false), Ok(true)]);
-        Ok(xidl_rust_axum::stream::boxed_sse(stream))
     }
 
     async fn upload_asset(
@@ -170,5 +174,28 @@ impl CityHttpStreamApi for CityHttpStreamService {
             total += item.chunk.len();
         }
         Ok(format!("uploaded:{asset_id}:{total}"))
+    }
+
+    async fn chat(
+        &self,
+        req: xidl_rust_axum::Request<
+            xidl_rust_axum::stream::BidiServerStream<
+                CityHttpStreamApiChatRequest,
+                CityHttpStreamApiChatResponse,
+            >,
+        >,
+    ) -> Result<(), xidl_rust_axum::Error> {
+        let mut stream = req.data;
+        while let Some(item) = stream.read().await {
+            let item = item?;
+            stream
+                .write(CityHttpStreamApiChatResponse {
+                    from: "server".to_string(),
+                    text: format!("echo:{}:{}", item.room, item.message),
+                })
+                .await?;
+        }
+        stream.close();
+        Ok(())
     }
 }
