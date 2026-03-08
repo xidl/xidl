@@ -6,6 +6,7 @@ mod client;
 mod error;
 #[cfg(feature = "tokio")]
 mod server;
+pub mod stream;
 
 #[cfg(feature = "tokio")]
 pub use client::Client;

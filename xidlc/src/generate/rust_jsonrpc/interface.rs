@@ -22,6 +22,7 @@ struct OutputField {
 
 #[derive(Serialize)]
 struct MethodContext {
+    kind: String,
     name: String,
     params: Vec<String>,
     params_fields: Vec<ParamField>,
@@ -33,6 +34,20 @@ struct MethodContext {
     response_struct: String,
     response_fields: Vec<OutputField>,
     response_single_field: String,
+    stream_item_ty: String,
+}
+
+#[derive(Serialize)]
+struct WatchMethodContext {
+    getter_name: String,
+    item_ty: String,
+}
+
+#[derive(Clone, Copy, Eq, PartialEq)]
+enum StreamKind {
+    Server,
+    Client,
+    Bidi,
 }
 
 pub fn render_interface_with_path(
@@ -55,6 +70,7 @@ fn render_interface_def(
 ) -> IdlcResult<JsonRpcRenderOutput> {
     let mut out = JsonRpcRenderOutput::default();
     let mut methods = Vec::new();
+    let mut watch_methods = Vec::new();
     let mut user_ops = HashSet::new();
     if let Some(body) = &def.interface_body {
         for export in &body.0 {
@@ -68,15 +84,12 @@ fn render_interface_def(
         for export in &body.0 {
             match export {
                 hir::Export::OpDcl(op) => {
-                    methods.push(render_op(op, &def.header.ident, module_path));
+                    methods.extend(render_op(op, &def.header.ident, module_path)?);
                 }
                 hir::Export::AttrDcl(attr) => {
-                    methods.extend(render_attr(
-                        attr,
-                        &def.header.ident,
-                        module_path,
-                        &user_ops,
-                    )?);
+                    let rendered = render_attr(attr, &def.header.ident, module_path, &user_ops)?;
+                    methods.extend(rendered.methods);
+                    watch_methods.extend(rendered.watch_methods);
                 }
                 _ => {}
             }
@@ -86,13 +99,31 @@ fn render_interface_def(
     let ctx = serde_json::json!({
         "ident": rust_ident(&def.header.ident),
         "methods": methods,
+        "watch_methods": watch_methods,
     });
     let rendered = renderer.render_template("interface.rs.j2", &ctx)?;
     out.source.push(rendered);
     Ok(out)
 }
 
-fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> MethodContext {
+fn render_op(
+    op: &hir::OpDcl,
+    interface_name: &str,
+    module_path: &[String],
+) -> IdlcResult<Vec<MethodContext>> {
+    let stream_kind = stream_kind_from_annotations(&op.annotations)?;
+    if let Some(kind) = stream_kind {
+        return Ok(vec![render_stream_op(
+            op,
+            interface_name,
+            module_path,
+            kind,
+        )]);
+    }
+    Ok(vec![render_unary_op(op, interface_name, module_path)])
+}
+
+fn render_unary_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> MethodContext {
     let params = op
         .parameter
         .as_ref()
@@ -149,6 +180,7 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
         _ => response_struct_name(interface_name, &method_name),
     };
     MethodContext {
+        kind: "rpc".to_string(),
         name: method_name.clone(),
         params: param_list,
         params_fields: param_fields,
@@ -163,7 +195,99 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
             .map(|value| value.name.clone())
             .unwrap_or_default(),
         response_fields,
+        stream_item_ty: String::new(),
     }
+}
+
+fn render_stream_op(
+    op: &hir::OpDcl,
+    interface_name: &str,
+    module_path: &[String],
+    kind: StreamKind,
+) -> MethodContext {
+    let params = op
+        .parameter
+        .as_ref()
+        .map(|value| value.0.as_slice())
+        .unwrap_or(&[]);
+    let mut param_list = Vec::new();
+    let mut response_fields = Vec::new();
+
+    if let hir::OpTypeSpec::TypeSpec(ty) = &op.ty {
+        response_fields.push(OutputField {
+            name: rust_ident("return"),
+            json_name: "return".to_string(),
+            ty: jsonrpc_type(ty),
+        });
+    }
+
+    for param in params {
+        let mode = param_mode(param.attr.as_ref());
+        if matches!(mode, ParamMode::In | ParamMode::InOut) {
+            let name = rust_ident(&param.declarator.0);
+            let ty = render_param_type(&param.ty, param.attr.as_ref());
+            param_list.push(format!("{name}: {ty}"));
+        }
+        if matches!(mode, ParamMode::Out | ParamMode::InOut) {
+            response_fields.push(OutputField {
+                name: rust_ident(&param.declarator.0),
+                json_name: param.declarator.0.clone(),
+                ty: render_param_type(&param.ty, param.attr.as_ref()),
+            });
+        }
+    }
+
+    let response_kind = if response_fields.is_empty() {
+        "empty"
+    } else if response_fields.len() == 1 && response_fields[0].json_name == "return" {
+        "single_return"
+    } else if response_fields.len() == 1 {
+        "single_output"
+    } else {
+        "multi"
+    };
+    let unary_ret = match response_kind {
+        "empty" => "()".to_string(),
+        "single_return" | "single_output" => response_fields[0].ty.clone(),
+        _ => response_struct_name(interface_name, &op.ident),
+    };
+
+    let method_name = rust_ident(&op.ident);
+    let (params, ret) = match kind {
+        StreamKind::Server => (
+            param_list,
+            "xidl_jsonrpc::stream::BoxStream<'a, serde_json::Value>".to_string(),
+        ),
+        StreamKind::Client => (
+            vec!["stream: xidl_jsonrpc::stream::BoxStream<'a, serde_json::Value>".to_string()],
+            unary_ret,
+        ),
+        StreamKind::Bidi => (
+            vec!["stream: xidl_jsonrpc::stream::BoxStream<'a, serde_json::Value>".to_string()],
+            "xidl_jsonrpc::stream::BoxStream<'a, serde_json::Value>".to_string(),
+        ),
+    };
+
+    MethodContext {
+        kind: "stream_op".to_string(),
+        name: method_name.clone(),
+        params,
+        params_fields: Vec::new(),
+        params_struct: String::new(),
+        ret,
+        rpc_name: rpc_method_name(module_path, interface_name, &op.ident),
+        args: Vec::new(),
+        response_kind: response_kind.to_string(),
+        response_struct: response_struct_name(interface_name, &method_name),
+        response_fields,
+        response_single_field: String::new(),
+        stream_item_ty: String::new(),
+    }
+}
+
+struct RenderedAttr {
+    methods: Vec<MethodContext>,
+    watch_methods: Vec<WatchMethodContext>,
 }
 
 fn render_attr(
@@ -171,14 +295,17 @@ fn render_attr(
     interface_name: &str,
     module_path: &[String],
     user_ops: &HashSet<&str>,
-) -> IdlcResult<Vec<MethodContext>> {
+) -> IdlcResult<RenderedAttr> {
+    let emit_watch = has_annotation(&attr.annotations, "server_stream");
     match &attr.decl {
         hir::AttrDclInner::ReadonlyAttrSpec(spec) => {
             let mut out = Vec::new();
+            let mut watch_methods = Vec::new();
             for names in readonly_attr_names(spec) {
                 validate_attr_collision(user_ops, &names.raw_attr, &names.raw_getter, "")?;
                 let ret = attr_return_type(&spec.ty);
                 out.push(MethodContext {
+                    kind: "rpc".to_string(),
                     name: rust_ident(&names.raw_getter),
                     params: Vec::new(),
                     params_fields: Vec::new(),
@@ -194,12 +321,40 @@ fn render_attr(
                         ty: attr_return_type(&spec.ty),
                     }],
                     response_single_field: rust_ident("return"),
+                    stream_item_ty: String::new(),
                 });
+                if emit_watch {
+                    let raw_stream_setter = format!("set_attribute_{}", names.raw_attr);
+                    let stream_setter = rust_ident(&raw_stream_setter);
+                    out.push(MethodContext {
+                        kind: "stream_source".to_string(),
+                        name: stream_setter,
+                        params: Vec::new(),
+                        params_fields: Vec::new(),
+                        params_struct: String::new(),
+                        ret: String::new(),
+                        rpc_name: String::new(),
+                        args: Vec::new(),
+                        response_kind: "empty".to_string(),
+                        response_struct: String::new(),
+                        response_fields: Vec::new(),
+                        response_single_field: String::new(),
+                        stream_item_ty: attr_return_type(&spec.ty),
+                    });
+                    watch_methods.push(WatchMethodContext {
+                        getter_name: rust_ident(&names.raw_getter),
+                        item_ty: attr_return_type(&spec.ty),
+                    });
+                }
             }
-            Ok(out)
+            Ok(RenderedAttr {
+                methods: out,
+                watch_methods,
+            })
         }
         hir::AttrDclInner::AttrSpec(spec) => {
             let mut out = Vec::new();
+            let mut watch_methods = Vec::new();
             match &spec.declarator {
                 hir::AttrDeclarator::SimpleDeclarator(list) => {
                     for decl in list {
@@ -213,6 +368,7 @@ fn render_attr(
                         let param = render_param_type(&spec.ty, None);
                         let value_ident = rust_ident(&raw_name);
                         out.push(MethodContext {
+                            kind: "rpc".to_string(),
                             name: getter.clone(),
                             params: Vec::new(),
                             params_fields: Vec::new(),
@@ -228,8 +384,10 @@ fn render_attr(
                                 ty: attr_return_type(&spec.ty),
                             }],
                             response_single_field: rust_ident("return"),
+                            stream_item_ty: String::new(),
                         });
                         out.push(MethodContext {
+                            kind: "rpc".to_string(),
                             name: setter.clone(),
                             params: vec![format!("{value_ident}: {param}")],
                             params_fields: vec![ParamField {
@@ -244,7 +402,31 @@ fn render_attr(
                             response_struct: response_struct_name(interface_name, &setter),
                             response_fields: Vec::new(),
                             response_single_field: String::new(),
+                            stream_item_ty: String::new(),
                         });
+                        if emit_watch {
+                            let raw_stream_setter = format!("set_attribute_{raw_name}");
+                            let stream_setter = rust_ident(&raw_stream_setter);
+                            out.push(MethodContext {
+                                kind: "stream_source".to_string(),
+                                name: stream_setter,
+                                params: Vec::new(),
+                                params_fields: Vec::new(),
+                                params_struct: String::new(),
+                                ret: String::new(),
+                                rpc_name: String::new(),
+                                args: Vec::new(),
+                                response_kind: "empty".to_string(),
+                                response_struct: String::new(),
+                                response_fields: Vec::new(),
+                                response_single_field: String::new(),
+                                stream_item_ty: attr_return_type(&spec.ty),
+                            });
+                            watch_methods.push(WatchMethodContext {
+                                getter_name: getter,
+                                item_ty: attr_return_type(&spec.ty),
+                            });
+                        }
                     }
                 }
                 hir::AttrDeclarator::WithRaises { declarator, .. } => {
@@ -258,6 +440,7 @@ fn render_attr(
                     let param = render_param_type(&spec.ty, None);
                     let value_ident = rust_ident(&raw_name);
                     out.push(MethodContext {
+                        kind: "rpc".to_string(),
                         name: getter.clone(),
                         params: Vec::new(),
                         params_fields: Vec::new(),
@@ -273,8 +456,10 @@ fn render_attr(
                             ty: attr_return_type(&spec.ty),
                         }],
                         response_single_field: rust_ident("return"),
+                        stream_item_ty: String::new(),
                     });
                     out.push(MethodContext {
+                        kind: "rpc".to_string(),
                         name: setter.clone(),
                         params: vec![format!("{value_ident}: {param}")],
                         params_fields: vec![ParamField {
@@ -289,10 +474,37 @@ fn render_attr(
                         response_struct: response_struct_name(interface_name, &setter),
                         response_fields: Vec::new(),
                         response_single_field: String::new(),
+                        stream_item_ty: String::new(),
                     });
+                    if emit_watch {
+                        let raw_stream_setter = format!("set_attribute_{raw_name}");
+                        let stream_setter = rust_ident(&raw_stream_setter);
+                        out.push(MethodContext {
+                            kind: "stream_source".to_string(),
+                            name: stream_setter,
+                            params: Vec::new(),
+                            params_fields: Vec::new(),
+                            params_struct: String::new(),
+                            ret: String::new(),
+                            rpc_name: String::new(),
+                            args: Vec::new(),
+                            response_kind: "empty".to_string(),
+                            response_struct: String::new(),
+                            response_fields: Vec::new(),
+                            response_single_field: String::new(),
+                            stream_item_ty: attr_return_type(&spec.ty),
+                        });
+                        watch_methods.push(WatchMethodContext {
+                            getter_name: getter,
+                            item_ty: attr_return_type(&spec.ty),
+                        });
+                    }
                 }
             }
-            Ok(out)
+            Ok(RenderedAttr {
+                methods: out,
+                watch_methods,
+            })
         }
     }
 }
@@ -345,6 +557,53 @@ fn param_mode(attr: Option<&hir::ParamAttribute>) -> ParamMode {
         Some("inout") => ParamMode::InOut,
         _ => ParamMode::In,
     }
+}
+
+fn stream_kind_from_annotations(annotations: &[hir::Annotation]) -> IdlcResult<Option<StreamKind>> {
+    let mut out = None;
+    for annotation in annotations {
+        let Some(name) = annotation_name(annotation) else {
+            continue;
+        };
+        let current = if name.eq_ignore_ascii_case("server_stream") {
+            Some(StreamKind::Server)
+        } else if name.eq_ignore_ascii_case("client_stream") {
+            Some(StreamKind::Client)
+        } else if name.eq_ignore_ascii_case("bidi_stream") {
+            Some(StreamKind::Bidi)
+        } else {
+            None
+        };
+        let Some(current) = current else {
+            continue;
+        };
+        match out {
+            None => out = Some(current),
+            Some(prev) if prev == current => {}
+            Some(_) => {
+                return Err(IdlcError::rpc(
+                    "@server_stream/@client_stream/@bidi_stream are mutually exclusive",
+                ));
+            }
+        }
+    }
+    Ok(out)
+}
+
+fn annotation_name(annotation: &hir::Annotation) -> Option<&str> {
+    match annotation {
+        hir::Annotation::Builtin { name, .. } => Some(name.as_str()),
+        hir::Annotation::ScopedName { name, .. } => name.name.last().map(|value| value.as_str()),
+        _ => None,
+    }
+}
+
+fn has_annotation(annotations: &[hir::Annotation], target: &str) -> bool {
+    annotations.iter().any(|annotation| {
+        annotation_name(annotation)
+            .map(|name| name.eq_ignore_ascii_case(target))
+            .unwrap_or(false)
+    })
 }
 
 fn validate_attr_collision(

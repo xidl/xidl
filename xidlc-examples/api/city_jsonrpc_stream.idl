@@ -1,0 +1,27 @@
+#progma xidlc package Smart City JSON-RPC Stream APIs
+#progma xidlc version v1.0.0
+
+interface CityJsonrpcStreamApi {
+    @server_stream
+    void subscribe_alert(
+        in string district,
+        out string message
+    );
+
+    @client_stream
+    void upload_sensor(
+        in string sensor_id,
+        in long value
+    );
+
+    @bidi_stream
+    void chat(
+        in string room_id,
+        in string text,
+        out string from,
+        out string message
+    );
+
+    @server_stream
+    readonly attribute string ops_notice;
+};

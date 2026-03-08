@@ -1,0 +1,15 @@
+module city {
+    interface StreamApi {
+        @server_stream
+        void watch_alert(in string district, out string message);
+
+        @client_stream
+        void upload_sensor(in string sensor_id, in long value);
+
+        @bidi_stream
+        void chat(in string room_id, in string text, out string from, out string body);
+
+        @server_stream
+        readonly attribute string status;
+    };
+};

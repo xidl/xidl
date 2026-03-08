@@ -1,0 +1,406 @@
+{
+  "openrpc": "1.3.2",
+  "info": {
+    "title": "Smart City JSON-RPC Stream APIs",
+    "version": "v1.0.0"
+  },
+  "methods": [
+    {
+      "name": "CityJsonrpcStreamApi.chat",
+      "params": [
+        {
+          "name": "room_id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "text",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "from": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "from",
+            "message"
+          ]
+        }
+      },
+      "x-xidl-stream": {
+        "mode": "bidi",
+        "codec": "json",
+        "delivery": "direct"
+      }
+    },
+    {
+      "name": "CityJsonrpcStreamApi.get_attribute_ops_notice",
+      "params": [],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "return": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "return"
+          ]
+        }
+      },
+      "x-xidl-stream": {
+        "mode": "server",
+        "codec": "json",
+        "delivery": "direct"
+      }
+    },
+    {
+      "name": "CityJsonrpcStreamApi.subscribe_alert",
+      "params": [
+        {
+          "name": "district",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "message": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "message"
+          ]
+        }
+      },
+      "x-xidl-stream": {
+        "mode": "server",
+        "codec": "json",
+        "delivery": "direct"
+      }
+    },
+    {
+      "name": "CityJsonrpcStreamApi.upload_sensor",
+      "params": [
+        {
+          "name": "sensor_id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "value",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "properties": {}
+        }
+      },
+      "x-xidl-stream": {
+        "mode": "client",
+        "codec": "json",
+        "delivery": "direct"
+      }
+    }
+  ],
+  "components": {
+    "schemas": {
+      "CityJsonrpcStreamApi_Call": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "subscribe_alert": {
+                "$ref": "#/components/schemas/CityJsonrpcStreamApi_subscribe_alert_In"
+              }
+            },
+            "required": [
+              "subscribe_alert"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "upload_sensor": {
+                "$ref": "#/components/schemas/CityJsonrpcStreamApi_upload_sensor_In"
+              }
+            },
+            "required": [
+              "upload_sensor"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "chat": {
+                "$ref": "#/components/schemas/CityJsonrpcStreamApi_chat_In"
+              }
+            },
+            "required": [
+              "chat"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "get_attribute_ops_notice": {
+                "$ref": "#/components/schemas/CityJsonrpcStreamApi_get_attribute_ops_notice_In"
+              }
+            },
+            "required": [
+              "get_attribute_ops_notice"
+            ]
+          }
+        ]
+      },
+      "CityJsonrpcStreamApi_Reply": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/CityJsonrpcStreamApi_Return"
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CityJsonrpcStreamApi_Request": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/CityJsonrpcStreamApi_Call"
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CityJsonrpcStreamApi_Return": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "subscribe_alert": {
+                "$ref": "#/components/schemas/CityJsonrpcStreamApi_subscribe_alert_Result"
+              }
+            },
+            "required": [
+              "subscribe_alert"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "upload_sensor": {
+                "$ref": "#/components/schemas/CityJsonrpcStreamApi_upload_sensor_Result"
+              }
+            },
+            "required": [
+              "upload_sensor"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "chat": {
+                "$ref": "#/components/schemas/CityJsonrpcStreamApi_chat_Result"
+              }
+            },
+            "required": [
+              "chat"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "get_attribute_ops_notice": {
+                "$ref": "#/components/schemas/CityJsonrpcStreamApi_get_attribute_ops_notice_Result"
+              }
+            },
+            "required": [
+              "get_attribute_ops_notice"
+            ]
+          }
+        ]
+      },
+      "CityJsonrpcStreamApi_chat_In": {
+        "type": "object",
+        "properties": {
+          "room_id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "room_id",
+          "text"
+        ]
+      },
+      "CityJsonrpcStreamApi_chat_Out": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "from",
+          "message"
+        ]
+      },
+      "CityJsonrpcStreamApi_chat_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/CityJsonrpcStreamApi_chat_Out"
+              }
+            },
+            "required": [
+              "result"
+            ]
+          }
+        ]
+      },
+      "CityJsonrpcStreamApi_get_attribute_ops_notice_In": {
+        "type": "object",
+        "properties": {}
+      },
+      "CityJsonrpcStreamApi_get_attribute_ops_notice_Out": {
+        "type": "object",
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "return_"
+        ]
+      },
+      "CityJsonrpcStreamApi_get_attribute_ops_notice_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/CityJsonrpcStreamApi_get_attribute_ops_notice_Out"
+              }
+            },
+            "required": [
+              "result"
+            ]
+          }
+        ]
+      },
+      "CityJsonrpcStreamApi_subscribe_alert_In": {
+        "type": "object",
+        "properties": {
+          "district": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "district"
+        ]
+      },
+      "CityJsonrpcStreamApi_subscribe_alert_Out": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "CityJsonrpcStreamApi_subscribe_alert_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/CityJsonrpcStreamApi_subscribe_alert_Out"
+              }
+            },
+            "required": [
+              "result"
+            ]
+          }
+        ]
+      },
+      "CityJsonrpcStreamApi_upload_sensor_In": {
+        "type": "object",
+        "properties": {
+          "sensor_id": {
+            "type": "string"
+          },
+          "value": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "required": [
+          "sensor_id",
+          "value"
+        ]
+      },
+      "CityJsonrpcStreamApi_upload_sensor_Out": {
+        "type": "object",
+        "properties": {}
+      },
+      "CityJsonrpcStreamApi_upload_sensor_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/CityJsonrpcStreamApi_upload_sensor_Out"
+              }
+            },
+            "required": [
+              "result"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

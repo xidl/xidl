@@ -52,8 +52,8 @@ async fn http_stream_client_calls_stream_endpoints() {
     assert!(!m1);
     assert!(m2);
 
-    let upload_stream = xidl_rust_axum::stream::boxed_ndjson(
-        xidl_rust_axum::futures_util::stream::iter(vec![
+    let upload_stream =
+        xidl_rust_axum::stream::boxed_ndjson(xidl_rust_axum::futures_util::stream::iter(vec![
             Ok(CityHttpStreamApiUploadAssetRequest {
                 asset_id: "asset-1".to_string(),
                 chunk: vec![1, 2, 3],
@@ -62,8 +62,7 @@ async fn http_stream_client_calls_stream_endpoints() {
                 asset_id: "asset-1".to_string(),
                 chunk: vec![4, 5],
             }),
-        ]),
-    );
+        ]));
     let upload_resp = client
         .upload_asset(upload_stream)
         .await

@@ -21,5 +21,6 @@ pub mod city_http_stream {
 }
 
 pub mod city_jsonrpc;
+pub mod city_jsonrpc_stream;
 
 pub mod example_services;

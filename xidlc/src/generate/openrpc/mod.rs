@@ -217,6 +217,13 @@ enum ParamDirection {
     InOut,
 }
 
+#[derive(Copy, Clone, Eq, PartialEq)]
+enum StreamKind {
+    Server,
+    Client,
+    Bidi,
+}
+
 fn param_direction(attr: Option<&hir::ParamAttribute>) -> ParamDirection {
     match attr.map(|value| value.0.as_str()) {
         Some("out") => ParamDirection::Out,
@@ -228,6 +235,7 @@ fn param_direction(attr: Option<&hir::ParamAttribute>) -> ParamDirection {
 fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> Value {
     let mut params = Vec::new();
     let mut outputs = Vec::new();
+    let stream_kind = stream_kind_from_annotations(&op.annotations);
 
     if let hir::OpTypeSpec::TypeSpec(ty) = &op.ty {
         outputs.push(("return".to_string(), schema_for_type(ty)));
@@ -256,14 +264,20 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> V
         }
     }
 
-    json!({
+    let mut method = json!({
         "name": rpc_method_name(module_path, interface_name, &op.ident),
         "params": params,
         "result": {
             "name": "result",
             "schema": result_object_schema(outputs),
         },
-    })
+    });
+
+    if let Some(kind) = stream_kind {
+        method["x-xidl-stream"] = stream_extension(kind, module_path, interface_name, &op.ident);
+    }
+
+    method
 }
 
 fn render_attr(
@@ -272,20 +286,25 @@ fn render_attr(
     module_path: &[String],
     user_ops: &HashSet<String>,
 ) -> Vec<Value> {
+    let emit_watch = has_annotation(&attr.annotations, "server_stream");
     match &attr.decl {
         hir::AttrDclInner::ReadonlyAttrSpec(spec) => readonly_attr_names(spec)
             .into_iter()
             .map(|name| {
                 let getter = format!("get_attribute_{name}");
                 validate_attr_collision(user_ops, &name, &getter, None);
-                json!({
+                let mut method = json!({
                     "name": rpc_method_name(module_path, interface_name, &getter),
                     "params": [],
                     "result": {
                         "name": "result",
                         "schema": result_object_schema(vec![("return".to_string(), schema_for_type(&spec.ty))]),
                     }
-                })
+                });
+                if emit_watch {
+                    method["x-xidl-stream"] = stream_extension_direct(StreamKind::Server);
+                }
+                method
             })
             .collect(),
         hir::AttrDclInner::AttrSpec(spec) => {
@@ -298,14 +317,19 @@ fn render_attr(
                         let setter = format!("set_attribute_{name}");
                         validate_attr_collision(user_ops, &name, &getter, Some(&setter));
 
-                        out.push(json!({
+                        let mut getter_method = json!({
                             "name": rpc_method_name(module_path, interface_name, &getter),
                             "params": [],
                             "result": {
                                 "name": "result",
                                 "schema": result_object_schema(vec![("return".to_string(), schema_for_type(&spec.ty))]),
                             }
-                        }));
+                        });
+                        if emit_watch {
+                            getter_method["x-xidl-stream"] =
+                                stream_extension_direct(StreamKind::Server);
+                        }
+                        out.push(getter_method);
 
                         out.push(json!({
                             "name": rpc_method_name(module_path, interface_name, &setter),
@@ -327,14 +351,19 @@ fn render_attr(
                     let setter = format!("set_attribute_{name}");
                     validate_attr_collision(user_ops, &name, &getter, Some(&setter));
 
-                    out.push(json!({
+                    let mut getter_method = json!({
                         "name": rpc_method_name(module_path, interface_name, &getter),
                         "params": [],
                         "result": {
                             "name": "result",
                             "schema": result_object_schema(vec![("return".to_string(), schema_for_type(&spec.ty))]),
                         }
-                    }));
+                    });
+                    if emit_watch {
+                        getter_method["x-xidl-stream"] =
+                            stream_extension_direct(StreamKind::Server);
+                    }
+                    out.push(getter_method);
 
                     out.push(json!({
                         "name": rpc_method_name(module_path, interface_name, &setter),
@@ -614,6 +643,67 @@ fn has_optional_annotation(annotations: &[hir::Annotation]) -> bool {
         annotation_name(annotation)
             .map(|name| name.eq_ignore_ascii_case("optional"))
             .unwrap_or(false)
+    })
+}
+
+fn has_annotation(annotations: &[hir::Annotation], target: &str) -> bool {
+    annotations.iter().any(|annotation| {
+        annotation_name(annotation)
+            .map(|name| name.eq_ignore_ascii_case(target))
+            .unwrap_or(false)
+    })
+}
+
+fn stream_kind_from_annotations(annotations: &[hir::Annotation]) -> Option<StreamKind> {
+    let mut out = None;
+    for annotation in annotations {
+        let Some(name) = annotation_name(annotation) else {
+            continue;
+        };
+        let current = if name.eq_ignore_ascii_case("server_stream") {
+            Some(StreamKind::Server)
+        } else if name.eq_ignore_ascii_case("client_stream") {
+            Some(StreamKind::Client)
+        } else if name.eq_ignore_ascii_case("bidi_stream") {
+            Some(StreamKind::Bidi)
+        } else {
+            None
+        };
+        let Some(current) = current else {
+            continue;
+        };
+        match out {
+            None => out = Some(current),
+            Some(prev) if prev == current => {}
+            Some(_) => panic!("@server_stream/@client_stream/@bidi_stream are mutually exclusive"),
+        }
+    }
+    out
+}
+
+fn stream_mode_name(kind: StreamKind) -> &'static str {
+    match kind {
+        StreamKind::Server => "server",
+        StreamKind::Client => "client",
+        StreamKind::Bidi => "bidi",
+    }
+}
+
+fn stream_extension(
+    kind: StreamKind,
+    module_path: &[String],
+    interface_name: &str,
+    method_name: &str,
+) -> Value {
+    let _ = (module_path, interface_name, method_name);
+    stream_extension_direct(kind)
+}
+
+fn stream_extension_direct(kind: StreamKind) -> Value {
+    json!({
+        "mode": stream_mode_name(kind),
+        "codec": "json",
+        "delivery": "direct",
     })
 }
 

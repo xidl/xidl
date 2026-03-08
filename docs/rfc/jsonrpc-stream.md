@@ -159,7 +159,7 @@ This RFC is transport-neutral. Common choices:
 
 Full-duplex behavior does not depend on HTTP constraints in this profile.
 Multiplexing (if needed) is transport/runtime responsibility, not protocol
-handshake responsibility in this RFC.
+framing responsibility in this RFC.
 
 ## 12. Example (Bidirectional)
 

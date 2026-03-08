@@ -1,21 +1,29 @@
 #[async_trait::async_trait]
 pub trait {{ ident }} {
     {% for method in methods %}
-        async fn {{ method.name }}<'a>(&'a self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.ret }}, xidl_jsonrpc::Error>;
+        {% if method.kind == "rpc" %}
+            async fn {{ method.name }}<'a>(&'a self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.ret }}, xidl_jsonrpc::Error>;
+        {% elif method.kind == "stream_op" %}
+            async fn {{ method.name }}<'a>(&'a self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.ret }}, xidl_jsonrpc::Error>;
+        {% elif method.kind == "stream_source" %}
+            async fn {{ method.name }}<'a>(&'a self) -> Result<xidl_jsonrpc::stream::BoxStream<'a, {{ method.stream_item_ty }}>, xidl_jsonrpc::Error>;
+        {% endif %}
     {% endfor %}
 }
 
 {% for method in methods %}
-    #[derive(::serde::Serialize, ::serde::Deserialize)]
-    struct {{ method.params_struct }} {
-        {% for field in method.params_fields %}
-            {{ field.name }}: {{ field.ty }},
-        {% endfor %}
-    }
+    {% if method.kind == "rpc" %}
+        #[derive(::serde::Serialize, ::serde::Deserialize)]
+        struct {{ method.params_struct }} {
+            {% for field in method.params_fields %}
+                {{ field.name }}: {{ field.ty }},
+            {% endfor %}
+        }
+    {% endif %}
 {% endfor %}
 
 {% for method in methods %}
-    {% if method.response_kind != "empty" %}
+    {% if method.kind == "rpc" and method.response_kind != "empty" %}
         #[derive(::serde::Serialize, ::serde::Deserialize)]
         pub struct {{ method.response_struct }} {
             {% for field in method.response_fields %}
@@ -44,6 +52,7 @@ T: {{ ident }} + Send + Sync,
     async fn handle(&self, method: &str, params: ::serde_json::Value) -> Result<::serde_json::Value, xidl_jsonrpc::Error> {
         match method {
             {% for method in methods %}
+                {% if method.kind == "rpc" %}
                 "{{ method.rpc_name }}" => {
                     let params: {{ method.params_struct }} = ::serde_json::from_value(params)
                         .map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
@@ -61,6 +70,7 @@ T: {{ ident }} + Send + Sync,
                         Ok(::serde_json::to_value(result)?)
                     {% endif %}
                 }
+                {% endif %}
             {% endfor %}
             _ => Err(xidl_jsonrpc::Error::method_not_found(method)),
         }
@@ -90,23 +100,49 @@ R: tokio::io::AsyncRead + Unpin + Send,
     W: tokio::io::AsyncWrite + Unpin + Send,
 {
     {% for method in methods %}
-        async fn {{ method.name }}(& self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.ret }}, xidl_jsonrpc::Error> {
-            let params = {{ method.params_struct }} {
-                {% for field in method.params_fields %}
-                    {{ field.name }},
-                {% endfor %}
-            };
+        {% if method.kind == "rpc" %}
+            async fn {{ method.name }}(& self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.ret }}, xidl_jsonrpc::Error> {
+                let params = {{ method.params_struct }} {
+                    {% for field in method.params_fields %}
+                        {{ field.name }},
+                    {% endfor %}
+                };
 
-            let mut client = self.client.lock().await;
-            {% if method.response_kind == "empty" %}
-                let _: ::serde_json::Value = client.call("{{ method.rpc_name }}", params).await?;
-                Ok(())
-            {% elif method.response_kind == "single_return" or method.response_kind == "single_output" %}
-                let result: {{ method.response_struct }} = client.call("{{ method.rpc_name }}", params).await?;
-                Ok(result.{{ method.response_single_field }})
-            {% else %}
-                client.call("{{ method.rpc_name }}", params).await
-            {% endif %}
-    }
-{% endfor %}
+                let mut client = self.client.lock().await;
+                {% if method.response_kind == "empty" %}
+                    let _: ::serde_json::Value = client.call("{{ method.rpc_name }}", params).await?;
+                    Ok(())
+                {% elif method.response_kind == "single_return" or method.response_kind == "single_output" %}
+                    let result: {{ method.response_struct }} = client.call("{{ method.rpc_name }}", params).await?;
+                    Ok(result.{{ method.response_single_field }})
+                {% else %}
+                    client.call("{{ method.rpc_name }}", params).await
+                {% endif %}
+            }
+        {% elif method.kind == "stream_source" %}
+            async fn {{ method.name }}(& self) -> Result<xidl_jsonrpc::stream::BoxStream<'_, {{ method.stream_item_ty }}>, xidl_jsonrpc::Error> {
+                Err(xidl_jsonrpc::Error::Protocol("stream source method is server-side only"))
+            }
+        {% elif method.kind == "stream_op" %}
+            async fn {{ method.name }}<'a>(&'a self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.ret }}, xidl_jsonrpc::Error> {
+                Err(xidl_jsonrpc::Error::Protocol("stream operation is not implemented in client runtime"))
+            }
+        {% endif %}
+    {% endfor %}
+}
+
+impl<R, W> {{ ident }}Client<R, W>
+where
+R: tokio::io::AsyncRead + Unpin + Send,
+W: tokio::io::AsyncWrite + Unpin + Send,
+{
+    {% for method in watch_methods %}
+        pub async fn {{ method.getter_name }}(&self) -> Result<xidl_jsonrpc::stream::BoxStream<'_, {{ method.item_ty }}>, xidl_jsonrpc::Error> {
+            let value = <Self as {{ ident }}>::{{ method.getter_name }}(self).await?;
+            let stream = async_stream::try_stream! {
+                yield value;
+            };
+            Ok(xidl_jsonrpc::stream::boxed(stream))
+        }
+    {% endfor %}
 }
