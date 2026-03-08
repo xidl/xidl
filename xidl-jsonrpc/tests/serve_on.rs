@@ -111,3 +111,76 @@ async fn serve_on_tcp_uri() {
 
     task.abort();
 }
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+#[cfg(feature = "tokio-websocket")]
+async fn serve_on_websocket_uri() {
+    let probe = std::net::TcpListener::bind("127.0.0.1:0").expect("bind probe");
+    let addr = probe.local_addr().expect("probe addr");
+    drop(probe);
+
+    let uri = format!("ws://{addr}/rpc");
+    let serve_uri = uri.clone();
+    let task = tokio::spawn(async move {
+        xidl_jsonrpc::Server::builder()
+            .with_service(EchoHandler)
+            .serve_on(&serve_uri)
+            .await
+    });
+
+    tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+
+    let stream = xidl_jsonrpc::transport::connect(&uri)
+        .await
+        .expect("connect websocket");
+    let result = call_echo_over_stream(stream).await.expect("rpc call");
+    assert_eq!(result, "ok");
+
+    task.abort();
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+#[cfg(feature = "tokio-websocket")]
+async fn wss_requires_cert_and_key() {
+    let endpoint = "wss://127.0.0.1:18443/rpc";
+    let err = xidl_jsonrpc::Server::builder()
+        .with_service(EchoHandler)
+        .serve_on(endpoint)
+        .await
+        .expect_err("wss should require cert and key");
+    assert!(err.to_string().contains("missing tls parameter `cert`"));
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+#[cfg(feature = "tokio-tls")]
+async fn tls_requires_cert_and_key() {
+    let endpoint = "tls://127.0.0.1:19443";
+    let err = xidl_jsonrpc::Server::builder()
+        .with_service(EchoHandler)
+        .serve_on(endpoint)
+        .await
+        .expect_err("tls should require cert and key");
+    assert!(err.to_string().contains("missing tls parameter `cert`"));
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+#[cfg(feature = "tokio-websocket")]
+async fn wss_connect_requires_ca() {
+    let endpoint = "wss://127.0.0.1:18443/rpc";
+    let err = match xidl_jsonrpc::transport::connect(endpoint).await {
+        Ok(_) => panic!("wss client should require ca"),
+        Err(err) => err,
+    };
+    assert!(err.to_string().contains("missing tls parameter `ca`"));
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+#[cfg(feature = "tokio-tls")]
+async fn tls_connect_requires_ca() {
+    let endpoint = "tls://127.0.0.1:19443";
+    let err = match xidl_jsonrpc::transport::connect(endpoint).await {
+        Ok(_) => panic!("tls client should require ca"),
+        Err(err) => err,
+    };
+    assert!(err.to_string().contains("missing tls parameter `ca`"));
+}

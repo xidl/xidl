@@ -5,6 +5,10 @@ use crate::Error;
 use crate::transport::QuicListener;
 #[cfg(feature = "tokio-net")]
 use crate::transport::TcpListener;
+#[cfg(feature = "tokio-tls")]
+use crate::transport::TlsListener;
+#[cfg(feature = "tokio-websocket")]
+use crate::transport::WebSocketListener;
 use crate::transport::{InprocListener, IoListener, Listener};
 use serde_json::Value;
 use session::ServerSession;
@@ -207,6 +211,30 @@ impl ServerBuilder {
             {
                 return Err(Error::Protocol(
                     "quic transport requires `quic-s2n` feature",
+                ));
+            }
+        } else if endpoint.starts_with("tls://") {
+            #[cfg(feature = "tokio-tls")]
+            {
+                let listener = TlsListener::bind(endpoint).await?;
+                self.with_listener(listener)
+            }
+            #[cfg(not(feature = "tokio-tls"))]
+            {
+                return Err(Error::Protocol(
+                    "tls transport requires `tokio-tls` feature",
+                ));
+            }
+        } else if endpoint.starts_with("ws://") || endpoint.starts_with("wss://") {
+            #[cfg(feature = "tokio-websocket")]
+            {
+                let listener = WebSocketListener::bind(endpoint).await?;
+                self.with_listener(listener)
+            }
+            #[cfg(not(feature = "tokio-websocket"))]
+            {
+                return Err(Error::Protocol(
+                    "websocket transport requires `tokio-websocket` feature",
                 ));
             }
         } else if let Some(endpoint) = endpoint.strip_prefix("inproc://") {
