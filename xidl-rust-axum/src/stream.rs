@@ -9,6 +9,8 @@ use serde::de::DeserializeOwned;
 use std::convert::Infallible;
 use std::pin::Pin;
 use tokio::io::AsyncRead;
+use tokio::sync::mpsc;
+use tokio::task::JoinHandle;
 use tokio_util::codec::{FramedRead, LinesCodec};
 use tokio_util::io::StreamReader;
 
@@ -16,6 +18,55 @@ pub type SseStream<T> = Pin<Box<dyn Stream<Item = Result<T>> + Send + 'static>>;
 pub type SseClientStream<T> = Pin<Box<dyn Stream<Item = Result<T>> + Send + 'static>>;
 pub type NdjsonStream<T> = Pin<Box<dyn Stream<Item = Result<T>> + Send + 'static>>;
 pub type NdjsonSendStream<T> = Pin<Box<dyn Stream<Item = Result<T>> + Send + 'static>>;
+
+pub struct ClientStreamWriter<T, R> {
+    tx: Option<mpsc::Sender<Result<T>>>,
+    response: Option<JoinHandle<Result<R>>>,
+}
+
+impl<T, R> ClientStreamWriter<T, R> {
+    pub fn new(tx: mpsc::Sender<Result<T>>, response: JoinHandle<Result<R>>) -> Self {
+        Self {
+            tx: Some(tx),
+            response: Some(response),
+        }
+    }
+
+    pub async fn write(&mut self, item: T) -> Result<()> {
+        let tx = self
+            .tx
+            .as_mut()
+            .ok_or_else(|| Error::new(500, "stream writer is already closed"))?;
+        tx.send(Ok(item))
+            .await
+            .map_err(|_| Error::new(500, "stream writer is closed"))
+    }
+
+    pub async fn close(mut self) -> Result<R> {
+        let _ = self.tx.take();
+        let response = self
+            .response
+            .take()
+            .ok_or_else(|| Error::new(500, "stream writer is already closed"))?;
+        response
+            .await
+            .map_err(|err| Error::new(500, err.to_string()))?
+    }
+
+    pub async fn cancel(mut self) -> Result<()> {
+        let _ = self.tx.take();
+        if let Some(response) = self.response.take() {
+            response.abort();
+        }
+        Ok(())
+    }
+}
+
+impl<T, R> Drop for ClientStreamWriter<T, R> {
+    fn drop(&mut self) {
+        let _ = self.tx.take();
+    }
+}
 
 pub fn boxed_sse<T, S>(stream: S) -> SseStream<T>
 where

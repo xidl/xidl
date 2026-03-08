@@ -15,6 +15,7 @@ pub use error::{Error, ErrorCode};
 pub use server::{Handler, Io, Server, ServerBuilder};
 #[cfg(feature = "tokio")]
 pub mod transport;
+pub use futures_util;
 #[cfg(feature = "tokio")]
 pub use transport::{Listener, Stream};
 

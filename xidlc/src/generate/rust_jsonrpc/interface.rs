@@ -23,6 +23,7 @@ struct OutputField {
 #[derive(Serialize)]
 struct MethodContext {
     kind: String,
+    stream_mode: String,
     name: String,
     params: Vec<String>,
     params_fields: Vec<ParamField>,
@@ -41,6 +42,14 @@ struct MethodContext {
 struct WatchMethodContext {
     getter_name: String,
     item_ty: String,
+}
+
+fn stream_mode_name(kind: StreamKind) -> &'static str {
+    match kind {
+        StreamKind::Server => "server",
+        StreamKind::Client => "client",
+        StreamKind::Bidi => "bidi",
+    }
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
@@ -181,6 +190,7 @@ fn render_unary_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]
     };
     MethodContext {
         kind: "rpc".to_string(),
+        stream_mode: String::new(),
         name: method_name.clone(),
         params: param_list,
         params_fields: param_fields,
@@ -267,9 +277,14 @@ fn render_stream_op(
             "xidl_jsonrpc::stream::BoxStream<'a, serde_json::Value>".to_string(),
         ),
     };
+    let response_single_field = response_fields
+        .first()
+        .map(|value| value.name.clone())
+        .unwrap_or_default();
 
     MethodContext {
         kind: "stream_op".to_string(),
+        stream_mode: stream_mode_name(kind).to_string(),
         name: method_name.clone(),
         params,
         params_fields: Vec::new(),
@@ -280,7 +295,7 @@ fn render_stream_op(
         response_kind: response_kind.to_string(),
         response_struct: response_struct_name(interface_name, &method_name),
         response_fields,
-        response_single_field: String::new(),
+        response_single_field,
         stream_item_ty: String::new(),
     }
 }
@@ -306,6 +321,7 @@ fn render_attr(
                 let ret = attr_return_type(&spec.ty);
                 out.push(MethodContext {
                     kind: "rpc".to_string(),
+                    stream_mode: String::new(),
                     name: rust_ident(&names.raw_getter),
                     params: Vec::new(),
                     params_fields: Vec::new(),
@@ -328,6 +344,7 @@ fn render_attr(
                     let stream_setter = rust_ident(&raw_stream_setter);
                     out.push(MethodContext {
                         kind: "stream_source".to_string(),
+                        stream_mode: String::new(),
                         name: stream_setter,
                         params: Vec::new(),
                         params_fields: Vec::new(),
@@ -369,6 +386,7 @@ fn render_attr(
                         let value_ident = rust_ident(&raw_name);
                         out.push(MethodContext {
                             kind: "rpc".to_string(),
+                            stream_mode: String::new(),
                             name: getter.clone(),
                             params: Vec::new(),
                             params_fields: Vec::new(),
@@ -388,6 +406,7 @@ fn render_attr(
                         });
                         out.push(MethodContext {
                             kind: "rpc".to_string(),
+                            stream_mode: String::new(),
                             name: setter.clone(),
                             params: vec![format!("{value_ident}: {param}")],
                             params_fields: vec![ParamField {
@@ -409,6 +428,7 @@ fn render_attr(
                             let stream_setter = rust_ident(&raw_stream_setter);
                             out.push(MethodContext {
                                 kind: "stream_source".to_string(),
+                                stream_mode: String::new(),
                                 name: stream_setter,
                                 params: Vec::new(),
                                 params_fields: Vec::new(),
@@ -441,6 +461,7 @@ fn render_attr(
                     let value_ident = rust_ident(&raw_name);
                     out.push(MethodContext {
                         kind: "rpc".to_string(),
+                        stream_mode: String::new(),
                         name: getter.clone(),
                         params: Vec::new(),
                         params_fields: Vec::new(),
@@ -460,6 +481,7 @@ fn render_attr(
                     });
                     out.push(MethodContext {
                         kind: "rpc".to_string(),
+                        stream_mode: String::new(),
                         name: setter.clone(),
                         params: vec![format!("{value_ident}: {param}")],
                         params_fields: vec![ParamField {
@@ -481,6 +503,7 @@ fn render_attr(
                         let stream_setter = rust_ident(&raw_stream_setter);
                         out.push(MethodContext {
                             kind: "stream_source".to_string(),
+                            stream_mode: String::new(),
                             name: stream_setter,
                             params: Vec::new(),
                             params_fields: Vec::new(),

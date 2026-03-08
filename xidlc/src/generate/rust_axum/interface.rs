@@ -396,10 +396,8 @@ fn render_op(
         )));
     }
     if is_client_stream {
-        param_list = vec![format!(
-            "stream: xidl_rust_axum::stream::NdjsonSendStream<{request_ty}>"
-        )];
-        param_names = vec!["stream".to_string()];
+        param_list.clear();
+        param_names.clear();
     }
     let response_output_count = usize::from(!return_is_unit) + response_params.len();
     let response_is_empty = response_output_count == 0;

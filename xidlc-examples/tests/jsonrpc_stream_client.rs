@@ -26,12 +26,15 @@ async fn jsonrpc_client_calls_stream_endpoints() {
     let (reader, writer) = split(stream);
     let client = CityJsonrpcStreamApiClient::new(reader, writer);
 
-    let upload = async_stream::try_stream! {
-        yield serde_json::json!({ "sensor_id": "sensor-1", "value": 42 });
-        yield serde_json::json!({ "sensor_id": "sensor-1", "value": 43 });
-    };
-    let upload = xidl_jsonrpc::stream::boxed(upload);
-    let _ = client.upload_sensor(upload).await;
+    let mut upload = client
+        .upload_sensor()
+        .await
+        .expect("open upload sensor writer");
+    upload
+        .write(serde_json::json!({ "sensor_id": "sensor-1", "value": 42 }))
+        .await
+        .expect("write upload chunk");
+    let _ = upload.close().await;
 
     let chat_in = async_stream::try_stream! {
         yield serde_json::json!({ "room_id": "ops", "text": "hello" });

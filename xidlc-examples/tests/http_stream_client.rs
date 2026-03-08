@@ -52,21 +52,22 @@ async fn http_stream_client_calls_stream_endpoints() {
     assert!(!m1);
     assert!(m2);
 
-    let upload_stream =
-        xidl_rust_axum::stream::boxed_ndjson(xidl_rust_axum::futures_util::stream::iter(vec![
-            Ok(CityHttpStreamApiUploadAssetRequest {
-                asset_id: "asset-1".to_string(),
-                chunk: vec![1, 2, 3],
-            }),
-            Ok(CityHttpStreamApiUploadAssetRequest {
-                asset_id: "asset-1".to_string(),
-                chunk: vec![4, 5],
-            }),
-        ]));
-    let upload_resp = client
-        .upload_asset(upload_stream)
+    let mut upload = client.upload_asset().await.expect("open upload_asset");
+    upload
+        .write(CityHttpStreamApiUploadAssetRequest {
+            asset_id: "asset-1".to_string(),
+            chunk: vec![1, 2, 3],
+        })
         .await
-        .expect("call upload_asset");
+        .expect("write first chunk");
+    upload
+        .write(CityHttpStreamApiUploadAssetRequest {
+            asset_id: "asset-1".to_string(),
+            chunk: vec![4, 5],
+        })
+        .await
+        .expect("write second chunk");
+    let upload_resp = upload.close().await.expect("close upload_asset");
     assert_eq!(upload_resp, "uploaded:asset-1:5");
 
     task.abort();
