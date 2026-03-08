@@ -12,6 +12,19 @@ use tokio::io::{AsyncRead, AsyncWrite};
 #[async_trait::async_trait]
 pub trait Handler: Send + Sync {
     async fn handle(&self, method: &str, params: Value) -> Result<Value, Error>;
+
+    fn accepts_bidi(&self, _method: &str) -> bool {
+        false
+    }
+
+    async fn handle_bidi(
+        &self,
+        method: &str,
+        _params: Value,
+        _stream: crate::stream::ReaderWriter<Value, Value>,
+    ) -> Result<(), Error> {
+        Err(Error::method_not_found(method))
+    }
 }
 
 #[async_trait::async_trait]
@@ -21,6 +34,19 @@ where
 {
     async fn handle(&self, method: &str, params: Value) -> Result<Value, Error> {
         (**self).handle(method, params).await
+    }
+
+    fn accepts_bidi(&self, method: &str) -> bool {
+        (**self).accepts_bidi(method)
+    }
+
+    async fn handle_bidi(
+        &self,
+        method: &str,
+        params: Value,
+        stream: crate::stream::ReaderWriter<Value, Value>,
+    ) -> Result<(), Error> {
+        (**self).handle_bidi(method, params, stream).await
     }
 }
 
@@ -51,6 +77,26 @@ impl Handler for MultiHandler {
                     }
                     return Err(err);
                 }
+            }
+        }
+        Err(Error::method_not_found(method))
+    }
+
+    fn accepts_bidi(&self, method: &str) -> bool {
+        self.services
+            .iter()
+            .any(|service| service.accepts_bidi(method))
+    }
+
+    async fn handle_bidi(
+        &self,
+        method: &str,
+        params: Value,
+        stream: crate::stream::ReaderWriter<Value, Value>,
+    ) -> Result<(), Error> {
+        for service in &self.services {
+            if service.accepts_bidi(method) {
+                return service.handle_bidi(method, params, stream).await;
             }
         }
         Err(Error::method_not_found(method))

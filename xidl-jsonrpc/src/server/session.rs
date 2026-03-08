@@ -3,39 +3,47 @@ use serde_json::Value;
 use tokio::io::{AsyncBufReadExt, AsyncRead, AsyncWrite, AsyncWriteExt, BufStream};
 
 pub(crate) struct ServerSession<RW, H> {
-    stream: BufStream<RW>,
+    stream: Option<BufStream<RW>>,
     handler: H,
 }
 
 impl<RW, H> ServerSession<RW, H>
 where
     H: Handler,
-    RW: AsyncRead + AsyncWrite + Unpin,
+    RW: AsyncRead + AsyncWrite + Unpin + Send + 'static,
 {
     pub(crate) fn new(stream: RW, handler: H) -> Self {
         let stream = tokio::io::BufStream::new(stream);
-        Self { stream, handler }
+        Self {
+            stream: Some(stream),
+            handler,
+        }
     }
 
     pub(crate) async fn run(&mut self) -> Result<(), Error> {
         let mut line = String::new();
         loop {
             line.clear();
-            let bytes = self.stream.read_line(&mut line).await?;
+            let Some(stream) = self.stream.as_mut() else {
+                break;
+            };
+            let bytes = stream.read_line(&mut line).await?;
             if bytes == 0 {
                 break;
             }
-            self.handle_line(&line).await?;
+            if !self.handle_line(&line).await? {
+                break;
+            }
         }
         Ok(())
     }
 
-    async fn handle_line(&mut self, line: &str) -> Result<(), Error> {
+    async fn handle_line(&mut self, line: &str) -> Result<bool, Error> {
         let request: RpcRequestOwned = match serde_json::from_str(line) {
             Ok(value) => value,
             Err(err) => {
                 self.write_error(None, Error::Json(err)).await?;
-                return Ok(());
+                return Ok(true);
             }
         };
         let id = request.id;
@@ -44,15 +52,26 @@ where
             None => {
                 self.write_error(id, Error::Protocol("missing method"))
                     .await?;
-                return Ok(());
+                return Ok(true);
             }
         };
         let params = request.params.unwrap_or(Value::Null);
 
-        match self.handler.handle(&method, params).await {
-            Ok(value) => self.write_result(id, value).await,
-            Err(err) => self.write_error(id, err).await,
+        if self.handler.accepts_bidi(&method) {
+            let stream = self
+                .stream
+                .take()
+                .ok_or(Error::Protocol("missing stream"))?;
+            let bidi = crate::stream::open_bidi_server(stream);
+            self.handler.handle_bidi(&method, params, bidi).await?;
+            return Ok(false);
         }
+
+        match self.handler.handle(&method, params).await {
+            Ok(value) => self.write_result(id, value).await?,
+            Err(err) => self.write_error(id, err).await?,
+        }
+        Ok(true)
     }
 
     async fn write_result(&mut self, id: Option<u64>, result: Value) -> Result<(), Error> {
@@ -103,9 +122,13 @@ where
 
     async fn write_response(&mut self, response: RpcResponse) -> Result<(), Error> {
         let payload = serde_json::to_string(&response)?;
-        self.stream.write_all(payload.as_bytes()).await?;
-        self.stream.write_all(b"\n").await?;
-        self.stream.flush().await?;
+        let stream = self
+            .stream
+            .as_mut()
+            .ok_or(Error::Protocol("missing stream"))?;
+        stream.write_all(payload.as_bytes()).await?;
+        stream.write_all(b"\n").await?;
+        stream.flush().await?;
         Ok(())
     }
 }

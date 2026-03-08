@@ -62,13 +62,13 @@
             "from": {
               "type": "string"
             },
-            "message": {
+            "text": {
               "type": "string"
             }
           },
           "required": [
             "from",
-            "message"
+            "text"
           ]
         }
       },
@@ -312,13 +312,13 @@
           "from": {
             "type": "string"
           },
-          "message": {
+          "text": {
             "type": "string"
           }
         },
         "required": [
           "from",
-          "message"
+          "text"
         ]
       },
       "CityJsonrpcStreamApi_chat_Result": {

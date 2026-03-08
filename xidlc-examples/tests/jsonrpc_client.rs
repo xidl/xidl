@@ -1,5 +1,3 @@
-use tokio::io::split;
-use tokio::net::TcpStream;
 use xidlc_examples::city_jsonrpc::{
     SmartCityRpcApi, SmartCityRpcApiClient, SmartCityRpcApiServer, SmartCityRpcService,
 };
@@ -20,10 +18,11 @@ async fn jsonrpc_client_calls_all_endpoints() {
 
     tokio::time::sleep(std::time::Duration::from_millis(100)).await;
 
-    let stream = TcpStream::connect(addr).await.expect("connect jsonrpc");
-    stream.set_nodelay(true).expect("set nodelay");
-    let (reader, writer) = split(stream);
-    let client = SmartCityRpcApiClient::new(reader, writer);
+    let client = SmartCityRpcApiClient::builder()
+        .with_endpoint(format!("tcp://{}", addr))
+        .build()
+        .await
+        .expect("build client");
 
     let quote = client
         .quote_trip("rider-1".to_string(), "zone-a".to_string())

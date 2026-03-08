@@ -20,6 +20,8 @@ pub type SseStream<T> = Pin<Box<dyn Stream<Item = Result<T>> + Send + 'static>>;
 pub type SseClientStream<T> = Pin<Box<dyn Stream<Item = Result<T>> + Send + 'static>>;
 pub type NdjsonStream<T> = Pin<Box<dyn Stream<Item = Result<T>> + Send + 'static>>;
 pub type NdjsonSendStream<T> = Pin<Box<dyn Stream<Item = Result<T>> + Send + 'static>>;
+pub type Writer<T, R> = ClientStreamWriter<T, R>;
+pub type ReaderWriter<TIn, TOut> = BidiClientStream<TIn, TOut>;
 
 pub struct Reader<T> {
     inner: SseClientStream<T>,
@@ -58,6 +60,10 @@ impl<TIn, TOut> BidiServerStream<TIn, TOut> {
     pub fn close(&mut self) {
         let _ = self.outbound.take();
     }
+
+    pub fn error_sender(&self) -> Option<mpsc::Sender<Result<TOut>>> {
+        self.outbound.as_ref().cloned()
+    }
 }
 
 impl<TIn, TOut> Drop for BidiServerStream<TIn, TOut> {
@@ -69,6 +75,8 @@ impl<TIn, TOut> Drop for BidiServerStream<TIn, TOut> {
 pub struct BidiClientStream<TIn, TOut> {
     writer: Option<mpsc::Sender<Result<TIn>>>,
     reader: mpsc::Receiver<Result<TOut>>,
+    write_task: Option<JoinHandle<()>>,
+    read_task: Option<JoinHandle<()>>,
 }
 
 impl<TIn, TOut> BidiClientStream<TIn, TOut> {
@@ -92,6 +100,12 @@ impl<TIn, TOut> BidiClientStream<TIn, TOut> {
 
     pub fn cancel(&mut self) {
         let _ = self.writer.take();
+        if let Some(handle) = self.write_task.take() {
+            handle.abort();
+        }
+        if let Some(handle) = self.read_task.take() {
+            handle.abort();
+        }
     }
 }
 
@@ -173,7 +187,7 @@ where
     let (in_tx, in_rx) = mpsc::channel::<Result<TIn>>(32);
     let (out_tx, mut out_rx) = mpsc::channel::<Result<TOut>>(32);
 
-    tokio::spawn(async move {
+    let _read_task = tokio::spawn(async move {
         while let Some(msg) = ws_rx.next().await {
             let msg = match msg {
                 Ok(value) => value,
@@ -202,7 +216,7 @@ where
         }
     });
 
-    tokio::spawn(async move {
+    let _write_task = tokio::spawn(async move {
         while let Some(item) = out_rx.recv().await {
             let item = match item {
                 Ok(value) => value,
@@ -260,7 +274,7 @@ where
     let (read_tx, read_rx) = mpsc::channel::<Result<TOut>>(32);
     let read_tx_writer = read_tx.clone();
 
-    tokio::spawn(async move {
+    let write_task = tokio::spawn(async move {
         while let Some(item) = write_rx.recv().await {
             let item = match item {
                 Ok(value) => value,
@@ -289,7 +303,7 @@ where
         let _ = ws_tx.send(TungsteniteMessage::Close(None)).await;
     });
 
-    tokio::spawn(async move {
+    let read_task = tokio::spawn(async move {
         while let Some(msg) = ws_rx.next().await {
             let msg = match msg {
                 Ok(value) => value,
@@ -321,6 +335,8 @@ where
     Ok(BidiClientStream {
         writer: Some(write_tx),
         reader: read_rx,
+        write_task: Some(write_task),
+        read_task: Some(read_task),
     })
 }
 

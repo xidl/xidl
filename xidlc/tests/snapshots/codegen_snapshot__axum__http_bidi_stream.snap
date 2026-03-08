@@ -68,9 +68,13 @@ T:HttpBidiStreamService+Send+Sync+'static,
         let svc = svc.clone();
         return Ok(ws.on_upgrade(move|socket|async move{
             let bidi = xidl_rust_axum::stream::open_bidi_server::<HttpBidiStreamServiceChatRequest,HttpBidiStreamServiceChatResponse>(socket);
+            let error_sender = bidi.error_sender();
             let req = ::xidl_rust_axum::Request::new(req_headers,bidi);
-            let _ = svc.chat(req).await;
-
+            if let Err(err) = svc.chat(req).await{
+                if let Some(tx) = error_sender{
+                    let _ = tx.send(Err(err)).await;
+                }
+            }
         }));
     }
 }
@@ -97,7 +101,7 @@ impl HttpBidiStreamServiceClient{
 }
 
 impl HttpBidiStreamServiceClient{
-    pub async fn chat(&self)->Result<xidl_rust_axum::stream::BidiClientStream<HttpBidiStreamServiceChatRequest,HttpBidiStreamServiceChatResponse>,xidl_rust_axum::Error>{
+    pub async fn chat(&self)->Result<xidl_rust_axum::stream::ReaderWriter<HttpBidiStreamServiceChatRequest,HttpBidiStreamServiceChatResponse>,xidl_rust_axum::Error>{
         let path = "/chat".to_string();
         let url = self.client.url(&path);
         let mut req = self

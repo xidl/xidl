@@ -20,3 +20,25 @@ pub trait Listener: Send + Sync {
         &self,
     ) -> std::io::Result<(Box<dyn Stream + Unpin + Send + 'static>, SocketAddr)>;
 }
+
+pub async fn connect(endpoint: &str) -> std::io::Result<Box<dyn Stream + Unpin + Send + 'static>> {
+    if let Some(name) = endpoint.strip_prefix("inproc://") {
+        return Ok(Box::new(connect_inproc(name)?));
+    }
+
+    #[cfg(feature = "tokio-net")]
+    {
+        let addr = endpoint.strip_prefix("tcp://").unwrap_or(endpoint);
+        let stream = tokio::net::TcpStream::connect(addr).await?;
+        return Ok(Box::new(stream));
+    }
+
+    #[cfg(not(feature = "tokio-net"))]
+    {
+        let _ = endpoint;
+        Err(std::io::Error::new(
+            std::io::ErrorKind::Unsupported,
+            "tcp transport requires `tokio-net` feature",
+        ))
+    }
+}

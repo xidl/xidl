@@ -42,6 +42,7 @@ struct MethodContext {
 struct WatchMethodContext {
     getter_name: String,
     item_ty: String,
+    stream_rpc_name: String,
 }
 
 fn stream_mode_name(kind: StreamKind) -> &'static str {
@@ -221,6 +222,8 @@ fn render_stream_op(
         .map(|value| value.0.as_slice())
         .unwrap_or(&[]);
     let mut param_list = Vec::new();
+    let mut param_fields = Vec::new();
+    let mut args = Vec::new();
     let mut response_fields = Vec::new();
 
     if let hir::OpTypeSpec::TypeSpec(ty) = &op.ty {
@@ -237,6 +240,11 @@ fn render_stream_op(
             let name = rust_ident(&param.declarator.0);
             let ty = render_param_type(&param.ty, param.attr.as_ref());
             param_list.push(format!("{name}: {ty}"));
+            param_fields.push(ParamField {
+                name: name.clone(),
+                ty: ty.clone(),
+            });
+            args.push(name);
         }
         if matches!(mode, ParamMode::Out | ParamMode::InOut) {
             response_fields.push(OutputField {
@@ -273,8 +281,11 @@ fn render_stream_op(
             unary_ret,
         ),
         StreamKind::Bidi => (
-            Vec::new(),
-            "xidl_jsonrpc::stream::DuplexStream<serde_json::Value, serde_json::Value>".to_string(),
+            vec![
+                "stream: xidl_jsonrpc::stream::ReaderWriter<serde_json::Value, serde_json::Value>"
+                    .to_string(),
+            ],
+            "()".to_string(),
         ),
     };
     let response_single_field = response_fields
@@ -287,11 +298,23 @@ fn render_stream_op(
         stream_mode: stream_mode_name(kind).to_string(),
         name: method_name.clone(),
         params,
-        params_fields: Vec::new(),
-        params_struct: String::new(),
+        params_fields: if matches!(kind, StreamKind::Server) {
+            param_fields
+        } else {
+            Vec::new()
+        },
+        params_struct: if matches!(kind, StreamKind::Server) {
+            params_struct_name(interface_name, &method_name)
+        } else {
+            String::new()
+        },
         ret,
         rpc_name: rpc_method_name(module_path, interface_name, &op.ident),
-        args: Vec::new(),
+        args: if matches!(kind, StreamKind::Server) {
+            args
+        } else {
+            Vec::new()
+        },
         response_kind: response_kind.to_string(),
         response_struct: response_struct_name(interface_name, &method_name),
         response_fields,
@@ -350,7 +373,7 @@ fn render_attr(
                         params_fields: Vec::new(),
                         params_struct: String::new(),
                         ret: String::new(),
-                        rpc_name: String::new(),
+                        rpc_name: rpc_method_name(module_path, interface_name, &raw_stream_setter),
                         args: Vec::new(),
                         response_kind: "empty".to_string(),
                         response_struct: String::new(),
@@ -361,6 +384,11 @@ fn render_attr(
                     watch_methods.push(WatchMethodContext {
                         getter_name: rust_ident(&names.raw_getter),
                         item_ty: attr_return_type(&spec.ty),
+                        stream_rpc_name: rpc_method_name(
+                            module_path,
+                            interface_name,
+                            &raw_stream_setter,
+                        ),
                     });
                 }
             }
@@ -434,7 +462,11 @@ fn render_attr(
                                 params_fields: Vec::new(),
                                 params_struct: String::new(),
                                 ret: String::new(),
-                                rpc_name: String::new(),
+                                rpc_name: rpc_method_name(
+                                    module_path,
+                                    interface_name,
+                                    &raw_stream_setter,
+                                ),
                                 args: Vec::new(),
                                 response_kind: "empty".to_string(),
                                 response_struct: String::new(),
@@ -445,6 +477,11 @@ fn render_attr(
                             watch_methods.push(WatchMethodContext {
                                 getter_name: getter,
                                 item_ty: attr_return_type(&spec.ty),
+                                stream_rpc_name: rpc_method_name(
+                                    module_path,
+                                    interface_name,
+                                    &raw_stream_setter,
+                                ),
                             });
                         }
                     }
@@ -509,7 +546,11 @@ fn render_attr(
                             params_fields: Vec::new(),
                             params_struct: String::new(),
                             ret: String::new(),
-                            rpc_name: String::new(),
+                            rpc_name: rpc_method_name(
+                                module_path,
+                                interface_name,
+                                &raw_stream_setter,
+                            ),
                             args: Vec::new(),
                             response_kind: "empty".to_string(),
                             response_struct: String::new(),
@@ -520,6 +561,11 @@ fn render_attr(
                         watch_methods.push(WatchMethodContext {
                             getter_name: getter,
                             item_ty: attr_return_type(&spec.ty),
+                            stream_rpc_name: rpc_method_name(
+                                module_path,
+                                interface_name,
+                                &raw_stream_setter,
+                            ),
                         });
                     }
                 }

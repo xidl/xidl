@@ -145,8 +145,13 @@ pub trait {{ ident }} {
                     let svc = svc.clone();
                     return Ok(ws.on_upgrade(move |socket| async move {
                         let bidi = xidl_rust_axum::stream::open_bidi_server::<{{ method.request_item_ty }}, {{ method.response_ty }}>(socket);
+                        let error_sender = bidi.error_sender();
                         let req = ::xidl_rust_axum::Request::new(req_headers, bidi);
-                        let _ = svc.{{ method.name }}(req).await;
+                        if let Err(err) = svc.{{ method.name }}(req).await {
+                            if let Some(tx) = error_sender {
+                                let _ = tx.send(Err(err)).await;
+                            }
+                        }
                     }));
                 {% elif method.is_client_stream %}
                     let data = xidl_rust_axum::stream::decode_ndjson_body::<{{ method.request_item_ty }}>(body);
@@ -202,7 +207,7 @@ pub trait {{ ident }} {
 
     impl {{ ident }}Client {
         {% for method in methods %}
-            pub async fn {{ method.name }}(&self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{% if method.is_client_stream %}xidl_rust_axum::stream::ClientStreamWriter<{{ method.request_item_ty }}, {{ method.response_ty }}>{% elif method.is_bidi_stream %}xidl_rust_axum::stream::BidiClientStream<{{ method.request_item_ty }}, {{ method.response_ty }}>{% elif method.is_server_stream %}xidl_rust_axum::stream::Reader<{{ method.response_ty }}>{% else %}{{ method.response_ty }}{% endif %}, xidl_rust_axum::Error> {
+            pub async fn {{ method.name }}(&self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{% if method.is_client_stream %}xidl_rust_axum::stream::Writer<{{ method.request_item_ty }}, {{ method.response_ty }}>{% elif method.is_bidi_stream %}xidl_rust_axum::stream::ReaderWriter<{{ method.request_item_ty }}, {{ method.response_ty }}>{% elif method.is_server_stream %}xidl_rust_axum::stream::Reader<{{ method.response_ty }}>{% else %}{{ method.response_ty }}{% endif %}, xidl_rust_axum::Error> {
                 let path = "{{ method.path }}".to_string();
                 {% for param in method.path_params %}
                     let path = path.replace("{{ ['{', param.path_template_name, '}'] | join}}", &{{ param.name }}.to_string());
@@ -283,7 +288,7 @@ pub trait {{ ident }} {
                             Err(err)
                         }
                     });
-                    return Ok(xidl_rust_axum::stream::ClientStreamWriter::new(tx, response_task));
+                    return Ok(xidl_rust_axum::stream::Writer::new(tx, response_task));
                 {% elif method.body_params | length > 0 %}
                     {% if method.body_params | length == 1 %}
                         let body = {{ method.body_params[0].name }};

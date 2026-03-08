@@ -19,7 +19,7 @@ interface CityJsonrpcStreamApi {
         in string room_id,
         in string text,
         out string from,
-        out string message
+        out string text
     );
 
     @server_stream

@@ -27,13 +27,26 @@ impl CityJsonrpcStreamApi for CityJsonrpcStreamService {
 
     async fn chat(
         &self,
-    ) -> Result<
-        xidl_jsonrpc::stream::DuplexStream<serde_json::Value, serde_json::Value>,
-        xidl_jsonrpc::Error,
-    > {
-        Err(xidl_jsonrpc::Error::Protocol(
-            "server-side bidi runtime is not implemented",
-        ))
+        mut stream: xidl_jsonrpc::stream::ReaderWriter<serde_json::Value, serde_json::Value>,
+    ) -> Result<(), xidl_jsonrpc::Error> {
+        while let Some(item) = stream.read().await {
+            let value = item?;
+            let room = value
+                .get("room_id")
+                .and_then(|v| v.as_str())
+                .unwrap_or_default();
+            let text = value
+                .get("text")
+                .and_then(|v| v.as_str())
+                .unwrap_or_default();
+            stream
+                .write(serde_json::json!({
+                    "from": "server",
+                    "text": format!("echo:{room}:{text}")
+                }))
+                .await?;
+        }
+        Ok(())
     }
 
     async fn get_attribute_ops_notice(&self) -> Result<String, xidl_jsonrpc::Error> {
