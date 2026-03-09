@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use crate::error::{IdlcError, IdlcResult};
+use crate::generate::utils::typescript_format_filter;
 use minijinja::{Environment, Error, ErrorKind};
 use rust_embed::RustEmbed;
 use serde::Serialize;
@@ -51,13 +52,4 @@ fn load_template(name: &str) -> std::result::Result<String, Error> {
         )
     })?;
     Ok(content)
-}
-
-fn typescript_format_filter(value: String) -> std::result::Result<String, Error> {
-    crate::fmt::format_typescript_source(&value).map_err(|err| {
-        Error::new(
-            ErrorKind::InvalidOperation,
-            format!("typescript format failed: {err}"),
-        )
-    })
 }

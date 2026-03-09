@@ -1,6 +1,6 @@
 use crate::{
     error::{IdlcError, IdlcResult},
-    generate::utils::{format_timestamp_filter, to_case},
+    generate::utils::{clang_format_filter, format_timestamp_filter, to_case},
 };
 use minijinja::{Environment, Error, ErrorKind};
 use rust_embed::RustEmbed;
@@ -93,8 +93,4 @@ fn load_template(name: &str) -> std::result::Result<String, Error> {
         )
     })?;
     Ok(content)
-}
-
-fn clang_format_filter(value: String) -> String {
-    crate::fmt::format_c_source(&value).unwrap_or(value)
 }

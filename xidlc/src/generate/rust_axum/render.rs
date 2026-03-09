@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::utils::{format_timestamp_filter, strip_template_padding};
+use crate::generate::utils::{format_timestamp_filter, rust_format_filter, strip_template_padding};
 use minijinja::{Environment, Error, ErrorKind};
 use rust_embed::RustEmbed;
 use serde::Serialize;
@@ -71,13 +71,4 @@ fn load_template(name: &str) -> std::result::Result<String, Error> {
         )
     })?;
     Ok(strip_template_padding(content))
-}
-
-fn rust_format_filter(value: String) -> std::result::Result<String, Error> {
-    crate::fmt::format_rust_source(&value).map_err(|err| {
-        Error::new(
-            ErrorKind::InvalidOperation,
-            format!("rust format failed: {err}"),
-        )
-    })
 }
