@@ -40,17 +40,17 @@ jobs:
       - name: Build wasm artifacts
         run: sh scripts/build-wasm.sh
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-          cache-dependency-path: xidl-playground/pnpm-lock.yaml
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: xidl-playground/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
