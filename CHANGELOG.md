@@ -1,5 +1,42 @@
 # Changelog
 
+## [0.9.0](https://github.com/xidl/xidl/compare/v0.8.0...v0.9.0) (2026-03-09)
+
+
+### Features
+
+* **axum:** update axum by http ([00b3743](https://github.com/xidl/xidl/commit/00b374309a8c4693c027f689a39df36604ec8360))
+* bump tree-sitter-idl to 3.16.0 and add annotation support for param_dcl ([60e19ac](https://github.com/xidl/xidl/commit/60e19acb934ffc61fac1f90ad2d5049460c41e37))
+* complete http stream and jsonrpc stream ([41373f6](https://github.com/xidl/xidl/commit/41373f6d6fa2e6cb78b4590bfcdc6e45202f1099))
+* **http:** document the in, out and inout ([70c2d1b](https://github.com/xidl/xidl/commit/70c2d1bdde2b16622f0ad573bcdf5a0f25555e06))
+* **jsonpc:** add tcp and inproc support ([e6c7b93](https://github.com/xidl/xidl/commit/e6c7b93a32f5aaed976d38622ae402c202fd5352))
+* **jsonrpc:** add quic support ([c07e660](https://github.com/xidl/xidl/commit/c07e6605b2cc533eee5005345650048217fc08cb))
+* **jsonrpc:** add ws, wss, tls support ([fc98fdc](https://github.com/xidl/xidl/commit/fc98fdc7781bdff5f3f9dfeabe61764457109096))
+* **jsonrpc:** impl stream for jsonrpc ([df85fe5](https://github.com/xidl/xidl/commit/df85fe5ee9b241047eb265352eb4162cbe5bb6fa))
+* **jsonrpc:** update rust_jsonrpc ([66f9448](https://github.com/xidl/xidl/commit/66f9448bb73261edef8bc487a78f9cf9fb6b5d0c))
+* **openapi:** unify return code ([609dc5a](https://github.com/xidl/xidl/commit/609dc5a7d6ca3e85d8022ab6cfef676954b27b16))
+* **rust-axum:** impl bidi_stream ([9b1f1b8](https://github.com/xidl/xidl/commit/9b1f1b883af35016161d33bcd59753a0d319a701))
+* **stream:** using writer on the client_side ([9dc3d1b](https://github.com/xidl/xidl/commit/9dc3d1bd8c53a76194f5ed19c7ff562c1dd18b9e))
+* support query param ([bd818c4](https://github.com/xidl/xidl/commit/bd818c4b003776515ba46aef0eb400124ffc1170))
+* **xidl-build:** allow set openapi and openrpc output file name ([59eb939](https://github.com/xidl/xidl/commit/59eb939598f1f1693d2658d50a6c22f1c9ba4aba))
+* **xidlc:** add is_optional to member ([bbc7ed2](https://github.com/xidl/xidl/commit/bbc7ed2cd7ed71a459bdcf0fd6d10edd08a55d91))
+* **xidlc:** add openrpc support ([081a4a9](https://github.com/xidl/xidl/commit/081a4a9bd8c2430b3e502db792705593d8fe4142))
+* **xidlc:** add support for [@optional](https://github.com/optional) ([85a75dd](https://github.com/xidl/xidl/commit/85a75dd493d45f84c027080279d63eb494943d12))
+* **xidlc:** align with rfc ([368f742](https://github.com/xidl/xidl/commit/368f742b8b70531f2f2b7b5ea9c771b4bee048a8))
+* **xidlc:** impl stream for axum, ts and openapi ([64e8344](https://github.com/xidl/xidl/commit/64e834425ae2fb6df650d333a840b848d1879f12))
+* **xidlc:** remove axum nested object ([7c8262b](https://github.com/xidl/xidl/commit/7c8262bf6ad3e8b8b442cac6022476b5b5112335))
+* **xidlc:** update axum and ts by http rfc ([8f1fcd7](https://github.com/xidl/xidl/commit/8f1fcd744f773ff6128497648aa57a3ebf235fd5))
+* **xidl:** support catch all path ([96a6540](https://github.com/xidl/xidl/commit/96a654000f9a39b111867dc325664f073e0ad074))
+* **xidl:** update ts by http ([71a388b](https://github.com/xidl/xidl/commit/71a388b74803f83c7f642f7c14ec0fab14e6bba5))
+
+
+### Bug Fixes
+
+* **jsonrpc:** fix jsonrpc ([ffa6aac](https://github.com/xidl/xidl/commit/ffa6aacf5df26ccd1d39f72f1a38d250178f8220))
+* **openrpc:** fix openrpc generate ([359c228](https://github.com/xidl/xidl/commit/359c2289dac54ae9637f176d031c8cca20fdf7a4))
+* **xidlc:** fix axum generate ([da8c841](https://github.com/xidl/xidl/commit/da8c841e8350e4705b68a5a08c8916a689e7e69b))
+* **xidlc:** fix wasm build ([782df53](https://github.com/xidl/xidl/commit/782df53b8ba70cc40e08b0dcbf534b29a506e162))
+
 ## [0.8.0](https://github.com/xidl/xidl/compare/v0.7.0...v0.8.0) (2026-03-04)
 
 
