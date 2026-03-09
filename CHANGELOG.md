@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.10.0](https://github.com/xidl/xidl/compare/v0.9.0...v0.10.0) (2026-03-09)
+
+
+### Features
+
+* **playground:** add openapi and openrpc ([e68971d](https://github.com/xidl/xidl/commit/e68971d23779c0beafa29ce2a7356050a14d5ec6))
+* **xidl-rust-axum:** update error model ([5712624](https://github.com/xidl/xidl/commit/5712624aa0e8046affd7e39aeacf6775b3e9ea2d))
+
 ## [0.9.0](https://github.com/xidl/xidl/compare/v0.8.0...v0.9.0) (2026-03-09)
 
 
