@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
+import { LANG_OPTIONS } from './constants';
 
 type HeaderBarProps = {
   lang: string;
@@ -59,13 +60,13 @@ export function HeaderBar({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="rust">Rust</SelectItem>
-              <SelectItem value="rust-axum">Rust Axum</SelectItem>
-              <SelectItem value="rust-jsonrpc">Rust JSON-RPC</SelectItem>
-              <SelectItem value="c">C</SelectItem>
-              <SelectItem value="cpp">C++</SelectItem>
-              <SelectItem value="hir">HIR</SelectItem>
-              <SelectItem value="typed_ast">Typed AST</SelectItem>
+              {LANG_OPTIONS.map(opt => {
+                return (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         </div>

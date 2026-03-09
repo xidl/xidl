@@ -11,14 +11,20 @@ export const DEFAULT_SKIP_CLIENT = false;
 export const DEFAULT_SKIP_SERVER = false;
 
 export const LANG_OPTIONS = [
-  'rust',
-  'rust-axum',
-  'rust-jsonrpc',
-  'c',
-  'cpp',
-  'hir',
-  'typed_ast',
+  { value: 'typed_ast', label: 'Typed AST' },
+  { value: 'hir', label: 'HIR' },
+  { value: 'c', label: 'C' },
+  { value: 'cpp', label: 'C++' },
+  { value: 'rust', label: 'Rust' },
+  { value: 'rust-axum', label: 'Rust Axum' },
+  { value: 'rust-jsonrpc', label: 'Rust JsonRPC' },
+  { value: 'openapi', label: 'OpenAPI' },
+  { value: 'openrpc', label: 'OpenRPC' },
 ];
+
+export function isValidLanguage(lang: string): boolean {
+  return LANG_OPTIONS.some(option => option.value === lang);
+}
 
 export const BASE_PATH = (process.env.NEXT_PUBLIC_BASE_PATH ?? '').replace(
   /\/$/,

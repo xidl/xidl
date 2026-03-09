@@ -9,6 +9,7 @@ import {
   DEFAULT_METADATA,
   DEFAULT_SKIP_CLIENT,
   DEFAULT_SKIP_SERVER,
+  isValidLanguage,
   LANG_OPTIONS,
   WASM_BASE,
 } from '@/components/playground/constants';
@@ -85,7 +86,7 @@ export function usePlaygroundState(): UsePlaygroundStateResult {
     }
 
     const urlLang = params.get('lang');
-    if (urlLang && LANG_OPTIONS.includes(urlLang)) {
+    if (urlLang && isValidLanguage(urlLang)) {
       setLang(urlLang);
     }
 
