@@ -1,3 +1,5 @@
+use xidl_jsonrpc::futures_util::StreamExt;
+
 include!(concat!(env!("OUT_DIR"), "/city_jsonrpc_stream.rs"));
 
 pub struct CityJsonrpcStreamService;
@@ -8,18 +10,19 @@ impl CityJsonrpcStreamApi for CityJsonrpcStreamService {
         &'a self,
         district: String,
     ) -> Result<xidl_jsonrpc::stream::BoxStream<'a, serde_json::Value>, xidl_jsonrpc::Error> {
-        let stream = async_stream::try_stream! {
-            yield serde_json::json!({ "message": format!("{district}:alert-1") });
-            yield serde_json::json!({ "message": format!("{district}:alert-2") });
-        };
-        Ok(xidl_jsonrpc::stream::boxed(stream))
+        Ok(async_stream::try_stream! {
+            for i in 0..2{
+                yield serde_json::json!({ "message": format!("{district}:alert-{i}") });
+            }
+        }
+        .boxed())
     }
 
     async fn upload_sensor<'a>(
         &'a self,
         mut stream: xidl_jsonrpc::stream::BoxStream<'a, serde_json::Value>,
     ) -> Result<(), xidl_jsonrpc::Error> {
-        while let Some(item) = xidl_rust_axum::futures_util::StreamExt::next(&mut stream).await {
+        while let Some(item) = stream.next().await {
             let _ = item?;
         }
         Ok(())

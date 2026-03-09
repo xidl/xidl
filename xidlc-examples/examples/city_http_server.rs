@@ -1,5 +1,5 @@
 use xidlc_examples::city_http::SmartCityHttpApiServer;
-use xidlc_examples::example_services::SmartCityHttpService;
+use xidlc_examples::city_http::SmartCityHttpService;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

@@ -1,6 +1,6 @@
 use xidlc_examples::city_http::SmartCityHttpApiClient;
 use xidlc_examples::city_http::SmartCityHttpApiServer;
-use xidlc_examples::example_services::SmartCityHttpService;
+use xidlc_examples::city_http::SmartCityHttpService;
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn http_client_calls_all_endpoints() {

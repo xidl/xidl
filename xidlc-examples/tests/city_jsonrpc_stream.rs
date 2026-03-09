@@ -73,8 +73,8 @@ async fn jsonrpc_client_calls_stream_endpoints() {
         .await
         .expect("second alert item")
         .expect("second alert payload");
-    assert_eq!(first_alert["message"], "pudong:alert-1");
-    assert_eq!(second_alert["message"], "pudong:alert-2");
+    assert_eq!(first_alert["message"], "pudong:alert-0");
+    assert_eq!(second_alert["message"], "pudong:alert-1");
 
     let mut notice_stream = client
         .get_attribute_ops_notice()
@@ -135,7 +135,7 @@ async fn jsonrpc_bidi_stream_works_over_inproc_transport() {
         .await
         .expect("first alert item")
         .expect("first alert payload");
-    assert_eq!(first_alert["message"], "pudong:alert-1");
+    assert_eq!(first_alert["message"], "pudong:alert-0");
 
     let mut chat = client.chat().await.expect("open chat duplex");
     chat.write(serde_json::json!({ "room_id": "ops", "text": "inproc" }))

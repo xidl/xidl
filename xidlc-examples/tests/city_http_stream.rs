@@ -2,7 +2,7 @@ use xidlc_examples::city_http_stream::CityHttpStreamApiChatRequest;
 use xidlc_examples::city_http_stream::CityHttpStreamApiClient;
 use xidlc_examples::city_http_stream::CityHttpStreamApiServer;
 use xidlc_examples::city_http_stream::CityHttpStreamApiUploadAssetRequest;
-use xidlc_examples::example_services::CityHttpStreamService;
+use xidlc_examples::city_http_stream::CityHttpStreamService;
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn http_stream_client_calls_stream_endpoints() {
