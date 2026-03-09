@@ -232,14 +232,7 @@ pub trait {{ ident }} {
                     }
                 {% endif %}
                 {% if method.is_bidi_stream %}
-                    let mut ws_url = self.client.url(&path);
-                    if let Some(rest) = ws_url.strip_prefix("https://") {
-                        ws_url = format!("wss://{rest}");
-                    } else if let Some(rest) = ws_url.strip_prefix("http://") {
-                        ws_url = format!("ws://{rest}");
-                    } else {
-                        return Err(xidl_rust_axum::Error::new(500, "unsupported base_url scheme for websocket"));
-                    }
+                    let mut ws_url = self.client.ws_url(&path)?;
                     {% if method.query_params | length > 0 %}
                         let query = {{ method.struct_prefix }}Query {
                             {% for param in method.query_params %}
@@ -249,7 +242,7 @@ pub trait {{ ident }} {
                         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
                             .map_err(|err| xidl_rust_axum::Error::new(500, err.to_string()))?;
                         if !query.is_empty() {
-                            ws_url.push('?');
+                            ws_url.push(if ws_url.contains('?') { '&' } else { '?' });
                             ws_url.push_str(&query);
                         }
                     {% endif %}
@@ -281,11 +274,7 @@ pub trait {{ ident }} {
                         } else {
                             let status = resp.status();
                             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
-                            let err = match body {
-                                Some(body) => xidl_rust_axum::Error::new(body.code, body.msg),
-                                None => xidl_rust_axum::Error::new(500, format!("http error: {}", status.as_u16())),
-                            };
-                            Err(err)
+                            Err(xidl_rust_axum::Error::from_http_response(status, body))
                         }
                     });
                     return Ok(xidl_rust_axum::stream::Writer::new(tx, response_task));
@@ -327,11 +316,7 @@ pub trait {{ ident }} {
                 } else {
                     let status = resp.status();
                     let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
-                    let err = match body {
-                        Some(body) => xidl_rust_axum::Error::new(body.code, body.msg),
-                        None => xidl_rust_axum::Error::new(500, format!("http error: {}", status.as_u16())),
-                    };
-                    Err(err)
+                    Err(xidl_rust_axum::Error::from_http_response(status, body))
                 }
                 {% endif %}
             }

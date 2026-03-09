@@ -1374,12 +1374,7 @@ impl HttpAnnoServiceClient{
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
-            let err = match body{
-                Some(body) => xidl_rust_axum::Error::new(body.code,body.msg),
-                None => xidl_rust_axum::Error::new(500,format!("http error: {}",status.as_u16())),
-
-            };
-            Err(err)
+            Err(xidl_rust_axum::Error::from_http_response(status,body))
         }
     }
 
@@ -1416,12 +1411,7 @@ impl HttpAnnoServiceClient{
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
-            let err = match body{
-                Some(body) => xidl_rust_axum::Error::new(body.code,body.msg),
-                None => xidl_rust_axum::Error::new(500,format!("http error: {}",status.as_u16())),
-
-            };
-            Err(err)
+            Err(xidl_rust_axum::Error::from_http_response(status,body))
         }
     }
 
@@ -1456,12 +1446,7 @@ impl HttpAnnoServiceClient{
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
-            let err = match body{
-                Some(body) => xidl_rust_axum::Error::new(body.code,body.msg),
-                None => xidl_rust_axum::Error::new(500,format!("http error: {}",status.as_u16())),
-
-            };
-            Err(err)
+            Err(xidl_rust_axum::Error::from_http_response(status,body))
         }
     }
 
@@ -1497,12 +1482,7 @@ impl HttpAnnoServiceClient{
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
-            let err = match body{
-                Some(body) => xidl_rust_axum::Error::new(body.code,body.msg),
-                None => xidl_rust_axum::Error::new(500,format!("http error: {}",status.as_u16())),
-
-            };
-            Err(err)
+            Err(xidl_rust_axum::Error::from_http_response(status,body))
         }
     }
 
@@ -1538,12 +1518,7 @@ impl HttpAnnoServiceClient{
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
-            let err = match body{
-                Some(body) => xidl_rust_axum::Error::new(body.code,body.msg),
-                None => xidl_rust_axum::Error::new(500,format!("http error: {}",status.as_u16())),
-
-            };
-            Err(err)
+            Err(xidl_rust_axum::Error::from_http_response(status,body))
         }
     }
 
@@ -1580,12 +1555,7 @@ impl HttpAnnoServiceClient{
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
-            let err = match body{
-                Some(body) => xidl_rust_axum::Error::new(body.code,body.msg),
-                None => xidl_rust_axum::Error::new(500,format!("http error: {}",status.as_u16())),
-
-            };
-            Err(err)
+            Err(xidl_rust_axum::Error::from_http_response(status,body))
         }
     }
 
@@ -1619,12 +1589,7 @@ impl HttpAnnoServiceClient{
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
-            let err = match body{
-                Some(body) => xidl_rust_axum::Error::new(body.code,body.msg),
-                None => xidl_rust_axum::Error::new(500,format!("http error: {}",status.as_u16())),
-
-            };
-            Err(err)
+            Err(xidl_rust_axum::Error::from_http_response(status,body))
         }
     }
 
@@ -1650,12 +1615,7 @@ impl HttpAnnoServiceClient{
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
-            let err = match body{
-                Some(body) => xidl_rust_axum::Error::new(body.code,body.msg),
-                None => xidl_rust_axum::Error::new(500,format!("http error: {}",status.as_u16())),
-
-            };
-            Err(err)
+            Err(xidl_rust_axum::Error::from_http_response(status,body))
         }
     }
 
@@ -1679,12 +1639,7 @@ impl HttpAnnoServiceClient{
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
-            let err = match body{
-                Some(body) => xidl_rust_axum::Error::new(body.code,body.msg),
-                None => xidl_rust_axum::Error::new(500,format!("http error: {}",status.as_u16())),
-
-            };
-            Err(err)
+            Err(xidl_rust_axum::Error::from_http_response(status,body))
         }
     }
 }

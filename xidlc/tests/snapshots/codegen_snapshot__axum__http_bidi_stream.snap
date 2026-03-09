@@ -110,17 +110,7 @@ impl HttpBidiStreamServiceClient{
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
-        let mut ws_url = self.client.url(&path);
-        if let Some(rest) = ws_url.strip_prefix("https://"){
-            ws_url = format!("wss://{rest}");
-
-        }else if let Some(rest) = ws_url.strip_prefix("http://"){
-            ws_url = format!("ws://{rest}");
-
-        }else{
-            return Err(xidl_rust_axum::Error::new(500,"unsupported base_url scheme for websocket"));
-        }
-
+        let mut ws_url = self.client.ws_url(&path)?;
         return xidl_rust_axum::stream::open_bidi_client::<HttpBidiStreamServiceChatRequest,HttpBidiStreamServiceChatResponse>(&ws_url).await;
     }
 }

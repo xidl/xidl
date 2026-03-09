@@ -221,7 +221,6 @@ where
             let item = match item {
                 Ok(value) => value,
                 Err(err) => {
-                    let _ = ws_tx.send(AxumWsMessage::Close(None)).await;
                     let _ = ws_tx
                         .send(AxumWsMessage::Text(
                             serde_json::to_string(&ErrorBody::from(err))
@@ -320,6 +319,10 @@ where
                         }
                     }
                     Err(err) => {
+                        if let Ok(body) = serde_json::from_str::<ErrorBody>(&text) {
+                            let _ = read_tx.send(Err(Error::new(body.code, body.msg))).await;
+                            break;
+                        }
                         let _ = read_tx
                             .send(Err(Error::new(400, format!("invalid ws payload: {err}"))))
                             .await;
@@ -374,11 +377,7 @@ where
     if !resp.status().is_success() {
         let status = resp.status();
         let body = resp.json::<ErrorBody>().await.ok();
-        let err = match body {
-            Some(body) => Error::new(body.code, body.msg),
-            None => Error::new(500, format!("http error: {}", status.as_u16())),
-        };
-        return Err(err);
+        return Err(Error::from_http_response(status, body));
     }
 
     let byte_stream = resp

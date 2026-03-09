@@ -36,6 +36,17 @@ impl Error {
         }
     }
 
+    pub fn http_status(&self) -> StatusCode {
+        StatusCode::from_u16(self.code).unwrap_or(StatusCode::INTERNAL_SERVER_ERROR)
+    }
+
+    pub fn from_http_response(status: StatusCode, body: Option<ErrorBody>) -> Self {
+        match body {
+            Some(body) => Self::new(body.code, body.msg),
+            None => Self::new(status.as_u16(), format!("http error: {}", status.as_u16())),
+        }
+    }
+
     pub fn message(message: impl Into<Cow<'static, str>>) -> Self {
         Self::new(500, message)
     }
@@ -255,8 +266,10 @@ impl From<Error> for ErrorBody {
 
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
-        let body: ErrorBody = self.into();
-        (StatusCode::from_u16(body.code).unwrap(), axum::Json(body)).into_response()
+        let status = self.http_status();
+        let mut body: ErrorBody = self.into();
+        body.code = status.as_u16();
+        (status, axum::Json(body)).into_response()
     }
 }
 
@@ -266,4 +279,21 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub struct ErrorBody {
     pub code: u16,
     pub msg: Cow<'static, str>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn invalid_error_code_falls_back_to_internal_server_error() {
+        let response = Error::new(42, "boom").into_response();
+        assert_eq!(response.status(), StatusCode::INTERNAL_SERVER_ERROR);
+    }
+
+    #[test]
+    fn http_response_fallback_preserves_http_status_code() {
+        let err = Error::from_http_response(StatusCode::NOT_FOUND, None);
+        assert_eq!(err.code, 404);
+    }
 }

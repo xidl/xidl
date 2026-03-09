@@ -227,7 +227,7 @@ Server behavior:
 Client behavior:
 
 - For non-2xx responses, it tries to parse `ErrorBody` and returns it as `Error`.
-- If the body is not a valid `ErrorBody`, it returns `Error::new(500, "http error: <status>")`.
+- If the body is not a valid `ErrorBody`, it returns `Error::new(<status>, "http error: <status>")`.
 
 ## Notes
 
