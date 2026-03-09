@@ -59,6 +59,7 @@ pub async fn connect(endpoint: &str) -> std::io::Result<Box<dyn Stream + Unpin +
     {
         let addr = endpoint.strip_prefix("tcp://").unwrap_or(endpoint);
         let stream = tokio::net::TcpStream::connect(addr).await?;
+        #[allow(clippy::needless_return)]
         return Ok(Box::new(stream));
     }
 

@@ -95,11 +95,6 @@ fn load_template(name: &str) -> std::result::Result<String, Error> {
     Ok(content)
 }
 
-fn clang_format_filter(value: String) -> std::result::Result<String, Error> {
-    crate::fmt::format_c_source(&value).map_err(|err| {
-        Error::new(
-            ErrorKind::InvalidOperation,
-            format!("clang-format failed: {err}"),
-        )
-    })
+fn clang_format_filter(value: String) -> String {
+    crate::fmt::format_c_source(&value).unwrap_or(value)
 }

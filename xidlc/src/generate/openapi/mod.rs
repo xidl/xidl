@@ -293,6 +293,7 @@ struct MethodInfo {
     response_status: &'static str,
     response_schema: Option<RefOr<Schema>>,
     is_server_stream: bool,
+    #[allow(dead_code)]
     is_client_stream: bool,
 }
 

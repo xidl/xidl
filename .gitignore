@@ -2,3 +2,4 @@
 Cargo.lock
 xidl-playground/.next
 xidl-playground/out
+xidl-playground/public/wasm
