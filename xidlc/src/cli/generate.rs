@@ -9,7 +9,7 @@ pub struct ArgsGenerate {
     pub out_dir: String,
     #[arg(long = "client", default_value_t = false)]
     pub client: bool,
-    #[arg(long = "server", default_value_t = false)]
+    #[arg(long = "server", default_value_t = true)]
     pub server: bool,
     #[arg(long = "dry-run", default_value_t = false)]
     pub dry_run: bool,
