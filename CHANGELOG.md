@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0](https://github.com/xidl/xidl/compare/v0.11.0...v0.12.0) (2026-03-10)
+
+
+### Features
+
+* **ts:** generate interface for ts ([0e0ae3a](https://github.com/xidl/xidl/commit/0e0ae3a63924dc06b6698452e4bcd38edb398567))
+
 ## [0.11.0](https://github.com/xidl/xidl/compare/v0.10.0...v0.11.0) (2026-03-10)
 
 
