@@ -85,6 +85,10 @@ pub enum Pragma {
     XidlcVersion(SerializeVersion),
     XidlcPackage(String),
     XidlcOpenApiVersion(String),
+    XidlcOpenApiService {
+        base_url: String,
+        description: Option<String>,
+    },
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Copy)]
@@ -105,7 +109,9 @@ impl SerializeConfig {
                 self.version = Some(version);
                 self.explicit_kind = None;
             }
-            Pragma::XidlcPackage(_) | Pragma::XidlcOpenApiVersion(_) => {}
+            Pragma::XidlcPackage(_)
+            | Pragma::XidlcOpenApiVersion(_)
+            | Pragma::XidlcOpenApiService { .. } => {}
         }
     }
 
@@ -432,6 +438,15 @@ fn parse_xidlc_pragma(call: &crate::typed_ast::PreprocCall) -> Option<Pragma> {
         }
         return None;
     }
+    if token.eq_ignore_ascii_case("service") {
+        if let Some((base_url, description)) = parse_pragma_service(&rest) {
+            return Some(Pragma::XidlcOpenApiService {
+                base_url,
+                description,
+            });
+        }
+        return None;
+    }
 
     if let Some(inner) = token
         .strip_prefix("serialize(")
@@ -462,6 +477,46 @@ fn trim_pragma_value(value: &str) -> String {
         }
     }
     value.to_string()
+}
+
+fn parse_pragma_service(value: &str) -> Option<(String, Option<String>)> {
+    let value = value.trim();
+    if value.is_empty() {
+        return None;
+    }
+
+    let mut base_url = None;
+    let mut remainder = "";
+
+    if value.starts_with('"') || value.starts_with('\'') {
+        let quote = value.chars().next().unwrap();
+        let mut end = None;
+        for (index, ch) in value.char_indices().skip(1) {
+            if ch == quote {
+                end = Some(index);
+                break;
+            }
+        }
+        if let Some(end) = end {
+            base_url = Some(value[1..end].to_string());
+            remainder = value[end + 1..].trim();
+        }
+    }
+
+    if base_url.is_none() {
+        let mut parts = value.splitn(2, char::is_whitespace);
+        base_url = parts.next().map(str::to_string);
+        remainder = parts.next().unwrap_or("").trim();
+    }
+
+    let base_url = base_url?;
+    let description = if remainder.is_empty() {
+        None
+    } else {
+        Some(trim_pragma_value(remainder))
+    };
+
+    Some((base_url, description))
 }
 
 fn parse_serialize_kind(value: &str) -> Option<SerializeKind> {

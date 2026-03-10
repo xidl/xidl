@@ -10,6 +10,7 @@ use utoipa::openapi::response::ResponseBuilder;
 use utoipa::openapi::schema::{
     ArrayBuilder, KnownFormat, ObjectBuilder, OneOf, Schema, SchemaFormat, Type,
 };
+use utoipa::openapi::server::Server;
 use utoipa::openapi::{
     Content, InfoBuilder, OpenApi, OpenApiBuilder, Ref, RefOr, Required, ResponsesBuilder,
 };
@@ -57,10 +58,17 @@ pub fn render_openapi(spec: &hir::Specification) -> OpenApi {
     let title = ctx.info_title.as_deref().unwrap_or("xidl");
     let version = ctx.info_version.as_deref().unwrap_or("0.1.0");
 
+    let servers = if ctx.servers.is_empty() {
+        None
+    } else {
+        Some(ctx.servers)
+    };
+
     OpenApiBuilder::new()
         .info(InfoBuilder::new().title(title).version(version).build())
         .paths(ctx.paths.build())
         .components(Some(components.build()))
+        .servers(servers)
         .build()
 }
 
@@ -70,6 +78,7 @@ struct OpenApiContext {
     paths: PathsBuilder,
     info_title: Option<String>,
     info_version: Option<String>,
+    servers: Vec<Server>,
 }
 
 impl OpenApiContext {
@@ -83,6 +92,16 @@ impl OpenApiContext {
             hir::Pragma::XidlcOpenApiVersion(value) => {
                 if !value.is_empty() {
                     self.info_version = Some(value.clone());
+                }
+            }
+            hir::Pragma::XidlcOpenApiService {
+                base_url,
+                description,
+            } => {
+                if !base_url.is_empty() {
+                    let mut server = Server::new(base_url);
+                    server.description = description.clone();
+                    self.servers.push(server);
                 }
             }
             _ => {}

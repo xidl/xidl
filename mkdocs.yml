@@ -10,6 +10,7 @@ nav:
   - XIDLC:
       - axum: rust-axum.md
       - rust-jsonrpc: rust-jsonrpc.md
+      - OpenAPI: openapi.md
   - Compiler Extension: pragma.md
   - Plugin Development: plugin.md
 
