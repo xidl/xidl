@@ -21,7 +21,7 @@ serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
 
-xidl-jsonrpc = { version = "0.11.0", path = "../xidl-jsonrpc", default-features = false, features = [
+xidl-jsonrpc = { version = "0.12.0", path = "../xidl-jsonrpc", default-features = false, features = [
   "tokio",
 ] }
 miette = { version = "7.6.0", features = ["fancy"] }
