@@ -11,8 +11,6 @@ pub struct ArgsGenerate {
     pub client: bool,
     #[arg(long = "server", default_value_t = false)]
     pub server: bool,
-    #[arg(long = "ts", default_value_t = false)]
-    pub ts: bool,
     #[arg(long = "dry-run", default_value_t = false)]
     pub dry_run: bool,
     pub files: Vec<PathBuf>,

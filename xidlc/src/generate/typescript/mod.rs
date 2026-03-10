@@ -145,8 +145,7 @@ impl crate::jsonrpc::Codegen for TypescriptCodegen {
 
     async fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
         Ok(hashmap! {
-            "expand_interface" => false,
-            "format_typescript" => true
+            "expand_interface" => false
         })
     }
 

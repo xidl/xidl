@@ -11,7 +11,6 @@ pub struct Builder {
     output_filename: Option<PathBuf>,
     client: bool,
     server: bool,
-    ts: bool,
 }
 
 impl Default for Builder {
@@ -22,7 +21,6 @@ impl Default for Builder {
             output_filename: None,
             client: true,
             server: true,
-            ts: true,
         }
     }
 }
@@ -73,7 +71,6 @@ impl Builder {
             files: inputs.iter().map(|p| p.as_ref().to_path_buf()).collect(),
             client: self.client,
             server: self.server,
-            ts: self.ts,
             dry_run: false,
         };
 

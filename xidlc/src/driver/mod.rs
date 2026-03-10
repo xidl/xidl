@@ -45,7 +45,6 @@ impl Driver {
         let mut props = HashMap::new();
         props.insert("enable_client".into(), self.args.client.into());
         props.insert("enable_server".into(), self.args.server.into());
-        props.insert("enable_ts".into(), self.args.ts.into());
 
         for input in self.args.files {
             let source = fs::read_to_string(&input)?;

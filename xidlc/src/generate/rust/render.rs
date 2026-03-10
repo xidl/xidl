@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::utils::{format_timestamp_filter, rust_format_filter, strip_template_padding};
+use crate::generate::utils::{format_timestamp_filter, rust_format_filter};
 use minijinja::{Environment, Error, ErrorKind};
 use rust_embed::RustEmbed;
 use serde::Serialize;
@@ -45,7 +45,6 @@ impl RustRenderer {
         env.add_function("md5_14", |value: String| md5_prefix(value.as_bytes(), 14));
         env.add_function("md5_4", |value: String| md5_prefix(value.as_bytes(), 4));
         env.add_function("name_hash", |value: String| md5_prefix(value.as_bytes(), 4));
-        env.add_filter("rust", rust_format_filter);
         env.add_filter("rustfmt", rust_format_filter);
         env.add_filter("fmt_timestamp", format_timestamp_filter);
         env.add_global("opt", minijinja::Value::from_serialize(&attribute));
@@ -82,7 +81,7 @@ fn load_template(name: &str) -> std::result::Result<String, Error> {
             format!("template {name} is not valid utf-8: {err}"),
         )
     })?;
-    Ok(strip_template_padding(content))
+    Ok(content)
 }
 
 fn md5_prefix(input: &[u8], len: usize) -> Vec<u8> {

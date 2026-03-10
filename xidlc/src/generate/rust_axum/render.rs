@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::utils::{format_timestamp_filter, rust_format_filter, strip_template_padding};
+use crate::generate::utils::{format_timestamp_filter, rust_format_filter};
 use minijinja::{Environment, Error, ErrorKind};
 use rust_embed::RustEmbed;
 use serde::Serialize;
@@ -20,7 +20,6 @@ pub trait RustAxumRender {
 }
 
 pub struct RustAxumRenderer {
-    typescript: crate::generate::typescript::TypescriptRenderer,
     env: Environment<'static>,
 }
 
@@ -28,13 +27,9 @@ impl RustAxumRenderer {
     pub fn new() -> IdlcResult<Self> {
         let mut env = Environment::new();
         env.set_loader(|name| load_template(name).map(Some));
-        env.add_filter("rust", rust_format_filter);
         env.add_filter("rustfmt", rust_format_filter);
         env.add_filter("fmt_timestamp", format_timestamp_filter);
-        Ok(Self {
-            typescript: crate::generate::typescript::TypescriptRenderer::new()?,
-            env,
-        })
+        Ok(Self { env })
     }
 
     pub fn render_template<T: Serialize>(&self, template: &str, ctx: &T) -> IdlcResult<String> {
@@ -48,11 +43,6 @@ impl RustAxumRenderer {
     pub fn extend(&mut self, props: &HashMap<String, serde_json::Value>) {
         self.env
             .add_global("opt", minijinja::Value::from_serialize(props));
-        self.typescript.extend(props);
-    }
-
-    pub fn typescript(&self) -> &crate::generate::typescript::TypescriptRenderer {
-        &self.typescript
     }
 }
 
@@ -70,5 +60,5 @@ fn load_template(name: &str) -> std::result::Result<String, Error> {
             format!("template {name} is not valid utf-8: {err}"),
         )
     })?;
-    Ok(strip_template_padding(content))
+    Ok(content)
 }

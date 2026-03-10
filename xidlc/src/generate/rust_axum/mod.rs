@@ -38,46 +38,7 @@ pub fn generate(
         content,
     })];
 
-    let has_bidi_stream = has_bidi_stream(&spec);
-    let enable_ts = props
-        .get("enable_ts")
-        .and_then(|value| value.as_bool())
-        .unwrap_or(true)
-        && !has_bidi_stream;
-
-    if enable_ts {
-        let mut props = props.clone();
-        props.insert("typescript_mode".into(), "interface_only".into());
-        artifacts.push(Artifact::new_hir(ArtifactHir {
-            lang: "typescript".into(),
-            hir: spec.clone(),
-            props,
-        }));
-    }
-
-    artifacts.push(Artifact::new_hir(ArtifactHir {
-        lang: "openapi".into(),
-        hir: spec.clone(),
-        props: HashMap::new(),
-    }));
-
     let non_interface = strip_interfaces(spec);
-    if enable_ts {
-        let ts_types = crate::generate::typescript::TypescriptRender::render(
-            &non_interface,
-            file_name,
-            renderer.typescript(),
-            crate::generate::typescript::TsMode::TypesOnly,
-        )?;
-        artifacts.push(Artifact::new_file(ArtifactFile {
-            path: format!("{file_name}.d.ts"),
-            content: ts_types.types,
-        }));
-        artifacts.push(Artifact::new_file(ArtifactFile {
-            path: format!("{file_name}.zod.ts"),
-            content: ts_types.zod,
-        }));
-    }
     if !non_interface.0.is_empty() {
         let props = hashmap! {
             "enable_render_header" => false,
@@ -87,49 +48,13 @@ pub fn generate(
         };
 
         artifacts.push(Artifact::new_hir(ArtifactHir {
-            lang: "rs".into(),
+            lang: "rust".into(),
             hir: non_interface,
             props,
         }));
     }
 
     Ok(artifacts)
-}
-
-fn has_bidi_stream(spec: &hir::Specification) -> bool {
-    fn annotation_name(annotation: &hir::Annotation) -> Option<&str> {
-        match annotation {
-            hir::Annotation::Builtin { name, .. } => Some(name.as_str()),
-            hir::Annotation::ScopedName { name, .. } => {
-                name.name.last().map(|value| value.as_str())
-            }
-            _ => None,
-        }
-    }
-
-    spec.0.iter().any(|def| match def {
-        hir::Definition::InterfaceDcl(interface) => match &interface.decl {
-            hir::InterfaceDclInner::InterfaceDef(def) => def
-                .interface_body
-                .as_ref()
-                .map(|body| {
-                    body.0.iter().any(|export| match export {
-                        hir::Export::OpDcl(op) => op.annotations.iter().any(|annotation| {
-                            annotation_name(annotation)
-                                .map(|name| name.eq_ignore_ascii_case("bidi_stream"))
-                                .unwrap_or(false)
-                        }),
-                        _ => false,
-                    })
-                })
-                .unwrap_or(false),
-            _ => false,
-        },
-        hir::Definition::ModuleDcl(module) => {
-            has_bidi_stream(&hir::Specification(module.definition.clone()))
-        }
-        _ => false,
-    })
 }
 
 pub(crate) struct RustAxumCodegen;
@@ -143,10 +68,8 @@ impl crate::jsonrpc::Codegen for RustAxumCodegen {
     async fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
         Ok(hashmap! {
             "expand_interface" => false,
-            "format_typescript" => true,
             "enable_client" => true,
             "enable_server" => true,
-            "enable_ts" => true,
             "enable_render_header" => true,
             "enable_serialize" => true,
             "enable_deserialize" => true,

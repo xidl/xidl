@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::utils::{format_timestamp_filter, rust_format_filter, strip_template_padding};
+use crate::generate::utils::{format_timestamp_filter, rust_format_filter};
 use minijinja::{Environment, Error, ErrorKind};
 use rust_embed::RustEmbed;
 use serde::Serialize;
@@ -61,5 +61,5 @@ fn load_template(name: &str) -> std::result::Result<String, Error> {
             format!("template {name} is not valid utf-8: {err}"),
         )
     })?;
-    Ok(strip_template_padding(content))
+    Ok(content)
 }
