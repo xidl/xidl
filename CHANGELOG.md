@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.0](https://github.com/xidl/xidl/compare/v0.10.0...v0.11.0) (2026-03-10)
+
+
+### Features
+
+* **openapi:** support progma xidlc service ([649f542](https://github.com/xidl/xidl/commit/649f542540940b2ccf013e72c2613243ce54f87c))
+
 ## [0.10.0](https://github.com/xidl/xidl/compare/v0.9.0...v0.10.0) (2026-03-09)
 
 
