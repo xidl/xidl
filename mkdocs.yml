@@ -1,4 +1,5 @@
 site_name: XIDL
+site_url: https://xidl.github.io/xidl/
 
 nav:
   - Home: index.md

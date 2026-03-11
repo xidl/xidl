@@ -57,7 +57,6 @@ pnpm start
 - `xidlc`: eXtensible IDL compiler.
 - `xidl-build`: xidlc builder derive.
 - `xidl-jsonrpc`: xidlc rust jsonrpc framework.
-- `xidl-playground`: xidlc playground.
 - `xidl-rust-axum`: xidlc rust axum codegen framework.
 - `xidl-typeobject`: omg dds typeobject.
 - `xidl-xcdr`: omg dds xcdr.

@@ -52,11 +52,6 @@
           "jsonpath": "$.dependencies.xidl-jsonrpc.version"
         },
         {
-          "path": "xidl-playground/package.json",
-          "type": "json",
-          "jsonpath": "$.version"
-        },
-        {
           "path": "Cargo.lock",
           "type": "toml",
           "jsonpath": "$.package[?(@.name.value=='xidl-build')].version"
