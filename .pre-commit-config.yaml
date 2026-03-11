@@ -1,5 +1,5 @@
 # See https://pre-commit.com/hooks.html for more hooks
-exclude: ^(tests/snapshots)|(xidl-xcdr/include/xidl_xcdr.h)|(.*.snap)|(xidlc-examples/api/.*.json)$
+exclude: ^(tests/snapshots)|(xidl-xcdr/include/xidl_xcdr.h)|(.*.snap)|(xidlc-examples/api/.*.json)|(CHANGELOG.md)$
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v3.2.0
@@ -33,3 +33,9 @@ repos:
       - id: biome-check
         additional_dependencies: ["@biomejs/biome@2.2.6"]
         exclude: "CHANGELOG.md"
+
+  - repo: https://github.com/bneijt/deno-pre-commit
+    rev: 2.2.5
+    hooks:
+      - id: deno-fmt
+        exclude_types: ["javascript", "jsx", "ts", "tsx", "json"]

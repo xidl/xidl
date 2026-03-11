@@ -43,9 +43,11 @@ The following annotations are supported:
 Parameter annotations:
 
 - `@path` (parameter-level source declaration)
-- `@path("name")` (parameter-level source declaration with explicit route/query name)
+- `@path("name")` (parameter-level source declaration with explicit route/query
+  name)
 - `@query` (parameter-level source declaration)
-- `@query("name")` (parameter-level source declaration with explicit route/query name)
+- `@query("name")` (parameter-level source declaration with explicit route/query
+  name)
 
 Rules:
 
@@ -53,11 +55,13 @@ Rules:
   are mutually exclusive:
   - A method can have only one of
     `@get/@post/@put/@patch/@delete/@head/@options`.
-  - Using more than one verb annotation on the same method is invalid and
-    should raise an error.
+  - Using more than one verb annotation on the same method is invalid and should
+    raise an error.
 - If no HTTP verb annotation is present, behavior is equivalent to `@post`.
-- Route path can come from a verb annotation `path` argument or from `@path(...)`.
-- A method may define multiple paths, and repeated path declarations are allowed:
+- Route path can come from a verb annotation `path` argument or from
+  `@path(...)`.
+- A method may define multiple paths, and repeated path declarations are
+  allowed:
   - Multiple `@path(...)`
   - Multiple path declarations in supported annotation forms
   - Mixed usage of both sources
@@ -70,9 +74,9 @@ Rules:
     - `interface`-level annotations define defaults for all methods.
     - method-level annotations override interface-level defaults.
     - if neither is specified, use `application/json`.
-  - This RFC defines the JSON mapping as the baseline profile. Other media
-    types may be added in future revisions without changing the core HTTP
-    source/route rules.
+  - This RFC defines the JSON mapping as the baseline profile. Other media types
+    may be added in future revisions without changing the core HTTP source/route
+    rules.
 - `@head` has additional constraints:
   - return type MUST be `void`
   - parameters MUST be request-side only (`in` or omitted direction)
@@ -87,14 +91,13 @@ Rules:
 
 - Default HTTP method: `POST` (equivalent to `@post` when omitted).
 - Default route:
-  - If explicit method path is not provided, route is auto-generated from
-    method and parameter annotations.
+  - If explicit method path is not provided, route is auto-generated from method
+    and parameter annotations.
   - Base route is exactly `/{method_name}` (no interface/module prefix).
   - `@path` parameters are appended as path template segments.
-  - `@query` parameters do not change the route path; they are resolved as
-    query parameters at request handling time.
-  - Example:
-    `void get_name(@query string name)` -> `POST "/get_name"`.
+  - `@query` parameters do not change the route path; they are resolved as query
+    parameters at request handling time.
+  - Example: `void get_name(@query string name)` -> `POST "/get_name"`.
 
 ### 4.2 Explicit Routes and Multi-Route
 
@@ -260,27 +263,27 @@ Name binding rules for `@path` / `@query`:
 
 Constraints:
 
-- A Path bound name should match a route template variable name.
-  Non-matching cases are invalid and should raise an error.
+- A Path bound name should match a route template variable name. Non-matching
+  cases are invalid and should raise an error.
 - A parameter can have only one source.
 - If a method has multiple bound routes, a Path bound name must appear in every
   bound route template of that method.
 - Every route template variable `{name}` must be bound by exactly one
   request-side parameter (`in`/`inout`) resolved to Path source.
-- Catch-all template variable `{*name}` follows the same binding rule as `{name}`.
+- Catch-all template variable `{*name}` follows the same binding rule as
+  `{name}`.
 - A route template may contain at most one catch-all variable.
 - Catch-all variable SHOULD appear at the end of route template.
-- Query-template variable names in `{?name1,name2,...}` must be bound by
-  exactly one request-side parameter resolved to Query source.
-- A route template may contain at most one query-template suffix (`{?...}`),
-  and it SHOULD appear at the end of route template.
+- Query-template variable names in `{?name1,name2,...}` must be bound by exactly
+  one request-side parameter resolved to Query source.
+- A route template may contain at most one query-template suffix (`{?...}`), and
+  it SHOULD appear at the end of route template.
 
 ## 6. Request Encoding
 
-Encoding is selected by `@Consumes`, defaulting to `application/json`.
-This RFC specifies JSON request encoding behavior.
-When media-type negotiation cannot be satisfied, implementations MUST return an
-error response (see section 10).
+Encoding is selected by `@Consumes`, defaulting to `application/json`. This RFC
+specifies JSON request encoding behavior. When media-type negotiation cannot be
+satisfied, implementations MUST return an error response (see section 10).
 
 ### 6.1 Query Encoding
 
@@ -300,15 +303,15 @@ Body parameters are encoded by parameter count:
 Examples:
 
 - Single parameter: `create(User req)` -> body is `{"id":1,"name":"a"}`
-- Multiple parameters: `create(string name, uint32 age)` ->
-  body is `{"name":"a","age":18}`
+- Multiple parameters: `create(string name, uint32 age)` -> body is
+  `{"name":"a","age":18}`
 
 ## 7. Response Encoding
 
-Encoding is selected by `@Produces`, defaulting to `application/json`.
-This RFC specifies JSON response encoding behavior.
-When response media-type negotiation cannot be satisfied, implementations MUST
-return an error response (see section 10).
+Encoding is selected by `@Produces`, defaulting to `application/json`. This RFC
+specifies JSON response encoding behavior. When response media-type negotiation
+cannot be satisfied, implementations MUST return an error response (see section
+10).
 
 Response rules:
 
@@ -393,7 +396,8 @@ issues, and return consistent HTTP errors for runtime request issues.
 
 ### 10.1 Build/Registration-Time Validation
 
-The following are invalid and should raise mapping errors before serving traffic:
+The following are invalid and should raise mapping errors before serving
+traffic:
 
 - More than one HTTP verb annotation on one method.
 - `@path` parameter names that do not appear in any bound route template.
@@ -405,14 +409,16 @@ The following are invalid and should raise mapping errors before serving traffic
 - Any query-template variable that has no matching request-side parameter bound
   to Query source.
 - A route template containing more than one query-template suffix (`{?...}`).
-- Duplicate final route bindings (`HTTP method + normalized path`) across methods.
+- Duplicate final route bindings (`HTTP method + normalized path`) across
+  methods.
 - Any `@head` method with non-`void` return type.
 - Any `@head` method containing `out` or `inout` parameters.
 
 ### 10.2 Runtime Request Validation
 
 - Missing required Path/Query parameters: `400 Bad Request`.
-- Type conversion failures (for example `uint32` parse failure): `400 Bad Request`.
+- Type conversion failures (for example `uint32` parse failure):
+  `400 Bad Request`.
 - Unsupported request media type for `@Consumes`: `415 Unsupported Media Type`.
 - Requested response media type not satisfiable for `@Produces`:
   `406 Not Acceptable`.

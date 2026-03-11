@@ -23,8 +23,8 @@ IDL definitions are ignored in JSON-RPC output.
 - `fixed` maps to `f64`.
 - Other scalar and enum mappings follow `idl2rust.md`.
 
-All interface parameters are passed by value in JSON-RPC (no `&` or `&mut`),
-and `in/out/inout` attributes are currently ignored.
+All interface parameters are passed by value in JSON-RPC (no `&` or `&mut`), and
+`in/out/inout` attributes are currently ignored.
 
 ## Interfaces
 

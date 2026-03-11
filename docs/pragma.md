@@ -71,7 +71,8 @@ Effect:
 
 ## Scope and precedence
 
-- Pragmas are applied in file order; later values override earlier values of the same kind.
+- Pragmas are applied in file order; later values override earlier values of the
+  same kind.
 - `package` and `version` only affect OpenAPI generation.
 - `XCDR1`, `XCDR2`, and `serialize(...)` affect serialization configuration.
 - Values may be quoted with single or double quotes; outer quotes are trimmed.

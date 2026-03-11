@@ -7,7 +7,8 @@ does not rely on template definitions.
 ## General
 
 - IDL identifiers map directly to Rust identifiers.
-- Rust keywords are escaped using raw identifiers (e.g., `type` becomes `r#type`).
+- Rust keywords are escaped using raw identifiers (e.g., `type` becomes
+  `r#type`).
 - IDL modules map to Rust modules of the same name.
 - IDL declarations outside any module map to Rust items at module root.
 
@@ -346,8 +347,8 @@ Required methods:
 
 ## Interfaces
 
-IDL interfaces are rendered into Rust traits with method signatures derived
-from operation and attribute declarations.
+IDL interfaces are rendered into Rust traits with method signatures derived from
+operation and attribute declarations.
 
 - `in` parameters are passed by value for value types (integers, floats, char,
   wchar, bool) and by reference for others.
@@ -374,9 +375,10 @@ interface Calc {
 
 ## Derive Annotations
 
-xidlc supports a builtin `@derive(...)` annotation to attach Rust `#[derive(...)]`
-attributes to generated types. This annotation is collected from the IDL element
-and applied to structs, unions, bitsets, and bitmasks (not enums).
+xidlc supports a builtin `@derive(...)` annotation to attach Rust
+`#[derive(...)]` attributes to generated types. This annotation is collected
+from the IDL element and applied to structs, unions, bitsets, and bitmasks (not
+enums).
 
 Examples:
 

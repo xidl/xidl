@@ -4,7 +4,8 @@ This directory contains IDL-driven snapshot tests for code generation.
 
 ## Layout
 
-- `c/`, `cpp/`, `rust/`, `ts/`, `axum/`, `openapi/`, `openrpc/`: input `.idl` test cases
+- `c/`, `cpp/`, `rust/`, `ts/`, `axum/`, `openapi/`, `openrpc/`: input `.idl`
+  test cases
 - `snapshots/`: generated `insta` snapshots
 - `codegen_snapshot.rs`: test runner that discovers cases automatically
 

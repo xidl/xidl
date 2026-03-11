@@ -1,7 +1,7 @@
 # Plugin Development Guide
 
-This project uses JSON-RPC 2.0 for plugins. `xidlc` launches the plugin as a child
-process and communicates over stdin/stdout with one JSON message per line.
+This project uses JSON-RPC 2.0 for plugins. `xidlc` launches the plugin as a
+child process and communicates over stdin/stdout with one JSON message per line.
 
 ## Conventions
 
@@ -13,15 +13,13 @@ process and communicates over stdin/stdout with one JSON message per line.
 
 Plugins must implement two methods:
 
-1) `parser_properties`
-Returns parser options. Currently:
+1. `parser_properties` Returns parser options. Currently:
 
 ```json
-{"expand_interface": true}
+{ "expand_interface": true }
 ```
 
-2) `generate`
-Params:
+2. `generate` Params:
 
 ```json
 {
@@ -35,7 +33,7 @@ Returns:
 ```json
 {
   "files": [
-    {"filename": "xx", "filecontent": "yy"}
+    { "filename": "xx", "filecontent": "yy" }
   ]
 }
 ```
@@ -45,13 +43,13 @@ Returns:
 `parser_properties` request:
 
 ```json
-{"jsonrpc":"2.0","id":1,"method":"parser_properties"}
+{ "jsonrpc": "2.0", "id": 1, "method": "parser_properties" }
 ```
 
 Response:
 
 ```json
-{"jsonrpc":"2.0","id":1,"result":{"expand_interface":true}}
+{ "jsonrpc": "2.0", "id": 1, "result": { "expand_interface": true } }
 ```
 
 `generate` request:
@@ -63,18 +61,27 @@ Response:
 Response:
 
 ```json
-{"jsonrpc":"2.0","id":2,"result":{"files":[{"filename":"out.txt","filecontent":"..."}]}}
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": { "files": [{ "filename": "out.txt", "filecontent": "..." }] }
+}
 ```
 
 Error response:
 
 ```json
-{"jsonrpc":"2.0","id":2,"error":{"code":-32000,"message":"...","data":null}}
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "error": { "code": -32000, "message": "...", "data": null }
+}
 ```
 
 ## Rust Plugin Example
 
-Generate the IPC bindings from `ipc.idl`, then use the generated `Codegen` interface in your plugin:
+Generate the IPC bindings from `ipc.idl`, then use the generated `Codegen`
+interface in your plugin:
 
 ```sh
 idlc --lang rust_jsonrpc --out-dir src ipc.idl

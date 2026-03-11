@@ -86,11 +86,11 @@ constexpr omg::types::wstring_view ws{ L"Hello World" };
 
 ### Floating-Point Types
 
-| IDL Type    | C++ Type   |
-| ----------- | ---------- |
-| float       | float      |
-| double      | double     |
-| long double | long double|
+| IDL Type    | C++ Type    |
+| ----------- | ----------- |
+| float       | float       |
+| double      | double      |
+| long double | long double |
 
 ### Other Basic Types
 
@@ -98,14 +98,16 @@ constexpr omg::types::wstring_view ws{ L"Hello World" };
 - `wchar` -> `wchar_t`
 - `boolean` -> `bool`
 - `octet` -> `uint8_t`
-- Default values: integers and floats `0`, `bool` is `false`, `char/wchar` is `0`.
+- Default values: integers and floats `0`, `bool` is `false`, `char/wchar` is
+  `0`.
 
 ## Template Types
 
 ### Sequences
 
 - `sequence<T>` maps to `std::vector<T>` or `omg::types::sequence<T>`.
-- Bounded sequences map to `std::vector<T>` or `omg::types::bounded_sequence<T, N>`.
+- Bounded sequences map to `std::vector<T>` or
+  `omg::types::bounded_sequence<T, N>`.
 - Implementations must define `omg::types::sequence<T>` and
   `omg::types::bounded_sequence<T, N>` and support conversion to/from
   `std::vector<T>`.
@@ -127,8 +129,8 @@ using V2 = omg::types::bounded_sequence<int32_t, 3>;
 - `wstring` -> `std::wstring` or `omg::types::wstring`.
 - Bounded strings use `omg::types::bounded_string<N>` / `bounded_wstring<N>`.
 - Implementations must define `omg::types::string`, `bounded_string<N>`,
-  `omg::types::wstring`, and `bounded_wstring<N>` and support conversion
-  to/from `std::string` / `std::wstring`.
+  `omg::types::wstring`, and `bounded_wstring<N>` and support conversion to/from
+  `std::string` / `std::wstring`.
 - Bounded strings require a bounds check (often at serialization time).
 
 ```idl
@@ -219,8 +221,8 @@ struct ChildStruct : MyStruct {
   discriminator parameter.
 - If an implicit default exists, `_default()` is provided.
 - A `swap(Union&, Union&)` is provided in the class scope.
-- Discriminator types include integral, enum, `char`, `wchar`, `boolean`,
-  and (with extended data types) `octet`, `int8`, `uint8`.
+- Discriminator types include integral, enum, `char`, `wchar`, `boolean`, and
+  (with extended data types) `octet`, `int8`, `uint8`.
 
 ```idl
 union AUnion switch (octet) {
@@ -247,8 +249,8 @@ public:
 ### Enums
 
 - `enum` maps to a scoped `enum class`.
-- If `@bit_bound` is present, the enum underlying type is:
-  `int8_t` (1..8), `int16_t` (9..16), `int32_t` (17..32), `int64_t` (33..64).
+- If `@bit_bound` is present, the enum underlying type is: `int8_t` (1..8),
+  `int16_t` (9..16), `int32_t` (17..32), `int64_t` (33..64).
 - If `@value` is present, the enumerator value is set accordingly.
 
 ```idl
@@ -473,20 +475,20 @@ struct MyBitMask {
 ### 8-bit and Explicitly-Named Integers
 
 | IDL Type | C++ Type |
-| --- | --- |
-| int8 | int8_t |
-| uint8 | uint8_t |
-| int16 | int16_t |
-| uint16 | uint16_t |
-| int32 | int32_t |
-| uint32 | uint32_t |
-| int64 | int64_t |
-| uint64 | uint64_t |
+| -------- | -------- |
+| int8     | int8_t   |
+| uint8    | uint8_t  |
+| int16    | int16_t  |
+| uint16   | uint16_t |
+| int32    | int32_t  |
+| uint32   | uint32_t |
+| int64    | int64_t  |
+| uint64   | uint64_t |
 
 ## Anonymous Types
 
-- Anonymous types do not change the mapping rules. Use `decltype` in C++ if
-  you need the declared type.
+- Anonymous types do not change the mapping rules. Use `decltype` in C++ if you
+  need the declared type.
 
 ## Annotations Impacting Mapping
 

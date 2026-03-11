@@ -9,8 +9,8 @@ Reference specifications:
 
 ## 1. Scope
 
-This document defines a streaming profile on top of the XIDL HTTP mapping.
-It extends unary HTTP APIs with long-lived request/response streams.
+This document defines a streaming profile on top of the XIDL HTTP mapping. It
+extends unary HTTP APIs with long-lived request/response streams.
 
 This document defines:
 
@@ -66,7 +66,8 @@ Validation:
   - `{name}` (path variable)
   - `{*name}` (catch-all path variable)
   - `{?name1,name2,...}` (query-template variables)
-- Bound names must be resolved by request-side parameters using `@path`/`@query`.
+- Bound names must be resolved by request-side parameters using
+  `@path`/`@query`.
 
 Example:
 
@@ -273,7 +274,8 @@ Attributes are not streamed by default.
 
 Rule:
 
-- Only attributes marked with `@server_stream` are mapped to change-notification streams.
+- Only attributes marked with `@server_stream` are mapped to change-notification
+  streams.
 - The generated watch operation is server-stream (`@server_stream`) only.
 - Client-side attribute-change streaming is not supported in v1.
 - Attribute change notification should use SSE in v1 (`@stream_codec("sse")`).

@@ -180,8 +180,8 @@ typedef enum Color {
 ### Bitsets
 
 - IDL `bitset` maps to a C `struct` with fields for each bitfield.
-- Bitfield widths are not represented in the C type layout; widths are shown
-  in comments as `/* pos N */`.
+- Bitfield widths are not represented in the C type layout; widths are shown in
+  comments as `/* pos N */`.
 - Helpers for set operations are generated (insert/remove/toggle/etc.).
 
 ```idl
@@ -247,5 +247,5 @@ void Calc_set_attribute_name(char * name);
 
 ## XCDR Support
 
-- For structs, unions, enums, bitsets, and bitmasks, the C generator also
-  emits XCDR serialization helpers in separate `*_xcdr.h/.c` outputs.
+- For structs, unions, enums, bitsets, and bitmasks, the C generator also emits
+  XCDR serialization helpers in separate `*_xcdr.h/.c` outputs.

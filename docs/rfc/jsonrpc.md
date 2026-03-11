@@ -150,8 +150,8 @@ Response mapping rules (together with return value):
 
 ## 6. Response Mapping
 
-JSON-RPC `result` is always an object, shaped from the outputs set
-(return + `out` + `inout`):
+JSON-RPC `result` is always an object, shaped from the outputs set (return +
+`out` + `inout`):
 
 - if output count is `0`: `result` is `{}`
 - if output count is `1` and it is return value only:
@@ -171,8 +171,8 @@ Profile note:
 
 - DDS-RPC basic topic mapping describes synthesized `In`/`Out` structures and a
   `Result` union (including names like `dummy`, `return_`, and `result`).
-- This JSON-RPC RFC is an application-level JSON profile and intentionally
-  maps directly to JSON `params` / `result` objects instead of mirroring those
+- This JSON-RPC RFC is an application-level JSON profile and intentionally maps
+  directly to JSON `params` / `result` objects instead of mirroring those
   synthesized topic-type names verbatim.
 
 ## 7. Attribute Mapping
@@ -180,12 +180,11 @@ Profile note:
 Every attribute in the interface maps to implied IDL operations using the
 following rules:
 
-1. Each attribute `<attribute-name>` maps to a pair of implied operations in
-   the same interface:
+1. Each attribute `<attribute-name>` maps to a pair of implied operations in the
+   same interface:
    - `get_attribute_<attribute-name>`
-   - `set_attribute_<attribute-name>`
-   It is illegal to define user operations with the same implied names for the
-   same attribute.
+   - `set_attribute_<attribute-name>` It is illegal to define user operations
+     with the same implied names for the same attribute.
 2. `get_attribute_<attribute-name>`:
    - return type is the attribute type
    - accepts no arguments
