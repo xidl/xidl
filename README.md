@@ -1,38 +1,47 @@
-# XIDL
+XIDL (eXtensible IDL) is an OMG IDL-based code generator. The core compiler is `xidlc`.
 
-XIDL (eXtensible IDL) is an OMG IDL-based code generator. It supports targets
-such as `c`, `cpp`, `rust`, `rust-axum`, and `rust-jsonrpc`. XIDL is
-plugin-capable and uses JSON-RPC as the plugin communication protocol.
+[![publish-release](https://github.com/xidl/xidl/actions/workflows/publish-release.yml/badge.svg)](https://github.com/xidl/xidl/actions/workflows/publish-release.yml)
+[![publish-crates](https://github.com/xidl/xidl/actions/workflows/publish-crates.yml/badge.svg)](https://github.com/xidl/xidl/actions/workflows/publish-crates.yml)
+[![deploy-docs](https://github.com/xidl/xidl/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/xidl/xidl/actions/workflows/deploy-docs.yml)
+![Crates.io Version](<https://img.shields.io/crates/v/xidlc?label=xidlc(crates.io)>)
+![Crates.io Version](<https://img.shields.io/crates/v/xidl-build?label=xidl-build(crates.io)>)
+![GitHub Release](https://img.shields.io/github/v/release/xidl/xidl)
+[![GitHub](https://img.shields.io/badge/View_on-GitHub-181717?logo=github)](https://github.com/xidl/xidl)
 
-## Features
+## Installation
 
-- Multi-language code generation from IDL
-- Layered generation pipeline (`typed_ast` / `hir` / target code)
-- Pluggable codegen engines via JSON-RPC
-- Built-in formatting for IDL / Rust / C++ / TypeScript
+=== "Release (macOS / Linux)"
+
+    ```bash
+    curl --proto '=https' --tlsv1.2 -sSf https://xidl.github.io/xidl/public/install.sh | sh
+    ```
+
+=== "Release (Windows PowerShell)"
+
+    ```powershell
+    iwr -useb https://xidl.github.io/xidl/public/install.ps1 | iex
+    ```
+
+=== "Cargo"
+
+    ```bash
+    cargo install xidlc
+    ```
+
+=== "Cargo Binstall"
+
+    ```bash
+    cargo binstall xidlc
+    ```
 
 ## Quick Start
 
 ```bash
-# Build
-cargo build
-
-# Run tests
-cargo test
-
 # Generate code (example)
 xidlc -l rust -o out your.idl
 ```
 
-## Docs (Docusaurus)
-
-```bash
-cd website
-pnpm install
-pnpm start
-```
-
-## Built-in Targets (current)
+## Built-in Targets
 
 - `c`
 - `cpp`
@@ -40,24 +49,3 @@ pnpm start
 - `rust-jsonrpc`
 - `rust-axum`
 - `ts` / `typescript`
-
-## Plugin Model
-
-- During generation, `xidlc` starts a codegen engine based on the target
-  language.
-- Built-in engines run in-process; unknown targets can be handled by external
-  `xidl-<lang>` plugins.
-- Plugins communicate with the host via JSON-RPC; see
-  `xidlc/src/jsonrpc/ipc.idl` for the core interface.
-
-## Repository Layout
-
-- `xidl-parser-derive`: tree-sitter helper derive.
-- `xidl-parser`: tree-sitter parser.
-- `xidlc`: eXtensible IDL compiler.
-- `xidl-build`: xidlc builder derive.
-- `xidl-jsonrpc`: xidlc rust jsonrpc framework.
-- `xidl-rust-axum`: xidlc rust axum codegen framework.
-- `xidl-typeobject`: omg dds typeobject.
-- `xidl-xcdr`: omg dds xcdr.
-- `xidlc-examples`: examples

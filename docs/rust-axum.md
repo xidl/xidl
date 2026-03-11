@@ -1,1 +1,1 @@
-../xidl-rust-axum/README.md
+{% include-markdown "../xidl-rust-axum/README.md" %}

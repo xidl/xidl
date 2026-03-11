@@ -1,1 +1,1 @@
-../README.md
+{% include-markdown "../README.md" %}

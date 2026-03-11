@@ -2,21 +2,24 @@ site_name: XIDL
 site_url: https://xidl.github.io/xidl/
 
 nav:
-  - Home: index.md
+  - Overview: index.md
+  - axum: rust-axum.md
+  - rust-jsonrpc: rust-jsonrpc.md
+  - OpenAPI: openapi.md
+
   - RFC:
       - HTTP: rfc/http.md
       - HTTP Stream: rfc/http-stream.md
       - JSONRPC: rfc/jsonrpc.md
       - JSONRPC Stream: rfc/jsonrpc-stream.md
-  - XIDLC:
-      - axum: rust-axum.md
-      - rust-jsonrpc: rust-jsonrpc.md
-      - OpenAPI: openapi.md
-  - Compiler Extension: pragma.md
-  - Plugin Development: plugin.md
+  - Development:
+      - Plugin Development: plugin.md
+      - Compiler Spec: architecture.md
+      - Compiler Extensions: pragma.md
 
 theme:
   name: material
+  language: en
   palette:
     # Palette toggle for automatic mode
     - media: "(prefers-color-scheme)"
@@ -49,6 +52,8 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
 
 plugins:
   - search
