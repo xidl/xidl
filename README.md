@@ -1,4 +1,9 @@
-XIDL (eXtensible IDL) is an OMG IDL-based code generator. The core compiler is `xidlc`.
+XIDL (eXtensible IDL) is an OMG IDL-based code generator. It generates
+C/C++/Rust/Typescript code and also supports
+[HTTP](docs/rfc/http.md)/[JSONRPC](docs/rfc/jsonrpc.md).
+
+> Currently,
+> [HTTP-STREAM](docs/rfc/http-stream.md)/[JSONRPC-STREAM](docs/rfc/jsonrpc-stream.md) are still in an implementation/experimental stage.
 
 [![publish-release](https://github.com/xidl/xidl/actions/workflows/publish-release.yml/badge.svg)](https://github.com/xidl/xidl/actions/workflows/publish-release.yml)
 [![publish-crates](https://github.com/xidl/xidl/actions/workflows/publish-crates.yml/badge.svg)](https://github.com/xidl/xidl/actions/workflows/publish-crates.yml)
@@ -37,7 +42,7 @@ XIDL (eXtensible IDL) is an OMG IDL-based code generator. The core compiler is `
 ## Quick Start
 
 ```bash
-# Generate code (example)
+# Generate code
 xidlc -l rust -o out your.idl
 ```
 
