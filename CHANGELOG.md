@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.13.0](https://github.com/xidl/xidl/compare/v0.12.0...v0.13.0) (2026-03-11)
+
+
+### Features
+
+* remove playground ([bae5e45](https://github.com/xidl/xidl/commit/bae5e451a4947b22ca585a6f5d850248bc048774))
+* **xidlc:** dont't generate ts and openapi in axum ([b86dd13](https://github.com/xidl/xidl/commit/b86dd131dbc54fdff55eaf1680385d480d1b3de0))
+* **xidlc:** generate service code by default ([d03ccf6](https://github.com/xidl/xidl/commit/d03ccf6f00467ccba89be6d5bf6645d7f73424c3))
+
 ## [0.12.0](https://github.com/xidl/xidl/compare/v0.11.0...v0.12.0) (2026-03-10)
 
 
