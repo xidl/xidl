@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.0](https://github.com/xidl/xidl/compare/v0.15.0...v0.16.0) (2026-03-12)
+
+
+### Features
+
+* add [@http](https://github.com/http)(rename) for field serialization ([d7cb3c8](https://github.com/xidl/xidl/commit/d7cb3c88783f0b115d585a4fd7acbb8120b21697))
+
 ## [0.15.0](https://github.com/xidl/xidl/compare/v0.14.0...v0.15.0) (2026-03-12)
 
 
