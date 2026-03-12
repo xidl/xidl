@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.0](https://github.com/xidl/xidl/compare/v0.16.0...v0.17.0) (2026-03-12)
+
+
+### Features
+
+* add [@name](https://github.com/name) field rename ([bef6497](https://github.com/xidl/xidl/commit/bef64973f20eae1f42eab971757a2049ba0945ec))
+
 ## [0.16.0](https://github.com/xidl/xidl/compare/v0.15.0...v0.16.0) (2026-03-12)
 
 
