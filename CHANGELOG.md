@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.0](https://github.com/xidl/xidl/compare/v0.13.0...v0.14.0) (2026-03-12)
+
+
+### Features
+
+* **http:** add [@header](https://github.com/header) support ([d01783a](https://github.com/xidl/xidl/commit/d01783a207c5a90cc2ea442670925e85d3755c5e))
+
 ## [0.13.0](https://github.com/xidl/xidl/compare/v0.12.0...v0.13.0) (2026-03-11)
 
 
