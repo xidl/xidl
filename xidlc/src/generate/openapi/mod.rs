@@ -785,9 +785,12 @@ fn parameter_schema(
 fn schema_for_struct(members: &[hir::Member]) -> RefOr<Schema> {
     let mut object = ObjectBuilder::new().schema_type(Type::Object);
     for member in members {
+        let http_rename = http_rename(&member.annotations);
         let optional = member.is_optional();
         for decl in &member.ident {
-            let name = declarator_name(decl);
+            let name = http_rename
+                .clone()
+                .unwrap_or_else(|| declarator_name(decl));
             let schema = schema_for_decl(&member.ty, decl);
             object = object.property(name.clone(), schema);
             if !optional {
@@ -1132,6 +1135,24 @@ fn has_optional_annotation(annotations: &[hir::Annotation]) -> bool {
             .map(|name| name.eq_ignore_ascii_case("optional"))
             .unwrap_or(false)
     })
+}
+
+fn http_rename(annotations: &[hir::Annotation]) -> Option<String> {
+    for annotation in annotations {
+        let Some(name) = annotation_name(annotation) else {
+            continue;
+        };
+        if !name.eq_ignore_ascii_case("http") {
+            continue;
+        }
+        let value = annotation_params(annotation)
+            .map(normalize_params)
+            .and_then(|params| params.get("rename").cloned());
+        if value.is_some() {
+            return value;
+        }
+    }
+    None
 }
 
 fn normalize_params(params: &hir::AnnotationParams) -> HashMap<String, String> {

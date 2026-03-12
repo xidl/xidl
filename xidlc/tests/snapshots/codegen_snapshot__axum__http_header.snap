@@ -109,7 +109,7 @@ pub mod test{
             let header_str = header_value
             .to_str()
             .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
-            let age:u32 = xidl_rust_axum::serde_json::from_str(header_str)
+            let age:u32 = header_str.parse()
             .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
             let mut cookie_map: ::std::collections::HashMap<String,Vec<String>> = ::std::collections::HashMap::new();
             for header_value in headers.get_all("cookie").iter(){
@@ -282,8 +282,7 @@ pub mod test{
             "X-Age".as_bytes(),
             )
             .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
-            let header_value_str = xidl_rust_axum::serde_json::to_string(&age)
-            .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+            let header_value_str = age.to_string();
             let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
             &header_value_str,
             )

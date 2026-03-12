@@ -559,7 +559,7 @@ http_header.d.ts
 export namespace test{
     export interface User{
         id : number;
-        name : string;
+        full_name : string;
     }
 }
 ===============
@@ -664,7 +664,7 @@ export namespace test{
 
         ).nonnegative(
 
-        ), name : z.string(
+        ), full_name : z.string(
 
         ),
     }

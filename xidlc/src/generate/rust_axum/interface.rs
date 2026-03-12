@@ -91,9 +91,11 @@ struct ParamContext {
     header_is_multi: bool,
     header_item_ty: String,
     header_item_is_string: bool,
+    header_item_is_primitive: bool,
     cookie_is_multi: bool,
     cookie_item_ty: String,
     cookie_item_is_string: bool,
+    cookie_item_is_primitive: bool,
 }
 
 struct RouteTemplate {
@@ -289,6 +291,7 @@ fn render_op(
         let name = rust_ident(&param.declarator.0);
         let direction = param_direction(param.attr.as_ref());
         if matches!(direction, ParamDirection::Out | ParamDirection::InOut) {
+            let http_rename = http_rename(&param.annotations);
             response_params.push(ParamContext {
                 name: name.clone(),
                 raw_name: param.declarator.0.clone(),
@@ -296,13 +299,18 @@ fn render_op(
                 path_template_name: String::new(),
                 ty: ty.clone(),
                 source: String::new(),
-                serde_rename: serde_rename(&param.declarator.0, &name),
+                serde_rename: http_rename
+                    .as_ref()
+                    .and_then(|value| serde_rename(value, &name))
+                    .or_else(|| serde_rename(&param.declarator.0, &name)),
                 header_is_multi: false,
                 header_item_ty: ty.clone(),
                 header_item_is_string: false,
+                header_item_is_primitive: false,
                 cookie_is_multi: false,
                 cookie_item_ty: ty.clone(),
                 cookie_item_is_string: false,
+                cookie_item_is_primitive: false,
             });
         }
         if matches!(direction, ParamDirection::Out) {
@@ -329,8 +337,9 @@ fn render_op(
                 param.declarator.0, wire_name, op.ident
             )));
         }
+        let http_rename = http_rename(&param.annotations);
         let serde_name = if matches!(source, ParamSource::Body) {
-            param.declarator.0.clone()
+            http_rename.clone().unwrap_or_else(|| param.declarator.0.clone())
         } else {
             wire_name.clone()
         };
@@ -351,9 +360,11 @@ fn render_op(
             header_is_multi: header_is_multi(&param.ty),
             header_item_ty: header_item_ty(&param.ty),
             header_item_is_string: header_item_is_string(&param.ty),
+            header_item_is_primitive: header_item_is_primitive(&param.ty),
             cookie_is_multi: cookie_is_multi(&param.ty),
             cookie_item_ty: cookie_item_ty(&param.ty),
             cookie_item_is_string: cookie_item_is_string(&param.ty),
+            cookie_item_is_primitive: cookie_item_is_primitive(&param.ty),
         };
         request_params.push(ctx.clone());
         match source {
@@ -638,9 +649,11 @@ fn render_attr(
                             header_is_multi: false,
                             header_item_ty: param.clone(),
                             header_item_is_string: false,
+                            header_item_is_primitive: false,
                             cookie_is_multi: false,
                             cookie_item_ty: param.clone(),
                             cookie_item_is_string: false,
+                            cookie_item_is_primitive: false,
                         };
                         out.push(MethodContext {
                             name: setter.clone(),
@@ -766,9 +779,11 @@ fn render_attr(
                         header_is_multi: false,
                         header_item_ty: param.clone(),
                         header_item_is_string: false,
+                        header_item_is_primitive: false,
                         cookie_is_multi: false,
                         cookie_item_ty: param.clone(),
                         cookie_item_is_string: false,
+                        cookie_item_is_primitive: false,
                     };
                     out.push(MethodContext {
                         name: setter.clone(),
@@ -1049,6 +1064,24 @@ fn has_annotation(annotations: &[hir::Annotation], target: &str) -> bool {
             .map(|name| name.eq_ignore_ascii_case(target))
             .unwrap_or(false)
     })
+}
+
+fn http_rename(annotations: &[hir::Annotation]) -> Option<String> {
+    for annotation in annotations {
+        let Some(name) = annotation_name(annotation) else {
+            continue;
+        };
+        if !name.eq_ignore_ascii_case("http") {
+            continue;
+        }
+        let value = annotation_params(annotation)
+            .map(normalize_params)
+            .and_then(|params| params.get("rename").cloned());
+        if value.is_some() {
+            return value;
+        }
+    }
+    None
 }
 
 fn stream_kind_from_annotations(annotations: &[hir::Annotation]) -> IdlcResult<Option<StreamKind>> {
@@ -1543,6 +1576,18 @@ fn header_item_is_string(ty: &hir::TypeSpec) -> bool {
     }
 }
 
+fn header_item_is_primitive(ty: &hir::TypeSpec) -> bool {
+    match ty {
+        hir::TypeSpec::TemplateTypeSpec(hir::TemplateTypeSpec::SequenceType(seq)) => {
+            header_item_is_primitive(&seq.ty)
+        }
+        hir::TypeSpec::SimpleTypeSpec(hir::SimpleTypeSpec::IntegerType(_))
+        | hir::TypeSpec::SimpleTypeSpec(hir::SimpleTypeSpec::FloatingPtType)
+        | hir::TypeSpec::SimpleTypeSpec(hir::SimpleTypeSpec::Boolean) => true,
+        _ => false,
+    }
+}
+
 fn cookie_is_multi(ty: &hir::TypeSpec) -> bool {
     header_is_multi(ty)
 }
@@ -1553,6 +1598,10 @@ fn cookie_item_ty(ty: &hir::TypeSpec) -> String {
 
 fn cookie_item_is_string(ty: &hir::TypeSpec) -> bool {
     header_item_is_string(ty)
+}
+
+fn cookie_item_is_primitive(ty: &hir::TypeSpec) -> bool {
+    header_item_is_primitive(ty)
 }
 
 fn validate_header_name(bound_name: &str, param_name: &str) -> IdlcResult<()> {

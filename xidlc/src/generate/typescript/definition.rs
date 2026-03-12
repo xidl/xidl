@@ -1006,11 +1006,14 @@ enum StreamCodec {
 fn struct_fields(members: &[hir::Member], module_path: &[String]) -> Vec<FieldDecl> {
     let mut fields = Vec::new();
     for member in members {
+        let http_rename = http_rename(&member.annotations);
         let optional = member.is_optional();
         for decl in &member.ident {
-            let name = declarator_name(decl);
+            let name = http_rename
+                .clone()
+                .unwrap_or_else(|| declarator_name(decl).to_string());
             fields.push(FieldDecl {
-                prop: ts_prop_name(name),
+                prop: ts_prop_name(&name),
                 ty: ts_type_for_decl(&member.ty, decl, module_path, TypeRefTarget::Types),
                 schema: zod_schema_for_decl(&member.ty, decl, module_path),
                 optional,
@@ -1547,9 +1550,13 @@ fn ts_type_for_constr_inline(
         hir::ConstrTypeDcl::StructDcl(def) => {
             let mut fields = Vec::new();
             for member in &def.member {
+                let http_rename = http_rename(&member.annotations);
                 let optional = member.is_optional();
                 for decl in &member.ident {
-                    let name = ts_prop_name(declarator_name(decl));
+                    let name = http_rename
+                        .clone()
+                        .unwrap_or_else(|| declarator_name(decl).to_string());
+                    let name = ts_prop_name(&name);
                     let ty = ts_type_for_decl(&member.ty, decl, module_path, target);
                     if optional {
                         fields.push(format!("{name}?: {ty}"));
@@ -1617,9 +1624,13 @@ fn zod_schema_for_constr_inline(constr: &hir::ConstrTypeDcl, module_path: &[Stri
         hir::ConstrTypeDcl::StructDcl(def) => {
             let mut fields = Vec::new();
             for member in &def.member {
+                let http_rename = http_rename(&member.annotations);
                 let optional = member.is_optional();
                 for decl in &member.ident {
-                    let name = ts_prop_name(declarator_name(decl));
+                    let name = http_rename
+                        .clone()
+                        .unwrap_or_else(|| declarator_name(decl).to_string());
+                    let name = ts_prop_name(&name);
                     let schema = zod_schema_for_decl(&member.ty, decl, module_path);
                     if optional {
                         fields.push(format!("{name}: {schema}.optional()"));
@@ -2122,6 +2133,24 @@ fn has_optional_annotation(annotations: &[hir::Annotation]) -> bool {
             .map(|name| name.eq_ignore_ascii_case("optional"))
             .unwrap_or(false)
     })
+}
+
+fn http_rename(annotations: &[hir::Annotation]) -> Option<String> {
+    for annotation in annotations {
+        let Some(name) = annotation_name(annotation) else {
+            continue;
+        };
+        if !name.eq_ignore_ascii_case("http") {
+            continue;
+        }
+        let value = annotation_params(annotation)
+            .map(normalize_params)
+            .and_then(|params| params.get("rename").cloned());
+        if value.is_some() {
+            return value;
+        }
+    }
+    None
 }
 
 struct SourceBinding {
