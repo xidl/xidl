@@ -167,11 +167,19 @@ openapi.json
           }
         }
       },
+      "test.Status": {
+        "type": "string",
+        "enum": [
+          "ok",
+          "FAILED"
+        ]
+      },
       "test.User": {
         "type": "object",
         "required": [
           "id",
-          "full_name"
+          "full_name",
+          "status"
         ],
         "properties": {
           "full_name": {
@@ -181,6 +189,9 @@ openapi.json
             "type": "integer",
             "format": "int32",
             "minimum": 0
+          },
+          "status": {
+            "$ref": "#/components/schemas/Status"
           }
         }
       },

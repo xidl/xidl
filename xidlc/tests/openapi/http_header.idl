@@ -1,8 +1,15 @@
 module test {
+    enum Status {
+        @name("ok")
+        OK,
+        FAILED
+    };
+
     struct User {
         uint32 id;
         @name("full_name")
         string name;
+        Status status;
     };
 
     interface HeaderService {

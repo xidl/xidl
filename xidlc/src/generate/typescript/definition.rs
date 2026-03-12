@@ -491,7 +491,11 @@ fn render_enum(def: &hir::EnumDcl, renderer: &TypescriptRenderer) -> IdlcResult<
     let members = def
         .member
         .iter()
-        .map(|value| format!("\"{}\"", value.ident))
+        .map(|value| {
+            let rename = field_rename(&value.annotations);
+            let raw = rename.unwrap_or_else(|| value.ident.clone());
+            format!("\"{}\"", raw)
+        })
         .collect::<Vec<_>>();
     let union = if members.is_empty() {
         "never".to_string()
@@ -1570,7 +1574,11 @@ fn ts_type_for_constr_inline(
         hir::ConstrTypeDcl::EnumDcl(def) => def
             .member
             .iter()
-            .map(|value| format!("\"{}\"", value.ident))
+            .map(|value| {
+                let rename = field_rename(&value.annotations);
+                let raw = rename.unwrap_or_else(|| value.ident.clone());
+                format!("\"{}\"", raw)
+            })
             .collect::<Vec<_>>()
             .join(" | "),
         hir::ConstrTypeDcl::UnionDef(def) => {
@@ -1645,7 +1653,11 @@ fn zod_schema_for_constr_inline(constr: &hir::ConstrTypeDcl, module_path: &[Stri
             let values = def
                 .member
                 .iter()
-                .map(|value| format!("\"{}\"", value.ident))
+                .map(|value| {
+                    let rename = field_rename(&value.annotations);
+                    let raw = rename.unwrap_or_else(|| value.ident.clone());
+                    format!("\"{}\"", raw)
+                })
                 .collect::<Vec<_>>();
             if values.is_empty() {
                 "z.never()".to_string()

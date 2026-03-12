@@ -407,9 +407,22 @@ pub mod test{
 http_header.rs
 ===============
 pub mod test{
+    #[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq
+    )]
+    pub enum Status{
+        OK,
+        FAILED
+    }
+
     pub struct User{
         pub id:u32,
         pub name:String,
+        pub status:Status,
     }
 
     impl User{

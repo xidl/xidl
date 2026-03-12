@@ -167,7 +167,11 @@ impl OpenApiContext {
             }
             hir::ConstrTypeDcl::EnumDcl(def) => {
                 let name = scoped_name(module_path, &def.ident);
-                let values = def.member.iter().map(|v| Value::String(v.ident.clone()));
+                let values = def.member.iter().map(|v| {
+                    let rename = field_rename(&v.annotations);
+                    let raw = rename.unwrap_or_else(|| v.ident.clone());
+                    Value::String(raw)
+                });
                 let schema = RefOr::T(Schema::from(
                     ObjectBuilder::new()
                         .schema_type(Type::String)

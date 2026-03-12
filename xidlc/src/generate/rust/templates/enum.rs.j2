@@ -9,7 +9,10 @@
 )]
 pub enum {{ ident }} {
     {% for member in members %}
-        {{ member }}{% if not loop.last %},{% endif %}
+        {% if (has_serde_serialize or has_serde_deserialize) and member.serde_rename is defined and member.serde_rename %}
+            #[serde(rename = "{{ member.serde_rename }}")]
+        {% endif %}
+        {{ member.name }}{% if not loop.last %},{% endif %}
     {%- endfor %}
 }
 
@@ -33,7 +36,7 @@ pub enum {{ ident }} {
             let value: u32 = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
             match value {
                 {% for member in members %}
-                    {{ loop.index0 }} => Ok(Self::{{ member }}),
+                    {{ loop.index0 }} => Ok(Self::{{ member.name }}),
                 {% endfor %}
                 _ => Err(xidl_xcdr::error::XcdrError::Message(format!(
                 "invalid {{ ident }} discriminant: {}",
