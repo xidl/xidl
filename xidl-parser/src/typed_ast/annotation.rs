@@ -110,6 +110,32 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AnnotationAppl {
     }
 }
 
+impl AnnotationAppl {
+    pub fn doc(text: String) -> Self {
+        let escaped = escape_doc_text(&text);
+        Self {
+            name: AnnotationName::Builtin("doc".to_string()),
+            params: Some(AnnotationParams::Raw(format!("\"{}\"", escaped))),
+            is_extend: false,
+            extra: Vec::new(),
+        }
+    }
+}
+
+fn escape_doc_text(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    for ch in text.chars() {
+        match ch {
+            '\\' => out.push_str("\\\\"),
+            '"' => out.push_str("\\\""),
+            '\n' => out.push_str("\\n"),
+            '\r' => {}
+            _ => out.push(ch),
+        }
+    }
+    out
+}
+
 impl<'a> crate::parser::FromTreeSitter<'a> for AnnotationParams {
     fn from_node(
         node: tree_sitter::Node<'a>,

@@ -792,9 +792,7 @@ fn schema_for_struct(members: &[hir::Member]) -> RefOr<Schema> {
         let rename = field_rename(&member.annotations);
         let optional = member.is_optional();
         for decl in &member.ident {
-            let name = rename
-                .clone()
-                .unwrap_or_else(|| declarator_name(decl));
+            let name = rename.clone().unwrap_or_else(|| declarator_name(decl));
             let schema = schema_for_decl(&member.ty, decl);
             object = object.property(name.clone(), schema);
             if !optional {

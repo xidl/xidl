@@ -97,6 +97,9 @@ impl<'a> crate::parser::FromTreeSitter<'a> for BitValue {
                 _ => {}
             }
         }
+        if let Some(doc) = ctx.take_doc_comment(&node) {
+            annotations.insert(0, AnnotationAppl::doc(doc));
+        }
         Ok(Self {
             annotations,
             ident: ident.ok_or_else(|| {

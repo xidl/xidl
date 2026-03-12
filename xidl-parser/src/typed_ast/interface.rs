@@ -41,6 +41,9 @@ impl<'a> crate::parser::FromTreeSitter<'a> for InterfaceDcl {
                 _ => {}
             }
         }
+        if let Some(doc) = ctx.take_doc_comment(&node) {
+            annotations.insert(0, AnnotationAppl::doc(doc));
+        }
         Ok(Self {
             annotations,
             decl: decl.ok_or_else(|| {
@@ -135,6 +138,9 @@ impl<'a> crate::parser::FromTreeSitter<'a> for OpDcl {
                 _ => {}
             }
         }
+        if let Some(doc) = ctx.take_doc_comment(&node) {
+            annotations.insert(0, AnnotationAppl::doc(doc));
+        }
         Ok(Self {
             annotations,
             ty: ty.ok_or_else(|| {
@@ -226,6 +232,9 @@ impl<'a> crate::parser::FromTreeSitter<'a> for ParamDcl {
                 _ => {}
             }
         }
+        if let Some(doc) = ctx.take_doc_comment(&node) {
+            annotations.insert(0, AnnotationAppl::doc(doc));
+        }
         Ok(Self {
             annotations,
             attr,
@@ -298,6 +307,9 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AttrDcl {
                 }
                 _ => {}
             }
+        }
+        if let Some(doc) = ctx.take_doc_comment(&node) {
+            annotations.insert(0, AnnotationAppl::doc(doc));
         }
         Ok(Self {
             annotations,
