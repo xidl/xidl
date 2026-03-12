@@ -115,6 +115,22 @@ value : unknown
     );
 }
 
+function encodeHeaderValue(
+value : unknown
+) : string{
+    if(value===null||value===undefined){
+        return"";
+    }
+    if(typeof value==="string"||typeof value==="number"||typeof value==="boolean"){
+        return String(
+        value
+        );
+    }
+    return JSON.stringify(
+    value
+    );
+}
+
 async function parseXidlError(
 resp : Response
 ) : Promise<
@@ -399,10 +415,9 @@ export class HttpStreamSseServiceClient{
         if(queryString.length>0){
             path = `${path}?${queryString}`;
         }
-
-        const headers = {
-            ...this.defaultHeaders
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
         const options = {
             method : "GET", headers
         };
@@ -422,9 +437,9 @@ export class HttpStreamSseServiceClient{
     boolean
     >{
         let path = "/HttpStreamSseService/online";
-        const headers = {
-            ...this.defaultHeaders
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
         const options = {
             method : "GET", headers
         };
@@ -457,9 +472,12 @@ export class HttpStreamSseServiceClient{
         );
         let path = "/HttpStreamSseService/set_online";
         const body = parsed["value"];
-        const headers = {
-            ...this.defaultHeaders, "Content-Type" : "application/json"
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
+        headers.set(
+        "Content-Type", "application/json"
+        );
         const options = {
             method : "POST", headers, body : JSON.stringify(
             body
@@ -485,9 +503,9 @@ export class HttpStreamSseServiceClient{
     boolean
     >{
         let path = "/HttpStreamSseService/watch_attribute_online";
-        const headers = {
-            ...this.defaultHeaders
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
         const options = {
             method : "GET", headers
         };

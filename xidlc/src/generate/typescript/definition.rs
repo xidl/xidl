@@ -705,6 +705,7 @@ struct ClientMethodContext {
     http_method: String,
     path_params: Vec<PathParamContext>,
     query_params: Vec<QueryParamContext>,
+    header_params: Vec<HeaderParamContext>,
     body_params: Vec<BodyParamContext>,
     body_single: Option<BodyParamContext>,
     is_server_stream: bool,
@@ -737,6 +738,13 @@ struct QueryParamContext {
 }
 
 #[derive(Serialize)]
+struct HeaderParamContext {
+    raw_name: String,
+    access: String,
+    is_multi: bool,
+}
+
+#[derive(Serialize)]
 struct BodyParamContext {
     raw_name: String,
     access: String,
@@ -763,6 +771,7 @@ struct MethodInfo {
     request_schema_ref: Option<String>,
     path_params: Vec<ParamInfo>,
     query_params: Vec<ParamInfo>,
+    header_params: Vec<ParamInfo>,
     body_params: Vec<ParamInfo>,
     output_params: Vec<ParamInfo>,
     is_server_stream: bool,
@@ -881,6 +890,15 @@ impl MethodInfo {
                     access: parsed_access(self, &param.raw_name),
                 })
                 .collect(),
+            header_params: self
+                .header_params
+                .iter()
+                .map(|param| HeaderParamContext {
+                    raw_name: param.wire_name.clone(),
+                    access: parsed_access(self, &param.raw_name),
+                    is_multi: is_sequence_type(&param.ty),
+                })
+                .collect(),
             body_params: self
                 .body_params
                 .iter()
@@ -942,6 +960,7 @@ enum HttpMethod {
 enum ParamSource {
     Path,
     Query,
+    Header,
     Body,
 }
 
@@ -1082,6 +1101,7 @@ fn render_op(
     let mut param_list = Vec::new();
     let mut path_params = Vec::new();
     let mut query_params = Vec::new();
+    let mut header_params = Vec::new();
     let mut body_params = Vec::new();
     let mut output_params = Vec::new();
     let mut path_binding_count = HashMap::<String, usize>::new();
@@ -1144,6 +1164,9 @@ fn render_op(
                     .or_insert(0) += 1;
                 query_params.push(info);
             }
+            ParamSource::Header => {
+                header_params.push(info);
+            }
             ParamSource::Body => body_params.push(info),
         }
     }
@@ -1185,7 +1208,9 @@ fn render_op(
             }
         }
     }
-    if is_client_stream && (!path_params.is_empty() || !query_params.is_empty()) {
+    if is_client_stream
+        && (!path_params.is_empty() || !query_params.is_empty() || !header_params.is_empty())
+    {
         return Err(IdlcError::rpc(format!(
             "@client_stream method '{}' currently supports body parameters only",
             op.ident
@@ -1224,6 +1249,7 @@ fn render_op(
         request_schema_ref,
         path_params,
         query_params,
+        header_params,
         body_params,
         output_params,
         is_server_stream,
@@ -1252,6 +1278,7 @@ fn render_attr(
                     request_schema_ref: None,
                     path_params: Vec::new(),
                     query_params: Vec::new(),
+                    header_params: Vec::new(),
                     body_params: Vec::new(),
                     output_params: Vec::new(),
                     is_server_stream: false,
@@ -1270,6 +1297,7 @@ fn render_attr(
                         request_schema_ref: None,
                         path_params: Vec::new(),
                         query_params: Vec::new(),
+                        header_params: Vec::new(),
                         body_params: Vec::new(),
                         output_params: Vec::new(),
                         is_server_stream: true,
@@ -1296,6 +1324,7 @@ fn render_attr(
                             request_schema_ref: None,
                             path_params: Vec::new(),
                             query_params: Vec::new(),
+                            header_params: Vec::new(),
                             body_params: Vec::new(),
                             output_params: Vec::new(),
                             is_server_stream: false,
@@ -1330,6 +1359,7 @@ fn render_attr(
                             request_schema_ref,
                             path_params: Vec::new(),
                             query_params: Vec::new(),
+                            header_params: Vec::new(),
                             body_params: vec![param],
                             output_params: Vec::new(),
                             is_server_stream: false,
@@ -1349,6 +1379,7 @@ fn render_attr(
                                 request_schema_ref: None,
                                 path_params: Vec::new(),
                                 query_params: Vec::new(),
+                                header_params: Vec::new(),
                                 body_params: Vec::new(),
                                 output_params: Vec::new(),
                                 is_server_stream: true,
@@ -1370,6 +1401,7 @@ fn render_attr(
                         request_schema_ref: None,
                         path_params: Vec::new(),
                         query_params: Vec::new(),
+                        header_params: Vec::new(),
                         body_params: Vec::new(),
                         output_params: Vec::new(),
                         is_server_stream: false,
@@ -1404,6 +1436,7 @@ fn render_attr(
                         request_schema_ref,
                         path_params: Vec::new(),
                         query_params: Vec::new(),
+                        header_params: Vec::new(),
                         body_params: vec![param],
                         output_params: Vec::new(),
                         is_server_stream: false,
@@ -1423,6 +1456,7 @@ fn render_attr(
                             request_schema_ref: None,
                             path_params: Vec::new(),
                             query_params: Vec::new(),
+                            header_params: Vec::new(),
                             body_params: Vec::new(),
                             output_params: Vec::new(),
                             is_server_stream: true,
@@ -2070,6 +2104,8 @@ fn explicit_param_binding(param: &hir::ParamDcl) -> IdlcResult<Option<SourceBind
             Some(ParamSource::Path)
         } else if name.eq_ignore_ascii_case("query") {
             Some(ParamSource::Query)
+        } else if name.eq_ignore_ascii_case("header") {
+            Some(ParamSource::Header)
         } else {
             None
         };
@@ -2080,6 +2116,9 @@ fn explicit_param_binding(param: &hir::ParamDcl) -> IdlcResult<Option<SourceBind
             .map(normalize_params)
             .and_then(|params| params.get("value").cloned())
             .unwrap_or_else(|| param.declarator.0.clone());
+        if matches!(current, ParamSource::Header) {
+            validate_header_name(&bound_name, &param.declarator.0)?;
+        }
         match found {
             None => {
                 found = Some(SourceBinding {
@@ -2090,7 +2129,7 @@ fn explicit_param_binding(param: &hir::ParamDcl) -> IdlcResult<Option<SourceBind
             Some(ref prev) if prev.source == current && prev.bound_name == bound_name => {}
             Some(_) => {
                 return Err(IdlcError::rpc(format!(
-                    "parameter '{}' has conflicting source annotations (@path/@query)",
+                    "parameter '{}' has conflicting source annotations (@path/@query/@header)",
                     param.declarator.0
                 )));
             }
@@ -2124,6 +2163,22 @@ fn auto_default_method_path(op: &hir::OpDcl, method: HttpMethod) -> IdlcResult<S
         }
     }
     Ok(path)
+}
+
+fn validate_header_name(bound_name: &str, param_name: &str) -> IdlcResult<()> {
+    if bound_name.is_empty() {
+        return Err(IdlcError::rpc(format!(
+            "parameter '{}' has empty @header name",
+            param_name
+        )));
+    }
+    if bound_name.starts_with(':') {
+        return Err(IdlcError::rpc(format!(
+            "parameter '{}' uses reserved pseudo-header name '{}'",
+            param_name, bound_name
+        )));
+    }
+    Ok(())
 }
 
 fn normalize_params(params: &hir::AnnotationParams) -> std::collections::HashMap<String, String> {
@@ -2353,6 +2408,13 @@ fn strip_path_param_prefix(value: &str) -> String {
 
 fn path_param_is_catch_all(path: &str, name: &str) -> bool {
     path.contains(&format!("{{*{name}}}"))
+}
+
+fn is_sequence_type(ty: &hir::TypeSpec) -> bool {
+    matches!(
+        ty,
+        hir::TypeSpec::TemplateTypeSpec(hir::TemplateTypeSpec::SequenceType(_))
+    )
 }
 
 fn validate_route_template(path: &str) -> IdlcResult<()> {

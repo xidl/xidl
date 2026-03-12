@@ -28,18 +28,22 @@ export class {{ client_name }} {
                 {% for param in method.body_params %}            "{{ param.raw_name }}": {{ param.access }},
                 {% endfor %}        };
         {% endif %}
-        {% endif %}{% if method.body_params | length > 0 %}
-        const headers = { ...this.defaultHeaders, "Content-Type": "application/json" };
+        {% endif %}        const headers = new Headers(this.defaultHeaders);
+        {% for param in method.header_params %}        {% if param.is_multi %}for (const value of {{ param.access }}) {
+            headers.append("{{ param.raw_name }}", encodeHeaderValue(value));
+        }
+        {% else %}headers.set("{{ param.raw_name }}", encodeHeaderValue({{ param.access }}));
+        {% endif %}{% endfor %}{% if method.body_params | length > 0 %}
+        headers.set("Content-Type", "application/json");
         const options = { method: "{{ method.http_method }}", headers, body: JSON.stringify(body) };
         {% else %}
-            const headers = { ...this.defaultHeaders };
             const options = { method: "{{ method.http_method }}", headers };
         {% endif %}
         const url = joinUrl(this.baseUrl, path);
         {% if method.is_server_stream %}
         return sseJsonStream<{{ method.stream_item_ty }}>(this.fetchImpl, url, options);
         {% elif method.is_client_stream %}
-        const headers = { ...this.defaultHeaders, "Content-Type": "application/x-ndjson" };
+        headers.set("Content-Type", "application/x-ndjson");
         const streamBody = ndjsonBody<{{ method.client_stream_item_ty }}>(stream);
         const resp = await this.fetchImpl(url, { method: "{{ method.http_method }}", headers, body: streamBody });
         if (!resp.ok) {

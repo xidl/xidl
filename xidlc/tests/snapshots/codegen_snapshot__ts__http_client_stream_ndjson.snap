@@ -115,6 +115,22 @@ value : unknown
     );
 }
 
+function encodeHeaderValue(
+value : unknown
+) : string{
+    if(value===null||value===undefined){
+        return"";
+    }
+    if(typeof value==="string"||typeof value==="number"||typeof value==="boolean"){
+        return String(
+        value
+        );
+    }
+    return JSON.stringify(
+    value
+    );
+}
+
 async function parseXidlError(
 resp : Response
 ) : Promise<
@@ -380,9 +396,12 @@ export class HttpClientStreamServiceClient{
         const body = {
             "file_id" : parsed["file_id"], "chunk" : parsed["chunk"],
         };
-        const headers = {
-            ...this.defaultHeaders, "Content-Type" : "application/json"
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
+        headers.set(
+        "Content-Type", "application/json"
+        );
         const options = {
             method : "POST", headers, body : JSON.stringify(
             body
@@ -391,9 +410,9 @@ export class HttpClientStreamServiceClient{
         const url = joinUrl(
         this.baseUrl, path
         );
-        const headers = {
-            ...this.defaultHeaders, "Content-Type" : "application/x-ndjson"
-        };
+        headers.set(
+        "Content-Type", "application/x-ndjson"
+        );
         const streamBody = ndjsonBody<
         HttpClientStreamServiceUploadChunkRequest
         >(

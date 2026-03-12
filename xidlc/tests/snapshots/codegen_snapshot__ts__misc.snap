@@ -115,6 +115,22 @@ value : unknown
     );
 }
 
+function encodeHeaderValue(
+value : unknown
+) : string{
+    if(value===null||value===undefined){
+        return"";
+    }
+    if(typeof value==="string"||typeof value==="number"||typeof value==="boolean"){
+        return String(
+        value
+        );
+    }
+    return JSON.stringify(
+    value
+    );
+}
+
 async function parseXidlError(
 resp : Response
 ) : Promise<
@@ -470,9 +486,9 @@ export class AClient{
     void
     >{
         let path = "/make_it_so";
-        const headers = {
-            ...this.defaultHeaders
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
         const options = {
             method : "POST", headers
         };
@@ -521,9 +537,12 @@ export class BClient{
         );
         let path = "/make_it_so";
         const body = parsed["times"];
-        const headers = {
-            ...this.defaultHeaders, "Content-Type" : "application/json"
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
+        headers.set(
+        "Content-Type", "application/json"
+        );
         const options = {
             method : "POST", headers, body : JSON.stringify(
             body
@@ -577,9 +596,12 @@ export class AClient{
         );
         let path = "/opA";
         const body = parsed["l_1"];
-        const headers = {
-            ...this.defaultHeaders, "Content-Type" : "application/json"
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
+        headers.set(
+        "Content-Type", "application/json"
+        );
         const options = {
             method : "POST", headers, body : JSON.stringify(
             body
@@ -633,9 +655,12 @@ export class BClient{
         );
         let path = "/opB";
         const body = parsed["l"];
-        const headers = {
-            ...this.defaultHeaders, "Content-Type" : "application/json"
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
+        headers.set(
+        "Content-Type", "application/json"
+        );
         const options = {
             method : "POST", headers, body : JSON.stringify(
             body
@@ -689,9 +714,12 @@ export class CClient{
         );
         let path = "/opC";
         const body = parsed["l_3"];
-        const headers = {
-            ...this.defaultHeaders, "Content-Type" : "application/json"
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
+        headers.set(
+        "Content-Type", "application/json"
+        );
         const options = {
             method : "POST", headers, body : JSON.stringify(
             body
@@ -745,9 +773,12 @@ export class AClient{
         );
         let path = "/f";
         const body = parsed["s"];
-        const headers = {
-            ...this.defaultHeaders, "Content-Type" : "application/json"
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
+        headers.set(
+        "Content-Type", "application/json"
+        );
         const options = {
             method : "POST", headers, body : JSON.stringify(
             body
@@ -868,9 +899,9 @@ export class CClient{
     types.string_t
     >{
         let path = "/C/Title";
-        const headers = {
-            ...this.defaultHeaders
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
         const options = {
             method : "GET", headers
         };
@@ -903,9 +934,12 @@ export class CClient{
         );
         let path = "/C/set_Title";
         const body = parsed["value"];
-        const headers = {
-            ...this.defaultHeaders, "Content-Type" : "application/json"
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
+        headers.set(
+        "Content-Type", "application/json"
+        );
         const options = {
             method : "POST", headers, body : JSON.stringify(
             body
@@ -931,9 +965,9 @@ export class CClient{
     types.A.string_t
     >{
         let path = "/C/Name";
-        const headers = {
-            ...this.defaultHeaders
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
         const options = {
             method : "GET", headers
         };
@@ -966,9 +1000,12 @@ export class CClient{
         );
         let path = "/C/set_Name";
         const body = parsed["value"];
-        const headers = {
-            ...this.defaultHeaders, "Content-Type" : "application/json"
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
+        headers.set(
+        "Content-Type", "application/json"
+        );
         const options = {
             method : "POST", headers, body : JSON.stringify(
             body
@@ -994,9 +1031,9 @@ export class CClient{
     types.B.string_t
     >{
         let path = "/C/City";
-        const headers = {
-            ...this.defaultHeaders
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
         const options = {
             method : "GET", headers
         };
@@ -1029,9 +1066,12 @@ export class CClient{
         );
         let path = "/C/set_City";
         const body = parsed["value"];
-        const headers = {
-            ...this.defaultHeaders, "Content-Type" : "application/json"
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
+        headers.set(
+        "Content-Type", "application/json"
+        );
         const options = {
             method : "POST", headers, body : JSON.stringify(
             body

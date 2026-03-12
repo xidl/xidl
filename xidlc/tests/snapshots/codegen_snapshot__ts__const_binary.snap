@@ -115,6 +115,22 @@ value : unknown
     );
 }
 
+function encodeHeaderValue(
+value : unknown
+) : string{
+    if(value===null||value===undefined){
+        return"";
+    }
+    if(typeof value==="string"||typeof value==="number"||typeof value==="boolean"){
+        return String(
+        value
+        );
+    }
+    return JSON.stringify(
+    value
+    );
+}
+
 async function parseXidlError(
 resp : Response
 ) : Promise<

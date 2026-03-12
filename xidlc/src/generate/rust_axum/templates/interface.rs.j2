@@ -129,6 +129,36 @@ pub trait {{ ident }} {
                         {% endfor %}
                     } = query;
                 {% endif %}
+                {% if method.header_params | length > 0 %}
+                    {% for param in method.header_params %}
+                        {% if param.header_is_multi %}
+                            let mut {{ param.name }}: Vec<{{ param.header_item_ty }}> = Vec::new();
+                            for header_value in headers.get_all("{{ param.wire_name }}").iter() {
+                                let header_str = header_value
+                                    .to_str()
+                                    .map_err(|err| xidl_rust_axum::Error::new(400, err.to_string()))?;
+                                let parsed: {{ param.header_item_ty }} = {% if param.header_item_is_string %}header_str.to_string(){% else %}xidl_rust_axum::serde_json::from_str(header_str)
+                                    .map_err(|err| xidl_rust_axum::Error::new(400, err.to_string()))?{% endif %};
+                                {{ param.name }}.push(parsed);
+                            }
+                            if {{ param.name }}.is_empty() {
+                                return Err(xidl_rust_axum::Error::new(
+                                    400,
+                                    format!("missing header '{}'", "{{ param.wire_name }}"),
+                                ));
+                            }
+                        {% else %}
+                            let header_value = headers.get("{{ param.wire_name }}").ok_or_else(|| {
+                                xidl_rust_axum::Error::new(400, format!("missing header '{}'", "{{ param.wire_name }}"))
+                            })?;
+                            let header_str = header_value
+                                .to_str()
+                                .map_err(|err| xidl_rust_axum::Error::new(400, err.to_string()))?;
+                            let {{ param.name }}: {{ param.header_item_ty }} = {% if param.header_item_is_string %}header_str.to_string(){% else %}xidl_rust_axum::serde_json::from_str(header_str)
+                                .map_err(|err| xidl_rust_axum::Error::new(400, err.to_string()))?{% endif %};
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
                 {% if method.body_params | length > 0 and not method.is_client_stream and not method.is_bidi_stream %}
                     {% if method.body_params | length == 1 %}
                         let {{ method.body_params[0].name }} = body;
@@ -219,6 +249,33 @@ pub trait {{ ident }} {
                     .request(xidl_rust_axum::reqwest::Method::{{ method.reqwest_method }}, url)
                     .build()
                     .map_err(|err| xidl_rust_axum::Error::new(500, err.to_string()))?;
+                {% if method.header_params | length > 0 %}
+                    {% for param in method.header_params %}
+                        let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
+                            "{{ param.wire_name }}".as_bytes(),
+                        )
+                        .map_err(|err| xidl_rust_axum::Error::new(400, err.to_string()))?;
+                        {% if param.header_is_multi %}
+                            for value in {{ param.name }} {
+                                let header_value_str = {% if param.header_item_is_string %}value{% else %}xidl_rust_axum::serde_json::to_string(&value)
+                                    .map_err(|err| xidl_rust_axum::Error::new(400, err.to_string()))?{% endif %};
+                                let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                                    &header_value_str,
+                                )
+                                .map_err(|err| xidl_rust_axum::Error::new(400, err.to_string()))?;
+                                req.headers_mut().append(header_name.clone(), header_value);
+                            }
+                        {% else %}
+                            let header_value_str = {% if param.header_item_is_string %}{{ param.name }}{% else %}xidl_rust_axum::serde_json::to_string(&{{ param.name }})
+                                .map_err(|err| xidl_rust_axum::Error::new(400, err.to_string()))?{% endif %};
+                            let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                                &header_value_str,
+                            )
+                            .map_err(|err| xidl_rust_axum::Error::new(400, err.to_string()))?;
+                            req.headers_mut().insert(header_name, header_value);
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
                 {% if method.query_params | length > 0 %}
                     let query = {{ method.struct_prefix }}Query {
                         {% for param in method.query_params %}

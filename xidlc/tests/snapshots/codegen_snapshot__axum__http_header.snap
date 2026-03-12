@@ -1,0 +1,283 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+http_header.rs
+===============
+pub mod test{
+    #[async_trait::async_trait]
+    pub trait HeaderService{
+        async fn get_user(
+        &self,
+        req:xidl_rust_axum::Request<HeaderServiceGetUserRequest>
+        )->Result<User,xidl_rust_axum::Error>;
+        async fn create_user(
+        &self,
+        req:xidl_rust_axum::Request<HeaderServiceCreateUserRequest>
+        )->Result<(),xidl_rust_axum::Error>;
+    }
+
+    #[derive(::serde::Serialize,::serde::Deserialize)]
+    struct HeaderServiceGetUserPath{
+        id:u32,
+    }
+
+    #[derive(::serde::Serialize,::serde::Deserialize)]
+    pub struct HeaderServiceGetUserRequest{
+        pub id:u32,
+        pub req_id:String,
+        pub flags:Vec<String>,
+        pub age:u32,
+    }
+
+    type HeaderServiceCreateUserBody = String;
+    #[derive(::serde::Serialize,::serde::Deserialize)]
+    pub struct HeaderServiceCreateUserRequest{
+        pub token:String,
+        pub name:String,
+    }
+
+    pub struct HeaderServiceServer<T>{
+        inner: ::std::sync::Arc<T>,
+    }
+
+    impl<T>HeaderServiceServer<T>
+    where
+    T:HeaderService+Send+Sync+'static,
+    {
+        pub fn new(inner:T)->Self{
+            Self{
+                inner: ::std::sync::Arc::new(inner),
+            }
+        }
+
+        pub fn from_arc(inner: ::std::sync::Arc<T>)->Self{
+            Self{
+                inner}
+        }
+
+        pub fn router(self)->xidl_rust_axum::axum::Router{
+            let svc = self.inner;
+            xidl_rust_axum::axum::Router::new()
+
+            .route("/v1/headers/{id}",xidl_rust_axum::axum::routing::get(Self::get_user))
+
+            .route("/v1/headers",xidl_rust_axum::axum::routing::post(Self::create_user))
+
+            .with_state(svc)
+        }
+
+        async fn get_user(
+        ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<HeaderServiceGetUserPath>
+        )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+            let HeaderServiceGetUserPath{
+
+            id,
+
+            } = path;
+            let header_value = headers.get("X-Req-Id").ok_or_else(||{
+                xidl_rust_axum::Error::new(400,format!("missing header '{}'","X-Req-Id"))
+            })?;
+            let header_str = header_value
+            .to_str()
+            .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+            let req_id:String = header_str.to_string();
+            let mut flags:Vec<String> = Vec::new();
+            for header_value in headers.get_all("X-Flags").iter(){
+                let header_str = header_value
+                .to_str()
+                .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+                let parsed:String = header_str.to_string();
+                flags.push(parsed);
+            }
+            if flags.is_empty(){
+                return Err(xidl_rust_axum::Error::new(
+                400,
+                format!("missing header '{}'","X-Flags"),
+                ));
+            }
+
+            let header_value = headers.get("X-Age").ok_or_else(||{
+                xidl_rust_axum::Error::new(400,format!("missing header '{}'","X-Age"))
+            })?;
+            let header_str = header_value
+            .to_str()
+            .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+            let age:u32 = xidl_rust_axum::serde_json::from_str(header_str)
+            .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+            let data = HeaderServiceGetUserRequest{
+                id,
+                req_id,
+                flags,
+                age,
+            };
+            let req = ::xidl_rust_axum::Request::new(headers,data);
+            let resp = svc.get_user(req).await?;
+            Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        }
+
+        async fn create_user(
+        ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        xidl_rust_axum::axum::Json(body):xidl_rust_axum::axum::Json<HeaderServiceCreateUserBody>
+        )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+            let header_value = headers.get("X-Token").ok_or_else(||{
+                xidl_rust_axum::Error::new(400,format!("missing header '{}'","X-Token"))
+            })?;
+            let header_str = header_value
+            .to_str()
+            .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+            let token:String = header_str.to_string();
+            let name = body;
+            let data = HeaderServiceCreateUserRequest{
+                token,
+                name,
+            };
+            let req = ::xidl_rust_axum::Request::new(headers,data);
+            let resp = svc.create_user(req).await?;
+            let _ = resp;
+            Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT))
+        }
+    }
+
+    impl<T>xidl_rust_axum::Service for HeaderServiceServer<T>
+    where
+    T:HeaderService+Send+Sync+'static,
+    {
+        fn into_router(self)->xidl_rust_axum::axum::Router{
+            self.router()
+        }
+    }
+
+    pub struct HeaderServiceClient{
+        client:xidl_rust_axum::Client,
+    }
+
+    impl HeaderServiceClient{
+        pub fn new(base_url:impl Into<String>)->Self{
+            Self{
+                client:xidl_rust_axum::Client::new(base_url),
+            }
+        }
+    }
+
+    impl HeaderServiceClient{
+        pub async fn get_user(&self,id:u32,req_id:String,flags:Vec<String>,age:u32)->Result<User,xidl_rust_axum::Error>{
+            let path = "/v1/headers/{id}".to_string();
+            let path = path.replace("{id}",&id.to_string());
+            let url = self.client.url(&path);
+            let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::GET,url)
+            .build()
+            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+            let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
+            "X-Req-Id".as_bytes(),
+            )
+            .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+            let header_value_str = req_id;
+            let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+            &header_value_str,
+            )
+            .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+            req.headers_mut().insert(header_name,header_value);
+            let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
+            "X-Flags".as_bytes(),
+            )
+            .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+            for value in flags{
+                let header_value_str = value;
+                let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                &header_value_str,
+                )
+                .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+                req.headers_mut().append(header_name.clone(),header_value);
+            }
+
+            let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
+            "X-Age".as_bytes(),
+            )
+            .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+            let header_value_str = xidl_rust_axum::serde_json::to_string(&age)
+            .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+            let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+            &header_value_str,
+            )
+            .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+            req.headers_mut().insert(header_name,header_value);
+            let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+            if resp.status().is_success(){
+                resp.json::<User>()
+                .await
+                .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+            }else{
+                let status = resp.status();
+                let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+                Err(xidl_rust_axum::Error::from_http_response(status,body))
+            }
+        }
+
+        pub async fn create_user(&self,token:String,name:String)->Result<(),xidl_rust_axum::Error>{
+            let path = "/v1/headers".to_string();
+            let url = self.client.url(&path);
+            let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::POST,url)
+            .build()
+            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+            let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
+            "X-Token".as_bytes(),
+            )
+            .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+            let header_value_str = token;
+            let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+            &header_value_str,
+            )
+            .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+            req.headers_mut().insert(header_name,header_value);
+            let body = name;
+            let body = xidl_rust_axum::serde_json::to_vec(&body)
+            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+            req.headers_mut().insert(
+            xidl_rust_axum::reqwest::header::CONTENT_TYPE,
+            xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/json"),
+            );
+            *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
+            let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+            if resp.status().is_success(){
+                Ok(())
+            }else{
+                let status = resp.status();
+                let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+                Err(xidl_rust_axum::Error::from_http_response(status,body))
+            }
+        }
+    }
+}
+===============
+http_header.rs
+===============
+pub mod test{
+    pub struct User{
+        pub id:u32,
+        pub name:String,
+    }
+
+    impl User{
+    }
+}

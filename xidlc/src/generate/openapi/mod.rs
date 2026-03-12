@@ -475,6 +475,14 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
                     !optional,
                 ));
             }
+            ParamSource::Header => {
+                parameters.push(parameter_schema(
+                    ParameterIn::Header,
+                    &bound_name,
+                    schema,
+                    !optional,
+                ));
+            }
             ParamSource::Body => {
                 body_props.push((raw_name.clone(), schema));
                 if !optional {
@@ -957,6 +965,7 @@ enum HttpMethod {
 enum ParamSource {
     Path,
     Query,
+    Header,
     Body,
 }
 
@@ -1453,6 +1462,8 @@ fn explicit_param_binding(param: &hir::ParamDcl) -> Option<SourceBinding> {
             Some(ParamSource::Path)
         } else if name.eq_ignore_ascii_case("query") {
             Some(ParamSource::Query)
+        } else if name.eq_ignore_ascii_case("header") {
+            Some(ParamSource::Header)
         } else {
             None
         };
@@ -1463,6 +1474,9 @@ fn explicit_param_binding(param: &hir::ParamDcl) -> Option<SourceBinding> {
             .map(normalize_params)
             .and_then(|params| params.get("value").cloned())
             .unwrap_or_else(|| param.declarator.0.clone());
+        if matches!(current, ParamSource::Header) {
+            validate_header_name(&bound_name, &param.declarator.0);
+        }
         match found {
             None => {
                 found = Some(SourceBinding {
@@ -1473,13 +1487,25 @@ fn explicit_param_binding(param: &hir::ParamDcl) -> Option<SourceBinding> {
             Some(ref prev) if prev.source == current && prev.bound_name == bound_name => {}
             Some(_) => {
                 panic!(
-                    "parameter '{}' has conflicting source annotations (@path/@query)",
+                    "parameter '{}' has conflicting source annotations (@path/@query/@header)",
                     param.declarator.0
                 );
             }
         }
     }
     found
+}
+
+fn validate_header_name(bound_name: &str, param_name: &str) {
+    if bound_name.is_empty() {
+        panic!("parameter '{}' has empty @header name", param_name);
+    }
+    if bound_name.starts_with(':') {
+        panic!(
+            "parameter '{}' uses reserved pseudo-header name '{}'",
+            param_name, bound_name
+        );
+    }
 }
 
 fn auto_default_method_path(op: &hir::OpDcl, method: HttpMethod) -> String {

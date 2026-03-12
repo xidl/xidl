@@ -115,6 +115,22 @@ value : unknown
     );
 }
 
+function encodeHeaderValue(
+value : unknown
+) : string{
+    if(value===null||value===undefined){
+        return"";
+    }
+    if(typeof value==="string"||typeof value==="number"||typeof value==="boolean"){
+        return String(
+        value
+        );
+    }
+    return JSON.stringify(
+    value
+    );
+}
+
 async function parseXidlError(
 resp : Response
 ) : Promise<
@@ -432,9 +448,9 @@ export class AClient{
     void
     >{
         let path = "/func1";
-        const headers = {
-            ...this.defaultHeaders
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
         const options = {
             method : "POST", headers
         };
@@ -458,9 +474,9 @@ export class AClient{
     void
     >{
         let path = "/func1";
-        const headers = {
-            ...this.defaultHeaders
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
         const options = {
             method : "POST", headers
         };
@@ -484,9 +500,9 @@ export class AClient{
     void
     >{
         let path = "/func1";
-        const headers = {
-            ...this.defaultHeaders
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
         const options = {
             method : "POST", headers
         };
@@ -516,9 +532,12 @@ export class AClient{
         );
         let path = "/func1";
         const body = parsed["attr"];
-        const headers = {
-            ...this.defaultHeaders, "Content-Type" : "application/json"
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
+        headers.set(
+        "Content-Type", "application/json"
+        );
         const options = {
             method : "POST", headers, body : JSON.stringify(
             body
@@ -553,9 +572,12 @@ export class AClient{
         );
         let path = "/func1";
         const body = parsed["attr"];
-        const headers = {
-            ...this.defaultHeaders, "Content-Type" : "application/json"
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
+        headers.set(
+        "Content-Type", "application/json"
+        );
         const options = {
             method : "POST", headers, body : JSON.stringify(
             body
@@ -590,9 +612,12 @@ export class AClient{
         );
         let path = "/func1";
         const body = parsed["attr"];
-        const headers = {
-            ...this.defaultHeaders, "Content-Type" : "application/json"
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
+        headers.set(
+        "Content-Type", "application/json"
+        );
         const options = {
             method : "POST", headers, body : JSON.stringify(
             body
@@ -621,9 +646,9 @@ export class AClient{
     types.u8
     >{
         let path = "/A/attr1";
-        const headers = {
-            ...this.defaultHeaders
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
         const options = {
             method : "GET", headers
         };
@@ -650,9 +675,9 @@ export class AClient{
     types.u8
     >{
         let path = "/A/attr1";
-        const headers = {
-            ...this.defaultHeaders
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
         const options = {
             method : "GET", headers
         };
@@ -679,9 +704,9 @@ export class AClient{
     types.u8
     >{
         let path = "/A/attr1";
-        const headers = {
-            ...this.defaultHeaders
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
         const options = {
             method : "GET", headers
         };
@@ -708,9 +733,9 @@ export class AClient{
     types.u8
     >{
         let path = "/A/attr1";
-        const headers = {
-            ...this.defaultHeaders
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
         const options = {
             method : "GET", headers
         };
@@ -743,9 +768,12 @@ export class AClient{
         );
         let path = "/A/set_attr1";
         const body = parsed["value"];
-        const headers = {
-            ...this.defaultHeaders, "Content-Type" : "application/json"
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
+        headers.set(
+        "Content-Type", "application/json"
+        );
         const options = {
             method : "POST", headers, body : JSON.stringify(
             body
@@ -771,9 +799,9 @@ export class AClient{
     types.u8
     >{
         let path = "/A/attr2";
-        const headers = {
-            ...this.defaultHeaders
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
         const options = {
             method : "GET", headers
         };
@@ -806,9 +834,12 @@ export class AClient{
         );
         let path = "/A/set_attr2";
         const body = parsed["value"];
-        const headers = {
-            ...this.defaultHeaders, "Content-Type" : "application/json"
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
+        headers.set(
+        "Content-Type", "application/json"
+        );
         const options = {
             method : "POST", headers, body : JSON.stringify(
             body
@@ -834,9 +865,9 @@ export class AClient{
     types.u8
     >{
         let path = "/A/attr3";
-        const headers = {
-            ...this.defaultHeaders
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
         const options = {
             method : "GET", headers
         };
@@ -869,9 +900,12 @@ export class AClient{
         );
         let path = "/A/set_attr3";
         const body = parsed["value"];
-        const headers = {
-            ...this.defaultHeaders, "Content-Type" : "application/json"
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
+        headers.set(
+        "Content-Type", "application/json"
+        );
         const options = {
             method : "POST", headers, body : JSON.stringify(
             body
@@ -897,9 +931,9 @@ export class AClient{
     types.u8
     >{
         let path = "/A/attr1";
-        const headers = {
-            ...this.defaultHeaders
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
         const options = {
             method : "GET", headers
         };
@@ -932,9 +966,12 @@ export class AClient{
         );
         let path = "/A/set_attr1";
         const body = parsed["value"];
-        const headers = {
-            ...this.defaultHeaders, "Content-Type" : "application/json"
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
+        headers.set(
+        "Content-Type", "application/json"
+        );
         const options = {
             method : "POST", headers, body : JSON.stringify(
             body
@@ -960,9 +997,9 @@ export class AClient{
     types.u8
     >{
         let path = "/A/attr1";
-        const headers = {
-            ...this.defaultHeaders
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
         const options = {
             method : "GET", headers
         };
@@ -995,9 +1032,12 @@ export class AClient{
         );
         let path = "/A/set_attr1";
         const body = parsed["value"];
-        const headers = {
-            ...this.defaultHeaders, "Content-Type" : "application/json"
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
+        headers.set(
+        "Content-Type", "application/json"
+        );
         const options = {
             method : "POST", headers, body : JSON.stringify(
             body
@@ -1023,9 +1063,9 @@ export class AClient{
     types.u8
     >{
         let path = "/A/attr1";
-        const headers = {
-            ...this.defaultHeaders
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
         const options = {
             method : "GET", headers
         };
@@ -1058,9 +1098,12 @@ export class AClient{
         );
         let path = "/A/set_attr1";
         const body = parsed["value"];
-        const headers = {
-            ...this.defaultHeaders, "Content-Type" : "application/json"
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
+        headers.set(
+        "Content-Type", "application/json"
+        );
         const options = {
             method : "POST", headers, body : JSON.stringify(
             body
@@ -1111,9 +1154,12 @@ export class AClient{
         );
         let path = "/opA";
         const body = parsed["l_1"];
-        const headers = {
-            ...this.defaultHeaders, "Content-Type" : "application/json"
-        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
+        headers.set(
+        "Content-Type", "application/json"
+        );
         const options = {
             method : "POST", headers, body : JSON.stringify(
             body

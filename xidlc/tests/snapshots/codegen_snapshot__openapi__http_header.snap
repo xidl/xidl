@@ -1,0 +1,363 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+openapi.json
+===============
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "xidl",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/v1/headers": {
+      "post": {
+        "operationId": "test.HeaderService.create_user",
+        "parameters": [
+          {
+            "name": "X-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/headers/{id}": {
+      "get": {
+        "operationId": "test.HeaderService.get_user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "X-Req-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Flags",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "X-Age",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "code",
+          "msg"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "details": {
+            "type": "object"
+          },
+          "msg": {
+            "type": "string"
+          }
+        }
+      },
+      "test.User": {
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "test.test.HeaderService_Call": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_user"
+            ],
+            "properties": {
+              "get_user": {
+                "$ref": "#/components/schemas/HeaderService_get_user_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "create_user"
+            ],
+            "properties": {
+              "create_user": {
+                "$ref": "#/components/schemas/HeaderService_create_user_In"
+              }
+            }
+          }
+        ]
+      },
+      "test.test.HeaderService_Reply": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/HeaderService_Return"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
+          }
+        }
+      },
+      "test.test.HeaderService_Request": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/HeaderService_Call"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
+          }
+        }
+      },
+      "test.test.HeaderService_Return": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_user"
+            ],
+            "properties": {
+              "get_user": {
+                "$ref": "#/components/schemas/HeaderService_get_user_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "create_user"
+            ],
+            "properties": {
+              "create_user": {
+                "$ref": "#/components/schemas/HeaderService_create_user_Result"
+              }
+            }
+          }
+        ]
+      },
+      "test.test.HeaderService_create_user_In": {
+        "type": "object",
+        "required": [
+          "token",
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          }
+        }
+      },
+      "test.test.HeaderService_create_user_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "test.test.HeaderService_create_user_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HeaderService_create_user_Out"
+              }
+            }
+          }
+        ]
+      },
+      "test.test.HeaderService_get_user_In": {
+        "type": "object",
+        "required": [
+          "id",
+          "req_id",
+          "flags",
+          "age"
+        ],
+        "properties": {
+          "age": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "flags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "req_id": {
+            "type": "string"
+          }
+        }
+      },
+      "test.test.HeaderService_get_user_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "$ref": "#/components/schemas/User"
+          }
+        }
+      },
+      "test.test.HeaderService_get_user_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HeaderService_get_user_Out"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
