@@ -48,6 +48,9 @@ Parameter annotations:
 - `@query` (parameter-level source declaration)
 - `@query("name")` (parameter-level source declaration with explicit route/query
   name)
+- `@header` (parameter-level source declaration)
+- `@header("name")` (parameter-level source declaration with explicit header
+  name)
 
 Rules:
 
@@ -82,8 +85,8 @@ Rules:
   - parameters MUST be request-side only (`in` or omitted direction)
   - `out` and `inout` parameters are invalid
   - response is always `204 No Content` with no response body
-  - request-side parameter source rules are unchanged (`@path` / `@query`
-    annotations are allowed and follow section 5)
+  - request-side parameter source rules are unchanged (`@path` / `@query` /
+    `@header` annotations are allowed and follow section 5)
 
 ## 4. Route Resolution
 
@@ -240,10 +243,11 @@ Each parameter is assigned to a source by the following priority:
 
 1. If the parameter is explicitly annotated with `@path`, source is Path.
 2. If the parameter is explicitly annotated with `@query`, source is Query.
-3. If the parameter name appears in a route template `{name}`, source is Path.
-4. If the parameter name appears in a query-template suffix `{?name,...}`,
+3. If the parameter is explicitly annotated with `@header`, source is Header.
+4. If the parameter name appears in a route template `{name}`, source is Path.
+5. If the parameter name appears in a query-template suffix `{?name,...}`,
    source is Query.
-5. Otherwise, apply HTTP-method defaults:
+6. Otherwise, apply HTTP-method defaults:
    - `GET/DELETE/HEAD/OPTIONS` -> Query
    - `POST/PUT/PATCH` -> Body
 
@@ -254,12 +258,13 @@ Direction interaction (`in/out/inout`):
 - `in` and `inout` parameters participate in request-side source resolution
   using the priority rules above.
 
-Name binding rules for `@path` / `@query`:
+Name binding rules for `@path` / `@query` / `@header`:
 
 - Without argument (`@path`, `@query`): the bound name is the parameter name.
-- With argument (`@path("id")`, `@query("id")`): the bound name is the
-  annotation argument.
-- The bound name is used for route template variables and query keys.
+- With argument (`@path("id")`, `@query("id")`, `@header("X-Req-Id")`): the
+  bound name is the annotation argument.
+- The bound name is used for route template variables, query keys, or header
+  field names.
 
 Constraints:
 
@@ -278,6 +283,9 @@ Constraints:
   one request-side parameter resolved to Query source.
 - A route template may contain at most one query-template suffix (`{?...}`), and
   it SHOULD appear at the end of route template.
+- Header bound names MUST be non-empty and MUST NOT start with `:` (pseudo
+  header field names are reserved for HTTP/2 and HTTP/3).
+- Header name matching is case-insensitive for incoming requests.
 
 ## 6. Request Encoding
 
@@ -305,6 +313,13 @@ Examples:
 - Single parameter: `create(User req)` -> body is `{"id":1,"name":"a"}`
 - Multiple parameters: `create(string name, uint32 age)` -> body is
   `{"name":"a","age":18}`
+
+### 6.3 Header Encoding
+
+- `@header` parameters are encoded as HTTP request headers.
+- The bound header name is used verbatim when sending requests.
+- For multi-valued parameters (sequence types), encode each value as a separate
+  header field with the same name, in declaration order.
 
 ## 7. Response Encoding
 
@@ -411,6 +426,7 @@ traffic:
 - A route template containing more than one query-template suffix (`{?...}`).
 - Duplicate final route bindings (`HTTP method + normalized path`) across
   methods.
+- Any `@header` bound name that is empty or starts with `:`.
 - Any `@head` method with non-`void` return type.
 - Any `@head` method containing `out` or `inout` parameters.
 
