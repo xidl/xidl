@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.18.0](https://github.com/xidl/xidl/compare/v0.17.0...v0.18.0) (2026-03-12)
+
+
+### Features
+
+* apply [@name](https://github.com/name) to rust struct fields ([ebe42f0](https://github.com/xidl/xidl/commit/ebe42f0efb5ec2a5a69a8576738a0ef66218ba43))
+* support [@name](https://github.com/name) on enum members ([909595f](https://github.com/xidl/xidl/commit/909595fae6b450a2b12d25ef74977374d0f14c2d))
+
 ## [0.17.0](https://github.com/xidl/xidl/compare/v0.16.0...v0.17.0) (2026-03-12)
 
 
