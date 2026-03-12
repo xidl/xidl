@@ -6,6 +6,9 @@ pub struct {{ ident }} {
         pub base: {{ parent }},
     {% endif %}
     {%- for member in members %}
+        {% if opt.enable_serialize and opt.enable_deserialize and enable_serde_attrs and member.serde_rename is defined and member.serde_rename %}
+            #[serde(rename = "{{ member.serde_rename }}")]
+        {% endif %}
         pub {{ member.name }}: {{ member.ty }},
     {%- endfor %}
 }
