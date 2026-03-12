@@ -291,7 +291,6 @@ fn render_op(
         let name = rust_ident(&param.declarator.0);
         let direction = param_direction(param.attr.as_ref());
         if matches!(direction, ParamDirection::Out | ParamDirection::InOut) {
-            let http_rename = http_rename(&param.annotations);
             response_params.push(ParamContext {
                 name: name.clone(),
                 raw_name: param.declarator.0.clone(),
@@ -299,9 +298,7 @@ fn render_op(
                 path_template_name: String::new(),
                 ty: ty.clone(),
                 source: String::new(),
-                serde_rename: http_rename
-                    .as_ref()
-                    .and_then(|value| serde_rename(value, &name))
+                serde_rename: field_rename(&param.annotations, &name)
                     .or_else(|| serde_rename(&param.declarator.0, &name)),
                 header_is_multi: false,
                 header_item_ty: ty.clone(),
@@ -337,9 +334,8 @@ fn render_op(
                 param.declarator.0, wire_name, op.ident
             )));
         }
-        let http_rename = http_rename(&param.annotations);
         let serde_name = if matches!(source, ParamSource::Body) {
-            http_rename.clone().unwrap_or_else(|| param.declarator.0.clone())
+            field_rename_raw(&param.annotations).unwrap_or_else(|| param.declarator.0.clone())
         } else {
             wire_name.clone()
         };
@@ -1066,22 +1062,31 @@ fn has_annotation(annotations: &[hir::Annotation], target: &str) -> bool {
     })
 }
 
-fn http_rename(annotations: &[hir::Annotation]) -> Option<String> {
+fn field_rename_raw(annotations: &[hir::Annotation]) -> Option<String> {
     for annotation in annotations {
         let Some(name) = annotation_name(annotation) else {
             continue;
         };
-        if !name.eq_ignore_ascii_case("http") {
+        if !name.eq_ignore_ascii_case("name") {
             continue;
         }
         let value = annotation_params(annotation)
             .map(normalize_params)
-            .and_then(|params| params.get("rename").cloned());
+            .and_then(|params| {
+                params
+                    .get("value")
+                    .cloned()
+                    .or_else(|| params.get("name").cloned())
+            });
         if value.is_some() {
             return value;
         }
     }
     None
+}
+
+fn field_rename(annotations: &[hir::Annotation], rust_name: &str) -> Option<String> {
+    field_rename_raw(annotations).and_then(|value| serde_rename(&value, rust_name))
 }
 
 fn stream_kind_from_annotations(annotations: &[hir::Annotation]) -> IdlcResult<Option<StreamKind>> {

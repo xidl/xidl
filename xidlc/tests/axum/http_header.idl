@@ -1,7 +1,7 @@
 module test {
     struct User {
         uint32 id;
-        @http(rename = "full_name")
+        @name("full_name")
         string name;
     };
 
