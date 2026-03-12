@@ -3,6 +3,7 @@ use crate::generate::rust::util::{
     bitfield_type, render_const, rust_scoped_name, serialize_kind_name,
 };
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
+use crate::generate::utils::doc_lines_from_annotations;
 use serde_json::json;
 use xidl_parser::hir;
 
@@ -46,6 +47,7 @@ pub(crate) fn render_bitset_with_config(
         "fields": fields,
         "serialize_kind": serialize_kind,
         "derive": derive,
+        "doc": doc_lines_from_annotations(&def.annotations),
         "typeobject_path": renderer.typeobject_path(),
     });
     let rendered = renderer.render_template("bitset.rs.j2", &ctx)?;

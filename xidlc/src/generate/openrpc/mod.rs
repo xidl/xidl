@@ -3,6 +3,7 @@ use std::collections::{BTreeMap, HashMap, HashSet};
 use xidl_parser::hir;
 use xidl_parser::hir::{ParserProperties, Specification};
 
+use crate::generate::utils::doc_lines_from_annotations;
 use crate::jsonrpc::{Artifact, ArtifactFile};
 
 pub(crate) struct OpenRpcCodegen;
@@ -142,7 +143,10 @@ impl OpenRpcContext {
         let (name, schema) = match constr {
             hir::ConstrTypeDcl::StructDcl(def) => (
                 scoped_name(module_path, &def.ident),
-                schema_for_struct(&def.member),
+                apply_schema_description(
+                    schema_for_struct(&def.member),
+                    doc_text(&def.annotations),
+                ),
             ),
             hir::ConstrTypeDcl::EnumDcl(def) => {
                 let values = def
@@ -152,19 +156,23 @@ impl OpenRpcContext {
                     .collect::<Vec<_>>();
                 (
                     scoped_name(module_path, &def.ident),
-                    json!({ "type": "string", "enum": values }),
+                    apply_schema_description(
+                        json!({ "type": "string", "enum": values }),
+                        doc_text(&def.annotations),
+                    ),
                 )
             }
-            hir::ConstrTypeDcl::UnionDef(def) => {
-                (scoped_name(module_path, &def.ident), schema_for_union(def))
-            }
+            hir::ConstrTypeDcl::UnionDef(def) => (
+                scoped_name(module_path, &def.ident),
+                apply_schema_description(schema_for_union(def), doc_text(&def.annotations)),
+            ),
             hir::ConstrTypeDcl::BitsetDcl(def) => (
                 scoped_name(module_path, &def.ident),
-                json!({ "type": "integer" }),
+                apply_schema_description(json!({ "type": "integer" }), doc_text(&def.annotations)),
             ),
             hir::ConstrTypeDcl::BitmaskDcl(def) => (
                 scoped_name(module_path, &def.ident),
-                json!({ "type": "integer" }),
+                apply_schema_description(json!({ "type": "integer" }), doc_text(&def.annotations)),
             ),
             hir::ConstrTypeDcl::StructForwardDcl(_) | hir::ConstrTypeDcl::UnionForwardDcl(_) => {
                 return;
@@ -253,11 +261,15 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> V
         let schema = schema_for_type(&param.ty);
 
         if matches!(direction, ParamDirection::In | ParamDirection::InOut) {
-            params.push(json!({
+            let mut param_value = json!({
                 "name": name,
                 "required": !has_optional_annotation(&param.annotations),
                 "schema": schema,
-            }));
+            });
+            if let Some(description) = doc_text(&param.annotations) {
+                param_value["description"] = Value::String(description);
+            }
+            params.push(param_value);
         }
         if matches!(direction, ParamDirection::Out | ParamDirection::InOut) {
             outputs.push((name, schema));
@@ -272,6 +284,9 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> V
             "schema": result_object_schema(outputs),
         },
     });
+    if let Some(description) = doc_text(&op.annotations) {
+        method["description"] = Value::String(description);
+    }
 
     if let Some(kind) = stream_kind {
         method["x-xidl-stream"] = stream_extension(kind, module_path, interface_name, &op.ident);
@@ -287,6 +302,7 @@ fn render_attr(
     user_ops: &HashSet<String>,
 ) -> Vec<Value> {
     let emit_watch = has_annotation(&attr.annotations, "server_stream");
+    let attr_doc = doc_text(&attr.annotations);
     match &attr.decl {
         hir::AttrDclInner::ReadonlyAttrSpec(spec) => readonly_attr_names(spec)
             .into_iter()
@@ -301,6 +317,9 @@ fn render_attr(
                         "schema": result_object_schema(vec![("return".to_string(), schema_for_type(&spec.ty))]),
                     }
                 });
+                if let Some(description) = attr_doc.clone() {
+                    method["description"] = Value::String(description);
+                }
                 if emit_watch {
                     method["x-xidl-stream"] = stream_extension_direct(StreamKind::Server);
                 }
@@ -325,13 +344,16 @@ fn render_attr(
                                 "schema": result_object_schema(vec![("return".to_string(), schema_for_type(&spec.ty))]),
                             }
                         });
+                        if let Some(description) = attr_doc.clone() {
+                            getter_method["description"] = Value::String(description);
+                        }
                         if emit_watch {
                             getter_method["x-xidl-stream"] =
                                 stream_extension_direct(StreamKind::Server);
                         }
                         out.push(getter_method);
 
-                        out.push(json!({
+                        let mut setter_method = json!({
                             "name": rpc_method_name(module_path, interface_name, &setter),
                             "params": [{
                                 "name": name,
@@ -342,7 +364,11 @@ fn render_attr(
                                 "name": "result",
                                 "schema": result_object_schema(Vec::new()),
                             }
-                        }));
+                        });
+                        if let Some(description) = attr_doc.clone() {
+                            setter_method["params"][0]["description"] = Value::String(description);
+                        }
+                        out.push(setter_method);
                     }
                 }
                 hir::AttrDeclarator::WithRaises { declarator, .. } => {
@@ -359,13 +385,16 @@ fn render_attr(
                             "schema": result_object_schema(vec![("return".to_string(), schema_for_type(&spec.ty))]),
                         }
                     });
+                    if let Some(description) = attr_doc.clone() {
+                        getter_method["description"] = Value::String(description);
+                    }
                     if emit_watch {
                         getter_method["x-xidl-stream"] =
                             stream_extension_direct(StreamKind::Server);
                     }
                     out.push(getter_method);
 
-                    out.push(json!({
+                    let mut setter_method = json!({
                         "name": rpc_method_name(module_path, interface_name, &setter),
                         "params": [{
                             "name": name,
@@ -376,7 +405,11 @@ fn render_attr(
                             "name": "result",
                             "schema": result_object_schema(Vec::new()),
                         }
-                    }));
+                    });
+                    if let Some(description) = attr_doc.clone() {
+                        setter_method["params"][0]["description"] = Value::String(description);
+                    }
+                    out.push(setter_method);
                 }
             }
             out
@@ -436,9 +469,10 @@ fn schema_for_struct(members: &[hir::Member]) -> Value {
         if is_internal_rpc_marker_type(&member.ty) {
             continue;
         }
+        let doc = doc_text(&member.annotations);
         for decl in &member.ident {
             let name = declarator_name(decl);
-            let schema = schema_for_decl(&member.ty, decl);
+            let schema = apply_schema_description(schema_for_decl(&member.ty, decl), doc.clone());
             properties.insert(name.clone(), schema);
             if !member.is_optional() {
                 required.push(Value::String(name));
@@ -463,7 +497,10 @@ fn schema_for_union(def: &hir::UnionDef) -> Value {
         .filter(|case| !is_internal_rpc_marker_element(&case.element.ty))
         .map(|case| {
             let name = declarator_name(&case.element.value);
-            let schema = schema_for_element(&case.element.ty, &case.element.value);
+            let schema = apply_schema_description(
+                schema_for_element(&case.element.ty, &case.element.value),
+                doc_text(&case.element.annotations),
+            );
             let mut properties = Map::new();
             properties.insert(name.clone(), schema);
             Value::Object(
@@ -604,6 +641,74 @@ fn integer_schema(value: &hir::IntegerType) -> Value {
 
 fn schema_ref(name: &str) -> Value {
     json!({ "$ref": format!("#/components/schemas/{name}") })
+}
+
+fn apply_schema_description(mut schema: Value, doc: Option<String>) -> Value {
+    let Some(doc) = doc.filter(|value| !value.is_empty()) else {
+        return schema;
+    };
+    if let Value::Object(ref map) = schema {
+        if map.contains_key("$ref") {
+            return schema;
+        }
+    }
+    if let Value::Object(ref mut map) = schema {
+        if !map.contains_key("description") {
+            map.insert("description".to_string(), Value::String(doc));
+        }
+    }
+    schema
+}
+
+fn doc_text(annotations: &[hir::Annotation]) -> Option<String> {
+    let lines = doc_lines_from_annotations(annotations);
+    if lines.is_empty() {
+        None
+    } else {
+        Some(lines.join("\n"))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use xidl_parser::hir;
+
+    fn doc_annotation(text: &str) -> hir::Annotation {
+        hir::Annotation::Builtin {
+            name: "doc".to_string(),
+            params: Some(hir::AnnotationParams::Raw(format!("\"{}\"", text))),
+        }
+    }
+
+    #[test]
+    fn schema_for_struct_applies_doc_to_fields() {
+        let member = hir::Member {
+            annotations: vec![doc_annotation("field doc")],
+            ty: hir::TypeSpec::SimpleTypeSpec(hir::SimpleTypeSpec::IntegerType(
+                hir::IntegerType::I32,
+            )),
+            ident: vec![hir::Declarator::SimpleDeclarator(hir::SimpleDeclarator(
+                "value".to_string(),
+            ))],
+            default: None,
+            field_id: None,
+        };
+        let schema = schema_for_struct(&[member]);
+        let Value::Object(map) = schema else {
+            panic!("expected object schema");
+        };
+        let Value::Object(props) = map.get("properties").expect("properties") else {
+            panic!("expected properties");
+        };
+        let Value::Object(value_schema) = props.get("value").expect("value") else {
+            panic!("expected value schema");
+        };
+        assert_eq!(
+            value_schema.get("description").and_then(Value::as_str),
+            Some("field doc")
+        );
+    }
 }
 
 fn declarator_name(decl: &hir::Declarator) -> String {

@@ -1,5 +1,14 @@
+{% if doc and doc | length > 0 %}
+/**
+{% for line in doc %} * {{ line }}
+{% endfor %} */
+{% endif %}
 {% if extends %}export interface {{ ident }} extends {{ extends }} {
     {% else %}export interface {{ ident }} {
         {% endif %}
-        {% for field in fields %}    {{ field.prop }}{% if field.optional %}?{% endif %}: {{ field.ty }};
+        {% for field in fields %}{% if field.doc and field.doc | length > 0 %}
+    /**
+{% for line in field.doc %}     * {{ line }}
+{% endfor %}     */
+{% endif %}    {{ field.prop }}{% if field.optional %}?{% endif %}: {{ field.ty }};
         {% endfor %}}

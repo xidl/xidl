@@ -1,1 +1,6 @@
+{% if doc and doc | length > 0 %}
+/**
+{% for line in doc %} * {{ line }}
+{% endfor %} */
+{% endif %}
 export type {{ ident }} = {{ union }};

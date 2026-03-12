@@ -3,6 +3,7 @@ use crate::generate::rust::util::{
     declarator_name, rust_scoped_name, serialize_kind_name, type_with_decl,
 };
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
+use crate::generate::utils::doc_lines_from_annotations;
 use serde_json::json;
 use std::collections::HashMap;
 use xidl_parser::hir;
@@ -33,6 +34,7 @@ pub(crate) fn render_struct_with_config(
             let field_id = member.field_id.map(|value| format!("{value}u32"));
             let optional = member.is_optional();
             let rename = field_rename_raw(&member.annotations);
+            let doc = doc_lines_from_annotations(&member.annotations);
             member.ident.iter().map(move |decl| {
                 let name = crate::generate::rust::util::rust_ident(&declarator_name(decl));
                 let mut ty = type_with_decl(&member.ty, decl);
@@ -44,7 +46,8 @@ pub(crate) fn render_struct_with_config(
                     "name": name,
                     "serde_rename": rename,
                     "field_id": field_id.clone(),
-                    "optional": optional
+                    "optional": optional,
+                    "doc": doc
                 })
             })
         })
@@ -66,6 +69,7 @@ pub(crate) fn render_struct_with_config(
         "derive": derive,
         "enable_serde_attrs": enable_serde_attrs,
         "module_path": module_path,
+        "doc": doc_lines_from_annotations(&def.annotations),
         "typeobject_path": renderer.typeobject_path(),
     });
     let rendered = renderer.render_template("struct.rs.j2", &ctx)?;

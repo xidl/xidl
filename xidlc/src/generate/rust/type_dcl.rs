@@ -4,6 +4,7 @@ use crate::generate::rust::struct_dcl::render_struct_with_config;
 use crate::generate::rust::union_def::render_union_with_config;
 use crate::generate::rust::util::{rust_scoped_name, rust_type, typedef_json};
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
+use crate::generate::utils::doc_lines_from_annotations;
 use serde_json::json;
 use xidl_parser::hir;
 
@@ -18,6 +19,7 @@ impl RustRender for hir::TypeDcl {
                 let ctx = json!({
                     "name": crate::generate::rust::util::rust_ident(&native.decl.0),
                     "ty": "*mut c_void",
+                    "doc": doc_lines_from_annotations(&native.annotations),
                     "typeobject_path": renderer.typeobject_path(),
                     "typeobject_complete": "xidl_typeobject::runtime::build_complete_alias(\"\", 0u32, xidl_typeobject::runtime::type_identifier_none())",
                     "typeobject_minimal": "xidl_typeobject::runtime::build_minimal_alias(0u32, xidl_typeobject::runtime::type_identifier_none())",
@@ -41,6 +43,7 @@ pub(crate) fn render_typedef_with_config(
     module_path: &[String],
 ) -> IdlcResult<RustRenderOutput> {
     let mut out = RustRenderOutput::default();
+    let doc = doc_lines_from_annotations(&def.annotations);
     match &def.ty {
         hir::TypedefType::TypeSpec(ty) => {
             for decl in &def.decl {
@@ -51,6 +54,7 @@ pub(crate) fn render_typedef_with_config(
                         "typeobject_path".to_string(),
                         json!(renderer.typeobject_path()),
                     );
+                    obj.insert("doc".to_string(), json!(doc.clone()));
                 }
                 let rendered = renderer.render_template("typedef.rs.j2", &ctx)?;
                 out.source.push(rendered);
@@ -101,6 +105,7 @@ pub(crate) fn render_typedef_with_config(
                         "typeobject_path".to_string(),
                         json!(renderer.typeobject_path()),
                     );
+                    obj.insert("doc".to_string(), json!(doc.clone()));
                 }
                 let rendered = renderer.render_template("typedef.rs.j2", &ctx)?;
                 out.source.push(rendered);

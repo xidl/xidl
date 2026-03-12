@@ -1,5 +1,15 @@
+{% if doc and doc | length > 0 %}
+    {%- for line in doc %}
+        /// {{ line }}
+    {%- endfor %}
+{% endif %}
 pub trait {{ ident }} {
     {% for method in methods %}
+        {% if method.doc and method.doc | length > 0 %}
+            {%- for line in method.doc %}
+                /// {{ line }}
+            {%- endfor %}
+        {% endif %}
         fn {{ method.name }}(&self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> {{ method.ret }};
     {% endfor %}
 }

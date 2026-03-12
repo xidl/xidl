@@ -9,6 +9,11 @@ export class {{ client_name }} {
         this.defaultHeaders = options.headers ?? {};
     }
     {% for method in methods %}
+        {% if method.doc and method.doc | length > 0 %}
+        /**
+        {% for line in method.doc %} * {{ line }}
+        {% endfor %} */
+        {% endif %}
         {% if method.is_server_stream %}{{ method.name }}{% else %}async {{ method.name }}{% endif %}({% for param in method.params %}{{ param.name }}: {{ param.ty }}{% if not loop.last %}, {% endif %}{% endfor %}): {% if method.is_server_stream %}{{ method.return_ty }}{% else %}Promise<{{ method.return_ty }}>{% endif %} {
             {% if method.request_schema_ref and not method.is_client_stream %}        const parsed = {{ method.request_schema_ref }}.parse({ {% for entry in method.request_payload %}"{{ entry.raw_name }}": {{ entry.name }}{% if not loop.last %}, {% endif %}{% endfor %} });
             {% endif %}        let path = "{{ method.path }}";

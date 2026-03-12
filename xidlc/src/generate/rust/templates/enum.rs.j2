@@ -1,3 +1,8 @@
+{% if doc and doc | length > 0 %}
+    {%- for line in doc %}
+        /// {{ line }}
+    {%- endfor %}
+{% endif %}
 #[derive(
     Debug,
     Clone,
@@ -9,6 +14,11 @@
 )]
 pub enum {{ ident }} {
     {% for member in members %}
+        {% if member.doc and member.doc | length > 0 %}
+            {%- for line in member.doc %}
+                /// {{ line }}
+            {%- endfor %}
+        {% endif %}
         {% if (has_serde_serialize or has_serde_deserialize) and member.serde_rename is defined and member.serde_rename %}
             #[serde(rename = "{{ member.serde_rename }}")]
         {% endif %}

@@ -17,6 +17,7 @@ use utoipa::openapi::{
 use xidl_parser::hir;
 use xidl_parser::hir::{ParserProperties, Specification};
 
+use crate::generate::utils::doc_lines_from_annotations;
 use crate::jsonrpc::{Artifact, ArtifactFile};
 
 pub(crate) struct OpenApiCodegen;
@@ -162,7 +163,10 @@ impl OpenApiContext {
         match constr {
             hir::ConstrTypeDcl::StructDcl(def) => {
                 let name = scoped_name(module_path, &def.ident);
-                let schema = schema_for_struct(&def.member);
+                let schema = apply_schema_description(
+                    schema_for_struct(&def.member),
+                    doc_text(&def.annotations).as_deref(),
+                );
                 self.schemas.insert(name, schema);
             }
             hir::ConstrTypeDcl::EnumDcl(def) => {
@@ -177,30 +181,35 @@ impl OpenApiContext {
                         .schema_type(Type::String)
                         .enum_values(Some(values.collect::<Vec<_>>())),
                 ));
+                let schema =
+                    apply_schema_description(schema, doc_text(&def.annotations).as_deref());
                 self.schemas.insert(name, schema);
             }
             hir::ConstrTypeDcl::UnionDef(def) => {
                 let name = scoped_name(module_path, &def.ident);
-                let schema = schema_for_union(def);
+                let schema = apply_schema_description(
+                    schema_for_union(def),
+                    doc_text(&def.annotations).as_deref(),
+                );
                 self.schemas.insert(name, schema);
             }
             hir::ConstrTypeDcl::BitsetDcl(def) => {
                 let name = scoped_name(module_path, &def.ident);
-                self.schemas.insert(
-                    name,
-                    RefOr::T(Schema::from(
-                        ObjectBuilder::new().schema_type(Type::Integer),
-                    )),
-                );
+                let schema = RefOr::T(Schema::from(
+                    ObjectBuilder::new().schema_type(Type::Integer),
+                ));
+                let schema =
+                    apply_schema_description(schema, doc_text(&def.annotations).as_deref());
+                self.schemas.insert(name, schema);
             }
             hir::ConstrTypeDcl::BitmaskDcl(def) => {
                 let name = scoped_name(module_path, &def.ident);
-                self.schemas.insert(
-                    name,
-                    RefOr::T(Schema::from(
-                        ObjectBuilder::new().schema_type(Type::Integer),
-                    )),
-                );
+                let schema = RefOr::T(Schema::from(
+                    ObjectBuilder::new().schema_type(Type::Integer),
+                ));
+                let schema =
+                    apply_schema_description(schema, doc_text(&def.annotations).as_deref());
+                self.schemas.insert(name, schema);
             }
             hir::ConstrTypeDcl::StructForwardDcl(_) | hir::ConstrTypeDcl::UnionForwardDcl(_) => {}
         }
@@ -244,6 +253,8 @@ impl OpenApiContext {
                 response_schema,
                 is_server_stream,
                 is_client_stream: _,
+                summary,
+                description,
             } = method;
 
             for path in paths {
@@ -281,6 +292,11 @@ impl OpenApiContext {
                             )
                             .build(),
                     );
+                if summary.is_some() || description.is_some() {
+                    operation = operation
+                        .summary(summary.as_deref())
+                        .description(description.as_deref());
+                }
                 for parameter in &parameters {
                     operation = operation.parameter(parameter.clone());
                 }
@@ -318,6 +334,8 @@ struct MethodInfo {
     is_server_stream: bool,
     #[allow(dead_code)]
     is_client_stream: bool,
+    summary: Option<String>,
+    description: Option<String>,
 }
 
 struct RouteTemplate {
@@ -468,6 +486,7 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
                     &bound_name,
                     schema,
                     true,
+                    doc_text(&param.annotations),
                 ));
             }
             ParamSource::Query => {
@@ -477,6 +496,7 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
                     &bound_name,
                     schema,
                     !optional,
+                    doc_text(&param.annotations),
                 ));
             }
             ParamSource::Header => {
@@ -485,6 +505,7 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
                     &bound_name,
                     schema,
                     !optional,
+                    doc_text(&param.annotations),
                 ));
             }
             ParamSource::Cookie => {
@@ -493,9 +514,12 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
                     &bound_name,
                     schema,
                     !optional,
+                    doc_text(&param.annotations),
                 ));
             }
             ParamSource::Body => {
+                let schema =
+                    apply_schema_description(schema, doc_text(&param.annotations).as_deref());
                 body_props.push((raw_name.clone(), schema));
                 if !optional {
                     body_required.push(raw_name);
@@ -589,6 +613,8 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
         response_schema,
         is_server_stream,
         is_client_stream,
+        summary: doc_summary(&op.annotations),
+        description: doc_text(&op.annotations),
     }
 }
 
@@ -598,6 +624,8 @@ fn render_attr(
     module_path: &[String],
 ) -> Vec<MethodInfo> {
     let emit_watch = has_annotation(&attr.annotations, "server_stream");
+    let summary = doc_summary(&attr.annotations);
+    let description = doc_text(&attr.annotations);
     match &attr.decl {
         hir::AttrDclInner::ReadonlyAttrSpec(spec) => readonly_attr_names(spec)
             .into_iter()
@@ -612,6 +640,8 @@ fn render_attr(
                     response_schema: Some(schema_for_type(&spec.ty)),
                     is_server_stream: false,
                     is_client_stream: false,
+                    summary: summary.clone(),
+                    description: description.clone(),
                 }];
                 if emit_watch {
                     let raw_watch = format!("watch_attribute_{raw_name}");
@@ -625,6 +655,8 @@ fn render_attr(
                         response_schema: Some(schema_for_type(&spec.ty)),
                         is_server_stream: true,
                         is_client_stream: false,
+                        summary: summary.clone(),
+                        description: description.clone(),
                     });
                 }
                 methods
@@ -646,6 +678,8 @@ fn render_attr(
                             response_schema: Some(schema_for_type(&spec.ty)),
                             is_server_stream: false,
                             is_client_stream: false,
+                            summary: summary.clone(),
+                            description: description.clone(),
                         });
                         let raw_setter = format!("set_{raw_name}");
                         let props = vec![("value".to_string(), schema_for_type(&spec.ty))];
@@ -660,6 +694,8 @@ fn render_attr(
                             response_schema: None,
                             is_server_stream: false,
                             is_client_stream: false,
+                            summary: summary.clone(),
+                            description: description.clone(),
                         });
                         if emit_watch {
                             let raw_watch = format!("watch_attribute_{raw_name}");
@@ -673,6 +709,8 @@ fn render_attr(
                                 response_schema: Some(schema_for_type(&spec.ty)),
                                 is_server_stream: true,
                                 is_client_stream: false,
+                                summary: summary.clone(),
+                                description: description.clone(),
                             });
                         }
                     }
@@ -689,6 +727,8 @@ fn render_attr(
                         response_schema: Some(schema_for_type(&spec.ty)),
                         is_server_stream: false,
                         is_client_stream: false,
+                        summary: summary.clone(),
+                        description: description.clone(),
                     });
                     let raw_setter = format!("set_{raw_name}");
                     let props = vec![("value".to_string(), schema_for_type(&spec.ty))];
@@ -703,6 +743,8 @@ fn render_attr(
                         response_schema: None,
                         is_server_stream: false,
                         is_client_stream: false,
+                        summary: summary.clone(),
+                        description: description.clone(),
                     });
                     if emit_watch {
                         let raw_watch = format!("watch_attribute_{raw_name}");
@@ -716,6 +758,8 @@ fn render_attr(
                             response_schema: Some(schema_for_type(&spec.ty)),
                             is_server_stream: true,
                             is_client_stream: false,
+                            summary: summary.clone(),
+                            description: description.clone(),
                         });
                     }
                 }
@@ -772,18 +816,22 @@ fn parameter_schema(
     name: &str,
     schema: RefOr<Schema>,
     required: bool,
+    description: Option<String>,
 ) -> utoipa::openapi::path::Parameter {
     let required = if required {
         Required::True
     } else {
         Required::False
     };
-    ParameterBuilder::new()
+    let mut builder = ParameterBuilder::new()
         .name(name)
         .parameter_in(location)
         .required(required)
-        .schema(Some(schema))
-        .build()
+        .schema(Some(schema));
+    if let Some(description) = description {
+        builder = builder.description(Some(description));
+    }
+    builder.build()
 }
 
 fn schema_for_struct(members: &[hir::Member]) -> RefOr<Schema> {
@@ -791,9 +839,11 @@ fn schema_for_struct(members: &[hir::Member]) -> RefOr<Schema> {
     for member in members {
         let rename = field_rename(&member.annotations);
         let optional = member.is_optional();
+        let doc = doc_text(&member.annotations);
         for decl in &member.ident {
             let name = rename.clone().unwrap_or_else(|| declarator_name(decl));
-            let schema = schema_for_decl(&member.ty, decl);
+            let schema =
+                apply_schema_description(schema_for_decl(&member.ty, decl), doc.as_deref());
             object = object.property(name.clone(), schema);
             if !optional {
                 object = object.required(name);
@@ -808,7 +858,10 @@ fn schema_for_union(def: &hir::UnionDef) -> RefOr<Schema> {
     for case in &def.case {
         let decl = &case.element.value;
         let name = declarator_name(decl);
-        let schema = schema_for_element(&case.element.ty, decl);
+        let schema = apply_schema_description(
+            schema_for_element(&case.element.ty, decl),
+            doc_text(&case.element.annotations).as_deref(),
+        );
         let object = ObjectBuilder::new()
             .schema_type(Type::Object)
             .property(name.clone(), schema)
@@ -843,6 +896,78 @@ fn schema_for_decl(ty: &hir::TypeSpec, decl: &hir::Declarator) -> RefOr<Schema> 
         }
     }
     schema
+}
+
+fn apply_schema_description(mut schema: RefOr<Schema>, doc: Option<&str>) -> RefOr<Schema> {
+    let Some(doc) = doc.filter(|value| !value.is_empty()) else {
+        return schema;
+    };
+    match &mut schema {
+        RefOr::T(Schema::Object(object)) => {
+            object.description = Some(doc.to_string());
+        }
+        RefOr::T(Schema::Array(array)) => {
+            array.description = Some(doc.to_string());
+        }
+        RefOr::T(Schema::OneOf(one_of)) => {
+            one_of.description = Some(doc.to_string());
+        }
+        _ => {}
+    }
+    schema
+}
+
+fn doc_text(annotations: &[hir::Annotation]) -> Option<String> {
+    let lines = doc_lines_from_annotations(annotations);
+    if lines.is_empty() {
+        None
+    } else {
+        Some(lines.join("\n"))
+    }
+}
+
+fn doc_summary(annotations: &[hir::Annotation]) -> Option<String> {
+    let lines = doc_lines_from_annotations(annotations);
+    lines.first().cloned()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use xidl_parser::hir;
+
+    fn doc_annotation(text: &str) -> hir::Annotation {
+        hir::Annotation::Builtin {
+            name: "doc".to_string(),
+            params: Some(hir::AnnotationParams::Raw(format!("\"{}\"", text))),
+        }
+    }
+
+    #[test]
+    fn schema_for_struct_applies_doc_to_fields() {
+        let member = hir::Member {
+            annotations: vec![doc_annotation("field doc")],
+            ty: hir::TypeSpec::SimpleTypeSpec(hir::SimpleTypeSpec::IntegerType(
+                hir::IntegerType::I32,
+            )),
+            ident: vec![hir::Declarator::SimpleDeclarator(hir::SimpleDeclarator(
+                "value".to_string(),
+            ))],
+            default: None,
+            field_id: None,
+        };
+        let schema = schema_for_struct(&[member]);
+        let RefOr::T(Schema::Object(object)) = schema else {
+            panic!("expected object schema");
+        };
+        let Some(prop) = object.properties.get("value") else {
+            panic!("missing value property");
+        };
+        let RefOr::T(Schema::Object(prop_obj)) = prop else {
+            panic!("expected object property schema");
+        };
+        assert_eq!(prop_obj.description.as_deref(), Some("field doc"));
+    }
 }
 
 fn schema_for_type(ty: &hir::TypeSpec) -> RefOr<Schema> {

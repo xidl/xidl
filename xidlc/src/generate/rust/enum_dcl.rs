@@ -1,5 +1,6 @@
 use crate::error::IdlcResult;
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
+use crate::generate::utils::doc_lines_from_annotations;
 use serde_json::json;
 use std::collections::HashMap;
 use xidl_parser::hir;
@@ -12,9 +13,11 @@ impl RustRender for hir::EnumDcl {
             .map(|member| {
                 let rust_name = crate::generate::rust::util::rust_ident(&member.ident);
                 let rename = field_rename_raw(&member.annotations);
+                let doc = doc_lines_from_annotations(&member.annotations);
                 json!({
                     "name": rust_name,
                     "serde_rename": rename,
+                    "doc": doc,
                 })
             })
             .collect::<Vec<_>>();
@@ -29,6 +32,7 @@ impl RustRender for hir::EnumDcl {
             "members": members,
             "has_serde_serialize": has_serde_serialize,
             "has_serde_deserialize": has_serde_deserialize,
+            "doc": doc_lines_from_annotations(&self.annotations),
             "typeobject_path": renderer.typeobject_path(),
         });
         let rendered = renderer.render_template("enum.rs.j2", &ctx)?;

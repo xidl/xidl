@@ -1,3 +1,8 @@
+{%- if doc and doc | length > 0 %}
+    {%- for line in doc %}
+        /// {{ line }}
+    {%- endfor %}
+{% endif %}
 {%- if derive and derive | length > 0 %}
     #[derive({{ derive | join(", ") }})]
 {%- endif %}
@@ -6,6 +11,11 @@ pub struct {{ ident }} {
         pub base: {{ parent }},
     {% endif %}
     {%- for member in members %}
+        {% if member.doc and member.doc | length > 0 %}
+            {%- for line in member.doc %}
+                /// {{ line }}
+            {%- endfor %}
+        {% endif %}
         {% if opt.enable_serialize and opt.enable_deserialize and enable_serde_attrs and member.serde_rename is defined and member.serde_rename %}
             #[serde(rename = "{{ member.serde_rename }}")]
         {% endif %}

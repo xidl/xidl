@@ -4,6 +4,7 @@ use crate::generate::rust::util::{
     type_with_decl,
 };
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
+use crate::generate::utils::doc_lines_from_annotations;
 use itertools::Itertools;
 use serde_json::json;
 use std::collections::BTreeSet;
@@ -32,20 +33,21 @@ pub(crate) fn render_union_with_config(
     for case in &def.case {
         let name = crate::generate::rust::util::rust_ident(&declarator_name(&case.element.value));
         if seen.insert(name.clone()) {
-            fields.push((name, &case.element.ty, &case.element.value));
+            let doc = doc_lines_from_annotations(&case.element.annotations);
+            fields.push((name, &case.element.ty, &case.element.value, doc));
         }
     }
 
     let members = fields
         .into_iter()
-        .map(|(name, ty, decl)| {
+        .map(|(name, ty, decl, doc)| {
             let ty = match ty {
                 hir::ElementSpecTy::TypeSpec(spec) => type_with_decl(spec, decl),
                 hir::ElementSpecTy::ConstrTypeDcl(constr) => {
                     rust_scoped_name(&constr_type_name(constr))
                 }
             };
-            json!({ "name": name, "ty": ty })
+            json!({ "name": name, "ty": ty, "doc": doc })
         })
         .collect::<Vec<_>>();
 
@@ -112,6 +114,7 @@ pub(crate) fn render_union_with_config(
         "has_serde_deserialize": derive.iter().find(|v|*v=="::serde::Deserialize"),
         "derive": derive.into_iter().filter(|v| v != "::serde::Serialize" && v!="::serde::Deserialize").collect_vec(),
         "module_path": module_path,
+        "doc": doc_lines_from_annotations(&def.annotations),
         "typeobject_path": renderer.typeobject_path(),
     });
     let rendered = renderer.render_template("union.rs.j2", &ctx)?;

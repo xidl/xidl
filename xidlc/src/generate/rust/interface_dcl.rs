@@ -1,6 +1,7 @@
 use crate::error::IdlcResult;
 use crate::generate::rust::util::rust_type;
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
+use crate::generate::utils::doc_lines_from_annotations;
 use serde_json::json;
 use xidl_parser::hir;
 
@@ -49,6 +50,7 @@ impl RustRender for hir::InterfaceDef {
         let ctx = json!({
             "ident": crate::generate::rust::util::rust_ident(&self.header.ident),
             "methods": methods,
+            "doc": doc_lines_from_annotations(&self.annotations),
         });
         let rendered = renderer.render_template("interface.rs.j2", &ctx)?;
         out.source.push(rendered);
@@ -76,10 +78,12 @@ fn render_op(op: &hir::OpDcl) -> serde_json::Value {
         "ret": ret,
         "name": crate::generate::rust::util::rust_ident(&op.ident),
         "params": param_list,
+        "doc": doc_lines_from_annotations(&op.annotations),
     })
 }
 
 fn render_attr(attr: &hir::AttrDcl) -> Vec<serde_json::Value> {
+    let doc = doc_lines_from_annotations(&attr.annotations);
     match &attr.decl {
         hir::AttrDclInner::ReadonlyAttrSpec(spec) => readonly_attr_names(spec)
             .into_iter()
@@ -89,6 +93,7 @@ fn render_attr(attr: &hir::AttrDcl) -> Vec<serde_json::Value> {
                     "ret": ret,
                     "name": name,
                     "params": Vec::<String>::new(),
+                    "doc": doc.clone(),
                 })
             })
             .collect(),
@@ -104,11 +109,13 @@ fn render_attr(attr: &hir::AttrDcl) -> Vec<serde_json::Value> {
                             "ret": ret,
                             "name": name.clone(),
                             "params": Vec::<String>::new(),
+                            "doc": doc.clone(),
                         }));
                         out.push(json!({
                             "ret": "()",
                             "name": format!("set_{name}"),
                             "params": vec![format!("value: {param}")],
+                            "doc": doc.clone(),
                         }));
                     }
                 }
@@ -120,11 +127,13 @@ fn render_attr(attr: &hir::AttrDcl) -> Vec<serde_json::Value> {
                         "ret": ret,
                         "name": name.clone(),
                         "params": Vec::<String>::new(),
+                        "doc": doc.clone(),
                     }));
                     out.push(json!({
                         "ret": "()",
                         "name": format!("set_{name}"),
                         "params": vec![format!("value: {param}")],
+                        "doc": doc.clone(),
                     }));
                 }
             }

@@ -1,3 +1,12 @@
+{% if doc and doc | length > 0 %}
+/**
+{% for line in doc %} * {{ line }}
+{% endfor %} */
+{% endif %}
 export interface {{ name }} {
-    {% for param in params %}    {{ param.prop }}{% if param.optional %}?{% endif %}: {{ param.ty }};
+    {% for param in params %}{% if param.doc and param.doc | length > 0 %}
+    /**
+{% for line in param.doc %}     * {{ line }}
+{% endfor %}     */
+{% endif %}    {{ param.prop }}{% if param.optional %}?{% endif %}: {{ param.ty }};
     {% endfor %}}

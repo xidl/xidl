@@ -1,5 +1,6 @@
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::typescript::{TsMode, TypescriptRenderOutput, TypescriptRenderer};
+use crate::generate::utils::doc_lines_from_annotations;
 use convert_case::{Case, Casing};
 use serde::Serialize;
 use std::collections::{HashMap, HashSet};
@@ -257,6 +258,7 @@ fn render_type_dcl(
                     &TypedefTypeContext {
                         name: name.clone(),
                         type_expr,
+                        doc: doc_lines_from_annotations(&typedef.annotations),
                     },
                 )?;
                 out.types.push(types);
@@ -289,6 +291,7 @@ fn render_type_dcl(
                 &TypedefTypeContext {
                     name: name.clone(),
                     type_expr: "unknown".to_string(),
+                    doc: doc_lines_from_annotations(&native.annotations),
                 },
             )?;
             out.types.push(types);
@@ -344,6 +347,7 @@ fn render_interface(
                     ty: ts_type_for_type_spec(&param.ty, module_path, TypeRefTarget::Types),
                     schema: zod_schema_for_type_spec(&param.ty, module_path),
                     optional: param.optional,
+                    doc: param.doc.clone(),
                 })
                 .collect::<Vec<_>>();
             let types = renderer.render_template(
@@ -351,6 +355,7 @@ fn render_interface(
                 &RequestContext {
                     name: request_name.clone(),
                     params: params.clone(),
+                    doc: method.doc.clone(),
                 },
             )?;
             let schema_name = format!("{request_name}Schema");
@@ -386,18 +391,21 @@ fn render_interface(
                     )
                 },
                 optional: false,
+                doc: Vec::new(),
             }];
             params.extend(method.output_params.iter().map(|param| ParamDeclContext {
                 prop: ts_prop_name(&param.raw_name),
                 ty: ts_type_for_type_spec(&param.ty, module_path, TypeRefTarget::Types),
                 schema: zod_schema_for_type_spec(&param.ty, module_path),
                 optional: param.optional,
+                doc: param.doc.clone(),
             }));
             let types = renderer.render_template(
                 "request.d.ts.j2",
                 &RequestContext {
                     name: response_name.clone(),
                     params: params.clone(),
+                    doc: method.doc.clone(),
                 },
             )?;
             let schema_name = format!("{response_name}Schema");
@@ -452,12 +460,14 @@ fn render_struct(
         &StructTypeContext {
             ident: ident.clone(),
             extends,
+            doc: doc_lines_from_annotations(&def.annotations),
             fields: fields
                 .iter()
                 .map(|field| FieldTypeContext {
                     prop: field.prop.clone(),
                     ty: field.ty.clone(),
                     optional: field.optional,
+                    doc: field.doc.clone(),
                 })
                 .collect(),
         },
@@ -507,6 +517,7 @@ fn render_enum(def: &hir::EnumDcl, renderer: &TypescriptRenderer) -> IdlcResult<
         &EnumTypeContext {
             ident: ident.clone(),
             union,
+            doc: doc_lines_from_annotations(&def.annotations),
         },
     )?;
     let schema_name = format!("{ident}Schema");
@@ -558,6 +569,7 @@ fn render_union(
         &UnionTypeContext {
             ident: ident.clone(),
             union,
+            doc: doc_lines_from_annotations(&def.annotations),
         },
     )?;
     let schema_name = format!("{ident}Schema");
@@ -584,6 +596,7 @@ fn render_bit_number(ident: &str, renderer: &TypescriptRenderer) -> IdlcResult<T
         &TypedefTypeContext {
             name: name.clone(),
             type_expr: "number".to_string(),
+            doc: Vec::new(),
         },
     )?;
     let schema_name = format!("{name}Schema");
@@ -607,6 +620,7 @@ struct FieldTypeContext {
     prop: String,
     ty: String,
     optional: bool,
+    doc: Vec<String>,
 }
 
 #[derive(Serialize)]
@@ -621,6 +635,7 @@ struct StructTypeContext {
     ident: String,
     extends: Option<String>,
     fields: Vec<FieldTypeContext>,
+    doc: Vec<String>,
 }
 
 #[derive(Serialize)]
@@ -634,6 +649,7 @@ struct StructZodContext {
 struct EnumTypeContext {
     ident: String,
     union: String,
+    doc: Vec<String>,
 }
 
 #[derive(Serialize)]
@@ -647,6 +663,7 @@ struct EnumZodContext {
 struct UnionTypeContext {
     ident: String,
     union: String,
+    doc: Vec<String>,
 }
 
 #[derive(Serialize)]
@@ -660,6 +677,7 @@ struct UnionZodContext {
 struct TypedefTypeContext {
     name: String,
     type_expr: String,
+    doc: Vec<String>,
 }
 
 #[derive(Serialize)]
@@ -675,12 +693,14 @@ struct ParamDeclContext {
     ty: String,
     schema: String,
     optional: bool,
+    doc: Vec<String>,
 }
 
 #[derive(Serialize)]
 struct RequestContext {
     name: String,
     params: Vec<ParamDeclContext>,
+    doc: Vec<String>,
 }
 
 #[derive(Serialize)]
@@ -715,6 +735,7 @@ struct ClientMethodContext {
     body_single: Option<BodyParamContext>,
     is_server_stream: bool,
     is_client_stream: bool,
+    doc: Vec<String>,
 }
 
 #[derive(Serialize)]
@@ -769,6 +790,7 @@ struct ParamInfo {
     wire_name: String,
     ty: hir::TypeSpec,
     optional: bool,
+    doc: Vec<String>,
 }
 
 #[derive(Clone)]
@@ -789,6 +811,7 @@ struct MethodInfo {
     output_params: Vec<ParamInfo>,
     is_server_stream: bool,
     is_client_stream: bool,
+    doc: Vec<String>,
 }
 
 struct RouteTemplate {
@@ -935,6 +958,7 @@ impl MethodInfo {
             }),
             is_server_stream: self.is_server_stream,
             is_client_stream: self.is_client_stream,
+            doc: self.doc.clone(),
         }
     }
 }
@@ -1012,6 +1036,7 @@ fn struct_fields(members: &[hir::Member], module_path: &[String]) -> Vec<FieldDe
     for member in members {
         let rename = field_rename(&member.annotations);
         let optional = member.is_optional();
+        let doc = doc_lines_from_annotations(&member.annotations);
         for decl in &member.ident {
             let name = rename
                 .clone()
@@ -1021,6 +1046,7 @@ fn struct_fields(members: &[hir::Member], module_path: &[String]) -> Vec<FieldDe
                 ty: ts_type_for_decl(&member.ty, decl, module_path, TypeRefTarget::Types),
                 schema: zod_schema_for_decl(&member.ty, decl, module_path),
                 optional,
+                doc: doc.clone(),
             });
         }
     }
@@ -1032,6 +1058,7 @@ struct FieldDecl {
     ty: String,
     schema: String,
     optional: bool,
+    doc: Vec<String>,
 }
 
 fn render_op(
@@ -1169,6 +1196,7 @@ fn render_op(
             wire_name,
             ty,
             optional: has_optional_annotation(&param.annotations),
+            doc: doc_lines_from_annotations(&param.annotations),
         };
         let direction = param_direction(param.attr.as_ref());
         if matches!(direction, ParamDirection::Out | ParamDirection::InOut) {
@@ -1288,6 +1316,7 @@ fn render_op(
         output_params,
         is_server_stream,
         is_client_stream,
+        doc: doc_lines_from_annotations(&op.annotations),
     })
 }
 
@@ -1297,6 +1326,7 @@ fn render_attr(
     module_path: &[String],
 ) -> Vec<MethodInfo> {
     let emit_watch = has_annotation(&attr.annotations, "server_stream");
+    let doc = doc_lines_from_annotations(&attr.annotations);
     match &attr.decl {
         hir::AttrDclInner::ReadonlyAttrSpec(spec) => readonly_attr_names(spec)
             .into_iter()
@@ -1318,6 +1348,7 @@ fn render_attr(
                     output_params: Vec::new(),
                     is_server_stream: false,
                     is_client_stream: false,
+                    doc: doc.clone(),
                 }];
                 if emit_watch {
                     let raw_watch = format!("watch_attribute_{}", names.raw);
@@ -1338,6 +1369,7 @@ fn render_attr(
                         output_params: Vec::new(),
                         is_server_stream: true,
                         is_client_stream: false,
+                        doc: doc.clone(),
                     });
                 }
                 methods
@@ -1366,6 +1398,7 @@ fn render_attr(
                             output_params: Vec::new(),
                             is_server_stream: false,
                             is_client_stream: false,
+                            doc: doc.clone(),
                         };
                         out.push(getter);
 
@@ -1376,6 +1409,7 @@ fn render_attr(
                             wire_name: "value".to_string(),
                             ty: spec.ty.clone(),
                             optional: false,
+                            doc: doc.clone(),
                         };
                         let request_name = Some(format!(
                             "{}Request",
@@ -1402,6 +1436,7 @@ fn render_attr(
                             output_params: Vec::new(),
                             is_server_stream: false,
                             is_client_stream: false,
+                            doc: doc.clone(),
                         };
                         out.push(setter);
                         if emit_watch {
@@ -1423,6 +1458,7 @@ fn render_attr(
                                 output_params: Vec::new(),
                                 is_server_stream: true,
                                 is_client_stream: false,
+                                doc: doc.clone(),
                             });
                         }
                     }
@@ -1446,6 +1482,7 @@ fn render_attr(
                         output_params: Vec::new(),
                         is_server_stream: false,
                         is_client_stream: false,
+                        doc: doc.clone(),
                     };
                     out.push(getter);
 
@@ -1456,6 +1493,7 @@ fn render_attr(
                         wire_name: "value".to_string(),
                         ty: spec.ty.clone(),
                         optional: false,
+                        doc: doc.clone(),
                     };
                     let request_name = Some(format!(
                         "{}Request",
@@ -1482,6 +1520,7 @@ fn render_attr(
                         output_params: Vec::new(),
                         is_server_stream: false,
                         is_client_stream: false,
+                        doc: doc.clone(),
                     };
                     out.push(setter);
                     if emit_watch {
@@ -1503,6 +1542,7 @@ fn render_attr(
                             output_params: Vec::new(),
                             is_server_stream: true,
                             is_client_stream: false,
+                            doc: doc.clone(),
                         });
                     }
                 }

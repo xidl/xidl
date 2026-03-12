@@ -1,5 +1,6 @@
 use crate::error::IdlcResult;
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
+use crate::generate::utils::doc_lines_from_annotations;
 use serde_json::json;
 use xidl_parser::hir;
 
@@ -13,6 +14,7 @@ impl RustRender for hir::BitmaskDcl {
                 json!({
                     "name": crate::generate::rust::util::rust_ident(&value.ident),
                     "index": idx,
+                    "doc": doc_lines_from_annotations(&value.annotations),
                 })
             })
             .collect::<Vec<_>>();
@@ -24,6 +26,7 @@ impl RustRender for hir::BitmaskDcl {
             "ident": crate::generate::rust::util::rust_ident(&self.ident),
             "values": values,
             "derive": derive,
+            "doc": doc_lines_from_annotations(&self.annotations),
             "typeobject_path": renderer.typeobject_path(),
         });
         let rendered = renderer.render_template("bitmask.rs.j2", &ctx)?;
