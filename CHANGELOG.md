@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.0](https://github.com/xidl/xidl/compare/v0.14.0...v0.15.0) (2026-03-12)
+
+
+### Features
+
+* add [@cookie](https://github.com/cookie) support for http generators ([50c005b](https://github.com/xidl/xidl/commit/50c005b073f425a0fb24e5ec6d767445cac0443b))
+
 ## [0.14.0](https://github.com/xidl/xidl/compare/v0.13.0...v0.14.0) (2026-03-12)
 
 
