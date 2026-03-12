@@ -51,6 +51,9 @@ Parameter annotations:
 - `@header` (parameter-level source declaration)
 - `@header("name")` (parameter-level source declaration with explicit header
   name)
+- `@cookie` (parameter-level source declaration)
+- `@cookie("name")` (parameter-level source declaration with explicit cookie
+  name)
 
 Rules:
 
@@ -86,7 +89,7 @@ Rules:
   - `out` and `inout` parameters are invalid
   - response is always `204 No Content` with no response body
   - request-side parameter source rules are unchanged (`@path` / `@query` /
-    `@header` annotations are allowed and follow section 5)
+    `@header` / `@cookie` annotations are allowed and follow section 5)
 
 ## 4. Route Resolution
 
@@ -244,10 +247,11 @@ Each parameter is assigned to a source by the following priority:
 1. If the parameter is explicitly annotated with `@path`, source is Path.
 2. If the parameter is explicitly annotated with `@query`, source is Query.
 3. If the parameter is explicitly annotated with `@header`, source is Header.
-4. If the parameter name appears in a route template `{name}`, source is Path.
-5. If the parameter name appears in a query-template suffix `{?name,...}`,
+4. If the parameter is explicitly annotated with `@cookie`, source is Cookie.
+5. If the parameter name appears in a route template `{name}`, source is Path.
+6. If the parameter name appears in a query-template suffix `{?name,...}`,
    source is Query.
-6. Otherwise, apply HTTP-method defaults:
+7. Otherwise, apply HTTP-method defaults:
    - `GET/DELETE/HEAD/OPTIONS` -> Query
    - `POST/PUT/PATCH` -> Body
 
@@ -258,13 +262,13 @@ Direction interaction (`in/out/inout`):
 - `in` and `inout` parameters participate in request-side source resolution
   using the priority rules above.
 
-Name binding rules for `@path` / `@query` / `@header`:
+Name binding rules for `@path` / `@query` / `@header` / `@cookie`:
 
 - Without argument (`@path`, `@query`): the bound name is the parameter name.
-- With argument (`@path("id")`, `@query("id")`, `@header("X-Req-Id")`): the
-  bound name is the annotation argument.
-- The bound name is used for route template variables, query keys, or header
-  field names.
+- With argument (`@path("id")`, `@query("id")`, `@header("X-Req-Id")`,
+  `@cookie("sid")`): the bound name is the annotation argument.
+- The bound name is used for route template variables, query keys, header field
+  names, or cookie names.
 
 Constraints:
 
@@ -286,6 +290,8 @@ Constraints:
 - Header bound names MUST be non-empty and MUST NOT start with `:` (pseudo
   header field names are reserved for HTTP/2 and HTTP/3).
 - Header name matching is case-insensitive for incoming requests.
+- Cookie bound names MUST be non-empty and MUST NOT contain ASCII whitespace,
+  `;`, or `=` characters.
 
 ## 6. Request Encoding
 
@@ -320,6 +326,14 @@ Examples:
 - The bound header name is used verbatim when sending requests.
 - For multi-valued parameters (sequence types), encode each value as a separate
   header field with the same name, in declaration order.
+
+### 6.4 Cookie Encoding
+
+- `@cookie` parameters are encoded in the HTTP `Cookie` request header.
+- The bound cookie name is used as the cookie key.
+- For multi-valued parameters (sequence types), encode each value as a separate
+  cookie pair with the same name, in declaration order (for example
+  `Cookie: id=a; id=b`).
 
 ## 7. Response Encoding
 
@@ -427,6 +441,8 @@ traffic:
 - Duplicate final route bindings (`HTTP method + normalized path`) across
   methods.
 - Any `@header` bound name that is empty or starts with `:`.
+- Any `@cookie` bound name that is empty or contains ASCII whitespace, `;`, or
+  `=`.
 - Any `@head` method with non-`void` return type.
 - Any `@head` method containing `out` or `inout` parameters.
 
