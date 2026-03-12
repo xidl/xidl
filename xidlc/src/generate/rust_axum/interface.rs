@@ -22,6 +22,7 @@ enum ParamSource {
     Path,
     Query,
     Header,
+    Cookie,
     Body,
 }
 
@@ -62,6 +63,7 @@ struct MethodContext {
     path_params: Vec<ParamContext>,
     query_params: Vec<ParamContext>,
     header_params: Vec<ParamContext>,
+    cookie_params: Vec<ParamContext>,
     body_params: Vec<ParamContext>,
     request_ty: String,
     request_struct: Option<String>,
@@ -89,6 +91,9 @@ struct ParamContext {
     header_is_multi: bool,
     header_item_ty: String,
     header_item_is_string: bool,
+    cookie_is_multi: bool,
+    cookie_item_ty: String,
+    cookie_item_is_string: bool,
 }
 
 struct RouteTemplate {
@@ -197,6 +202,7 @@ fn render_op(
     let mut path_params = Vec::new();
     let mut query_params = Vec::new();
     let mut header_params = Vec::new();
+    let mut cookie_params = Vec::new();
     let mut body_params = Vec::new();
     let mut request_params = Vec::new();
     let mut response_params = Vec::new();
@@ -294,6 +300,9 @@ fn render_op(
                 header_is_multi: false,
                 header_item_ty: ty.clone(),
                 header_item_is_string: false,
+                cookie_is_multi: false,
+                cookie_item_ty: ty.clone(),
+                cookie_item_is_string: false,
             });
         }
         if matches!(direction, ParamDirection::Out) {
@@ -342,6 +351,9 @@ fn render_op(
             header_is_multi: header_is_multi(&param.ty),
             header_item_ty: header_item_ty(&param.ty),
             header_item_is_string: header_item_is_string(&param.ty),
+            cookie_is_multi: cookie_is_multi(&param.ty),
+            cookie_item_ty: cookie_item_ty(&param.ty),
+            cookie_item_is_string: cookie_item_is_string(&param.ty),
         };
         request_params.push(ctx.clone());
         match source {
@@ -356,6 +368,7 @@ fn render_op(
                 query_params.push(ctx);
             }
             ParamSource::Header => header_params.push(ctx),
+            ParamSource::Cookie => cookie_params.push(ctx),
             ParamSource::Body => body_params.push(ctx),
         }
     }
@@ -415,7 +428,10 @@ fn render_op(
         )));
     }
     if (is_client_stream || is_bidi_stream)
-        && (!path_params.is_empty() || !query_params.is_empty() || !header_params.is_empty())
+        && (!path_params.is_empty()
+            || !query_params.is_empty()
+            || !header_params.is_empty()
+            || !cookie_params.is_empty())
     {
         return Err(IdlcError::rpc(format!(
             "@bidi_stream method '{}' currently supports body parameters only",
@@ -462,6 +478,7 @@ fn render_op(
         path_params,
         query_params,
         header_params,
+        cookie_params,
         body_params,
         request_ty: request_ty.clone(),
         request_struct,
@@ -508,6 +525,7 @@ fn render_attr(
                     path_params: Vec::new(),
                     query_params: Vec::new(),
                     header_params: Vec::new(),
+                    cookie_params: Vec::new(),
                     body_params: Vec::new(),
                     request_ty: "()".to_string(),
                     request_struct,
@@ -541,6 +559,7 @@ fn render_attr(
                         path_params: Vec::new(),
                         query_params: Vec::new(),
                         header_params: Vec::new(),
+                        cookie_params: Vec::new(),
                         body_params: Vec::new(),
                         request_ty: "()".to_string(),
                         request_struct: None,
@@ -585,6 +604,7 @@ fn render_attr(
                             path_params: Vec::new(),
                             query_params: Vec::new(),
                             header_params: Vec::new(),
+                            cookie_params: Vec::new(),
                             body_params: Vec::new(),
                             request_ty: "()".to_string(),
                             request_struct,
@@ -618,6 +638,9 @@ fn render_attr(
                             header_is_multi: false,
                             header_item_ty: param.clone(),
                             header_item_is_string: false,
+                            cookie_is_multi: false,
+                            cookie_item_ty: param.clone(),
+                            cookie_item_is_string: false,
                         };
                         out.push(MethodContext {
                             name: setter.clone(),
@@ -635,6 +658,7 @@ fn render_attr(
                             path_params: Vec::new(),
                             query_params: Vec::new(),
                             header_params: Vec::new(),
+                            cookie_params: Vec::new(),
                             body_params: vec![request_param.clone()],
                             request_ty: request_struct.clone().unwrap_or_else(|| "()".to_string()),
                             request_struct,
@@ -668,6 +692,7 @@ fn render_attr(
                                 path_params: Vec::new(),
                                 query_params: Vec::new(),
                                 header_params: Vec::new(),
+                                cookie_params: Vec::new(),
                                 body_params: Vec::new(),
                                 request_ty: "()".to_string(),
                                 request_struct: None,
@@ -708,6 +733,7 @@ fn render_attr(
                         path_params: Vec::new(),
                         query_params: Vec::new(),
                         header_params: Vec::new(),
+                        cookie_params: Vec::new(),
                         body_params: Vec::new(),
                         request_ty: "()".to_string(),
                         request_struct,
@@ -740,6 +766,9 @@ fn render_attr(
                         header_is_multi: false,
                         header_item_ty: param.clone(),
                         header_item_is_string: false,
+                        cookie_is_multi: false,
+                        cookie_item_ty: param.clone(),
+                        cookie_item_is_string: false,
                     };
                     out.push(MethodContext {
                         name: setter.clone(),
@@ -757,6 +786,7 @@ fn render_attr(
                         path_params: Vec::new(),
                         query_params: Vec::new(),
                         header_params: Vec::new(),
+                        cookie_params: Vec::new(),
                         body_params: vec![request_param.clone()],
                         request_ty: request_struct.clone().unwrap_or_else(|| "()".to_string()),
                         request_struct,
@@ -790,6 +820,7 @@ fn render_attr(
                             path_params: Vec::new(),
                             query_params: Vec::new(),
                             header_params: Vec::new(),
+                            cookie_params: Vec::new(),
                             body_params: Vec::new(),
                             request_ty: "()".to_string(),
                             request_struct: None,
@@ -1094,6 +1125,8 @@ fn explicit_param_binding(param: &hir::ParamDcl) -> IdlcResult<Option<SourceBind
             Some(ParamSource::Query)
         } else if name.eq_ignore_ascii_case("header") {
             Some(ParamSource::Header)
+        } else if name.eq_ignore_ascii_case("cookie") {
+            Some(ParamSource::Cookie)
         } else {
             None
         };
@@ -1107,6 +1140,9 @@ fn explicit_param_binding(param: &hir::ParamDcl) -> IdlcResult<Option<SourceBind
         if matches!(current, ParamSource::Header) {
             validate_header_name(&bound_name, &param.declarator.0)?;
         }
+        if matches!(current, ParamSource::Cookie) {
+            validate_cookie_name(&bound_name, &param.declarator.0)?;
+        }
         match found {
             None => {
                 found = Some(SourceBinding {
@@ -1117,7 +1153,7 @@ fn explicit_param_binding(param: &hir::ParamDcl) -> IdlcResult<Option<SourceBind
             Some(ref prev) if prev.source == current && prev.bound_name == bound_name => {}
             Some(_) => {
                 return Err(IdlcError::rpc(format!(
-                    "parameter '{}' has conflicting source annotations (@path/@query/@header)",
+                    "parameter '{}' has conflicting source annotations (@path/@query/@header/@cookie)",
                     param.declarator.0
                 )));
             }
@@ -1476,6 +1512,7 @@ fn param_source_code(source: ParamSource) -> String {
         ParamSource::Body => "ParamSource::Body".to_string(),
         ParamSource::Path => "ParamSource::Path".to_string(),
         ParamSource::Header => "ParamSource::Header".to_string(),
+        ParamSource::Cookie => "ParamSource::Cookie".to_string(),
     }
 }
 
@@ -1506,6 +1543,18 @@ fn header_item_is_string(ty: &hir::TypeSpec) -> bool {
     }
 }
 
+fn cookie_is_multi(ty: &hir::TypeSpec) -> bool {
+    header_is_multi(ty)
+}
+
+fn cookie_item_ty(ty: &hir::TypeSpec) -> String {
+    header_item_ty(ty)
+}
+
+fn cookie_item_is_string(ty: &hir::TypeSpec) -> bool {
+    header_item_is_string(ty)
+}
+
 fn validate_header_name(bound_name: &str, param_name: &str) -> IdlcResult<()> {
     if bound_name.is_empty() {
         return Err(IdlcError::rpc(format!(
@@ -1516,6 +1565,25 @@ fn validate_header_name(bound_name: &str, param_name: &str) -> IdlcResult<()> {
     if bound_name.starts_with(':') {
         return Err(IdlcError::rpc(format!(
             "parameter '{}' uses reserved pseudo-header name '{}'",
+            param_name, bound_name
+        )));
+    }
+    Ok(())
+}
+
+fn validate_cookie_name(bound_name: &str, param_name: &str) -> IdlcResult<()> {
+    if bound_name.is_empty() {
+        return Err(IdlcError::rpc(format!(
+            "parameter '{}' has empty @cookie name",
+            param_name
+        )));
+    }
+    if bound_name
+        .chars()
+        .any(|ch| ch.is_ascii_whitespace() || ch == ';' || ch == '=')
+    {
+        return Err(IdlcError::rpc(format!(
+            "parameter '{}' has invalid @cookie name '{}'",
             param_name, bound_name
         )));
     }

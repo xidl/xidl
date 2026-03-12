@@ -29,12 +29,15 @@ pub mod test{
         pub req_id:String,
         pub flags:Vec<String>,
         pub age:u32,
+        pub session_id:String,
+        pub prefs:Vec<String>,
     }
 
     type HeaderServiceCreateUserBody = String;
     #[derive(::serde::Serialize,::serde::Deserialize)]
     pub struct HeaderServiceCreateUserRequest{
         pub token:String,
+        pub session_id:String,
         pub name:String,
     }
 
@@ -108,11 +111,57 @@ pub mod test{
             .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
             let age:u32 = xidl_rust_axum::serde_json::from_str(header_str)
             .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+            let mut cookie_map: ::std::collections::HashMap<String,Vec<String>> = ::std::collections::HashMap::new();
+            for header_value in headers.get_all("cookie").iter(){
+                let cookie_str = header_value
+                .to_str()
+                .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+                for part in cookie_str.split(';'){
+                    let part = part.trim();
+                    if part.is_empty(){
+                        continue;
+                    }
+                    let mut iter = part.splitn(2,'=');
+                    let name = iter.next().unwrap_or("").trim();
+                    if name.is_empty(){
+                        continue;
+                    }
+                    let value = iter.next().unwrap_or("").trim().to_string();
+                    cookie_map.entry(name.to_string()).or_default().push(value);
+                }
+            }
+
+            let value = cookie_map
+            .get("sid")
+            .and_then(|values|values.first())
+            .ok_or_else(||{
+                xidl_rust_axum::Error::new(
+                400,
+                format!("missing cookie '{}'","sid"),
+                )
+            })?;
+            let session_id:String = value.to_string();
+            let mut prefs:Vec<String> = Vec::new();
+            if let Some(values) = cookie_map.get("pref"){
+                for value in values{
+                    let parsed:String = value.to_string();
+                    prefs.push(parsed);
+                }
+            }
+            if prefs.is_empty(){
+                return Err(xidl_rust_axum::Error::new(
+                400,
+                format!("missing cookie '{}'","pref"),
+                ));
+            }
+
             let data = HeaderServiceGetUserRequest{
                 id,
                 req_id,
                 flags,
                 age,
+                session_id,
+                prefs,
             };
             let req = ::xidl_rust_axum::Request::new(headers,data);
             let resp = svc.get_user(req).await?;
@@ -131,9 +180,40 @@ pub mod test{
             .to_str()
             .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
             let token:String = header_str.to_string();
+            let mut cookie_map: ::std::collections::HashMap<String,Vec<String>> = ::std::collections::HashMap::new();
+            for header_value in headers.get_all("cookie").iter(){
+                let cookie_str = header_value
+                .to_str()
+                .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+                for part in cookie_str.split(';'){
+                    let part = part.trim();
+                    if part.is_empty(){
+                        continue;
+                    }
+                    let mut iter = part.splitn(2,'=');
+                    let name = iter.next().unwrap_or("").trim();
+                    if name.is_empty(){
+                        continue;
+                    }
+                    let value = iter.next().unwrap_or("").trim().to_string();
+                    cookie_map.entry(name.to_string()).or_default().push(value);
+                }
+            }
+
+            let value = cookie_map
+            .get("sid")
+            .and_then(|values|values.first())
+            .ok_or_else(||{
+                xidl_rust_axum::Error::new(
+                400,
+                format!("missing cookie '{}'","sid"),
+                )
+            })?;
+            let session_id:String = value.to_string();
             let name = body;
             let data = HeaderServiceCreateUserRequest{
                 token,
+                session_id,
                 name,
             };
             let req = ::xidl_rust_axum::Request::new(headers,data);
@@ -165,7 +245,7 @@ pub mod test{
     }
 
     impl HeaderServiceClient{
-        pub async fn get_user(&self,id:u32,req_id:String,flags:Vec<String>,age:u32)->Result<User,xidl_rust_axum::Error>{
+        pub async fn get_user(&self,id:u32,req_id:String,flags:Vec<String>,age:u32,session_id:String,prefs:Vec<String>)->Result<User,xidl_rust_axum::Error>{
             let path = "/v1/headers/{id}".to_string();
             let path = path.replace("{id}",&id.to_string());
             let url = self.client.url(&path);
@@ -209,6 +289,36 @@ pub mod test{
             )
             .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
             req.headers_mut().insert(header_name,header_value);
+            let mut cookie_pairs:Vec<String> = Vec::new();
+            let value_str = session_id;
+            cookie_pairs.push(format!("{}={}","sid",value_str));
+            for value in prefs{
+                let value_str = value;
+                cookie_pairs.push(format!("{}={}","pref",value_str));
+            }
+
+            if!cookie_pairs.is_empty(){
+                let cookie_value = cookie_pairs.join("; ");
+                let cookie_name = xidl_rust_axum::reqwest::header::HeaderName::from_static("cookie");
+                let merged = match req.headers().get(&cookie_name){
+                    Some(existing) => {
+                        let existing = existing
+                        .to_str()
+                        .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+                        if existing.is_empty(){
+                            cookie_value
+                        }else{
+                            format!("{existing}; {cookie_value}")
+                        }
+                    }
+                    None => cookie_value,
+
+                };
+                let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(&merged)
+                .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+                req.headers_mut().insert(cookie_name,header_value);
+            }
+
             let resp = self
             .client
             .http()
@@ -226,7 +336,7 @@ pub mod test{
             }
         }
 
-        pub async fn create_user(&self,token:String,name:String)->Result<(),xidl_rust_axum::Error>{
+        pub async fn create_user(&self,token:String,session_id:String,name:String)->Result<(),xidl_rust_axum::Error>{
             let path = "/v1/headers".to_string();
             let url = self.client.url(&path);
             let mut req = self
@@ -245,6 +355,31 @@ pub mod test{
             )
             .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
             req.headers_mut().insert(header_name,header_value);
+            let mut cookie_pairs:Vec<String> = Vec::new();
+            let value_str = session_id;
+            cookie_pairs.push(format!("{}={}","sid",value_str));
+            if!cookie_pairs.is_empty(){
+                let cookie_value = cookie_pairs.join("; ");
+                let cookie_name = xidl_rust_axum::reqwest::header::HeaderName::from_static("cookie");
+                let merged = match req.headers().get(&cookie_name){
+                    Some(existing) => {
+                        let existing = existing
+                        .to_str()
+                        .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+                        if existing.is_empty(){
+                            cookie_value
+                        }else{
+                            format!("{existing}; {cookie_value}")
+                        }
+                    }
+                    None => cookie_value,
+
+                };
+                let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(&merged)
+                .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+                req.headers_mut().insert(cookie_name,header_value);
+            }
+
             let body = name;
             let body = xidl_rust_axum::serde_json::to_vec(&body)
             .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;

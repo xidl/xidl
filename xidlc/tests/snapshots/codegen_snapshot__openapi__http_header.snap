@@ -23,6 +23,14 @@ openapi.json
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "sid",
+            "in": "cookie",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -92,6 +100,25 @@ openapi.json
               "type": "integer",
               "format": "int32",
               "minimum": 0
+            }
+          },
+          {
+            "name": "sid",
+            "in": "cookie",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pref",
+            "in": "cookie",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -265,10 +292,14 @@ openapi.json
         "type": "object",
         "required": [
           "token",
+          "session_id",
           "name"
         ],
         "properties": {
           "name": {
+            "type": "string"
+          },
+          "session_id": {
             "type": "string"
           },
           "token": {
@@ -308,7 +339,9 @@ openapi.json
           "id",
           "req_id",
           "flags",
-          "age"
+          "age",
+          "session_id",
+          "prefs"
         ],
         "properties": {
           "age": {
@@ -327,7 +360,16 @@ openapi.json
             "format": "int32",
             "minimum": 0
           },
+          "prefs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "req_id": {
+            "type": "string"
+          },
+          "session_id": {
             "type": "string"
           }
         }

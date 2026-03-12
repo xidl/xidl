@@ -33,7 +33,20 @@ export class {{ client_name }} {
             headers.append("{{ param.raw_name }}", encodeHeaderValue(value));
         }
         {% else %}headers.set("{{ param.raw_name }}", encodeHeaderValue({{ param.access }}));
-        {% endif %}{% endfor %}{% if method.body_params | length > 0 %}
+        {% endif %}{% endfor %}
+        {% if method.cookie_params | length > 0 %}
+        const cookiePairs: string[] = [];
+        {% for param in method.cookie_params %}        {% if param.is_multi %}for (const value of {{ param.access }}) {
+            cookiePairs.push(`${"{{ param.raw_name }}"}=${encodeCookieValue(value)}`);
+        }
+        {% else %}cookiePairs.push(`${"{{ param.raw_name }}"}=${encodeCookieValue({{ param.access }})}`);
+        {% endif %}{% endfor %}        if (cookiePairs.length > 0) {
+            const cookieValue = cookiePairs.join("; ");
+            const existing = headers.get("Cookie");
+            headers.set("Cookie", existing ? `${existing}; ${cookieValue}` : cookieValue);
+        }
+        {% endif %}
+        {% if method.body_params | length > 0 %}
         headers.set("Content-Type", "application/json");
         const options = { method: "{{ method.http_method }}", headers, body: JSON.stringify(body) };
         {% else %}

@@ -483,6 +483,14 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
                     !optional,
                 ));
             }
+            ParamSource::Cookie => {
+                parameters.push(parameter_schema(
+                    ParameterIn::Cookie,
+                    &bound_name,
+                    schema,
+                    !optional,
+                ));
+            }
             ParamSource::Body => {
                 body_props.push((raw_name.clone(), schema));
                 if !optional {
@@ -966,6 +974,7 @@ enum ParamSource {
     Path,
     Query,
     Header,
+    Cookie,
     Body,
 }
 
@@ -1464,6 +1473,8 @@ fn explicit_param_binding(param: &hir::ParamDcl) -> Option<SourceBinding> {
             Some(ParamSource::Query)
         } else if name.eq_ignore_ascii_case("header") {
             Some(ParamSource::Header)
+        } else if name.eq_ignore_ascii_case("cookie") {
+            Some(ParamSource::Cookie)
         } else {
             None
         };
@@ -1477,6 +1488,9 @@ fn explicit_param_binding(param: &hir::ParamDcl) -> Option<SourceBinding> {
         if matches!(current, ParamSource::Header) {
             validate_header_name(&bound_name, &param.declarator.0);
         }
+        if matches!(current, ParamSource::Cookie) {
+            validate_cookie_name(&bound_name, &param.declarator.0);
+        }
         match found {
             None => {
                 found = Some(SourceBinding {
@@ -1487,7 +1501,7 @@ fn explicit_param_binding(param: &hir::ParamDcl) -> Option<SourceBinding> {
             Some(ref prev) if prev.source == current && prev.bound_name == bound_name => {}
             Some(_) => {
                 panic!(
-                    "parameter '{}' has conflicting source annotations (@path/@query/@header)",
+                    "parameter '{}' has conflicting source annotations (@path/@query/@header/@cookie)",
                     param.declarator.0
                 );
             }
@@ -1503,6 +1517,21 @@ fn validate_header_name(bound_name: &str, param_name: &str) {
     if bound_name.starts_with(':') {
         panic!(
             "parameter '{}' uses reserved pseudo-header name '{}'",
+            param_name, bound_name
+        );
+    }
+}
+
+fn validate_cookie_name(bound_name: &str, param_name: &str) {
+    if bound_name.is_empty() {
+        panic!("parameter '{}' has empty @cookie name", param_name);
+    }
+    if bound_name
+        .chars()
+        .any(|ch| ch.is_ascii_whitespace() || ch == ';' || ch == '=')
+    {
+        panic!(
+            "parameter '{}' has invalid @cookie name '{}'",
             param_name, bound_name
         );
     }

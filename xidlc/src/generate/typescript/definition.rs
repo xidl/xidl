@@ -706,6 +706,7 @@ struct ClientMethodContext {
     path_params: Vec<PathParamContext>,
     query_params: Vec<QueryParamContext>,
     header_params: Vec<HeaderParamContext>,
+    cookie_params: Vec<CookieParamContext>,
     body_params: Vec<BodyParamContext>,
     body_single: Option<BodyParamContext>,
     is_server_stream: bool,
@@ -745,6 +746,13 @@ struct HeaderParamContext {
 }
 
 #[derive(Serialize)]
+struct CookieParamContext {
+    raw_name: String,
+    access: String,
+    is_multi: bool,
+}
+
+#[derive(Serialize)]
 struct BodyParamContext {
     raw_name: String,
     access: String,
@@ -772,6 +780,7 @@ struct MethodInfo {
     path_params: Vec<ParamInfo>,
     query_params: Vec<ParamInfo>,
     header_params: Vec<ParamInfo>,
+    cookie_params: Vec<ParamInfo>,
     body_params: Vec<ParamInfo>,
     output_params: Vec<ParamInfo>,
     is_server_stream: bool,
@@ -899,6 +908,15 @@ impl MethodInfo {
                     is_multi: is_sequence_type(&param.ty),
                 })
                 .collect(),
+            cookie_params: self
+                .cookie_params
+                .iter()
+                .map(|param| CookieParamContext {
+                    raw_name: param.wire_name.clone(),
+                    access: parsed_access(self, &param.raw_name),
+                    is_multi: is_sequence_type(&param.ty),
+                })
+                .collect(),
             body_params: self
                 .body_params
                 .iter()
@@ -961,6 +979,7 @@ enum ParamSource {
     Path,
     Query,
     Header,
+    Cookie,
     Body,
 }
 
@@ -1102,6 +1121,7 @@ fn render_op(
     let mut path_params = Vec::new();
     let mut query_params = Vec::new();
     let mut header_params = Vec::new();
+    let mut cookie_params = Vec::new();
     let mut body_params = Vec::new();
     let mut output_params = Vec::new();
     let mut path_binding_count = HashMap::<String, usize>::new();
@@ -1167,6 +1187,9 @@ fn render_op(
             ParamSource::Header => {
                 header_params.push(info);
             }
+            ParamSource::Cookie => {
+                cookie_params.push(info);
+            }
             ParamSource::Body => body_params.push(info),
         }
     }
@@ -1209,7 +1232,10 @@ fn render_op(
         }
     }
     if is_client_stream
-        && (!path_params.is_empty() || !query_params.is_empty() || !header_params.is_empty())
+        && (!path_params.is_empty()
+            || !query_params.is_empty()
+            || !header_params.is_empty()
+            || !cookie_params.is_empty())
     {
         return Err(IdlcError::rpc(format!(
             "@client_stream method '{}' currently supports body parameters only",
@@ -1250,6 +1276,7 @@ fn render_op(
         path_params,
         query_params,
         header_params,
+        cookie_params,
         body_params,
         output_params,
         is_server_stream,
@@ -1279,6 +1306,7 @@ fn render_attr(
                     path_params: Vec::new(),
                     query_params: Vec::new(),
                     header_params: Vec::new(),
+                    cookie_params: Vec::new(),
                     body_params: Vec::new(),
                     output_params: Vec::new(),
                     is_server_stream: false,
@@ -1298,6 +1326,7 @@ fn render_attr(
                         path_params: Vec::new(),
                         query_params: Vec::new(),
                         header_params: Vec::new(),
+                        cookie_params: Vec::new(),
                         body_params: Vec::new(),
                         output_params: Vec::new(),
                         is_server_stream: true,
@@ -1325,6 +1354,7 @@ fn render_attr(
                             path_params: Vec::new(),
                             query_params: Vec::new(),
                             header_params: Vec::new(),
+                            cookie_params: Vec::new(),
                             body_params: Vec::new(),
                             output_params: Vec::new(),
                             is_server_stream: false,
@@ -1360,6 +1390,7 @@ fn render_attr(
                             path_params: Vec::new(),
                             query_params: Vec::new(),
                             header_params: Vec::new(),
+                            cookie_params: Vec::new(),
                             body_params: vec![param],
                             output_params: Vec::new(),
                             is_server_stream: false,
@@ -1380,6 +1411,7 @@ fn render_attr(
                                 path_params: Vec::new(),
                                 query_params: Vec::new(),
                                 header_params: Vec::new(),
+                                cookie_params: Vec::new(),
                                 body_params: Vec::new(),
                                 output_params: Vec::new(),
                                 is_server_stream: true,
@@ -1402,6 +1434,7 @@ fn render_attr(
                         path_params: Vec::new(),
                         query_params: Vec::new(),
                         header_params: Vec::new(),
+                        cookie_params: Vec::new(),
                         body_params: Vec::new(),
                         output_params: Vec::new(),
                         is_server_stream: false,
@@ -1437,6 +1470,7 @@ fn render_attr(
                         path_params: Vec::new(),
                         query_params: Vec::new(),
                         header_params: Vec::new(),
+                        cookie_params: Vec::new(),
                         body_params: vec![param],
                         output_params: Vec::new(),
                         is_server_stream: false,
@@ -1457,6 +1491,7 @@ fn render_attr(
                             path_params: Vec::new(),
                             query_params: Vec::new(),
                             header_params: Vec::new(),
+                            cookie_params: Vec::new(),
                             body_params: Vec::new(),
                             output_params: Vec::new(),
                             is_server_stream: true,
@@ -2106,6 +2141,8 @@ fn explicit_param_binding(param: &hir::ParamDcl) -> IdlcResult<Option<SourceBind
             Some(ParamSource::Query)
         } else if name.eq_ignore_ascii_case("header") {
             Some(ParamSource::Header)
+        } else if name.eq_ignore_ascii_case("cookie") {
+            Some(ParamSource::Cookie)
         } else {
             None
         };
@@ -2119,6 +2156,9 @@ fn explicit_param_binding(param: &hir::ParamDcl) -> IdlcResult<Option<SourceBind
         if matches!(current, ParamSource::Header) {
             validate_header_name(&bound_name, &param.declarator.0)?;
         }
+        if matches!(current, ParamSource::Cookie) {
+            validate_cookie_name(&bound_name, &param.declarator.0)?;
+        }
         match found {
             None => {
                 found = Some(SourceBinding {
@@ -2129,7 +2169,7 @@ fn explicit_param_binding(param: &hir::ParamDcl) -> IdlcResult<Option<SourceBind
             Some(ref prev) if prev.source == current && prev.bound_name == bound_name => {}
             Some(_) => {
                 return Err(IdlcError::rpc(format!(
-                    "parameter '{}' has conflicting source annotations (@path/@query/@header)",
+                    "parameter '{}' has conflicting source annotations (@path/@query/@header/@cookie)",
                     param.declarator.0
                 )));
             }
@@ -2175,6 +2215,25 @@ fn validate_header_name(bound_name: &str, param_name: &str) -> IdlcResult<()> {
     if bound_name.starts_with(':') {
         return Err(IdlcError::rpc(format!(
             "parameter '{}' uses reserved pseudo-header name '{}'",
+            param_name, bound_name
+        )));
+    }
+    Ok(())
+}
+
+fn validate_cookie_name(bound_name: &str, param_name: &str) -> IdlcResult<()> {
+    if bound_name.is_empty() {
+        return Err(IdlcError::rpc(format!(
+            "parameter '{}' has empty @cookie name",
+            param_name
+        )));
+    }
+    if bound_name
+        .chars()
+        .any(|ch| ch.is_ascii_whitespace() || ch == ';' || ch == '=')
+    {
+        return Err(IdlcError::rpc(format!(
+            "parameter '{}' has invalid @cookie name '{}'",
             param_name, bound_name
         )));
     }

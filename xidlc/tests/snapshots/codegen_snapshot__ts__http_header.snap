@@ -131,6 +131,22 @@ value : unknown
     );
 }
 
+function encodeCookieValue(
+value : unknown
+) : string{
+    if(value===null||value===undefined){
+        return"";
+    }
+    if(typeof value==="string"||typeof value==="number"||typeof value==="boolean"){
+        return String(
+        value
+        );
+    }
+    return JSON.stringify(
+    value
+    );
+}
+
 async function parseXidlError(
 resp : Response
 ) : Promise<
@@ -389,13 +405,15 @@ export namespace test{
         async get_user(
         id : number, req_id : string, flags : Array<
         string
-        >, age : number
+        >, age : number, session_id : string, prefs : Array<
+        string
+        >
         ) : Promise<
         types.User
         >{
             const parsed = zodSchemas.test.HeaderServiceGetUserRequestSchema.parse(
             {
-                "id" : id, "req_id" : req_id, "flags" : flags, "age" : age
+                "id" : id, "req_id" : req_id, "flags" : flags, "age" : age, "session_id" : session_id, "prefs" : prefs
             }
             );
             let path = "/v1/headers/{id}";
@@ -424,6 +442,33 @@ export namespace test{
             parsed["age"]
             )
             );
+            const cookiePairs : string[] = [
+
+            ];
+            cookiePairs.push(
+            `${"sid"}=${encodeCookieValue(
+                parsed["session_id"]
+                )}`
+            );
+            for(const value of parsed["prefs"]){
+                cookiePairs.push(
+                `${"pref"}=${encodeCookieValue(
+                    value
+                    )}`
+                );
+            }
+            if(cookiePairs.length>0){
+                const cookieValue = cookiePairs.join(
+                "; "
+                );
+                const existing = headers.get(
+                "Cookie"
+                );
+                headers.set(
+                "Cookie", existing ?`${existing}; ${cookieValue}` : cookieValue
+                );
+            }
+
             const options = {
                 method : "GET", headers
             };
@@ -445,13 +490,13 @@ export namespace test{
         }
 
         async create_user(
-        token : string, name : string
+        token : string, session_id : string, name : string
         ) : Promise<
         void
         >{
             const parsed = zodSchemas.test.HeaderServiceCreateUserRequestSchema.parse(
             {
-                "token" : token, "name" : name
+                "token" : token, "session_id" : session_id, "name" : name
             }
             );
             let path = "/v1/headers";
@@ -464,6 +509,26 @@ export namespace test{
             parsed["token"]
             )
             );
+            const cookiePairs : string[] = [
+
+            ];
+            cookiePairs.push(
+            `${"sid"}=${encodeCookieValue(
+                parsed["session_id"]
+                )}`
+            );
+            if(cookiePairs.length>0){
+                const cookieValue = cookiePairs.join(
+                "; "
+                );
+                const existing = headers.get(
+                "Cookie"
+                );
+                headers.set(
+                "Cookie", existing ?`${existing}; ${cookieValue}` : cookieValue
+                );
+            }
+
             headers.set(
             "Content-Type", "application/json"
             );
@@ -509,9 +574,14 @@ export namespace test{
         string
         >;
         age : number;
+        session_id : string;
+        prefs : Array<
+        string
+        >;
     }
     export interface HeaderServiceCreateUserRequest{
         token : string;
+        session_id : string;
         name : string;
     }
 }
@@ -541,6 +611,12 @@ export namespace test{
 
         ).nonnegative(
 
+        ), session_id : z.string(
+
+        ), prefs : z.array(
+        z.string(
+
+        )
         ),
     }
     );
@@ -550,6 +626,8 @@ export namespace test{
     export const HeaderServiceCreateUserRequestSchema = z.object(
     {
         token : z.string(
+
+        ), session_id : z.string(
 
         ), name : z.string(
 

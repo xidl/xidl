@@ -65,6 +65,16 @@ function encodeHeaderValue(value: unknown): string {
     return JSON.stringify(value);
 }
 
+function encodeCookieValue(value: unknown): string {
+    if (value === null || value === undefined) {
+        return "";
+    }
+    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+        return String(value);
+    }
+    return JSON.stringify(value);
+}
+
 async function parseXidlError(resp: Response): Promise<XidlClientError> {
     const status = resp.status;
     try {

@@ -159,6 +159,57 @@ pub trait {{ ident }} {
                         {% endif %}
                     {% endfor %}
                 {% endif %}
+                {% if method.cookie_params | length > 0 %}
+                    let mut cookie_map: ::std::collections::HashMap<String, Vec<String>> = ::std::collections::HashMap::new();
+                    for header_value in headers.get_all("cookie").iter() {
+                        let cookie_str = header_value
+                            .to_str()
+                            .map_err(|err| xidl_rust_axum::Error::new(400, err.to_string()))?;
+                        for part in cookie_str.split(';') {
+                            let part = part.trim();
+                            if part.is_empty() {
+                                continue;
+                            }
+                            let mut iter = part.splitn(2, '=');
+                            let name = iter.next().unwrap_or("").trim();
+                            if name.is_empty() {
+                                continue;
+                            }
+                            let value = iter.next().unwrap_or("").trim().to_string();
+                            cookie_map.entry(name.to_string()).or_default().push(value);
+                        }
+                    }
+                    {% for param in method.cookie_params %}
+                        {% if param.cookie_is_multi %}
+                            let mut {{ param.name }}: Vec<{{ param.cookie_item_ty }}> = Vec::new();
+                            if let Some(values) = cookie_map.get("{{ param.wire_name }}") {
+                                for value in values {
+                                    let parsed: {{ param.cookie_item_ty }} = {% if param.cookie_item_is_string %}value.to_string(){% else %}xidl_rust_axum::serde_json::from_str(value)
+                                        .map_err(|err| xidl_rust_axum::Error::new(400, err.to_string()))?{% endif %};
+                                    {{ param.name }}.push(parsed);
+                                }
+                            }
+                            if {{ param.name }}.is_empty() {
+                                return Err(xidl_rust_axum::Error::new(
+                                    400,
+                                    format!("missing cookie '{}'", "{{ param.wire_name }}"),
+                                ));
+                            }
+                        {% else %}
+                            let value = cookie_map
+                                .get("{{ param.wire_name }}")
+                                .and_then(|values| values.first())
+                                .ok_or_else(|| {
+                                    xidl_rust_axum::Error::new(
+                                        400,
+                                        format!("missing cookie '{}'", "{{ param.wire_name }}"),
+                                    )
+                                })?;
+                            let {{ param.name }}: {{ param.cookie_item_ty }} = {% if param.cookie_item_is_string %}value.to_string(){% else %}xidl_rust_axum::serde_json::from_str(value)
+                                .map_err(|err| xidl_rust_axum::Error::new(400, err.to_string()))?{% endif %};
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
                 {% if method.body_params | length > 0 and not method.is_client_stream and not method.is_bidi_stream %}
                     {% if method.body_params | length == 1 %}
                         let {{ method.body_params[0].name }} = body;
@@ -275,6 +326,42 @@ pub trait {{ ident }} {
                             req.headers_mut().insert(header_name, header_value);
                         {% endif %}
                     {% endfor %}
+                {% endif %}
+                {% if method.cookie_params | length > 0 %}
+                    let mut cookie_pairs: Vec<String> = Vec::new();
+                    {% for param in method.cookie_params %}
+                        {% if param.cookie_is_multi %}
+                            for value in {{ param.name }} {
+                                let value_str = {% if param.cookie_item_is_string %}value{% else %}xidl_rust_axum::serde_json::to_string(&value)
+                                    .map_err(|err| xidl_rust_axum::Error::new(400, err.to_string()))?{% endif %};
+                                cookie_pairs.push(format!("{}={}", "{{ param.wire_name }}", value_str));
+                            }
+                        {% else %}
+                            let value_str = {% if param.cookie_item_is_string %}{{ param.name }}{% else %}xidl_rust_axum::serde_json::to_string(&{{ param.name }})
+                                .map_err(|err| xidl_rust_axum::Error::new(400, err.to_string()))?{% endif %};
+                            cookie_pairs.push(format!("{}={}", "{{ param.wire_name }}", value_str));
+                        {% endif %}
+                    {% endfor %}
+                    if !cookie_pairs.is_empty() {
+                        let cookie_value = cookie_pairs.join("; ");
+                        let cookie_name = xidl_rust_axum::reqwest::header::HeaderName::from_static("cookie");
+                        let merged = match req.headers().get(&cookie_name) {
+                            Some(existing) => {
+                                let existing = existing
+                                    .to_str()
+                                    .map_err(|err| xidl_rust_axum::Error::new(400, err.to_string()))?;
+                                if existing.is_empty() {
+                                    cookie_value
+                                } else {
+                                    format!("{existing}; {cookie_value}")
+                                }
+                            }
+                            None => cookie_value,
+                        };
+                        let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(&merged)
+                            .map_err(|err| xidl_rust_axum::Error::new(400, err.to_string()))?;
+                        req.headers_mut().insert(cookie_name, header_value);
+                    }
                 {% endif %}
                 {% if method.query_params | length > 0 %}
                     let query = {{ method.struct_prefix }}Query {

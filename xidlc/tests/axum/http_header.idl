@@ -10,12 +10,15 @@ module test {
             @path("id") uint32 id,
             @header("X-Req-Id") string req_id,
             @header("X-Flags") sequence<string> flags,
-            @header("X-Age") uint32 age
+            @header("X-Age") uint32 age,
+            @cookie("sid") string session_id,
+            @cookie("pref") sequence<string> prefs
         );
 
         @post(path = "/v1/headers")
         void create_user(
             @header("X-Token") string token,
+            @cookie("sid") string session_id,
             string name
         );
     };
