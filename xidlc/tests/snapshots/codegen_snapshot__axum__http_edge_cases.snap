@@ -25,9 +25,11 @@ pub trait HttpEdgeCasesService{
     )->Result<String,xidl_rust_axum::Error>;
 }
 
-#[derive(::serde::Serialize,::serde::Deserialize)]
+#[derive(::serde::Serialize,::serde::Deserialize,::core::default::Default)]
 struct HttpEdgeCasesServiceHealthQuery{
     #[serde(rename = "trace_id")]
+
+    #[serde(default)]
 
     trace:String,
 }
@@ -44,9 +46,11 @@ struct HttpEdgeCasesServiceGetUserPath{
     uid:u32,
 }
 
-#[derive(::serde::Serialize,::serde::Deserialize)]
+#[derive(::serde::Serialize,::serde::Deserialize,::core::default::Default)]
 struct HttpEdgeCasesServiceGetUserQuery{
     #[serde(rename = "lang")]
+
+    #[serde(default)]
 
     locale:String,
 }
@@ -69,10 +73,14 @@ pub struct HttpEdgeCasesServiceGetItemRequest{
     pub item_id:u32,
 }
 
-#[derive(::serde::Serialize,::serde::Deserialize)]
+#[derive(::serde::Serialize,::serde::Deserialize,::core::default::Default)]
 struct HttpEdgeCasesServiceLookupQuery{
+    #[serde(default)]
+
     keyword:String,
     #[serde(rename = "limit")]
+
+    #[serde(default)]
 
     page_size:u32,
 }
@@ -124,6 +132,10 @@ T:HttpEdgeCasesService+Send+Sync+'static,
     headers: ::xidl_rust_axum::axum::http::HeaderMap,
     xidl_rust_axum::axum::extract::Query(query):xidl_rust_axum::axum::extract::Query<HttpEdgeCasesServiceHealthQuery>
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let HttpEdgeCasesServiceHealthQuery{
 
         trace,
@@ -144,6 +156,10 @@ T:HttpEdgeCasesService+Send+Sync+'static,
     ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<HttpEdgeCasesServiceGetUserPath>,
     xidl_rust_axum::axum::extract::Query(query):xidl_rust_axum::axum::extract::Query<HttpEdgeCasesServiceGetUserQuery>
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let HttpEdgeCasesServiceGetUserPath{
 
         uid,
@@ -168,6 +184,10 @@ T:HttpEdgeCasesService+Send+Sync+'static,
     headers: ::xidl_rust_axum::axum::http::HeaderMap,
     ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<HttpEdgeCasesServiceGetItemPath>
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let HttpEdgeCasesServiceGetItemPath{
 
         order_id,
@@ -189,6 +209,10 @@ T:HttpEdgeCasesService+Send+Sync+'static,
     headers: ::xidl_rust_axum::axum::http::HeaderMap,
     xidl_rust_axum::axum::extract::Query(query):xidl_rust_axum::axum::extract::Query<HttpEdgeCasesServiceLookupQuery>
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let HttpEdgeCasesServiceLookupQuery{
 
         keyword,
@@ -237,6 +261,11 @@ impl HttpEdgeCasesServiceClient{
         .request(xidl_rust_axum::reqwest::Method::HEAD,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let query = HttpEdgeCasesServiceHealthQuery{
             trace,
         };
@@ -271,6 +300,11 @@ impl HttpEdgeCasesServiceClient{
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let query = HttpEdgeCasesServiceGetUserQuery{
             locale,
         };
@@ -308,6 +342,11 @@ impl HttpEdgeCasesServiceClient{
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let resp = self
         .client
         .http()
@@ -334,6 +373,11 @@ impl HttpEdgeCasesServiceClient{
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let query = HttpEdgeCasesServiceLookupQuery{
             keyword,
             page_size,

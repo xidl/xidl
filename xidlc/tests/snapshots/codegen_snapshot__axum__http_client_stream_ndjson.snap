@@ -15,7 +15,11 @@ pub trait HttpClientStreamService{
 
 #[derive(::serde::Serialize,::serde::Deserialize)]
 struct HttpClientStreamServiceUploadChunkBody{
+    #[serde(default,deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null")]
+
     file_id:String,
+    #[serde(default,deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null")]
+
     chunk:Vec<u8>,
 }
 
@@ -58,6 +62,10 @@ T:HttpClientStreamService+Send+Sync+'static,
     headers: ::xidl_rust_axum::axum::http::HeaderMap,
     body: ::xidl_rust_axum::axum::body::Body
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let data = xidl_rust_axum::stream::decode_ndjson_body::<HttpClientStreamServiceUploadChunkRequest>(body);
         let req = ::xidl_rust_axum::Request::new(headers,data);
         let resp = svc.upload_chunk(req).await?;
@@ -96,6 +104,11 @@ impl HttpClientStreamServiceClient{
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         req.headers_mut().insert(
         xidl_rust_axum::reqwest::header::CONTENT_TYPE,
         xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/x-ndjson"),

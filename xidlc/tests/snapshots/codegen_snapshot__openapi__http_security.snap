@@ -8,119 +8,18 @@ openapi.json
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "xidl",
-    "version": "0.1.0"
+    "title": "xidlc",
+    "version": "v1.0.0"
   },
   "paths": {
-    "/HttpStreamSseService/online": {
-      "get": {
-        "operationId": "HttpStreamSseService.online",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "boolean"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/HttpStreamSseService/set_online": {
+    "/health": {
       "post": {
-        "operationId": "HttpStreamSseService.set_online",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "boolean"
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": "OK"
-          },
-          "500": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/HttpStreamSseService/watch_attribute_online": {
-      "get": {
-        "operationId": "HttpStreamSseService.watch_attribute_online",
+        "operationId": "HttpSecurityService.health",
         "responses": {
           "200": {
             "description": "OK",
             "content": {
-              "text/event-stream": {
-                "schema": {
-                  "type": "boolean"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Error",
-            "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/events/{topic}": {
-      "get": {
-        "operationId": "HttpStreamSseService.watch_topic",
-        "parameters": [
-          {
-            "name": "topic",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "lang",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/event-stream": {
                 "schema": {
                   "type": "string"
                 }
@@ -137,7 +36,127 @@ openapi.json
               }
             }
           }
-        }
+        },
+        "deprecated": true,
+        "security": []
+      }
+    },
+    "/users/search": {
+      "post": {
+        "operationId": "HttpSecurityService.search_user",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "keyword": {
+                    "type": "string"
+                  },
+                  "page": {
+                    "type": "integer",
+                    "format": "int32",
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "write:users",
+              "read:users"
+            ]
+          }
+        ]
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "operationId": "HttpSecurityService.get_user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Trace-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true,
+        "security": [
+          {
+            "http-basic": []
+          },
+          {
+            "api-key-header-x-api-key": []
+          }
+        ]
       }
     }
   },
@@ -161,7 +180,7 @@ openapi.json
           }
         }
       },
-      "HttpStreamSseService_Call": {
+      "HttpSecurityService_Call": {
         "oneOf": [
           {
             "type": "object",
@@ -177,39 +196,39 @@ openapi.json
           {
             "type": "object",
             "required": [
-              "watch_topic"
+              "get_user"
             ],
             "properties": {
-              "watch_topic": {
-                "$ref": "#/components/schemas/HttpStreamSseService_watch_topic_In"
+              "get_user": {
+                "$ref": "#/components/schemas/HttpSecurityService_get_user_In"
               }
             }
           },
           {
             "type": "object",
             "required": [
-              "get_attribute_online"
+              "search_user"
             ],
             "properties": {
-              "get_attribute_online": {
-                "$ref": "#/components/schemas/HttpStreamSseService_get_attribute_online_In"
+              "search_user": {
+                "$ref": "#/components/schemas/HttpSecurityService_search_user_In"
               }
             }
           },
           {
             "type": "object",
             "required": [
-              "set_attribute_online"
+              "health"
             ],
             "properties": {
-              "set_attribute_online": {
-                "$ref": "#/components/schemas/HttpStreamSseService_set_attribute_online_In"
+              "health": {
+                "$ref": "#/components/schemas/HttpSecurityService_health_In"
               }
             }
           }
         ]
       },
-      "HttpStreamSseService_Reply": {
+      "HttpSecurityService_Reply": {
         "type": "object",
         "required": [
           "header",
@@ -217,14 +236,14 @@ openapi.json
         ],
         "properties": {
           "data": {
-            "$ref": "#/components/schemas/HttpStreamSseService_Return"
+            "$ref": "#/components/schemas/HttpSecurityService_Return"
           },
           "header": {
             "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
           }
         }
       },
-      "HttpStreamSseService_Request": {
+      "HttpSecurityService_Request": {
         "type": "object",
         "required": [
           "header",
@@ -232,14 +251,14 @@ openapi.json
         ],
         "properties": {
           "data": {
-            "$ref": "#/components/schemas/HttpStreamSseService_Call"
+            "$ref": "#/components/schemas/HttpSecurityService_Call"
           },
           "header": {
             "$ref": "#/components/schemas/dds.rpc.RequestHeader"
           }
         }
       },
-      "HttpStreamSseService_Return": {
+      "HttpSecurityService_Return": {
         "oneOf": [
           {
             "type": "object",
@@ -255,128 +274,60 @@ openapi.json
           {
             "type": "object",
             "required": [
-              "watch_topic"
+              "get_user"
             ],
             "properties": {
-              "watch_topic": {
-                "$ref": "#/components/schemas/HttpStreamSseService_watch_topic_Result"
+              "get_user": {
+                "$ref": "#/components/schemas/HttpSecurityService_get_user_Result"
               }
             }
           },
           {
             "type": "object",
             "required": [
-              "get_attribute_online"
+              "search_user"
             ],
             "properties": {
-              "get_attribute_online": {
-                "$ref": "#/components/schemas/HttpStreamSseService_get_attribute_online_Result"
+              "search_user": {
+                "$ref": "#/components/schemas/HttpSecurityService_search_user_Result"
               }
             }
           },
           {
             "type": "object",
             "required": [
-              "set_attribute_online"
+              "health"
             ],
             "properties": {
-              "set_attribute_online": {
-                "$ref": "#/components/schemas/HttpStreamSseService_set_attribute_online_Result"
+              "health": {
+                "$ref": "#/components/schemas/HttpSecurityService_health_Result"
               }
             }
           }
         ]
       },
-      "HttpStreamSseService_get_attribute_online_In": {
+      "HttpSecurityService_get_user_In": {
         "type": "object",
         "required": [
-          "dummy"
+          "id",
+          "locale",
+          "trace_id"
         ],
         "properties": {
-          "dummy": {
-            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
-          }
-        }
-      },
-      "HttpStreamSseService_get_attribute_online_Out": {
-        "type": "object",
-        "required": [
-          "return_"
-        ],
-        "properties": {
-          "return_": {
-            "type": "boolean"
-          }
-        }
-      },
-      "HttpStreamSseService_get_attribute_online_Result": {
-        "oneOf": [
-          {
-            "type": "object",
-            "required": [
-              "result"
-            ],
-            "properties": {
-              "result": {
-                "$ref": "#/components/schemas/HttpStreamSseService_get_attribute_online_Out"
-              }
-            }
-          }
-        ]
-      },
-      "HttpStreamSseService_set_attribute_online_In": {
-        "type": "object",
-        "required": [
-          "online"
-        ],
-        "properties": {
-          "online": {
-            "type": "boolean"
-          }
-        }
-      },
-      "HttpStreamSseService_set_attribute_online_Out": {
-        "type": "object",
-        "required": [
-          "dummy"
-        ],
-        "properties": {
-          "dummy": {
-            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
-          }
-        }
-      },
-      "HttpStreamSseService_set_attribute_online_Result": {
-        "oneOf": [
-          {
-            "type": "object",
-            "required": [
-              "result"
-            ],
-            "properties": {
-              "result": {
-                "$ref": "#/components/schemas/HttpStreamSseService_set_attribute_online_Out"
-              }
-            }
-          }
-        ]
-      },
-      "HttpStreamSseService_watch_topic_In": {
-        "type": "object",
-        "required": [
-          "topic",
-          "lang"
-        ],
-        "properties": {
-          "lang": {
+          "id": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "locale": {
             "type": "string"
           },
-          "topic": {
+          "trace_id": {
             "type": "string"
           }
         }
       },
-      "HttpStreamSseService_watch_topic_Out": {
+      "HttpSecurityService_get_user_Out": {
         "type": "object",
         "required": [
           "return_"
@@ -387,7 +338,7 @@ openapi.json
           }
         }
       },
-      "HttpStreamSseService_watch_topic_Result": {
+      "HttpSecurityService_get_user_Result": {
         "oneOf": [
           {
             "type": "object",
@@ -396,11 +347,114 @@ openapi.json
             ],
             "properties": {
               "result": {
-                "$ref": "#/components/schemas/HttpStreamSseService_watch_topic_Out"
+                "$ref": "#/components/schemas/HttpSecurityService_get_user_Out"
               }
             }
           }
         ]
+      },
+      "HttpSecurityService_health_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "HttpSecurityService_health_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpSecurityService_health_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpSecurityService_health_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpSecurityService_search_user_In": {
+        "type": "object",
+        "required": [
+          "keyword",
+          "page"
+        ],
+        "properties": {
+          "keyword": {
+            "type": "string"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          }
+        }
+      },
+      "HttpSecurityService_search_user_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpSecurityService_search_user_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpSecurityService_search_user_Out"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "securitySchemes": {
+      "api-key-header-x-api-key": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      },
+      "http-basic": {
+        "type": "http",
+        "scheme": "basic"
+      },
+      "oauth2": {
+        "type": "oauth2",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://example.invalid/token",
+            "scopes": {
+              "read:users": "read:users",
+              "write:users": "write:users"
+            }
+          }
+        }
       }
     }
   }

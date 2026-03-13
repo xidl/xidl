@@ -1,0 +1,1704 @@
+---
+source: xidl-parser/tests/test-annotation.rs
+expression: hir
+---
+Specification(
+    [
+        ConstDcl(
+            ConstDcl {
+                ty: IntegerType(
+                    I32,
+                ),
+                ident: "HttpApi_old_ping_Hash",
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        DecNumber(
+                                                            "3850959154",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: IntegerType(
+                    I32,
+                ),
+                ident: "HttpApi_get_user_Hash",
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        DecNumber(
+                                                            "3347793635",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: IntegerType(
+                    I32,
+                ),
+                ident: "HttpApi_update_user_Hash",
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        DecNumber(
+                                                            "1317556379",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        ConstDcl(
+            ConstDcl {
+                ty: IntegerType(
+                    I32,
+                ),
+                ident: "HttpApi_health_Hash",
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        DecNumber(
+                                                            "888691541",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
+                            annotations: [],
+                            ident: "HttpApi_old_ping_In",
+                            parent: [],
+                            member: [
+                                Member {
+                                    annotations: [],
+                                    ty: SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "rpc",
+                                                    "UnusedMember",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "dummy",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
+                            annotations: [],
+                            ident: "HttpApi_old_ping_Out",
+                            parent: [],
+                            member: [
+                                Member {
+                                    annotations: [],
+                                    ty: SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "rpc",
+                                                    "UnusedMember",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "dummy",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    UnionDef(
+                        UnionDef {
+                            annotations: [],
+                            ident: "HttpApi_old_ping_Result",
+                            switch_type_spec: IntegerType(
+                                I32,
+                            ),
+                            case: [
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "dds",
+                                                                                        "RETCODE_OK",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "HttpApi_old_ping_Out",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "result",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            1,
+                                        ),
+                                    },
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
+                            annotations: [],
+                            ident: "HttpApi_get_user_In",
+                            parent: [],
+                            member: [
+                                Member {
+                                    annotations: [],
+                                    ty: TemplateTypeSpec(
+                                        StringType(
+                                            StringType {
+                                                bound: None,
+                                            },
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "id",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
+                            annotations: [],
+                            ident: "HttpApi_get_user_Out",
+                            parent: [],
+                            member: [
+                                Member {
+                                    annotations: [],
+                                    ty: TemplateTypeSpec(
+                                        StringType(
+                                            StringType {
+                                                bound: None,
+                                            },
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "return_",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    UnionDef(
+                        UnionDef {
+                            annotations: [],
+                            ident: "HttpApi_get_user_Result",
+                            switch_type_spec: IntegerType(
+                                I32,
+                            ),
+                            case: [
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "dds",
+                                                                                        "RETCODE_OK",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "HttpApi_get_user_Out",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "result",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            1,
+                                        ),
+                                    },
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
+                            annotations: [],
+                            ident: "HttpApi_update_user_In",
+                            parent: [],
+                            member: [
+                                Member {
+                                    annotations: [],
+                                    ty: TemplateTypeSpec(
+                                        StringType(
+                                            StringType {
+                                                bound: None,
+                                            },
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "request_id",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                                Member {
+                                    annotations: [],
+                                    ty: TemplateTypeSpec(
+                                        StringType(
+                                            StringType {
+                                                bound: None,
+                                            },
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "name",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                    field_id: Some(
+                                        2,
+                                    ),
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
+                            annotations: [],
+                            ident: "HttpApi_update_user_Out",
+                            parent: [],
+                            member: [
+                                Member {
+                                    annotations: [],
+                                    ty: TemplateTypeSpec(
+                                        StringType(
+                                            StringType {
+                                                bound: None,
+                                            },
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "return_",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    UnionDef(
+                        UnionDef {
+                            annotations: [],
+                            ident: "HttpApi_update_user_Result",
+                            switch_type_spec: IntegerType(
+                                I32,
+                            ),
+                            case: [
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "dds",
+                                                                                        "RETCODE_OK",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "HttpApi_update_user_Out",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "result",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            1,
+                                        ),
+                                    },
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
+                            annotations: [],
+                            ident: "HttpApi_health_In",
+                            parent: [],
+                            member: [
+                                Member {
+                                    annotations: [],
+                                    ty: SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "rpc",
+                                                    "UnusedMember",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "dummy",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
+                            annotations: [],
+                            ident: "HttpApi_health_Out",
+                            parent: [],
+                            member: [
+                                Member {
+                                    annotations: [],
+                                    ty: TemplateTypeSpec(
+                                        StringType(
+                                            StringType {
+                                                bound: None,
+                                            },
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "return_",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    UnionDef(
+                        UnionDef {
+                            annotations: [],
+                            ident: "HttpApi_health_Result",
+                            switch_type_spec: IntegerType(
+                                I32,
+                            ),
+                            case: [
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "dds",
+                                                                                        "RETCODE_OK",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "HttpApi_health_Out",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "result",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            1,
+                                        ),
+                                    },
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    UnionDef(
+                        UnionDef {
+                            annotations: [],
+                            ident: "HttpApi_Call",
+                            switch_type_spec: IntegerType(
+                                I32,
+                            ),
+                            case: [
+                                Case {
+                                    label: [
+                                        Default,
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "dds",
+                                                            "rpc",
+                                                            "UnknownOperation",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "unknownOp",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            1,
+                                        ),
+                                    },
+                                },
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "HttpApi_old_ping_Hash",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "HttpApi_old_ping_In",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "old_ping",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            2,
+                                        ),
+                                    },
+                                },
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "HttpApi_get_user_Hash",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "HttpApi_get_user_In",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "get_user",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            3,
+                                        ),
+                                    },
+                                },
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "HttpApi_update_user_Hash",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "HttpApi_update_user_In",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "update_user",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            4,
+                                        ),
+                                    },
+                                },
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "HttpApi_health_Hash",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "HttpApi_health_In",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "health",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            5,
+                                        ),
+                                    },
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
+                            annotations: [],
+                            ident: "HttpApi_Request",
+                            parent: [],
+                            member: [
+                                Member {
+                                    annotations: [],
+                                    ty: SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "rpc",
+                                                    "RequestHeader",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "header",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                                Member {
+                                    annotations: [],
+                                    ty: SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "HttpApi_Call",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "data",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                    field_id: Some(
+                                        2,
+                                    ),
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    UnionDef(
+                        UnionDef {
+                            annotations: [],
+                            ident: "HttpApi_Return",
+                            switch_type_spec: IntegerType(
+                                I32,
+                            ),
+                            case: [
+                                Case {
+                                    label: [
+                                        Default,
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "dds",
+                                                            "rpc",
+                                                            "UnknownOperation",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "unknownOp",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            1,
+                                        ),
+                                    },
+                                },
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "HttpApi_old_ping_Hash",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "HttpApi_old_ping_Result",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "old_ping",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            2,
+                                        ),
+                                    },
+                                },
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "HttpApi_get_user_Hash",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "HttpApi_get_user_Result",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "get_user",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            3,
+                                        ),
+                                    },
+                                },
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "HttpApi_update_user_Hash",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "HttpApi_update_user_Result",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "update_user",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            4,
+                                        ),
+                                    },
+                                },
+                                Case {
+                                    label: [
+                                        Value(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            ScopedName(
+                                                                                ScopedName {
+                                                                                    name: [
+                                                                                        "HttpApi_health_Hash",
+                                                                                    ],
+                                                                                    is_root: false,
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                    element: ElementSpec {
+                                        annotations: [],
+                                        ty: TypeSpec(
+                                            SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "HttpApi_health_Result",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
+                                            ),
+                                        ),
+                                        value: SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "health",
+                                            ),
+                                        ),
+                                        field_id: Some(
+                                            5,
+                                        ),
+                                    },
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
+                            annotations: [],
+                            ident: "HttpApi_Reply",
+                            parent: [],
+                            member: [
+                                Member {
+                                    annotations: [],
+                                    ty: SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "rpc",
+                                                    "ReplyHeader",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "header",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                                Member {
+                                    annotations: [],
+                                    ty: SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "HttpApi_Return",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "data",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                    field_id: Some(
+                                        2,
+                                    ),
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        InterfaceDcl(
+            InterfaceDcl {
+                annotations: [
+                    Builtin {
+                        name: "http-basic",
+                        params: None,
+                    },
+                    Builtin {
+                        name: "api-key",
+                        params: Some(
+                            Raw(
+                                "in = \"header\", name = \"X-API-Key\"",
+                            ),
+                        ),
+                    },
+                ],
+                decl: InterfaceDef(
+                    InterfaceDef {
+                        header: InterfaceHeader {
+                            ident: "HttpApi",
+                            parent: None,
+                        },
+                        interface_body: Some(
+                            InterfaceBody(
+                                [
+                                    OpDcl(
+                                        OpDcl {
+                                            annotations: [
+                                                ScopedName {
+                                                    name: ScopedName {
+                                                        name: [
+                                                            "deprecated",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                    params: None,
+                                                },
+                                            ],
+                                            ty: Void,
+                                            ident: "old_ping",
+                                            parameter: None,
+                                            raises: None,
+                                        },
+                                    ),
+                                    OpDcl(
+                                        OpDcl {
+                                            annotations: [
+                                                ScopedName {
+                                                    name: ScopedName {
+                                                        name: [
+                                                            "deprecated",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                    params: Some(
+                                                        ConstExpr(
+                                                            ConstExpr(
+                                                                XorExpr(
+                                                                    AndExpr(
+                                                                        ShiftExpr(
+                                                                            AddExpr(
+                                                                                MultExpr(
+                                                                                    UnaryExpr(
+                                                                                        PrimaryExpr(
+                                                                                            Literal(
+                                                                                                StringLiteral(
+                                                                                                    "\"2026-03-13\"",
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                },
+                                                Builtin {
+                                                    name: "http-bearer",
+                                                    params: None,
+                                                },
+                                            ],
+                                            ty: TypeSpec(
+                                                TemplateTypeSpec(
+                                                    StringType(
+                                                        StringType {
+                                                            bound: None,
+                                                        },
+                                                    ),
+                                                ),
+                                            ),
+                                            ident: "get_user",
+                                            parameter: Some(
+                                                ParameterDcls(
+                                                    [
+                                                        ParamDcl {
+                                                            annotations: [
+                                                                ScopedName {
+                                                                    name: ScopedName {
+                                                                        name: [
+                                                                            "query",
+                                                                        ],
+                                                                        is_root: false,
+                                                                    },
+                                                                    params: None,
+                                                                },
+                                                            ],
+                                                            attr: None,
+                                                            ty: TemplateTypeSpec(
+                                                                StringType(
+                                                                    StringType {
+                                                                        bound: None,
+                                                                    },
+                                                                ),
+                                                            ),
+                                                            declarator: SimpleDeclarator(
+                                                                "id",
+                                                            ),
+                                                        },
+                                                    ],
+                                                ),
+                                            ),
+                                            raises: None,
+                                        },
+                                    ),
+                                    OpDcl(
+                                        OpDcl {
+                                            annotations: [
+                                                ScopedName {
+                                                    name: ScopedName {
+                                                        name: [
+                                                            "deprecated",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                    params: Some(
+                                                        Params(
+                                                            [
+                                                                AnnotationParam {
+                                                                    ident: "since",
+                                                                    value: Some(
+                                                                        ConstExpr(
+                                                                            XorExpr(
+                                                                                AndExpr(
+                                                                                    ShiftExpr(
+                                                                                        AddExpr(
+                                                                                            MultExpr(
+                                                                                                UnaryExpr(
+                                                                                                    PrimaryExpr(
+                                                                                                        Literal(
+                                                                                                            StringLiteral(
+                                                                                                                "\"2026-03-13\"",
+                                                                                                            ),
+                                                                                                        ),
+                                                                                                    ),
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                },
+                                                                AnnotationParam {
+                                                                    ident: "after",
+                                                                    value: Some(
+                                                                        ConstExpr(
+                                                                            XorExpr(
+                                                                                AndExpr(
+                                                                                    ShiftExpr(
+                                                                                        AddExpr(
+                                                                                            MultExpr(
+                                                                                                UnaryExpr(
+                                                                                                    PrimaryExpr(
+                                                                                                        Literal(
+                                                                                                            StringLiteral(
+                                                                                                                "\"2026-03-14T12:00:00+08:00\"",
+                                                                                                            ),
+                                                                                                        ),
+                                                                                                    ),
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                },
+                                                            ],
+                                                        ),
+                                                    ),
+                                                },
+                                                Builtin {
+                                                    name: "oauth2",
+                                                    params: Some(
+                                                        Raw(
+                                                            "scopes = [\"read:users\", \"write:users\"]",
+                                                        ),
+                                                    ),
+                                                },
+                                            ],
+                                            ty: TypeSpec(
+                                                TemplateTypeSpec(
+                                                    StringType(
+                                                        StringType {
+                                                            bound: None,
+                                                        },
+                                                    ),
+                                                ),
+                                            ),
+                                            ident: "update_user",
+                                            parameter: Some(
+                                                ParameterDcls(
+                                                    [
+                                                        ParamDcl {
+                                                            annotations: [
+                                                                ScopedName {
+                                                                    name: ScopedName {
+                                                                        name: [
+                                                                            "header",
+                                                                        ],
+                                                                        is_root: false,
+                                                                    },
+                                                                    params: Some(
+                                                                        ConstExpr(
+                                                                            ConstExpr(
+                                                                                XorExpr(
+                                                                                    AndExpr(
+                                                                                        ShiftExpr(
+                                                                                            AddExpr(
+                                                                                                MultExpr(
+                                                                                                    UnaryExpr(
+                                                                                                        PrimaryExpr(
+                                                                                                            Literal(
+                                                                                                                StringLiteral(
+                                                                                                                    "\"X-Req-Id\"",
+                                                                                                                ),
+                                                                                                            ),
+                                                                                                        ),
+                                                                                                    ),
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                },
+                                                            ],
+                                                            attr: None,
+                                                            ty: TemplateTypeSpec(
+                                                                StringType(
+                                                                    StringType {
+                                                                        bound: None,
+                                                                    },
+                                                                ),
+                                                            ),
+                                                            declarator: SimpleDeclarator(
+                                                                "request_id",
+                                                            ),
+                                                        },
+                                                        ParamDcl {
+                                                            annotations: [],
+                                                            attr: None,
+                                                            ty: TemplateTypeSpec(
+                                                                StringType(
+                                                                    StringType {
+                                                                        bound: None,
+                                                                    },
+                                                                ),
+                                                            ),
+                                                            declarator: SimpleDeclarator(
+                                                                "name",
+                                                            ),
+                                                        },
+                                                    ],
+                                                ),
+                                            ),
+                                            raises: None,
+                                        },
+                                    ),
+                                    OpDcl(
+                                        OpDcl {
+                                            annotations: [
+                                                Builtin {
+                                                    name: "no-security",
+                                                    params: None,
+                                                },
+                                            ],
+                                            ty: TypeSpec(
+                                                TemplateTypeSpec(
+                                                    StringType(
+                                                        StringType {
+                                                            bound: None,
+                                                        },
+                                                    ),
+                                                ),
+                                            ),
+                                            ident: "health",
+                                            parameter: None,
+                                            raises: None,
+                                        },
+                                    ),
+                                ],
+                            ),
+                        ),
+                    },
+                ),
+            },
+        ),
+    ],
+)

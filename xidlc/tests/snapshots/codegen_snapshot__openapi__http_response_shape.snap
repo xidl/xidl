@@ -20,10 +20,6 @@ openapi.json
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "a",
-                  "b"
-                ],
                 "properties": {
                   "a": {
                     "type": "integer",

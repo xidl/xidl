@@ -43,7 +43,11 @@ pub trait HttpService{
 
 #[derive(::serde::Serialize,::serde::Deserialize)]
 struct HttpServiceCreateSimpleBody{
+    #[serde(default,deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null")]
+
     local_addr:String,
+    #[serde(default,deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null")]
+
     remote_port:u16,
 }
 
@@ -109,6 +113,10 @@ T:HttpService+Send+Sync+'static,
     ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
     headers: ::xidl_rust_axum::axum::http::HeaderMap
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
         let resp = svc.get_health(req).await?;
@@ -119,6 +127,10 @@ T:HttpService+Send+Sync+'static,
     ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
     headers: ::xidl_rust_axum::axum::http::HeaderMap
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
         let resp = svc.get_version(req).await?;
@@ -129,6 +141,10 @@ T:HttpService+Send+Sync+'static,
     ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
     headers: ::xidl_rust_axum::axum::http::HeaderMap
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
         let resp = svc.get_memory_info(req).await?;
@@ -139,6 +155,10 @@ T:HttpService+Send+Sync+'static,
     ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
     headers: ::xidl_rust_axum::axum::http::HeaderMap
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
         let resp = svc.restart(req).await?;
@@ -150,6 +170,10 @@ T:HttpService+Send+Sync+'static,
     ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
     headers: ::xidl_rust_axum::axum::http::HeaderMap
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
         let resp = svc.get_state(req).await?;
@@ -160,6 +184,10 @@ T:HttpService+Send+Sync+'static,
     ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
     headers: ::xidl_rust_axum::axum::http::HeaderMap
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
         let resp = svc.get_udp_stats(req).await?;
@@ -171,6 +199,10 @@ T:HttpService+Send+Sync+'static,
     headers: ::xidl_rust_axum::axum::http::HeaderMap,
     xidl_rust_axum::axum::Json(body):xidl_rust_axum::axum::Json<HttpServiceCreateSimpleBody>
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let HttpServiceCreateSimpleBody{
 
         local_addr,
@@ -192,6 +224,10 @@ T:HttpService+Send+Sync+'static,
     headers: ::xidl_rust_axum::axum::http::HeaderMap,
     ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<HttpServiceStopSimplePath>
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let HttpServiceStopSimplePath{
 
         id,
@@ -238,6 +274,11 @@ impl HttpServiceClient{
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let resp = self
         .client
         .http()
@@ -264,6 +305,11 @@ impl HttpServiceClient{
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let resp = self
         .client
         .http()
@@ -290,6 +336,11 @@ impl HttpServiceClient{
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let resp = self
         .client
         .http()
@@ -316,6 +367,11 @@ impl HttpServiceClient{
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let resp = self
         .client
         .http()
@@ -340,6 +396,11 @@ impl HttpServiceClient{
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let resp = self
         .client
         .http()
@@ -366,6 +427,11 @@ impl HttpServiceClient{
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let resp = self
         .client
         .http()
@@ -392,6 +458,11 @@ impl HttpServiceClient{
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let body = HttpServiceCreateSimpleBody{
             local_addr,
             remote_port,
@@ -400,7 +471,8 @@ impl HttpServiceClient{
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
         xidl_rust_axum::reqwest::header::CONTENT_TYPE,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/json"),
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
         );
         *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
         let resp = self
@@ -430,6 +502,11 @@ impl HttpServiceClient{
         .request(xidl_rust_axum::reqwest::Method::DELETE,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let resp = self
         .client
         .http()

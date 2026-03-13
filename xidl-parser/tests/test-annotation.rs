@@ -25,6 +25,32 @@ const TEST_CASES: &[(&str, &str)] = &[(
             @key attribute long value;
         };
     "#,
+), (
+    "annotation_http_rfc",
+    r#"
+        @http-basic
+        @api-key(in = "header", name = "X-API-Key")
+        interface HttpApi {
+            @deprecated
+            void old_ping();
+
+            @deprecated("2026-03-13")
+            @http-bearer
+            string get_user(
+                @query string id
+            );
+
+            @deprecated(since = "2026-03-13", after = "2026-03-14T12:00:00+08:00")
+            @oauth2(scopes = ["read:users", "write:users"])
+            string update_user(
+                @header("X-Req-Id") string request_id,
+                string name
+            );
+
+            @no-security
+            string health();
+        };
+    "#,
 )];
 
 #[test]

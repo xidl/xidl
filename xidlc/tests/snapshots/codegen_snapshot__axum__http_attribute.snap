@@ -63,6 +63,10 @@ T:HttpAttributeService+Send+Sync+'static,
     ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
     headers: ::xidl_rust_axum::axum::http::HeaderMap
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
         let resp = svc.version(req).await?;
@@ -73,6 +77,10 @@ T:HttpAttributeService+Send+Sync+'static,
     ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
     headers: ::xidl_rust_axum::axum::http::HeaderMap
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
         let resp = svc.name(req).await?;
@@ -84,6 +92,10 @@ T:HttpAttributeService+Send+Sync+'static,
     headers: ::xidl_rust_axum::axum::http::HeaderMap,
     xidl_rust_axum::axum::Json(body):xidl_rust_axum::axum::Json<HttpAttributeServiceSetNameBody>
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let value = body;
         let data = HttpAttributeServiceSetNameRequest{
             value,
@@ -126,6 +138,11 @@ impl HttpAttributeServiceClient{
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let resp = self
         .client
         .http()
@@ -152,6 +169,11 @@ impl HttpAttributeServiceClient{
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let resp = self
         .client
         .http()
@@ -178,12 +200,18 @@ impl HttpAttributeServiceClient{
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let body = value;
         let body = xidl_rust_axum::serde_json::to_vec(&body)
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
         xidl_rust_axum::reqwest::header::CONTENT_TYPE,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/json"),
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
         );
         *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
         let resp = self

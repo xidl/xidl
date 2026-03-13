@@ -19,7 +19,7 @@ openapi.json
           {
             "name": "keyword",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -27,7 +27,7 @@ openapi.json
           {
             "name": "limit",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -115,7 +115,7 @@ openapi.json
           {
             "name": "trace_id",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -155,7 +155,7 @@ openapi.json
           {
             "name": "lang",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -202,7 +202,7 @@ openapi.json
           {
             "name": "lang",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }

@@ -5,6 +5,10 @@ use utoipa::openapi::path::{
     HttpMethod as OpenApiHttpMethod, OperationBuilder, ParameterBuilder, ParameterIn, PathItem,
     PathsBuilder,
 };
+use utoipa::openapi::security::{
+    ApiKey, ApiKeyValue, Http, HttpAuthScheme, OAuth2, Scopes, SecurityRequirement,
+    SecurityScheme,
+};
 use utoipa::openapi::request_body::RequestBody;
 use utoipa::openapi::response::ResponseBuilder;
 use utoipa::openapi::schema::{
@@ -17,7 +21,10 @@ use utoipa::openapi::{
 use xidl_parser::hir;
 use xidl_parser::hir::{ParserProperties, Specification};
 
-use crate::generate::utils::doc_lines_from_annotations;
+use crate::generate::utils::{
+    DeprecatedInfo, HttpApiKeyLocation, HttpSecurityRequirement, deprecated_info,
+    doc_lines_from_annotations, effective_media_type, effective_security, validate_http_annotations,
+};
 use crate::jsonrpc::{Artifact, ArtifactFile};
 
 pub(crate) struct OpenApiCodegen;
@@ -55,6 +62,9 @@ pub fn render_openapi(spec: &hir::Specification) -> OpenApi {
     for (name, schema) in ctx.schemas {
         components = components.schema(name, schema);
     }
+    for (name, scheme) in ctx.security_schemes {
+        components = components.security_scheme(name, scheme);
+    }
 
     let title = ctx.info_title.as_deref().unwrap_or("xidl");
     let version = ctx.info_version.as_deref().unwrap_or("0.1.0");
@@ -76,6 +86,7 @@ pub fn render_openapi(spec: &hir::Specification) -> OpenApi {
 #[derive(Default)]
 struct OpenApiContext {
     schemas: BTreeMap<String, RefOr<Schema>>,
+    security_schemes: BTreeMap<String, SecurityScheme>,
     paths: PathsBuilder,
     info_title: Option<String>,
     info_version: Option<String>,
@@ -226,15 +237,30 @@ impl OpenApiContext {
             hir::InterfaceDclInner::InterfaceDef(def) => def,
             _ => return,
         };
+        validate_http_annotations(
+            &format!("interface '{}'", def.header.ident),
+            &interface.annotations,
+        )
+        .unwrap_or_else(|err| panic!("{err}"));
         let mut methods = Vec::new();
         if let Some(body) = &def.interface_body {
             for export in &body.0 {
                 match export {
                     hir::Export::OpDcl(op) => {
-                        methods.push(render_op(op, &def.header.ident, module_path));
+                        methods.push(render_op(
+                            op,
+                            &interface.annotations,
+                            &def.header.ident,
+                            module_path,
+                        ));
                     }
                     hir::Export::AttrDcl(attr) => {
-                        methods.extend(render_attr(attr, &def.header.ident, module_path));
+                        methods.extend(render_attr(
+                            attr,
+                            &interface.annotations,
+                            &def.header.ident,
+                            module_path,
+                        ));
                     }
                     _ => {}
                 }
@@ -251,11 +277,18 @@ impl OpenApiContext {
                 request_body,
                 response_status,
                 response_schema,
-                is_server_stream,
+                is_server_stream: _,
                 is_client_stream: _,
                 summary,
                 description,
+                deprecated,
+                security_requirements,
+                security,
+                response_content_type,
             } = method;
+            if let Some(security_requirements) = &security_requirements {
+                register_security_schemes(&mut self.security_schemes, security_requirements);
+            }
 
             for path in paths {
                 let key = format!("{} {path}", openapi_method_name(&http_method));
@@ -267,17 +300,17 @@ impl OpenApiContext {
                 let mut responses = ResponsesBuilder::new();
                 let mut ok_response = ResponseBuilder::new().description("OK");
                 if let Some(schema) = &response_schema {
-                    let content_type = if is_server_stream {
-                        "text/event-stream"
-                    } else {
-                        "application/json"
-                    };
-                    ok_response =
-                        ok_response.content(content_type, Content::new(Some(schema.clone())));
+                    ok_response = ok_response
+                        .content(&response_content_type, Content::new(Some(schema.clone())));
                 }
                 responses = responses.response(response_status, ok_response.build());
                 let mut operation = OperationBuilder::new()
                     .operation_id(Some(operation_id.clone()))
+                    .deprecated(if deprecated {
+                        Some(utoipa::openapi::Deprecated::True)
+                    } else {
+                        None
+                    })
                     .responses(
                         responses
                             .response(
@@ -296,6 +329,9 @@ impl OpenApiContext {
                     operation = operation
                         .summary(summary.as_deref())
                         .description(description.as_deref());
+                }
+                if let Some(security) = &security {
+                    operation = operation.securities(Some(security.clone()));
                 }
                 for parameter in &parameters {
                     operation = operation.parameter(parameter.clone());
@@ -331,11 +367,14 @@ struct MethodInfo {
     request_body: Option<RequestBody>,
     response_status: &'static str,
     response_schema: Option<RefOr<Schema>>,
-    is_server_stream: bool,
     #[allow(dead_code)]
     is_client_stream: bool,
     summary: Option<String>,
     description: Option<String>,
+    deprecated: bool,
+    security_requirements: Option<Vec<HttpSecurityRequirement>>,
+    security: Option<Vec<SecurityRequirement>>,
+    response_content_type: String,
 }
 
 struct RouteTemplate {
@@ -344,7 +383,14 @@ struct RouteTemplate {
     query_params: HashSet<String>,
 }
 
-fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> MethodInfo {
+fn render_op(
+    op: &hir::OpDcl,
+    interface_annotations: &[hir::Annotation],
+    interface_name: &str,
+    module_path: &[String],
+) -> MethodInfo {
+    validate_http_annotations(&format!("operation '{}'", op.ident), &op.annotations)
+        .unwrap_or_else(|err| panic!("{err}"));
     let stream_kind = stream_kind_from_annotations(&op.annotations);
     let is_server_stream = matches!(stream_kind, Some(StreamKind::Server));
     let is_client_stream = matches!(stream_kind, Some(StreamKind::Client));
@@ -426,7 +472,7 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
 
     let mut parameters = Vec::new();
     let mut body_props = Vec::new();
-    let mut body_required = Vec::new();
+    let body_required = Vec::new();
     let mut output_fields = Vec::new();
     let mut path_binding_count = HashMap::<String, usize>::new();
     let mut query_binding_count = HashMap::<String, usize>::new();
@@ -458,7 +504,6 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
         if matches!(direction, ParamDirection::Out) {
             continue;
         }
-        let optional = has_optional_annotation(&param.annotations);
         let binding = explicit_param_binding(param);
         let (source, bound_name) = match binding {
             Some(binding) => (binding.source, binding.bound_name),
@@ -495,7 +540,7 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
                     ParameterIn::Query,
                     &bound_name,
                     schema,
-                    !optional,
+                    false,
                     doc_text(&param.annotations),
                 ));
             }
@@ -504,7 +549,7 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
                     ParameterIn::Header,
                     &bound_name,
                     schema,
-                    !optional,
+                    false,
                     doc_text(&param.annotations),
                 ));
             }
@@ -513,7 +558,7 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
                     ParameterIn::Cookie,
                     &bound_name,
                     schema,
-                    !optional,
+                    false,
                     doc_text(&param.annotations),
                 ));
             }
@@ -521,9 +566,6 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
                 let schema =
                     apply_schema_description(schema, doc_text(&param.annotations).as_deref());
                 body_props.push((raw_name.clone(), schema));
-                if !optional {
-                    body_required.push(raw_name);
-                }
             }
         }
     }
@@ -598,9 +640,32 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
         request_schema = request_schema.map(array_schema);
     }
     let request_content_type = if is_client_stream {
-        "application/x-ndjson"
+        "application/x-ndjson".to_string()
     } else {
-        "application/json"
+        effective_media_type(interface_annotations, &op.annotations, "Consumes")
+    };
+    let response_content_type = if is_server_stream {
+        "text/event-stream".to_string()
+    } else {
+        effective_media_type(interface_annotations, &op.annotations, "Produces")
+    };
+    let deprecated = effective_deprecated(interface_annotations, &op.annotations)
+        .unwrap_or_else(|err| panic!("{err}"))
+        .map(|value| value.deprecated)
+        .unwrap_or(false);
+    let security_requirements = effective_security(interface_annotations, &op.annotations)
+        .unwrap_or_else(|err| panic!("{err}"))
+        .map(|requirements| {
+            let openapi = requirements
+                .iter()
+                .cloned()
+                .map(openapi_security_requirement)
+                .collect::<Vec<_>>();
+            (requirements, openapi)
+        });
+    let (security_requirements, security) = match security_requirements {
+        Some((requirements, openapi)) => (Some(requirements), Some(openapi)),
+        None => (None, None),
     };
     MethodInfo {
         http_method: method_to_openapi(method),
@@ -608,24 +673,51 @@ fn render_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]) -> M
         operation_id: operation_id(module_path, interface_name, &op.ident),
         parameters,
         request_body: request_schema
-            .map(|schema| request_body_schema(schema, request_content_type)),
+            .map(|schema| request_body_schema(schema, &request_content_type)),
         response_status,
         response_schema,
-        is_server_stream,
         is_client_stream,
         summary: doc_summary(&op.annotations),
         description: doc_text(&op.annotations),
+        deprecated,
+        security_requirements,
+        security,
+        response_content_type,
     }
 }
 
 fn render_attr(
     attr: &hir::AttrDcl,
+    interface_annotations: &[hir::Annotation],
     interface_name: &str,
     module_path: &[String],
 ) -> Vec<MethodInfo> {
+    validate_http_annotations(
+        &format!("attribute in interface '{interface_name}'"),
+        &attr.annotations,
+    )
+    .unwrap_or_else(|err| panic!("{err}"));
     let emit_watch = has_annotation(&attr.annotations, "server_stream");
     let summary = doc_summary(&attr.annotations);
     let description = doc_text(&attr.annotations);
+    let deprecated = effective_deprecated(interface_annotations, &attr.annotations)
+        .unwrap_or_else(|err| panic!("{err}"))
+        .map(|value| value.deprecated)
+        .unwrap_or(false);
+    let security_requirements = effective_security(interface_annotations, &attr.annotations)
+        .unwrap_or_else(|err| panic!("{err}"))
+        .map(|requirements| {
+            let openapi = requirements
+                .iter()
+                .cloned()
+                .map(openapi_security_requirement)
+                .collect::<Vec<_>>();
+            (requirements, openapi)
+        });
+    let (security_requirements, security) = match security_requirements {
+        Some((requirements, openapi)) => (Some(requirements), Some(openapi)),
+        None => (None, None),
+    };
     match &attr.decl {
         hir::AttrDclInner::ReadonlyAttrSpec(spec) => readonly_attr_names(spec)
             .into_iter()
@@ -638,10 +730,13 @@ fn render_attr(
                     request_body: None,
                     response_status: "200",
                     response_schema: Some(schema_for_type(&spec.ty)),
-                    is_server_stream: false,
                     is_client_stream: false,
                     summary: summary.clone(),
                     description: description.clone(),
+                    deprecated,
+                    security_requirements: security_requirements.clone(),
+                    security: security.clone(),
+                    response_content_type: "application/json".to_string(),
                 }];
                 if emit_watch {
                     let raw_watch = format!("watch_attribute_{raw_name}");
@@ -653,10 +748,13 @@ fn render_attr(
                         request_body: None,
                         response_status: "200",
                         response_schema: Some(schema_for_type(&spec.ty)),
-                        is_server_stream: true,
                         is_client_stream: false,
                         summary: summary.clone(),
                         description: description.clone(),
+                        deprecated,
+                        security_requirements: security_requirements.clone(),
+                        security: security.clone(),
+                        response_content_type: "text/event-stream".to_string(),
                     });
                 }
                 methods
@@ -676,10 +774,13 @@ fn render_attr(
                             request_body: None,
                             response_status: "200",
                             response_schema: Some(schema_for_type(&spec.ty)),
-                            is_server_stream: false,
                             is_client_stream: false,
                             summary: summary.clone(),
                             description: description.clone(),
+                            deprecated,
+                            security_requirements: security_requirements.clone(),
+                            security: security.clone(),
+                            response_content_type: "application/json".to_string(),
                         });
                         let raw_setter = format!("set_{raw_name}");
                         let props = vec![("value".to_string(), schema_for_type(&spec.ty))];
@@ -692,10 +793,13 @@ fn render_attr(
                             request_body: body_schema(props, required, "application/json"),
                             response_status: "204",
                             response_schema: None,
-                            is_server_stream: false,
                             is_client_stream: false,
                             summary: summary.clone(),
                             description: description.clone(),
+                            deprecated,
+                            security_requirements: security_requirements.clone(),
+                            security: security.clone(),
+                            response_content_type: "application/json".to_string(),
                         });
                         if emit_watch {
                             let raw_watch = format!("watch_attribute_{raw_name}");
@@ -707,10 +811,13 @@ fn render_attr(
                                 request_body: None,
                                 response_status: "200",
                                 response_schema: Some(schema_for_type(&spec.ty)),
-                                is_server_stream: true,
                                 is_client_stream: false,
                                 summary: summary.clone(),
                                 description: description.clone(),
+                                deprecated,
+                                security_requirements: security_requirements.clone(),
+                                security: security.clone(),
+                                response_content_type: "text/event-stream".to_string(),
                             });
                         }
                     }
@@ -725,10 +832,13 @@ fn render_attr(
                         request_body: None,
                         response_status: "200",
                         response_schema: Some(schema_for_type(&spec.ty)),
-                        is_server_stream: false,
                         is_client_stream: false,
                         summary: summary.clone(),
                         description: description.clone(),
+                        deprecated,
+                        security_requirements: security_requirements.clone(),
+                        security: security.clone(),
+                        response_content_type: "application/json".to_string(),
                     });
                     let raw_setter = format!("set_{raw_name}");
                     let props = vec![("value".to_string(), schema_for_type(&spec.ty))];
@@ -741,11 +851,14 @@ fn render_attr(
                         request_body: body_schema(props, required, "application/json"),
                         response_status: "204",
                         response_schema: None,
-                        is_server_stream: false,
-                        is_client_stream: false,
-                        summary: summary.clone(),
-                        description: description.clone(),
-                    });
+                            is_client_stream: false,
+                            summary: summary.clone(),
+                            description: description.clone(),
+                            deprecated,
+                            security_requirements: security_requirements.clone(),
+                            security: security.clone(),
+                            response_content_type: "application/json".to_string(),
+                        });
                     if emit_watch {
                         let raw_watch = format!("watch_attribute_{raw_name}");
                         out.push(MethodInfo {
@@ -756,11 +869,14 @@ fn render_attr(
                             request_body: None,
                             response_status: "200",
                             response_schema: Some(schema_for_type(&spec.ty)),
-                            is_server_stream: true,
-                            is_client_stream: false,
-                            summary: summary.clone(),
-                            description: description.clone(),
-                        });
+                                is_client_stream: false,
+                                summary: summary.clone(),
+                                description: description.clone(),
+                                deprecated,
+                                security_requirements: security_requirements.clone(),
+                                security: security.clone(),
+                                response_content_type: "text/event-stream".to_string(),
+                            });
                     }
                 }
             }
@@ -929,6 +1045,84 @@ fn doc_text(annotations: &[hir::Annotation]) -> Option<String> {
 fn doc_summary(annotations: &[hir::Annotation]) -> Option<String> {
     let lines = doc_lines_from_annotations(annotations);
     lines.first().cloned()
+}
+
+fn effective_deprecated(
+    interface_annotations: &[hir::Annotation],
+    method_annotations: &[hir::Annotation],
+) -> Result<Option<DeprecatedInfo>, String> {
+    if let Some(info) = deprecated_info(method_annotations)? {
+        return Ok(Some(info));
+    }
+    deprecated_info(interface_annotations)
+}
+
+fn openapi_security_requirement(requirement: HttpSecurityRequirement) -> SecurityRequirement {
+    match requirement {
+        HttpSecurityRequirement::HttpBasic => SecurityRequirement::new("http-basic", Vec::<String>::new()),
+        HttpSecurityRequirement::HttpBearer => SecurityRequirement::new("http-bearer", Vec::<String>::new()),
+        HttpSecurityRequirement::ApiKey { location, name } => {
+            SecurityRequirement::new(api_key_scheme_name(&location, &name), Vec::<String>::new())
+        }
+        HttpSecurityRequirement::OAuth2 { scopes } => SecurityRequirement::new("oauth2", scopes),
+    }
+}
+
+fn register_security_schemes(
+    store: &mut BTreeMap<String, SecurityScheme>,
+    security: &[HttpSecurityRequirement],
+) {
+    for requirement in security {
+        match requirement {
+            HttpSecurityRequirement::HttpBasic => {
+                store.entry("http-basic".to_string()).or_insert_with(|| {
+                    SecurityScheme::Http(Http::new(HttpAuthScheme::Basic))
+                });
+            }
+            HttpSecurityRequirement::HttpBearer => {
+                store.entry("http-bearer".to_string()).or_insert_with(|| {
+                    SecurityScheme::Http(Http::new(HttpAuthScheme::Bearer))
+                });
+            }
+            HttpSecurityRequirement::ApiKey { location, name } => {
+                let key = api_key_scheme_name(location, name);
+                store.entry(key).or_insert_with(|| match location {
+                    HttpApiKeyLocation::Header => {
+                        SecurityScheme::ApiKey(ApiKey::Header(ApiKeyValue::new(name.clone())))
+                    }
+                    HttpApiKeyLocation::Query => {
+                        SecurityScheme::ApiKey(ApiKey::Query(ApiKeyValue::new(name.clone())))
+                    }
+                    HttpApiKeyLocation::Cookie => {
+                        SecurityScheme::ApiKey(ApiKey::Cookie(ApiKeyValue::new(name.clone())))
+                    }
+                });
+            }
+            HttpSecurityRequirement::OAuth2 { scopes } => {
+                store.entry("oauth2".to_string()).or_insert_with(|| {
+                    let scopes = scopes
+                        .iter()
+                        .map(|scope| (scope.clone(), scope.clone()))
+                        .collect::<Vec<_>>();
+                    SecurityScheme::OAuth2(OAuth2::new([utoipa::openapi::security::Flow::ClientCredentials(
+                        utoipa::openapi::security::ClientCredentials::new(
+                            "https://example.invalid/token",
+                            Scopes::from_iter(scopes),
+                        ),
+                    )]))
+                });
+            }
+        }
+    }
+}
+
+fn api_key_scheme_name(location: &HttpApiKeyLocation, name: &str) -> String {
+    let location = match location {
+        HttpApiKeyLocation::Header => "header",
+        HttpApiKeyLocation::Query => "query",
+        HttpApiKeyLocation::Cookie => "cookie",
+    };
+    format!("api-key-{location}-{}", name.to_ascii_lowercase())
 }
 
 #[cfg(test)]
@@ -1254,14 +1448,6 @@ fn stream_codec_from_annotations(annotations: &[hir::Annotation]) -> StreamCodec
         };
     }
     codec
-}
-
-fn has_optional_annotation(annotations: &[hir::Annotation]) -> bool {
-    annotations.iter().any(|annotation| {
-        annotation_name(annotation)
-            .map(|name| name.eq_ignore_ascii_case("optional"))
-            .unwrap_or(false)
-    })
 }
 
 fn field_rename(annotations: &[hir::Annotation]) -> Option<String> {

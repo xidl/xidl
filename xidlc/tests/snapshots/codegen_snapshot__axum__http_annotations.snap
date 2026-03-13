@@ -50,8 +50,10 @@ struct HttpAnnoServiceGetUserPath{
     id:u32,
 }
 
-#[derive(::serde::Serialize,::serde::Deserialize)]
+#[derive(::serde::Serialize,::serde::Deserialize,::core::default::Default)]
 struct HttpAnnoServiceGetUserQuery{
+    #[serde(default)]
+
     lang:String,
 }
 
@@ -63,7 +65,11 @@ pub struct HttpAnnoServiceGetUserRequest{
 
 #[derive(::serde::Serialize,::serde::Deserialize)]
 struct HttpAnnoServiceCreateUserBody{
+    #[serde(default,deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null")]
+
     name:String,
+    #[serde(default,deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null")]
+
     age:u32,
 }
 
@@ -73,8 +79,10 @@ pub struct HttpAnnoServiceCreateUserRequest{
     pub age:u32,
 }
 
-#[derive(::serde::Serialize,::serde::Deserialize)]
+#[derive(::serde::Serialize,::serde::Deserialize,::core::default::Default)]
 struct HttpAnnoServiceGetNameQuery{
+    #[serde(default)]
+
     name:String,
 }
 
@@ -83,9 +91,13 @@ pub struct HttpAnnoServiceGetNameRequest{
     pub name:String,
 }
 
-#[derive(::serde::Serialize,::serde::Deserialize)]
+#[derive(::serde::Serialize,::serde::Deserialize,::core::default::Default)]
 struct HttpAnnoServiceSearchUserQuery{
+    #[serde(default)]
+
     keyword:String,
+    #[serde(default)]
+
     page:u32,
 }
 
@@ -102,9 +114,11 @@ struct HttpAnnoServiceGetUserAliasPath{
     user_id:u32,
 }
 
-#[derive(::serde::Serialize,::serde::Deserialize)]
+#[derive(::serde::Serialize,::serde::Deserialize,::core::default::Default)]
 struct HttpAnnoServiceGetUserAliasQuery{
     #[serde(rename = "lang")]
+
+    #[serde(default)]
 
     locale:String,
 }
@@ -117,7 +131,11 @@ pub struct HttpAnnoServiceGetUserAliasRequest{
 
 #[derive(::serde::Serialize,::serde::Deserialize)]
 struct HttpAnnoServiceAddBody{
+    #[serde(default,deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null")]
+
     a:i32,
+    #[serde(default,deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null")]
+
     b:i32,
 }
 
@@ -199,6 +217,10 @@ T:HttpAnnoService+Send+Sync+'static,
     ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<HttpAnnoServiceGetUserPath>,
     xidl_rust_axum::axum::extract::Query(query):xidl_rust_axum::axum::extract::Query<HttpAnnoServiceGetUserQuery>
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let HttpAnnoServiceGetUserPath{
 
         id,
@@ -223,6 +245,10 @@ T:HttpAnnoService+Send+Sync+'static,
     headers: ::xidl_rust_axum::axum::http::HeaderMap,
     xidl_rust_axum::axum::Json(body):xidl_rust_axum::axum::Json<HttpAnnoServiceCreateUserBody>
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let HttpAnnoServiceCreateUserBody{
 
         name,
@@ -244,6 +270,10 @@ T:HttpAnnoService+Send+Sync+'static,
     headers: ::xidl_rust_axum::axum::http::HeaderMap,
     xidl_rust_axum::axum::extract::Query(query):xidl_rust_axum::axum::extract::Query<HttpAnnoServiceGetNameQuery>
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let HttpAnnoServiceGetNameQuery{
 
         name,
@@ -262,6 +292,10 @@ T:HttpAnnoService+Send+Sync+'static,
     headers: ::xidl_rust_axum::axum::http::HeaderMap,
     xidl_rust_axum::axum::extract::Query(query):xidl_rust_axum::axum::extract::Query<HttpAnnoServiceSearchUserQuery>
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let HttpAnnoServiceSearchUserQuery{
 
         keyword,
@@ -284,6 +318,10 @@ T:HttpAnnoService+Send+Sync+'static,
     ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<HttpAnnoServiceGetUserAliasPath>,
     xidl_rust_axum::axum::extract::Query(query):xidl_rust_axum::axum::extract::Query<HttpAnnoServiceGetUserAliasQuery>
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let HttpAnnoServiceGetUserAliasPath{
 
         user_id,
@@ -308,6 +346,10 @@ T:HttpAnnoService+Send+Sync+'static,
     headers: ::xidl_rust_axum::axum::http::HeaderMap,
     xidl_rust_axum::axum::Json(body):xidl_rust_axum::axum::Json<HttpAnnoServiceAddBody>
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let HttpAnnoServiceAddBody{
 
         a,
@@ -329,6 +371,10 @@ T:HttpAnnoService+Send+Sync+'static,
     headers: ::xidl_rust_axum::axum::http::HeaderMap,
     xidl_rust_axum::axum::Json(body):xidl_rust_axum::axum::Json<HttpAnnoServiceBumpBody>
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let value = body;
         let data = HttpAnnoServiceBumpRequest{
             value,
@@ -342,6 +388,10 @@ T:HttpAnnoService+Send+Sync+'static,
     ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
     headers: ::xidl_rust_axum::axum::http::HeaderMap
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
         let resp = svc.get_count(req).await?;
@@ -352,6 +402,10 @@ T:HttpAnnoService+Send+Sync+'static,
     ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
     headers: ::xidl_rust_axum::axum::http::HeaderMap
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
         let resp = svc.ping(req).await?;
@@ -392,6 +446,11 @@ impl HttpAnnoServiceClient{
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let query = HttpAnnoServiceGetUserQuery{
             lang,
         };
@@ -427,6 +486,11 @@ impl HttpAnnoServiceClient{
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let body = HttpAnnoServiceCreateUserBody{
             name,
             age,
@@ -435,7 +499,8 @@ impl HttpAnnoServiceClient{
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
         xidl_rust_axum::reqwest::header::CONTENT_TYPE,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/json"),
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
         );
         *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
         let resp = self
@@ -464,6 +529,11 @@ impl HttpAnnoServiceClient{
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let query = HttpAnnoServiceGetNameQuery{
             name,
         };
@@ -499,6 +569,11 @@ impl HttpAnnoServiceClient{
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let query = HttpAnnoServiceSearchUserQuery{
             keyword,
             page,
@@ -536,6 +611,11 @@ impl HttpAnnoServiceClient{
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let query = HttpAnnoServiceGetUserAliasQuery{
             locale,
         };
@@ -571,6 +651,11 @@ impl HttpAnnoServiceClient{
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let body = HttpAnnoServiceAddBody{
             a,
             b,
@@ -579,7 +664,8 @@ impl HttpAnnoServiceClient{
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
         xidl_rust_axum::reqwest::header::CONTENT_TYPE,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/json"),
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
         );
         *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
         let resp = self
@@ -608,12 +694,18 @@ impl HttpAnnoServiceClient{
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let body = value;
         let body = xidl_rust_axum::serde_json::to_vec(&body)
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
         xidl_rust_axum::reqwest::header::CONTENT_TYPE,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/json"),
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
         );
         *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
         let resp = self
@@ -642,6 +734,11 @@ impl HttpAnnoServiceClient{
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let resp = self
         .client
         .http()
@@ -668,6 +765,11 @@ impl HttpAnnoServiceClient{
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let resp = self
         .client
         .http()

@@ -103,7 +103,7 @@
           {
             "name": "version",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -227,10 +227,6 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "display_name",
-                  "phone_number"
-                ],
                 "properties": {
                   "display_name": {
                     "type": "string"
@@ -282,7 +278,7 @@
           {
             "name": "trace_id",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -361,10 +357,6 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "plate_number",
-                  "minutes"
-                ],
                 "properties": {
                   "minutes": {
                     "type": "integer",
@@ -434,7 +426,7 @@
           {
             "name": "line",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -442,7 +434,7 @@
           {
             "name": "lang",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }

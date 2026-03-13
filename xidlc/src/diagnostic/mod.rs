@@ -40,9 +40,14 @@ impl DiagnosticRunner {
         parser
             .set_language(&self.language)
             .map_err(|err| IdlcError::fmt(format!("set {} language: {err}", self.label)))?;
+        let normalized = if self.label == "idl" {
+            xidl_parser::parser::normalize_source_for_tree_sitter(source)
+        } else {
+            std::borrow::Cow::Borrowed(source)
+        };
 
         parser
-            .parse(source, None)
+            .parse(normalized.as_ref(), None)
             .ok_or_else(|| IdlcError::fmt(format!("failed to parse {}", self.label)))
     }
 

@@ -27,7 +27,7 @@ openapi.json
           {
             "name": "v",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }

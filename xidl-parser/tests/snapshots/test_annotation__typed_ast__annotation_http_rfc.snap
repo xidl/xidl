@@ -1,0 +1,390 @@
+---
+source: xidl-parser/tests/test-annotation.rs
+expression: ast
+---
+Specification(
+    [
+        InterfaceDcl(
+            InterfaceDcl {
+                annotations: [
+                    AnnotationAppl {
+                        name: Builtin(
+                            "http-basic",
+                        ),
+                        params: None,
+                        is_extend: false,
+                        extra: [],
+                    },
+                    AnnotationAppl {
+                        name: Builtin(
+                            "api-key",
+                        ),
+                        params: Some(
+                            Raw(
+                                "in = \"header\", name = \"X-API-Key\"",
+                            ),
+                        ),
+                        is_extend: false,
+                        extra: [],
+                    },
+                ],
+                decl: InterfaceDef(
+                    InterfaceDef {
+                        header: InterfaceHeader {
+                            kind: InterfaceKind,
+                            ident: Identifier(
+                                "HttpApi",
+                            ),
+                            parent: None,
+                        },
+                        interface_body: Some(
+                            InterfaceBody(
+                                [
+                                    OpDcl(
+                                        OpDcl {
+                                            annotations: [
+                                                AnnotationAppl {
+                                                    name: ScopedName(
+                                                        ScopedName {
+                                                            scoped_name: None,
+                                                            identifier: Identifier(
+                                                                "deprecated",
+                                                            ),
+                                                            node_text: "deprecated",
+                                                        },
+                                                    ),
+                                                    params: None,
+                                                    is_extend: false,
+                                                    extra: [],
+                                                },
+                                            ],
+                                            ty: Void,
+                                            ident: Identifier(
+                                                "old_ping",
+                                            ),
+                                            parameter: None,
+                                            raises: None,
+                                        },
+                                    ),
+                                    OpDcl(
+                                        OpDcl {
+                                            annotations: [
+                                                AnnotationAppl {
+                                                    name: ScopedName(
+                                                        ScopedName {
+                                                            scoped_name: None,
+                                                            identifier: Identifier(
+                                                                "deprecated",
+                                                            ),
+                                                            node_text: "deprecated",
+                                                        },
+                                                    ),
+                                                    params: Some(
+                                                        ConstExpr(
+                                                            ConstExpr(
+                                                                XorExpr(
+                                                                    AndExpr(
+                                                                        ShiftExpr(
+                                                                            AddExpr(
+                                                                                MultExpr(
+                                                                                    UnaryExpr(
+                                                                                        PrimaryExpr(
+                                                                                            Literal(
+                                                                                                StringLiteral(
+                                                                                                    "\"2026-03-13\"",
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                    is_extend: false,
+                                                    extra: [],
+                                                },
+                                                AnnotationAppl {
+                                                    name: Builtin(
+                                                        "http-bearer",
+                                                    ),
+                                                    params: None,
+                                                    is_extend: false,
+                                                    extra: [],
+                                                },
+                                            ],
+                                            ty: TypeSpec(
+                                                TemplateTypeSpec(
+                                                    StringType(
+                                                        StringType {
+                                                            bound: None,
+                                                        },
+                                                    ),
+                                                ),
+                                            ),
+                                            ident: Identifier(
+                                                "get_user",
+                                            ),
+                                            parameter: Some(
+                                                ParameterDcls(
+                                                    [
+                                                        ParamDcl {
+                                                            annotations: [
+                                                                AnnotationAppl {
+                                                                    name: ScopedName(
+                                                                        ScopedName {
+                                                                            scoped_name: None,
+                                                                            identifier: Identifier(
+                                                                                "query",
+                                                                            ),
+                                                                            node_text: "query",
+                                                                        },
+                                                                    ),
+                                                                    params: None,
+                                                                    is_extend: false,
+                                                                    extra: [],
+                                                                },
+                                                            ],
+                                                            attr: None,
+                                                            ty: TemplateTypeSpec(
+                                                                StringType(
+                                                                    StringType {
+                                                                        bound: None,
+                                                                    },
+                                                                ),
+                                                            ),
+                                                            declarator: SimpleDeclarator(
+                                                                Identifier(
+                                                                    "id",
+                                                                ),
+                                                            ),
+                                                        },
+                                                    ],
+                                                ),
+                                            ),
+                                            raises: None,
+                                        },
+                                    ),
+                                    OpDcl(
+                                        OpDcl {
+                                            annotations: [
+                                                AnnotationAppl {
+                                                    name: ScopedName(
+                                                        ScopedName {
+                                                            scoped_name: None,
+                                                            identifier: Identifier(
+                                                                "deprecated",
+                                                            ),
+                                                            node_text: "deprecated",
+                                                        },
+                                                    ),
+                                                    params: Some(
+                                                        Params(
+                                                            [
+                                                                AnnotationApplParam {
+                                                                    ident: Identifier(
+                                                                        "since",
+                                                                    ),
+                                                                    value: Some(
+                                                                        ConstExpr(
+                                                                            XorExpr(
+                                                                                AndExpr(
+                                                                                    ShiftExpr(
+                                                                                        AddExpr(
+                                                                                            MultExpr(
+                                                                                                UnaryExpr(
+                                                                                                    PrimaryExpr(
+                                                                                                        Literal(
+                                                                                                            StringLiteral(
+                                                                                                                "\"2026-03-13\"",
+                                                                                                            ),
+                                                                                                        ),
+                                                                                                    ),
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                },
+                                                                AnnotationApplParam {
+                                                                    ident: Identifier(
+                                                                        "after",
+                                                                    ),
+                                                                    value: Some(
+                                                                        ConstExpr(
+                                                                            XorExpr(
+                                                                                AndExpr(
+                                                                                    ShiftExpr(
+                                                                                        AddExpr(
+                                                                                            MultExpr(
+                                                                                                UnaryExpr(
+                                                                                                    PrimaryExpr(
+                                                                                                        Literal(
+                                                                                                            StringLiteral(
+                                                                                                                "\"2026-03-14T12:00:00+08:00\"",
+                                                                                                            ),
+                                                                                                        ),
+                                                                                                    ),
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                },
+                                                            ],
+                                                        ),
+                                                    ),
+                                                    is_extend: false,
+                                                    extra: [],
+                                                },
+                                                AnnotationAppl {
+                                                    name: Builtin(
+                                                        "oauth2",
+                                                    ),
+                                                    params: Some(
+                                                        Raw(
+                                                            "scopes = [\"read:users\", \"write:users\"]",
+                                                        ),
+                                                    ),
+                                                    is_extend: false,
+                                                    extra: [],
+                                                },
+                                            ],
+                                            ty: TypeSpec(
+                                                TemplateTypeSpec(
+                                                    StringType(
+                                                        StringType {
+                                                            bound: None,
+                                                        },
+                                                    ),
+                                                ),
+                                            ),
+                                            ident: Identifier(
+                                                "update_user",
+                                            ),
+                                            parameter: Some(
+                                                ParameterDcls(
+                                                    [
+                                                        ParamDcl {
+                                                            annotations: [
+                                                                AnnotationAppl {
+                                                                    name: ScopedName(
+                                                                        ScopedName {
+                                                                            scoped_name: None,
+                                                                            identifier: Identifier(
+                                                                                "header",
+                                                                            ),
+                                                                            node_text: "header",
+                                                                        },
+                                                                    ),
+                                                                    params: Some(
+                                                                        ConstExpr(
+                                                                            ConstExpr(
+                                                                                XorExpr(
+                                                                                    AndExpr(
+                                                                                        ShiftExpr(
+                                                                                            AddExpr(
+                                                                                                MultExpr(
+                                                                                                    UnaryExpr(
+                                                                                                        PrimaryExpr(
+                                                                                                            Literal(
+                                                                                                                StringLiteral(
+                                                                                                                    "\"X-Req-Id\"",
+                                                                                                                ),
+                                                                                                            ),
+                                                                                                        ),
+                                                                                                    ),
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                    is_extend: false,
+                                                                    extra: [],
+                                                                },
+                                                            ],
+                                                            attr: None,
+                                                            ty: TemplateTypeSpec(
+                                                                StringType(
+                                                                    StringType {
+                                                                        bound: None,
+                                                                    },
+                                                                ),
+                                                            ),
+                                                            declarator: SimpleDeclarator(
+                                                                Identifier(
+                                                                    "request_id",
+                                                                ),
+                                                            ),
+                                                        },
+                                                        ParamDcl {
+                                                            annotations: [],
+                                                            attr: None,
+                                                            ty: TemplateTypeSpec(
+                                                                StringType(
+                                                                    StringType {
+                                                                        bound: None,
+                                                                    },
+                                                                ),
+                                                            ),
+                                                            declarator: SimpleDeclarator(
+                                                                Identifier(
+                                                                    "name",
+                                                                ),
+                                                            ),
+                                                        },
+                                                    ],
+                                                ),
+                                            ),
+                                            raises: None,
+                                        },
+                                    ),
+                                    OpDcl(
+                                        OpDcl {
+                                            annotations: [
+                                                AnnotationAppl {
+                                                    name: Builtin(
+                                                        "no-security",
+                                                    ),
+                                                    params: None,
+                                                    is_extend: false,
+                                                    extra: [],
+                                                },
+                                            ],
+                                            ty: TypeSpec(
+                                                TemplateTypeSpec(
+                                                    StringType(
+                                                        StringType {
+                                                            bound: None,
+                                                        },
+                                                    ),
+                                                ),
+                                            ),
+                                            ident: Identifier(
+                                                "health",
+                                            ),
+                                            parameter: None,
+                                            raises: None,
+                                        },
+                                    ),
+                                ],
+                            ),
+                        ),
+                    },
+                ),
+            },
+        ),
+    ],
+)

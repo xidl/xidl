@@ -20,10 +20,6 @@ openapi.json
             "application/x-ndjson": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "file_id",
-                  "chunk"
-                ],
                 "properties": {
                   "chunk": {
                     "type": "array",

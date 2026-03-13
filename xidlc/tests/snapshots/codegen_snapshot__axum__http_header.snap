@@ -76,18 +76,25 @@ pub mod test{
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
         ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<HeaderServiceGetUserPath>
         )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+            if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+                return Err(xidl_rust_axum::Error::not_acceptable());
+            }
+
             let HeaderServiceGetUserPath{
 
             id,
 
             } = path;
-            let header_value = headers.get("X-Req-Id").ok_or_else(||{
-                xidl_rust_axum::Error::new(400,format!("missing header '{}'","X-Req-Id"))
-            })?;
-            let header_str = header_value
-            .to_str()
-            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
-            let req_id:String = header_str.to_string();
+            let req_id:String = match headers.get("X-Req-Id"){
+                Some(header_value) => {
+                    let header_str = header_value
+                    .to_str()
+                    .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
+                    header_str.to_string()
+                }
+                None => ::core::default::Default::default(),
+
+            };
             let mut flags:Vec<String> = Vec::new();
             for header_value in headers.get_all("X-Flags").iter(){
                 let header_str = header_value
@@ -96,21 +103,25 @@ pub mod test{
                 let parsed:String = header_str.to_string();
                 flags.push(parsed);
             }
+
             if flags.is_empty(){
-                return Err(xidl_rust_axum::Error::new(
-                400,
-                format!("missing header '{}'","X-Flags"),
-                ));
+                let flags:Vec<String> = ::core::default::Default::default();
+
+            }else{
+                let flags:Vec<String> = flags;
             }
 
-            let header_value = headers.get("X-Age").ok_or_else(||{
-                xidl_rust_axum::Error::new(400,format!("missing header '{}'","X-Age"))
-            })?;
-            let header_str = header_value
-            .to_str()
-            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
-            let age:u32 = header_str.parse()
-            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
+            let age:u32 = match headers.get("X-Age"){
+                Some(header_value) => {
+                    let header_str = header_value
+                    .to_str()
+                    .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
+                    header_str.parse()
+                    .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?
+                }
+                None => ::core::default::Default::default(),
+
+            };
             let mut cookie_map: ::std::collections::HashMap<String,Vec<String>> = ::std::collections::HashMap::new();
             for header_value in headers.get_all("cookie").iter(){
                 let cookie_str = header_value
@@ -131,16 +142,13 @@ pub mod test{
                 }
             }
 
-            let value = cookie_map
+            let session_id:String = match cookie_map
             .get("sid")
-            .and_then(|values|values.first())
-            .ok_or_else(||{
-                xidl_rust_axum::Error::new(
-                400,
-                format!("missing cookie '{}'","sid"),
-                )
-            })?;
-            let session_id:String = value.to_string();
+            .and_then(|values|values.first()){
+                Some(value) => value.to_string(),
+                None => ::core::default::Default::default(),
+
+            };
             let mut prefs:Vec<String> = Vec::new();
             if let Some(values) = cookie_map.get("pref"){
                 for value in values{
@@ -148,11 +156,12 @@ pub mod test{
                     prefs.push(parsed);
                 }
             }
+
             if prefs.is_empty(){
-                return Err(xidl_rust_axum::Error::new(
-                400,
-                format!("missing cookie '{}'","pref"),
-                ));
+                let prefs:Vec<String> = ::core::default::Default::default();
+
+            }else{
+                let prefs:Vec<String> = prefs;
             }
 
             let data = HeaderServiceGetUserRequest{
@@ -173,13 +182,20 @@ pub mod test{
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
         xidl_rust_axum::axum::Json(body):xidl_rust_axum::axum::Json<HeaderServiceCreateUserBody>
         )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
-            let header_value = headers.get("X-Token").ok_or_else(||{
-                xidl_rust_axum::Error::new(400,format!("missing header '{}'","X-Token"))
-            })?;
-            let header_str = header_value
-            .to_str()
-            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
-            let token:String = header_str.to_string();
+            if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+                return Err(xidl_rust_axum::Error::not_acceptable());
+            }
+
+            let token:String = match headers.get("X-Token"){
+                Some(header_value) => {
+                    let header_str = header_value
+                    .to_str()
+                    .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
+                    header_str.to_string()
+                }
+                None => ::core::default::Default::default(),
+
+            };
             let mut cookie_map: ::std::collections::HashMap<String,Vec<String>> = ::std::collections::HashMap::new();
             for header_value in headers.get_all("cookie").iter(){
                 let cookie_str = header_value
@@ -200,16 +216,13 @@ pub mod test{
                 }
             }
 
-            let value = cookie_map
+            let session_id:String = match cookie_map
             .get("sid")
-            .and_then(|values|values.first())
-            .ok_or_else(||{
-                xidl_rust_axum::Error::new(
-                400,
-                format!("missing cookie '{}'","sid"),
-                )
-            })?;
-            let session_id:String = value.to_string();
+            .and_then(|values|values.first()){
+                Some(value) => value.to_string(),
+                None => ::core::default::Default::default(),
+
+            };
             let name = body;
             let data = HeaderServiceCreateUserRequest{
                 token,
@@ -255,6 +268,11 @@ pub mod test{
             .request(xidl_rust_axum::reqwest::Method::GET,url)
             .build()
             .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+            req.headers_mut().insert(
+            xidl_rust_axum::reqwest::header::ACCEPT,
+            xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+            );
             let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
             "X-Req-Id".as_bytes(),
             )
@@ -344,6 +362,11 @@ pub mod test{
             .request(xidl_rust_axum::reqwest::Method::POST,url)
             .build()
             .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+            req.headers_mut().insert(
+            xidl_rust_axum::reqwest::header::ACCEPT,
+            xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+            );
             let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
             "X-Token".as_bytes(),
             )
@@ -384,7 +407,8 @@ pub mod test{
             .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
             req.headers_mut().insert(
             xidl_rust_axum::reqwest::header::CONTENT_TYPE,
-            xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/json"),
+            xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
             );
             *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
             let resp = self

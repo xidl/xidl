@@ -11,6 +11,7 @@ mod request;
 pub use request::Request;
 
 pub mod stream;
+pub mod http;
 
 pub use axum;
 pub use futures_util;

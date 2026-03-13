@@ -20,11 +20,6 @@ openapi.json
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "hir",
-                  "path",
-                  "props"
-                ],
                 "properties": {
                   "hir": {
                     "$ref": "#/components/schemas/xidl_parser.hir.Specification"

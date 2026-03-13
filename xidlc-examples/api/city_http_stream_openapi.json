@@ -76,7 +76,7 @@
           {
             "name": "lang",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -114,10 +114,6 @@
             "application/x-ndjson": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "asset_id",
-                  "chunk"
-                ],
                 "properties": {
                   "asset_id": {
                     "type": "string"
@@ -169,10 +165,6 @@
                 "type": "array",
                 "items": {
                   "type": "object",
-                  "required": [
-                    "room",
-                    "message"
-                  ],
                   "properties": {
                     "message": {
                       "type": "string"

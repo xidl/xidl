@@ -19,7 +19,7 @@ openapi.json
           {
             "name": "keyword",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -75,7 +75,7 @@ openapi.json
           {
             "name": "lang",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -83,7 +83,7 @@ openapi.json
           {
             "name": "region",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }

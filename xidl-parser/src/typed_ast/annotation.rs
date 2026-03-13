@@ -60,6 +60,10 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AnnotationAppl {
             }
         }
 
+        if requires_raw_annotation_parse(&raw) {
+            return parse_annotation_from_raw(&raw, is_extend, extra);
+        }
+
         if let Some(custom_body) = custom_body {
             let mut scoped_name = None;
             let mut params = None;
@@ -108,6 +112,37 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AnnotationAppl {
             extra,
         })
     }
+}
+
+fn requires_raw_annotation_parse(raw: &str) -> bool {
+    let source = raw.trim();
+    let source = source.strip_prefix("//@").unwrap_or(source);
+    let source = source.strip_prefix('@').unwrap_or(source);
+    let name = source.split_once('(').map(|(name, _)| name).unwrap_or(source);
+    name.contains('-') || source.contains('[') || source.contains(']')
+}
+
+fn parse_annotation_from_raw(
+    raw: &str,
+    is_extend: bool,
+    extra: Vec<AnnotationAppl>,
+) -> crate::error::ParserResult<AnnotationAppl> {
+    let source = raw.trim();
+    let source = source.strip_prefix("//@").unwrap_or(source);
+    let source = source.strip_prefix('@').unwrap_or(source).trim();
+    let (name, args) = match source.split_once('(') {
+        Some((name, rest)) => {
+            let args = rest.strip_suffix(')').unwrap_or(rest).trim();
+            (name.trim(), Some(args))
+        }
+        None => (source, None),
+    };
+    Ok(AnnotationAppl {
+        name: AnnotationName::Builtin(name.to_string()),
+        params: args.map(|value| AnnotationParams::Raw(value.to_string())),
+        is_extend,
+        extra,
+    })
 }
 
 impl AnnotationAppl {

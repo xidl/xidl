@@ -20,10 +20,6 @@ openapi.json
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "a",
-                  "b"
-                ],
                 "properties": {
                   "a": {
                     "type": "integer",
@@ -135,10 +131,6 @@ openapi.json
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "name",
-                  "age"
-                ],
                 "properties": {
                   "age": {
                     "type": "integer",
@@ -212,7 +204,7 @@ openapi.json
           {
             "name": "name",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -259,7 +251,7 @@ openapi.json
           {
             "name": "lang",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -316,7 +308,7 @@ openapi.json
           {
             "name": "keyword",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -324,7 +316,7 @@ openapi.json
           {
             "name": "page",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -373,7 +365,7 @@ openapi.json
           {
             "name": "lang",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -420,7 +412,7 @@ openapi.json
           {
             "name": "lang",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -467,7 +459,7 @@ openapi.json
           {
             "name": "lang",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }

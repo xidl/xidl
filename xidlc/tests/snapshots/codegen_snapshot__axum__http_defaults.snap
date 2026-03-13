@@ -33,8 +33,10 @@ pub trait HttpDefaultsService{
     )->Result<String,xidl_rust_axum::Error>;
 }
 
-#[derive(::serde::Serialize,::serde::Deserialize)]
+#[derive(::serde::Serialize,::serde::Deserialize,::core::default::Default)]
 struct HttpDefaultsServiceGetNameQuery{
+    #[serde(default)]
+
     name:String,
 }
 
@@ -50,9 +52,13 @@ struct HttpDefaultsServiceListOrdersPath{
     user_id:u32,
 }
 
-#[derive(::serde::Serialize,::serde::Deserialize)]
+#[derive(::serde::Serialize,::serde::Deserialize,::core::default::Default)]
 struct HttpDefaultsServiceListOrdersQuery{
+    #[serde(default)]
+
     page:u32,
+    #[serde(default)]
+
     size:u32,
 }
 
@@ -71,7 +77,11 @@ pub struct HttpDefaultsServiceCreateUserRequest{
 
 #[derive(::serde::Serialize,::serde::Deserialize)]
 struct HttpDefaultsServiceSearchUserBody{
+    #[serde(default,deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null")]
+
     name:String,
+    #[serde(default,deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null")]
+
     age:u32,
 }
 
@@ -86,8 +96,10 @@ struct HttpDefaultsServiceGetUserPath{
     id:u32,
 }
 
-#[derive(::serde::Serialize,::serde::Deserialize)]
+#[derive(::serde::Serialize,::serde::Deserialize,::core::default::Default)]
 struct HttpDefaultsServiceGetUserQuery{
+    #[serde(default)]
+
     lang:String,
 }
 
@@ -104,9 +116,11 @@ struct HttpDefaultsServiceGetUserAliasPath{
     user_id:u32,
 }
 
-#[derive(::serde::Serialize,::serde::Deserialize)]
+#[derive(::serde::Serialize,::serde::Deserialize,::core::default::Default)]
 struct HttpDefaultsServiceGetUserAliasQuery{
     #[serde(rename = "lang")]
+
+    #[serde(default)]
 
     locale:String,
 }
@@ -160,6 +174,10 @@ T:HttpDefaultsService+Send+Sync+'static,
     headers: ::xidl_rust_axum::axum::http::HeaderMap,
     xidl_rust_axum::axum::extract::Query(query):xidl_rust_axum::axum::extract::Query<HttpDefaultsServiceGetNameQuery>
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let HttpDefaultsServiceGetNameQuery{
 
         name,
@@ -179,6 +197,10 @@ T:HttpDefaultsService+Send+Sync+'static,
     ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<HttpDefaultsServiceListOrdersPath>,
     xidl_rust_axum::axum::extract::Query(query):xidl_rust_axum::axum::extract::Query<HttpDefaultsServiceListOrdersQuery>
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let HttpDefaultsServiceListOrdersPath{
 
         user_id,
@@ -206,6 +228,10 @@ T:HttpDefaultsService+Send+Sync+'static,
     headers: ::xidl_rust_axum::axum::http::HeaderMap,
     xidl_rust_axum::axum::Json(body):xidl_rust_axum::axum::Json<HttpDefaultsServiceCreateUserBody>
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let req = body;
         let data = HttpDefaultsServiceCreateUserRequest{
             req,
@@ -220,6 +246,10 @@ T:HttpDefaultsService+Send+Sync+'static,
     headers: ::xidl_rust_axum::axum::http::HeaderMap,
     xidl_rust_axum::axum::Json(body):xidl_rust_axum::axum::Json<HttpDefaultsServiceSearchUserBody>
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let HttpDefaultsServiceSearchUserBody{
 
         name,
@@ -242,6 +272,10 @@ T:HttpDefaultsService+Send+Sync+'static,
     ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<HttpDefaultsServiceGetUserPath>,
     xidl_rust_axum::axum::extract::Query(query):xidl_rust_axum::axum::extract::Query<HttpDefaultsServiceGetUserQuery>
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let HttpDefaultsServiceGetUserPath{
 
         id,
@@ -267,6 +301,10 @@ T:HttpDefaultsService+Send+Sync+'static,
     ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<HttpDefaultsServiceGetUserAliasPath>,
     xidl_rust_axum::axum::extract::Query(query):xidl_rust_axum::axum::extract::Query<HttpDefaultsServiceGetUserAliasQuery>
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let HttpDefaultsServiceGetUserAliasPath{
 
         user_id,
@@ -318,6 +356,11 @@ impl HttpDefaultsServiceClient{
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let query = HttpDefaultsServiceGetNameQuery{
             name,
         };
@@ -354,6 +397,11 @@ impl HttpDefaultsServiceClient{
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let query = HttpDefaultsServiceListOrdersQuery{
             page,
             size,
@@ -390,12 +438,18 @@ impl HttpDefaultsServiceClient{
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let body = req;
         let body = xidl_rust_axum::serde_json::to_vec(&body)
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
         xidl_rust_axum::reqwest::header::CONTENT_TYPE,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/json"),
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
         );
         *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
         let resp = self
@@ -424,6 +478,11 @@ impl HttpDefaultsServiceClient{
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let body = HttpDefaultsServiceSearchUserBody{
             name,
             age,
@@ -432,7 +491,8 @@ impl HttpDefaultsServiceClient{
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
         xidl_rust_axum::reqwest::header::CONTENT_TYPE,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/json"),
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
         );
         *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
         let resp = self
@@ -462,6 +522,11 @@ impl HttpDefaultsServiceClient{
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let query = HttpDefaultsServiceGetUserQuery{
             lang,
         };
@@ -498,6 +563,11 @@ impl HttpDefaultsServiceClient{
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let query = HttpDefaultsServiceGetUserAliasQuery{
             locale,
         };

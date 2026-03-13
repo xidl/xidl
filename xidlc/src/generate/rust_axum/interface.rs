@@ -77,6 +77,8 @@ struct MethodContext {
     is_client_stream: bool,
     is_bidi_stream: bool,
     request_item_ty: String,
+    request_content_type: String,
+    response_content_type: String,
 }
 
 #[derive(Serialize, Clone)]
@@ -96,6 +98,8 @@ struct ParamContext {
     cookie_item_ty: String,
     cookie_item_is_string: bool,
     cookie_item_is_primitive: bool,
+    optional: bool,
+    inner_ty: String,
 }
 
 struct RouteTemplate {
@@ -112,13 +116,14 @@ pub fn render_interface_with_path(
     match &interface.decl {
         hir::InterfaceDclInner::InterfaceForwardDcl(_) => Ok(RustAxumRenderOutput::default()),
         hir::InterfaceDclInner::InterfaceDef(def) => {
-            render_interface_def(def, renderer, module_path)
+            render_interface_def(def, &interface.annotations, renderer, module_path)
         }
     }
 }
 
 fn render_interface_def(
     def: &hir::InterfaceDef,
+    interface_annotations: &[hir::Annotation],
     renderer: &RustAxumRenderer,
     module_path: &[String],
 ) -> IdlcResult<RustAxumRenderOutput> {
@@ -126,13 +131,28 @@ fn render_interface_def(
     let mut methods = Vec::new();
 
     if let Some(body) = &def.interface_body {
+        crate::generate::utils::validate_http_annotations(
+            &format!("interface '{}'", def.header.ident),
+            interface_annotations,
+        )
+        .map_err(IdlcError::rpc)?;
         for export in &body.0 {
             match export {
                 hir::Export::OpDcl(op) => {
-                    methods.push(render_op(op, &def.header.ident, module_path)?);
+                    methods.push(render_op(
+                        op,
+                        interface_annotations,
+                        &def.header.ident,
+                        module_path,
+                    )?);
                 }
                 hir::Export::AttrDcl(attr) => {
-                    methods.extend(render_attr(attr, &def.header.ident, module_path));
+                    methods.extend(render_attr(
+                        attr,
+                        interface_annotations,
+                        &def.header.ident,
+                        module_path,
+                    ));
                 }
                 _ => {}
             }
@@ -163,9 +183,12 @@ fn render_interface_def(
 
 fn render_op(
     op: &hir::OpDcl,
+    interface_annotations: &[hir::Annotation],
     interface_name: &str,
     _module_path: &[String],
 ) -> IdlcResult<MethodContext> {
+    crate::generate::utils::validate_http_annotations(&format!("operation '{}'", op.ident), &op.annotations)
+        .map_err(IdlcError::rpc)?;
     let stream_kind = stream_kind_from_annotations(&op.annotations)?;
     let is_server_stream = matches!(stream_kind, Some(StreamKind::Server));
     let is_client_stream = matches!(stream_kind, Some(StreamKind::Client));
@@ -287,7 +310,9 @@ fn render_op(
     }
 
     for param in params {
-        let ty = render_param_type(&param.ty, param.attr.as_ref());
+        let optional = crate::generate::utils::has_optional_annotation(&param.annotations);
+        let inner_ty = axum_type(&param.ty);
+        let ty = render_param_type(&param.ty, param.attr.as_ref(), optional);
         let name = rust_ident(&param.declarator.0);
         let direction = param_direction(param.attr.as_ref());
         if matches!(direction, ParamDirection::Out | ParamDirection::InOut) {
@@ -296,18 +321,20 @@ fn render_op(
                 raw_name: param.declarator.0.clone(),
                 wire_name: param.declarator.0.clone(),
                 path_template_name: String::new(),
-                ty: ty.clone(),
+                ty: inner_ty.clone(),
                 source: String::new(),
                 serde_rename: field_rename(&param.annotations, &name)
                     .or_else(|| serde_rename(&param.declarator.0, &name)),
                 header_is_multi: false,
-                header_item_ty: ty.clone(),
+                header_item_ty: inner_ty.clone(),
                 header_item_is_string: false,
                 header_item_is_primitive: false,
                 cookie_is_multi: false,
-                cookie_item_ty: ty.clone(),
+                cookie_item_ty: inner_ty.clone(),
                 cookie_item_is_string: false,
                 cookie_item_is_primitive: false,
+                optional: false,
+                inner_ty: inner_ty.clone(),
             });
         }
         if matches!(direction, ParamDirection::Out) {
@@ -351,6 +378,7 @@ fn render_op(
             },
             wire_name,
             ty,
+            inner_ty: inner_ty.clone(),
             source: param_source_code(source),
             serde_rename: serde_rename(&serde_name, &name),
             header_is_multi: header_is_multi(&param.ty),
@@ -361,7 +389,14 @@ fn render_op(
             cookie_item_ty: cookie_item_ty(&param.ty),
             cookie_item_is_string: cookie_item_is_string(&param.ty),
             cookie_item_is_primitive: cookie_item_is_primitive(&param.ty),
+            optional,
         };
+        if ctx.optional && matches!(source, ParamSource::Path) {
+            return Err(IdlcError::rpc(format!(
+                "@optional cannot be applied to path parameter '{}' of method '{}'",
+                param.declarator.0, op.ident
+            )));
+        }
         request_params.push(ctx.clone());
         match source {
             ParamSource::Path => {
@@ -499,14 +534,35 @@ fn render_op(
         is_client_stream,
         is_bidi_stream,
         request_item_ty: request_ty,
+        request_content_type: crate::generate::utils::effective_media_type(
+            interface_annotations,
+            &op.annotations,
+            "Consumes",
+        ),
+        response_content_type: if is_server_stream {
+            "text/event-stream".to_string()
+        } else if is_client_stream {
+            "application/json".to_string()
+        } else {
+            crate::generate::utils::effective_media_type(
+                interface_annotations,
+                &op.annotations,
+                "Produces",
+            )
+        },
     })
 }
 
 fn render_attr(
     attr: &hir::AttrDcl,
+    _interface_annotations: &[hir::Annotation],
     interface_name: &str,
     module_path: &[String],
 ) -> Vec<MethodContext> {
+    let _ = crate::generate::utils::validate_http_annotations(
+        &format!("attribute in interface '{interface_name}'"),
+        &attr.annotations,
+    );
     let emit_watch = has_annotation(&attr.annotations, "server_stream");
     match &attr.decl {
         hir::AttrDclInner::ReadonlyAttrSpec(spec) => readonly_attr_names(spec)
@@ -546,6 +602,8 @@ fn render_attr(
                     is_client_stream: false,
                     is_bidi_stream: false,
                     request_item_ty: "()".to_string(),
+                    request_content_type: "application/json".to_string(),
+                    response_content_type: "application/json".to_string(),
                 }];
                 if emit_watch {
                     let raw_watch = format!("watch_attribute_{raw}");
@@ -580,6 +638,8 @@ fn render_attr(
                         is_client_stream: false,
                         is_bidi_stream: false,
                         request_item_ty: "()".to_string(),
+                        request_content_type: "application/json".to_string(),
+                        response_content_type: "text/event-stream".to_string(),
                     });
                 }
                 methods
@@ -625,10 +685,12 @@ fn render_attr(
                             is_client_stream: false,
                             is_bidi_stream: false,
                             request_item_ty: "()".to_string(),
+                            request_content_type: "application/json".to_string(),
+                            response_content_type: "application/json".to_string(),
                         });
                         let raw_setter = format!("set_{raw_name}");
                         let setter = rust_ident(&raw_setter);
-                        let param = render_param_type(&spec.ty, None);
+                        let param = render_param_type(&spec.ty, None, false);
                         let setter_path = default_path(module_path, interface_name, &raw_setter);
                         let request_struct = Some(format!(
                             "{}Request",
@@ -650,6 +712,8 @@ fn render_attr(
                             cookie_item_ty: param.clone(),
                             cookie_item_is_string: false,
                             cookie_item_is_primitive: false,
+                            optional: false,
+                            inner_ty: param.clone(),
                         };
                         out.push(MethodContext {
                             name: setter.clone(),
@@ -681,6 +745,8 @@ fn render_attr(
                             is_client_stream: false,
                             is_bidi_stream: false,
                             request_item_ty: "()".to_string(),
+                            request_content_type: "application/json".to_string(),
+                            response_content_type: "application/json".to_string(),
                         });
                         if emit_watch {
                             let raw_watch = format!("watch_attribute_{raw_name}");
@@ -715,6 +781,8 @@ fn render_attr(
                                 is_client_stream: false,
                                 is_bidi_stream: false,
                                 request_item_ty: "()".to_string(),
+                                request_content_type: "application/json".to_string(),
+                                response_content_type: "text/event-stream".to_string(),
                             });
                         }
                     }
@@ -724,7 +792,7 @@ fn render_attr(
                     let raw_name = declarator.0.clone();
                     let ret = attr_return_type(&spec.ty);
                     let path = default_path(module_path, interface_name, &raw_name);
-                    let param = render_param_type(&spec.ty, None);
+                    let param = render_param_type(&spec.ty, None, false);
                     let request_struct = None;
                     out.push(MethodContext {
                         name: name.clone(),
@@ -756,6 +824,8 @@ fn render_attr(
                         is_client_stream: false,
                         is_bidi_stream: false,
                         request_item_ty: "()".to_string(),
+                        request_content_type: "application/json".to_string(),
+                        response_content_type: "application/json".to_string(),
                     });
                     let raw_setter = format!("set_{raw_name}");
                     let setter = rust_ident(&raw_setter);
@@ -780,6 +850,8 @@ fn render_attr(
                         cookie_item_ty: param.clone(),
                         cookie_item_is_string: false,
                         cookie_item_is_primitive: false,
+                        optional: false,
+                        inner_ty: param.clone(),
                     };
                     out.push(MethodContext {
                         name: setter.clone(),
@@ -811,6 +883,8 @@ fn render_attr(
                         is_client_stream: false,
                         is_bidi_stream: false,
                         request_item_ty: "()".to_string(),
+                        request_content_type: "application/json".to_string(),
+                        response_content_type: "application/json".to_string(),
                     });
                     if emit_watch {
                         let raw_watch = format!("watch_attribute_{raw_name}");
@@ -845,6 +919,8 @@ fn render_attr(
                             is_client_stream: false,
                             is_bidi_stream: false,
                             request_item_ty: "()".to_string(),
+                            request_content_type: "application/json".to_string(),
+                            response_content_type: "text/event-stream".to_string(),
                         });
                     }
                 }
@@ -873,9 +949,18 @@ fn attr_return_type(ty: &hir::TypeSpec) -> String {
     axum_type(ty)
 }
 
-fn render_param_type(ty: &hir::TypeSpec, attr: Option<&hir::ParamAttribute>) -> String {
+fn render_param_type(
+    ty: &hir::TypeSpec,
+    attr: Option<&hir::ParamAttribute>,
+    optional: bool,
+) -> String {
     let _ = attr;
-    axum_type(ty)
+    let inner = axum_type(ty);
+    if optional {
+        format!("Option<{inner}>")
+    } else {
+        inner
+    }
 }
 
 fn param_direction(attr: Option<&hir::ParamAttribute>) -> ParamDirection {

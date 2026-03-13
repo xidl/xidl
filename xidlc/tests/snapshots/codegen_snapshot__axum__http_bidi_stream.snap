@@ -15,7 +15,11 @@ pub trait HttpBidiStreamService{
 
 #[derive(::serde::Serialize,::serde::Deserialize)]
 struct HttpBidiStreamServiceChatBody{
+    #[serde(default,deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null")]
+
     room:String,
+    #[serde(default,deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null")]
+
     text:String,
 }
 
@@ -64,6 +68,10 @@ T:HttpBidiStreamService+Send+Sync+'static,
     headers: ::xidl_rust_axum::axum::http::HeaderMap,
     ws: ::xidl_rust_axum::axum::extract::ws::WebSocketUpgrade
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let req_headers = headers.clone();
         let svc = svc.clone();
         return Ok(ws.on_upgrade(move|socket|async move{
@@ -110,6 +118,11 @@ impl HttpBidiStreamServiceClient{
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let mut ws_url = self.client.ws_url(&path)?;
         return xidl_rust_axum::stream::open_bidi_client::<HttpBidiStreamServiceChatRequest,HttpBidiStreamServiceChatResponse>(&ws_url).await;
     }

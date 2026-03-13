@@ -34,9 +34,11 @@ struct HttpCatchAllServiceReadAssetPath{
     key:String,
 }
 
-#[derive(::serde::Serialize,::serde::Deserialize)]
+#[derive(::serde::Serialize,::serde::Deserialize,::core::default::Default)]
 struct HttpCatchAllServiceReadAssetQuery{
     #[serde(rename = "v")]
+
+    #[serde(default)]
 
     version:String,
 }
@@ -82,6 +84,10 @@ T:HttpCatchAllService+Send+Sync+'static,
     headers: ::xidl_rust_axum::axum::http::HeaderMap,
     ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<HttpCatchAllServiceReadFilePath>
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let HttpCatchAllServiceReadFilePath{
 
         rel_path,
@@ -101,6 +107,10 @@ T:HttpCatchAllService+Send+Sync+'static,
     ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<HttpCatchAllServiceReadAssetPath>,
     xidl_rust_axum::axum::extract::Query(query):xidl_rust_axum::axum::extract::Query<HttpCatchAllServiceReadAssetQuery>
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let HttpCatchAllServiceReadAssetPath{
 
         key,
@@ -153,6 +163,11 @@ impl HttpCatchAllServiceClient{
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let resp = self
         .client
         .http()
@@ -180,6 +195,11 @@ impl HttpCatchAllServiceClient{
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let query = HttpCatchAllServiceReadAssetQuery{
             version,
         };

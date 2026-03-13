@@ -22,9 +22,13 @@ struct HttpQueryTemplateServiceGetUserPath{
     id:u32,
 }
 
-#[derive(::serde::Serialize,::serde::Deserialize)]
+#[derive(::serde::Serialize,::serde::Deserialize,::core::default::Default)]
 struct HttpQueryTemplateServiceGetUserQuery{
+    #[serde(default)]
+
     lang:String,
+    #[serde(default)]
+
     region:String,
 }
 
@@ -35,8 +39,10 @@ pub struct HttpQueryTemplateServiceGetUserRequest{
     pub region:String,
 }
 
-#[derive(::serde::Serialize,::serde::Deserialize)]
+#[derive(::serde::Serialize,::serde::Deserialize,::core::default::Default)]
 struct HttpQueryTemplateServiceSearchQuery{
+    #[serde(default)]
+
     keyword:String,
 }
 
@@ -83,6 +89,10 @@ T:HttpQueryTemplateService+Send+Sync+'static,
     ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<HttpQueryTemplateServiceGetUserPath>,
     xidl_rust_axum::axum::extract::Query(query):xidl_rust_axum::axum::extract::Query<HttpQueryTemplateServiceGetUserQuery>
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let HttpQueryTemplateServiceGetUserPath{
 
         id,
@@ -111,6 +121,10 @@ T:HttpQueryTemplateService+Send+Sync+'static,
     xidl_rust_axum::axum::extract::Query(query):xidl_rust_axum::axum::extract::Query<HttpQueryTemplateServiceSearchQuery>,
     xidl_rust_axum::axum::Json(body):xidl_rust_axum::axum::Json<HttpQueryTemplateServiceSearchBody>
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
         let HttpQueryTemplateServiceSearchQuery{
 
         keyword,
@@ -159,6 +173,11 @@ impl HttpQueryTemplateServiceClient{
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let query = HttpQueryTemplateServiceGetUserQuery{
             lang,
             region,
@@ -195,6 +214,11 @@ impl HttpQueryTemplateServiceClient{
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
         let query = HttpQueryTemplateServiceSearchQuery{
             keyword,
         };
@@ -209,7 +233,8 @@ impl HttpQueryTemplateServiceClient{
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
         xidl_rust_axum::reqwest::header::CONTENT_TYPE,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/json"),
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
         );
         *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
         let resp = self

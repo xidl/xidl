@@ -3,59 +3,66 @@ source: xidlc/tests/codegen_snapshot.rs
 expression: output
 ---
 ===============
-http_stream_sse.rs
+http_security.rs
 ===============
 #[async_trait::async_trait]
-pub trait HttpStreamSseService{
-    async fn watch_topic(
+pub trait HttpSecurityService{
+    async fn get_user(
     &self,
-    req:xidl_rust_axum::Request<HttpStreamSseServiceWatchTopicRequest>
-    )->Result<xidl_rust_axum::stream::SseStream<String>,xidl_rust_axum::Error>;
-    async fn online(
+    req:xidl_rust_axum::Request<HttpSecurityServiceGetUserRequest>
+    )->Result<String,xidl_rust_axum::Error>;
+    async fn search_user(
     &self,
-    req:xidl_rust_axum::Request<()>
-    )->Result<bool,xidl_rust_axum::Error>;
-    async fn set_online(
-    &self,
-    req:xidl_rust_axum::Request<HttpStreamSseServiceSetOnlineRequest>
-    )->Result<(),xidl_rust_axum::Error>;
-    async fn watch_attribute_online(
+    req:xidl_rust_axum::Request<HttpSecurityServiceSearchUserRequest>
+    )->Result<String,xidl_rust_axum::Error>;
+    async fn health(
     &self,
     req:xidl_rust_axum::Request<()>
-    )->Result<xidl_rust_axum::stream::SseStream<bool>,xidl_rust_axum::Error>;
+    )->Result<String,xidl_rust_axum::Error>;
 }
 
 #[derive(::serde::Serialize,::serde::Deserialize)]
-struct HttpStreamSseServiceWatchTopicPath{
-    topic:String,
+struct HttpSecurityServiceGetUserPath{
+    id:u32,
 }
 
 #[derive(::serde::Serialize,::serde::Deserialize,::core::default::Default)]
-struct HttpStreamSseServiceWatchTopicQuery{
+struct HttpSecurityServiceGetUserQuery{
     #[serde(default)]
 
-    lang:String,
+    locale:Option<String>,
 }
 
 #[derive(::serde::Serialize,::serde::Deserialize)]
-pub struct HttpStreamSseServiceWatchTopicRequest{
-    pub topic:String,
-    pub lang:String,
+pub struct HttpSecurityServiceGetUserRequest{
+    pub id:u32,
+    pub locale:Option<String>,
+    pub trace_id:String,
 }
 
-type HttpStreamSseServiceSetOnlineBody = bool;
 #[derive(::serde::Serialize,::serde::Deserialize)]
-pub struct HttpStreamSseServiceSetOnlineRequest{
-    pub value:bool,
+struct HttpSecurityServiceSearchUserBody{
+    #[serde(default,deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null")]
+
+    keyword:String,
+    #[serde(default)]
+
+    page:Option<u32>,
 }
 
-pub struct HttpStreamSseServiceServer<T>{
+#[derive(::serde::Serialize,::serde::Deserialize)]
+pub struct HttpSecurityServiceSearchUserRequest{
+    pub keyword:String,
+    pub page:Option<u32>,
+}
+
+pub struct HttpSecurityServiceServer<T>{
     inner: ::std::sync::Arc<T>,
 }
 
-impl<T>HttpStreamSseServiceServer<T>
+impl<T>HttpSecurityServiceServer<T>
 where
-T:HttpStreamSseService+Send+Sync+'static,
+T:HttpSecurityService+Send+Sync+'static,
 {
     pub fn new(inner:T)->Self{
         Self{
@@ -72,108 +79,109 @@ T:HttpStreamSseService+Send+Sync+'static,
         let svc = self.inner;
         xidl_rust_axum::axum::Router::new()
 
-        .route("/events/{topic}",xidl_rust_axum::axum::routing::get(Self::watch_topic))
+        .route("/users/{id}",xidl_rust_axum::axum::routing::get(Self::get_user))
 
-        .route("/HttpStreamSseService/online",xidl_rust_axum::axum::routing::get(Self::online))
+        .route("/users/search",xidl_rust_axum::axum::routing::post(Self::search_user))
 
-        .route("/HttpStreamSseService/set_online",xidl_rust_axum::axum::routing::post(Self::set_online))
-
-        .route("/HttpStreamSseService/watch_attribute_online",xidl_rust_axum::axum::routing::get(Self::watch_attribute_online))
+        .route("/health",xidl_rust_axum::axum::routing::post(Self::health))
 
         .with_state(svc)
     }
 
-    async fn watch_topic(
+    async fn get_user(
     ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
     headers: ::xidl_rust_axum::axum::http::HeaderMap,
-    ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<HttpStreamSseServiceWatchTopicPath>,
-    xidl_rust_axum::axum::extract::Query(query):xidl_rust_axum::axum::extract::Query<HttpStreamSseServiceWatchTopicQuery>
-    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
-        if!xidl_rust_axum::http::accepts_media_type(&headers,"text/event-stream"){
-            return Err(xidl_rust_axum::Error::not_acceptable());
-        }
-
-        let HttpStreamSseServiceWatchTopicPath{
-
-        topic,
-
-        } = path;
-        let HttpStreamSseServiceWatchTopicQuery{
-
-        lang,
-
-        } = query;
-        let data = HttpStreamSseServiceWatchTopicRequest{
-            topic,
-            lang,
-        };
-        let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.watch_topic(req).await?;
-        Ok(xidl_rust_axum::stream::sse_response(resp))
-    }
-
-    async fn online(
-    ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
-    headers: ::xidl_rust_axum::axum::http::HeaderMap
+    ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<HttpSecurityServiceGetUserPath>,
+    xidl_rust_axum::axum::extract::Query(query):xidl_rust_axum::axum::extract::Query<HttpSecurityServiceGetUserQuery>
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
         if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
 
-        let data = ();
+        let HttpSecurityServiceGetUserPath{
+
+        id,
+
+        } = path;
+        let HttpSecurityServiceGetUserQuery{
+
+        locale,
+
+        } = query;
+        let trace_id:String = match headers.get("X-Trace-Id"){
+            Some(header_value) => {
+                let header_str = header_value
+                .to_str()
+                .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
+                header_str.to_string()
+            }
+            None => ::core::default::Default::default(),
+
+        };
+        let data = HttpSecurityServiceGetUserRequest{
+            id,
+            locale,
+            trace_id,
+        };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.online(req).await?;
+        let resp = svc.get_user(req).await?;
         Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
     }
 
-    async fn set_online(
+    async fn search_user(
     ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
     headers: ::xidl_rust_axum::axum::http::HeaderMap,
-    xidl_rust_axum::axum::Json(body):xidl_rust_axum::axum::Json<HttpStreamSseServiceSetOnlineBody>
+    xidl_rust_axum::axum::Json(body):xidl_rust_axum::axum::Json<HttpSecurityServiceSearchUserBody>
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
         if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
 
-        let value = body;
-        let data = HttpStreamSseServiceSetOnlineRequest{
-            value,
+        let HttpSecurityServiceSearchUserBody{
+
+        keyword,
+
+        page,
+
+        } = body;
+        let data = HttpSecurityServiceSearchUserRequest{
+            keyword,
+            page,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.set_online(req).await?;
-        let _ = resp;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT))
+        let resp = svc.search_user(req).await?;
+        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
     }
 
-    async fn watch_attribute_online(
+    async fn health(
     ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
     headers: ::xidl_rust_axum::axum::http::HeaderMap
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
-        if!xidl_rust_axum::http::accepts_media_type(&headers,"text/event-stream"){
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
 
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.watch_attribute_online(req).await?;
-        Ok(xidl_rust_axum::stream::sse_response(resp))
+        let resp = svc.health(req).await?;
+        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
     }
 }
 
-impl<T>xidl_rust_axum::Service for HttpStreamSseServiceServer<T>
+impl<T>xidl_rust_axum::Service for HttpSecurityServiceServer<T>
 where
-T:HttpStreamSseService+Send+Sync+'static,
+T:HttpSecurityService+Send+Sync+'static,
 {
     fn into_router(self)->xidl_rust_axum::axum::Router{
         self.router()
     }
 }
 
-pub struct HttpStreamSseServiceClient{
+pub struct HttpSecurityServiceClient{
     client:xidl_rust_axum::Client,
 }
 
-impl HttpStreamSseServiceClient{
+impl HttpSecurityServiceClient{
     pub fn new(base_url:impl Into<String>)->Self{
         Self{
             client:xidl_rust_axum::Client::new(base_url),
@@ -181,36 +189,10 @@ impl HttpStreamSseServiceClient{
     }
 }
 
-impl HttpStreamSseServiceClient{
-    pub async fn watch_topic(&self,topic:String,lang:String)->Result<xidl_rust_axum::stream::Reader<String>,xidl_rust_axum::Error>{
-        let path = "/events/{topic}".to_string();
-        let path = path.replace("{topic}",&topic.to_string());
-        let url = self.client.url(&path);
-        let mut req = self
-        .client
-        .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,url)
-        .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        req.headers_mut().insert(
-        xidl_rust_axum::reqwest::header::ACCEPT,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/event-stream")
-        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
-        );
-        let query = HttpStreamSseServiceWatchTopicQuery{
-            lang,
-        };
-        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        if!query.is_empty(){
-            req.url_mut().set_query(Some(&query));
-        }
-
-        xidl_rust_axum::stream::open_sse::<String>(self.client.http(),req).await
-    }
-
-    pub async fn online(&self)->Result<bool,xidl_rust_axum::Error>{
-        let path = "/HttpStreamSseService/online".to_string();
+impl HttpSecurityServiceClient{
+    pub async fn get_user(&self,id:u32,locale:Option<String>,trace_id:String)->Result<String,xidl_rust_axum::Error>{
+        let path = "/users/{id}".to_string();
+        let path = path.replace("{id}",&id.to_string());
         let url = self.client.url(&path);
         let mut req = self
         .client
@@ -223,6 +205,25 @@ impl HttpStreamSseServiceClient{
         xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
         .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
         );
+        let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
+        "X-Trace-Id".as_bytes(),
+        )
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
+        let header_value_str = trace_id;
+        let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+        &header_value_str,
+        )
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
+        req.headers_mut().insert(header_name,header_value);
+        let query = HttpSecurityServiceGetUserQuery{
+            locale,
+        };
+        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        if!query.is_empty(){
+            req.url_mut().set_query(Some(&query));
+        }
+
         let resp = self
         .client
         .http()
@@ -230,7 +231,7 @@ impl HttpStreamSseServiceClient{
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
-            resp.json::<bool>()
+            resp.json::<String>()
             .await
             .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
         }else{
@@ -240,8 +241,8 @@ impl HttpStreamSseServiceClient{
         }
     }
 
-    pub async fn set_online(&self,value:bool)->Result<(),xidl_rust_axum::Error>{
-        let path = "/HttpStreamSseService/set_online".to_string();
+    pub async fn search_user(&self,keyword:String,page:Option<u32>)->Result<String,xidl_rust_axum::Error>{
+        let path = "/users/search".to_string();
         let url = self.client.url(&path);
         let mut req = self
         .client
@@ -254,7 +255,10 @@ impl HttpStreamSseServiceClient{
         xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
         .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
         );
-        let body = value;
+        let body = HttpSecurityServiceSearchUserBody{
+            keyword,
+            page,
+        };
         let body = xidl_rust_axum::serde_json::to_vec(&body)
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
@@ -270,7 +274,9 @@ impl HttpStreamSseServiceClient{
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
-            Ok(())
+            resp.json::<String>()
+            .await
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -278,20 +284,37 @@ impl HttpStreamSseServiceClient{
         }
     }
 
-    pub async fn watch_attribute_online(&self)->Result<xidl_rust_axum::stream::Reader<bool>,xidl_rust_axum::Error>{
-        let path = "/HttpStreamSseService/watch_attribute_online".to_string();
+    pub async fn health(&self)->Result<String,xidl_rust_axum::Error>{
+        let path = "/health".to_string();
         let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,url)
+        .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
         xidl_rust_axum::reqwest::header::ACCEPT,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/event-stream")
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
         .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
         );
-        xidl_rust_axum::stream::open_sse::<bool>(self.client.http(),req).await
+        let resp = self
+        .client
+        .http()
+        .execute(req)
+        .await
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        if resp.status().is_success(){
+            resp.json::<String>()
+            .await
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
+        }else{
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status,body))
+        }
     }
 }
+===============
+http_security.rs
+===============

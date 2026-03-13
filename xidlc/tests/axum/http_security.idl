@@ -1,0 +1,25 @@
+#progma xidlc package xidlc
+#progma xidlc version v1.0.0
+
+interface HttpSecurityService {
+    @http-basic
+    @api-key(in = "header", name = "X-API-Key")
+    @get(path = "/users/{id}")
+    @deprecated("2026-03-13")
+    string get_user(
+        @path uint32 id,
+        @query @optional string locale,
+        @header("X-Trace-Id") string trace_id
+    );
+
+    @oauth2(scopes = ["write:users", "read:users"])
+    @post(path = "/users/search")
+    string search_user(
+        string keyword,
+        @optional uint32 page
+    );
+
+    @no-security
+    @deprecated(since = "2026-03-13", after = "2026-03-14")
+    string health();
+};

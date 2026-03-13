@@ -1,5 +1,6 @@
 use crate::error::ParserResult;
 use std::collections::{HashMap, HashSet};
+use std::borrow::Cow;
 use tree_sitter::Node;
 
 pub struct ParseContext<'a> {
@@ -123,7 +124,9 @@ pub fn parser_text(text: &str) -> ParserResult<crate::typed_ast::Specification> 
     let mut parser = tree_sitter::Parser::new();
     parser.set_language(&tree_sitter_idl::language()).unwrap();
 
-    let tree = parser.parse(text, None).ok_or_else(|| {
+    let normalized = normalize_source_for_tree_sitter(text);
+
+    let tree = parser.parse(normalized.as_ref(), None).ok_or_else(|| {
         crate::error::ParseError::TreeSitterError("Failed to parse text".to_string())
     })?;
 
@@ -136,6 +139,111 @@ pub fn parser_text(text: &str) -> ParserResult<crate::typed_ast::Specification> 
     let mut context = ParseContext::new(text.as_bytes());
 
     Specification::from_node(root_node, &mut context)
+}
+
+pub fn normalize_source_for_tree_sitter(text: &str) -> Cow<'_, str> {
+    let bytes = text.as_bytes();
+    let mut out = String::with_capacity(text.len());
+    let mut changed = false;
+    let mut i = 0usize;
+    let mut quote = None;
+
+    while i < bytes.len() {
+        let ch = bytes[i] as char;
+
+        if let Some(current_quote) = quote {
+            out.push(ch);
+            if ch == '\\' && i + 1 < bytes.len() {
+                i += 1;
+                out.push(bytes[i] as char);
+            } else if ch == current_quote {
+                quote = None;
+            }
+            i += 1;
+            continue;
+        }
+
+        if ch == '"' || ch == '\'' {
+            quote = Some(ch);
+            out.push(ch);
+            i += 1;
+            continue;
+        }
+
+        if ch == '@' {
+            out.push(ch);
+            i += 1;
+            let mut saw_hyphen = false;
+            while i < bytes.len() {
+                let next = bytes[i] as char;
+                if next.is_ascii_alphanumeric() || next == '_' || next == '-' || next == ':' {
+                    if next == '-' {
+                        out.push('_');
+                        changed = true;
+                        saw_hyphen = true;
+                    } else {
+                        out.push(next);
+                    }
+                    i += 1;
+                    continue;
+                }
+                break;
+            }
+            if i < bytes.len() && bytes[i] as char == '(' {
+                let mut j = i + 1;
+                let mut inner_quote = None;
+                let mut depth = 1usize;
+                let mut has_bracket = false;
+                while j < bytes.len() {
+                    let current = bytes[j] as char;
+                    if let Some(q) = inner_quote {
+                        if current == '\\' && j + 1 < bytes.len() {
+                            j += 2;
+                            continue;
+                        }
+                        if current == q {
+                            inner_quote = None;
+                        }
+                        j += 1;
+                        continue;
+                    }
+                    match current {
+                        '"' | '\'' => inner_quote = Some(current),
+                        '[' | ']' => has_bracket = true,
+                        '(' => depth += 1,
+                        ')' => {
+                            depth -= 1;
+                            if depth == 0 {
+                                break;
+                            }
+                        }
+                        _ => {}
+                    }
+                    j += 1;
+                }
+                if j < bytes.len() && (has_bracket || saw_hyphen) {
+                    out.push('(');
+                    for _ in i + 1..j {
+                        out.push(' ');
+                    }
+                    out.push(')');
+                    changed = true;
+                    i = j + 1;
+                    continue;
+                }
+            }
+            continue;
+        }
+
+        out.push(ch);
+        i += 1;
+    }
+
+    if changed {
+        Cow::Owned(out)
+    } else {
+        Cow::Borrowed(text)
+    }
 }
 
 #[cfg(test)]
