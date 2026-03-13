@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.19.0](https://github.com/xidl/xidl/compare/v0.18.0...v0.19.0) (2026-03-13)
+
+
+### Features
+
+* add doc comment to annotation ([bb1e191](https://github.com/xidl/xidl/commit/bb1e1918d14cc56657777bdf598a031cce209af6))
+* **xidlc:** render doc ([c4d32e7](https://github.com/xidl/xidl/commit/c4d32e7b69803108c192496a768b3315b20f91af))
+* **xidlc:** render doc ([eab28b5](https://github.com/xidl/xidl/commit/eab28b5968b17b122a4a4b6277e79a16f59a25f4))
+
 ## [0.18.0](https://github.com/xidl/xidl/compare/v0.17.0...v0.18.0) (2026-03-12)
 
 
