@@ -136,8 +136,7 @@ fn parse_raw_params(raw: &str) -> Vec<(String, String)> {
     let mut parts = Vec::new();
     let mut buf = String::new();
     let mut quote = None;
-    let mut iter = raw.chars().peekable();
-    while let Some(ch) = iter.next() {
+    for ch in raw.chars().peekable() {
         match ch {
             '"' | '\'' => {
                 if quote == Some(ch) {

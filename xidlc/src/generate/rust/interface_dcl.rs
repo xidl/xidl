@@ -9,9 +9,11 @@ impl RustRender for hir::InterfaceDcl {
     fn render(&self, renderer: &RustRenderer) -> IdlcResult<RustRenderOutput> {
         match &self.decl {
             hir::InterfaceDclInner::InterfaceForwardDcl(forward) => forward.render(renderer),
-            hir::InterfaceDclInner::InterfaceDef(def) => {
-                render_interface_def_with_doc(def, doc_lines_from_annotations(&self.annotations), renderer)
-            }
+            hir::InterfaceDclInner::InterfaceDef(def) => render_interface_def_with_doc(
+                def,
+                doc_lines_from_annotations(&self.annotations),
+                renderer,
+            ),
         }
     }
 }
