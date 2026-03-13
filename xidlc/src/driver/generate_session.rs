@@ -1,7 +1,6 @@
 use crate::driver::lang::Plugin;
 use crate::error::{IdlcError, IdlcResult};
 use crate::jsonrpc::{Codegen, CodegenClient};
-#[cfg(not(target_os = "emscripten"))]
 use crate::transport::{Reader, Writer};
 use semver::{Version, VersionReq};
 use tokio::io::{AsyncRead, AsyncWrite};
@@ -20,24 +19,13 @@ impl CodegenSession {
         let plugin = Plugin::from(lang);
         let (client, server) = match plugin {
             Plugin::Custom(custom_lang) => {
-                #[cfg(target_os = "emscripten")]
-                {
-                    let _ = custom_lang;
-                    return Err(IdlcError::rpc(
-                        "custom codegen plugins are unsupported on emscripten",
-                    ));
-                }
-                #[cfg(not(target_os = "emscripten"))]
-                {
-                    let (stdout_tx, stdout_rx) = crate::transport::pipe()?;
-                    let (stdin_tx, stdin_rx) = crate::transport::pipe()?;
-                    let server =
-                        Self::spawn_custom_codegen_server(&custom_lang, stdout_rx, stdin_tx)?;
-                    let reader: RpcReader = Box::new(stdin_rx);
-                    let writer: RpcWriter = Box::new(stdout_tx);
-                    let client = CodegenClient::new(reader, writer);
-                    (client, server)
-                }
+                let (stdout_tx, stdout_rx) = crate::transport::pipe()?;
+                let (stdin_tx, stdin_rx) = crate::transport::pipe()?;
+                let server = Self::spawn_custom_codegen_server(&custom_lang, stdout_rx, stdin_tx)?;
+                let reader: RpcReader = Box::new(stdin_rx);
+                let writer: RpcWriter = Box::new(stdout_tx);
+                let client = CodegenClient::new(reader, writer);
+                (client, server)
             }
             plugin => {
                 let endpoint = Self::random_inproc_endpoint(lang);
@@ -102,7 +90,6 @@ impl CodegenSession {
         }
     }
 
-    #[cfg(not(target_os = "emscripten"))]
     fn spawn_custom_codegen_server(
         lang: &str,
         stdout_rx: Reader,

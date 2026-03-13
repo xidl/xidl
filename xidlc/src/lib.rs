@@ -29,6 +29,3 @@ pub fn generate_from_source(
         rt.block_on(generator.generate_from_idl(idl, Path::new("input.idl"), props))
     }
 }
-
-#[cfg(target_os = "emscripten")]
-pub mod wasm_api;

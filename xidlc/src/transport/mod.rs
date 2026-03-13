@@ -1,15 +1,11 @@
 #![allow(dead_code)]
 
-mod emscripten;
-#[cfg(target_os = "emscripten")]
-pub use emscripten::*;
-
-#[cfg(all(not(target_os = "emscripten"), unix))]
+#[cfg(unix)]
 mod fallback;
-#[cfg(all(not(target_os = "emscripten"), unix))]
+#[cfg(unix)]
 pub use fallback::*;
 
-#[cfg(all(not(target_os = "emscripten"), windows))]
+#[cfg(windows)]
 mod windows_pipe;
-#[cfg(all(not(target_os = "emscripten"), windows))]
+#[cfg(windows)]
 pub use windows_pipe::*;

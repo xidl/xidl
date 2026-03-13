@@ -26,7 +26,7 @@ impl Generator {
         tracing::info!("generate for idl");
         DiagnosticRunner::new_idl().run(source, path.to_string_lossy().as_ref())?;
 
-        let ts = if cfg!(test) || cfg!(target_os = "emscripten") {
+        let ts = if cfg!(test) {
             0
         } else {
             SystemTime::now()
