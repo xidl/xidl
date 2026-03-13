@@ -2,6 +2,7 @@ use crate::driver::lang::Plugin;
 use crate::error::{IdlcError, IdlcResult};
 use crate::jsonrpc::{Codegen, CodegenClient};
 use semver::{Version, VersionReq};
+use std::future::Future;
 use tokio::io::{AsyncRead, AsyncWrite};
 use tokio::task::JoinHandle;
 
@@ -114,26 +115,29 @@ impl CodegenSession {
     async fn connect_with_retry(
         endpoint: &str,
     ) -> IdlcResult<Box<dyn xidl_jsonrpc::transport::Stream + Unpin + Send + 'static>> {
-        let mut last_err = None;
-        for _ in 0..50 {
-            match xidl_jsonrpc::transport::connect(endpoint).await {
-                Ok(stream) => return Ok(stream),
-                Err(err) => {
-                    last_err = Some(err);
-                    tokio::time::sleep(std::time::Duration::from_millis(10)).await;
-                }
-            }
-        }
-        let err = last_err.unwrap_or_else(|| {
-            std::io::Error::other(format!("failed to connect rpc endpoint: {endpoint}"))
-        });
-        Err(IdlcError::rpc(err.to_string()))
+        Self::retry_connect(
+            || xidl_jsonrpc::transport::connect(endpoint),
+            format!("failed to connect rpc endpoint: {endpoint}"),
+        )
+        .await
     }
 
     async fn connect_inproc_with_retry(endpoint: &str) -> IdlcResult<tokio::io::DuplexStream> {
+        Self::retry_connect(
+            || std::future::ready(xidl_jsonrpc::transport::connect_inproc(endpoint)),
+            "failed to connect inproc endpoint".to_string(),
+        )
+        .await
+    }
+
+    async fn retry_connect<T, F, Fut>(mut connect: F, error_message: String) -> IdlcResult<T>
+    where
+        F: FnMut() -> Fut,
+        Fut: Future<Output = std::io::Result<T>>,
+    {
         let mut last_err = None;
         for _ in 0..50 {
-            match xidl_jsonrpc::transport::connect_inproc(endpoint) {
+            match connect().await {
                 Ok(stream) => return Ok(stream),
                 Err(err) => {
                     last_err = Some(err);
@@ -141,8 +145,7 @@ impl CodegenSession {
                 }
             }
         }
-        let err =
-            last_err.unwrap_or_else(|| std::io::Error::other("failed to connect inproc endpoint"));
+        let err = last_err.unwrap_or_else(|| std::io::Error::other(error_message));
         Err(IdlcError::rpc(err.to_string()))
     }
 

@@ -1,17 +1,7 @@
 mod session;
 
 use crate::Error;
-#[cfg(all(feature = "tokio-net", unix))]
-use crate::transport::IpcListener;
-#[cfg(feature = "quic-s2n")]
-use crate::transport::QuicListener;
-#[cfg(feature = "tokio-net")]
-use crate::transport::TcpListener;
-#[cfg(feature = "tokio-tls")]
-use crate::transport::TlsListener;
-#[cfg(feature = "tokio-websocket")]
-use crate::transport::WebSocketListener;
-use crate::transport::{InprocListener, IoListener, Listener};
+use crate::transport::{IoListener, Listener};
 use serde_json::Value;
 use session::ServerSession;
 use std::sync::Arc;
@@ -191,9 +181,11 @@ impl ServerBuilder {
         }
 
         let (listener, endpoint) = if let Some(listener) = self.listener {
-            (listener, None)
+            let endpoint = listener.endpoint();
+            (listener, endpoint)
         } else if let Some(endpoint) = self.endpoint {
-            Self::bind_listener(&endpoint).await?
+            let (listener, endpoint) = crate::transport::bind(&endpoint).await?.into_parts();
+            (listener, Some(endpoint))
         } else {
             return Err(Error::Protocol("missing listener"));
         };
@@ -221,93 +213,5 @@ impl ServerBuilder {
         S: AsRef<str>,
     {
         self.build_on(endpoint).await?.serve().await
-    }
-
-    async fn bind_listener(endpoint: &str) -> Result<(Box<dyn Listener>, Option<String>), Error> {
-        let listener: Box<dyn Listener> = if let Some(addr) = endpoint.strip_prefix("tcp://") {
-            #[cfg(feature = "tokio-net")]
-            {
-                Box::new(TcpListener::bind(addr).await?)
-            }
-            #[cfg(not(feature = "tokio-net"))]
-            {
-                let _ = addr;
-                return Err(Error::Protocol(
-                    "tcp transport requires `tokio-net` feature",
-                ));
-            }
-        } else if let Some(path) = endpoint.strip_prefix("ipc://") {
-            #[cfg(all(feature = "tokio-net", unix))]
-            {
-                Box::new(IpcListener::bind(path)?)
-            }
-            #[cfg(all(feature = "tokio-net", windows))]
-            {
-                let _ = path;
-                return Err(Error::Protocol("ipc transport is unsupported on windows"));
-            }
-            #[cfg(not(feature = "tokio-net"))]
-            {
-                let _ = path;
-                return Err(Error::Protocol(
-                    "ipc transport requires `tokio-net` feature",
-                ));
-            }
-            #[cfg(all(feature = "tokio-net", not(any(unix, windows))))]
-            {
-                let _ = path;
-                return Err(Error::Protocol(
-                    "ipc transport is unsupported on this platform",
-                ));
-            }
-        } else if endpoint.starts_with("quic://") {
-            #[cfg(feature = "quic-s2n")]
-            {
-                Box::new(QuicListener::bind(endpoint)?)
-            }
-            #[cfg(not(feature = "quic-s2n"))]
-            {
-                return Err(Error::Protocol(
-                    "quic transport requires `quic-s2n` feature",
-                ));
-            }
-        } else if endpoint.starts_with("tls://") {
-            #[cfg(feature = "tokio-tls")]
-            {
-                Box::new(TlsListener::bind(endpoint).await?)
-            }
-            #[cfg(not(feature = "tokio-tls"))]
-            {
-                return Err(Error::Protocol(
-                    "tls transport requires `tokio-tls` feature",
-                ));
-            }
-        } else if endpoint.starts_with("ws://") || endpoint.starts_with("wss://") {
-            #[cfg(feature = "tokio-websocket")]
-            {
-                Box::new(WebSocketListener::bind(endpoint).await?)
-            }
-            #[cfg(not(feature = "tokio-websocket"))]
-            {
-                return Err(Error::Protocol(
-                    "websocket transport requires `tokio-websocket` feature",
-                ));
-            }
-        } else if let Some(endpoint) = endpoint.strip_prefix("inproc://") {
-            Box::new(InprocListener::bind(endpoint.to_string())?)
-        } else {
-            #[cfg(feature = "tokio-net")]
-            {
-                Box::new(TcpListener::bind(endpoint).await?)
-            }
-            #[cfg(not(feature = "tokio-net"))]
-            {
-                return Err(Error::Protocol(
-                    "tcp transport requires `tokio-net` feature",
-                ));
-            }
-        };
-        let resolved = listener.endpoint().unwrap_or_else(|| endpoint.to_string());
-        Ok((listener, Some(resolved)))
     }
 }
