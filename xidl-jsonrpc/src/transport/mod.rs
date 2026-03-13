@@ -1,5 +1,7 @@
 mod inproc;
 mod io;
+#[cfg(all(feature = "tokio-net", unix))]
+mod ipc;
 #[cfg(feature = "quic-s2n")]
 mod quic;
 #[cfg(feature = "tokio-net")]
@@ -15,6 +17,8 @@ use std::net::SocketAddr;
 
 pub use inproc::{InprocListener, connect_inproc};
 pub use io::IoListener;
+#[cfg(all(feature = "tokio-net", unix))]
+pub use ipc::{IpcListener, connect_ipc};
 #[cfg(feature = "quic-s2n")]
 pub use quic::{QuicListener, connect_quic};
 #[cfg(feature = "tokio-net")]
@@ -38,6 +42,40 @@ pub trait Listener: Send + Sync {
 pub async fn connect(endpoint: &str) -> std::io::Result<Box<dyn Stream + Unpin + Send + 'static>> {
     if let Some(name) = endpoint.strip_prefix("inproc://") {
         return Ok(Box::new(connect_inproc(name)?));
+    }
+
+    if let Some(path) = endpoint.strip_prefix("ipc://") {
+        #[cfg(all(feature = "tokio-net", unix))]
+        {
+            return connect_ipc(path).await;
+        }
+
+        #[cfg(all(feature = "tokio-net", windows))]
+        {
+            let _ = path;
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::Unsupported,
+                "ipc transport is unsupported on windows",
+            ));
+        }
+
+        #[cfg(not(feature = "tokio-net"))]
+        {
+            let _ = path;
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::Unsupported,
+                "ipc transport requires `tokio-net` feature",
+            ));
+        }
+
+        #[cfg(all(feature = "tokio-net", not(any(unix, windows))))]
+        {
+            let _ = path;
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::Unsupported,
+                "ipc transport is unsupported on this platform",
+            ));
+        }
     }
 
     #[cfg(feature = "quic-s2n")]

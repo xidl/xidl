@@ -33,12 +33,37 @@ where
         .await
 }
 
+async fn connect_with_retry(
+    endpoint: &str,
+) -> std::io::Result<Box<dyn xidl_jsonrpc::transport::Stream + Unpin + Send + 'static>> {
+    let mut last_err = None;
+    for _ in 0..50 {
+        match xidl_jsonrpc::transport::connect(endpoint).await {
+            Ok(stream) => return Ok(stream),
+            Err(err) => {
+                last_err = Some(err);
+                tokio::time::sleep(std::time::Duration::from_millis(10)).await;
+            }
+        }
+    }
+    Err(last_err.unwrap_or_else(|| {
+        std::io::Error::other(format!("failed to connect endpoint: {endpoint}"))
+    }))
+}
+
 fn random_endpoint(prefix: &str) -> String {
     let nanos = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .expect("system time before epoch")
         .as_nanos();
     format!("{prefix}-{nanos}")
+}
+
+#[cfg(all(feature = "tokio-net", unix))]
+fn random_ipc_uri(prefix: &str) -> String {
+    let path =
+        std::path::Path::new("/tmp").join(format!("xj-{prefix}-{}.sock", random_endpoint("ipc")));
+    format!("ipc://{}", path.display())
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
@@ -59,6 +84,61 @@ async fn serve_on_inproc_uri() {
     assert_eq!(result, "ok");
 
     task.abort();
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+#[cfg(all(feature = "tokio-net", unix))]
+async fn serve_on_ipc_uri() {
+    let uri = random_ipc_uri("serve-on-ipc");
+    let connect_uri = uri.clone();
+    let task = tokio::spawn(async move {
+        xidl_jsonrpc::Server::builder()
+            .with_service(EchoHandler)
+            .serve_on(&uri)
+            .await
+    });
+
+    let stream = match connect_with_retry(&connect_uri).await {
+        Ok(stream) => stream,
+        Err(err) => {
+            if task.is_finished() {
+                let result = task.await.expect("join ipc server task");
+                if matches!(
+                    &result,
+                    Err(Error::Io(io_err)) if io_err.kind() == std::io::ErrorKind::PermissionDenied
+                ) {
+                    return;
+                }
+                panic!("connect ipc failed: {err}; server result: {result:?}");
+            }
+            panic!("connect ipc: {err}");
+        }
+    };
+    let result = call_echo_over_stream(stream).await.expect("rpc call");
+    assert_eq!(result, "ok");
+
+    task.abort();
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+#[cfg(all(feature = "tokio-net", windows))]
+async fn ipc_uri_is_unsupported() {
+    let endpoint = "ipc://xidl-jsonrpc-unsupported";
+    let err = xidl_jsonrpc::Server::builder()
+        .with_service(EchoHandler)
+        .serve_on(endpoint)
+        .await
+        .expect_err("ipc should be unsupported");
+    assert!(
+        err.to_string()
+            .contains("ipc transport is unsupported on windows")
+    );
+
+    let err = match xidl_jsonrpc::transport::connect(endpoint).await {
+        Ok(_) => panic!("ipc connect should be unsupported"),
+        Err(err) => err,
+    };
+    assert_eq!(err.kind(), std::io::ErrorKind::Unsupported);
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
@@ -91,7 +171,11 @@ async fn inproc_connect_before_bind() {
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 #[cfg(feature = "tokio-net")]
 async fn serve_on_tcp_uri() {
-    let probe = std::net::TcpListener::bind("127.0.0.1:0").expect("bind probe");
+    let probe = match std::net::TcpListener::bind("127.0.0.1:0") {
+        Ok(probe) => probe,
+        Err(err) if err.kind() == std::io::ErrorKind::PermissionDenied => return,
+        Err(err) => panic!("bind probe: {err}"),
+    };
     let addr = probe.local_addr().expect("probe addr");
     drop(probe);
 

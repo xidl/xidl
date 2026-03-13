@@ -23,6 +23,7 @@ thiserror.workspace = true
 
 xidl-jsonrpc = { version = "0.20.0", path = "../xidl-jsonrpc", default-features = false, features = [
   "tokio",
+  "tokio-net",
 ] }
 miette = { version = "7.6.0", features = ["fancy"] }
 minijinja = { version = "2.14", features = ["loader"] }
@@ -46,7 +47,6 @@ utoipa = "5.4.0"
 semver = "1.0"
 jiff = "0.2"
 enum_dispatch = "0.3.13"
-interprocess = { version = "2.2.3", features = ["tokio"] }
 tokio = { version = "1.36", features = ["full"] }
 
 [dev-dependencies]

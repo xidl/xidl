@@ -1,6 +1,8 @@
 mod session;
 
 use crate::Error;
+#[cfg(all(feature = "tokio-net", unix))]
+use crate::transport::IpcListener;
 #[cfg(feature = "quic-s2n")]
 use crate::transport::QuicListener;
 #[cfg(feature = "tokio-net")]
@@ -199,6 +201,31 @@ impl ServerBuilder {
                 let _ = addr;
                 return Err(Error::Protocol(
                     "tcp transport requires `tokio-net` feature",
+                ));
+            }
+        } else if let Some(path) = endpoint.strip_prefix("ipc://") {
+            #[cfg(all(feature = "tokio-net", unix))]
+            {
+                let listener = IpcListener::bind(path)?;
+                self.with_listener(listener)
+            }
+            #[cfg(all(feature = "tokio-net", windows))]
+            {
+                let _ = path;
+                return Err(Error::Protocol("ipc transport is unsupported on windows"));
+            }
+            #[cfg(not(feature = "tokio-net"))]
+            {
+                let _ = path;
+                return Err(Error::Protocol(
+                    "ipc transport requires `tokio-net` feature",
+                ));
+            }
+            #[cfg(all(feature = "tokio-net", not(any(unix, windows))))]
+            {
+                let _ = path;
+                return Err(Error::Protocol(
+                    "ipc transport is unsupported on this platform",
                 ));
             }
         } else if endpoint.starts_with("quic://") {

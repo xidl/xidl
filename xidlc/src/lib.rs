@@ -6,7 +6,6 @@ pub mod fmt;
 pub mod generate;
 pub mod jsonrpc;
 pub mod macros;
-pub(crate) mod transport;
 
 use std::collections::HashMap;
 use std::path::Path;

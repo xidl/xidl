@@ -1,13 +1,16 @@
 # Plugin Development Guide
 
 This project uses JSON-RPC 2.0 for plugins. `xidlc` launches the plugin as a
-child process and communicates over stdin/stdout with one JSON message per line.
+child process and passes an RPC endpoint with `--endpoint <uri>`.
 
 ## Conventions
 
 - Plugin executable name: `xidl-<lang>` (for example, `xidl-foo`).
 - Invocation example: `idlc --lang foo --out-dir out path/to/file.idl`
-- Protocol: JSON-RPC 2.0, UTF-8, one line per request/response.
+- Transport:
+  - Unix: `ipc://...` over Unix domain sockets
+  - Windows: `tcp://127.0.0.1:PORT`
+- Protocol: JSON-RPC 2.0 over the endpoint passed in `--endpoint`.
 
 ## Required Methods
 
@@ -88,7 +91,7 @@ idlc --lang rust_jsonrpc --out-dir src ipc.idl
 ```
 
 ```rust
-use std::io::{BufRead, Write};
+use clap::Parser;
 use xidl_jsonrpc::Error;
 use xidl_parser::hir::{ParserProperties, Specification};
 
@@ -97,26 +100,41 @@ use ipc::{Codegen, CodegenServer, GeneratedFile};
 
 struct MyCodegen;
 
+#[async_trait::async_trait]
 impl Codegen for MyCodegen {
-    fn parser_properties(&self) -> Result<ParserProperties, Error> {
+    async fn get_properties(&self) -> Result<ParserProperties, Error> {
         Ok(ParserProperties::default())
     }
 
-    fn generate(
+    async fn get_engine_version(&self) -> Result<String, Error> {
+        Ok(env!(\"CARGO_PKG_VERSION\").to_string())
+    }
+
+    async fn generate(
         &self,
         hir: Specification,
-        input: String,
+        path: String,
+        props: ParserProperties,
     ) -> Result<Vec<GeneratedFile>, Error> {
-        let _ = (hir, input);
+        let _ = (hir, path, props);
         Ok(Vec::new())
     }
 }
 
-fn main() {
-    let stdin = std::io::stdin();
-    let stdout = std::io::stdout();
+#[derive(Parser)]
+struct Args {
+    #[arg(long)]
+    endpoint: String,
+}
+
+#[tokio::main]
+async fn main() {
+    let args = Args::parse();
     let handler = CodegenServer::new(MyCodegen);
-    let _ = xidl_jsonrpc::serve(stdin.lock(), stdout.lock(), handler);
+    let _ = xidl_jsonrpc::Server::builder()
+        .with_service(handler)
+        .serve_on(&args.endpoint)
+        .await;
 }
 ```
 

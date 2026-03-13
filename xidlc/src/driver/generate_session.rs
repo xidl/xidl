@@ -1,7 +1,6 @@
 use crate::driver::lang::Plugin;
 use crate::error::{IdlcError, IdlcResult};
 use crate::jsonrpc::{Codegen, CodegenClient};
-use crate::transport::{Reader, Writer};
 use semver::{Version, VersionReq};
 use tokio::io::{AsyncRead, AsyncWrite};
 use tokio::task::JoinHandle;
@@ -17,20 +16,20 @@ pub struct CodegenSession {
 impl CodegenSession {
     pub async fn spawn(lang: &str) -> IdlcResult<Self> {
         let plugin = Plugin::from(lang);
+        let endpoint = Self::rpc_endpoint(lang)?;
         let (client, server) = match plugin {
             Plugin::Custom(custom_lang) => {
-                let (stdout_tx, stdout_rx) = crate::transport::pipe()?;
-                let (stdin_tx, stdin_rx) = crate::transport::pipe()?;
-                let server = Self::spawn_custom_codegen_server(&custom_lang, stdout_rx, stdin_tx)?;
-                let reader: RpcReader = Box::new(stdin_rx);
-                let writer: RpcWriter = Box::new(stdout_tx);
+                let server = Self::spawn_custom_codegen_server(&custom_lang, endpoint.clone())?;
+                let stream = Self::connect_with_retry(&endpoint).await?;
+                let (reader, writer) = tokio::io::split(stream);
+                let reader: RpcReader = Box::new(reader);
+                let writer: RpcWriter = Box::new(writer);
                 let client = CodegenClient::new(reader, writer);
                 (client, server)
             }
             plugin => {
-                let endpoint = Self::random_inproc_endpoint(lang);
                 let server = Self::spawn_builtin_codegen_server(plugin, endpoint.clone())?;
-                let stream = Self::connect_inproc_with_retry(&endpoint).await?;
+                let stream = Self::connect_with_retry(&endpoint).await?;
                 let (reader, writer) = tokio::io::split(stream);
                 let reader: RpcReader = Box::new(reader);
                 let writer: RpcWriter = Box::new(writer);
@@ -53,14 +52,11 @@ impl CodegenSession {
     ) -> IdlcResult<JoinHandle<IdlcResult<()>>> {
         macro_rules! run_server {
             ($obj:expr) => {{
-                let listener = xidl_jsonrpc::transport::InprocListener::bind(endpoint.clone())
-                    .map_err(|err| crate::error::IdlcError::rpc(err.to_string()))?;
                 Ok(tokio::spawn(async move {
                     let handler = crate::jsonrpc::CodegenServer::new($obj);
                     xidl_jsonrpc::Server::builder()
-                        .with_listener(listener)
                         .with_service(handler)
-                        .serve()
+                        .serve_on(&endpoint)
                         .await
                         .map_err(|err| crate::error::IdlcError::rpc(err.to_string()))
                 }))
@@ -92,15 +88,13 @@ impl CodegenSession {
 
     fn spawn_custom_codegen_server(
         lang: &str,
-        stdout_rx: Reader,
-        stdin_tx: Writer,
+        endpoint: String,
     ) -> IdlcResult<JoinHandle<IdlcResult<()>>> {
         let exe = format!("xidl-{lang}");
-        eprintln!("{exe}");
-        tracing::info!("{lang} is not a builtin supported language,try spawn {exe}");
+        tracing::info!("{lang} is not a builtin supported language, try spawn {exe}");
         let mut child = std::process::Command::new(&exe)
-            .stdin(stdin_tx.into_stdio())
-            .stdout(stdout_rx.into_stdio())
+            .arg("--endpoint")
+            .arg(&endpoint)
             .spawn()
             .map_err(|err| std::io::Error::other(format!("cannot find plugin: {lang}, {err}")))?;
 
@@ -111,10 +105,12 @@ impl CodegenSession {
         Ok(server)
     }
 
-    async fn connect_inproc_with_retry(endpoint: &str) -> IdlcResult<tokio::io::DuplexStream> {
+    async fn connect_with_retry(
+        endpoint: &str,
+    ) -> IdlcResult<Box<dyn xidl_jsonrpc::transport::Stream + Unpin + Send + 'static>> {
         let mut last_err = None;
         for _ in 0..50 {
-            match xidl_jsonrpc::transport::connect_inproc(endpoint) {
+            match xidl_jsonrpc::transport::connect(endpoint).await {
                 Ok(stream) => return Ok(stream),
                 Err(err) => {
                     last_err = Some(err);
@@ -122,17 +118,36 @@ impl CodegenSession {
                 }
             }
         }
-        let err =
-            last_err.unwrap_or_else(|| std::io::Error::other("failed to connect inproc endpoint"));
+        let err = last_err.unwrap_or_else(|| {
+            std::io::Error::other(format!("failed to connect rpc endpoint: {endpoint}"))
+        });
         Err(IdlcError::rpc(err.to_string()))
     }
 
-    fn random_inproc_endpoint(lang: &str) -> String {
+    fn rpc_endpoint(lang: &str) -> IdlcResult<String> {
         let nanos = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .expect("system time before epoch")
             .as_nanos();
-        format!("xidlc.codegen.{lang}.{nanos}")
+        #[cfg(unix)]
+        {
+            let path = std::path::Path::new("/tmp").join(format!("xidlc.{lang}.{nanos}.sock"));
+            let path = path
+                .into_os_string()
+                .into_string()
+                .map_err(|_| IdlcError::rpc("invalid ipc socket path".to_string()))?;
+            Ok(format!("ipc://{path}"))
+        }
+        #[cfg(windows)]
+        {
+            let probe = std::net::TcpListener::bind("127.0.0.1:0")
+                .map_err(|err| IdlcError::rpc(err.to_string()))?;
+            let addr = probe
+                .local_addr()
+                .map_err(|err| IdlcError::rpc(err.to_string()))?;
+            drop(probe);
+            Ok(format!("tcp://{addr}"))
+        }
     }
 
     async fn verify_engine_version(client: &CodegenClient<RpcReader, RpcWriter>) -> IdlcResult<()> {
