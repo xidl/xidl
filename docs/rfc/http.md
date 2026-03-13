@@ -39,6 +39,9 @@ The following annotations are supported:
 - `@path("...")` (method-level route declaration)
 - `@Consumes("mime/type")` (interface-level or method-level)
 - `@Produces("mime/type")` (interface-level or method-level)
+- `@deprecated`
+- `@deprecated("date-or-datetime")`
+- `@deprecated(since = "...", after = "...")`
 
 Parameter annotations:
 
@@ -54,6 +57,7 @@ Parameter annotations:
 - `@cookie` (parameter-level source declaration)
 - `@cookie("name")` (parameter-level source declaration with explicit cookie
   name)
+- `@optional` (parameter may be omitted and is represented as an optional value)
 
 Rules:
 
@@ -83,6 +87,11 @@ Rules:
   - This RFC defines the JSON mapping as the baseline profile. Other media types
     may be added in future revisions without changing the core HTTP source/route
     rules.
+  - This RFC does not define proactive content negotiation:
+    - implementations select exactly one effective request media type and one
+      effective response media type for each operation
+    - if the incoming request or the caller's accepted response media types do
+      not include the effective media type, the request is rejected
 - `@head` has additional constraints:
   - return type MUST be `void`
   - parameters MUST be request-side only (`in` or omitted direction)
@@ -296,23 +305,123 @@ Constraints:
 ## 6. Request Encoding
 
 Encoding is selected by `@Consumes`, defaulting to `application/json`. This RFC
-specifies JSON request encoding behavior. When media-type negotiation cannot be
-satisfied, implementations MUST return an error response (see section 10).
+specifies JSON request encoding behavior. Implementations do not perform
+proactive content negotiation. They MUST decode requests using the effective
+`@Consumes` media type of the operation, and MUST reject non-matching request
+media types with an error response (see section 11).
 
-### 6.1 Query Encoding
+Effective request media type:
+
+- If method-level `@Consumes` is present, use it.
+- Otherwise if interface-level `@Consumes` is present, use it.
+- Otherwise use `application/json`.
+
+Request-side media-type validation:
+
+- If the operation expects a request body, the request `Content-Type` MUST match
+  the effective request media type.
+- If the operation does not expect a request body, `Content-Type` is ignored.
+- Implementations MUST NOT silently switch to another media type.
+
+### 6.1 Missing Values, Optional Values, and Defaults
+
+This section defines request decoding behavior when request data is omitted.
+
+General rules:
+
+- `@optional` is the only standard way to preserve the distinction between
+  "missing" and "present with zero/default value".
+- Without `@optional`, omitted request-side values decode to the target type's
+  zero/default value.
+- A present value that fails type conversion remains invalid and MUST produce
+  `400 Bad Request`.
+
+### 6.1.1 Default Value Table
+
+Unless another companion RFC defines more specific rules, omitted non-optional
+request-side values decode using the following defaults:
+
+- `boolean` -> `false`
+- signed / unsigned integer types -> `0`
+- floating-point types -> `0`
+- `char` / `wchar` -> `U+0000`
+- `string` / `wstring` -> empty string
+- `sequence<T>` -> empty sequence
+- `map<K, V>` -> empty map
+- struct / exception values -> each member decoded recursively by the same rules
+- enum / union / other constructed types without an obvious zero/default value:
+  implementations SHOULD reject omission unless a target-language mapping
+  defines a stable default
+
+These defaults apply only when the request-side value is omitted and the target
+is not annotated with `@optional`.
+
+### 6.1.2 `@optional` Applicability
+
+`@optional` may be used on:
+
+- request-side method parameters
+- fields of body-carried structured values
+- nested fields inside body-carried structures
+
+`@optional` MUST NOT be used on:
+
+- Path parameters
+- return values
+- `out`-only response parameters
+
+For method parameters:
+
+- `@optional` controls whether omission is preserved as `None` instead of being
+  converted to a zero/default value.
+
+For body-carried structure members:
+
+- `@optional` controls whether missing or explicit `null` JSON member values are
+  preserved as `None`.
+
+Path parameters:
+
+- Path parameters are always required.
+- `@optional` on Path parameters is invalid.
+- Missing path variables are treated as route mismatch or `400 Bad Request`,
+  depending on implementation structure.
+
+Query/Header/Cookie parameters:
+
+- If the parameter is annotated with `@optional`:
+  - missing value -> `None`
+  - present value -> parsed as the inner type
+- Otherwise:
+  - missing value -> zero/default value of the parameter type
+  - present value -> parsed as declared type
+- Query/Header/Cookie parameters do not define a distinct wire-level `null`
+  representation in this RFC.
+
+Body parameters / JSON object fields:
+
+- If a body field is annotated with `@optional`:
+  - missing field -> `None`
+  - explicit JSON `null` -> `None`
+- Otherwise:
+  - missing field -> zero/default value of the field type
+  - explicit JSON `null` -> `400 Bad Request`
+- JSON decoding still follows the selected effective request media type.
+
+### 6.2 Query Encoding
 
 - Query parameters are encoded into the URL query string.
 - Example: `?name=alice&age=18`.
 
-### 6.2 Body Encoding
+### 6.3 Body Encoding
 
 Body parameters are encoded by parameter count:
 
 - No Body parameters: no request body.
 - Exactly 1 Body parameter: encode that value directly.
 - 2+ Body parameters: encode an object keyed by parameter names.
-- `null`/empty-value encoding follows the selected `@Consumes` media type
-  semantics.
+- missing-value and `null` handling follows section 6.1 and the selected
+  effective request media type.
 
 Examples:
 
@@ -320,14 +429,14 @@ Examples:
 - Multiple parameters: `create(string name, uint32 age)` -> body is
   `{"name":"a","age":18}`
 
-### 6.3 Header Encoding
+### 6.4 Header Encoding
 
 - `@header` parameters are encoded as HTTP request headers.
 - The bound header name is used verbatim when sending requests.
 - For multi-valued parameters (sequence types), encode each value as a separate
   header field with the same name, in declaration order.
 
-### 6.4 Cookie Encoding
+### 6.5 Cookie Encoding
 
 - `@cookie` parameters are encoded in the HTTP `Cookie` request header.
 - The bound cookie name is used as the cookie key.
@@ -338,9 +447,25 @@ Examples:
 ## 7. Response Encoding
 
 Encoding is selected by `@Produces`, defaulting to `application/json`. This RFC
-specifies JSON response encoding behavior. When response media-type negotiation
-cannot be satisfied, implementations MUST return an error response (see section
-10).
+specifies JSON response encoding behavior. Implementations do not perform
+proactive content negotiation. They MUST encode successful responses using the
+effective `@Produces` media type of the operation, and MUST reject requests that
+do not accept that media type with an error response (see section 11).
+
+Effective response media type:
+
+- If method-level `@Produces` is present, use it.
+- Otherwise if interface-level `@Produces` is present, use it.
+- Otherwise use `application/json`.
+
+Response-side media-type validation:
+
+- Implementations produce exactly one successful response media type for an
+  operation.
+- If the caller's `Accept` header excludes that media type, the request MUST be
+  rejected with `406 Not Acceptable`.
+- If `Accept` is absent, wildcard, or includes the effective response media
+  type, the request may proceed.
 
 Response rules:
 
@@ -357,7 +482,7 @@ Response rules:
   - output count `0` -> `204 No Content`, no response body
   - output count `>=1` -> `200 OK`, JSON body encoded by the rules above
   - `HEAD` is a special case: always `204 No Content`, no response body
-- `null`/empty-value encoding follows the selected `@Produces` media type
+- `null`/empty-value encoding follows the selected effective response media type
   semantics.
 
 Examples:
@@ -377,7 +502,61 @@ Examples:
   - `POST /.../set_x`, request body is single parameter `value: T`, and the
     response is `204 No Content` with no body
 
-## 9. Examples
+## 9. Deprecation
+
+Operations and implied attribute operations may be marked as deprecated.
+
+Applicability:
+
+- `@deprecated` may be applied to an interface
+- `@deprecated` may be applied to an explicit operation
+- `@deprecated` may be applied to an attribute declaration
+- when applied to an interface, it is inherited by all contained operations and
+  implied attribute operations unless a more specific operation-level or
+  attribute-level deprecation annotation is present
+- when applied to an attribute declaration, it applies to all implied attribute
+  operations synthesized from that attribute
+
+Supported forms:
+
+- `@deprecated`
+- `@deprecated("...")`
+- `@deprecated(since = "...", after = "...")`
+
+Semantics:
+
+- `@deprecated` marks the operation as deprecated without attaching any time
+  metadata.
+- `@deprecated("...")` is shorthand for `@deprecated(since = "...")`.
+- `since` means the operation is considered deprecated at or after the provided
+  instant.
+- `after` means the operation is considered sunset / scheduled for removal at or
+  after the provided instant.
+- `since` and `after` do not change request routing or response shaping.
+
+Allowed time literal formats:
+
+- full-date: `YYYY-MM-DD`
+- date-time: RFC 3339 `date-time`
+
+Normalization rules:
+
+- full-date used in `since` is normalized to `YYYY-MM-DDT00:00:00Z`
+- full-date used in `after` is normalized to `YYYY-MM-DDT23:59:59Z`
+- RFC 3339 date-time values are normalized to UTC while preserving the instant
+- if both `since` and `after` are present, `since` MUST be less than or equal to
+  `after`
+
+HTTP mapping:
+
+- Deprecation metadata does not alter status code, routing, or body shape.
+- Documentation generators SHOULD mark deprecated operations accordingly.
+- HTTP implementations MAY surface:
+  - `since` as a `Deprecation` response header
+  - `after` as a `Sunset` response header
+- This RFC does not require implementations to emit either header.
+
+## 10. Examples
 
 ```idl
 interface UserService {
@@ -418,12 +597,12 @@ Behavior:
 
 - `greet` is bound to `/hello`, `/hi`, and `/greet`.
 
-## 10. Error Handling and Validation
+## 11. Error Handling and Validation
 
 Implementations should fail fast at build/registration time for static mapping
 issues, and return consistent HTTP errors for runtime request issues.
 
-### 10.1 Build/Registration-Time Validation
+### 11.1 Build/Registration-Time Validation
 
 The following are invalid and should raise mapping errors before serving
 traffic:
@@ -445,17 +624,23 @@ traffic:
   `=`.
 - Any `@head` method with non-`void` return type.
 - Any `@head` method containing `out` or `inout` parameters.
+- `@optional` applied to a Path parameter.
+- Invalid `@deprecated` timestamp literal.
+- `@deprecated(since = "...", after = "...")` where `since > after`.
 
-### 10.2 Runtime Request Validation
+### 11.2 Runtime Request Validation
 
-- Missing required Path/Query parameters: `400 Bad Request`.
+- Missing required Path parameters: `400 Bad Request`.
+- Missing request-side values that are required by companion RFCs or
+  implementation-specific validation rules: `400 Bad Request`.
 - Type conversion failures (for example `uint32` parse failure):
   `400 Bad Request`.
 - Unsupported request media type for `@Consumes`: `415 Unsupported Media Type`.
 - Requested response media type not satisfiable for `@Produces`:
   `406 Not Acceptable`.
+- Explicit JSON `null` for a non-`@optional` body field: `400 Bad Request`.
 
-### 10.3 Response Body Shape
+### 11.3 Response Body Shape
 
 - Success response body:
   - uses the output encoding rules from section 7.
@@ -463,26 +648,46 @@ traffic:
     section 7 shaping rules).
 - Failure response body:
   - MUST be an object with shape:
-    - `code`: machine-readable error code.
+    - `code`: numeric HTTP status code.
     - `msg`: human-readable summary.
     - `details`: optional structured error details.
 
-### 10.4 Recommended Status Codes
+### 11.4 Response Status Code Model
 
-- Successful read operations: `200 OK`.
-- Successful create operations: `201 Created` when a new resource is created,
-  otherwise `200 OK`.
-- Successful `void` responses with no body: `204 No Content`.
-- Method not supported on an existing route: `405 Method Not Allowed`.
-- Route not found: `404 Not Found`.
+Default success status codes:
 
-### 10.5 Error Response Example
+- `HEAD` -> `204 No Content`
+- output count `0` -> `204 No Content`
+- output count `>=1` -> `200 OK`
 
-Failure responses should follow section 10.3, for example:
+Custom success status codes:
+
+- This RFC allows implementations or future companion RFCs to return a different
+  successful status code when the operation semantics require it (for example
+  `201 Created` or `202 Accepted`).
+- This RFC does not currently define a standard annotation for selecting custom
+  success status codes.
+- If no such rule is declared, implementations MUST follow the default success
+  status code rules above.
+- Status code selection MUST NOT change response body shaping rules from section
+  7.
+
+Recommended runtime error status codes:
+
+- request decoding / validation failure -> `400 Bad Request`
+- unsupported request media type -> `415 Unsupported Media Type`
+- unacceptable response media type -> `406 Not Acceptable`
+- route not found -> `404 Not Found`
+- method not allowed on an existing route -> `405 Method Not Allowed`
+- unhandled server failure -> `500 Internal Server Error`
+
+### 11.5 Error Response Example
+
+Failure responses should follow section 11.3, for example:
 
 ```json
 {
-  "code": "INVALID_ARGUMENT",
+  "code": 400,
   "msg": "field 'age' must be >= 0",
   "details": {
     "field": "age",
@@ -490,3 +695,32 @@ Failure responses should follow section 10.3, for example:
   }
 }
 ```
+
+## 12. Compatibility
+
+This RFC does not guarantee wire compatibility across IDL revisions.
+
+Compatibility model:
+
+- Compatibility is best-effort and is the responsibility of the API designer.
+- Implementations and generators SHOULD provide tools that help preserve
+  compatibility, but they do not enforce compatibility.
+- Facilities such as multiple route bindings may be used to support migration
+  and aliasing.
+
+Non-goals:
+
+- This RFC does not define a protobuf-style or schema-registry-style
+  compatibility contract.
+- This RFC does not require generators to reject changes that may be wire
+  incompatible.
+
+Recommended practices:
+
+- prefer additive changes over renames or removals
+- use multi-route bindings to preserve old paths during migration
+- use `@deprecated` to communicate intent before removal
+- avoid changing parameter source (`path`/`query`/`body`/`header`/`cookie`) for
+  an existing operation unless a new route or operation is introduced
+- when changing success status codes, prefer introducing a new route or
+  operation rather than silently changing an existing one

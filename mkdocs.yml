@@ -10,6 +10,7 @@ nav:
 
   - RFC:
       - HTTP: rfc/http.md
+      - HTTP Security: rfc/http-security.md
       - HTTP Stream: rfc/http-stream.md
       - JSONRPC: rfc/jsonrpc.md
       - JSONRPC Stream: rfc/jsonrpc-stream.md
