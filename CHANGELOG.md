@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.21.0](https://github.com/xidl/xidl/compare/v0.20.0...v0.21.0) (2026-03-13)
+
+
+### Features
+
+* **jsonrpc:** add ipc transport for plugins ([5d9cfdb](https://github.com/xidl/xidl/commit/5d9cfdbf026474594f71303ab2a8c22a5ab9b9d0))
+* **jsonrpc:** expose bound server endpoint ([a933984](https://github.com/xidl/xidl/commit/a9339842cf72655d2670dc6a5eafcd4ad95840e5))
+
+
+### Bug Fixes
+
+* **xidlc:** map rust any to serde_json value ([7376020](https://github.com/xidl/xidl/commit/7376020ec717ccc6bd33588d5d27bee76e470592))
+
 ## [0.20.0](https://github.com/xidl/xidl/compare/v0.19.0...v0.20.0) (2026-03-13)
 
 
