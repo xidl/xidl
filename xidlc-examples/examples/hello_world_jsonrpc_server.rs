@@ -21,11 +21,16 @@ impl HelloWorld for HelloWorldImpl {
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
 
-    eprintln!("jsonrpc hello_world server listening on {}", args.addr);
-    xidl_jsonrpc::Server::builder()
+    let server = xidl_jsonrpc::Server::builder()
         .with_service(HelloWorldServer::new(HelloWorldImpl))
-        .serve_on(&args.addr)
+        .with_endpoint(format!("tcp://{}", args.addr))
+        .build()
         .await?;
+    eprintln!(
+        "jsonrpc hello_world server listening on {}",
+        server.endpoint().unwrap_or("")
+    );
+    server.serve().await?;
 
     Ok(())
 }

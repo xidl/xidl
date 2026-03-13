@@ -11,11 +11,16 @@ struct Args {
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
 
-    eprintln!("smart city jsonrpc server listening on {}", args.addr);
-    xidl_jsonrpc::Server::builder()
+    let server = xidl_jsonrpc::Server::builder()
         .with_service(SmartCityRpcApiServer::new(SmartCityRpcService::default()))
-        .serve_on(&args.addr)
+        .with_endpoint(format!("tcp://{}", args.addr))
+        .build()
         .await?;
+    eprintln!(
+        "smart city jsonrpc server listening on {}",
+        server.endpoint().unwrap_or("")
+    );
+    server.serve().await?;
 
     Ok(())
 }

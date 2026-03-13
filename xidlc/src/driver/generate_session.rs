@@ -16,9 +16,9 @@ pub struct CodegenSession {
 impl CodegenSession {
     pub async fn spawn(lang: &str) -> IdlcResult<Self> {
         let plugin = Plugin::from(lang);
-        let endpoint = Self::rpc_endpoint(lang)?;
         let (client, server) = match plugin {
             Plugin::Custom(custom_lang) => {
+                let endpoint = Self::rpc_endpoint(lang)?;
                 let server = Self::spawn_custom_codegen_server(&custom_lang, endpoint.clone())?;
                 let stream = Self::connect_with_retry(&endpoint).await?;
                 let (reader, writer) = tokio::io::split(stream);
@@ -28,8 +28,9 @@ impl CodegenSession {
                 (client, server)
             }
             plugin => {
-                let server = Self::spawn_builtin_codegen_server(plugin, endpoint.clone())?;
-                let stream = Self::connect_with_retry(&endpoint).await?;
+                let endpoint = Self::random_inproc_endpoint(lang);
+                let server = Self::spawn_builtin_codegen_server(plugin, endpoint.clone()).await?;
+                let stream = Self::connect_inproc_with_retry(&endpoint).await?;
                 let (reader, writer) = tokio::io::split(stream);
                 let reader: RpcReader = Box::new(reader);
                 let writer: RpcWriter = Box::new(writer);
@@ -46,17 +47,22 @@ impl CodegenSession {
         self.server.abort();
     }
 
-    fn spawn_builtin_codegen_server(
+    async fn spawn_builtin_codegen_server(
         lang: Plugin,
         endpoint: String,
     ) -> IdlcResult<JoinHandle<IdlcResult<()>>> {
         macro_rules! run_server {
             ($obj:expr) => {{
+                let handler = crate::jsonrpc::CodegenServer::new($obj);
+                let server = xidl_jsonrpc::Server::builder()
+                    .with_service(handler)
+                    .with_endpoint(format!("inproc://{endpoint}"))
+                    .build()
+                    .await
+                    .map_err(|err| crate::error::IdlcError::rpc(err.to_string()))?;
                 Ok(tokio::spawn(async move {
-                    let handler = crate::jsonrpc::CodegenServer::new($obj);
-                    xidl_jsonrpc::Server::builder()
-                        .with_service(handler)
-                        .serve_on(&endpoint)
+                    server
+                        .serve()
                         .await
                         .map_err(|err| crate::error::IdlcError::rpc(err.to_string()))
                 }))
@@ -122,6 +128,30 @@ impl CodegenSession {
             std::io::Error::other(format!("failed to connect rpc endpoint: {endpoint}"))
         });
         Err(IdlcError::rpc(err.to_string()))
+    }
+
+    async fn connect_inproc_with_retry(endpoint: &str) -> IdlcResult<tokio::io::DuplexStream> {
+        let mut last_err = None;
+        for _ in 0..50 {
+            match xidl_jsonrpc::transport::connect_inproc(endpoint) {
+                Ok(stream) => return Ok(stream),
+                Err(err) => {
+                    last_err = Some(err);
+                    tokio::time::sleep(std::time::Duration::from_millis(10)).await;
+                }
+            }
+        }
+        let err =
+            last_err.unwrap_or_else(|| std::io::Error::other("failed to connect inproc endpoint"));
+        Err(IdlcError::rpc(err.to_string()))
+    }
+
+    fn random_inproc_endpoint(lang: &str) -> String {
+        let nanos = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("system time before epoch")
+            .as_nanos();
+        format!("xidlc.codegen.{lang}.{nanos}")
     }
 
     fn rpc_endpoint(lang: &str) -> IdlcResult<String> {

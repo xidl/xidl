@@ -113,11 +113,13 @@ impl Handler for MultiHandler {
 
 pub struct ServerBuilder {
     listener: Option<Box<dyn Listener>>,
+    endpoint: Option<String>,
     services: Vec<Box<dyn Handler>>,
 }
 
 pub struct Server {
     listener: Box<dyn Listener>,
+    endpoint: Option<String>,
     services: Vec<Box<dyn Handler>>,
 }
 
@@ -125,8 +127,13 @@ impl Server {
     pub fn builder() -> ServerBuilder {
         ServerBuilder {
             listener: None,
+            endpoint: None,
             services: Vec::new(),
         }
+    }
+
+    pub fn endpoint(&self) -> Option<&str> {
+        self.endpoint.as_deref()
     }
 
     pub async fn serve(self) -> Result<(), Error> {
@@ -157,6 +164,11 @@ impl ServerBuilder {
         self
     }
 
+    pub fn with_endpoint(mut self, endpoint: impl Into<String>) -> Self {
+        self.endpoint = Some(endpoint.into());
+        self
+    }
+
     pub fn with_service<S>(mut self, service: S) -> Self
     where
         S: Handler + 'static,
@@ -173,28 +185,49 @@ impl ServerBuilder {
         self.with_listener(IoListener::from_io(io))
     }
 
-    pub async fn serve(self) -> Result<(), Error> {
-        let listener = self.listener.ok_or(Error::Protocol("missing listener"))?;
-        let server = Server {
-            listener,
-            services: self.services,
+    pub async fn build(self) -> Result<Server, Error> {
+        if self.listener.is_some() && self.endpoint.is_some() {
+            return Err(Error::Protocol("listener already set"));
+        }
+
+        let (listener, endpoint) = if let Some(listener) = self.listener {
+            (listener, None)
+        } else if let Some(endpoint) = self.endpoint {
+            Self::bind_listener(&endpoint).await?
+        } else {
+            return Err(Error::Protocol("missing listener"));
         };
-        server.serve().await
+
+        Ok(Server {
+            listener,
+            endpoint,
+            services: self.services,
+        })
+    }
+
+    pub async fn build_on<S>(self, endpoint: S) -> Result<Server, Error>
+    where
+        S: AsRef<str>,
+    {
+        self.with_endpoint(endpoint.as_ref()).build().await
+    }
+
+    pub async fn serve(self) -> Result<(), Error> {
+        self.build().await?.serve().await
     }
 
     pub async fn serve_on<S>(self, endpoint: S) -> Result<(), Error>
     where
         S: AsRef<str>,
     {
-        if self.listener.is_some() {
-            return Err(Error::Protocol("listener already set"));
-        }
-        let endpoint = endpoint.as_ref();
-        let server = if let Some(addr) = endpoint.strip_prefix("tcp://") {
+        self.build_on(endpoint).await?.serve().await
+    }
+
+    async fn bind_listener(endpoint: &str) -> Result<(Box<dyn Listener>, Option<String>), Error> {
+        let listener: Box<dyn Listener> = if let Some(addr) = endpoint.strip_prefix("tcp://") {
             #[cfg(feature = "tokio-net")]
             {
-                let listener = TcpListener::bind(addr).await?;
-                self.with_listener(listener)
+                Box::new(TcpListener::bind(addr).await?)
             }
             #[cfg(not(feature = "tokio-net"))]
             {
@@ -206,8 +239,7 @@ impl ServerBuilder {
         } else if let Some(path) = endpoint.strip_prefix("ipc://") {
             #[cfg(all(feature = "tokio-net", unix))]
             {
-                let listener = IpcListener::bind(path)?;
-                self.with_listener(listener)
+                Box::new(IpcListener::bind(path)?)
             }
             #[cfg(all(feature = "tokio-net", windows))]
             {
@@ -231,8 +263,7 @@ impl ServerBuilder {
         } else if endpoint.starts_with("quic://") {
             #[cfg(feature = "quic-s2n")]
             {
-                let listener = QuicListener::bind(endpoint)?;
-                self.with_listener(listener)
+                Box::new(QuicListener::bind(endpoint)?)
             }
             #[cfg(not(feature = "quic-s2n"))]
             {
@@ -243,8 +274,7 @@ impl ServerBuilder {
         } else if endpoint.starts_with("tls://") {
             #[cfg(feature = "tokio-tls")]
             {
-                let listener = TlsListener::bind(endpoint).await?;
-                self.with_listener(listener)
+                Box::new(TlsListener::bind(endpoint).await?)
             }
             #[cfg(not(feature = "tokio-tls"))]
             {
@@ -255,8 +285,7 @@ impl ServerBuilder {
         } else if endpoint.starts_with("ws://") || endpoint.starts_with("wss://") {
             #[cfg(feature = "tokio-websocket")]
             {
-                let listener = WebSocketListener::bind(endpoint).await?;
-                self.with_listener(listener)
+                Box::new(WebSocketListener::bind(endpoint).await?)
             }
             #[cfg(not(feature = "tokio-websocket"))]
             {
@@ -265,13 +294,11 @@ impl ServerBuilder {
                 ));
             }
         } else if let Some(endpoint) = endpoint.strip_prefix("inproc://") {
-            let listener = InprocListener::bind(endpoint.to_string())?;
-            self.with_listener(listener)
+            Box::new(InprocListener::bind(endpoint.to_string())?)
         } else {
             #[cfg(feature = "tokio-net")]
             {
-                let listener = TcpListener::bind(endpoint).await?;
-                self.with_listener(listener)
+                Box::new(TcpListener::bind(endpoint).await?)
             }
             #[cfg(not(feature = "tokio-net"))]
             {
@@ -280,6 +307,7 @@ impl ServerBuilder {
                 ));
             }
         };
-        server.serve().await
+        let resolved = listener.endpoint().unwrap_or_else(|| endpoint.to_string());
+        Ok((listener, Some(resolved)))
     }
 }

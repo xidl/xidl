@@ -6,22 +6,17 @@ use xidlc_examples::city_jsonrpc_stream::{
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn jsonrpc_client_calls_stream_endpoints() {
-    let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("bind ephemeral port");
-    let addr = listener.local_addr().expect("read local addr");
-    drop(listener);
-
-    let server_addr = addr.to_string();
-    let task = tokio::spawn(async move {
-        xidl_jsonrpc::Server::builder()
-            .with_service(CityJsonrpcStreamApiServer::new(CityJsonrpcStreamService))
-            .serve_on(&server_addr)
-            .await
-    });
-
-    tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+    let server = xidl_jsonrpc::Server::builder()
+        .with_service(CityJsonrpcStreamApiServer::new(CityJsonrpcStreamService))
+        .with_endpoint("tcp://127.0.0.1:0")
+        .build()
+        .await
+        .expect("build server");
+    let endpoint = server.endpoint().expect("server endpoint").to_string();
+    let task = tokio::spawn(async move { server.serve().await });
 
     let client = CityJsonrpcStreamApiClient::builder()
-        .with_endpoint(format!("tcp://{}", addr))
+        .with_endpoint(endpoint)
         .build()
         .await
         .expect("build client");
@@ -100,15 +95,14 @@ async fn jsonrpc_client_calls_stream_endpoints() {
 async fn jsonrpc_bidi_stream_works_over_inproc_transport() {
     let endpoint = "city-jsonrpc-stream-bidi-inproc";
     let serve_endpoint = format!("inproc://{endpoint}");
-    let client_endpoint = serve_endpoint.clone();
-    let task = tokio::spawn(async move {
-        xidl_jsonrpc::Server::builder()
-            .with_service(CityJsonrpcStreamApiServer::new(CityJsonrpcStreamService))
-            .serve_on(&serve_endpoint)
-            .await
-    });
-
-    tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+    let server = xidl_jsonrpc::Server::builder()
+        .with_service(CityJsonrpcStreamApiServer::new(CityJsonrpcStreamService))
+        .with_endpoint(serve_endpoint)
+        .build()
+        .await
+        .expect("build inproc server");
+    let client_endpoint = server.endpoint().expect("server endpoint").to_string();
+    let task = tokio::spawn(async move { server.serve().await });
 
     let client = CityJsonrpcStreamApiClient::builder()
         .with_endpoint(client_endpoint)

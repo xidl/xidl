@@ -137,4 +137,8 @@ impl Listener for InprocListener {
         })?;
         Ok((Box::new(stream), SocketAddr::from(([127, 0, 0, 1], 0))))
     }
+
+    fn endpoint(&self) -> Option<String> {
+        Some(format!("inproc://{}", self.endpoint))
+    }
 }

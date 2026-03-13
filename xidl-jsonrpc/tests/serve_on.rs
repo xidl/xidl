@@ -87,6 +87,20 @@ async fn serve_on_inproc_uri() {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn build_on_inproc_exposes_endpoint() {
+    let endpoint = random_endpoint("build-on-inproc");
+    let uri = format!("inproc://{endpoint}");
+    let server = xidl_jsonrpc::Server::builder()
+        .with_service(EchoHandler)
+        .with_endpoint(uri.clone())
+        .build()
+        .await
+        .expect("build inproc server");
+
+    assert_eq!(server.endpoint(), Some(uri.as_str()));
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 #[cfg(all(feature = "tokio-net", unix))]
 async fn serve_on_ipc_uri() {
     let uri = random_ipc_uri("serve-on-ipc");
@@ -193,6 +207,34 @@ async fn serve_on_tcp_uri() {
     let result = call_echo_over_stream(stream).await.expect("rpc call");
     assert_eq!(result, "ok");
 
+    task.abort();
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+#[cfg(feature = "tokio-net")]
+async fn build_tcp_zero_exposes_bound_endpoint() {
+    let server = match xidl_jsonrpc::Server::builder()
+        .with_service(EchoHandler)
+        .with_endpoint("tcp://127.0.0.1:0")
+        .build()
+        .await
+    {
+        Ok(server) => server,
+        Err(Error::Io(err)) if err.kind() == std::io::ErrorKind::PermissionDenied => return,
+        Err(err) => panic!("build tcp server: {err}"),
+    };
+
+    let endpoint = server.endpoint().expect("tcp endpoint").to_string();
+    assert!(endpoint.starts_with("tcp://127.0.0.1:"));
+    assert_ne!(endpoint, "tcp://127.0.0.1:0");
+
+    let connect_endpoint = endpoint.clone();
+    let task = tokio::spawn(async move { server.serve().await });
+    let stream = connect_with_retry(&connect_endpoint)
+        .await
+        .expect("connect tcp");
+    let result = call_echo_over_stream(stream).await.expect("rpc call");
+    assert_eq!(result, "ok");
     task.abort();
 }
 

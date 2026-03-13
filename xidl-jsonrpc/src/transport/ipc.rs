@@ -48,6 +48,10 @@ impl Listener for IpcListener {
         let (stream, _peer) = self.inner.accept().await?;
         Ok((Box::new(stream), SocketAddr::from(([127, 0, 0, 1], 0))))
     }
+
+    fn endpoint(&self) -> Option<String> {
+        Some(format!("ipc://{}", self.path.display()))
+    }
 }
 
 #[cfg(unix)]

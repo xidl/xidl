@@ -21,4 +21,11 @@ impl Listener for TcpListener {
         let (stream, peer) = self.inner.accept().await?;
         Ok((Box::new(stream), peer))
     }
+
+    fn endpoint(&self) -> Option<String> {
+        self.inner
+            .local_addr()
+            .ok()
+            .map(|addr| format!("tcp://{addr}"))
+    }
 }

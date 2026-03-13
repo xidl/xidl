@@ -4,22 +4,17 @@ use xidlc_examples::city_jsonrpc::{
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn jsonrpc_client_calls_all_endpoints() {
-    let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("bind ephemeral port");
-    let addr = listener.local_addr().expect("read local addr");
-    drop(listener);
-
-    let server_addr = addr.to_string();
-    let task = tokio::spawn(async move {
-        xidl_jsonrpc::Server::builder()
-            .with_service(SmartCityRpcApiServer::new(SmartCityRpcService::default()))
-            .serve_on(&server_addr)
-            .await
-    });
-
-    tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+    let server = xidl_jsonrpc::Server::builder()
+        .with_service(SmartCityRpcApiServer::new(SmartCityRpcService::default()))
+        .with_endpoint("tcp://127.0.0.1:0")
+        .build()
+        .await
+        .expect("build server");
+    let endpoint = server.endpoint().expect("server endpoint").to_string();
+    let task = tokio::spawn(async move { server.serve().await });
 
     let client = SmartCityRpcApiClient::builder()
-        .with_endpoint(format!("tcp://{}", addr))
+        .with_endpoint(endpoint)
         .build()
         .await
         .expect("build client");

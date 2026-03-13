@@ -37,6 +37,10 @@ pub trait Listener: Send + Sync {
     async fn accept(
         &self,
     ) -> std::io::Result<(Box<dyn Stream + Unpin + Send + 'static>, SocketAddr)>;
+
+    fn endpoint(&self) -> Option<String> {
+        None
+    }
 }
 
 pub async fn connect(endpoint: &str) -> std::io::Result<Box<dyn Stream + Unpin + Send + 'static>> {
