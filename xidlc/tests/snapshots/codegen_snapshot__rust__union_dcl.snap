@@ -135,7 +135,6 @@ impl C{
             core::mem::ManuallyDrop::take(&mut forget.data.a)
         }
     }
-
     pub fn new_b(value:String)->Self{
         Self{
             tag:1,

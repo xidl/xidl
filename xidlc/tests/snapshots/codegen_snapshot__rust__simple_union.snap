@@ -79,7 +79,6 @@ impl SimpleUnion{
             core::mem::ManuallyDrop::take(&mut forget.data.a)
         }
     }
-
     pub fn new_b(value:int)->Self{
         Self{
             tag:B,

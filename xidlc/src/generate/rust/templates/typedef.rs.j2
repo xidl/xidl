@@ -1,6 +1,6 @@
-{% if doc and doc | length > 0 %}
+{%- if doc and doc | length > 0 -%}
     {%- for line in doc %}
         /// {{ line }}
     {%- endfor %}
-{% endif %}
+{%- endif -%}
 pub type {{ name }} = {{ ty }};

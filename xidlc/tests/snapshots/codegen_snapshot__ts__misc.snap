@@ -1404,7 +1404,6 @@ impl Bar{
             core::mem::ManuallyDrop::take(&mut forget.data.l_mem)
         }
     }
-
     pub fn new_s_mem(value:Foo)->Self{
         Self{
             tag:1,

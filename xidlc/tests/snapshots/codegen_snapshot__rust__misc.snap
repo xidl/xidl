@@ -165,7 +165,6 @@ impl Bar{
             core::mem::ManuallyDrop::take(&mut forget.data.l_mem)
         }
     }
-
     pub fn new_s_mem(value:Foo)->Self{
         Self{
             tag:1,
@@ -537,7 +536,6 @@ impl A_Call{
             core::mem::ManuallyDrop::take(&mut forget.data.unknownOp)
         }
     }
-
     pub fn new_make_it_so(value:A_make_it_so_In)->Self{
         Self{
             tag:A_make_it_so_Hash,
@@ -746,7 +744,6 @@ impl A_Return{
             core::mem::ManuallyDrop::take(&mut forget.data.unknownOp)
         }
     }
-
     pub fn new_make_it_so(value:A_make_it_so_Result)->Self{
         Self{
             tag:A_make_it_so_Hash,
@@ -1149,7 +1146,6 @@ impl B_Call{
             core::mem::ManuallyDrop::take(&mut forget.data.unknownOp)
         }
     }
-
     pub fn new_make_it_so(value:B_make_it_so_In)->Self{
         Self{
             tag:B_make_it_so_Hash,
@@ -1358,7 +1354,6 @@ impl B_Return{
             core::mem::ManuallyDrop::take(&mut forget.data.unknownOp)
         }
     }
-
     pub fn new_make_it_so(value:B_make_it_so_Result)->Self{
         Self{
             tag:B_make_it_so_Hash,
@@ -1761,7 +1756,6 @@ impl A_Call{
             core::mem::ManuallyDrop::take(&mut forget.data.unknownOp)
         }
     }
-
     pub fn new_opA(value:A_opA_In)->Self{
         Self{
             tag:A_opA_Hash,
@@ -1970,7 +1964,6 @@ impl A_Return{
             core::mem::ManuallyDrop::take(&mut forget.data.unknownOp)
         }
     }
-
     pub fn new_opA(value:A_opA_Result)->Self{
         Self{
             tag:A_opA_Hash,
@@ -2374,7 +2367,6 @@ impl B_Call{
             core::mem::ManuallyDrop::take(&mut forget.data.unknownOp)
         }
     }
-
     pub fn new_opB(value:B_opB_In)->Self{
         Self{
             tag:B_opB_Hash,
@@ -2583,7 +2575,6 @@ impl B_Return{
             core::mem::ManuallyDrop::take(&mut forget.data.unknownOp)
         }
     }
-
     pub fn new_opB(value:B_opB_Result)->Self{
         Self{
             tag:B_opB_Hash,
@@ -2987,7 +2978,6 @@ impl C_Call{
             core::mem::ManuallyDrop::take(&mut forget.data.unknownOp)
         }
     }
-
     pub fn new_opC(value:C_opC_In)->Self{
         Self{
             tag:C_opC_Hash,
@@ -3196,7 +3186,6 @@ impl C_Return{
             core::mem::ManuallyDrop::take(&mut forget.data.unknownOp)
         }
     }
-
     pub fn new_opC(value:C_opC_Result)->Self{
         Self{
             tag:C_opC_Hash,
@@ -3602,7 +3591,6 @@ impl A_Call{
             core::mem::ManuallyDrop::take(&mut forget.data.unknownOp)
         }
     }
-
     pub fn new_f(value:A_f_In)->Self{
         Self{
             tag:A_f_Hash,
@@ -3811,7 +3799,6 @@ impl A_Return{
             core::mem::ManuallyDrop::take(&mut forget.data.unknownOp)
         }
     }
-
     pub fn new_f(value:A_f_Result)->Self{
         Self{
             tag:A_f_Hash,
@@ -5212,7 +5199,6 @@ impl C_Call{
             core::mem::ManuallyDrop::take(&mut forget.data.unknownOp)
         }
     }
-
     pub fn new_get_attribute_Title(value:C_get_attribute_Title_In)->Self{
         Self{
             tag:C_get_attribute_Title_Hash,
@@ -5247,7 +5233,6 @@ impl C_Call{
             core::mem::ManuallyDrop::take(&mut forget.data.get_attribute_Title)
         }
     }
-
     pub fn new_set_attribute_Title(value:C_set_attribute_Title_In)->Self{
         Self{
             tag:C_set_attribute_Title_Hash,
@@ -5282,7 +5267,6 @@ impl C_Call{
             core::mem::ManuallyDrop::take(&mut forget.data.set_attribute_Title)
         }
     }
-
     pub fn new_get_attribute_Name(value:C_get_attribute_Name_In)->Self{
         Self{
             tag:C_get_attribute_Name_Hash,
@@ -5317,7 +5301,6 @@ impl C_Call{
             core::mem::ManuallyDrop::take(&mut forget.data.get_attribute_Name)
         }
     }
-
     pub fn new_set_attribute_Name(value:C_set_attribute_Name_In)->Self{
         Self{
             tag:C_set_attribute_Name_Hash,
@@ -5352,7 +5335,6 @@ impl C_Call{
             core::mem::ManuallyDrop::take(&mut forget.data.set_attribute_Name)
         }
     }
-
     pub fn new_get_attribute_City(value:C_get_attribute_City_In)->Self{
         Self{
             tag:C_get_attribute_City_Hash,
@@ -5387,7 +5369,6 @@ impl C_Call{
             core::mem::ManuallyDrop::take(&mut forget.data.get_attribute_City)
         }
     }
-
     pub fn new_set_attribute_City(value:C_set_attribute_City_In)->Self{
         Self{
             tag:C_set_attribute_City_Hash,
@@ -5696,7 +5677,6 @@ impl C_Return{
             core::mem::ManuallyDrop::take(&mut forget.data.unknownOp)
         }
     }
-
     pub fn new_get_attribute_Title(value:C_get_attribute_Title_Result)->Self{
         Self{
             tag:C_get_attribute_Title_Hash,
@@ -5731,7 +5711,6 @@ impl C_Return{
             core::mem::ManuallyDrop::take(&mut forget.data.get_attribute_Title)
         }
     }
-
     pub fn new_set_attribute_Title(value:C_set_attribute_Title_Result)->Self{
         Self{
             tag:C_set_attribute_Title_Hash,
@@ -5766,7 +5745,6 @@ impl C_Return{
             core::mem::ManuallyDrop::take(&mut forget.data.set_attribute_Title)
         }
     }
-
     pub fn new_get_attribute_Name(value:C_get_attribute_Name_Result)->Self{
         Self{
             tag:C_get_attribute_Name_Hash,
@@ -5801,7 +5779,6 @@ impl C_Return{
             core::mem::ManuallyDrop::take(&mut forget.data.get_attribute_Name)
         }
     }
-
     pub fn new_set_attribute_Name(value:C_set_attribute_Name_Result)->Self{
         Self{
             tag:C_set_attribute_Name_Hash,
@@ -5836,7 +5813,6 @@ impl C_Return{
             core::mem::ManuallyDrop::take(&mut forget.data.set_attribute_Name)
         }
     }
-
     pub fn new_get_attribute_City(value:C_get_attribute_City_Result)->Self{
         Self{
             tag:C_get_attribute_City_Hash,
@@ -5871,7 +5847,6 @@ impl C_Return{
             core::mem::ManuallyDrop::take(&mut forget.data.get_attribute_City)
         }
     }
-
     pub fn new_set_attribute_City(value:C_set_attribute_City_Result)->Self{
         Self{
             tag:C_set_attribute_City_Hash,

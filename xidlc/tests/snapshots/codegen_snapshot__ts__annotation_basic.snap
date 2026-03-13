@@ -644,7 +644,6 @@ impl U{
             core::mem::ManuallyDrop::take(&mut forget.data.a)
         }
     }
-
     pub fn new_b(value:i32)->Self{
         Self{
             tag:i32::default(),

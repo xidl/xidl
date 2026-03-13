@@ -368,7 +368,6 @@ impl A_func1_Result{
             core::mem::ManuallyDrop::take(&mut forget.data.result)
         }
     }
-
     pub fn new_a_ex(value:A)->Self{
         Self{
             tag:A_Ex_Hash,
@@ -625,7 +624,6 @@ impl A_func1_Result{
             core::mem::ManuallyDrop::take(&mut forget.data.result)
         }
     }
-
     pub fn new_a_ex(value:A)->Self{
         Self{
             tag:A_Ex_Hash,
@@ -660,7 +658,6 @@ impl A_func1_Result{
             core::mem::ManuallyDrop::take(&mut forget.data.a_ex)
         }
     }
-
     pub fn new_b_ex(value:B)->Self{
         Self{
             tag:B_Ex_Hash,
@@ -695,7 +692,6 @@ impl A_func1_Result{
             core::mem::ManuallyDrop::take(&mut forget.data.b_ex)
         }
     }
-
     pub fn new_c_ex(value:C)->Self{
         Self{
             tag:C_Ex_Hash,
@@ -1158,7 +1154,6 @@ impl A_func1_Result{
             core::mem::ManuallyDrop::take(&mut forget.data.result)
         }
     }
-
     pub fn new_a_ex(value:A)->Self{
         Self{
             tag:A_Ex_Hash,
@@ -1415,7 +1410,6 @@ impl A_func1_Result{
             core::mem::ManuallyDrop::take(&mut forget.data.result)
         }
     }
-
     pub fn new_a_ex(value:A)->Self{
         Self{
             tag:A_Ex_Hash,
@@ -1450,7 +1444,6 @@ impl A_func1_Result{
             core::mem::ManuallyDrop::take(&mut forget.data.a_ex)
         }
     }
-
     pub fn new_b_ex(value:B)->Self{
         Self{
             tag:B_Ex_Hash,
@@ -1485,7 +1478,6 @@ impl A_func1_Result{
             core::mem::ManuallyDrop::take(&mut forget.data.b_ex)
         }
     }
-
     pub fn new_c_ex(value:C)->Self{
         Self{
             tag:C_Ex_Hash,
@@ -3468,7 +3460,6 @@ impl A_get_attribute_attr1_Result{
             core::mem::ManuallyDrop::take(&mut forget.data.result)
         }
     }
-
     pub fn new_a_ex(value:A)->Self{
         Self{
             tag:A_Ex_Hash,
@@ -3915,7 +3906,6 @@ impl A_get_attribute_attr1_Result{
             core::mem::ManuallyDrop::take(&mut forget.data.result)
         }
     }
-
     pub fn new_a_ex(value:A)->Self{
         Self{
             tag:A_Ex_Hash,
@@ -3950,7 +3940,6 @@ impl A_get_attribute_attr1_Result{
             core::mem::ManuallyDrop::take(&mut forget.data.a_ex)
         }
     }
-
     pub fn new_b_ex(value:B)->Self{
         Self{
             tag:B_Ex_Hash,
@@ -3985,7 +3974,6 @@ impl A_get_attribute_attr1_Result{
             core::mem::ManuallyDrop::take(&mut forget.data.b_ex)
         }
     }
-
     pub fn new_c_ex(value:C)->Self{
         Self{
             tag:C_Ex_Hash,
@@ -4258,7 +4246,6 @@ impl A_set_attribute_attr1_Result{
             core::mem::ManuallyDrop::take(&mut forget.data.result)
         }
     }
-
     pub fn new_a_ex(value:A)->Self{
         Self{
             tag:A_Ex_Hash,
@@ -4693,7 +4680,6 @@ impl A_set_attribute_attr1_Result{
             core::mem::ManuallyDrop::take(&mut forget.data.result)
         }
     }
-
     pub fn new_a_ex(value:A)->Self{
         Self{
             tag:A_Ex_Hash,
@@ -4970,7 +4956,6 @@ impl A_Call{
             core::mem::ManuallyDrop::take(&mut forget.data.unknownOp)
         }
     }
-
     pub fn new_func1(value:A_func1_In)->Self{
         Self{
             tag:A_func1_Hash,
@@ -5005,7 +4990,6 @@ impl A_Call{
             core::mem::ManuallyDrop::take(&mut forget.data.func1)
         }
     }
-
     pub fn new_get_attribute_attr1(value:A_get_attribute_attr1_In)->Self{
         Self{
             tag:A_func1_Hash,
@@ -5040,7 +5024,6 @@ impl A_Call{
             core::mem::ManuallyDrop::take(&mut forget.data.get_attribute_attr1)
         }
     }
-
     pub fn new_set_attribute_attr1(value:A_set_attribute_attr1_In)->Self{
         Self{
             tag:A_func1_Hash,
@@ -5075,7 +5058,6 @@ impl A_Call{
             core::mem::ManuallyDrop::take(&mut forget.data.set_attribute_attr1)
         }
     }
-
     pub fn new_get_attribute_attr2(value:A_get_attribute_attr2_In)->Self{
         Self{
             tag:A_func1_Hash,
@@ -5110,7 +5092,6 @@ impl A_Call{
             core::mem::ManuallyDrop::take(&mut forget.data.get_attribute_attr2)
         }
     }
-
     pub fn new_set_attribute_attr2(value:A_set_attribute_attr2_In)->Self{
         Self{
             tag:A_func1_Hash,
@@ -5145,7 +5126,6 @@ impl A_Call{
             core::mem::ManuallyDrop::take(&mut forget.data.set_attribute_attr2)
         }
     }
-
     pub fn new_get_attribute_attr3(value:A_get_attribute_attr3_In)->Self{
         Self{
             tag:A_func1_Hash,
@@ -5180,7 +5160,6 @@ impl A_Call{
             core::mem::ManuallyDrop::take(&mut forget.data.get_attribute_attr3)
         }
     }
-
     pub fn new_set_attribute_attr3(value:A_set_attribute_attr3_In)->Self{
         Self{
             tag:A_get_attribute_attr1_Hash,
@@ -5775,7 +5754,6 @@ impl A_Return{
             core::mem::ManuallyDrop::take(&mut forget.data.unknownOp)
         }
     }
-
     pub fn new_func1(value:A_func1_Result)->Self{
         Self{
             tag:A_func1_Hash,
@@ -5810,7 +5788,6 @@ impl A_Return{
             core::mem::ManuallyDrop::take(&mut forget.data.func1)
         }
     }
-
     pub fn new_get_attribute_attr1(value:A_get_attribute_attr1_Result)->Self{
         Self{
             tag:A_func1_Hash,
@@ -5845,7 +5822,6 @@ impl A_Return{
             core::mem::ManuallyDrop::take(&mut forget.data.get_attribute_attr1)
         }
     }
-
     pub fn new_set_attribute_attr1(value:A_set_attribute_attr1_Result)->Self{
         Self{
             tag:A_func1_Hash,
@@ -5880,7 +5856,6 @@ impl A_Return{
             core::mem::ManuallyDrop::take(&mut forget.data.set_attribute_attr1)
         }
     }
-
     pub fn new_get_attribute_attr2(value:A_get_attribute_attr2_Result)->Self{
         Self{
             tag:A_func1_Hash,
@@ -5915,7 +5890,6 @@ impl A_Return{
             core::mem::ManuallyDrop::take(&mut forget.data.get_attribute_attr2)
         }
     }
-
     pub fn new_set_attribute_attr2(value:A_set_attribute_attr2_Result)->Self{
         Self{
             tag:A_func1_Hash,
@@ -5950,7 +5924,6 @@ impl A_Return{
             core::mem::ManuallyDrop::take(&mut forget.data.set_attribute_attr2)
         }
     }
-
     pub fn new_get_attribute_attr3(value:A_get_attribute_attr3_Result)->Self{
         Self{
             tag:A_func1_Hash,
@@ -5985,7 +5958,6 @@ impl A_Return{
             core::mem::ManuallyDrop::take(&mut forget.data.get_attribute_attr3)
         }
     }
-
     pub fn new_set_attribute_attr3(value:A_set_attribute_attr3_Result)->Self{
         Self{
             tag:A_get_attribute_attr1_Hash,
@@ -6688,7 +6660,6 @@ impl A_Call{
             core::mem::ManuallyDrop::take(&mut forget.data.unknownOp)
         }
     }
-
     pub fn new_opA(value:A_opA_In)->Self{
         Self{
             tag:A_opA_Hash,
@@ -6897,7 +6868,6 @@ impl A_Return{
             core::mem::ManuallyDrop::take(&mut forget.data.unknownOp)
         }
     }
-
     pub fn new_opA(value:A_opA_Result)->Self{
         Self{
             tag:A_opA_Hash,

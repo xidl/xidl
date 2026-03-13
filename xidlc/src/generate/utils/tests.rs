@@ -20,9 +20,7 @@ fn test_parse_timestamp() {
 fn test_doc_lines_from_raw() {
     let annotations = vec![hir::Annotation::Builtin {
         name: "doc".to_string(),
-        params: Some(hir::AnnotationParams::Raw(
-            "\"hello\\\\nworld\"".to_string(),
-        )),
+        params: Some(hir::AnnotationParams::Raw("\"hello\\nworld\"".to_string())),
     }];
     let doc = doc_lines_from_annotations(&annotations);
     assert_eq!(doc, vec!["hello", "world"]);

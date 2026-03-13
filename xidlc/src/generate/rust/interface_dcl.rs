@@ -9,7 +9,9 @@ impl RustRender for hir::InterfaceDcl {
     fn render(&self, renderer: &RustRenderer) -> IdlcResult<RustRenderOutput> {
         match &self.decl {
             hir::InterfaceDclInner::InterfaceForwardDcl(forward) => forward.render(renderer),
-            hir::InterfaceDclInner::InterfaceDef(def) => def.render(renderer),
+            hir::InterfaceDclInner::InterfaceDef(def) => {
+                render_interface_def_with_doc(def, doc_lines_from_annotations(&self.annotations), renderer)
+            }
         }
     }
 }
@@ -22,40 +24,48 @@ impl RustRender for hir::InterfaceForwardDcl {
 
 impl RustRender for hir::InterfaceDef {
     fn render(&self, renderer: &RustRenderer) -> IdlcResult<RustRenderOutput> {
-        let mut out = RustRenderOutput::default();
-        let mut methods = Vec::new();
+        render_interface_def_with_doc(self, Vec::new(), renderer)
+    }
+}
 
-        if let Some(body) = &self.interface_body {
-            for export in &body.0 {
-                match export {
-                    hir::Export::OpDcl(op) => {
-                        methods.push(render_op(op));
-                    }
-                    hir::Export::AttrDcl(attr) => {
-                        methods.extend(render_attr(attr));
-                    }
-                    hir::Export::TypeDcl(type_dcl) => {
-                        out.extend(type_dcl.render(renderer)?);
-                    }
-                    hir::Export::ConstDcl(const_dcl) => {
-                        out.extend(const_dcl.render(renderer)?);
-                    }
-                    hir::Export::ExceptDcl(except) => {
-                        out.extend(except.render(renderer)?);
-                    }
+fn render_interface_def_with_doc(
+    def: &hir::InterfaceDef,
+    doc: Vec<String>,
+    renderer: &RustRenderer,
+) -> IdlcResult<RustRenderOutput> {
+    let mut out = RustRenderOutput::default();
+    let mut methods = Vec::new();
+
+    if let Some(body) = &def.interface_body {
+        for export in &body.0 {
+            match export {
+                hir::Export::OpDcl(op) => {
+                    methods.push(render_op(op));
+                }
+                hir::Export::AttrDcl(attr) => {
+                    methods.extend(render_attr(attr));
+                }
+                hir::Export::TypeDcl(type_dcl) => {
+                    out.extend(type_dcl.render(renderer)?);
+                }
+                hir::Export::ConstDcl(const_dcl) => {
+                    out.extend(const_dcl.render(renderer)?);
+                }
+                hir::Export::ExceptDcl(except) => {
+                    out.extend(except.render(renderer)?);
                 }
             }
         }
-
-        let ctx = json!({
-            "ident": crate::generate::rust::util::rust_ident(&self.header.ident),
-            "methods": methods,
-            "doc": doc_lines_from_annotations(&self.annotations),
-        });
-        let rendered = renderer.render_template("interface.rs.j2", &ctx)?;
-        out.source.push(rendered);
-        Ok(out)
     }
+
+    let ctx = json!({
+        "ident": crate::generate::rust::util::rust_ident(&def.header.ident),
+        "methods": methods,
+        "doc": doc,
+    });
+    let rendered = renderer.render_template("interface.rs.j2", &ctx)?;
+    out.source.push(rendered);
+    Ok(out)
 }
 
 fn render_op(op: &hir::OpDcl) -> serde_json::Value {

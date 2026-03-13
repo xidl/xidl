@@ -1,8 +1,8 @@
-{% if doc and doc | length > 0 %}
+{%- if doc and doc | length > 0 -%}
     {%- for line in doc %}
         /// {{ line }}
     {%- endfor %}
-{% endif %}
+{%- endif -%}
 {% if derive and derive | length > 0 %}
     #[derive({{ derive | join(", ") }})]
 {%- endif %}
@@ -16,11 +16,11 @@ pub struct {{ ident }} {
 {% endif %}
 union {{ ident }}Data {
     {%- for member in members %}
-        {% if member.doc and member.doc | length > 0 %}
+        {%- if member.doc and member.doc | length > 0 -%}
             {%- for line in member.doc %}
                 /// {{ line }}
             {%- endfor %}
-        {% endif %}
+        {%- endif -%}
         {{ member.name }}: core::mem::ManuallyDrop<{{ member.ty }}>,
     {%- endfor %}
 }
@@ -46,11 +46,11 @@ impl {{ ident }} {
     {% endif %}
 
     {% for member in members %}
-        {% if member.doc and member.doc | length > 0 %}
+        {%- if member.doc and member.doc | length > 0 -%}
             {%- for line in member.doc %}
                 /// {{ line }}
             {%- endfor %}
-        {% endif %}
+        {%- endif -%}
         pub fn new_{{ member.name }}(value: {{ member.ty }}) -> Self {
             {% set case = cases[loop.index - 1].pattern %}
                 {% if case == "_" %}

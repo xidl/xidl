@@ -186,7 +186,6 @@ impl U{
             core::mem::ManuallyDrop::take(&mut forget.data.a)
         }
     }
-
     pub fn new_b(value:i32)->Self{
         Self{
             tag:i32::default(),
@@ -937,7 +936,6 @@ impl I_Call{
             core::mem::ManuallyDrop::take(&mut forget.data.unknownOp)
         }
     }
-
     pub fn new_ping(value:I_ping_In)->Self{
         Self{
             tag:I_ping_Hash,
@@ -972,7 +970,6 @@ impl I_Call{
             core::mem::ManuallyDrop::take(&mut forget.data.ping)
         }
     }
-
     pub fn new_get_attribute_value(value:I_get_attribute_value_In)->Self{
         Self{
             tag:I_get_attribute_value_Hash,
@@ -1007,7 +1004,6 @@ impl I_Call{
             core::mem::ManuallyDrop::take(&mut forget.data.get_attribute_value)
         }
     }
-
     pub fn new_set_attribute_value(value:I_set_attribute_value_In)->Self{
         Self{
             tag:I_set_attribute_value_Hash,
@@ -1256,7 +1252,6 @@ impl I_Return{
             core::mem::ManuallyDrop::take(&mut forget.data.unknownOp)
         }
     }
-
     pub fn new_ping(value:I_ping_Result)->Self{
         Self{
             tag:I_ping_Hash,
@@ -1291,7 +1286,6 @@ impl I_Return{
             core::mem::ManuallyDrop::take(&mut forget.data.ping)
         }
     }
-
     pub fn new_get_attribute_value(value:I_get_attribute_value_Result)->Self{
         Self{
             tag:I_get_attribute_value_Hash,
@@ -1326,7 +1320,6 @@ impl I_Return{
             core::mem::ManuallyDrop::take(&mut forget.data.get_attribute_value)
         }
     }
-
     pub fn new_set_attribute_value(value:I_set_attribute_value_Result)->Self{
         Self{
             tag:I_set_attribute_value_Hash,
