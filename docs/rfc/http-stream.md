@@ -10,13 +10,14 @@ Reference specifications:
 ## 1. Scope
 
 This document defines a streaming profile on top of the XIDL HTTP mapping. It
-extends unary HTTP APIs with long-lived request/response streams.
+extends unary HTTP APIs with long-lived request or response streams.
 
 This document defines:
 
-- stream interaction model (server/client/bidi)
+- stream interaction model (server/client)
 - method annotation model for stream operations
 - HTTP wire profile and frame envelope
+- stream security integration with the HTTP security mapping
 - lifecycle, cancellation, and error semantics
 
 This document does not define:
@@ -24,14 +25,18 @@ This document does not define:
 - message broker transport
 - reliability beyond HTTP transport guarantees
 - exactly-once delivery
+- transport security negotiation
 
 ## 2. Terminology
 
 - `stream operation`: an IDL operation annotated as streaming.
+- `stream item`: one logical application value carried by a stream.
 - `frame`: one logical message in a stream body.
 - `upstream`: client -> server stream direction.
 - `downstream`: server -> client stream direction.
-- `half-close`: one direction is closed while the other is still open.
+- `effective security requirement`: the final authentication requirement that
+  applies to a stream operation after interface-level inheritance and
+  operation-level overrides are resolved.
 
 ## 3. Stream Operation Model
 
@@ -39,14 +44,16 @@ This document does not define:
 
 A method is treated as stream operation when it has:
 
-- `@server_stream`: server streaming
-- `@client_stream`: client streaming
-- `@bidi_stream`: bidirectional streaming
+- `@server-stream`: server streaming
+- `@client-stream`: client streaming
 
 Optional annotations:
 
 - `@path("...")`: explicit route path (same normalization rules as HTTP RFC)
-- `@stream_codec("ndjson" | "sse")`: payload framing codec
+- `@stream-codec("ndjson" | "sse")`: payload framing codec
+- security annotations from the HTTP security mapping RFC, including
+  `@no-security`, `@http-basic`, `@http-bearer`, `@api-key(...)`, and
+  `@oauth2(...)`
 
 Defaults:
 
@@ -56,8 +63,12 @@ Defaults:
 
 Validation:
 
-- `@server_stream`, `@client_stream`, and `@bidi_stream` are mutually exclusive.
-- A stream method must declare exactly one of the three annotations above.
+- `@server-stream` and `@client-stream` are mutually exclusive.
+- A stream method must declare exactly one of the two annotations above.
+- `@client-stream` methods must declare exactly one streaming input parameter,
+  and that parameter type must be `sequence<T>` for some item type `T`.
+- `@server-stream` methods must declare a return type of `sequence<T>` for some
+  item type `T`.
 
 `@path` template compatibility:
 
@@ -72,13 +83,12 @@ Validation:
 Example:
 
 ```idl
-@server_stream
+@server-stream
 @path("/files/{*path}{?lang,follow}")
-void tail_file(
+sequence<string> tail_file(
   @path("path") string path,
   @query("lang") string lang,
-  @query("follow") boolean follow,
-  out string line
+  @query("follow") boolean follow
 );
 ```
 
@@ -86,18 +96,55 @@ void tail_file(
 
 - `server`:
   - one request object
-  - many response events
+  - many response items from `sequence<T>` return values
 - `client`:
-  - many request events
+  - many request items from the single `sequence<T>` input parameter
   - one final response object
-- `bidi`:
-  - many request events
-  - many response events
 
-Direction semantics still follow IDL `in/out/inout`:
+Sequence semantics:
 
-- request-side fields: `in` + `inout`
-- response-side fields: `out` + `inout` + `return` (if non-void)
+- The stream item type is derived from `sequence<T>`.
+- For `@client-stream`, `T` is the item type of the single streaming input
+  parameter.
+- For `@server-stream`, `T` is the item type of the `sequence<T>` return value.
+- This RFC intentionally uses type-driven stream item semantics rather than a
+  dedicated item annotation.
+
+This RFC does not define bidirectional HTTP stream operations. True duplex
+streaming is expected to use a separate WebSocket binding.
+
+### 3.3 Security Model
+
+Stream operations support the same security annotations and effective-requirement
+rules defined by the HTTP security mapping RFC.
+
+Supported annotations:
+
+- `@no-security`
+- `@http-basic`
+- `@http-bearer`
+- `@api-key(...)`
+- `@oauth2(...)`
+
+Inheritance and override rules:
+
+- interface-level security annotations define the default security requirement
+  for all stream operations in that interface
+- operation-level security annotations replace inherited interface defaults
+- `@no-security` on a stream operation clears inherited interface-level security
+  requirements
+- if no operation-level security annotations are present, the effective
+  requirement is inherited from the interface
+
+Stream-specific guidance:
+
+- credentials are evaluated before the stream is established
+- credentials are carried by the normal HTTP security mapping and are not part
+  of stream `next.data` payloads
+- long-lived streams do not redefine authentication semantics; token refresh,
+  re-authentication, or session renewal remain implementation concerns
+- security annotations add request-acceptance preconditions only and do not
+  change stream item typing, codec selection, or frame sequencing
 
 ## 4. Wire Profiles
 
@@ -105,13 +152,16 @@ Direction semantics still follow IDL `in/out/inout`:
 
 - `Content-Type` must match selected codec.
 - `Transfer-Encoding: chunked` is used on HTTP/1.1 for indefinite bodies.
-- HTTP/2 and HTTP/3 should be preferred for bidi streams.
 - Stream responses should disable buffering at proxy/gateway layer.
 
 Request headers:
 
-- `x-xidl-stream-mode: server|client|bidi`
+- `x-xidl-stream-mode: server|client`
 - `x-xidl-stream-version: 1`
+
+Security headers and credentials follow the HTTP security mapping RFC. For
+example, HTTP Basic and Bearer use `Authorization`, and API key credentials use
+their declared header, cookie, or query location.
 
 ## 4.2 NDJSON Codec (default)
 
@@ -125,7 +175,7 @@ Each line is a JSON frame object.
 Frame envelope:
 
 ```json
-{ "t": "next", "seq": 1, "data": { "value": 42 } }
+{ "t": "next", "seq": 1, "data": 42 }
 ```
 
 Fields:
@@ -157,22 +207,35 @@ SSE mapping:
 
 Constraints:
 
-- valid only for `@server_stream`
+- valid only for `@server-stream`
 - request body is normal unary JSON request (`application/json`)
 
 ## 5. Payload Mapping
 
-For `next` frames, payload shape is derived from IDL outputs.
+For `next` frames, payload shape is derived from the stream item type `T`.
 
-Request `next.data` shape:
+Request `next.data` shape for `@client-stream`:
 
-- contains `in` and `inout` parameters only
+- is one serialized item of type `T`, where the operation declares exactly one
+  streaming input parameter of type `sequence<T>`
 
-Response `next.data` shape:
+Response `next.data` shape for `@server-stream`:
 
-- contains `out`, `inout`, and `return` when return type is non-void
+- is one serialized item of type `T`, where the operation return type is
+  `sequence<T>`
 
-When only one logical field exists, object shape is still required.
+Generators targeting OpenAPI 3.2 should map the stream item type `T` to the
+media type `itemSchema`.
+
+Byte-stream mapping:
+
+- a byte stream is modeled by choosing `T = octet`
+- `@client-stream` byte streams therefore use an input parameter of type
+  `sequence<octet>`
+- `@server-stream` byte streams therefore use a return type of
+  `sequence<octet>`
+- octet chunk values are transported as JSON arrays of octets in NDJSON-based
+  profiles unless a companion codec profile specifies another representation
 
 Example:
 
@@ -235,6 +298,15 @@ Mapping guidance:
 - business failure during stream -> `error` frame
 - overload/backpressure -> `error.code = "RESOURCE_EXHAUSTED"`
 
+Security-specific guidance:
+
+- missing or invalid credentials -> HTTP `401 Unauthorized`
+- authenticated but insufficient privileges -> HTTP `403 Forbidden`
+- when `401` is returned for HTTP-auth-based schemes, implementations SHOULD
+  emit `WWW-Authenticate` where applicable
+- if authentication fails before the first stream frame, the stream is not
+  established and no stream frames are emitted
+
 ## 8. Flow Control and Backpressure
 
 Transport-level flow control uses HTTP/2 or HTTP/3 windowing.
@@ -251,9 +323,18 @@ Application-level recommendations:
 
 Build-time validation:
 
-- `@stream_codec("sse")` is only valid with `@server_stream`
+- `@stream-codec("sse")` is only valid with `@server-stream`
 - duplicate stream routes after normalization are invalid
 - non-POST stream methods are discouraged and should emit warnings
+- `@client-stream` methods must declare exactly one streaming input parameter
+- that streaming input parameter must have type `sequence<T>`
+- `@server-stream` methods must return `sequence<T>`
+- `@no-security` must not be combined with other operation-level security
+  annotations on the same stream operation
+- security annotations on stream operations follow the same duplicate and
+  argument validation rules defined by the HTTP security mapping RFC
+- `@bidi-stream` is outside the scope of this RFC and should be rejected by
+  conforming HTTP stream profiles
 
 Runtime validation:
 
@@ -274,24 +355,28 @@ Attributes are not streamed by default.
 
 Rule:
 
-- Only attributes marked with `@server_stream` are mapped to change-notification
+- Only attributes marked with `@server-stream` are mapped to change-notification
   streams.
-- The generated watch operation is server-stream (`@server_stream`) only.
+- The generated watch operation is server-stream (`@server-stream`) only.
 - Client-side attribute-change streaming is not supported in v1.
-- Attribute change notification should use SSE in v1 (`@stream_codec("sse")`).
+- Attribute change notification should use SSE in v1 (`@stream-codec("sse")`).
+- The generated watch operation returns `sequence<T>`, where `T` is the event
+  item type for that attribute stream.
 
 Generated operation shape:
 
-- attribute `foo` with `@server_stream` maps to:
-  - `watch_attribute_foo(...)`
+- attribute `foo` with `@server-stream` maps to:
+  - `watch_attribute_foo(...): sequence<AttributeFooEvent>`
 - default route follows normal stream route rules unless overridden by `@path`.
 - default codec for generated watch operation is SSE (`text/event-stream`).
 
 Event payload recommendation:
 
-- `value`: current attribute value
-- `version`: monotonic version per attribute
-- `ts`: server timestamp
+- define an event type such as `AttributeFooEvent`
+- recommended fields on that event type:
+  - `value`: current attribute value
+  - `version`: monotonic version per attribute
+  - `ts`: server timestamp
 
 Behavior:
 
@@ -303,7 +388,7 @@ Example:
 
 ```idl
 interface DeviceState {
-  @server_stream
+  @server-stream
   attribute boolean online;
 };
 ```
@@ -311,10 +396,16 @@ interface DeviceState {
 Generated watch stream (conceptually):
 
 ```idl
+struct OnlineEvent {
+  boolean value;
+  uint64 version;
+  string ts;
+};
+
 interface DeviceState {
-  @server_stream
-  @stream_codec("sse")
-  void watch_attribute_online(out boolean value, out uint64 version, out string ts);
+  @server-stream
+  @stream-codec("sse")
+  sequence<OnlineEvent> watch_attribute_online();
 };
 ```
 
@@ -326,9 +417,18 @@ IDL:
 
 ```idl
 interface Metrics {
-  @server_stream
+  @server-stream
   @path("/metrics/tail")
-  void tail(@query("service") string service, out double cpu, out double mem);
+  sequence<MetricSample> tail(@query("service") string service);
+};
+```
+
+Where `MetricSample` is a structured item type, for example:
+
+```idl
+struct MetricSample {
+  double cpu;
+  double mem;
 };
 ```
 
@@ -346,16 +446,16 @@ IDL:
 
 ```idl
 interface Upload {
-  @client_stream
-  UploadResult push(in string file_id, in sequence<octet> chunk);
+  @client-stream
+  UploadResult push(in sequence<octet> chunk);
 };
 ```
 
 Request frames:
 
 ```json
-{ "t": "next", "seq": 1, "data": { "file_id": "f-1", "chunk": "...base64..." } }
-{ "t": "next", "seq": 2, "data": { "file_id": "f-1", "chunk": "...base64..." } }
+{ "t": "next", "seq": 1, "data": [1, 2, 3, 4] }
+{ "t": "next", "seq": 2, "data": [5, 6, 7, 8] }
 { "t": "complete", "seq": 3 }
 ```
 
@@ -365,30 +465,35 @@ Final response:
 { "return": { "ok": true, "bytes": 2097152 } }
 ```
 
-### 12.3 Bidi Stream (NDJSON)
+### 12.3 Server Stream (Octets)
 
 IDL:
 
 ```idl
-interface Chat {
-  @bidi_stream
-  void room(in string room_id, in string text, out string from, out string text_out);
+interface Download {
+  @server-stream
+  sequence<octet> pull(@query("file") string file);
 };
 ```
 
-Both sides exchange `next` frames concurrently until one side sends `complete`
-or `error`.
+Response frames:
+
+```json
+{ "t": "next", "seq": 1, "data": [1, 2, 3, 4] }
+{ "t": "next", "seq": 2, "data": [5, 6, 7, 8] }
+{ "t": "complete", "seq": 3 }
+```
 
 ## 13. Conformance Levels
 
 Minimum conformance (v1):
 
-- support `@server_stream` + NDJSON codec
+- support `@server-stream` + NDJSON codec
 - support frame types `next|error|complete`
 - enforce terminal and sequence rules
 
 Full conformance (v1):
 
-- support all stream modes (`server|client|bidi`)
+- support both stream modes (`server|client`)
 - support cancellation semantics
 - support SSE for server stream
