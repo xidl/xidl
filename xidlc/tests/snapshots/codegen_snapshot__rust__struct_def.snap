@@ -229,7 +229,7 @@ pub struct HelloWorld{
     pub c:Vec<u8>,
     pub d:String,
     pub d:String,
-    pub d:*mut c_void,
+    pub d: ::serde_json::Value,
 }
 
 impl HelloWorld{

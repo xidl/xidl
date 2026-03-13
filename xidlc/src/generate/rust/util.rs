@@ -78,9 +78,9 @@ pub fn rust_type(ty: &hir::TypeSpec) -> String {
             hir::SimpleTypeSpec::CharType => "char".to_string(),
             hir::SimpleTypeSpec::WideCharType => "char".to_string(),
             hir::SimpleTypeSpec::Boolean => "bool".to_string(),
-            hir::SimpleTypeSpec::AnyType => "*mut c_void".to_string(),
-            hir::SimpleTypeSpec::ObjectType => "*mut c_void".to_string(),
-            hir::SimpleTypeSpec::ValueBaseType => "*mut c_void".to_string(),
+            hir::SimpleTypeSpec::AnyType => "::serde_json::Value".to_string(),
+            hir::SimpleTypeSpec::ObjectType => "::serde_json::Value".to_string(),
+            hir::SimpleTypeSpec::ValueBaseType => "::serde_json::Value".to_string(),
             hir::SimpleTypeSpec::ScopedName(value) => rust_scoped_name(value),
         },
         hir::TypeSpec::TemplateTypeSpec(template) => match template {
