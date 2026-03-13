@@ -43,7 +43,7 @@ rustls-pemfile = { version = "2", optional = true }
 default = ["tokio"]
 tokio = ["dep:tokio"]
 tokio-net = ["tokio", "tokio/net"]
-quic-s2n = ["tokio-net", "dep:s2n-quic"]
+quic-s2n = ["tokio-net", "dep:s2n-quic", "dep:url"]
 tokio-tls = [
   "tokio-net",
   "dep:tokio-rustls",

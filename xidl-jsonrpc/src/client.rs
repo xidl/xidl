@@ -1,8 +1,9 @@
+use crate::line_io::{read_json_line, write_json_line};
 use crate::{Error, ErrorCode, JSONRPC_VERSION, RpcRequest, RpcResponse};
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 use serde_json::Value;
-use tokio::io::{AsyncBufRead, AsyncBufReadExt, AsyncWrite, AsyncWriteExt};
+use tokio::io::{AsyncBufRead, AsyncWrite};
 
 pub struct Client<R, W> {
     reader: R,
@@ -37,18 +38,11 @@ where
             method,
             params,
         };
-        let payload = serde_json::to_string(&request)?;
-        self.writer.write_all(payload.as_bytes()).await?;
-        self.writer.write_all(b"\n").await?;
-        self.writer.flush().await?;
+        write_json_line(&mut self.writer, &request).await?;
 
-        let mut line = String::new();
-        let bytes = self.reader.read_line(&mut line).await?;
-        if bytes == 0 {
+        let Some(response) = read_json_line::<_, RpcResponse>(&mut self.reader).await? else {
             return Err(Error::Protocol("no response"));
-        }
-
-        let response: RpcResponse = serde_json::from_str(&line)?;
+        };
         if response.id != Some(id) {
             return Err(Error::Protocol("unexpected JSON-RPC id"));
         }

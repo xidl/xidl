@@ -63,27 +63,39 @@ struct MultiHandler {
     services: Vec<Box<dyn Handler>>,
 }
 
-#[async_trait::async_trait]
-impl Handler for MultiHandler {
-    async fn handle(&self, method: &str, params: Value) -> Result<Value, Error> {
+struct ServerBinding {
+    listener: Box<dyn Listener>,
+    endpoint: Option<String>,
+}
+
+impl MultiHandler {
+    async fn dispatch(&self, method: &str, params: Value) -> Result<Value, Error> {
         for service in &self.services {
             match service.handle(method, params.clone()).await {
                 Ok(value) => return Ok(value),
-                Err(err) => {
-                    if err.is_method_not_found() {
-                        continue;
-                    }
-                    return Err(err);
-                }
+                Err(err) if err.is_method_not_found() => continue,
+                Err(err) => return Err(err),
             }
         }
         Err(Error::method_not_found(method))
     }
 
-    fn accepts_bidi(&self, method: &str) -> bool {
+    fn bidi_service(&self, method: &str) -> Option<&dyn Handler> {
         self.services
             .iter()
-            .any(|service| service.accepts_bidi(method))
+            .find(|service| service.accepts_bidi(method))
+            .map(|service| service.as_ref())
+    }
+}
+
+#[async_trait::async_trait]
+impl Handler for MultiHandler {
+    async fn handle(&self, method: &str, params: Value) -> Result<Value, Error> {
+        self.dispatch(method, params).await
+    }
+
+    fn accepts_bidi(&self, method: &str) -> bool {
+        self.bidi_service(method).is_some()
     }
 
     async fn handle_bidi(
@@ -92,10 +104,8 @@ impl Handler for MultiHandler {
         params: Value,
         stream: crate::stream::ReaderWriter<Value, Value>,
     ) -> Result<(), Error> {
-        for service in &self.services {
-            if service.accepts_bidi(method) {
-                return service.handle_bidi(method, params, stream).await;
-            }
+        if let Some(service) = self.bidi_service(method) {
+            return service.handle_bidi(method, params, stream).await;
         }
         Err(Error::method_not_found(method))
     }
@@ -175,25 +185,36 @@ impl ServerBuilder {
         self.with_listener(IoListener::from_io(io))
     }
 
-    pub async fn build(self) -> Result<Server, Error> {
+    async fn resolve_binding(self) -> Result<(ServerBinding, Vec<Box<dyn Handler>>), Error> {
         if self.listener.is_some() && self.endpoint.is_some() {
             return Err(Error::Protocol("listener already set"));
         }
 
-        let (listener, endpoint) = if let Some(listener) = self.listener {
-            let endpoint = listener.endpoint();
-            (listener, endpoint)
+        let binding = if let Some(listener) = self.listener {
+            ServerBinding {
+                endpoint: listener.endpoint(),
+                listener,
+            }
         } else if let Some(endpoint) = self.endpoint {
             let (listener, endpoint) = crate::transport::bind(&endpoint).await?.into_parts();
-            (listener, Some(endpoint))
+            ServerBinding {
+                listener,
+                endpoint: Some(endpoint),
+            }
         } else {
             return Err(Error::Protocol("missing listener"));
         };
 
+        Ok((binding, self.services))
+    }
+
+    pub async fn build(self) -> Result<Server, Error> {
+        let (binding, services) = self.resolve_binding().await?;
+
         Ok(Server {
-            listener,
-            endpoint,
-            services: self.services,
+            listener: binding.listener,
+            endpoint: binding.endpoint,
+            services,
         })
     }
 

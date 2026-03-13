@@ -6,7 +6,7 @@ use std::sync::{Arc, LazyLock, Mutex};
 use dashmap::DashMap;
 use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender, unbounded_channel};
 
-use super::{Listener, Stream};
+use super::{Listener, Stream, loopback_peer_addr};
 
 type InprocStream = tokio::io::DuplexStream;
 
@@ -135,7 +135,7 @@ impl Listener for InprocListener {
         let stream = rx.recv().await.ok_or_else(|| {
             std::io::Error::new(std::io::ErrorKind::BrokenPipe, "inproc listener closed")
         })?;
-        Ok((Box::new(stream), SocketAddr::from(([127, 0, 0, 1], 0))))
+        Ok((Box::new(stream), loopback_peer_addr()))
     }
 
     fn endpoint(&self) -> Option<String> {

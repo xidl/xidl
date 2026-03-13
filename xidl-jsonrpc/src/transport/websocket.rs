@@ -7,21 +7,10 @@ use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 use tokio::sync::{Mutex, mpsc};
 use tokio_tungstenite::tungstenite::Message;
 
-use super::tls_config::{
-    build_client_config, build_server_acceptor, parse_url, query_map, required_param, url_host_port,
-};
+use super::tls_config::{TransportUrl, build_client_config, build_server_acceptor};
 use super::{Listener, Stream};
 
 type DynStream = Box<dyn Stream + Unpin + Send + 'static>;
-
-fn parse_bind_addr(host: &str, port: u16) -> String {
-    let bind_host = if host.contains(':') {
-        format!("[{host}]")
-    } else {
-        host.to_string()
-    };
-    format!("{bind_host}:{port}")
-}
 
 enum ServerTls {
     Disabled,
@@ -35,18 +24,15 @@ pub struct WebSocketListener {
 
 impl WebSocketListener {
     pub async fn bind(endpoint: &str) -> std::io::Result<Self> {
-        let url = parse_url(endpoint, &["ws", "wss"])?;
-        let params = query_map(&url);
-        let (host, port) = url_host_port(&url)?;
-        let addr = parse_bind_addr(&host, port);
-        let tls = if url.scheme() == "wss" {
-            let cert = required_param(&params, "cert", "XIDL_WSS_CERT")?;
-            let key = required_param(&params, "key", "XIDL_WSS_KEY")?;
+        let endpoint = TransportUrl::parse(endpoint, &["ws", "wss"])?;
+        let tls = if endpoint.scheme() == "wss" {
+            let cert = endpoint.required_param("cert", "XIDL_WSS_CERT")?;
+            let key = endpoint.required_param("key", "XIDL_WSS_KEY")?;
             ServerTls::Enabled(build_server_acceptor(&cert, &key)?)
         } else {
             ServerTls::Disabled
         };
-        let listener = tokio::net::TcpListener::bind(addr).await?;
+        let listener = tokio::net::TcpListener::bind(endpoint.bind_addr()?).await?;
         let (tx, rx) = mpsc::unbounded_channel::<(DynStream, SocketAddr)>();
         let task = tokio::spawn(async move {
             loop {
@@ -103,18 +89,17 @@ impl Listener for WebSocketListener {
 }
 
 pub async fn connect_websocket(endpoint: &str) -> std::io::Result<DynStream> {
-    let url = parse_url(endpoint, &["ws", "wss"])?;
-    let params = query_map(&url);
-    let connector = if url.scheme() == "wss" {
-        let ca = required_param(&params, "ca", "XIDL_WSS_CA")?;
-        let _ = url_host_port(&url)?;
+    let endpoint = TransportUrl::parse(endpoint, &["ws", "wss"])?;
+    let connector = if endpoint.scheme() == "wss" {
+        let ca = endpoint.required_param("ca", "XIDL_WSS_CA")?;
+        let _ = endpoint.host_port()?;
         let config = build_client_config(&ca)?;
         Some(tokio_tungstenite::Connector::Rustls(config))
     } else {
         None
     };
     let (ws, _) =
-        tokio_tungstenite::connect_async_tls_with_config(endpoint, None, false, connector)
+        tokio_tungstenite::connect_async_tls_with_config(endpoint.as_str(), None, false, connector)
             .await
             .map_err(super::tls_config::io_other)?;
     Ok(Box::new(WebSocketIo::new(ws)))

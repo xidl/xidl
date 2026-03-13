@@ -8,7 +8,11 @@ mod quic;
 mod tcp;
 #[cfg(feature = "tokio-tls")]
 mod tls;
-#[cfg(any(feature = "tokio-tls", feature = "tokio-websocket"))]
+#[cfg(any(
+    feature = "tokio-tls",
+    feature = "tokio-websocket",
+    feature = "quic-s2n"
+))]
 mod tls_config;
 #[cfg(feature = "tokio-websocket")]
 mod websocket;
@@ -31,6 +35,14 @@ pub use websocket::{WebSocketListener, connect_websocket};
 pub trait Stream: tokio::io::AsyncRead + tokio::io::AsyncWrite {}
 
 impl<T> Stream for T where T: tokio::io::AsyncRead + tokio::io::AsyncWrite {}
+
+pub(crate) fn loopback_peer_addr() -> SocketAddr {
+    SocketAddr::from(([127, 0, 0, 1], 0))
+}
+
+pub(crate) fn unsupported(message: &'static str) -> std::io::Error {
+    std::io::Error::new(std::io::ErrorKind::Unsupported, message)
+}
 
 #[async_trait::async_trait]
 pub trait Listener: Send + Sync {
@@ -81,195 +93,177 @@ impl Endpoint {
             Self::Tcp(endpoint.to_string())
         }
     }
-}
 
-pub async fn bind(endpoint: &str) -> std::io::Result<BoundListener> {
-    let listener: Box<dyn Listener> = match Endpoint::parse(endpoint) {
-        Endpoint::Inproc(name) => Box::new(InprocListener::bind(name)?),
-        Endpoint::Ipc(path) => {
-            #[cfg(all(feature = "tokio-net", unix))]
-            {
-                Box::new(IpcListener::bind(path)?)
+    async fn bind(self) -> std::io::Result<BoundListener> {
+        let endpoint = self.display();
+        let listener: Box<dyn Listener> = match self {
+            Endpoint::Inproc(name) => Box::new(InprocListener::bind(name)?),
+            Endpoint::Ipc(path) => {
+                #[cfg(all(feature = "tokio-net", unix))]
+                {
+                    Box::new(IpcListener::bind(path)?)
+                }
+                #[cfg(all(feature = "tokio-net", windows))]
+                {
+                    let _ = path;
+                    return Err(unsupported("ipc transport is unsupported on windows"));
+                }
+                #[cfg(not(feature = "tokio-net"))]
+                {
+                    let _ = path;
+                    return Err(unsupported("ipc transport requires `tokio-net` feature"));
+                }
+                #[cfg(all(feature = "tokio-net", not(any(unix, windows))))]
+                {
+                    let _ = path;
+                    return Err(unsupported("ipc transport is unsupported on this platform"));
+                }
             }
-            #[cfg(all(feature = "tokio-net", windows))]
-            {
-                let _ = path;
-                return Err(std::io::Error::new(
-                    std::io::ErrorKind::Unsupported,
-                    "ipc transport is unsupported on windows",
-                ));
+            Endpoint::Quic(endpoint) => {
+                #[cfg(feature = "quic-s2n")]
+                {
+                    Box::new(QuicListener::bind(&endpoint)?)
+                }
+                #[cfg(not(feature = "quic-s2n"))]
+                {
+                    let _ = endpoint;
+                    return Err(unsupported("quic transport requires `quic-s2n` feature"));
+                }
             }
-            #[cfg(not(feature = "tokio-net"))]
-            {
-                let _ = path;
-                return Err(std::io::Error::new(
-                    std::io::ErrorKind::Unsupported,
-                    "ipc transport requires `tokio-net` feature",
-                ));
+            Endpoint::Tls(endpoint) => {
+                #[cfg(feature = "tokio-tls")]
+                {
+                    Box::new(TlsListener::bind(&endpoint).await?)
+                }
+                #[cfg(not(feature = "tokio-tls"))]
+                {
+                    let _ = endpoint;
+                    return Err(unsupported("tls transport requires `tokio-tls` feature"));
+                }
             }
-            #[cfg(all(feature = "tokio-net", not(any(unix, windows))))]
-            {
-                let _ = path;
-                return Err(std::io::Error::new(
-                    std::io::ErrorKind::Unsupported,
-                    "ipc transport is unsupported on this platform",
-                ));
+            Endpoint::WebSocket(endpoint) => {
+                #[cfg(feature = "tokio-websocket")]
+                {
+                    Box::new(WebSocketListener::bind(&endpoint).await?)
+                }
+                #[cfg(not(feature = "tokio-websocket"))]
+                {
+                    let _ = endpoint;
+                    return Err(unsupported(
+                        "websocket transport requires `tokio-websocket` feature",
+                    ));
+                }
             }
-        }
-        Endpoint::Quic(endpoint) => {
-            #[cfg(feature = "quic-s2n")]
-            {
-                Box::new(QuicListener::bind(&endpoint)?)
+            Endpoint::Tcp(addr) => {
+                #[cfg(feature = "tokio-net")]
+                {
+                    Box::new(TcpListener::bind(&addr).await?)
+                }
+                #[cfg(not(feature = "tokio-net"))]
+                {
+                    let _ = addr;
+                    return Err(unsupported("tcp transport requires `tokio-net` feature"));
+                }
             }
-            #[cfg(not(feature = "quic-s2n"))]
-            {
-                let _ = endpoint;
-                return Err(std::io::Error::new(
-                    std::io::ErrorKind::Unsupported,
-                    "quic transport requires `quic-s2n` feature",
-                ));
-            }
-        }
-        Endpoint::Tls(endpoint) => {
-            #[cfg(feature = "tokio-tls")]
-            {
-                Box::new(TlsListener::bind(&endpoint).await?)
-            }
-            #[cfg(not(feature = "tokio-tls"))]
-            {
-                let _ = endpoint;
-                return Err(std::io::Error::new(
-                    std::io::ErrorKind::Unsupported,
-                    "tls transport requires `tokio-tls` feature",
-                ));
-            }
-        }
-        Endpoint::WebSocket(endpoint) => {
-            #[cfg(feature = "tokio-websocket")]
-            {
-                Box::new(WebSocketListener::bind(&endpoint).await?)
-            }
-            #[cfg(not(feature = "tokio-websocket"))]
-            {
-                let _ = endpoint;
-                return Err(std::io::Error::new(
-                    std::io::ErrorKind::Unsupported,
-                    "websocket transport requires `tokio-websocket` feature",
-                ));
-            }
-        }
-        Endpoint::Tcp(addr) => {
-            #[cfg(feature = "tokio-net")]
-            {
-                Box::new(TcpListener::bind(&addr).await?)
-            }
-            #[cfg(not(feature = "tokio-net"))]
-            {
-                let _ = addr;
-                return Err(std::io::Error::new(
-                    std::io::ErrorKind::Unsupported,
-                    "tcp transport requires `tokio-net` feature",
-                ));
-            }
-        }
-    };
+        };
 
-    let resolved = listener.endpoint().unwrap_or_else(|| endpoint.to_string());
-    Ok(BoundListener {
-        listener,
-        endpoint: resolved,
-    })
-}
+        let resolved = listener.endpoint().unwrap_or(endpoint);
+        Ok(BoundListener {
+            listener,
+            endpoint: resolved,
+        })
+    }
 
-pub async fn connect(endpoint: &str) -> std::io::Result<Box<dyn Stream + Unpin + Send + 'static>> {
-    match Endpoint::parse(endpoint) {
-        Endpoint::Inproc(name) => Ok(Box::new(connect_inproc(&name)?)),
-        Endpoint::Ipc(path) => {
-            #[cfg(all(feature = "tokio-net", unix))]
-            {
-                connect_ipc(&path).await
+    async fn connect(self) -> std::io::Result<Box<dyn Stream + Unpin + Send + 'static>> {
+        match self {
+            Endpoint::Inproc(name) => Ok(Box::new(connect_inproc(&name)?)),
+            Endpoint::Ipc(path) => {
+                #[cfg(all(feature = "tokio-net", unix))]
+                {
+                    connect_ipc(&path).await
+                }
+                #[cfg(all(feature = "tokio-net", windows))]
+                {
+                    let _ = path;
+                    Err(unsupported("ipc transport is unsupported on windows"))
+                }
+                #[cfg(not(feature = "tokio-net"))]
+                {
+                    let _ = path;
+                    Err(unsupported("ipc transport requires `tokio-net` feature"))
+                }
+                #[cfg(all(feature = "tokio-net", not(any(unix, windows))))]
+                {
+                    let _ = path;
+                    Err(unsupported("ipc transport is unsupported on this platform"))
+                }
             }
-            #[cfg(all(feature = "tokio-net", windows))]
-            {
-                let _ = path;
-                Err(std::io::Error::new(
-                    std::io::ErrorKind::Unsupported,
-                    "ipc transport is unsupported on windows",
-                ))
+            Endpoint::Quic(endpoint) => {
+                #[cfg(feature = "quic-s2n")]
+                {
+                    connect_quic(&endpoint).await
+                }
+                #[cfg(not(feature = "quic-s2n"))]
+                {
+                    let _ = endpoint;
+                    Err(unsupported("quic transport requires `quic-s2n` feature"))
+                }
             }
-            #[cfg(not(feature = "tokio-net"))]
-            {
-                let _ = path;
-                Err(std::io::Error::new(
-                    std::io::ErrorKind::Unsupported,
-                    "ipc transport requires `tokio-net` feature",
-                ))
+            Endpoint::WebSocket(endpoint) => {
+                #[cfg(feature = "tokio-websocket")]
+                {
+                    connect_websocket(&endpoint).await
+                }
+                #[cfg(not(feature = "tokio-websocket"))]
+                {
+                    let _ = endpoint;
+                    Err(unsupported(
+                        "websocket transport requires `tokio-websocket` feature",
+                    ))
+                }
             }
-            #[cfg(all(feature = "tokio-net", not(any(unix, windows))))]
-            {
-                let _ = path;
-                Err(std::io::Error::new(
-                    std::io::ErrorKind::Unsupported,
-                    "ipc transport is unsupported on this platform",
-                ))
+            Endpoint::Tls(endpoint) => {
+                #[cfg(feature = "tokio-tls")]
+                {
+                    connect_tls(&endpoint).await
+                }
+                #[cfg(not(feature = "tokio-tls"))]
+                {
+                    let _ = endpoint;
+                    Err(unsupported("tls transport requires `tokio-tls` feature"))
+                }
             }
-        }
-        Endpoint::Quic(endpoint) => {
-            #[cfg(feature = "quic-s2n")]
-            {
-                connect_quic(&endpoint).await
-            }
-            #[cfg(not(feature = "quic-s2n"))]
-            {
-                let _ = endpoint;
-                Err(std::io::Error::new(
-                    std::io::ErrorKind::Unsupported,
-                    "quic transport requires `quic-s2n` feature",
-                ))
-            }
-        }
-        Endpoint::WebSocket(endpoint) => {
-            #[cfg(feature = "tokio-websocket")]
-            {
-                connect_websocket(&endpoint).await
-            }
-            #[cfg(not(feature = "tokio-websocket"))]
-            {
-                let _ = endpoint;
-                Err(std::io::Error::new(
-                    std::io::ErrorKind::Unsupported,
-                    "websocket transport requires `tokio-websocket` feature",
-                ))
-            }
-        }
-        Endpoint::Tls(endpoint) => {
-            #[cfg(feature = "tokio-tls")]
-            {
-                connect_tls(&endpoint).await
-            }
-            #[cfg(not(feature = "tokio-tls"))]
-            {
-                let _ = endpoint;
-                Err(std::io::Error::new(
-                    std::io::ErrorKind::Unsupported,
-                    "tls transport requires `tokio-tls` feature",
-                ))
-            }
-        }
-        Endpoint::Tcp(addr) => {
-            #[cfg(feature = "tokio-net")]
-            {
-                let stream = tokio::net::TcpStream::connect(&addr).await?;
-                Ok(Box::new(stream))
-            }
-            #[cfg(not(feature = "tokio-net"))]
-            {
-                let _ = addr;
-                Err(std::io::Error::new(
-                    std::io::ErrorKind::Unsupported,
-                    "tcp transport requires `tokio-net` feature",
-                ))
+            Endpoint::Tcp(addr) => {
+                #[cfg(feature = "tokio-net")]
+                {
+                    let stream = tokio::net::TcpStream::connect(&addr).await?;
+                    Ok(Box::new(stream))
+                }
+                #[cfg(not(feature = "tokio-net"))]
+                {
+                    let _ = addr;
+                    Err(unsupported("tcp transport requires `tokio-net` feature"))
+                }
             }
         }
     }
+
+    fn display(&self) -> String {
+        match self {
+            Endpoint::Inproc(name) => format!("inproc://{name}"),
+            Endpoint::Ipc(path) => format!("ipc://{path}"),
+            Endpoint::Quic(endpoint) | Endpoint::Tls(endpoint) | Endpoint::WebSocket(endpoint) => {
+                endpoint.clone()
+            }
+            Endpoint::Tcp(addr) => format!("tcp://{addr}"),
+        }
+    }
+}
+
+pub async fn bind(endpoint: &str) -> std::io::Result<BoundListener> {
+    Endpoint::parse(endpoint).bind().await
+}
+
+pub async fn connect(endpoint: &str) -> std::io::Result<Box<dyn Stream + Unpin + Send + 'static>> {
+    Endpoint::parse(endpoint).connect().await
 }

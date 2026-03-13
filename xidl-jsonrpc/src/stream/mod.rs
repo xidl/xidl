@@ -1,11 +1,12 @@
 use crate::Error;
+use crate::line_io::{read_json_line, write_json_line};
 use futures_core::Stream;
 use futures_util::StreamExt;
 use serde_json::Value;
 use std::future::Future;
 use std::pin::Pin;
 use std::time::Duration;
-use tokio::io::{AsyncBufReadExt, AsyncRead, AsyncWrite, AsyncWriteExt, BufReader, BufWriter};
+use tokio::io::{AsyncRead, AsyncWrite, AsyncWriteExt, BufReader, BufWriter};
 use tokio::sync::mpsc;
 use tokio::task::JoinHandle;
 
@@ -148,16 +149,7 @@ pub async fn open_bidi_client<S>(
 where
     S: AsyncRead + AsyncWrite + Unpin + Send + 'static,
 {
-    let request = serde_json::json!({
-        "jsonrpc": "2.0",
-        "id": 1u64,
-        "method": method,
-        "params": Value::Null,
-    });
-    let payload = serde_json::to_string(&request)?;
-    io.write_all(payload.as_bytes()).await?;
-    io.write_all(b"\n").await?;
-    io.flush().await?;
+    write_request_line(&mut io, method, Value::Null).await?;
     Ok(open_bidi_io(io))
 }
 
@@ -169,32 +161,10 @@ pub async fn open_server_stream_client<S>(
 where
     S: AsyncRead + AsyncWrite + Unpin + Send + 'static,
 {
-    let request = serde_json::json!({
-        "jsonrpc": "2.0",
-        "id": 1u64,
-        "method": method,
-        "params": params,
-    });
-    let payload = serde_json::to_string(&request)?;
-    io.write_all(payload.as_bytes()).await?;
-    io.write_all(b"\n").await?;
-    io.flush().await?;
+    write_request_line(&mut io, method, params).await?;
 
     let (read_half, _write_half) = tokio::io::split(io);
-    let reader_stream = boxed(async_stream::try_stream! {
-        let mut reader = BufReader::new(read_half);
-        let mut line = String::new();
-        loop {
-            line.clear();
-            let bytes = reader.read_line(&mut line).await?;
-            if bytes == 0 {
-                break;
-            }
-            let value: Value = serde_json::from_str(&line)?;
-            yield value;
-        }
-    });
-    Ok(Reader::new(reader_stream))
+    Ok(json_value_reader(read_half))
 }
 
 fn open_bidi_io<S>(io: S) -> ReaderWriter<Value, Value>
@@ -207,29 +177,42 @@ where
         let mut writer = BufWriter::new(write_half);
         while let Some(item) = rx.recv().await {
             let value = item?;
-            let payload = serde_json::to_string(&value)?;
-            writer.write_all(payload.as_bytes()).await?;
-            writer.write_all(b"\n").await?;
-            writer.flush().await?;
+            write_json_line(&mut writer, &value).await?;
         }
         writer.shutdown().await?;
         Ok(())
     });
     let writer = Writer::new(tx, writer_task);
 
+    let reader = json_value_reader(read_half);
+    ReaderWriter::new(writer, reader)
+}
+
+async fn write_request_line<W>(writer: &mut W, method: &str, params: Value) -> Result<(), Error>
+where
+    W: AsyncWrite + Unpin,
+{
+    let request = serde_json::json!({
+        "jsonrpc": "2.0",
+        "id": 1u64,
+        "method": method,
+        "params": params,
+    });
+    write_json_line(writer, &request).await
+}
+
+fn json_value_reader<R>(reader: R) -> Reader<'static, Value>
+where
+    R: AsyncRead + Unpin + Send + 'static,
+{
     let reader_stream = boxed(async_stream::try_stream! {
-        let mut reader = BufReader::new(read_half);
-        let mut line = String::new();
+        let mut reader = BufReader::new(reader);
         loop {
-            line.clear();
-            let bytes = reader.read_line(&mut line).await?;
-            if bytes == 0 {
+            let Some(value) = read_json_line::<_, Value>(&mut reader).await? else {
                 break;
-            }
-            let value: Value = serde_json::from_str(&line)?;
+            };
             yield value;
         }
     });
-    let reader = Reader::new(reader_stream);
-    ReaderWriter::new(writer, reader)
+    Reader::new(reader_stream)
 }

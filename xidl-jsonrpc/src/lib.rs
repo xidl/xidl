@@ -5,6 +5,8 @@ use serde_json::Value;
 mod client;
 mod error;
 #[cfg(feature = "tokio")]
+mod line_io;
+#[cfg(feature = "tokio")]
 mod server;
 pub mod stream;
 

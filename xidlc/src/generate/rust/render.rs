@@ -16,6 +16,10 @@ pub struct RustRenderOutput {
 }
 
 impl RustRenderOutput {
+    pub fn empty() -> Self {
+        Self::default()
+    }
+
     pub fn push_source(mut self, value: String) -> Self {
         self.source.push(value);
         self
@@ -60,6 +64,68 @@ impl RustRenderer {
             .map_err(|err| IdlcError::template(err.to_string()))?
             .render(ctx)
             .map_err(|err| IdlcError::template(err.to_string()))
+    }
+
+    pub fn render_source_template<T: Serialize>(
+        &self,
+        template: &str,
+        ctx: &T,
+    ) -> IdlcResult<RustRenderOutput> {
+        self.render_template(template, ctx)
+            .map(|rendered| RustRenderOutput::default().push_source(rendered))
+    }
+
+    pub fn render_module(&self, ident: &str, body: &str) -> IdlcResult<String> {
+        self.render_template(
+            "module.rs.j2",
+            &serde_json::json!({
+                "ident": crate::generate::rust::util::rust_ident(ident),
+                "body": body,
+            }),
+        )
+    }
+
+    pub fn render_spec(&self, definitions: &[String]) -> IdlcResult<String> {
+        self.render_template(
+            "spec.rs.j2",
+            &serde_json::json!({
+                "definitions": definitions,
+            }),
+        )
+    }
+
+    pub fn enrich_ctx(&self, mut ctx: serde_json::Value, doc: &[String]) -> serde_json::Value {
+        if let Some(obj) = ctx.as_object_mut() {
+            obj.insert(
+                "typeobject_path".to_string(),
+                serde_json::json!(self.typeobject_path()),
+            );
+            obj.insert("doc".to_string(), serde_json::json!(doc));
+        }
+        ctx
+    }
+
+    pub fn with_ident(&self, mut ctx: serde_json::Value, ident: &str) -> serde_json::Value {
+        if let Some(obj) = ctx.as_object_mut() {
+            obj.insert(
+                "ident".to_string(),
+                serde_json::json!(crate::generate::rust::util::rust_ident(ident)),
+            );
+        }
+        ctx
+    }
+
+    pub fn enrich_scoped_ctx(
+        &self,
+        ctx: serde_json::Value,
+        doc: &[String],
+        module_path: &[String],
+    ) -> serde_json::Value {
+        let mut ctx = self.enrich_ctx(ctx, doc);
+        if let Some(obj) = ctx.as_object_mut() {
+            obj.insert("module_path".to_string(), serde_json::json!(module_path));
+        }
+        ctx
     }
 
     pub fn typeobject_path(&self) -> &str {

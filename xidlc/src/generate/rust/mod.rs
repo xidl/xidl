@@ -18,7 +18,6 @@ pub use render::{RustRender, RustRenderOutput, RustRenderer};
 
 use crate::error::IdlcResult;
 use crate::jsonrpc::{Artifact, ArtifactFile};
-use serde_json::json;
 use std::path::Path;
 use xidl_parser::hir;
 use xidl_parser::hir::{ParserProperties, Specification};
@@ -39,13 +38,7 @@ pub fn generate_with_properties(
 
     let renderer = RustRenderer::new(typeobject_path.to_string(), properties.clone())?;
     let output = spec.render(&renderer)?;
-
-    let source = renderer.render_template(
-        "spec.rs.j2",
-        &json!({
-            "definitions": output.source,
-        }),
-    )?;
+    let source = renderer.render_spec(&output.source)?;
 
     Ok(vec![Artifact::new_file(ArtifactFile {
         path: filename,

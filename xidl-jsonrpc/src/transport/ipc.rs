@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 
 use std::net::SocketAddr;
 
-use super::{Listener, Stream};
+use super::{Listener, Stream, loopback_peer_addr};
 
 #[cfg(unix)]
 pub struct IpcListener {
@@ -46,7 +46,7 @@ impl Listener for IpcListener {
         &self,
     ) -> std::io::Result<(Box<dyn Stream + Unpin + Send + 'static>, SocketAddr)> {
         let (stream, _peer) = self.inner.accept().await?;
-        Ok((Box::new(stream), SocketAddr::from(([127, 0, 0, 1], 0))))
+        Ok((Box::new(stream), loopback_peer_addr()))
     }
 
     fn endpoint(&self) -> Option<String> {

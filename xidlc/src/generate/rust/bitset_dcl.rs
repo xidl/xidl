@@ -1,6 +1,6 @@
 use crate::error::IdlcResult;
 use crate::generate::rust::util::{
-    bitfield_type, render_const, rust_scoped_name, serialize_kind_name,
+    bitfield_type, render_const, rust_derive_info_with_extra, rust_scoped_name, serialize_kind_name,
 };
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::doc_lines_from_annotations;
@@ -37,19 +37,16 @@ pub(crate) fn render_bitset_with_config(
         })
         .collect::<Vec<_>>();
     let serialize_kind = serialize_kind_name(def.serialize_kind(config));
-    let derive = crate::generate::rust::util::rust_derives_from_annotations_with_extra(
-        &def.annotations,
-        &def.annotations,
+    let derive = rust_derive_info_with_extra(&def.annotations, &def.annotations);
+    let ctx = renderer.enrich_ctx(
+        json!({
+            "ident": crate::generate::rust::util::rust_ident(&def.ident),
+            "parent": parent,
+            "fields": fields,
+            "serialize_kind": serialize_kind,
+            "derive": derive.all,
+        }),
+        &doc_lines_from_annotations(&def.annotations),
     );
-    let ctx = json!({
-        "ident": crate::generate::rust::util::rust_ident(&def.ident),
-        "parent": parent,
-        "fields": fields,
-        "serialize_kind": serialize_kind,
-        "derive": derive,
-        "doc": doc_lines_from_annotations(&def.annotations),
-        "typeobject_path": renderer.typeobject_path(),
-    });
-    let rendered = renderer.render_template("bitset.rs.j2", &ctx)?;
-    Ok(RustRenderOutput::default().push_source(rendered))
+    renderer.render_source_template("bitset.rs.j2", &ctx)
 }

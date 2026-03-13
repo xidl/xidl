@@ -1,7 +1,7 @@
 use crate::error::IdlcResult;
 use crate::generate::rust::util::{
-    declarator_name, render_const, rust_scoped_name, rust_switch_type, serialize_kind_name,
-    type_with_decl,
+    constr_type_scoped_name, declarator_name, render_const, rust_derive_info_with_extra,
+    rust_scoped_name, rust_switch_type, serialize_kind_name, type_with_decl,
 };
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::doc_lines_from_annotations;
@@ -12,7 +12,7 @@ use xidl_parser::hir;
 
 impl RustRender for hir::UnionForwardDcl {
     fn render(&self, _renderer: &RustRenderer) -> IdlcResult<RustRenderOutput> {
-        Ok(RustRenderOutput::default())
+        Ok(RustRenderOutput::empty())
     }
 }
 
@@ -44,7 +44,7 @@ pub(crate) fn render_union_with_config(
             let ty = match ty {
                 hir::ElementSpecTy::TypeSpec(spec) => type_with_decl(spec, decl),
                 hir::ElementSpecTy::ConstrTypeDcl(constr) => {
-                    rust_scoped_name(&constr_type_name(constr))
+                    rust_scoped_name(&constr_type_scoped_name(constr))
                 }
             };
             json!({ "name": name, "ty": ty, "doc": doc })
@@ -79,7 +79,7 @@ pub(crate) fn render_union_with_config(
             let field_ty = match &case.element.ty {
                 hir::ElementSpecTy::TypeSpec(spec) => type_with_decl(spec, &case.element.value),
                 hir::ElementSpecTy::ConstrTypeDcl(constr) => {
-                    rust_scoped_name(&constr_type_name(constr))
+                    rust_scoped_name(&constr_type_scoped_name(constr))
                 }
             };
             json!({
@@ -97,42 +97,21 @@ pub(crate) fn render_union_with_config(
         .any(|case| case["is_default"].as_bool() == Some(true));
 
     let serialize_kind = serialize_kind_name(def.serialize_kind(config));
-    let derive = crate::generate::rust::util::rust_derives_from_annotations_with_extra(
-        &def.annotations,
-        &def.annotations,
+    let derive = rust_derive_info_with_extra(&def.annotations, &def.annotations);
+    let ctx = renderer.enrich_scoped_ctx(
+        json!({
+            "ident": crate::generate::rust::util::rust_ident(&def.ident),
+            "switch_ty": rust_switch_type(&def.switch_type_spec),
+            "members": members,
+            "cases": cases,
+            "has_default": has_default,
+            "serialize_kind": serialize_kind,
+            "has_serde_serialize": derive.has_serde_serialize,
+            "has_serde_deserialize": derive.has_serde_deserialize,
+            "derive": derive.non_serde.into_iter().collect_vec(),
+        }),
+        &doc_lines_from_annotations(&def.annotations),
+        module_path,
     );
-    let module_path = module_path.to_vec();
-
-    let ctx = json!({
-        "ident": crate::generate::rust::util::rust_ident(&def.ident),
-        "switch_ty": rust_switch_type(&def.switch_type_spec),
-        "members": members,
-        "cases": cases,
-        "has_default": has_default,
-        "serialize_kind": serialize_kind,
-        "has_serde_serialize": derive.iter().find(|v|*v=="::serde::Serialize"),
-        "has_serde_deserialize": derive.iter().find(|v|*v=="::serde::Deserialize"),
-        "derive": derive.into_iter().filter(|v| v != "::serde::Serialize" && v!="::serde::Deserialize").collect_vec(),
-        "module_path": module_path,
-        "doc": doc_lines_from_annotations(&def.annotations),
-        "typeobject_path": renderer.typeobject_path(),
-    });
-    let rendered = renderer.render_template("union.rs.j2", &ctx)?;
-    Ok(RustRenderOutput::default().push_source(rendered))
-}
-
-fn constr_type_name(constr: &hir::ConstrTypeDcl) -> hir::ScopedName {
-    let name = match constr {
-        hir::ConstrTypeDcl::StructForwardDcl(def) => def.ident.clone(),
-        hir::ConstrTypeDcl::StructDcl(def) => def.ident.clone(),
-        hir::ConstrTypeDcl::EnumDcl(def) => def.ident.clone(),
-        hir::ConstrTypeDcl::UnionForwardDcl(def) => def.ident.clone(),
-        hir::ConstrTypeDcl::UnionDef(def) => def.ident.clone(),
-        hir::ConstrTypeDcl::BitsetDcl(def) => def.ident.clone(),
-        hir::ConstrTypeDcl::BitmaskDcl(def) => def.ident.clone(),
-    };
-    hir::ScopedName {
-        name: vec![name],
-        is_root: false,
-    }
+    renderer.render_source_template("union.rs.j2", &ctx)
 }

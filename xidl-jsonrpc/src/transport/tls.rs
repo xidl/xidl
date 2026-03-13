@@ -1,9 +1,6 @@
 use std::net::SocketAddr;
 
-use super::tls_config::{
-    build_client_connector, build_server_acceptor, parse_url, query_map, required_param,
-    server_name, url_host_port,
-};
+use super::tls_config::{TransportUrl, build_client_connector, build_server_acceptor, server_name};
 use super::{Listener, Stream};
 
 type DynStream = Box<dyn Stream + Unpin + Send + 'static>;
@@ -15,17 +12,10 @@ pub struct TlsListener {
 
 impl TlsListener {
     pub async fn bind(endpoint: &str) -> std::io::Result<Self> {
-        let url = parse_url(endpoint, &["tls"])?;
-        let params = query_map(&url);
-        let cert = required_param(&params, "cert", "XIDL_TLS_CERT")?;
-        let key = required_param(&params, "key", "XIDL_TLS_KEY")?;
-        let (host, port) = url_host_port(&url)?;
-        let bind_host = if host.contains(':') {
-            format!("[{host}]")
-        } else {
-            host
-        };
-        let listener = tokio::net::TcpListener::bind(format!("{bind_host}:{port}")).await?;
+        let endpoint = TransportUrl::parse(endpoint, &["tls"])?;
+        let cert = endpoint.required_param("cert", "XIDL_TLS_CERT")?;
+        let key = endpoint.required_param("key", "XIDL_TLS_KEY")?;
+        let listener = tokio::net::TcpListener::bind(endpoint.bind_addr()?).await?;
         let acceptor = build_server_acceptor(&cert, &key)?;
         Ok(Self { listener, acceptor })
     }
@@ -45,11 +35,10 @@ impl Listener for TlsListener {
 }
 
 pub async fn connect_tls(endpoint: &str) -> std::io::Result<DynStream> {
-    let url = parse_url(endpoint, &["tls"])?;
-    let params = query_map(&url);
-    let ca = required_param(&params, "ca", "XIDL_TLS_CA")?;
-    let (host, port) = url_host_port(&url)?;
-    let server_name = server_name(&host, params.get("server_name").map(|s| s.as_str()))?;
+    let endpoint = TransportUrl::parse(endpoint, &["tls"])?;
+    let ca = endpoint.required_param("ca", "XIDL_TLS_CA")?;
+    let (host, port) = endpoint.host_port()?;
+    let server_name = server_name(&host, endpoint.optional_param("server_name"))?;
     let connector = build_client_connector(&ca)?;
     let tcp = tokio::net::TcpStream::connect(format!("{host}:{port}")).await?;
     let tls = connector.connect(server_name, tcp).await?;

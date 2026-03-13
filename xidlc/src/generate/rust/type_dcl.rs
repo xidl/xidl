@@ -2,7 +2,9 @@ use crate::error::IdlcResult;
 use crate::generate::rust::bitset_dcl::render_bitset_with_config;
 use crate::generate::rust::struct_dcl::render_struct_with_config;
 use crate::generate::rust::union_def::render_union_with_config;
-use crate::generate::rust::util::{rust_scoped_name, rust_type, typedef_json};
+use crate::generate::rust::util::{
+    constr_type_scoped_name, rust_scoped_name, rust_type, typedef_json,
+};
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::doc_lines_from_annotations;
 use serde_json::json;
@@ -16,16 +18,16 @@ impl RustRender for hir::TypeDcl {
                 render_typedef_with_config(typedef, renderer, &[])
             }
             hir::TypeDclInner::NativeDcl(native) => {
-                let ctx = json!({
+                let ctx = renderer.enrich_ctx(
+                    json!({
                     "name": crate::generate::rust::util::rust_ident(&native.decl.0),
                     "ty": "*mut c_void",
-                    "doc": doc_lines_from_annotations(&native.annotations),
-                    "typeobject_path": renderer.typeobject_path(),
                     "typeobject_complete": "xidl_typeobject::runtime::build_complete_alias(\"\", 0u32, xidl_typeobject::runtime::type_identifier_none())",
                     "typeobject_minimal": "xidl_typeobject::runtime::build_minimal_alias(0u32, xidl_typeobject::runtime::type_identifier_none())",
-                });
-                let rendered = renderer.render_template("typedef.rs.j2", &ctx)?;
-                Ok(RustRenderOutput::default().push_source(rendered))
+                    }),
+                    &doc_lines_from_annotations(&native.annotations),
+                );
+                renderer.render_source_template("typedef.rs.j2", &ctx)
             }
         }
     }
@@ -48,16 +50,8 @@ pub(crate) fn render_typedef_with_config(
         hir::TypedefType::TypeSpec(ty) => {
             for decl in &def.decl {
                 let base = rust_type(ty);
-                let mut ctx = typedef_json(&base, decl);
-                if let Some(obj) = ctx.as_object_mut() {
-                    obj.insert(
-                        "typeobject_path".to_string(),
-                        json!(renderer.typeobject_path()),
-                    );
-                    obj.insert("doc".to_string(), json!(doc.clone()));
-                }
-                let rendered = renderer.render_template("typedef.rs.j2", &ctx)?;
-                out.source.push(rendered);
+                let ctx = renderer.enrich_ctx(typedef_json(&base, decl), &doc);
+                out.extend(renderer.render_source_template("typedef.rs.j2", &ctx)?);
             }
         }
         hir::TypedefType::ConstrTypeDcl(constr) => {
@@ -78,37 +72,10 @@ pub(crate) fn render_typedef_with_config(
                 | hir::ConstrTypeDcl::UnionForwardDcl(_) => RustRenderOutput::default(),
             };
             out.extend(rendered);
-            let name = match constr {
-                hir::ConstrTypeDcl::StructForwardDcl(def) => def.ident.clone(),
-                hir::ConstrTypeDcl::StructDcl(def) => def.ident.clone(),
-                hir::ConstrTypeDcl::EnumDcl(def) => def.ident.clone(),
-                hir::ConstrTypeDcl::UnionForwardDcl(def) => def.ident.clone(),
-                hir::ConstrTypeDcl::UnionDef(def) => def.ident.clone(),
-                hir::ConstrTypeDcl::BitsetDcl(def) => def.ident.clone(),
-                hir::ConstrTypeDcl::BitmaskDcl(def) => def.ident.clone(),
-            };
-            let ty =
-                hir::TypeSpec::SimpleTypeSpec(hir::SimpleTypeSpec::ScopedName(hir::ScopedName {
-                    name: vec![name],
-                    is_root: false,
-                }));
-            let base = match &ty {
-                hir::TypeSpec::SimpleTypeSpec(hir::SimpleTypeSpec::ScopedName(value)) => {
-                    rust_scoped_name(value)
-                }
-                _ => unreachable!(),
-            };
+            let base = rust_scoped_name(&constr_type_scoped_name(constr));
             for decl in &def.decl {
-                let mut ctx = typedef_json(&base, decl);
-                if let Some(obj) = ctx.as_object_mut() {
-                    obj.insert(
-                        "typeobject_path".to_string(),
-                        json!(renderer.typeobject_path()),
-                    );
-                    obj.insert("doc".to_string(), json!(doc.clone()));
-                }
-                let rendered = renderer.render_template("typedef.rs.j2", &ctx)?;
-                out.source.push(rendered);
+                let ctx = renderer.enrich_ctx(typedef_json(&base, decl), &doc);
+                out.extend(renderer.render_source_template("typedef.rs.j2", &ctx)?);
             }
         }
     }

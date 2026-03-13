@@ -1,4 +1,5 @@
 use crate::error::IdlcResult;
+use crate::generate::rust::util::rust_derive_info_with_extra;
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::doc_lines_from_annotations;
 use serde_json::json;
@@ -18,18 +19,17 @@ impl RustRender for hir::BitmaskDcl {
                 })
             })
             .collect::<Vec<_>>();
-        let derive = crate::generate::rust::util::rust_derives_from_annotations_with_extra(
-            &self.annotations,
-            &self.annotations,
+        let derive = rust_derive_info_with_extra(&self.annotations, &self.annotations);
+        let ctx = renderer.enrich_ctx(
+            renderer.with_ident(
+                json!({
+                    "values": values,
+                    "derive": derive.all,
+                }),
+                &self.ident,
+            ),
+            &doc_lines_from_annotations(&self.annotations),
         );
-        let ctx = json!({
-            "ident": crate::generate::rust::util::rust_ident(&self.ident),
-            "values": values,
-            "derive": derive,
-            "doc": doc_lines_from_annotations(&self.annotations),
-            "typeobject_path": renderer.typeobject_path(),
-        });
-        let rendered = renderer.render_template("bitmask.rs.j2", &ctx)?;
-        Ok(RustRenderOutput::default().push_source(rendered))
+        renderer.render_source_template("bitmask.rs.j2", &ctx)
     }
 }

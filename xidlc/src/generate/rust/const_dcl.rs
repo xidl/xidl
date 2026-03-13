@@ -8,12 +8,13 @@ impl RustRender for hir::ConstDcl {
     fn render(&self, renderer: &RustRenderer) -> IdlcResult<RustRenderOutput> {
         let ty = rust_const_type(&self.ty);
         let value = render_const(&self.value);
-        let ctx = json!({
-            "ty": ty,
-            "ident": crate::generate::rust::util::rust_ident(&self.ident),
-            "value": value,
-        });
-        let rendered = renderer.render_template("const.rs.j2", &ctx)?;
-        Ok(RustRenderOutput::default().push_source(rendered))
+        let ctx = renderer.with_ident(
+            json!({
+                "ty": ty,
+                "value": value,
+            }),
+            &self.ident,
+        );
+        renderer.render_source_template("const.rs.j2", &ctx)
     }
 }

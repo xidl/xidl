@@ -1,6 +1,6 @@
 use crate::generate::render_const_expr;
 use serde_json::json;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use xidl_parser::hir;
 
 pub fn rust_scoped_name(value: &hir::ScopedName) -> String {
@@ -223,6 +223,45 @@ pub fn typedef_json(base: &str, decl: &hir::Declarator) -> serde_json::Value {
     json!({ "ty": ty, "name": name })
 }
 
+pub fn constr_type_scoped_name(constr: &hir::ConstrTypeDcl) -> hir::ScopedName {
+    let ident = match constr {
+        hir::ConstrTypeDcl::StructForwardDcl(def) => def.ident.clone(),
+        hir::ConstrTypeDcl::StructDcl(def) => def.ident.clone(),
+        hir::ConstrTypeDcl::EnumDcl(def) => def.ident.clone(),
+        hir::ConstrTypeDcl::UnionForwardDcl(def) => def.ident.clone(),
+        hir::ConstrTypeDcl::UnionDef(def) => def.ident.clone(),
+        hir::ConstrTypeDcl::BitsetDcl(def) => def.ident.clone(),
+        hir::ConstrTypeDcl::BitmaskDcl(def) => def.ident.clone(),
+    };
+    hir::ScopedName {
+        name: vec![ident],
+        is_root: false,
+    }
+}
+
+pub fn serde_rename_from_annotations(annotations: &[hir::Annotation]) -> Option<String> {
+    for annotation in annotations {
+        let Some(name) = annotation_name(annotation) else {
+            continue;
+        };
+        if !name.eq_ignore_ascii_case("name") {
+            continue;
+        }
+        let value = annotation_params(annotation)
+            .map(normalize_annotation_params)
+            .and_then(|params| {
+                params
+                    .get("value")
+                    .cloned()
+                    .or_else(|| params.get("name").cloned())
+            });
+        if value.is_some() {
+            return value;
+        }
+    }
+    None
+}
+
 fn annotation_name_is_derive(annotation: &hir::Annotation) -> bool {
     match annotation {
         hir::Annotation::Builtin { name, .. } => name.eq_ignore_ascii_case("derive"),
@@ -232,6 +271,114 @@ fn annotation_name_is_derive(annotation: &hir::Annotation) -> bool {
             .map(|value| value.eq_ignore_ascii_case("derive"))
             .unwrap_or(false),
         _ => false,
+    }
+}
+
+fn annotation_name(annotation: &hir::Annotation) -> Option<&str> {
+    match annotation {
+        hir::Annotation::Builtin { name, .. } => Some(name.as_str()),
+        hir::Annotation::ScopedName { name, .. } => name.name.last().map(|value| value.as_str()),
+        _ => None,
+    }
+}
+
+fn annotation_params(annotation: &hir::Annotation) -> Option<&hir::AnnotationParams> {
+    match annotation {
+        hir::Annotation::Builtin { params, .. } => params.as_ref(),
+        hir::Annotation::ScopedName { params, .. } => params.as_ref(),
+        _ => None,
+    }
+}
+
+fn normalize_annotation_params(params: &hir::AnnotationParams) -> HashMap<String, String> {
+    let mut out = HashMap::new();
+    match params {
+        hir::AnnotationParams::Raw(value) => {
+            for (key, value) in parse_raw_annotation_params(value) {
+                out.insert(key.to_ascii_lowercase(), value);
+            }
+        }
+        hir::AnnotationParams::Params(values) => {
+            for value in values {
+                let raw = value
+                    .value
+                    .as_ref()
+                    .map(render_annotation_const_expr)
+                    .unwrap_or_default();
+                out.insert(
+                    value.ident.to_ascii_lowercase(),
+                    trim_annotation_quotes(&raw).unwrap_or(raw),
+                );
+            }
+        }
+        hir::AnnotationParams::ConstExpr(expr) => {
+            let rendered = render_annotation_const_expr(expr);
+            out.insert(
+                "value".to_string(),
+                trim_annotation_quotes(&rendered).unwrap_or(rendered),
+            );
+        }
+    }
+    out
+}
+
+fn render_annotation_const_expr(expr: &hir::ConstExpr) -> String {
+    crate::generate::render_const_expr(expr, &rust_scoped_name, &rust_literal)
+}
+
+fn trim_annotation_quotes(raw: &str) -> Option<String> {
+    let raw = raw.trim();
+    if raw.len() >= 2 {
+        let bytes = raw.as_bytes();
+        let first = bytes[0] as char;
+        let last = bytes[raw.len() - 1] as char;
+        if (first == '"' && last == '"') || (first == '\'' && last == '\'') {
+            return Some(raw[1..raw.len() - 1].to_string());
+        }
+    }
+    None
+}
+
+fn parse_raw_annotation_params(raw: &str) -> Vec<(String, String)> {
+    let mut parts = Vec::new();
+    let mut buf = String::new();
+    let mut quote = None;
+    for ch in raw.chars() {
+        match ch {
+            '"' | '\'' => {
+                if quote == Some(ch) {
+                    quote = None;
+                } else if quote.is_none() {
+                    quote = Some(ch);
+                }
+                buf.push(ch);
+            }
+            ',' if quote.is_none() => {
+                push_raw_annotation_param(&mut parts, &buf);
+                buf.clear();
+            }
+            _ => buf.push(ch),
+        }
+    }
+    push_raw_annotation_param(&mut parts, &buf);
+    parts
+}
+
+fn push_raw_annotation_param(parts: &mut Vec<(String, String)>, raw: &str) {
+    let raw = raw.trim();
+    if raw.is_empty() {
+        return;
+    }
+    if let Some((key, value)) = raw.split_once('=') {
+        let key = key.trim();
+        let value = value.trim();
+        if !key.is_empty() {
+            let value = trim_annotation_quotes(value).unwrap_or_else(|| value.to_string());
+            parts.push((key.to_string(), value));
+        }
+    } else {
+        let value = trim_annotation_quotes(raw).unwrap_or_else(|| raw.to_string());
+        parts.push(("value".to_string(), value));
     }
 }
 
@@ -306,4 +453,39 @@ pub fn rust_derives_from_annotations_with_extra(
         }
     }
     out
+}
+
+pub struct RustDeriveInfo {
+    pub all: Vec<String>,
+    pub non_serde: Vec<String>,
+    pub has_serde_serialize: bool,
+    pub has_serde_deserialize: bool,
+}
+
+impl RustDeriveInfo {
+    pub fn enable_serde_attrs(&self) -> bool {
+        self.has_serde_serialize || self.has_serde_deserialize
+    }
+}
+
+pub fn rust_derive_info_with_extra(
+    primary: &[hir::Annotation],
+    extra: &[hir::Annotation],
+) -> RustDeriveInfo {
+    let all = rust_derives_from_annotations_with_extra(primary, extra);
+    let has_serde_serialize = all.iter().any(|value| value == "::serde::Serialize");
+    let has_serde_deserialize = all.iter().any(|value| value == "::serde::Deserialize");
+    let non_serde = all
+        .iter()
+        .filter(|value| {
+            value.as_str() != "::serde::Serialize" && value.as_str() != "::serde::Deserialize"
+        })
+        .cloned()
+        .collect();
+    RustDeriveInfo {
+        all,
+        non_serde,
+        has_serde_serialize,
+        has_serde_deserialize,
+    }
 }

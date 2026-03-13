@@ -1,6 +1,7 @@
+use crate::line_io::write_json_line;
 use crate::{Error, ErrorCode, Handler, JSONRPC_VERSION, RpcError, RpcRequestOwned, RpcResponse};
 use serde_json::Value;
-use tokio::io::{AsyncBufReadExt, AsyncRead, AsyncWrite, AsyncWriteExt, BufStream};
+use tokio::io::{AsyncBufReadExt, AsyncRead, AsyncWrite, BufStream};
 
 pub(crate) struct ServerSession<RW, H> {
     stream: Option<BufStream<RW>>,
@@ -75,17 +76,34 @@ where
     }
 
     async fn write_result(&mut self, id: Option<u64>, result: Value) -> Result<(), Error> {
-        let response = RpcResponse {
+        self.write_response(Self::success_response(id, result))
+            .await
+    }
+
+    async fn write_error(&mut self, id: Option<u64>, error: Error) -> Result<(), Error> {
+        self.write_response(Self::error_response(id, error)).await
+    }
+
+    fn success_response(id: Option<u64>, result: Value) -> RpcResponse {
+        RpcResponse {
             jsonrpc: Some(JSONRPC_VERSION.to_string()),
             id,
             result: Some(result),
             error: None,
-        };
-        self.write_response(response).await
+        }
     }
 
-    async fn write_error(&mut self, id: Option<u64>, error: Error) -> Result<(), Error> {
-        let rpc_error = match error {
+    fn error_response(id: Option<u64>, error: Error) -> RpcResponse {
+        RpcResponse {
+            jsonrpc: Some(JSONRPC_VERSION.to_string()),
+            id,
+            result: None,
+            error: Some(Self::rpc_error(error)),
+        }
+    }
+
+    fn rpc_error(error: Error) -> RpcError {
+        match error {
             Error::Rpc {
                 code,
                 message,
@@ -110,25 +128,14 @@ where
                 message: err.to_string(),
                 data: None,
             },
-        };
-        let response = RpcResponse {
-            jsonrpc: Some(JSONRPC_VERSION.to_string()),
-            id,
-            result: None,
-            error: Some(rpc_error),
-        };
-        self.write_response(response).await
+        }
     }
 
     async fn write_response(&mut self, response: RpcResponse) -> Result<(), Error> {
-        let payload = serde_json::to_string(&response)?;
         let stream = self
             .stream
             .as_mut()
             .ok_or(Error::Protocol("missing stream"))?;
-        stream.write_all(payload.as_bytes()).await?;
-        stream.write_all(b"\n").await?;
-        stream.flush().await?;
-        Ok(())
+        write_json_line(stream, &response).await
     }
 }

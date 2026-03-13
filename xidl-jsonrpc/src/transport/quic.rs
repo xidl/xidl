@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::net::{Ipv4Addr, SocketAddr, SocketAddrV4};
 use std::sync::{Arc, LazyLock};
 
@@ -6,6 +5,7 @@ use dashmap::DashMap;
 use s2n_quic::client::Connect;
 use tokio::sync::{Mutex, mpsc};
 
+use super::tls_config::TransportUrl;
 use super::{Listener, Stream};
 
 type DynStream = Box<dyn Stream + Unpin + Send + 'static>;
@@ -15,73 +15,40 @@ const DEFAULT_KEY: &str = "key.pem";
 const DEFAULT_CA: &str = "cert.pem";
 const DEFAULT_SERVER_NAME: &str = "localhost";
 
-struct QuicEndpoint {
-    addr: String,
-    params: HashMap<String, String>,
+struct QuicConfig {
+    endpoint: TransportUrl,
 }
 
-impl QuicEndpoint {
+impl QuicConfig {
     fn parse(endpoint: &str) -> std::io::Result<Self> {
-        let addr = endpoint
-            .strip_prefix("quic://")
-            .unwrap_or(endpoint)
-            .to_string();
-        let mut parts = addr.splitn(2, '?');
-        let host = parts.next().unwrap_or_default().to_string();
-        if host.is_empty() {
-            return Err(std::io::Error::new(
-                std::io::ErrorKind::InvalidInput,
-                "missing quic address",
-            ));
-        }
-        let mut params = HashMap::new();
-        if let Some(query) = parts.next() {
-            for pair in query.split('&') {
-                if pair.is_empty() {
-                    continue;
-                }
-                let mut kv = pair.splitn(2, '=');
-                let key = kv.next().unwrap_or_default();
-                if key.is_empty() {
-                    continue;
-                }
-                let value = kv.next().unwrap_or_default();
-                params.insert(key.to_string(), value.to_string());
-            }
-        }
-        Ok(Self { addr: host, params })
+        Ok(Self {
+            endpoint: TransportUrl::parse(endpoint, &["quic"])?,
+        })
+    }
+
+    fn addr(&self) -> std::io::Result<String> {
+        let (host, port) = self.endpoint.host_port()?;
+        Ok(format!("{host}:{port}"))
     }
 
     fn cert_path(&self) -> String {
-        self.params
-            .get("cert")
-            .cloned()
-            .or_else(|| std::env::var("XIDL_QUIC_CERT").ok())
-            .unwrap_or_else(|| DEFAULT_CERT.to_string())
+        self.endpoint
+            .param_or_env_or("cert", "XIDL_QUIC_CERT", DEFAULT_CERT)
     }
 
     fn key_path(&self) -> String {
-        self.params
-            .get("key")
-            .cloned()
-            .or_else(|| std::env::var("XIDL_QUIC_KEY").ok())
-            .unwrap_or_else(|| DEFAULT_KEY.to_string())
+        self.endpoint
+            .param_or_env_or("key", "XIDL_QUIC_KEY", DEFAULT_KEY)
     }
 
     fn ca_path(&self) -> String {
-        self.params
-            .get("ca")
-            .cloned()
-            .or_else(|| std::env::var("XIDL_QUIC_CA").ok())
-            .unwrap_or_else(|| DEFAULT_CA.to_string())
+        self.endpoint
+            .param_or_env_or("ca", "XIDL_QUIC_CA", DEFAULT_CA)
     }
 
     fn server_name(&self) -> String {
-        self.params
-            .get("server_name")
-            .cloned()
-            .or_else(|| std::env::var("XIDL_QUIC_SERVER_NAME").ok())
-            .unwrap_or_else(|| DEFAULT_SERVER_NAME.to_string())
+        self.endpoint
+            .param_or_env_or("server_name", "XIDL_QUIC_SERVER_NAME", DEFAULT_SERVER_NAME)
     }
 }
 
@@ -96,13 +63,14 @@ pub struct QuicListener {
 
 impl QuicListener {
     pub fn bind(endpoint: &str) -> std::io::Result<Self> {
-        let cfg = QuicEndpoint::parse(endpoint)?;
+        let cfg = QuicConfig::parse(endpoint)?;
         let cert = cfg.cert_path();
         let key = cfg.key_path();
+        let addr = cfg.addr()?;
         let mut server = s2n_quic::Server::builder()
             .with_tls((cert.as_str(), key.as_str()))
             .map_err(io_other)?
-            .with_io(cfg.addr.as_str())
+            .with_io(addr.as_str())
             .map_err(io_other)?
             .start()
             .map_err(io_other)?;
@@ -159,7 +127,7 @@ pub async fn connect_quic(endpoint: &str) -> std::io::Result<DynStream> {
         return Ok(Box::new(stream));
     }
 
-    let cfg = QuicEndpoint::parse(endpoint)?;
+    let cfg = QuicConfig::parse(endpoint)?;
     let client = s2n_quic::Client::builder()
         .with_tls(cfg.ca_path().as_str())
         .map_err(io_other)?
@@ -167,7 +135,7 @@ pub async fn connect_quic(endpoint: &str) -> std::io::Result<DynStream> {
         .map_err(io_other)?
         .start()
         .map_err(io_other)?;
-    let connect = Connect::new(cfg.addr.parse::<SocketAddr>().map_err(io_other)?)
+    let connect = Connect::new(cfg.addr()?.parse::<SocketAddr>().map_err(io_other)?)
         .with_server_name(cfg.server_name());
     let connection = client.connect(connect).await.map_err(io_other)?;
 
