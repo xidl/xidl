@@ -317,12 +317,12 @@ impl HttpDefaultsServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         let query = HttpDefaultsServiceGetNameQuery{
             name,
         };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if!query.is_empty(){
             req.url_mut().set_query(Some(&query));
         }
@@ -332,11 +332,11 @@ impl HttpDefaultsServiceClient{
         .http()
         .execute(req)
         .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
             resp.json::<String>()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -353,13 +353,13 @@ impl HttpDefaultsServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         let query = HttpDefaultsServiceListOrdersQuery{
             page,
             size,
         };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if!query.is_empty(){
             req.url_mut().set_query(Some(&query));
         }
@@ -369,11 +369,11 @@ impl HttpDefaultsServiceClient{
         .http()
         .execute(req)
         .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
             resp.json::<String>()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -389,10 +389,10 @@ impl HttpDefaultsServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         let body = req;
         let body = xidl_rust_axum::serde_json::to_vec(&body)
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
         xidl_rust_axum::reqwest::header::CONTENT_TYPE,
         xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/json"),
@@ -403,11 +403,11 @@ impl HttpDefaultsServiceClient{
         .http()
         .execute(req)
         .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
             resp.json::<String>()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -423,13 +423,13 @@ impl HttpDefaultsServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         let body = HttpDefaultsServiceSearchUserBody{
             name,
             age,
         };
         let body = xidl_rust_axum::serde_json::to_vec(&body)
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
         xidl_rust_axum::reqwest::header::CONTENT_TYPE,
         xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/json"),
@@ -440,11 +440,11 @@ impl HttpDefaultsServiceClient{
         .http()
         .execute(req)
         .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
             resp.json::<String>()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -461,12 +461,12 @@ impl HttpDefaultsServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         let query = HttpDefaultsServiceGetUserQuery{
             lang,
         };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if!query.is_empty(){
             req.url_mut().set_query(Some(&query));
         }
@@ -476,11 +476,11 @@ impl HttpDefaultsServiceClient{
         .http()
         .execute(req)
         .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
             resp.json::<String>()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -497,12 +497,12 @@ impl HttpDefaultsServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         let query = HttpDefaultsServiceGetUserAliasQuery{
             locale,
         };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if!query.is_empty(){
             req.url_mut().set_query(Some(&query));
         }
@@ -512,11 +512,11 @@ impl HttpDefaultsServiceClient{
         .http()
         .execute(req)
         .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
             resp.json::<String>()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();

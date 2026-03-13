@@ -109,7 +109,7 @@ impl HttpBidiStreamServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         let mut ws_url = self.client.ws_url(&path)?;
         return xidl_rust_axum::stream::open_bidi_client::<HttpBidiStreamServiceChatRequest,HttpBidiStreamServiceChatResponse>(&ws_url).await;
     }

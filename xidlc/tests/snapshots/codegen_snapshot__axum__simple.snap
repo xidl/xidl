@@ -237,17 +237,17 @@ impl HttpServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         let resp = self
         .client
         .http()
         .execute(req)
         .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
             resp.json::<HealthResponse>()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -263,17 +263,17 @@ impl HttpServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         let resp = self
         .client
         .http()
         .execute(req)
         .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
             resp.json::<VersionResponse>()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -289,17 +289,17 @@ impl HttpServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         let resp = self
         .client
         .http()
         .execute(req)
         .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
             resp.json::<MemoryResponse>()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -315,13 +315,13 @@ impl HttpServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         let resp = self
         .client
         .http()
         .execute(req)
         .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
             Ok(())
         }else{
@@ -339,17 +339,17 @@ impl HttpServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         let resp = self
         .client
         .http()
         .execute(req)
         .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
             resp.json::<crate::api::state::StateResponse>()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -365,17 +365,17 @@ impl HttpServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         let resp = self
         .client
         .http()
         .execute(req)
         .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
             resp.json::<UdpStatsResponse>()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -391,13 +391,13 @@ impl HttpServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         let body = HttpServiceCreateSimpleBody{
             local_addr,
             remote_port,
         };
         let body = xidl_rust_axum::serde_json::to_vec(&body)
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
         xidl_rust_axum::reqwest::header::CONTENT_TYPE,
         xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/json"),
@@ -408,11 +408,11 @@ impl HttpServiceClient{
         .http()
         .execute(req)
         .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
             resp.json::<CreateSimpleResponse>()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -429,13 +429,13 @@ impl HttpServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::DELETE,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         let resp = self
         .client
         .http()
         .execute(req)
         .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
             Ok(())
         }else{

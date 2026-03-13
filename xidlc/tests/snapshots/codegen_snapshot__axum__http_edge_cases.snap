@@ -236,12 +236,12 @@ impl HttpEdgeCasesServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::HEAD,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         let query = HttpEdgeCasesServiceHealthQuery{
             trace,
         };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if!query.is_empty(){
             req.url_mut().set_query(Some(&query));
         }
@@ -251,7 +251,7 @@ impl HttpEdgeCasesServiceClient{
         .http()
         .execute(req)
         .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
             Ok(())
         }else{
@@ -270,12 +270,12 @@ impl HttpEdgeCasesServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         let query = HttpEdgeCasesServiceGetUserQuery{
             locale,
         };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if!query.is_empty(){
             req.url_mut().set_query(Some(&query));
         }
@@ -285,11 +285,11 @@ impl HttpEdgeCasesServiceClient{
         .http()
         .execute(req)
         .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
             resp.json::<String>()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -307,17 +307,17 @@ impl HttpEdgeCasesServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         let resp = self
         .client
         .http()
         .execute(req)
         .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
             resp.json::<String>()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -333,13 +333,13 @@ impl HttpEdgeCasesServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         let query = HttpEdgeCasesServiceLookupQuery{
             keyword,
             page_size,
         };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if!query.is_empty(){
             req.url_mut().set_query(Some(&query));
         }
@@ -349,11 +349,11 @@ impl HttpEdgeCasesServiceClient{
         .http()
         .execute(req)
         .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
             resp.json::<String>()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();

@@ -95,7 +95,7 @@ impl HttpClientStreamServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
         xidl_rust_axum::reqwest::header::CONTENT_TYPE,
         xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/x-ndjson"),
@@ -110,11 +110,11 @@ impl HttpClientStreamServiceClient{
             let resp = http
             .execute(req)
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
             if resp.status().is_success(){
                 resp.json::<String>()
                 .await
-                .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+                .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
             }else{
                 let status = resp.status();
                 let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();

@@ -86,13 +86,13 @@ pub mod test{
             })?;
             let header_str = header_value
             .to_str()
-            .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
             let req_id:String = header_str.to_string();
             let mut flags:Vec<String> = Vec::new();
             for header_value in headers.get_all("X-Flags").iter(){
                 let header_str = header_value
                 .to_str()
-                .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+                .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
                 let parsed:String = header_str.to_string();
                 flags.push(parsed);
             }
@@ -108,14 +108,14 @@ pub mod test{
             })?;
             let header_str = header_value
             .to_str()
-            .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
             let age:u32 = header_str.parse()
-            .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
             let mut cookie_map: ::std::collections::HashMap<String,Vec<String>> = ::std::collections::HashMap::new();
             for header_value in headers.get_all("cookie").iter(){
                 let cookie_str = header_value
                 .to_str()
-                .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+                .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
                 for part in cookie_str.split(';'){
                     let part = part.trim();
                     if part.is_empty(){
@@ -178,13 +178,13 @@ pub mod test{
             })?;
             let header_str = header_value
             .to_str()
-            .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
             let token:String = header_str.to_string();
             let mut cookie_map: ::std::collections::HashMap<String,Vec<String>> = ::std::collections::HashMap::new();
             for header_value in headers.get_all("cookie").iter(){
                 let cookie_str = header_value
                 .to_str()
-                .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+                .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
                 for part in cookie_str.split(';'){
                     let part = part.trim();
                     if part.is_empty(){
@@ -254,39 +254,39 @@ pub mod test{
             .http()
             .request(xidl_rust_axum::reqwest::Method::GET,url)
             .build()
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
             let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
             "X-Req-Id".as_bytes(),
             )
-            .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
             let header_value_str = req_id;
             let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
             &header_value_str,
             )
-            .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
             req.headers_mut().insert(header_name,header_value);
             let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
             "X-Flags".as_bytes(),
             )
-            .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
             for value in flags{
                 let header_value_str = value;
                 let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
                 &header_value_str,
                 )
-                .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+                .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
                 req.headers_mut().append(header_name.clone(),header_value);
             }
 
             let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
             "X-Age".as_bytes(),
             )
-            .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
             let header_value_str = age.to_string();
             let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
             &header_value_str,
             )
-            .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
             req.headers_mut().insert(header_name,header_value);
             let mut cookie_pairs:Vec<String> = Vec::new();
             let value_str = session_id;
@@ -303,7 +303,7 @@ pub mod test{
                     Some(existing) => {
                         let existing = existing
                         .to_str()
-                        .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+                        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
                         if existing.is_empty(){
                             cookie_value
                         }else{
@@ -314,7 +314,7 @@ pub mod test{
 
                 };
                 let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(&merged)
-                .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+                .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
                 req.headers_mut().insert(cookie_name,header_value);
             }
 
@@ -323,11 +323,11 @@ pub mod test{
             .http()
             .execute(req)
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
             if resp.status().is_success(){
                 resp.json::<User>()
                 .await
-                .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+                .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
             }else{
                 let status = resp.status();
                 let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -343,16 +343,16 @@ pub mod test{
             .http()
             .request(xidl_rust_axum::reqwest::Method::POST,url)
             .build()
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
             let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
             "X-Token".as_bytes(),
             )
-            .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
             let header_value_str = token;
             let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
             &header_value_str,
             )
-            .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
             req.headers_mut().insert(header_name,header_value);
             let mut cookie_pairs:Vec<String> = Vec::new();
             let value_str = session_id;
@@ -364,7 +364,7 @@ pub mod test{
                     Some(existing) => {
                         let existing = existing
                         .to_str()
-                        .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+                        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
                         if existing.is_empty(){
                             cookie_value
                         }else{
@@ -375,13 +375,13 @@ pub mod test{
 
                 };
                 let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(&merged)
-                .map_err(|err|xidl_rust_axum::Error::new(400,err.to_string()))?;
+                .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
                 req.headers_mut().insert(cookie_name,header_value);
             }
 
             let body = name;
             let body = xidl_rust_axum::serde_json::to_vec(&body)
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
             req.headers_mut().insert(
             xidl_rust_axum::reqwest::header::CONTENT_TYPE,
             xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/json"),
@@ -392,7 +392,7 @@ pub mod test{
             .http()
             .execute(req)
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
             if resp.status().is_success(){
                 Ok(())
             }else{

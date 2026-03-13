@@ -391,12 +391,12 @@ impl HttpAnnoServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         let query = HttpAnnoServiceGetUserQuery{
             lang,
         };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if!query.is_empty(){
             req.url_mut().set_query(Some(&query));
         }
@@ -406,11 +406,11 @@ impl HttpAnnoServiceClient{
         .http()
         .execute(req)
         .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
             resp.json::<String>()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -426,13 +426,13 @@ impl HttpAnnoServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         let body = HttpAnnoServiceCreateUserBody{
             name,
             age,
         };
         let body = xidl_rust_axum::serde_json::to_vec(&body)
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
         xidl_rust_axum::reqwest::header::CONTENT_TYPE,
         xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/json"),
@@ -443,11 +443,11 @@ impl HttpAnnoServiceClient{
         .http()
         .execute(req)
         .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
             resp.json::<String>()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -463,12 +463,12 @@ impl HttpAnnoServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         let query = HttpAnnoServiceGetNameQuery{
             name,
         };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if!query.is_empty(){
             req.url_mut().set_query(Some(&query));
         }
@@ -478,11 +478,11 @@ impl HttpAnnoServiceClient{
         .http()
         .execute(req)
         .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
             resp.json::<String>()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -498,13 +498,13 @@ impl HttpAnnoServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::GET,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         let query = HttpAnnoServiceSearchUserQuery{
             keyword,
             page,
         };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if!query.is_empty(){
             req.url_mut().set_query(Some(&query));
         }
@@ -514,11 +514,11 @@ impl HttpAnnoServiceClient{
         .http()
         .execute(req)
         .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
             resp.json::<String>()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -535,12 +535,12 @@ impl HttpAnnoServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         let query = HttpAnnoServiceGetUserAliasQuery{
             locale,
         };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if!query.is_empty(){
             req.url_mut().set_query(Some(&query));
         }
@@ -550,11 +550,11 @@ impl HttpAnnoServiceClient{
         .http()
         .execute(req)
         .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
             resp.json::<String>()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -570,13 +570,13 @@ impl HttpAnnoServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         let body = HttpAnnoServiceAddBody{
             a,
             b,
         };
         let body = xidl_rust_axum::serde_json::to_vec(&body)
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
         xidl_rust_axum::reqwest::header::CONTENT_TYPE,
         xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/json"),
@@ -587,11 +587,11 @@ impl HttpAnnoServiceClient{
         .http()
         .execute(req)
         .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
             resp.json::<HttpAnnoServiceAddResponse>()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -607,10 +607,10 @@ impl HttpAnnoServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         let body = value;
         let body = xidl_rust_axum::serde_json::to_vec(&body)
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
         xidl_rust_axum::reqwest::header::CONTENT_TYPE,
         xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/json"),
@@ -621,11 +621,11 @@ impl HttpAnnoServiceClient{
         .http()
         .execute(req)
         .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
             resp.json::<HttpAnnoServiceBumpResponse>()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -641,17 +641,17 @@ impl HttpAnnoServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         let resp = self
         .client
         .http()
         .execute(req)
         .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
             resp.json::<i32>()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -667,13 +667,13 @@ impl HttpAnnoServiceClient{
         .http()
         .request(xidl_rust_axum::reqwest::Method::POST,url)
         .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         let resp = self
         .client
         .http()
         .execute(req)
         .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,err.to_string()))?;
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
             Ok(())
         }else{
