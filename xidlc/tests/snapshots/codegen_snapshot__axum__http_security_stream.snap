@@ -1,0 +1,156 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+http_security_stream.rs
+===============
+#[async_trait::async_trait]
+pub trait HttpSecurityStreamService{
+    async fn watch_channel(
+    &self,
+    req:xidl_rust_axum::Request<HttpSecurityStreamServiceWatchChannelRequest>
+    )->Result<xidl_rust_axum::stream::SseStream<String>,xidl_rust_axum::Error>;
+    async fn watch_public(
+    &self,
+    req:xidl_rust_axum::Request<()>
+    )->Result<xidl_rust_axum::stream::SseStream<String>,xidl_rust_axum::Error>;
+}
+
+#[derive(::serde::Serialize,::serde::Deserialize)]
+struct HttpSecurityStreamServiceWatchChannelPath{
+    channel:String,
+}
+
+#[derive(::serde::Serialize,::serde::Deserialize)]
+pub struct HttpSecurityStreamServiceWatchChannelRequest{
+    pub channel:String,
+}
+
+pub struct HttpSecurityStreamServiceServer<T>{
+    inner: ::std::sync::Arc<T>,
+}
+
+impl<T>HttpSecurityStreamServiceServer<T>
+where
+T:HttpSecurityStreamService+Send+Sync+'static,
+{
+    pub fn new(inner:T)->Self{
+        Self{
+            inner: ::std::sync::Arc::new(inner),
+        }
+    }
+
+    pub fn from_arc(inner: ::std::sync::Arc<T>)->Self{
+        Self{
+            inner}
+    }
+
+    pub fn router(self)->xidl_rust_axum::axum::Router{
+        let svc = self.inner;
+        xidl_rust_axum::axum::Router::new()
+
+        .route("/channels/{channel}/events",xidl_rust_axum::axum::routing::get(Self::watch_channel))
+
+        .route("/channels/public/events",xidl_rust_axum::axum::routing::get(Self::watch_public))
+
+        .with_state(svc)
+    }
+
+    async fn watch_channel(
+    ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+    headers: ::xidl_rust_axum::axum::http::HeaderMap,
+    ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<HttpSecurityStreamServiceWatchChannelPath>
+    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"text/event-stream"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
+        let HttpSecurityStreamServiceWatchChannelPath{
+
+        channel,
+
+        } = path;
+        let data = HttpSecurityStreamServiceWatchChannelRequest{
+            channel,
+        };
+        let req = ::xidl_rust_axum::Request::new(headers,data);
+        let resp = svc.watch_channel(req).await?;
+        Ok(xidl_rust_axum::stream::sse_response(resp))
+    }
+
+    async fn watch_public(
+    ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+    headers: ::xidl_rust_axum::axum::http::HeaderMap
+    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"text/event-stream"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
+        let data = ();
+        let req = ::xidl_rust_axum::Request::new(headers,data);
+        let resp = svc.watch_public(req).await?;
+        Ok(xidl_rust_axum::stream::sse_response(resp))
+    }
+}
+
+impl<T>xidl_rust_axum::Service for HttpSecurityStreamServiceServer<T>
+where
+T:HttpSecurityStreamService+Send+Sync+'static,
+{
+    fn into_router(self)->xidl_rust_axum::axum::Router{
+        self.router()
+    }
+}
+
+pub struct HttpSecurityStreamServiceClient{
+    client:xidl_rust_axum::Client,
+}
+
+impl HttpSecurityStreamServiceClient{
+    pub fn new(base_url:impl Into<String>)->Self{
+        Self{
+            client:xidl_rust_axum::Client::new(base_url),
+        }
+    }
+}
+
+impl HttpSecurityStreamServiceClient{
+    pub async fn watch_channel(&self,channel:String)->Result<xidl_rust_axum::stream::Reader<String>,xidl_rust_axum::Error>{
+        let path = "/channels/{channel}/events".to_string();
+        let path = path.replace("{channel}",&channel.to_string());
+        let url = self.client.url(&path);
+        let mut req = self
+        .client
+        .http()
+        .request(xidl_rust_axum::reqwest::Method::GET,url)
+        .build()
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/event-stream")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
+        xidl_rust_axum::stream::open_sse::<String>(self.client.http(),req).await
+    }
+
+    pub async fn watch_public(&self)->Result<xidl_rust_axum::stream::Reader<String>,xidl_rust_axum::Error>{
+        let path = "/channels/public/events".to_string();
+        let url = self.client.url(&path);
+        let mut req = self
+        .client
+        .http()
+        .request(xidl_rust_axum::reqwest::Method::GET,url)
+        .build()
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/event-stream")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
+        xidl_rust_axum::stream::open_sse::<String>(self.client.http(),req).await
+    }
+}
+===============
+http_security_stream.rs
+===============

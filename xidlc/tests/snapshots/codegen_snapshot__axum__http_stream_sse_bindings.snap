@@ -1,0 +1,172 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+http_stream_sse_bindings.rs
+===============
+#[async_trait::async_trait]
+pub trait HttpStreamSseBindingsService{
+    async fn watch_project(
+    &self,
+    req:xidl_rust_axum::Request<HttpStreamSseBindingsServiceWatchProjectRequest>
+    )->Result<xidl_rust_axum::stream::SseStream<ProjectEvent>,xidl_rust_axum::Error>;
+}
+
+#[derive(::serde::Serialize,::serde::Deserialize)]
+struct HttpStreamSseBindingsServiceWatchProjectPath{
+    project_id:String,
+}
+
+#[derive(::serde::Serialize,::serde::Deserialize,::core::default::Default)]
+struct HttpStreamSseBindingsServiceWatchProjectQuery{
+    #[serde(default)]
+
+    cursor:Option<String>,
+}
+
+#[derive(::serde::Serialize,::serde::Deserialize)]
+pub struct HttpStreamSseBindingsServiceWatchProjectRequest{
+    pub project_id:String,
+    pub cursor:Option<String>,
+    pub trace_id:String,
+}
+
+pub struct HttpStreamSseBindingsServiceServer<T>{
+    inner: ::std::sync::Arc<T>,
+}
+
+impl<T>HttpStreamSseBindingsServiceServer<T>
+where
+T:HttpStreamSseBindingsService+Send+Sync+'static,
+{
+    pub fn new(inner:T)->Self{
+        Self{
+            inner: ::std::sync::Arc::new(inner),
+        }
+    }
+
+    pub fn from_arc(inner: ::std::sync::Arc<T>)->Self{
+        Self{
+            inner}
+    }
+
+    pub fn router(self)->xidl_rust_axum::axum::Router{
+        let svc = self.inner;
+        xidl_rust_axum::axum::Router::new()
+
+        .route("/projects/{project_id}/events",xidl_rust_axum::axum::routing::get(Self::watch_project))
+
+        .with_state(svc)
+    }
+
+    async fn watch_project(
+    ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+    headers: ::xidl_rust_axum::axum::http::HeaderMap,
+    ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<HttpStreamSseBindingsServiceWatchProjectPath>,
+    xidl_rust_axum::axum::extract::Query(query):xidl_rust_axum::axum::extract::Query<HttpStreamSseBindingsServiceWatchProjectQuery>
+    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"text/event-stream"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
+        let HttpStreamSseBindingsServiceWatchProjectPath{
+
+        project_id,
+
+        } = path;
+        let HttpStreamSseBindingsServiceWatchProjectQuery{
+
+        cursor,
+
+        } = query;
+        let trace_id:String = match headers.get("X-Trace-Id"){
+            Some(header_value) => {
+                let header_str = header_value
+                .to_str()
+                .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
+                header_str.to_string()
+            }
+            None => ::core::default::Default::default(),
+
+        };
+        let data = HttpStreamSseBindingsServiceWatchProjectRequest{
+            project_id,
+            cursor,
+            trace_id,
+        };
+        let req = ::xidl_rust_axum::Request::new(headers,data);
+        let resp = svc.watch_project(req).await?;
+        Ok(xidl_rust_axum::stream::sse_response(resp))
+    }
+}
+
+impl<T>xidl_rust_axum::Service for HttpStreamSseBindingsServiceServer<T>
+where
+T:HttpStreamSseBindingsService+Send+Sync+'static,
+{
+    fn into_router(self)->xidl_rust_axum::axum::Router{
+        self.router()
+    }
+}
+
+pub struct HttpStreamSseBindingsServiceClient{
+    client:xidl_rust_axum::Client,
+}
+
+impl HttpStreamSseBindingsServiceClient{
+    pub fn new(base_url:impl Into<String>)->Self{
+        Self{
+            client:xidl_rust_axum::Client::new(base_url),
+        }
+    }
+}
+
+impl HttpStreamSseBindingsServiceClient{
+    pub async fn watch_project(&self,project_id:String,cursor:Option<String>,trace_id:String)->Result<xidl_rust_axum::stream::Reader<ProjectEvent>,xidl_rust_axum::Error>{
+        let path = "/projects/{project_id}/events".to_string();
+        let path = path.replace("{project_id}",&project_id.to_string());
+        let url = self.client.url(&path);
+        let mut req = self
+        .client
+        .http()
+        .request(xidl_rust_axum::reqwest::Method::GET,url)
+        .build()
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/event-stream")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
+        let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
+        "X-Trace-Id".as_bytes(),
+        )
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
+        let header_value_str = trace_id;
+        let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+        &header_value_str,
+        )
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
+        req.headers_mut().insert(header_name,header_value);
+        let query = HttpStreamSseBindingsServiceWatchProjectQuery{
+            cursor,
+        };
+        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        if!query.is_empty(){
+            req.url_mut().set_query(Some(&query));
+        }
+
+        xidl_rust_axum::stream::open_sse::<ProjectEvent>(self.client.http(),req).await
+    }
+}
+===============
+http_stream_sse_bindings.rs
+===============
+pub struct ProjectEvent{
+    pub id:String,
+    pub payload:String,
+}
+
+impl ProjectEvent{
+}

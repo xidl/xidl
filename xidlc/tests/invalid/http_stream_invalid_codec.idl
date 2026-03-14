@@ -1,0 +1,9 @@
+#progma xidlc package xidlc
+#progma xidlc version v1.0.0
+
+interface InvalidStreamCodecService {
+    @server-stream
+    @stream-codec("yaml")
+    @get(path = "/events")
+    string watch();
+};

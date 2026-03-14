@@ -29,7 +29,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "http-bearer": []
+          }
+        ]
       }
     },
     "/SmartCityHttpApi/maintenance_mode": {
@@ -56,7 +61,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "http-bearer": []
+          }
+        ]
       }
     },
     "/SmartCityHttpApi/set_maintenance_mode": {
@@ -85,7 +95,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "http-bearer": []
+          }
+        ]
       }
     },
     "/v1/assets/{path}": {
@@ -151,7 +166,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "http-bearer": []
+          }
+        ]
       }
     },
     "/v1/citizens/{citizen_id}": {
@@ -208,7 +228,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "http-bearer": []
+          }
+        ]
       },
       "patch": {
         "operationId": "SmartCityHttpApi.update_profile",
@@ -260,7 +285,94 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "http-bearer": []
+          }
+        ]
+      }
+    },
+    "/v1/devices/{device_id}": {
+      "get": {
+        "operationId": "SmartCityHttpApi.get_device_status",
+        "parameters": [
+          {
+            "name": "device_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Trace-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "return",
+                    "trace_echo",
+                    "session_echo"
+                  ],
+                  "properties": {
+                    "return": {
+                      "type": "string"
+                    },
+                    "session_echo": {
+                      "type": "string"
+                    },
+                    "trace_echo": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "http-bearer": []
+          }
+        ]
       }
     },
     "/v1/parking/lots/{lot_id}": {
@@ -298,7 +410,8 @@
               }
             }
           }
-        }
+        },
+        "security": []
       }
     },
     "/v1/parking/lots/{lot_id}/reservations/{reservation_id}": {
@@ -336,7 +449,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "http-bearer": []
+          }
+        ]
       }
     },
     "/v1/parking/lots/{lot_id}/reserve": {
@@ -408,7 +526,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "api-key-header-x-reserve-key": []
+          }
+        ]
       }
     },
     "/v1/stops/{stop_id}": {
@@ -479,7 +602,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "http-bearer": []
+          }
+        ]
       }
     },
     "/v1/stops/{stop_id}/nearby": {
@@ -519,7 +647,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "http-bearer": []
+          }
+        ]
       }
     }
   },
@@ -641,6 +774,17 @@
             "properties": {
               "update_profile": {
                 "$ref": "#/components/schemas/SmartCityHttpApi_update_profile_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_device_status"
+            ],
+            "properties": {
+              "get_device_status": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_get_device_status_In"
               }
             }
           },
@@ -807,6 +951,17 @@
             "properties": {
               "update_profile": {
                 "$ref": "#/components/schemas/SmartCityHttpApi_update_profile_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_device_status"
+            ],
+            "properties": {
+              "get_device_status": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_get_device_status_Result"
               }
             }
           },
@@ -1009,6 +1164,63 @@
             "properties": {
               "result": {
                 "$ref": "#/components/schemas/SmartCityHttpApi_get_attribute_maintenance_mode_Out"
+              }
+            }
+          }
+        ]
+      },
+      "SmartCityHttpApi_get_device_status_In": {
+        "type": "object",
+        "required": [
+          "device_id",
+          "trace_id",
+          "session_id",
+          "locale"
+        ],
+        "properties": {
+          "device_id": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "session_id": {
+            "type": "string"
+          },
+          "trace_id": {
+            "type": "string"
+          }
+        }
+      },
+      "SmartCityHttpApi_get_device_status_Out": {
+        "type": "object",
+        "required": [
+          "trace_echo",
+          "session_echo",
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          },
+          "session_echo": {
+            "type": "string"
+          },
+          "trace_echo": {
+            "type": "string"
+          }
+        }
+      },
+      "SmartCityHttpApi_get_device_status_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/SmartCityHttpApi_get_device_status_Out"
               }
             }
           }
@@ -1335,6 +1547,17 @@
             }
           }
         ]
+      }
+    },
+    "securitySchemes": {
+      "api-key-header-x-reserve-key": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Reserve-Key"
+      },
+      "http-bearer": {
+        "type": "http",
+        "scheme": "bearer"
       }
     }
   }

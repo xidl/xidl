@@ -763,7 +763,7 @@ fn render_attr(
         &attr.annotations,
     )
     .unwrap_or_else(|err| panic!("{err}"));
-    let emit_watch = has_annotation(&attr.annotations, "server_stream");
+    let emit_watch = has_annotation(&attr.annotations, "server-stream");
     let summary = doc_summary(&attr.annotations);
     let description = doc_text(&attr.annotations);
     let deprecated = effective_deprecated(interface_annotations, &attr.annotations)
@@ -1256,6 +1256,7 @@ fn api_key_scheme_name(location: &HttpApiKeyLocation, name: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::panic::{self, AssertUnwindSafe};
     use xidl_parser::hir;
 
     fn parse_spec(source: &str) -> hir::Specification {
@@ -1301,12 +1302,12 @@ mod tests {
         let spec = parse_spec(
             r#"
             interface StreamApi {
-              @server_stream
-              @stream_codec("sse")
+              @server-stream
+              @stream-codec("sse")
               string watch();
 
-              @client_stream
-              @stream_codec("ndjson")
+              @client-stream
+              @stream-codec("ndjson")
               string upload(
                 in string file_id,
                 in sequence<octet> chunk
@@ -1329,6 +1330,234 @@ mod tests {
             &doc["paths"]["/upload"]["post"]["requestBody"]["content"]["application/x-ndjson"];
         assert!(client_content.get("itemSchema").is_some());
         assert!(client_content.get("schema").is_none());
+    }
+
+    fn panic_message(payload: Box<dyn std::any::Any + Send>) -> String {
+        if let Some(message) = payload.downcast_ref::<&'static str>() {
+            (*message).to_string()
+        } else if let Some(message) = payload.downcast_ref::<String>() {
+            message.clone()
+        } else {
+            "unknown panic payload".to_string()
+        }
+    }
+
+    #[test]
+    fn render_openapi_json_rejects_invalid_stream_codec() {
+        let spec = parse_spec(
+            r#"
+            interface StreamApi {
+              @server-stream
+              @stream-codec("yaml")
+              string watch();
+            };
+            "#,
+        );
+        let payload = panic::catch_unwind(AssertUnwindSafe(|| render_openapi_json(&spec)))
+            .expect_err("invalid stream codec should panic");
+        let message = panic_message(payload);
+        assert!(message.contains("unsupported @stream-codec value"));
+    }
+
+    #[test]
+    fn render_openapi_json_rejects_invalid_stream_method() {
+        let spec = parse_spec(
+            r#"
+            interface StreamApi {
+              @server-stream
+              @stream-codec("sse")
+              @post(path = "/watch")
+              string watch();
+            };
+            "#,
+        );
+        let payload = panic::catch_unwind(AssertUnwindSafe(|| render_openapi_json(&spec)))
+            .expect_err("invalid stream method should panic");
+        let message = panic_message(payload);
+        assert!(message.contains("@server-stream method 'watch' must use GET"));
+    }
+
+    #[test]
+    fn render_openapi_json_rejects_duplicate_security_annotations() {
+        let spec = parse_spec(
+            r#"
+            interface SecurityApi {
+              @http-basic
+              @http-basic
+              @get(path = "/reports")
+              string list_reports();
+            };
+            "#,
+        );
+        let payload = panic::catch_unwind(AssertUnwindSafe(|| render_openapi_json(&spec)))
+            .expect_err("duplicate security annotations should panic");
+        let message = panic_message(payload);
+        assert!(message.contains("duplicate @http-basic annotation"));
+    }
+
+    #[test]
+    fn render_openapi_json_rejects_conflicting_no_security_annotations() {
+        let spec = parse_spec(
+            r#"
+            interface SecurityApi {
+              @no-security
+              @http-bearer
+              @get(path = "/reports")
+              string list_reports();
+            };
+            "#,
+        );
+        let payload = panic::catch_unwind(AssertUnwindSafe(|| render_openapi_json(&spec)))
+            .expect_err("conflicting security annotations should panic");
+        let message = panic_message(payload);
+        assert!(
+            message.contains("@no-security cannot be combined with other security annotations")
+        );
+    }
+
+    #[test]
+    fn render_openapi_json_rejects_conflicting_param_sources() {
+        let spec = parse_spec(
+            r#"
+            interface HttpApi {
+              @get(path = "/users/{id}")
+              string get_user(
+                @path("id") @query("user_id") string id
+              );
+            };
+            "#,
+        );
+        let payload = panic::catch_unwind(AssertUnwindSafe(|| render_openapi_json(&spec)))
+            .expect_err("conflicting parameter sources should panic");
+        let message = panic_message(payload);
+        assert!(message.contains("conflicting source annotations"));
+    }
+
+    #[test]
+    fn render_openapi_json_rejects_missing_query_template_binding() {
+        let spec = parse_spec(
+            r#"
+            interface HttpApi {
+              @get(path = "/users/{id}{?lang,region}")
+              string get_user(
+                @path("id") string id,
+                @query("lang") string lang
+              );
+            };
+            "#,
+        );
+        let payload = panic::catch_unwind(AssertUnwindSafe(|| render_openapi_json(&spec)))
+            .expect_err("missing query template binding should panic");
+        let message = panic_message(payload);
+        assert!(message.contains(
+            "query template variable 'region' has no matching request-side query parameter"
+        ));
+    }
+
+    #[test]
+    fn render_openapi_json_rejects_duplicate_route_bindings() {
+        let spec = parse_spec(
+            r#"
+            interface HttpApi {
+              @get(path = "/users/{id}")
+              string get_user(@path("id") string id);
+
+              @get(path = "/users/{id}")
+              string fetch_user(@path("id") string id);
+            };
+            "#,
+        );
+        let payload = panic::catch_unwind(AssertUnwindSafe(|| render_openapi_json(&spec)))
+            .expect_err("duplicate route binding should panic");
+        let message = panic_message(payload);
+        assert!(message.contains("duplicate HTTP route binding"));
+    }
+
+    #[test]
+    fn render_openapi_json_rejects_additional_invalid_security_annotations() {
+        let duplicate_bearer = parse_spec(
+            r#"
+            interface SecurityApi {
+              @http-bearer
+              @http-bearer
+              @get(path = "/reports")
+              string list_reports();
+            };
+            "#,
+        );
+        let payload =
+            panic::catch_unwind(AssertUnwindSafe(|| render_openapi_json(&duplicate_bearer)))
+                .expect_err("duplicate bearer should panic");
+        let message = panic_message(payload);
+        assert!(message.contains("duplicate @http-bearer annotation"));
+
+        let missing_name = parse_spec(
+            r#"
+            interface SecurityApi {
+              @api-key(in = "header")
+              @get(path = "/reports")
+              string list_reports();
+            };
+            "#,
+        );
+        let payload = panic::catch_unwind(AssertUnwindSafe(|| render_openapi_json(&missing_name)))
+            .expect_err("api key missing name should panic");
+        let message = panic_message(payload);
+        assert!(message.contains("@api-key requires non-empty name=..."));
+
+        let invalid_location = parse_spec(
+            r#"
+            interface SecurityApi {
+              @api-key(in = "body", name = "auth")
+              @get(path = "/reports")
+              string list_reports();
+            };
+            "#,
+        );
+        let payload =
+            panic::catch_unwind(AssertUnwindSafe(|| render_openapi_json(&invalid_location)))
+                .expect_err("api key invalid location should panic");
+        let message = panic_message(payload);
+        assert!(message.contains("must be one of header|query|cookie"));
+    }
+
+    #[test]
+    fn render_openapi_json_rejects_additional_invalid_stream_shapes() {
+        let mutually_exclusive = parse_spec(
+            r#"
+            interface StreamApi {
+              @server-stream
+              @client-stream
+              @stream-codec("ndjson")
+              @post(path = "/events")
+              string exchange(string payload);
+            };
+            "#,
+        );
+        let payload = panic::catch_unwind(AssertUnwindSafe(|| {
+            render_openapi_json(&mutually_exclusive)
+        }))
+        .expect_err("mutually exclusive stream annotations should panic");
+        let message = panic_message(payload);
+        assert!(message.contains("mutually exclusive"));
+
+        let client_sse = parse_spec(
+            r#"
+            interface StreamApi {
+              @client-stream
+              @stream-codec("sse")
+              @post(path = "/upload")
+              string upload(sequence<octet> chunk);
+            };
+            "#,
+        );
+        let payload = panic::catch_unwind(AssertUnwindSafe(|| render_openapi_json(&client_sse)))
+            .expect_err("client stream sse should panic");
+        let message = panic_message(payload);
+        assert!(
+            message.contains("supports only NDJSON for @client-stream methods")
+                || message.contains("@stream-codec(\"sse\") requires @server-stream")
+        );
     }
 }
 

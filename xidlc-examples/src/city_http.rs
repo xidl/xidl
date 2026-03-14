@@ -81,6 +81,18 @@ impl SmartCityHttpApi for SmartCityHttpService {
         Ok("audit-20260307-001".to_string())
     }
 
+    async fn get_device_status(
+        &self,
+        req: xidl_rust_axum::Request<SmartCityHttpApiGetDeviceStatusRequest>,
+    ) -> Result<SmartCityHttpApiGetDeviceStatusResponse, xidl_rust_axum::Error> {
+        let data = req.data;
+        Ok(SmartCityHttpApiGetDeviceStatusResponse {
+            r#return: format!("device:{}", data.device_id),
+            trace_echo: data.trace_id,
+            session_echo: data.session_id,
+        })
+    }
+
     async fn api_version(
         &self,
         _req: xidl_rust_axum::Request<()>,

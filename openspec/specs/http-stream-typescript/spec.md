@@ -1,30 +1,30 @@
 ## ADDED Requirements
 
 ### Requirement: TypeScript Server-Stream Projection
-The system MUST generate TypeScript client methods for `@server_stream`
+The system MUST generate TypeScript client methods for `@server-stream`
 operations using the Fetch-based SSE reader model.
 
 #### Scenario: Server-stream method returns async iterable
-- **WHEN** TypeScript code is generated for an `@server_stream` operation
+- **WHEN** TypeScript code is generated for an `@server-stream` operation
 - **THEN** the generated client method MUST return an async iterable of the
   stream item type
 
 #### Scenario: Server-stream request advertises sse accept header
-- **WHEN** a generated TypeScript client invokes an `@server_stream` operation
+- **WHEN** a generated TypeScript client invokes an `@server-stream` operation
 - **THEN** it MUST send `Accept: text/event-stream` unless the caller already
   provided an explicit value
 
 ### Requirement: TypeScript Client-Stream Projection
-The system MUST generate TypeScript client methods for `@client_stream`
+The system MUST generate TypeScript client methods for `@client-stream`
 operations using NDJSON request streams over Fetch.
 
 #### Scenario: Client-stream method accepts async iterable input
-- **WHEN** TypeScript code is generated for an `@client_stream` operation
+- **WHEN** TypeScript code is generated for an `@client-stream` operation
 - **THEN** the generated client method MUST accept an async iterable of the
   declared stream item type
 
 #### Scenario: Client-stream method encodes ndjson body
-- **WHEN** a generated TypeScript client invokes an `@client_stream` operation
+- **WHEN** a generated TypeScript client invokes an `@client-stream` operation
 - **THEN** it MUST send `Content-Type: application/x-ndjson` and encode each
   yielded item as one JSON line in the request body stream
 
@@ -43,6 +43,6 @@ TypeScript client model.
 - **THEN** code generation MUST fail with a validation error
 
 #### Scenario: Client-stream with non-body inputs is rejected
-- **WHEN** the TypeScript generator encounters an `@client_stream` operation
+- **WHEN** the TypeScript generator encounters an `@client-stream` operation
   that requires path, query, header, or cookie request inputs
 - **THEN** code generation MUST fail with a validation error

@@ -1,0 +1,19 @@
+#progma xidlc package xidlc
+#progma xidlc version v1.0.0
+
+struct UploadChunk {
+    string part_id;
+    sequence<octet> bytes;
+};
+
+struct UploadSummary {
+    string upload_id;
+    uint32 accepted;
+};
+
+interface HttpClientStreamReportService {
+    @client-stream
+    @stream-codec("ndjson")
+    @post(path = "/uploads/parts")
+    UploadSummary upload_parts(UploadChunk chunk);
+};

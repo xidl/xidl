@@ -208,11 +208,11 @@ pub fn http_stream_config(annotations: &[hir::Annotation]) -> Result<HttpStreamC
         let Some(name) = annotation_name(annotation) else {
             continue;
         };
-        let current = if name.eq_ignore_ascii_case("server_stream") {
+        let current = if name.eq_ignore_ascii_case("server-stream") {
             Some(HttpStreamKind::Server)
-        } else if name.eq_ignore_ascii_case("client_stream") {
+        } else if name.eq_ignore_ascii_case("client-stream") {
             Some(HttpStreamKind::Client)
-        } else if name.eq_ignore_ascii_case("bidi_stream") {
+        } else if name.eq_ignore_ascii_case("bidi-stream") {
             Some(HttpStreamKind::Bidi)
         } else {
             None
@@ -225,7 +225,7 @@ pub fn http_stream_config(annotations: &[hir::Annotation]) -> Result<HttpStreamC
             Some(prev) if prev == current => {}
             Some(_) => {
                 return Err(
-                    "@server_stream/@client_stream/@bidi_stream are mutually exclusive".to_string(),
+                    "@server-stream/@client-stream/@bidi-stream are mutually exclusive".to_string(),
                 );
             }
         }
@@ -236,7 +236,7 @@ pub fn http_stream_config(annotations: &[hir::Annotation]) -> Result<HttpStreamC
         let Some(name) = annotation_name(annotation) else {
             continue;
         };
-        if !name.eq_ignore_ascii_case("stream_codec") {
+        if !name.eq_ignore_ascii_case("stream-codec") {
             continue;
         }
         let value = annotation_params(annotation)
@@ -248,7 +248,7 @@ pub fn http_stream_config(annotations: &[hir::Annotation]) -> Result<HttpStreamC
             "ndjson" => HttpStreamCodec::Ndjson,
             other => {
                 return Err(format!(
-                    "unsupported @stream_codec value '{other}', expected 'sse' or 'ndjson'"
+                    "unsupported @stream-codec value '{other}', expected 'sse' or 'ndjson'"
                 ));
             }
         };
@@ -264,26 +264,26 @@ pub fn validate_http_stream_target(
 ) -> Result<(), String> {
     match config.kind {
         Some(HttpStreamKind::Server) if config.codec != support.server_codec => Err(format!(
-            "{} currently supports only {} for @server_stream methods: '{}'",
+            "{} currently supports only {} for @server-stream methods: '{}'",
             support.target,
             stream_codec_name(support.server_codec),
             op_name
         )),
         Some(HttpStreamKind::Client) if config.codec != support.client_codec => Err(format!(
-            "{} currently supports only {} for @client_stream methods: '{}'",
+            "{} currently supports only {} for @client-stream methods: '{}'",
             support.target,
             stream_codec_name(support.client_codec),
             op_name
         )),
         Some(HttpStreamKind::Bidi) if !support.supports_bidi => Err(format!(
-            "{} currently does not support @bidi_stream methods: '{}'",
+            "{} currently does not support @bidi-stream methods: '{}'",
             support.target, op_name
         )),
         Some(HttpStreamKind::Client | HttpStreamKind::Bidi)
             if config.codec == HttpStreamCodec::Sse =>
         {
             Err(format!(
-                "@stream_codec(\"sse\") requires @server_stream on method '{}'",
+                "@stream-codec(\"sse\") requires @server-stream on method '{}'",
                 op_name
             ))
         }
@@ -300,15 +300,15 @@ pub fn validate_http_stream_method(
     let method = method.to_ascii_uppercase();
     match kind {
         Some(HttpStreamKind::Server) if method != support.server_method => Err(format!(
-            "@server_stream method '{}' must use {}",
+            "@server-stream method '{}' must use {}",
             op_name, support.server_method
         )),
         Some(HttpStreamKind::Client) if method != support.client_method => Err(format!(
-            "@client_stream method '{}' must use {}",
+            "@client-stream method '{}' must use {}",
             op_name, support.client_method
         )),
         Some(HttpStreamKind::Bidi) if method != support.bidi_method => Err(format!(
-            "@bidi_stream method '{}' must use {}",
+            "@bidi-stream method '{}' must use {}",
             op_name, support.bidi_method
         )),
         _ => Ok(()),

@@ -1,0 +1,10 @@
+#progma xidlc package xidlc
+#progma xidlc version v1.0.0
+
+interface InvalidMutuallyExclusiveStreamService {
+    @server-stream
+    @client-stream
+    @stream-codec("ndjson")
+    @post(path = "/events")
+    string exchange(string payload);
+};

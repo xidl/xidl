@@ -304,7 +304,7 @@ fn render_attr(
     module_path: &[String],
     user_ops: &HashSet<String>,
 ) -> Vec<Value> {
-    let emit_watch = has_annotation(&attr.annotations, "server_stream");
+    let emit_watch = has_annotation(&attr.annotations, "server-stream");
     let attr_doc = doc_text(&attr.annotations);
     match &attr.decl {
         hir::AttrDclInner::ReadonlyAttrSpec(spec) => readonly_attr_names(spec)
@@ -726,11 +726,11 @@ fn stream_kind_from_annotations(annotations: &[hir::Annotation]) -> Option<Strea
         let Some(name) = annotation_name(annotation) else {
             continue;
         };
-        let current = if name.eq_ignore_ascii_case("server_stream") {
+        let current = if name.eq_ignore_ascii_case("server-stream") {
             Some(StreamKind::Server)
-        } else if name.eq_ignore_ascii_case("client_stream") {
+        } else if name.eq_ignore_ascii_case("client-stream") {
             Some(StreamKind::Client)
-        } else if name.eq_ignore_ascii_case("bidi_stream") {
+        } else if name.eq_ignore_ascii_case("bidi-stream") {
             Some(StreamKind::Bidi)
         } else {
             None
@@ -741,7 +741,7 @@ fn stream_kind_from_annotations(annotations: &[hir::Annotation]) -> Option<Strea
         match out {
             None => out = Some(current),
             Some(prev) if prev == current => {}
-            Some(_) => panic!("@server_stream/@client_stream/@bidi_stream are mutually exclusive"),
+            Some(_) => panic!("@server-stream/@client-stream/@bidi-stream are mutually exclusive"),
         }
     }
     out

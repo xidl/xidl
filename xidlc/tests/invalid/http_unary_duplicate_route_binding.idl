@@ -1,0 +1,10 @@
+#progma xidlc package xidlc
+#progma xidlc version v1.0.0
+
+interface InvalidDuplicateRouteService {
+    @get(path = "/users/{id}")
+    string get_user(@path("id") string id);
+
+    @get(path = "/users/{id}")
+    string fetch_user(@path("id") string id);
+};

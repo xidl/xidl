@@ -1,0 +1,9 @@
+#progma xidlc package xidlc
+#progma xidlc version v1.0.0
+
+interface InvalidClientStreamCodecService {
+    @client-stream
+    @stream-codec("sse")
+    @post(path = "/upload")
+    string upload(sequence<octet> chunk);
+};

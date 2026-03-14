@@ -108,11 +108,11 @@ fn test_validate_http_annotations_rejects_invalid_security_mix() {
 fn test_http_stream_config_parses_and_validates() {
     let annotations = vec![
         hir::Annotation::Builtin {
-            name: "server_stream".to_string(),
+            name: "server-stream".to_string(),
             params: None,
         },
         hir::Annotation::Builtin {
-            name: "stream_codec".to_string(),
+            name: "stream-codec".to_string(),
             params: Some(hir::AnnotationParams::Raw("\"sse\"".to_string())),
         },
     ];
@@ -124,7 +124,7 @@ fn test_http_stream_config_parses_and_validates() {
 #[test]
 fn test_http_stream_target_rejects_unsupported_bidi() {
     let annotations = vec![hir::Annotation::Builtin {
-        name: "bidi_stream".to_string(),
+        name: "bidi-stream".to_string(),
         params: None,
     }];
     let config = http_stream_config(&annotations).unwrap();
@@ -142,7 +142,7 @@ fn test_http_stream_target_rejects_unsupported_bidi() {
         },
     )
     .unwrap_err();
-    assert!(err.contains("does not support @bidi_stream"));
+    assert!(err.contains("does not support @bidi-stream"));
 }
 
 #[test]

@@ -29,7 +29,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "http-basic": []
+          }
+        ]
       }
     },
     "/CityHttpStreamApi/set_maintenance_mode": {
@@ -58,7 +63,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "http-basic": []
+          }
+        ]
       }
     },
     "/alerts/{district}": {
@@ -103,7 +113,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "http-basic": []
+          }
+        ]
       }
     },
     "/assets/upload": {
@@ -152,7 +167,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "http-bearer": []
+          }
+        ]
       }
     },
     "/chat": {
@@ -214,7 +234,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "http-basic": []
+          }
+        ]
       }
     },
     "/ticker": {
@@ -241,7 +266,8 @@
               }
             }
           }
-        }
+        },
+        "security": []
       }
     }
   },
@@ -699,6 +725,16 @@
             "type": "string"
           }
         }
+      }
+    },
+    "securitySchemes": {
+      "http-basic": {
+        "type": "http",
+        "scheme": "basic"
+      },
+      "http-bearer": {
+        "type": "http",
+        "scheme": "bearer"
       }
     }
   }

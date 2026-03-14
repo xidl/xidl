@@ -1,6 +1,7 @@
 #progma xidlc package Smart City Public APIs
 #progma xidlc version v2.0.0
 
+@http-bearer
 interface SmartCityHttpApi {
     @get(path = "/v1/stops/{stop_id}{?line,lang}")
     string get_stop_eta(
@@ -25,12 +26,14 @@ interface SmartCityHttpApi {
     );
 
     @head(path = "/v1/parking/lots/{lot_id}")
+    @no-security
     void probe_lot(
         @path("lot_id") string lot_id,
         @query("trace_id") string trace_id
     );
 
     @post(path = "/v1/parking/lots/{lot_id}/reserve")
+    @api-key(in = "header", name = "X-Reserve-Key")
     string reserve_lot(
         @path("lot_id") string lot_id,
         string plate_number,
@@ -59,6 +62,16 @@ interface SmartCityHttpApi {
         string display_name,
         string phone_number,
         out string audit_id
+    );
+
+    @get(path = "/v1/devices/{device_id}{?locale}")
+    string get_device_status(
+        @path("device_id") string device_id,
+        @header("X-Trace-Id") string trace_id,
+        @cookie("session") string session_id,
+        @query("locale") string locale,
+        out string trace_echo,
+        out string session_echo
     );
 
     readonly attribute string api_version;

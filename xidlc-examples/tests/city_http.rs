@@ -86,6 +86,19 @@ async fn http_client_calls_all_endpoints() {
         .expect("call update_profile");
     assert_eq!(update, "audit-20260307-001");
 
+    let device = client
+        .get_device_status(
+            "D100".to_string(),
+            "trace-001".to_string(),
+            "sess-abc".to_string(),
+            "en-US".to_string(),
+        )
+        .await
+        .expect("call get_device_status");
+    assert_eq!(device.r#return, "device:D100");
+    assert_eq!(device.trace_echo, "trace-001");
+    assert_eq!(device.session_echo, "sess-abc");
+
     let api_version = client.api_version().await.expect("call api_version");
     assert_eq!(api_version, "v2.0.0");
 

@@ -1,12 +1,12 @@
 interface HttpStreamSseService {
-  @server_stream
-  @stream_codec("sse")
+  @server-stream
+  @stream-codec("sse")
   @path("/events/{topic}{?lang}")
   string watch_topic(
     @path("topic") string topic,
     @query("lang") string lang
   );
 
-  @server_stream
+  @server-stream
   attribute boolean online;
 };

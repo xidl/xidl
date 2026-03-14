@@ -1,0 +1,8 @@
+#progma xidlc package xidlc
+#progma xidlc version v1.0.0
+
+interface InvalidApiKeySecurityService {
+    @api-key(in = "header")
+    @get(path = "/reports")
+    string list_reports();
+};

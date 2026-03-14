@@ -1,0 +1,49 @@
+#progma xidlc package xidlc
+#progma xidlc version v1.0.0
+
+interface HttpAnnoService {
+    @get(path = "/v1/users/{id}")
+    @path("/users/{id}")
+    @path("/u/{id}")
+    string get_user(
+        @path uint32 id,
+        @query string lang
+    );
+
+    @post
+    string create_user(
+        string name,
+        uint32 age
+    );
+
+    string get_name(
+        @query string name
+    );
+
+    @get
+    string search_user(
+        @query string keyword,
+        uint32 page
+    );
+
+    string get_user_alias(
+        @path("id") uint32 user_id,
+        @query("lang") string locale
+    );
+
+    long add(
+        in long a,
+        in long b,
+        out long sum
+    );
+
+    long bump(
+        inout long value
+    );
+
+    void get_count(
+        out long count
+    );
+
+    void ping();
+};

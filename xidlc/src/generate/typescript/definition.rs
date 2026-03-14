@@ -1255,7 +1255,7 @@ fn render_op(
             || !cookie_params.is_empty())
     {
         return Err(IdlcError::rpc(format!(
-            "@client_stream method '{}' currently supports body parameters only",
+            "@client-stream method '{}' currently supports body parameters only",
             op.ident
         )));
     }
@@ -1307,7 +1307,7 @@ fn render_attr(
     interface_name: &str,
     module_path: &[String],
 ) -> Vec<MethodInfo> {
-    let emit_watch = has_annotation(&attr.annotations, "server_stream");
+    let emit_watch = has_annotation(&attr.annotations, "server-stream");
     let doc = doc_lines_from_annotations(&attr.annotations);
     match &attr.decl {
         hir::AttrDclInner::ReadonlyAttrSpec(spec) => readonly_attr_names(spec)
@@ -2641,7 +2641,7 @@ mod tests {
         let spec = parse_spec(
             r#"
             interface StreamApi {
-              @bidi_stream
+              @bidi-stream
               void chat(
                 in string room,
                 in string text,
@@ -2655,7 +2655,7 @@ mod tests {
         let err = render_typescript(&spec, "stream_api", &renderer, TsMode::InterfaceOnly)
             .err()
             .expect("bidi stream should be rejected");
-        assert!(err.to_string().contains("@bidi_stream"));
+        assert!(err.to_string().contains("@bidi-stream"));
     }
 
     #[test]
@@ -2663,8 +2663,8 @@ mod tests {
         let spec = parse_spec(
             r#"
             interface StreamApi {
-              @client_stream
-              @stream_codec("ndjson")
+              @client-stream
+              @stream-codec("ndjson")
               @path("/upload/{bucket}")
               string upload(
                 @path("bucket") string bucket,

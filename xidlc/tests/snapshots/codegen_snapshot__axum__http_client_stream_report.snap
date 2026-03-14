@@ -1,0 +1,147 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+http_client_stream_report.rs
+===============
+#[async_trait::async_trait]
+pub trait HttpClientStreamReportService{
+    async fn upload_parts(
+    &self,
+    req:xidl_rust_axum::Request<xidl_rust_axum::stream::NdjsonStream<HttpClientStreamReportServiceUploadPartsRequest>>
+    )->Result<UploadSummary,xidl_rust_axum::Error>;
+}
+
+type HttpClientStreamReportServiceUploadPartsBody = UploadChunk;
+#[derive(::serde::Serialize,::serde::Deserialize)]
+pub struct HttpClientStreamReportServiceUploadPartsRequest{
+    pub chunk:UploadChunk,
+}
+
+pub struct HttpClientStreamReportServiceServer<T>{
+    inner: ::std::sync::Arc<T>,
+}
+
+impl<T>HttpClientStreamReportServiceServer<T>
+where
+T:HttpClientStreamReportService+Send+Sync+'static,
+{
+    pub fn new(inner:T)->Self{
+        Self{
+            inner: ::std::sync::Arc::new(inner),
+        }
+    }
+
+    pub fn from_arc(inner: ::std::sync::Arc<T>)->Self{
+        Self{
+            inner}
+    }
+
+    pub fn router(self)->xidl_rust_axum::axum::Router{
+        let svc = self.inner;
+        xidl_rust_axum::axum::Router::new()
+
+        .route("/uploads/parts",xidl_rust_axum::axum::routing::post(Self::upload_parts))
+
+        .with_state(svc)
+    }
+
+    async fn upload_parts(
+    ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+    headers: ::xidl_rust_axum::axum::http::HeaderMap,
+    body: ::xidl_rust_axum::axum::body::Body
+    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
+        let data = xidl_rust_axum::stream::decode_ndjson_body::<HttpClientStreamReportServiceUploadPartsRequest>(body);
+        let req = ::xidl_rust_axum::Request::new(headers,data);
+        let resp = svc.upload_parts(req).await?;
+        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+    }
+}
+
+impl<T>xidl_rust_axum::Service for HttpClientStreamReportServiceServer<T>
+where
+T:HttpClientStreamReportService+Send+Sync+'static,
+{
+    fn into_router(self)->xidl_rust_axum::axum::Router{
+        self.router()
+    }
+}
+
+pub struct HttpClientStreamReportServiceClient{
+    client:xidl_rust_axum::Client,
+}
+
+impl HttpClientStreamReportServiceClient{
+    pub fn new(base_url:impl Into<String>)->Self{
+        Self{
+            client:xidl_rust_axum::Client::new(base_url),
+        }
+    }
+}
+
+impl HttpClientStreamReportServiceClient{
+    pub async fn upload_parts(&self)->Result<xidl_rust_axum::stream::Writer<HttpClientStreamReportServiceUploadPartsRequest,UploadSummary>,xidl_rust_axum::Error>{
+        let path = "/uploads/parts".to_string();
+        let url = self.client.url(&path);
+        let mut req = self
+        .client
+        .http()
+        .request(xidl_rust_axum::reqwest::Method::POST,url)
+        .build()
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::CONTENT_TYPE,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/x-ndjson"),
+        );
+        let(tx,rx) = xidl_rust_axum::tokio::sync::mpsc::channel(32);
+        let outbound = xidl_rust_axum::futures_util::stream::unfold(rx,|mut rx|async move{
+            rx.recv().await.map(|item|(item,rx))
+        });
+        *req.body_mut() = Some(xidl_rust_axum::stream::encode_ndjson_body(Box::pin(outbound)));
+        let http = self.client.http().clone();
+        let response_task = xidl_rust_axum::tokio::spawn(async move{
+            let resp = http
+            .execute(req)
+            .await
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+            if resp.status().is_success(){
+                resp.json::<UploadSummary>()
+                .await
+                .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
+            }else{
+                let status = resp.status();
+                let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+                Err(xidl_rust_axum::Error::from_http_response(status,body))
+            }
+        });
+        return Ok(xidl_rust_axum::stream::Writer::new(tx,response_task));
+    }
+}
+===============
+http_client_stream_report.rs
+===============
+pub struct UploadChunk{
+    pub part_id:String,
+    pub bytes:Vec<u8>,
+}
+
+impl UploadChunk{
+}
+
+pub struct UploadSummary{
+    pub upload_id:String,
+    pub accepted:u32,
+}
+
+impl UploadSummary{
+}

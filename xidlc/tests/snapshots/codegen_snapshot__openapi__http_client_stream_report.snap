@@ -1,0 +1,230 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+openapi.json
+===============
+{
+  "components": {
+    "schemas": {
+      "Error": {
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "details": {
+            "type": "object"
+          },
+          "msg": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "msg"
+        ],
+        "type": "object"
+      },
+      "HttpClientStreamReportService_Call": {
+        "oneOf": [
+          {
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            },
+            "required": [
+              "unknownOp"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "upload_parts": {
+                "$ref": "#/components/schemas/HttpClientStreamReportService_upload_parts_In"
+              }
+            },
+            "required": [
+              "upload_parts"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpClientStreamReportService_Reply": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/HttpClientStreamReportService_Return"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
+          }
+        },
+        "required": [
+          "header",
+          "data"
+        ],
+        "type": "object"
+      },
+      "HttpClientStreamReportService_Request": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/HttpClientStreamReportService_Call"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
+          }
+        },
+        "required": [
+          "header",
+          "data"
+        ],
+        "type": "object"
+      },
+      "HttpClientStreamReportService_Return": {
+        "oneOf": [
+          {
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            },
+            "required": [
+              "unknownOp"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "upload_parts": {
+                "$ref": "#/components/schemas/HttpClientStreamReportService_upload_parts_Result"
+              }
+            },
+            "required": [
+              "upload_parts"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpClientStreamReportService_upload_parts_In": {
+        "properties": {
+          "chunk": {
+            "$ref": "#/components/schemas/UploadChunk"
+          }
+        },
+        "required": [
+          "chunk"
+        ],
+        "type": "object"
+      },
+      "HttpClientStreamReportService_upload_parts_Out": {
+        "properties": {
+          "return_": {
+            "$ref": "#/components/schemas/UploadSummary"
+          }
+        },
+        "required": [
+          "return_"
+        ],
+        "type": "object"
+      },
+      "HttpClientStreamReportService_upload_parts_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpClientStreamReportService_upload_parts_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "UploadChunk": {
+        "properties": {
+          "bytes": {
+            "items": {
+              "format": "int32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "part_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "part_id",
+          "bytes"
+        ],
+        "type": "object"
+      },
+      "UploadSummary": {
+        "properties": {
+          "accepted": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "upload_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "upload_id",
+          "accepted"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "xidlc",
+    "version": "v1.0.0"
+  },
+  "openapi": "3.2.0",
+  "paths": {
+    "/uploads/parts": {
+      "post": {
+        "operationId": "HttpClientStreamReportService.upload_parts",
+        "requestBody": {
+          "content": {
+            "application/x-ndjson": {
+              "itemSchema": {
+                "$ref": "#/components/schemas/UploadChunk"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadSummary"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        }
+      }
+    }
+  }
+}

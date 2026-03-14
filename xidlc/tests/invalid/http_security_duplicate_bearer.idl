@@ -1,0 +1,9 @@
+#progma xidlc package xidlc
+#progma xidlc version v1.0.0
+
+interface InvalidDuplicateBearerSecurityService {
+    @http-bearer
+    @http-bearer
+    @get(path = "/reports")
+    string list_reports();
+};
