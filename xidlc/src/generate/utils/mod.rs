@@ -10,7 +10,8 @@ pub use filter::{
     typescript_format_filter,
 };
 pub use http::{
-    DeprecatedInfo, HttpApiKeyLocation, HttpSecurityRequirement, deprecated_info,
-    effective_media_type, effective_security, has_optional_annotation,
-    validate_http_annotations,
+    DeprecatedInfo, HttpApiKeyLocation, HttpSecurityRequirement, HttpStreamCodec, HttpStreamKind,
+    HttpStreamTargetSupport, deprecated_info, effective_media_type, effective_security,
+    has_optional_annotation, http_stream_config, validate_http_annotations,
+    validate_http_stream_method, validate_http_stream_target,
 };

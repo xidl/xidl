@@ -1,6 +1,7 @@
-const TEST_CASES: &[(&str, &str)] = &[(
-    "annotation_basic",
-    r#"
+const TEST_CASES: &[(&str, &str)] = &[
+    (
+        "annotation_basic",
+        r#"
         @id(1)
         struct S {
             @id(10) long a; //@id(11)
@@ -25,9 +26,10 @@ const TEST_CASES: &[(&str, &str)] = &[(
             @key attribute long value;
         };
     "#,
-), (
-    "annotation_http_rfc",
-    r#"
+    ),
+    (
+        "annotation_http_rfc",
+        r#"
         @http-basic
         @api-key(in = "header", name = "X-API-Key")
         interface HttpApi {
@@ -51,7 +53,8 @@ const TEST_CASES: &[(&str, &str)] = &[(
             string health();
         };
     "#,
-)];
+    ),
+];
 
 #[test]
 fn test_typed_ast() {

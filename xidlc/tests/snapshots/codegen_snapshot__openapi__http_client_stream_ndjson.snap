@@ -6,70 +6,9 @@ expression: output
 openapi.json
 ===============
 {
-  "openapi": "3.1.0",
-  "info": {
-    "title": "xidl",
-    "version": "0.1.0"
-  },
-  "paths": {
-    "/upload/chunks": {
-      "post": {
-        "operationId": "HttpClientStreamService.upload_chunk",
-        "requestBody": {
-          "content": {
-            "application/x-ndjson": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "chunk": {
-                    "type": "array",
-                    "items": {
-                      "type": "integer",
-                      "format": "int32",
-                      "minimum": 0
-                    }
-                  },
-                  "file_id": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
   "components": {
     "schemas": {
       "Error": {
-        "type": "object",
-        "required": [
-          "code",
-          "msg"
-        ],
         "properties": {
           "code": {
             "type": "integer"
@@ -80,40 +19,40 @@ openapi.json
           "msg": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "code",
+          "msg"
+        ],
+        "type": "object"
       },
       "HttpClientStreamService_Call": {
         "oneOf": [
           {
-            "type": "object",
-            "required": [
-              "unknownOp"
-            ],
             "properties": {
               "unknownOp": {
                 "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
               }
-            }
+            },
+            "required": [
+              "unknownOp"
+            ],
+            "type": "object"
           },
           {
-            "type": "object",
-            "required": [
-              "upload_chunk"
-            ],
             "properties": {
               "upload_chunk": {
                 "$ref": "#/components/schemas/HttpClientStreamService_upload_chunk_In"
               }
-            }
+            },
+            "required": [
+              "upload_chunk"
+            ],
+            "type": "object"
           }
         ]
       },
       "HttpClientStreamService_Reply": {
-        "type": "object",
-        "required": [
-          "header",
-          "data"
-        ],
         "properties": {
           "data": {
             "$ref": "#/components/schemas/HttpClientStreamService_Return"
@@ -121,14 +60,14 @@ openapi.json
           "header": {
             "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
           }
-        }
-      },
-      "HttpClientStreamService_Request": {
-        "type": "object",
+        },
         "required": [
           "header",
           "data"
         ],
+        "type": "object"
+      },
+      "HttpClientStreamService_Request": {
         "properties": {
           "data": {
             "$ref": "#/components/schemas/HttpClientStreamService_Call"
@@ -136,79 +75,140 @@ openapi.json
           "header": {
             "$ref": "#/components/schemas/dds.rpc.RequestHeader"
           }
-        }
+        },
+        "required": [
+          "header",
+          "data"
+        ],
+        "type": "object"
       },
       "HttpClientStreamService_Return": {
         "oneOf": [
           {
-            "type": "object",
-            "required": [
-              "unknownOp"
-            ],
             "properties": {
               "unknownOp": {
                 "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
               }
-            }
+            },
+            "required": [
+              "unknownOp"
+            ],
+            "type": "object"
           },
           {
-            "type": "object",
-            "required": [
-              "upload_chunk"
-            ],
             "properties": {
               "upload_chunk": {
                 "$ref": "#/components/schemas/HttpClientStreamService_upload_chunk_Result"
               }
-            }
+            },
+            "required": [
+              "upload_chunk"
+            ],
+            "type": "object"
           }
         ]
       },
       "HttpClientStreamService_upload_chunk_In": {
-        "type": "object",
-        "required": [
-          "file_id",
-          "chunk"
-        ],
         "properties": {
           "chunk": {
-            "type": "array",
             "items": {
-              "type": "integer",
               "format": "int32",
-              "minimum": 0
-            }
+              "minimum": 0,
+              "type": "integer"
+            },
+            "type": "array"
           },
           "file_id": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "file_id",
+          "chunk"
+        ],
+        "type": "object"
       },
       "HttpClientStreamService_upload_chunk_Out": {
-        "type": "object",
-        "required": [
-          "return_"
-        ],
         "properties": {
           "return_": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "return_"
+        ],
+        "type": "object"
       },
       "HttpClientStreamService_upload_chunk_Result": {
         "oneOf": [
           {
-            "type": "object",
-            "required": [
-              "result"
-            ],
             "properties": {
               "result": {
                 "$ref": "#/components/schemas/HttpClientStreamService_upload_chunk_Out"
               }
-            }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
           }
         ]
+      }
+    }
+  },
+  "info": {
+    "title": "xidl",
+    "version": "0.1.0"
+  },
+  "openapi": "3.2.0",
+  "paths": {
+    "/upload/chunks": {
+      "post": {
+        "operationId": "HttpClientStreamService.upload_chunk",
+        "requestBody": {
+          "content": {
+            "application/x-ndjson": {
+              "itemSchema": {
+                "properties": {
+                  "chunk": {
+                    "items": {
+                      "format": "int32",
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "type": "array"
+                  },
+                  "file_id": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        }
       }
     }
   }

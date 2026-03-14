@@ -1,6 +1,9 @@
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::typescript::{TsMode, TypescriptRenderOutput, TypescriptRenderer};
-use crate::generate::utils::doc_lines_from_annotations;
+use crate::generate::utils::{
+    HttpStreamCodec, HttpStreamKind, HttpStreamTargetSupport, doc_lines_from_annotations,
+    http_stream_config, validate_http_stream_method, validate_http_stream_target,
+};
 use convert_case::{Case, Casing};
 use serde::Serialize;
 use std::collections::{HashMap, HashSet};
@@ -1018,19 +1021,6 @@ enum ParamDirection {
     InOut,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
-enum StreamKind {
-    Server,
-    Client,
-    Bidi,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq)]
-enum StreamCodec {
-    Sse,
-    Ndjson,
-}
-
 fn struct_fields(members: &[hir::Member], module_path: &[String]) -> Vec<FieldDecl> {
     let mut fields = Vec::new();
     for member in members {
@@ -1066,34 +1056,23 @@ fn render_op(
     interface_name: &str,
     module_path: &[String],
 ) -> IdlcResult<MethodInfo> {
-    let stream_kind = stream_kind_from_annotations(&op.annotations)?;
-    let is_server_stream = matches!(stream_kind, Some(StreamKind::Server));
-    let is_client_stream = matches!(stream_kind, Some(StreamKind::Client));
-    if matches!(stream_kind, Some(StreamKind::Bidi)) {
-        return Err(IdlcError::rpc(format!(
-            "typescript currently does not support @bidi_stream methods: '{}'",
-            op.ident
-        )));
-    }
-    let stream_codec = stream_codec_from_annotations(&op.annotations)?;
-    if is_server_stream && !matches!(stream_codec, StreamCodec::Sse) {
-        return Err(IdlcError::rpc(format!(
-            "typescript currently supports only SSE for @server_stream methods: '{}'",
-            op.ident
-        )));
-    }
-    if !is_server_stream && matches!(stream_codec, StreamCodec::Sse) {
-        return Err(IdlcError::rpc(format!(
-            "@stream_codec(\"sse\") requires @server_stream on method '{}'",
-            op.ident
-        )));
-    }
-    if is_client_stream && !matches!(stream_codec, StreamCodec::Ndjson) {
-        return Err(IdlcError::rpc(format!(
-            "typescript currently supports only NDJSON for @client_stream methods: '{}'",
-            op.ident
-        )));
-    }
+    let stream = http_stream_config(&op.annotations).map_err(IdlcError::rpc)?;
+    validate_http_stream_target(
+        &op.ident,
+        stream,
+        HttpStreamTargetSupport {
+            target: "typescript",
+            supports_bidi: false,
+            server_codec: HttpStreamCodec::Sse,
+            client_codec: HttpStreamCodec::Ndjson,
+            server_method: "GET",
+            client_method: "POST",
+            bidi_method: "GET",
+        },
+    )
+    .map_err(IdlcError::rpc)?;
+    let is_server_stream = matches!(stream.kind, Some(HttpStreamKind::Server));
+    let is_client_stream = matches!(stream.kind, Some(HttpStreamKind::Client));
     let ret = match &op.ty {
         hir::OpTypeSpec::Void => ReturnType::void(),
         hir::OpTypeSpec::TypeSpec(ty) => ReturnType::new(ty.clone()),
@@ -1109,18 +1088,21 @@ fn render_op(
         HttpMethod::Post
     };
     let (method, mut paths) = route_from_annotations(&op.annotations, default_method)?;
-    if is_server_stream && !matches!(method, HttpMethod::Get) {
-        return Err(IdlcError::rpc(format!(
-            "@server_stream method '{}' must use GET",
-            op.ident
-        )));
-    }
-    if is_client_stream && !matches!(method, HttpMethod::Post) {
-        return Err(IdlcError::rpc(format!(
-            "@client_stream method '{}' must use POST",
-            op.ident
-        )));
-    }
+    validate_http_stream_method(
+        &op.ident,
+        stream.kind,
+        method_name(method),
+        HttpStreamTargetSupport {
+            target: "typescript",
+            supports_bidi: false,
+            server_codec: HttpStreamCodec::Sse,
+            client_codec: HttpStreamCodec::Ndjson,
+            server_method: "GET",
+            client_method: "POST",
+            bidi_method: "GET",
+        },
+    )
+    .map_err(IdlcError::rpc)?;
     if paths.is_empty() {
         paths.push(auto_default_method_path(op, method)?);
     }
@@ -2122,63 +2104,6 @@ fn has_annotation(annotations: &[hir::Annotation], target: &str) -> bool {
     })
 }
 
-fn stream_kind_from_annotations(annotations: &[hir::Annotation]) -> IdlcResult<Option<StreamKind>> {
-    let mut out = None;
-    for annotation in annotations {
-        let Some(name) = annotation_name(annotation) else {
-            continue;
-        };
-        let current = if name.eq_ignore_ascii_case("server_stream") {
-            Some(StreamKind::Server)
-        } else if name.eq_ignore_ascii_case("client_stream") {
-            Some(StreamKind::Client)
-        } else if name.eq_ignore_ascii_case("bidi_stream") {
-            Some(StreamKind::Bidi)
-        } else {
-            None
-        };
-        let Some(current) = current else {
-            continue;
-        };
-        match out {
-            None => out = Some(current),
-            Some(prev) if prev == current => {}
-            Some(_) => {
-                return Err(IdlcError::rpc(
-                    "@server_stream/@client_stream/@bidi_stream are mutually exclusive",
-                ));
-            }
-        }
-    }
-    Ok(out)
-}
-
-fn stream_codec_from_annotations(annotations: &[hir::Annotation]) -> IdlcResult<StreamCodec> {
-    let mut codec = StreamCodec::Ndjson;
-    for annotation in annotations {
-        let Some(name) = annotation_name(annotation) else {
-            continue;
-        };
-        if !name.eq_ignore_ascii_case("stream_codec") {
-            continue;
-        }
-        let value = annotation_params(annotation)
-            .map(normalize_params)
-            .and_then(|params| params.get("value").cloned())
-            .unwrap_or_else(|| "sse".to_string());
-        codec = match value.to_ascii_lowercase().as_str() {
-            "sse" => StreamCodec::Sse,
-            "ndjson" => StreamCodec::Ndjson,
-            other => {
-                return Err(IdlcError::rpc(format!(
-                    "unsupported @stream_codec value '{other}', expected 'sse' or 'ndjson'"
-                )));
-            }
-        };
-    }
-    Ok(codec)
-}
-
 fn has_optional_annotation(annotations: &[hir::Annotation]) -> bool {
     annotations.iter().any(|annotation| {
         annotation_name(annotation)
@@ -2661,6 +2586,18 @@ fn method_http_code(method: HttpMethod) -> String {
     }
 }
 
+fn method_name(method: HttpMethod) -> &'static str {
+    match method {
+        HttpMethod::Get => "GET",
+        HttpMethod::Post => "POST",
+        HttpMethod::Put => "PUT",
+        HttpMethod::Patch => "PATCH",
+        HttpMethod::Delete => "DELETE",
+        HttpMethod::Head => "HEAD",
+        HttpMethod::Options => "OPTIONS",
+    }
+}
+
 struct AttrNames {
     raw: String,
 }
@@ -2687,4 +2624,59 @@ fn indent_block(value: &str, level: usize) -> String {
         })
         .collect::<Vec<_>>()
         .join("\n")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use xidl_parser::hir;
+
+    fn parse_spec(source: &str) -> hir::Specification {
+        let typed = xidl_parser::parser::parser_text(source).expect("parse typed ast");
+        hir::Specification::from_typed_ast_with_properties(typed, HashMap::new())
+    }
+
+    #[test]
+    fn rejects_bidi_stream_methods() {
+        let spec = parse_spec(
+            r#"
+            interface StreamApi {
+              @bidi_stream
+              void chat(
+                in string room,
+                in string text,
+                out string from,
+                out string reply
+              );
+            };
+            "#,
+        );
+        let renderer = TypescriptRenderer::new().expect("renderer");
+        let err = render_typescript(&spec, "stream_api", &renderer, TsMode::InterfaceOnly)
+            .err()
+            .expect("bidi stream should be rejected");
+        assert!(err.to_string().contains("@bidi_stream"));
+    }
+
+    #[test]
+    fn rejects_client_stream_with_non_body_inputs() {
+        let spec = parse_spec(
+            r#"
+            interface StreamApi {
+              @client_stream
+              @stream_codec("ndjson")
+              @path("/upload/{bucket}")
+              string upload(
+                @path("bucket") string bucket,
+                in sequence<octet> chunk
+              );
+            };
+            "#,
+        );
+        let renderer = TypescriptRenderer::new().expect("renderer");
+        let err = render_typescript(&spec, "stream_api", &renderer, TsMode::InterfaceOnly)
+            .err()
+            .expect("non-body client stream should be rejected");
+        assert!(err.to_string().contains("body parameters only"));
+    }
 }

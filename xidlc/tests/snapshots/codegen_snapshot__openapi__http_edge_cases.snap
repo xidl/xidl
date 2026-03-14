@@ -6,55 +6,393 @@ expression: output
 openapi.json
 ===============
 {
-  "openapi": "3.1.0",
+  "components": {
+    "schemas": {
+      "Error": {
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "details": {
+            "type": "object"
+          },
+          "msg": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "msg"
+        ],
+        "type": "object"
+      },
+      "HttpEdgeCasesService_Call": {
+        "oneOf": [
+          {
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            },
+            "required": [
+              "unknownOp"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "health": {
+                "$ref": "#/components/schemas/HttpEdgeCasesService_health_In"
+              }
+            },
+            "required": [
+              "health"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "get_user": {
+                "$ref": "#/components/schemas/HttpEdgeCasesService_get_user_In"
+              }
+            },
+            "required": [
+              "get_user"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "get_item": {
+                "$ref": "#/components/schemas/HttpEdgeCasesService_get_item_In"
+              }
+            },
+            "required": [
+              "get_item"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "lookup": {
+                "$ref": "#/components/schemas/HttpEdgeCasesService_lookup_In"
+              }
+            },
+            "required": [
+              "lookup"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpEdgeCasesService_Reply": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/HttpEdgeCasesService_Return"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
+          }
+        },
+        "required": [
+          "header",
+          "data"
+        ],
+        "type": "object"
+      },
+      "HttpEdgeCasesService_Request": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/HttpEdgeCasesService_Call"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
+          }
+        },
+        "required": [
+          "header",
+          "data"
+        ],
+        "type": "object"
+      },
+      "HttpEdgeCasesService_Return": {
+        "oneOf": [
+          {
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            },
+            "required": [
+              "unknownOp"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "health": {
+                "$ref": "#/components/schemas/HttpEdgeCasesService_health_Result"
+              }
+            },
+            "required": [
+              "health"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "get_user": {
+                "$ref": "#/components/schemas/HttpEdgeCasesService_get_user_Result"
+              }
+            },
+            "required": [
+              "get_user"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "get_item": {
+                "$ref": "#/components/schemas/HttpEdgeCasesService_get_item_Result"
+              }
+            },
+            "required": [
+              "get_item"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "lookup": {
+                "$ref": "#/components/schemas/HttpEdgeCasesService_lookup_Result"
+              }
+            },
+            "required": [
+              "lookup"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpEdgeCasesService_get_item_In": {
+        "properties": {
+          "item_id": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "order_id": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "order_id",
+          "item_id"
+        ],
+        "type": "object"
+      },
+      "HttpEdgeCasesService_get_item_Out": {
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "return_"
+        ],
+        "type": "object"
+      },
+      "HttpEdgeCasesService_get_item_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpEdgeCasesService_get_item_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpEdgeCasesService_get_user_In": {
+        "properties": {
+          "locale": {
+            "type": "string"
+          },
+          "uid": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "uid",
+          "locale"
+        ],
+        "type": "object"
+      },
+      "HttpEdgeCasesService_get_user_Out": {
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "return_"
+        ],
+        "type": "object"
+      },
+      "HttpEdgeCasesService_get_user_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpEdgeCasesService_get_user_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpEdgeCasesService_health_In": {
+        "properties": {
+          "trace": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "trace"
+        ],
+        "type": "object"
+      },
+      "HttpEdgeCasesService_health_Out": {
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        },
+        "required": [
+          "dummy"
+        ],
+        "type": "object"
+      },
+      "HttpEdgeCasesService_health_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpEdgeCasesService_health_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpEdgeCasesService_lookup_In": {
+        "properties": {
+          "keyword": {
+            "type": "string"
+          },
+          "page_size": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "keyword",
+          "page_size"
+        ],
+        "type": "object"
+      },
+      "HttpEdgeCasesService_lookup_Out": {
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "return_"
+        ],
+        "type": "object"
+      },
+      "HttpEdgeCasesService_lookup_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpEdgeCasesService_lookup_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      }
+    }
+  },
   "info": {
     "title": "xidlc",
     "version": "v1.0.0"
   },
+  "openapi": "3.2.0",
   "paths": {
     "/lookup": {
       "post": {
         "operationId": "HttpEdgeCasesService.lookup",
         "parameters": [
           {
-            "name": "keyword",
             "in": "query",
+            "name": "keyword",
             "required": false,
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "limit",
             "in": "query",
+            "name": "limit",
             "required": false,
             "schema": {
-              "type": "integer",
               "format": "int32",
-              "minimum": 0
+              "minimum": 0,
+              "type": "integer"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "string"
                 }
               }
-            }
+            },
+            "description": "OK"
           },
           "500": {
-            "description": "Error",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 }
               }
-            }
+            },
+            "description": "Error"
           }
         }
       }
@@ -64,46 +402,46 @@ openapi.json
         "operationId": "HttpEdgeCasesService.get_item",
         "parameters": [
           {
-            "name": "order_id",
             "in": "path",
+            "name": "order_id",
             "required": true,
             "schema": {
-              "type": "integer",
               "format": "int32",
-              "minimum": 0
+              "minimum": 0,
+              "type": "integer"
             }
           },
           {
-            "name": "item_id",
             "in": "path",
+            "name": "item_id",
             "required": true,
             "schema": {
-              "type": "integer",
               "format": "int32",
-              "minimum": 0
+              "minimum": 0,
+              "type": "integer"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "string"
                 }
               }
-            }
+            },
+            "description": "OK"
           },
           "500": {
-            "description": "Error",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 }
               }
-            }
+            },
+            "description": "Error"
           }
         }
       }
@@ -113,8 +451,8 @@ openapi.json
         "operationId": "HttpEdgeCasesService.health",
         "parameters": [
           {
-            "name": "trace_id",
             "in": "query",
+            "name": "trace_id",
             "required": false,
             "schema": {
               "type": "string"
@@ -126,14 +464,14 @@ openapi.json
             "description": "OK"
           },
           "500": {
-            "description": "Error",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 }
               }
-            }
+            },
+            "description": "Error"
           }
         }
       }
@@ -143,18 +481,18 @@ openapi.json
         "operationId": "HttpEdgeCasesService.get_user",
         "parameters": [
           {
-            "name": "id",
             "in": "path",
+            "name": "id",
             "required": true,
             "schema": {
-              "type": "integer",
               "format": "int32",
-              "minimum": 0
+              "minimum": 0,
+              "type": "integer"
             }
           },
           {
-            "name": "lang",
             "in": "query",
+            "name": "lang",
             "required": false,
             "schema": {
               "type": "string"
@@ -163,24 +501,24 @@ openapi.json
         ],
         "responses": {
           "200": {
-            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "string"
                 }
               }
-            }
+            },
+            "description": "OK"
           },
           "500": {
-            "description": "Error",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 }
               }
-            }
+            },
+            "description": "Error"
           }
         }
       }
@@ -190,18 +528,18 @@ openapi.json
         "operationId": "HttpEdgeCasesService.get_user",
         "parameters": [
           {
-            "name": "id",
             "in": "path",
+            "name": "id",
             "required": true,
             "schema": {
-              "type": "integer",
               "format": "int32",
-              "minimum": 0
+              "minimum": 0,
+              "type": "integer"
             }
           },
           {
-            "name": "lang",
             "in": "query",
+            "name": "lang",
             "required": false,
             "schema": {
               "type": "string"
@@ -210,364 +548,26 @@ openapi.json
         ],
         "responses": {
           "200": {
-            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "string"
                 }
               }
-            }
+            },
+            "description": "OK"
           },
           "500": {
-            "description": "Error",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 }
               }
-            }
+            },
+            "description": "Error"
           }
         }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "Error": {
-        "type": "object",
-        "required": [
-          "code",
-          "msg"
-        ],
-        "properties": {
-          "code": {
-            "type": "integer"
-          },
-          "details": {
-            "type": "object"
-          },
-          "msg": {
-            "type": "string"
-          }
-        }
-      },
-      "HttpEdgeCasesService_Call": {
-        "oneOf": [
-          {
-            "type": "object",
-            "required": [
-              "unknownOp"
-            ],
-            "properties": {
-              "unknownOp": {
-                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
-              }
-            }
-          },
-          {
-            "type": "object",
-            "required": [
-              "health"
-            ],
-            "properties": {
-              "health": {
-                "$ref": "#/components/schemas/HttpEdgeCasesService_health_In"
-              }
-            }
-          },
-          {
-            "type": "object",
-            "required": [
-              "get_user"
-            ],
-            "properties": {
-              "get_user": {
-                "$ref": "#/components/schemas/HttpEdgeCasesService_get_user_In"
-              }
-            }
-          },
-          {
-            "type": "object",
-            "required": [
-              "get_item"
-            ],
-            "properties": {
-              "get_item": {
-                "$ref": "#/components/schemas/HttpEdgeCasesService_get_item_In"
-              }
-            }
-          },
-          {
-            "type": "object",
-            "required": [
-              "lookup"
-            ],
-            "properties": {
-              "lookup": {
-                "$ref": "#/components/schemas/HttpEdgeCasesService_lookup_In"
-              }
-            }
-          }
-        ]
-      },
-      "HttpEdgeCasesService_Reply": {
-        "type": "object",
-        "required": [
-          "header",
-          "data"
-        ],
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/HttpEdgeCasesService_Return"
-          },
-          "header": {
-            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
-          }
-        }
-      },
-      "HttpEdgeCasesService_Request": {
-        "type": "object",
-        "required": [
-          "header",
-          "data"
-        ],
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/HttpEdgeCasesService_Call"
-          },
-          "header": {
-            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
-          }
-        }
-      },
-      "HttpEdgeCasesService_Return": {
-        "oneOf": [
-          {
-            "type": "object",
-            "required": [
-              "unknownOp"
-            ],
-            "properties": {
-              "unknownOp": {
-                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
-              }
-            }
-          },
-          {
-            "type": "object",
-            "required": [
-              "health"
-            ],
-            "properties": {
-              "health": {
-                "$ref": "#/components/schemas/HttpEdgeCasesService_health_Result"
-              }
-            }
-          },
-          {
-            "type": "object",
-            "required": [
-              "get_user"
-            ],
-            "properties": {
-              "get_user": {
-                "$ref": "#/components/schemas/HttpEdgeCasesService_get_user_Result"
-              }
-            }
-          },
-          {
-            "type": "object",
-            "required": [
-              "get_item"
-            ],
-            "properties": {
-              "get_item": {
-                "$ref": "#/components/schemas/HttpEdgeCasesService_get_item_Result"
-              }
-            }
-          },
-          {
-            "type": "object",
-            "required": [
-              "lookup"
-            ],
-            "properties": {
-              "lookup": {
-                "$ref": "#/components/schemas/HttpEdgeCasesService_lookup_Result"
-              }
-            }
-          }
-        ]
-      },
-      "HttpEdgeCasesService_get_item_In": {
-        "type": "object",
-        "required": [
-          "order_id",
-          "item_id"
-        ],
-        "properties": {
-          "item_id": {
-            "type": "integer",
-            "format": "int32",
-            "minimum": 0
-          },
-          "order_id": {
-            "type": "integer",
-            "format": "int32",
-            "minimum": 0
-          }
-        }
-      },
-      "HttpEdgeCasesService_get_item_Out": {
-        "type": "object",
-        "required": [
-          "return_"
-        ],
-        "properties": {
-          "return_": {
-            "type": "string"
-          }
-        }
-      },
-      "HttpEdgeCasesService_get_item_Result": {
-        "oneOf": [
-          {
-            "type": "object",
-            "required": [
-              "result"
-            ],
-            "properties": {
-              "result": {
-                "$ref": "#/components/schemas/HttpEdgeCasesService_get_item_Out"
-              }
-            }
-          }
-        ]
-      },
-      "HttpEdgeCasesService_get_user_In": {
-        "type": "object",
-        "required": [
-          "uid",
-          "locale"
-        ],
-        "properties": {
-          "locale": {
-            "type": "string"
-          },
-          "uid": {
-            "type": "integer",
-            "format": "int32",
-            "minimum": 0
-          }
-        }
-      },
-      "HttpEdgeCasesService_get_user_Out": {
-        "type": "object",
-        "required": [
-          "return_"
-        ],
-        "properties": {
-          "return_": {
-            "type": "string"
-          }
-        }
-      },
-      "HttpEdgeCasesService_get_user_Result": {
-        "oneOf": [
-          {
-            "type": "object",
-            "required": [
-              "result"
-            ],
-            "properties": {
-              "result": {
-                "$ref": "#/components/schemas/HttpEdgeCasesService_get_user_Out"
-              }
-            }
-          }
-        ]
-      },
-      "HttpEdgeCasesService_health_In": {
-        "type": "object",
-        "required": [
-          "trace"
-        ],
-        "properties": {
-          "trace": {
-            "type": "string"
-          }
-        }
-      },
-      "HttpEdgeCasesService_health_Out": {
-        "type": "object",
-        "required": [
-          "dummy"
-        ],
-        "properties": {
-          "dummy": {
-            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
-          }
-        }
-      },
-      "HttpEdgeCasesService_health_Result": {
-        "oneOf": [
-          {
-            "type": "object",
-            "required": [
-              "result"
-            ],
-            "properties": {
-              "result": {
-                "$ref": "#/components/schemas/HttpEdgeCasesService_health_Out"
-              }
-            }
-          }
-        ]
-      },
-      "HttpEdgeCasesService_lookup_In": {
-        "type": "object",
-        "required": [
-          "keyword",
-          "page_size"
-        ],
-        "properties": {
-          "keyword": {
-            "type": "string"
-          },
-          "page_size": {
-            "type": "integer",
-            "format": "int32",
-            "minimum": 0
-          }
-        }
-      },
-      "HttpEdgeCasesService_lookup_Out": {
-        "type": "object",
-        "required": [
-          "return_"
-        ],
-        "properties": {
-          "return_": {
-            "type": "string"
-          }
-        }
-      },
-      "HttpEdgeCasesService_lookup_Result": {
-        "oneOf": [
-          {
-            "type": "object",
-            "required": [
-              "result"
-            ],
-            "properties": {
-              "result": {
-                "$ref": "#/components/schemas/HttpEdgeCasesService_lookup_Out"
-              }
-            }
-          }
-        ]
       }
     }
   }

@@ -6,19 +6,233 @@ expression: output
 openapi.json
 ===============
 {
-  "openapi": "3.1.0",
+  "components": {
+    "schemas": {
+      "Error": {
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "details": {
+            "type": "object"
+          },
+          "msg": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "msg"
+        ],
+        "type": "object"
+      },
+      "HttpQueryTemplateService_Call": {
+        "oneOf": [
+          {
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            },
+            "required": [
+              "unknownOp"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "get_user": {
+                "$ref": "#/components/schemas/HttpQueryTemplateService_get_user_In"
+              }
+            },
+            "required": [
+              "get_user"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "search": {
+                "$ref": "#/components/schemas/HttpQueryTemplateService_search_In"
+              }
+            },
+            "required": [
+              "search"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpQueryTemplateService_Reply": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/HttpQueryTemplateService_Return"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
+          }
+        },
+        "required": [
+          "header",
+          "data"
+        ],
+        "type": "object"
+      },
+      "HttpQueryTemplateService_Request": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/HttpQueryTemplateService_Call"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
+          }
+        },
+        "required": [
+          "header",
+          "data"
+        ],
+        "type": "object"
+      },
+      "HttpQueryTemplateService_Return": {
+        "oneOf": [
+          {
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            },
+            "required": [
+              "unknownOp"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "get_user": {
+                "$ref": "#/components/schemas/HttpQueryTemplateService_get_user_Result"
+              }
+            },
+            "required": [
+              "get_user"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "search": {
+                "$ref": "#/components/schemas/HttpQueryTemplateService_search_Result"
+              }
+            },
+            "required": [
+              "search"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpQueryTemplateService_get_user_In": {
+        "properties": {
+          "id": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "lang": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "lang",
+          "region"
+        ],
+        "type": "object"
+      },
+      "HttpQueryTemplateService_get_user_Out": {
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "return_"
+        ],
+        "type": "object"
+      },
+      "HttpQueryTemplateService_get_user_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpQueryTemplateService_get_user_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpQueryTemplateService_search_In": {
+        "properties": {
+          "keyword": {
+            "type": "string"
+          },
+          "payload": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "keyword",
+          "payload"
+        ],
+        "type": "object"
+      },
+      "HttpQueryTemplateService_search_Out": {
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "return_"
+        ],
+        "type": "object"
+      },
+      "HttpQueryTemplateService_search_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpQueryTemplateService_search_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      }
+    }
+  },
   "info": {
     "title": "xidlc",
     "version": "v1.0.0"
   },
+  "openapi": "3.2.0",
   "paths": {
     "/search": {
       "post": {
         "operationId": "HttpQueryTemplateService.search",
         "parameters": [
           {
-            "name": "keyword",
             "in": "query",
+            "name": "keyword",
             "required": false,
             "schema": {
               "type": "string"
@@ -36,24 +250,24 @@ openapi.json
         },
         "responses": {
           "200": {
-            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "string"
                 }
               }
-            }
+            },
+            "description": "OK"
           },
           "500": {
-            "description": "Error",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 }
               }
-            }
+            },
+            "description": "Error"
           }
         }
       }
@@ -63,26 +277,26 @@ openapi.json
         "operationId": "HttpQueryTemplateService.get_user",
         "parameters": [
           {
-            "name": "id",
             "in": "path",
+            "name": "id",
             "required": true,
             "schema": {
-              "type": "integer",
               "format": "int32",
-              "minimum": 0
+              "minimum": 0,
+              "type": "integer"
             }
           },
           {
-            "name": "lang",
             "in": "query",
+            "name": "lang",
             "required": false,
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "region",
             "in": "query",
+            "name": "region",
             "required": false,
             "schema": {
               "type": "string"
@@ -91,240 +305,26 @@ openapi.json
         ],
         "responses": {
           "200": {
-            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "string"
                 }
               }
-            }
+            },
+            "description": "OK"
           },
           "500": {
-            "description": "Error",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 }
               }
-            }
+            },
+            "description": "Error"
           }
         }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "Error": {
-        "type": "object",
-        "required": [
-          "code",
-          "msg"
-        ],
-        "properties": {
-          "code": {
-            "type": "integer"
-          },
-          "details": {
-            "type": "object"
-          },
-          "msg": {
-            "type": "string"
-          }
-        }
-      },
-      "HttpQueryTemplateService_Call": {
-        "oneOf": [
-          {
-            "type": "object",
-            "required": [
-              "unknownOp"
-            ],
-            "properties": {
-              "unknownOp": {
-                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
-              }
-            }
-          },
-          {
-            "type": "object",
-            "required": [
-              "get_user"
-            ],
-            "properties": {
-              "get_user": {
-                "$ref": "#/components/schemas/HttpQueryTemplateService_get_user_In"
-              }
-            }
-          },
-          {
-            "type": "object",
-            "required": [
-              "search"
-            ],
-            "properties": {
-              "search": {
-                "$ref": "#/components/schemas/HttpQueryTemplateService_search_In"
-              }
-            }
-          }
-        ]
-      },
-      "HttpQueryTemplateService_Reply": {
-        "type": "object",
-        "required": [
-          "header",
-          "data"
-        ],
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/HttpQueryTemplateService_Return"
-          },
-          "header": {
-            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
-          }
-        }
-      },
-      "HttpQueryTemplateService_Request": {
-        "type": "object",
-        "required": [
-          "header",
-          "data"
-        ],
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/HttpQueryTemplateService_Call"
-          },
-          "header": {
-            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
-          }
-        }
-      },
-      "HttpQueryTemplateService_Return": {
-        "oneOf": [
-          {
-            "type": "object",
-            "required": [
-              "unknownOp"
-            ],
-            "properties": {
-              "unknownOp": {
-                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
-              }
-            }
-          },
-          {
-            "type": "object",
-            "required": [
-              "get_user"
-            ],
-            "properties": {
-              "get_user": {
-                "$ref": "#/components/schemas/HttpQueryTemplateService_get_user_Result"
-              }
-            }
-          },
-          {
-            "type": "object",
-            "required": [
-              "search"
-            ],
-            "properties": {
-              "search": {
-                "$ref": "#/components/schemas/HttpQueryTemplateService_search_Result"
-              }
-            }
-          }
-        ]
-      },
-      "HttpQueryTemplateService_get_user_In": {
-        "type": "object",
-        "required": [
-          "id",
-          "lang",
-          "region"
-        ],
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32",
-            "minimum": 0
-          },
-          "lang": {
-            "type": "string"
-          },
-          "region": {
-            "type": "string"
-          }
-        }
-      },
-      "HttpQueryTemplateService_get_user_Out": {
-        "type": "object",
-        "required": [
-          "return_"
-        ],
-        "properties": {
-          "return_": {
-            "type": "string"
-          }
-        }
-      },
-      "HttpQueryTemplateService_get_user_Result": {
-        "oneOf": [
-          {
-            "type": "object",
-            "required": [
-              "result"
-            ],
-            "properties": {
-              "result": {
-                "$ref": "#/components/schemas/HttpQueryTemplateService_get_user_Out"
-              }
-            }
-          }
-        ]
-      },
-      "HttpQueryTemplateService_search_In": {
-        "type": "object",
-        "required": [
-          "keyword",
-          "payload"
-        ],
-        "properties": {
-          "keyword": {
-            "type": "string"
-          },
-          "payload": {
-            "type": "string"
-          }
-        }
-      },
-      "HttpQueryTemplateService_search_Out": {
-        "type": "object",
-        "required": [
-          "return_"
-        ],
-        "properties": {
-          "return_": {
-            "type": "string"
-          }
-        }
-      },
-      "HttpQueryTemplateService_search_Result": {
-        "oneOf": [
-          {
-            "type": "object",
-            "required": [
-              "result"
-            ],
-            "properties": {
-              "result": {
-                "$ref": "#/components/schemas/HttpQueryTemplateService_search_Out"
-              }
-            }
-          }
-        ]
       }
     }
   }

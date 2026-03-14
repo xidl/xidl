@@ -1,6 +1,10 @@
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::rust::util::rust_ident;
 use crate::generate::rust_axum::{RustAxumRenderOutput, RustAxumRenderer};
+use crate::generate::utils::{
+    HttpStreamCodec, HttpStreamKind, HttpStreamTargetSupport, http_stream_config,
+    validate_http_stream_method, validate_http_stream_target,
+};
 use convert_case::{Case, Casing};
 use serde::Serialize;
 use std::collections::{HashMap, HashSet};
@@ -31,19 +35,6 @@ enum ParamDirection {
     In,
     Out,
     InOut,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq)]
-enum StreamKind {
-    Server,
-    Client,
-    Bidi,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq)]
-enum StreamCodec {
-    Sse,
-    Ndjson,
 }
 
 #[derive(Serialize)]
@@ -187,31 +178,29 @@ fn render_op(
     interface_name: &str,
     _module_path: &[String],
 ) -> IdlcResult<MethodContext> {
-    crate::generate::utils::validate_http_annotations(&format!("operation '{}'", op.ident), &op.annotations)
-        .map_err(IdlcError::rpc)?;
-    let stream_kind = stream_kind_from_annotations(&op.annotations)?;
-    let is_server_stream = matches!(stream_kind, Some(StreamKind::Server));
-    let is_client_stream = matches!(stream_kind, Some(StreamKind::Client));
-    let is_bidi_stream = matches!(stream_kind, Some(StreamKind::Bidi));
-    let stream_codec = stream_codec_from_annotations(&op.annotations)?;
-    if is_server_stream && !matches!(stream_codec, StreamCodec::Sse) {
-        return Err(IdlcError::rpc(format!(
-            "rust-axum currently supports only SSE for @server_stream methods: '{}'",
-            op.ident
-        )));
-    }
-    if is_client_stream && !matches!(stream_codec, StreamCodec::Ndjson) {
-        return Err(IdlcError::rpc(format!(
-            "rust-axum currently supports only NDJSON for @client_stream methods: '{}'",
-            op.ident
-        )));
-    }
-    if !is_server_stream && matches!(stream_codec, StreamCodec::Sse) {
-        return Err(IdlcError::rpc(format!(
-            "@stream_codec(\"sse\") requires @server_stream on method '{}'",
-            op.ident
-        )));
-    }
+    crate::generate::utils::validate_http_annotations(
+        &format!("operation '{}'", op.ident),
+        &op.annotations,
+    )
+    .map_err(IdlcError::rpc)?;
+    let stream = http_stream_config(&op.annotations).map_err(IdlcError::rpc)?;
+    validate_http_stream_target(
+        &op.ident,
+        stream,
+        HttpStreamTargetSupport {
+            target: "rust-axum",
+            supports_bidi: true,
+            server_codec: HttpStreamCodec::Sse,
+            client_codec: HttpStreamCodec::Ndjson,
+            server_method: "GET",
+            client_method: "POST",
+            bidi_method: "GET",
+        },
+    )
+    .map_err(IdlcError::rpc)?;
+    let is_server_stream = matches!(stream.kind, Some(HttpStreamKind::Server));
+    let is_client_stream = matches!(stream.kind, Some(HttpStreamKind::Client));
+    let is_bidi_stream = matches!(stream.kind, Some(HttpStreamKind::Bidi));
     let ret = match &op.ty {
         hir::OpTypeSpec::Void => "()".to_string(),
         hir::OpTypeSpec::TypeSpec(ty) => axum_type(ty),
@@ -238,24 +227,21 @@ fn render_op(
         HttpMethod::Post
     };
     let (method, mut paths) = route_from_annotations(&op.annotations, default_method)?;
-    if is_server_stream && !matches!(method, HttpMethod::Get) {
-        return Err(IdlcError::rpc(format!(
-            "@server_stream method '{}' must use GET",
-            op.ident
-        )));
-    }
-    if is_client_stream && !matches!(method, HttpMethod::Post) {
-        return Err(IdlcError::rpc(format!(
-            "@client_stream method '{}' must use POST",
-            op.ident
-        )));
-    }
-    if is_bidi_stream && !matches!(method, HttpMethod::Get) {
-        return Err(IdlcError::rpc(format!(
-            "@bidi_stream method '{}' must use GET",
-            op.ident
-        )));
-    }
+    validate_http_stream_method(
+        &op.ident,
+        stream.kind,
+        method_name(method),
+        HttpStreamTargetSupport {
+            target: "rust-axum",
+            supports_bidi: true,
+            server_codec: HttpStreamCodec::Sse,
+            client_codec: HttpStreamCodec::Ndjson,
+            server_method: "GET",
+            client_method: "POST",
+            bidi_method: "GET",
+        },
+    )
+    .map_err(IdlcError::rpc)?;
     if paths.is_empty() {
         paths.push(auto_default_method_path(op, method)?);
     }
@@ -1174,63 +1160,6 @@ fn field_rename(annotations: &[hir::Annotation], rust_name: &str) -> Option<Stri
     field_rename_raw(annotations).and_then(|value| serde_rename(&value, rust_name))
 }
 
-fn stream_kind_from_annotations(annotations: &[hir::Annotation]) -> IdlcResult<Option<StreamKind>> {
-    let mut out = None;
-    for annotation in annotations {
-        let Some(name) = annotation_name(annotation) else {
-            continue;
-        };
-        let current = if name.eq_ignore_ascii_case("server_stream") {
-            Some(StreamKind::Server)
-        } else if name.eq_ignore_ascii_case("client_stream") {
-            Some(StreamKind::Client)
-        } else if name.eq_ignore_ascii_case("bidi_stream") {
-            Some(StreamKind::Bidi)
-        } else {
-            None
-        };
-        let Some(current) = current else {
-            continue;
-        };
-        match out {
-            None => out = Some(current),
-            Some(prev) if prev == current => {}
-            Some(_) => {
-                return Err(IdlcError::rpc(
-                    "@server_stream/@client_stream/@bidi_stream are mutually exclusive",
-                ));
-            }
-        }
-    }
-    Ok(out)
-}
-
-fn stream_codec_from_annotations(annotations: &[hir::Annotation]) -> IdlcResult<StreamCodec> {
-    let mut codec = StreamCodec::Ndjson;
-    for annotation in annotations {
-        let Some(name) = annotation_name(annotation) else {
-            continue;
-        };
-        if !name.eq_ignore_ascii_case("stream_codec") {
-            continue;
-        }
-        let value = annotation_params(annotation)
-            .map(normalize_params)
-            .and_then(|params| params.get("value").cloned())
-            .unwrap_or_else(|| "sse".to_string());
-        codec = match value.to_ascii_lowercase().as_str() {
-            "sse" => StreamCodec::Sse,
-            "ndjson" => StreamCodec::Ndjson,
-            other => {
-                return Err(IdlcError::rpc(format!(
-                    "unsupported @stream_codec value '{other}', expected 'sse' or 'ndjson'"
-                )));
-            }
-        };
-    }
-    Ok(codec)
-}
-
 struct SourceBinding {
     source: ParamSource,
     bound_name: String,
@@ -1762,5 +1691,17 @@ fn reqwest_method_code(method: HttpMethod) -> String {
         HttpMethod::Delete => "DELETE".to_string(),
         HttpMethod::Head => "HEAD".to_string(),
         HttpMethod::Options => "OPTIONS".to_string(),
+    }
+}
+
+fn method_name(method: HttpMethod) -> &'static str {
+    match method {
+        HttpMethod::Get => "GET",
+        HttpMethod::Post => "POST",
+        HttpMethod::Put => "PUT",
+        HttpMethod::Patch => "PATCH",
+        HttpMethod::Delete => "DELETE",
+        HttpMethod::Head => "HEAD",
+        HttpMethod::Options => "OPTIONS",
     }
 }

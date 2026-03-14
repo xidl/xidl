@@ -36,8 +36,8 @@ fn parse_media_type(value: &str) -> Option<(&str, &str)> {
 }
 
 pub mod serde_ext {
-    use serde::de::{self, Deserializer};
     use serde::Deserialize;
+    use serde::de::{self, Deserializer};
 
     pub fn default_on_missing_reject_null<'de, D, T>(deserializer: D) -> Result<T, D::Error>
     where

@@ -5,14 +5,13 @@ use utoipa::openapi::path::{
     HttpMethod as OpenApiHttpMethod, OperationBuilder, ParameterBuilder, ParameterIn, PathItem,
     PathsBuilder,
 };
-use utoipa::openapi::security::{
-    ApiKey, ApiKeyValue, Http, HttpAuthScheme, OAuth2, Scopes, SecurityRequirement,
-    SecurityScheme,
-};
 use utoipa::openapi::request_body::RequestBody;
 use utoipa::openapi::response::ResponseBuilder;
 use utoipa::openapi::schema::{
     ArrayBuilder, KnownFormat, ObjectBuilder, OneOf, Schema, SchemaFormat, Type,
+};
+use utoipa::openapi::security::{
+    ApiKey, ApiKeyValue, Http, HttpAuthScheme, OAuth2, Scopes, SecurityRequirement, SecurityScheme,
 };
 use utoipa::openapi::server::Server;
 use utoipa::openapi::{
@@ -22,8 +21,10 @@ use xidl_parser::hir;
 use xidl_parser::hir::{ParserProperties, Specification};
 
 use crate::generate::utils::{
-    DeprecatedInfo, HttpApiKeyLocation, HttpSecurityRequirement, deprecated_info,
-    doc_lines_from_annotations, effective_media_type, effective_security, validate_http_annotations,
+    DeprecatedInfo, HttpApiKeyLocation, HttpSecurityRequirement, HttpStreamCodec, HttpStreamKind,
+    HttpStreamTargetSupport, deprecated_info, doc_lines_from_annotations, effective_media_type,
+    effective_security, http_stream_config, validate_http_annotations, validate_http_stream_method,
+    validate_http_stream_target,
 };
 use crate::jsonrpc::{Artifact, ArtifactFile};
 
@@ -45,7 +46,7 @@ impl crate::jsonrpc::Codegen for OpenApiCodegen {
         _path: String,
         _props: ParserProperties,
     ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
-        let openapi = render_openapi(&hir);
+        let openapi = render_openapi_json(&hir)?;
         let content = serde_json::to_string_pretty(&openapi)?;
         Ok(vec![Artifact::new_file(ArtifactFile {
             path: "openapi.json".to_string(),
@@ -54,7 +55,19 @@ impl crate::jsonrpc::Codegen for OpenApiCodegen {
     }
 }
 
-pub fn render_openapi(spec: &hir::Specification) -> OpenApi {
+fn render_openapi_json(spec: &hir::Specification) -> Result<Value, serde_json::Error> {
+    let ctx = render_openapi(spec);
+    let mut value = serde_json::to_value(ctx.document)?;
+    if let Some(openapi) = value.get_mut("openapi") {
+        *openapi = Value::String("3.2.0".to_string());
+    }
+    for patch in ctx.stream_patches {
+        patch_openapi_stream_content(&mut value, &patch);
+    }
+    Ok(value)
+}
+
+pub fn render_openapi(spec: &hir::Specification) -> RenderedOpenApi {
     let mut ctx = OpenApiContext::default();
     ctx.collect_spec(spec, &[]);
 
@@ -75,12 +88,17 @@ pub fn render_openapi(spec: &hir::Specification) -> OpenApi {
         Some(ctx.servers)
     };
 
-    OpenApiBuilder::new()
+    let document = OpenApiBuilder::new()
         .info(InfoBuilder::new().title(title).version(version).build())
         .paths(ctx.paths.build())
         .components(Some(components.build()))
         .servers(servers)
-        .build()
+        .build();
+
+    RenderedOpenApi {
+        document,
+        stream_patches: ctx.stream_patches,
+    }
 }
 
 #[derive(Default)]
@@ -91,6 +109,20 @@ struct OpenApiContext {
     info_title: Option<String>,
     info_version: Option<String>,
     servers: Vec<Server>,
+    stream_patches: Vec<OpenApiStreamPatch>,
+}
+
+pub struct RenderedOpenApi {
+    pub document: OpenApi,
+    stream_patches: Vec<OpenApiStreamPatch>,
+}
+
+struct OpenApiStreamPatch {
+    path: String,
+    method: &'static str,
+    response_status: Option<&'static str>,
+    content_type: String,
+    item_schema: Value,
 }
 
 impl OpenApiContext {
@@ -275,10 +307,10 @@ impl OpenApiContext {
                 operation_id,
                 parameters,
                 request_body,
+                request_stream_item_schema,
                 response_status,
                 response_schema,
-                is_server_stream: _,
-                is_client_stream: _,
+                response_stream_item_schema,
                 summary,
                 description,
                 deprecated,
@@ -296,6 +328,28 @@ impl OpenApiContext {
                     panic!(
                         "duplicate HTTP route binding: {key} (operations: {previous}, {operation_id})"
                     );
+                }
+                if let Some(item_schema) = &request_stream_item_schema {
+                    self.stream_patches.push(OpenApiStreamPatch {
+                        path: path.clone(),
+                        method: openapi_method_name(&http_method),
+                        response_status: None,
+                        content_type: request_stream_content_type(&request_body),
+                        item_schema: serde_json::to_value(item_schema).unwrap_or_else(|err| {
+                            panic!("failed to serialize request stream schema: {err}")
+                        }),
+                    });
+                }
+                if let Some(item_schema) = &response_stream_item_schema {
+                    self.stream_patches.push(OpenApiStreamPatch {
+                        path: path.clone(),
+                        method: openapi_method_name(&http_method),
+                        response_status: Some(response_status),
+                        content_type: response_content_type.clone(),
+                        item_schema: serde_json::to_value(item_schema).unwrap_or_else(|err| {
+                            panic!("failed to serialize response stream schema: {err}")
+                        }),
+                    });
                 }
                 let mut responses = ResponsesBuilder::new();
                 let mut ok_response = ResponseBuilder::new().description("OK");
@@ -365,10 +419,10 @@ struct MethodInfo {
     operation_id: String,
     parameters: Vec<utoipa::openapi::path::Parameter>,
     request_body: Option<RequestBody>,
+    request_stream_item_schema: Option<RefOr<Schema>>,
     response_status: &'static str,
     response_schema: Option<RefOr<Schema>>,
-    #[allow(dead_code)]
-    is_client_stream: bool,
+    response_stream_item_schema: Option<RefOr<Schema>>,
     summary: Option<String>,
     description: Option<String>,
     deprecated: bool,
@@ -391,29 +445,24 @@ fn render_op(
 ) -> MethodInfo {
     validate_http_annotations(&format!("operation '{}'", op.ident), &op.annotations)
         .unwrap_or_else(|err| panic!("{err}"));
-    let stream_kind = stream_kind_from_annotations(&op.annotations);
-    let is_server_stream = matches!(stream_kind, Some(StreamKind::Server));
-    let is_client_stream = matches!(stream_kind, Some(StreamKind::Client));
-    let is_bidi_stream = matches!(stream_kind, Some(StreamKind::Bidi));
-    let stream_codec = stream_codec_from_annotations(&op.annotations);
-    if is_server_stream && !matches!(stream_codec, StreamCodec::Sse) {
-        panic!(
-            "openapi currently supports only SSE for @server_stream methods: '{}'",
-            op.ident
-        );
-    }
-    if is_client_stream && !matches!(stream_codec, StreamCodec::Ndjson) {
-        panic!(
-            "openapi currently supports only NDJSON for @client_stream methods: '{}'",
-            op.ident
-        );
-    }
-    if !is_server_stream && matches!(stream_codec, StreamCodec::Sse) {
-        panic!(
-            "@stream_codec(\"sse\") requires @server_stream on method '{}'",
-            op.ident
-        );
-    }
+    let stream = http_stream_config(&op.annotations).unwrap_or_else(|err| panic!("{err}"));
+    validate_http_stream_target(
+        &op.ident,
+        stream,
+        HttpStreamTargetSupport {
+            target: "openapi",
+            supports_bidi: true,
+            server_codec: HttpStreamCodec::Sse,
+            client_codec: HttpStreamCodec::Ndjson,
+            server_method: "GET",
+            client_method: "POST",
+            bidi_method: "GET",
+        },
+    )
+    .unwrap_or_else(|err| panic!("{err}"));
+    let is_server_stream = matches!(stream.kind, Some(HttpStreamKind::Server));
+    let is_client_stream = matches!(stream.kind, Some(HttpStreamKind::Client));
+    let is_bidi_stream = matches!(stream.kind, Some(HttpStreamKind::Bidi));
     let return_schema = match &op.ty {
         hir::OpTypeSpec::Void => None,
         hir::OpTypeSpec::TypeSpec(ty) => Some(schema_for_type(ty)),
@@ -431,15 +480,21 @@ fn render_op(
         HttpMethod::Post
     };
     let (method, mut paths) = route_from_annotations(&op.annotations, default_method);
-    if is_server_stream && !matches!(method, HttpMethod::Get) {
-        panic!("@server_stream method '{}' must use GET", op.ident);
-    }
-    if is_client_stream && !matches!(method, HttpMethod::Post) {
-        panic!("@client_stream method '{}' must use POST", op.ident);
-    }
-    if is_bidi_stream && !matches!(method, HttpMethod::Get) {
-        panic!("@bidi_stream method '{}' must use GET", op.ident);
-    }
+    validate_http_stream_method(
+        &op.ident,
+        stream.kind,
+        method_name(method),
+        HttpStreamTargetSupport {
+            target: "openapi",
+            supports_bidi: true,
+            server_codec: HttpStreamCodec::Sse,
+            client_codec: HttpStreamCodec::Ndjson,
+            server_method: "GET",
+            client_method: "POST",
+            bidi_method: "GET",
+        },
+    )
+    .unwrap_or_else(|err| panic!("{err}"));
     if paths.is_empty() {
         paths.push(auto_default_method_path(op, method));
     }
@@ -667,6 +722,16 @@ fn render_op(
         Some((requirements, openapi)) => (Some(requirements), Some(openapi)),
         None => (None, None),
     };
+    let request_stream_item_schema = if is_client_stream {
+        request_schema.clone()
+    } else {
+        None
+    };
+    let response_stream_item_schema = if is_server_stream {
+        response_schema.clone()
+    } else {
+        None
+    };
     MethodInfo {
         http_method: method_to_openapi(method),
         paths,
@@ -674,9 +739,10 @@ fn render_op(
         parameters,
         request_body: request_schema
             .map(|schema| request_body_schema(schema, &request_content_type)),
+        request_stream_item_schema,
         response_status,
         response_schema,
-        is_client_stream,
+        response_stream_item_schema,
         summary: doc_summary(&op.annotations),
         description: doc_text(&op.annotations),
         deprecated,
@@ -728,9 +794,10 @@ fn render_attr(
                     operation_id: operation_id(module_path, interface_name, &raw_name),
                     parameters: Vec::new(),
                     request_body: None,
+                    request_stream_item_schema: None,
                     response_status: "200",
                     response_schema: Some(schema_for_type(&spec.ty)),
-                    is_client_stream: false,
+                    response_stream_item_schema: None,
                     summary: summary.clone(),
                     description: description.clone(),
                     deprecated,
@@ -746,9 +813,10 @@ fn render_attr(
                         operation_id: operation_id(module_path, interface_name, &raw_watch),
                         parameters: Vec::new(),
                         request_body: None,
+                        request_stream_item_schema: None,
                         response_status: "200",
                         response_schema: Some(schema_for_type(&spec.ty)),
-                        is_client_stream: false,
+                        response_stream_item_schema: Some(schema_for_type(&spec.ty)),
                         summary: summary.clone(),
                         description: description.clone(),
                         deprecated,
@@ -772,9 +840,10 @@ fn render_attr(
                             operation_id: operation_id(module_path, interface_name, &raw_name),
                             parameters: Vec::new(),
                             request_body: None,
+                            request_stream_item_schema: None,
                             response_status: "200",
                             response_schema: Some(schema_for_type(&spec.ty)),
-                            is_client_stream: false,
+                            response_stream_item_schema: None,
                             summary: summary.clone(),
                             description: description.clone(),
                             deprecated,
@@ -791,9 +860,10 @@ fn render_attr(
                             operation_id: operation_id(module_path, interface_name, &raw_setter),
                             parameters: Vec::new(),
                             request_body: body_schema(props, required, "application/json"),
+                            request_stream_item_schema: None,
                             response_status: "204",
                             response_schema: None,
-                            is_client_stream: false,
+                            response_stream_item_schema: None,
                             summary: summary.clone(),
                             description: description.clone(),
                             deprecated,
@@ -809,9 +879,10 @@ fn render_attr(
                                 operation_id: operation_id(module_path, interface_name, &raw_watch),
                                 parameters: Vec::new(),
                                 request_body: None,
+                                request_stream_item_schema: None,
                                 response_status: "200",
                                 response_schema: Some(schema_for_type(&spec.ty)),
-                                is_client_stream: false,
+                                response_stream_item_schema: Some(schema_for_type(&spec.ty)),
                                 summary: summary.clone(),
                                 description: description.clone(),
                                 deprecated,
@@ -830,9 +901,10 @@ fn render_attr(
                         operation_id: operation_id(module_path, interface_name, &raw_name),
                         parameters: Vec::new(),
                         request_body: None,
+                        request_stream_item_schema: None,
                         response_status: "200",
                         response_schema: Some(schema_for_type(&spec.ty)),
-                        is_client_stream: false,
+                        response_stream_item_schema: None,
                         summary: summary.clone(),
                         description: description.clone(),
                         deprecated,
@@ -849,16 +921,17 @@ fn render_attr(
                         operation_id: operation_id(module_path, interface_name, &raw_setter),
                         parameters: Vec::new(),
                         request_body: body_schema(props, required, "application/json"),
+                        request_stream_item_schema: None,
                         response_status: "204",
                         response_schema: None,
-                            is_client_stream: false,
-                            summary: summary.clone(),
-                            description: description.clone(),
-                            deprecated,
-                            security_requirements: security_requirements.clone(),
-                            security: security.clone(),
-                            response_content_type: "application/json".to_string(),
-                        });
+                        response_stream_item_schema: None,
+                        summary: summary.clone(),
+                        description: description.clone(),
+                        deprecated,
+                        security_requirements: security_requirements.clone(),
+                        security: security.clone(),
+                        response_content_type: "application/json".to_string(),
+                    });
                     if emit_watch {
                         let raw_watch = format!("watch_attribute_{raw_name}");
                         out.push(MethodInfo {
@@ -867,16 +940,17 @@ fn render_attr(
                             operation_id: operation_id(module_path, interface_name, &raw_watch),
                             parameters: Vec::new(),
                             request_body: None,
+                            request_stream_item_schema: None,
                             response_status: "200",
                             response_schema: Some(schema_for_type(&spec.ty)),
-                                is_client_stream: false,
-                                summary: summary.clone(),
-                                description: description.clone(),
-                                deprecated,
-                                security_requirements: security_requirements.clone(),
-                                security: security.clone(),
-                                response_content_type: "text/event-stream".to_string(),
-                            });
+                            response_stream_item_schema: Some(schema_for_type(&spec.ty)),
+                            summary: summary.clone(),
+                            description: description.clone(),
+                            deprecated,
+                            security_requirements: security_requirements.clone(),
+                            security: security.clone(),
+                            response_content_type: "text/event-stream".to_string(),
+                        });
                     }
                 }
             }
@@ -921,6 +995,54 @@ fn request_body_schema(schema: RefOr<Schema>, content_type: &str) -> RequestBody
         .content
         .insert(content_type.to_string(), Content::new(Some(schema)));
     request_body
+}
+
+fn request_stream_content_type(request_body: &Option<RequestBody>) -> String {
+    request_body
+        .as_ref()
+        .and_then(|body| body.content.keys().next().cloned())
+        .unwrap_or_else(|| panic!("stream request body is missing content"))
+}
+
+fn patch_openapi_stream_content(doc: &mut Value, patch: &OpenApiStreamPatch) {
+    let Some(paths) = doc.get_mut("paths").and_then(Value::as_object_mut) else {
+        return;
+    };
+    let Some(path_item) = paths.get_mut(&patch.path).and_then(Value::as_object_mut) else {
+        return;
+    };
+    let Some(operation) = path_item
+        .get_mut(patch.method)
+        .and_then(Value::as_object_mut)
+    else {
+        return;
+    };
+
+    let target = if let Some(status) = patch.response_status {
+        operation
+            .get_mut("responses")
+            .and_then(Value::as_object_mut)
+            .and_then(|responses| responses.get_mut(status))
+            .and_then(Value::as_object_mut)
+    } else {
+        operation
+            .get_mut("requestBody")
+            .and_then(Value::as_object_mut)
+    };
+    let Some(target) = target else {
+        return;
+    };
+    let Some(content) = target.get_mut("content").and_then(Value::as_object_mut) else {
+        return;
+    };
+    let Some(media_type) = content
+        .get_mut(&patch.content_type)
+        .and_then(Value::as_object_mut)
+    else {
+        return;
+    };
+    media_type.insert("itemSchema".to_string(), patch.item_schema.clone());
+    media_type.remove("schema");
 }
 
 fn array_schema(items: RefOr<Schema>) -> RefOr<Schema> {
@@ -1059,8 +1181,12 @@ fn effective_deprecated(
 
 fn openapi_security_requirement(requirement: HttpSecurityRequirement) -> SecurityRequirement {
     match requirement {
-        HttpSecurityRequirement::HttpBasic => SecurityRequirement::new("http-basic", Vec::<String>::new()),
-        HttpSecurityRequirement::HttpBearer => SecurityRequirement::new("http-bearer", Vec::<String>::new()),
+        HttpSecurityRequirement::HttpBasic => {
+            SecurityRequirement::new("http-basic", Vec::<String>::new())
+        }
+        HttpSecurityRequirement::HttpBearer => {
+            SecurityRequirement::new("http-bearer", Vec::<String>::new())
+        }
         HttpSecurityRequirement::ApiKey { location, name } => {
             SecurityRequirement::new(api_key_scheme_name(&location, &name), Vec::<String>::new())
         }
@@ -1075,14 +1201,14 @@ fn register_security_schemes(
     for requirement in security {
         match requirement {
             HttpSecurityRequirement::HttpBasic => {
-                store.entry("http-basic".to_string()).or_insert_with(|| {
-                    SecurityScheme::Http(Http::new(HttpAuthScheme::Basic))
-                });
+                store
+                    .entry("http-basic".to_string())
+                    .or_insert_with(|| SecurityScheme::Http(Http::new(HttpAuthScheme::Basic)));
             }
             HttpSecurityRequirement::HttpBearer => {
-                store.entry("http-bearer".to_string()).or_insert_with(|| {
-                    SecurityScheme::Http(Http::new(HttpAuthScheme::Bearer))
-                });
+                store
+                    .entry("http-bearer".to_string())
+                    .or_insert_with(|| SecurityScheme::Http(Http::new(HttpAuthScheme::Bearer)));
             }
             HttpSecurityRequirement::ApiKey { location, name } => {
                 let key = api_key_scheme_name(location, name);
@@ -1104,12 +1230,14 @@ fn register_security_schemes(
                         .iter()
                         .map(|scope| (scope.clone(), scope.clone()))
                         .collect::<Vec<_>>();
-                    SecurityScheme::OAuth2(OAuth2::new([utoipa::openapi::security::Flow::ClientCredentials(
-                        utoipa::openapi::security::ClientCredentials::new(
-                            "https://example.invalid/token",
-                            Scopes::from_iter(scopes),
+                    SecurityScheme::OAuth2(OAuth2::new([
+                        utoipa::openapi::security::Flow::ClientCredentials(
+                            utoipa::openapi::security::ClientCredentials::new(
+                                "https://example.invalid/token",
+                                Scopes::from_iter(scopes),
+                            ),
                         ),
-                    )]))
+                    ]))
                 });
             }
         }
@@ -1129,6 +1257,11 @@ fn api_key_scheme_name(location: &HttpApiKeyLocation, name: &str) -> String {
 mod tests {
     use super::*;
     use xidl_parser::hir;
+
+    fn parse_spec(source: &str) -> hir::Specification {
+        let typed = xidl_parser::parser::parser_text(source).expect("parse typed ast");
+        hir::Specification::from_typed_ast_with_properties(typed, HashMap::new())
+    }
 
     fn doc_annotation(text: &str) -> hir::Annotation {
         hir::Annotation::Builtin {
@@ -1161,6 +1294,41 @@ mod tests {
             panic!("expected object property schema");
         };
         assert_eq!(prop_obj.description.as_deref(), Some("field doc"));
+    }
+
+    #[test]
+    fn render_openapi_json_uses_32_and_item_schema_for_streams() {
+        let spec = parse_spec(
+            r#"
+            interface StreamApi {
+              @server_stream
+              @stream_codec("sse")
+              string watch();
+
+              @client_stream
+              @stream_codec("ndjson")
+              string upload(
+                in string file_id,
+                in sequence<octet> chunk
+              );
+            };
+            "#,
+        );
+        let doc = render_openapi_json(&spec).expect("render openapi json");
+        assert_eq!(
+            doc.get("openapi"),
+            Some(&Value::String("3.2.0".to_string()))
+        );
+
+        let server_content =
+            &doc["paths"]["/watch"]["get"]["responses"]["200"]["content"]["text/event-stream"];
+        assert!(server_content.get("itemSchema").is_some());
+        assert!(server_content.get("schema").is_none());
+
+        let client_content =
+            &doc["paths"]["/upload"]["post"]["requestBody"]["content"]["application/x-ndjson"];
+        assert!(client_content.get("itemSchema").is_some());
+        assert!(client_content.get("schema").is_none());
     }
 }
 
@@ -1309,19 +1477,6 @@ enum ParamDirection {
     InOut,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
-enum StreamKind {
-    Server,
-    Client,
-    Bidi,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq)]
-enum StreamCodec {
-    Sse,
-    Ndjson,
-}
-
 fn route_from_annotations(
     annotations: &[hir::Annotation],
     default_method: HttpMethod,
@@ -1399,55 +1554,6 @@ fn has_annotation(annotations: &[hir::Annotation], target: &str) -> bool {
             .map(|name| name.eq_ignore_ascii_case(target))
             .unwrap_or(false)
     })
-}
-
-fn stream_kind_from_annotations(annotations: &[hir::Annotation]) -> Option<StreamKind> {
-    let mut out = None;
-    for annotation in annotations {
-        let Some(name) = annotation_name(annotation) else {
-            continue;
-        };
-        let current = if name.eq_ignore_ascii_case("server_stream") {
-            Some(StreamKind::Server)
-        } else if name.eq_ignore_ascii_case("client_stream") {
-            Some(StreamKind::Client)
-        } else if name.eq_ignore_ascii_case("bidi_stream") {
-            Some(StreamKind::Bidi)
-        } else {
-            None
-        };
-        let Some(current) = current else {
-            continue;
-        };
-        match out {
-            None => out = Some(current),
-            Some(prev) if prev == current => {}
-            Some(_) => panic!("@server_stream/@client_stream/@bidi_stream are mutually exclusive"),
-        }
-    }
-    out
-}
-
-fn stream_codec_from_annotations(annotations: &[hir::Annotation]) -> StreamCodec {
-    let mut codec = StreamCodec::Ndjson;
-    for annotation in annotations {
-        let Some(name) = annotation_name(annotation) else {
-            continue;
-        };
-        if !name.eq_ignore_ascii_case("stream_codec") {
-            continue;
-        }
-        let value = annotation_params(annotation)
-            .map(normalize_params)
-            .and_then(|params| params.get("value").cloned())
-            .unwrap_or_else(|| "sse".to_string());
-        codec = match value.to_ascii_lowercase().as_str() {
-            "sse" => StreamCodec::Sse,
-            "ndjson" => StreamCodec::Ndjson,
-            other => panic!("unsupported @stream_codec value '{other}'"),
-        };
-    }
-    codec
 }
 
 fn field_rename(annotations: &[hir::Annotation]) -> Option<String> {
@@ -1917,14 +2023,26 @@ fn method_to_openapi(method: HttpMethod) -> OpenApiHttpMethod {
 
 fn openapi_method_name(method: &OpenApiHttpMethod) -> &'static str {
     match method {
-        OpenApiHttpMethod::Get => "GET",
-        OpenApiHttpMethod::Post => "POST",
-        OpenApiHttpMethod::Put => "PUT",
-        OpenApiHttpMethod::Patch => "PATCH",
-        OpenApiHttpMethod::Delete => "DELETE",
-        OpenApiHttpMethod::Head => "HEAD",
-        OpenApiHttpMethod::Options => "OPTIONS",
-        _ => "UNKNOWN",
+        OpenApiHttpMethod::Get => "get",
+        OpenApiHttpMethod::Post => "post",
+        OpenApiHttpMethod::Put => "put",
+        OpenApiHttpMethod::Patch => "patch",
+        OpenApiHttpMethod::Delete => "delete",
+        OpenApiHttpMethod::Head => "head",
+        OpenApiHttpMethod::Options => "options",
+        _ => "unknown",
+    }
+}
+
+fn method_name(method: HttpMethod) -> &'static str {
+    match method {
+        HttpMethod::Get => "GET",
+        HttpMethod::Post => "POST",
+        HttpMethod::Put => "PUT",
+        HttpMethod::Patch => "PATCH",
+        HttpMethod::Delete => "DELETE",
+        HttpMethod::Head => "HEAD",
+        HttpMethod::Options => "OPTIONS",
     }
 }
 

@@ -1,6 +1,6 @@
 use crate::error::ParserResult;
-use std::collections::{HashMap, HashSet};
 use std::borrow::Cow;
+use std::collections::{HashMap, HashSet};
 use tree_sitter::Node;
 
 pub struct ParseContext<'a> {

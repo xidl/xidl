@@ -103,3 +103,64 @@ fn test_validate_http_annotations_rejects_invalid_security_mix() {
     let err = validate_http_annotations("op foo", &annotations).unwrap_err();
     assert!(err.contains("no-security"));
 }
+
+#[test]
+fn test_http_stream_config_parses_and_validates() {
+    let annotations = vec![
+        hir::Annotation::Builtin {
+            name: "server_stream".to_string(),
+            params: None,
+        },
+        hir::Annotation::Builtin {
+            name: "stream_codec".to_string(),
+            params: Some(hir::AnnotationParams::Raw("\"sse\"".to_string())),
+        },
+    ];
+    let config = http_stream_config(&annotations).unwrap();
+    assert_eq!(config.kind, Some(HttpStreamKind::Server));
+    assert_eq!(config.codec, HttpStreamCodec::Sse);
+}
+
+#[test]
+fn test_http_stream_target_rejects_unsupported_bidi() {
+    let annotations = vec![hir::Annotation::Builtin {
+        name: "bidi_stream".to_string(),
+        params: None,
+    }];
+    let config = http_stream_config(&annotations).unwrap();
+    let err = validate_http_stream_target(
+        "chat",
+        config,
+        HttpStreamTargetSupport {
+            target: "typescript",
+            supports_bidi: false,
+            server_codec: HttpStreamCodec::Sse,
+            client_codec: HttpStreamCodec::Ndjson,
+            server_method: "GET",
+            client_method: "POST",
+            bidi_method: "GET",
+        },
+    )
+    .unwrap_err();
+    assert!(err.contains("does not support @bidi_stream"));
+}
+
+#[test]
+fn test_http_stream_method_rejects_invalid_server_method() {
+    let err = validate_http_stream_method(
+        "watch",
+        Some(HttpStreamKind::Server),
+        "POST",
+        HttpStreamTargetSupport {
+            target: "openapi",
+            supports_bidi: false,
+            server_codec: HttpStreamCodec::Sse,
+            client_codec: HttpStreamCodec::Ndjson,
+            server_method: "GET",
+            client_method: "POST",
+            bidi_method: "GET",
+        },
+    )
+    .unwrap_err();
+    assert!(err.contains("must use GET"));
+}

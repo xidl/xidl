@@ -6,151 +6,35 @@ expression: output
 openapi.json
 ===============
 {
-  "openapi": "3.1.0",
-  "info": {
-    "title": "xidl",
-    "version": "0.1.0"
-  },
-  "paths": {
-    "/generate": {
-      "post": {
-        "operationId": "Codegen.generate",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "hir": {
-                    "$ref": "#/components/schemas/xidl_parser.hir.Specification"
-                  },
-                  "path": {
-                    "type": "string"
-                  },
-                  "props": {
-                    "$ref": "#/components/schemas/xidl_parser.hir.ParserProperties"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Artifact"
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/get_engine_version": {
-      "post": {
-        "operationId": "Codegen.get_engine_version",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/get_properties": {
-      "post": {
-        "operationId": "Codegen.get_properties",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/xidl_parser.hir.ParserProperties"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
   "components": {
     "schemas": {
       "Artifact": {
         "oneOf": [
           {
-            "type": "object",
-            "required": [
-              "hir"
-            ],
             "properties": {
               "hir": {
                 "$ref": "#/components/schemas/ArtifactHir"
               }
-            }
+            },
+            "required": [
+              "hir"
+            ],
+            "type": "object"
           },
           {
-            "type": "object",
-            "required": [
-              "file"
-            ],
             "properties": {
               "file": {
                 "$ref": "#/components/schemas/ArtifactFile"
               }
-            }
+            },
+            "required": [
+              "file"
+            ],
+            "type": "object"
           }
         ]
       },
       "ArtifactFile": {
-        "type": "object",
-        "required": [
-          "path",
-          "content"
-        ],
         "properties": {
           "content": {
             "type": "string"
@@ -158,15 +42,14 @@ openapi.json
           "path": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "path",
+          "content"
+        ],
+        "type": "object"
       },
       "ArtifactHir": {
-        "type": "object",
-        "required": [
-          "lang",
-          "hir",
-          "props"
-        ],
         "properties": {
           "hir": {
             "$ref": "#/components/schemas/xidl_parser.hir.Specification"
@@ -177,69 +60,70 @@ openapi.json
           "props": {
             "$ref": "#/components/schemas/xidl_parser.hir.ParserProperties"
           }
-        }
+        },
+        "required": [
+          "lang",
+          "hir",
+          "props"
+        ],
+        "type": "object"
       },
       "ArtifactKind": {
-        "type": "string",
         "enum": [
           "Hir",
           "File"
-        ]
+        ],
+        "type": "string"
       },
       "Codegen_Call": {
         "oneOf": [
           {
-            "type": "object",
-            "required": [
-              "unknownOp"
-            ],
             "properties": {
               "unknownOp": {
                 "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
               }
-            }
+            },
+            "required": [
+              "unknownOp"
+            ],
+            "type": "object"
           },
           {
-            "type": "object",
-            "required": [
-              "get_engine_version"
-            ],
             "properties": {
               "get_engine_version": {
                 "$ref": "#/components/schemas/Codegen_get_engine_version_In"
               }
-            }
+            },
+            "required": [
+              "get_engine_version"
+            ],
+            "type": "object"
           },
           {
-            "type": "object",
-            "required": [
-              "get_properties"
-            ],
             "properties": {
               "get_properties": {
                 "$ref": "#/components/schemas/Codegen_get_properties_In"
               }
-            }
+            },
+            "required": [
+              "get_properties"
+            ],
+            "type": "object"
           },
           {
-            "type": "object",
-            "required": [
-              "generate"
-            ],
             "properties": {
               "generate": {
                 "$ref": "#/components/schemas/Codegen_generate_In"
               }
-            }
+            },
+            "required": [
+              "generate"
+            ],
+            "type": "object"
           }
         ]
       },
       "Codegen_Reply": {
-        "type": "object",
-        "required": [
-          "header",
-          "data"
-        ],
         "properties": {
           "data": {
             "$ref": "#/components/schemas/Codegen_Return"
@@ -247,14 +131,14 @@ openapi.json
           "header": {
             "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
           }
-        }
-      },
-      "Codegen_Request": {
-        "type": "object",
+        },
         "required": [
           "header",
           "data"
         ],
+        "type": "object"
+      },
+      "Codegen_Request": {
         "properties": {
           "data": {
             "$ref": "#/components/schemas/Codegen_Call"
@@ -262,63 +146,62 @@ openapi.json
           "header": {
             "$ref": "#/components/schemas/dds.rpc.RequestHeader"
           }
-        }
+        },
+        "required": [
+          "header",
+          "data"
+        ],
+        "type": "object"
       },
       "Codegen_Return": {
         "oneOf": [
           {
-            "type": "object",
-            "required": [
-              "unknownOp"
-            ],
             "properties": {
               "unknownOp": {
                 "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
               }
-            }
+            },
+            "required": [
+              "unknownOp"
+            ],
+            "type": "object"
           },
           {
-            "type": "object",
-            "required": [
-              "get_engine_version"
-            ],
             "properties": {
               "get_engine_version": {
                 "$ref": "#/components/schemas/Codegen_get_engine_version_Result"
               }
-            }
+            },
+            "required": [
+              "get_engine_version"
+            ],
+            "type": "object"
           },
           {
-            "type": "object",
-            "required": [
-              "get_properties"
-            ],
             "properties": {
               "get_properties": {
                 "$ref": "#/components/schemas/Codegen_get_properties_Result"
               }
-            }
+            },
+            "required": [
+              "get_properties"
+            ],
+            "type": "object"
           },
           {
-            "type": "object",
-            "required": [
-              "generate"
-            ],
             "properties": {
               "generate": {
                 "$ref": "#/components/schemas/Codegen_generate_Result"
               }
-            }
+            },
+            "required": [
+              "generate"
+            ],
+            "type": "object"
           }
         ]
       },
       "Codegen_generate_In": {
-        "type": "object",
-        "required": [
-          "hir",
-          "path",
-          "props"
-        ],
         "properties": {
           "hir": {
             "$ref": "#/components/schemas/xidl_parser.hir.Specification"
@@ -329,117 +212,118 @@ openapi.json
           "props": {
             "$ref": "#/components/schemas/xidl_parser.hir.ParserProperties"
           }
-        }
+        },
+        "required": [
+          "hir",
+          "path",
+          "props"
+        ],
+        "type": "object"
       },
       "Codegen_generate_Out": {
-        "type": "object",
+        "properties": {
+          "return_": {
+            "items": {
+              "$ref": "#/components/schemas/Artifact"
+            },
+            "type": "array"
+          }
+        },
         "required": [
           "return_"
         ],
-        "properties": {
-          "return_": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Artifact"
-            }
-          }
-        }
+        "type": "object"
       },
       "Codegen_generate_Result": {
         "oneOf": [
           {
-            "type": "object",
-            "required": [
-              "result"
-            ],
             "properties": {
               "result": {
                 "$ref": "#/components/schemas/Codegen_generate_Out"
               }
-            }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
           }
         ]
       },
       "Codegen_get_engine_version_In": {
-        "type": "object",
-        "required": [
-          "dummy"
-        ],
         "properties": {
           "dummy": {
             "$ref": "#/components/schemas/dds.rpc.UnusedMember"
           }
-        }
+        },
+        "required": [
+          "dummy"
+        ],
+        "type": "object"
       },
       "Codegen_get_engine_version_Out": {
-        "type": "object",
-        "required": [
-          "return_"
-        ],
         "properties": {
           "return_": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "return_"
+        ],
+        "type": "object"
       },
       "Codegen_get_engine_version_Result": {
         "oneOf": [
           {
-            "type": "object",
-            "required": [
-              "result"
-            ],
             "properties": {
               "result": {
                 "$ref": "#/components/schemas/Codegen_get_engine_version_Out"
               }
-            }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
           }
         ]
       },
       "Codegen_get_properties_In": {
-        "type": "object",
-        "required": [
-          "dummy"
-        ],
         "properties": {
           "dummy": {
             "$ref": "#/components/schemas/dds.rpc.UnusedMember"
           }
-        }
+        },
+        "required": [
+          "dummy"
+        ],
+        "type": "object"
       },
       "Codegen_get_properties_Out": {
-        "type": "object",
-        "required": [
-          "return_"
-        ],
         "properties": {
           "return_": {
             "$ref": "#/components/schemas/xidl_parser.hir.ParserProperties"
           }
-        }
+        },
+        "required": [
+          "return_"
+        ],
+        "type": "object"
       },
       "Codegen_get_properties_Result": {
         "oneOf": [
           {
-            "type": "object",
-            "required": [
-              "result"
-            ],
             "properties": {
               "result": {
                 "$ref": "#/components/schemas/Codegen_get_properties_Out"
               }
-            }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
           }
         ]
       },
       "Error": {
-        "type": "object",
-        "required": [
-          "code",
-          "msg"
-        ],
         "properties": {
           "code": {
             "type": "integer"
@@ -449,6 +333,122 @@ openapi.json
           },
           "msg": {
             "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "msg"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "xidl",
+    "version": "0.1.0"
+  },
+  "openapi": "3.2.0",
+  "paths": {
+    "/generate": {
+      "post": {
+        "operationId": "Codegen.generate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "hir": {
+                    "$ref": "#/components/schemas/xidl_parser.hir.Specification"
+                  },
+                  "path": {
+                    "type": "string"
+                  },
+                  "props": {
+                    "$ref": "#/components/schemas/xidl_parser.hir.ParserProperties"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Artifact"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        }
+      }
+    },
+    "/get_engine_version": {
+      "post": {
+        "operationId": "Codegen.get_engine_version",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        }
+      }
+    },
+    "/get_properties": {
+      "post": {
+        "operationId": "Codegen.get_properties",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/xidl_parser.hir.ParserProperties"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
           }
         }
       }

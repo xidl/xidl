@@ -118,7 +118,10 @@ fn requires_raw_annotation_parse(raw: &str) -> bool {
     let source = raw.trim();
     let source = source.strip_prefix("//@").unwrap_or(source);
     let source = source.strip_prefix('@').unwrap_or(source);
-    let name = source.split_once('(').map(|(name, _)| name).unwrap_or(source);
+    let name = source
+        .split_once('(')
+        .map(|(name, _)| name)
+        .unwrap_or(source);
     name.contains('-') || source.contains('[') || source.contains(']')
 }
 
