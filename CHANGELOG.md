@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.22.0](https://github.com/xidl/xidl/compare/v0.21.0...v0.22.0) (2026-03-14)
+
+
+### Features
+
+* Add OpenAPI 3.2 HTTP stream support ([7d285d6](https://github.com/xidl/xidl/commit/7d285d69b853102c66021cdf96a2a8346fe3f592))
+* align unary http and http security mapping ([c0dad07](https://github.com/xidl/xidl/commit/c0dad0728aa735267ecc3715d4ef04871588c015))
+
 ## [0.21.0](https://github.com/xidl/xidl/compare/v0.20.0...v0.21.0) (2026-03-13)
 
 
