@@ -13,10 +13,13 @@ interface_dcl.rs
 
 pub trait HelloWorld{
 }
+
 pub trait HelloWorld{
 }
+
 pub trait HelloWorld{
 }
+
 pub const A_func1_Hash:i32 = 4091574330;
 pub const A_func1_Hash:i32 = 4091574330;
 pub const A_Ex_Hash:i32 = 1885521279;
@@ -6406,6 +6409,7 @@ pub trait A{
     fn attr1(&self)->&u8;
     fn set_attr1(&self,value:&u8)->();
 }
+
 pub const A_opA_Hash:i32 = 3927698569;
 pub struct A_opA_In{
     pub l_1:L1,
@@ -7019,6 +7023,7 @@ pub const a:int = 10;
 pub struct A{
     pub a:int,
 }
+
 pub trait A{
     fn opA(&self,l_1:&L1)->i16;
 }

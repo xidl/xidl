@@ -1,5 +1,7 @@
 use crate::error::IdlcResult;
-use crate::generate::rust::util::rust_derive_info_with_extra;
+use crate::generate::rust::util::{
+    rust_derive_info_with_extra, rust_passthrough_attrs_from_annotations,
+};
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::doc_lines_from_annotations;
 use serde_json::json;
@@ -16,6 +18,7 @@ impl RustRender for hir::BitmaskDcl {
                     "name": crate::generate::rust::util::rust_ident(&value.ident),
                     "index": idx,
                     "doc": doc_lines_from_annotations(&value.annotations),
+                    "rust_attrs": rust_passthrough_attrs_from_annotations(&value.annotations),
                 })
             })
             .collect::<Vec<_>>();
@@ -25,6 +28,7 @@ impl RustRender for hir::BitmaskDcl {
                 json!({
                     "values": values,
                     "derive": derive.all,
+                    "rust_attrs": rust_passthrough_attrs_from_annotations(&self.annotations),
                 }),
                 &self.ident,
             ),

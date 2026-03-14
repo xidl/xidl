@@ -1,5 +1,5 @@
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::rust::util::rust_ident;
+use crate::generate::rust::util::{rust_ident, rust_passthrough_attrs_from_annotations};
 use crate::generate::rust_axum::{RustAxumRenderOutput, RustAxumRenderer};
 use crate::generate::utils::{
     HttpStreamCodec, HttpStreamKind, HttpStreamTargetSupport, http_stream_config,
@@ -41,6 +41,7 @@ enum ParamDirection {
 struct MethodContext {
     name: String,
     raw_name: String,
+    rust_attrs: Vec<String>,
     params: Vec<String>,
     param_names: Vec<String>,
     ret: String,
@@ -166,6 +167,7 @@ fn render_interface_def(
     let ctx = serde_json::json!({
         "ident": rust_ident(&def.header.ident),
         "methods": methods,
+        "rust_attrs": rust_passthrough_attrs_from_annotations(interface_annotations),
     });
     let rendered = renderer.render_template("interface.rs.j2", &ctx)?;
     out.source.push(rendered);
@@ -493,6 +495,7 @@ fn render_op(
     Ok(MethodContext {
         name: method_name,
         raw_name: op.ident.clone(),
+        rust_attrs: rust_passthrough_attrs_from_annotations(&op.annotations),
         params: param_list,
         param_names,
         ret,
@@ -550,6 +553,7 @@ fn render_attr(
         &attr.annotations,
     );
     let emit_watch = has_annotation(&attr.annotations, "server-stream");
+    let rust_attrs = rust_passthrough_attrs_from_annotations(&attr.annotations);
     match &attr.decl {
         hir::AttrDclInner::ReadonlyAttrSpec(spec) => readonly_attr_names(spec)
             .into_iter()
@@ -561,6 +565,7 @@ fn render_attr(
                 let mut methods = vec![MethodContext {
                     name: names.rust.clone(),
                     raw_name: raw.clone(),
+                    rust_attrs: rust_attrs.clone(),
                     params: Vec::new(),
                     param_names: Vec::new(),
                     ret: ret.clone(),
@@ -597,6 +602,7 @@ fn render_attr(
                     methods.push(MethodContext {
                         name: rust_ident(&raw_watch),
                         raw_name: raw_watch.clone(),
+                        rust_attrs: rust_attrs.clone(),
                         params: Vec::new(),
                         param_names: Vec::new(),
                         ret: ret.clone(),
@@ -644,6 +650,7 @@ fn render_attr(
                         out.push(MethodContext {
                             name: name.clone(),
                             raw_name: raw_name.clone(),
+                            rust_attrs: rust_attrs.clone(),
                             params: Vec::new(),
                             param_names: Vec::new(),
                             ret: ret.clone(),
@@ -704,6 +711,7 @@ fn render_attr(
                         out.push(MethodContext {
                             name: setter.clone(),
                             raw_name: raw_setter.clone(),
+                            rust_attrs: rust_attrs.clone(),
                             params: vec![format!("value: {param}")],
                             param_names: vec!["value".to_string()],
                             ret: "()".to_string(),
@@ -740,6 +748,7 @@ fn render_attr(
                             out.push(MethodContext {
                                 name: rust_ident(&raw_watch),
                                 raw_name: raw_watch.clone(),
+                                rust_attrs: rust_attrs.clone(),
                                 params: Vec::new(),
                                 param_names: Vec::new(),
                                 ret: ret.clone(),
@@ -783,6 +792,7 @@ fn render_attr(
                     out.push(MethodContext {
                         name: name.clone(),
                         raw_name: raw_name.clone(),
+                        rust_attrs: rust_attrs.clone(),
                         params: Vec::new(),
                         param_names: Vec::new(),
                         ret: ret.clone(),
@@ -842,6 +852,7 @@ fn render_attr(
                     out.push(MethodContext {
                         name: setter.clone(),
                         raw_name: raw_setter.clone(),
+                        rust_attrs: rust_attrs.clone(),
                         params: vec![format!("value: {param}")],
                         param_names: vec!["value".to_string()],
                         ret: "()".to_string(),
@@ -878,6 +889,7 @@ fn render_attr(
                         out.push(MethodContext {
                             name: rust_ident(&raw_watch),
                             raw_name: raw_watch.clone(),
+                            rust_attrs: rust_attrs.clone(),
                             params: Vec::new(),
                             param_names: Vec::new(),
                             ret: ret.clone(),

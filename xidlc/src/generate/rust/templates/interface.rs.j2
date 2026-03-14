@@ -3,6 +3,11 @@
         /// {{ line }}
     {%- endfor %}
 {%- endif -%}
+{% if rust_attrs and rust_attrs | length > 0 %}
+    {% for attr in rust_attrs %}
+        #[{{ attr }}]
+    {% endfor %}
+{%- endif %}
 pub trait {{ ident }} {
     {% for method in methods %}
         {%- if method.doc and method.doc | length > 0 -%}
@@ -10,6 +15,11 @@ pub trait {{ ident }} {
                 /// {{ line }}
             {%- endfor %}
         {%- endif -%}
+        {% if method.rust_attrs and method.rust_attrs | length > 0 %}
+            {% for attr in method.rust_attrs %}
+                #[{{ attr }}]
+            {% endfor %}
+        {% endif %}
         fn {{ method.name }}(&self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> {{ method.ret }};
     {% endfor %}
 }

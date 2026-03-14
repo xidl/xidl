@@ -1,6 +1,7 @@
 use crate::error::IdlcResult;
 use crate::generate::rust::util::{
-    bitfield_type, render_const, rust_derive_info_with_extra, rust_scoped_name, serialize_kind_name,
+    bitfield_type, render_const, rust_derive_info_with_extra,
+    rust_passthrough_attrs_from_annotations, rust_scoped_name, serialize_kind_name,
 };
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::doc_lines_from_annotations;
@@ -45,6 +46,7 @@ pub(crate) fn render_bitset_with_config(
             "fields": fields,
             "serialize_kind": serialize_kind,
             "derive": derive.all,
+            "rust_attrs": rust_passthrough_attrs_from_annotations(&def.annotations),
         }),
         &doc_lines_from_annotations(&def.annotations),
     );

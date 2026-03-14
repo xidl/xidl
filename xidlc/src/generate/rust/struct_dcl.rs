@@ -1,7 +1,7 @@
 use crate::error::IdlcResult;
 use crate::generate::rust::util::{
-    declarator_name, rust_derive_info_with_extra, rust_scoped_name, serde_rename_from_annotations,
-    serialize_kind_name, type_with_decl,
+    declarator_name, rust_derive_info_with_extra, rust_passthrough_attrs_from_annotations,
+    rust_scoped_name, serde_rename_from_annotations, serialize_kind_name, type_with_decl,
 };
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::doc_lines_from_annotations;
@@ -35,6 +35,7 @@ pub(crate) fn render_struct_with_config(
             let optional = member.is_optional();
             let rename = serde_rename_from_annotations(&member.annotations);
             let doc = doc_lines_from_annotations(&member.annotations);
+            let rust_attrs = rust_passthrough_attrs_from_annotations(&member.annotations);
             member.ident.iter().map(move |decl| {
                 let name = crate::generate::rust::util::rust_ident(&declarator_name(decl));
                 let mut ty = type_with_decl(&member.ty, decl);
@@ -47,7 +48,8 @@ pub(crate) fn render_struct_with_config(
                     "serde_rename": rename,
                     "field_id": field_id.clone(),
                     "optional": optional,
-                    "doc": doc
+                    "doc": doc,
+                    "rust_attrs": rust_attrs,
                 })
             })
         })
@@ -62,6 +64,7 @@ pub(crate) fn render_struct_with_config(
             "serialize_kind": serialize_kind,
             "derive": derive.all,
             "enable_serde_attrs": derive.enable_serde_attrs(),
+            "rust_attrs": rust_passthrough_attrs_from_annotations(&def.annotations),
         }),
         &doc_lines_from_annotations(&def.annotations),
         module_path,

@@ -3,6 +3,11 @@
         /// {{ line }}
     {%- endfor %}
 {%- endif -%}
+{% if rust_attrs and rust_attrs | length > 0 %}
+    {% for attr in rust_attrs %}
+        #[{{ attr }}]
+    {% endfor %}
+{%- endif %}
 {%- if derive and derive | length > 0 %}
     #[derive({{ derive | join(", ") }})]
 {%- endif %}
@@ -16,6 +21,11 @@ pub struct {{ ident }} {
                 /// {{ line }}
             {%- endfor %}
         {%- endif -%}
+        {% if member.rust_attrs and member.rust_attrs | length > 0 %}
+            {% for attr in member.rust_attrs %}
+                #[{{ attr }}]
+            {% endfor %}
+        {% endif %}
         {% if opt.enable_serialize and opt.enable_deserialize and enable_serde_attrs and member.serde_rename is defined and member.serde_rename %}
             #[serde(rename = "{{ member.serde_rename }}")]
         {% endif %}

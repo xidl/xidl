@@ -1,6 +1,16 @@
+{% if rust_attrs and rust_attrs | length > 0 %}
+    {% for attr in rust_attrs %}
+        #[{{ attr }}]
+    {% endfor %}
+{%- endif %}
 #[async_trait::async_trait]
 pub trait {{ ident }} {
     {% for method in methods %}
+        {% if method.rust_attrs and method.rust_attrs | length > 0 %}
+            {% for attr in method.rust_attrs %}
+                #[{{ attr }}]
+            {% endfor %}
+        {% endif %}
         async fn {{ method.name }}(
         &self,
         req: xidl_rust_axum::Request<{% if method.is_client_stream %}xidl_rust_axum::stream::NdjsonStream<{{ method.request_item_ty }}>{% elif method.is_bidi_stream %}xidl_rust_axum::stream::BidiServerStream<{{ method.request_item_ty }}, {{ method.response_ty }}>{% else %}{{ method.request_ty }}{% endif %}>

@@ -274,14 +274,19 @@ impl xidl_xcdr::XcdrDeserialize for Bar{
 
 pub trait A{
 }
+
 pub trait B{
 }
+
 pub trait C{
 }
+
 pub trait D{
 }
+
 pub trait E{
 }
+
 pub const A_make_it_so_Hash:i32 = 4027367364;
 pub struct A_make_it_so_In{
     pub dummy:dds::rpc::UnusedMember,
@@ -892,6 +897,7 @@ impl xidl_xcdr::XcdrDeserialize for A_Reply{
 pub trait A{
     fn make_it_so(&self)->();
 }
+
 pub const B_make_it_so_Hash:i32 = 4027367364;
 pub struct B_make_it_so_In{
     pub times:i32,
@@ -1502,6 +1508,7 @@ impl xidl_xcdr::XcdrDeserialize for B_Reply{
 pub trait B{
     fn make_it_so(&self,times:i32)->i16;
 }
+
 pub const A_opA_Hash:i32 = 3927698569;
 pub struct A_opA_In{
     pub l_1:L1,
@@ -2113,6 +2120,7 @@ pub type L1 = i32;
 pub trait A{
     fn opA(&self,l_1:&L1)->i16;
 }
+
 pub const B_opB_Hash:i32 = 772252025;
 pub struct B_opB_In{
     pub l:i32,
@@ -2724,6 +2732,7 @@ pub type L1 = i16;
 pub trait B{
     fn opB(&self,l:i32)->L1;
 }
+
 pub const C_opC_Hash:i32 = 1200187224;
 pub struct C_opC_In{
     pub l_3:L3,
@@ -3336,6 +3345,7 @@ pub type L3 = A::L1;
 pub trait C{
     fn opC(&self,l_3:&L3)->B::L1;
 }
+
 pub const L:i32 = 3;
 pub const A_f_Hash:i32 = 3712786831;
 pub struct A_f_In{
@@ -3949,17 +3959,22 @@ pub type coord = [f64;
 pub trait A{
     fn f(&self,s:&coord)->();
 }
+
 pub const L:i32 = 4;
 pub trait B{
 }
+
 pub trait C{
 }
+
 pub type string_t = String;
 pub trait A{
 }
+
 pub type string_t = String;
 pub trait B{
 }
+
 pub const C_get_attribute_Title_Hash:i32 = 2561239307;
 pub const C_set_attribute_Title_Hash:i32 = 601397578;
 pub const C_get_attribute_Name_Hash:i32 = 1786101153;
@@ -6114,8 +6129,10 @@ pub mod M{
 pub mod Example{
     pub trait derived{
     }
+
     pub trait base{
     }
+
     pub trait derived{
     }
 }

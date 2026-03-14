@@ -1,7 +1,8 @@
 use crate::error::IdlcResult;
 use crate::generate::rust::util::{
     constr_type_scoped_name, declarator_name, render_const, rust_derive_info_with_extra,
-    rust_scoped_name, rust_switch_type, serialize_kind_name, type_with_decl,
+    rust_passthrough_attrs_from_annotations, rust_scoped_name, rust_switch_type,
+    serialize_kind_name, type_with_decl,
 };
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::doc_lines_from_annotations;
@@ -34,20 +35,21 @@ pub(crate) fn render_union_with_config(
         let name = crate::generate::rust::util::rust_ident(&declarator_name(&case.element.value));
         if seen.insert(name.clone()) {
             let doc = doc_lines_from_annotations(&case.element.annotations);
-            fields.push((name, &case.element.ty, &case.element.value, doc));
+            let rust_attrs = rust_passthrough_attrs_from_annotations(&case.element.annotations);
+            fields.push((name, &case.element.ty, &case.element.value, doc, rust_attrs));
         }
     }
 
     let members = fields
         .into_iter()
-        .map(|(name, ty, decl, doc)| {
+        .map(|(name, ty, decl, doc, rust_attrs)| {
             let ty = match ty {
                 hir::ElementSpecTy::TypeSpec(spec) => type_with_decl(spec, decl),
                 hir::ElementSpecTy::ConstrTypeDcl(constr) => {
                     rust_scoped_name(&constr_type_scoped_name(constr))
                 }
             };
-            json!({ "name": name, "ty": ty, "doc": doc })
+            json!({ "name": name, "ty": ty, "doc": doc, "rust_attrs": rust_attrs })
         })
         .collect::<Vec<_>>();
 
@@ -109,6 +111,7 @@ pub(crate) fn render_union_with_config(
             "has_serde_serialize": derive.has_serde_serialize,
             "has_serde_deserialize": derive.has_serde_deserialize,
             "derive": derive.non_serde.into_iter().collect_vec(),
+            "rust_attrs": rust_passthrough_attrs_from_annotations(&def.annotations),
         }),
         &doc_lines_from_annotations(&def.annotations),
         module_path,

@@ -173,17 +173,10 @@ pub fn normalize_source_for_tree_sitter(text: &str) -> Cow<'_, str> {
         if ch == '@' {
             out.push(ch);
             i += 1;
-            let mut saw_hyphen = false;
             while i < bytes.len() {
                 let next = bytes[i] as char;
                 if next.is_ascii_alphanumeric() || next == '_' || next == '-' || next == ':' {
-                    if next == '-' {
-                        out.push('_');
-                        changed = true;
-                        saw_hyphen = true;
-                    } else {
-                        out.push(next);
-                    }
+                    out.push(next);
                     i += 1;
                     continue;
                 }
@@ -221,7 +214,7 @@ pub fn normalize_source_for_tree_sitter(text: &str) -> Cow<'_, str> {
                     }
                     j += 1;
                 }
-                if j < bytes.len() && (has_bracket || saw_hyphen) {
+                if j < bytes.len() && has_bracket {
                     out.push('(');
                     for _ in i + 1..j {
                         out.push(' ');

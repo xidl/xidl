@@ -1,5 +1,8 @@
 use crate::error::IdlcResult;
-use crate::generate::rust::util::{rust_derive_info_with_extra, serde_rename_from_annotations};
+use crate::generate::rust::util::{
+    rust_derive_info_with_extra, rust_passthrough_attrs_from_annotations,
+    serde_rename_from_annotations,
+};
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::doc_lines_from_annotations;
 use serde_json::json;
@@ -14,10 +17,12 @@ impl RustRender for hir::EnumDcl {
                 let rust_name = crate::generate::rust::util::rust_ident(&member.ident);
                 let rename = serde_rename_from_annotations(&member.annotations);
                 let doc = doc_lines_from_annotations(&member.annotations);
+                let rust_attrs = rust_passthrough_attrs_from_annotations(&member.annotations);
                 json!({
                     "name": rust_name,
                     "serde_rename": rename,
                     "doc": doc,
+                    "rust_attrs": rust_attrs,
                 })
             })
             .collect::<Vec<_>>();
@@ -28,6 +33,7 @@ impl RustRender for hir::EnumDcl {
                     "members": members,
                     "has_serde_serialize": derive.has_serde_serialize,
                     "has_serde_deserialize": derive.has_serde_deserialize,
+                    "rust_attrs": rust_passthrough_attrs_from_annotations(&self.annotations),
                 }),
                 &self.ident,
             ),

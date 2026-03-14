@@ -3,7 +3,8 @@ use crate::generate::rust::bitset_dcl::render_bitset_with_config;
 use crate::generate::rust::struct_dcl::render_struct_with_config;
 use crate::generate::rust::union_def::render_union_with_config;
 use crate::generate::rust::util::{
-    constr_type_scoped_name, rust_scoped_name, rust_type, typedef_json,
+    constr_type_scoped_name, rust_passthrough_attrs_from_annotations, rust_scoped_name, rust_type,
+    typedef_json,
 };
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::doc_lines_from_annotations;
@@ -24,6 +25,7 @@ impl RustRender for hir::TypeDcl {
                     "ty": "*mut c_void",
                     "typeobject_complete": "xidl_typeobject::runtime::build_complete_alias(\"\", 0u32, xidl_typeobject::runtime::type_identifier_none())",
                     "typeobject_minimal": "xidl_typeobject::runtime::build_minimal_alias(0u32, xidl_typeobject::runtime::type_identifier_none())",
+                    "rust_attrs": rust_passthrough_attrs_from_annotations(&native.annotations),
                     }),
                     &doc_lines_from_annotations(&native.annotations),
                 );
@@ -50,7 +52,10 @@ pub(crate) fn render_typedef_with_config(
         hir::TypedefType::TypeSpec(ty) => {
             for decl in &def.decl {
                 let base = rust_type(ty);
-                let ctx = renderer.enrich_ctx(typedef_json(&base, decl), &doc);
+                let mut typedef = typedef_json(&base, decl);
+                typedef["rust_attrs"] =
+                    json!(rust_passthrough_attrs_from_annotations(&def.annotations));
+                let ctx = renderer.enrich_ctx(typedef, &doc);
                 out.extend(renderer.render_source_template("typedef.rs.j2", &ctx)?);
             }
         }
@@ -74,7 +79,10 @@ pub(crate) fn render_typedef_with_config(
             out.extend(rendered);
             let base = rust_scoped_name(&constr_type_scoped_name(constr));
             for decl in &def.decl {
-                let ctx = renderer.enrich_ctx(typedef_json(&base, decl), &doc);
+                let mut typedef = typedef_json(&base, decl);
+                typedef["rust_attrs"] =
+                    json!(rust_passthrough_attrs_from_annotations(&def.annotations));
+                let ctx = renderer.enrich_ctx(typedef, &doc);
                 out.extend(renderer.render_source_template("typedef.rs.j2", &ctx)?);
             }
         }

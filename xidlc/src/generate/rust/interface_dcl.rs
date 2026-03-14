@@ -1,5 +1,5 @@
 use crate::error::IdlcResult;
-use crate::generate::rust::util::rust_type;
+use crate::generate::rust::util::{rust_passthrough_attrs_from_annotations, rust_type};
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::doc_lines_from_annotations;
 use serde_json::json;
@@ -13,6 +13,7 @@ impl RustRender for hir::InterfaceDcl {
                 def,
                 doc_lines_from_annotations(&self.annotations),
                 renderer,
+                rust_passthrough_attrs_from_annotations(&self.annotations),
             ),
         }
     }
@@ -26,7 +27,7 @@ impl RustRender for hir::InterfaceForwardDcl {
 
 impl RustRender for hir::InterfaceDef {
     fn render(&self, renderer: &RustRenderer) -> IdlcResult<RustRenderOutput> {
-        render_interface_def_with_doc(self, Vec::new(), renderer)
+        render_interface_def_with_doc(self, Vec::new(), renderer, Vec::new())
     }
 }
 
@@ -34,6 +35,7 @@ fn render_interface_def_with_doc(
     def: &hir::InterfaceDef,
     doc: Vec<String>,
     renderer: &RustRenderer,
+    rust_attrs: Vec<String>,
 ) -> IdlcResult<RustRenderOutput> {
     let mut out = RustRenderOutput::default();
     let method_renderer = InterfaceMethodRenderer::new();
@@ -65,6 +67,7 @@ fn render_interface_def_with_doc(
         "ident": crate::generate::rust::util::rust_ident(&def.header.ident),
         "methods": methods,
         "doc": doc,
+        "rust_attrs": rust_attrs,
     });
     out.extend(renderer.render_source_template("interface.rs.j2", &ctx)?);
     Ok(out)
@@ -102,6 +105,7 @@ impl InterfaceMethodRenderer {
             ret,
             param_list,
             &doc_lines_from_annotations(&op.annotations),
+            rust_passthrough_attrs_from_annotations(&op.annotations),
         )
     }
 
@@ -117,6 +121,7 @@ impl InterfaceMethodRenderer {
                         self.type_policy.return_type(&spec.ty),
                         Vec::new(),
                         &doc,
+                        rust_passthrough_attrs_from_annotations(&attr.annotations),
                     )
                 })
                 .collect(),
@@ -126,12 +131,22 @@ impl InterfaceMethodRenderer {
                     hir::AttrDeclarator::SimpleDeclarator(list) => {
                         for decl in list {
                             let name = crate::generate::rust::util::rust_ident(&decl.0);
-                            out.extend(self.render_accessor_methods(&name, &spec.ty, &doc));
+                            out.extend(self.render_accessor_methods(
+                                &name,
+                                &spec.ty,
+                                &doc,
+                                rust_passthrough_attrs_from_annotations(&attr.annotations),
+                            ));
                         }
                     }
                     hir::AttrDeclarator::WithRaises { declarator, .. } => {
                         let name = crate::generate::rust::util::rust_ident(&declarator.0);
-                        out.extend(self.render_accessor_methods(&name, &spec.ty, &doc));
+                        out.extend(self.render_accessor_methods(
+                            &name,
+                            &spec.ty,
+                            &doc,
+                            rust_passthrough_attrs_from_annotations(&attr.annotations),
+                        ));
                     }
                 }
                 out
@@ -153,16 +168,18 @@ impl InterfaceMethodRenderer {
         name: &str,
         ty: &hir::TypeSpec,
         doc: &[String],
+        rust_attrs: Vec<String>,
     ) -> Vec<serde_json::Value> {
         let ret = self.type_policy.return_type(ty);
         let param = self.type_policy.param_type(ty, None);
         vec![
-            self.method_json(name.to_string(), ret, Vec::new(), doc),
+            self.method_json(name.to_string(), ret, Vec::new(), doc, rust_attrs.clone()),
             self.method_json(
                 format!("set_{name}"),
                 "()".to_string(),
                 vec![format!("value: {param}")],
                 doc,
+                rust_attrs,
             ),
         ]
     }
@@ -173,12 +190,14 @@ impl InterfaceMethodRenderer {
         ret: String,
         params: Vec<String>,
         doc: &[String],
+        rust_attrs: Vec<String>,
     ) -> serde_json::Value {
         json!({
             "ret": ret,
             "name": name,
             "params": params,
             "doc": doc,
+            "rust_attrs": rust_attrs,
         })
     }
 }

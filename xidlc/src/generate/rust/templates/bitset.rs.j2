@@ -3,6 +3,11 @@
         /// {{ line }}
     {%- endfor %}
 {%- endif -%}
+{% if rust_attrs and rust_attrs | length > 0 %}
+    {% for attr in rust_attrs %}
+        #[{{ attr }}]
+    {% endfor %}
+{%- endif %}
 {% if derive and derive | length > 0 %}
     #[derive({{ derive | join(", ") }})]
 {% endif %}
@@ -12,6 +17,11 @@ pub struct {{ ident }} {
     {% endif %}
     {% for field in fields %}
         {% if field.name %}
+            {% if field.rust_attrs and field.rust_attrs | length > 0 %}
+                {% for attr in field.rust_attrs %}
+                    #[{{ attr }}]
+                {% endfor %}
+            {% endif %}
             pub {{ field.name }}: {{ field.ty }},
         {% endif %}
     {% endfor %}

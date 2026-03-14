@@ -1,6 +1,16 @@
+{% if rust_attrs and rust_attrs | length > 0 %}
+    {% for attr in rust_attrs %}
+        #[{{ attr }}]
+    {% endfor %}
+{%- endif %}
 #[async_trait::async_trait]
 pub trait {{ ident }} {
     {% for method in methods %}
+        {% if method.rust_attrs and method.rust_attrs | length > 0 %}
+            {% for attr in method.rust_attrs %}
+                #[{{ attr }}]
+            {% endfor %}
+        {% endif %}
         {% if method.kind == "rpc" %}
             async fn {{ method.name }}<'a>(&'a self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.ret }}, xidl_jsonrpc::Error>;
         {% elif method.kind == "stream_op" %}

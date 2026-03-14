@@ -274,6 +274,21 @@ fn annotation_name_is_derive(annotation: &hir::Annotation) -> bool {
     }
 }
 
+fn rust_passthrough_attr_name(annotation: &hir::Annotation) -> Option<String> {
+    let name = annotation_name(annotation)?;
+    let lower = name.to_ascii_lowercase();
+    let prefix = "rust-";
+    if !lower.starts_with(prefix) {
+        return None;
+    }
+    let attr = &name[prefix.len()..];
+    if attr.is_empty() {
+        None
+    } else {
+        Some(attr.to_string())
+    }
+}
+
 fn annotation_name(annotation: &hir::Annotation) -> Option<&str> {
     match annotation {
         hir::Annotation::Builtin { name, .. } => Some(name.as_str()),
@@ -324,6 +339,30 @@ fn normalize_annotation_params(params: &hir::AnnotationParams) -> HashMap<String
 
 fn render_annotation_const_expr(expr: &hir::ConstExpr) -> String {
     crate::generate::render_const_expr(expr, &rust_scoped_name, &rust_literal)
+}
+
+fn render_rust_passthrough_params(params: &hir::AnnotationParams) -> String {
+    match params {
+        hir::AnnotationParams::Raw(value) => value.trim().to_string(),
+        hir::AnnotationParams::ConstExpr(expr) => {
+            render_annotation_const_expr(expr).trim().to_string()
+        }
+        hir::AnnotationParams::Params(values) => values
+            .iter()
+            .map(|value| {
+                if let Some(expr) = &value.value {
+                    format!(
+                        "{} = {}",
+                        value.ident,
+                        render_annotation_const_expr(expr).trim()
+                    )
+                } else {
+                    value.ident.clone()
+                }
+            })
+            .collect::<Vec<_>>()
+            .join(", "),
+    }
 }
 
 fn trim_annotation_quotes(raw: &str) -> Option<String> {
@@ -423,6 +462,23 @@ pub fn rust_derives_from_annotations(annotations: &[hir::Annotation]) -> Vec<Str
                 for value in values {
                     push_derive(&mut out, &mut seen, &value.ident);
                 }
+            }
+        }
+    }
+    out
+}
+
+pub fn rust_passthrough_attrs_from_annotations(annotations: &[hir::Annotation]) -> Vec<String> {
+    let mut out = Vec::new();
+    for annotation in annotations {
+        if let Some(attr_name) = rust_passthrough_attr_name(annotation) {
+            let rendered = annotation_params(annotation)
+                .map(render_rust_passthrough_params)
+                .unwrap_or_default();
+            if rendered.is_empty() {
+                out.push(attr_name);
+            } else {
+                out.push(format!("{attr_name}({rendered})"));
             }
         }
     }

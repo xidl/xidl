@@ -3,6 +3,11 @@
         /// {{ line }}
     {%- endfor %}
 {%- endif -%}
+{% if rust_attrs and rust_attrs | length > 0 %}
+    {% for attr in rust_attrs %}
+        #[{{ attr }}]
+    {% endfor %}
+{%- endif %}
 {% if derive and derive | length > 0 %}
     #[derive({{ derive | join(", ") }})]
 {% endif %}
@@ -17,6 +22,11 @@ impl {{ ident }} {
                 /// {{ line }}
             {%- endfor %}
         {%- endif -%}
+        {% if value.rust_attrs and value.rust_attrs | length > 0 %}
+            {% for attr in value.rust_attrs %}
+                #[{{ attr }}]
+            {% endfor %}
+        {% endif %}
         pub const {{ value.name }}: u32 = 1u32 << {{ value.index }};
     {% endfor %}
 }

@@ -1,0 +1,12 @@
+#progma xidlc package xidlc
+#progma xidlc version v1.0.0
+
+@rust-allow(async_fn_in_trait)
+interface RustHttp {
+    @get(path = "/users/{user_id}")
+    @rust-cfg(feature = "server")
+    string get_user(@path uint32 user_id);
+
+    @rust-cfg(feature = "server")
+    attribute string display_name;
+};

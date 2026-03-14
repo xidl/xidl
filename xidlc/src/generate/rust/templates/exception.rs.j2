@@ -1,6 +1,21 @@
+{%- if doc and doc | length > 0 -%}
+    {%- for line in doc %}
+        /// {{ line }}
+    {%- endfor %}
+{%- endif -%}
+{% if rust_attrs and rust_attrs | length > 0 %}
+    {% for attr in rust_attrs %}
+        #[{{ attr }}]
+    {% endfor %}
+{%- endif %}
 #[derive(Debug, Clone)]
 pub struct {{ ident }} {
     {% for member in members %}
+        {% if member.rust_attrs and member.rust_attrs | length > 0 %}
+            {% for attr in member.rust_attrs %}
+                #[{{ attr }}]
+            {% endfor %}
+        {% endif %}
         pub {{ member.name }}: {{ member.ty }},
     {% endfor %}
 }

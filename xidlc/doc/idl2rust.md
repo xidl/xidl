@@ -163,7 +163,27 @@ type Matrix = [[i32; 2]; 3];
 - No inherent methods are generated for structs. Access is via public fields.
 - If `@derive(...)` annotations are present, the generated struct includes the
   corresponding `#[derive(...)]` list.
+- If `@rust-xxx(...)` annotations are present on a Rust-emitting declaration or
+  member, the generated Rust includes the corresponding raw `#[xxx(...)]`
+  attribute lines in source order. When no parameters are provided, generation
+  emits `#[xxx]`.
 - Struct inheritance is represented as a `base: <Parent>` field.
+
+```idl
+@rust-serde(rename_all = "camelCase")
+struct User {
+    @rust-serde(rename = "userId")
+    string user_id;
+};
+```
+
+```rust
+#[serde(rename_all = "camelCase")]
+pub struct User {
+    #[serde(rename = "userId")]
+    pub user_id: String,
+}
+```
 
 ```idl
 struct MyStruct {

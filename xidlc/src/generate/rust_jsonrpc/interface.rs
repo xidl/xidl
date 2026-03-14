@@ -1,5 +1,5 @@
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::rust::util::rust_ident;
+use crate::generate::rust::util::{rust_ident, rust_passthrough_attrs_from_annotations};
 use crate::generate::rust_jsonrpc::{JsonRpcRenderOutput, JsonRpcRenderer};
 use convert_case::{Case, Casing};
 use itertools::Itertools;
@@ -25,6 +25,7 @@ struct MethodContext {
     kind: String,
     stream_mode: String,
     name: String,
+    rust_attrs: Vec<String>,
     params: Vec<String>,
     params_fields: Vec<ParamField>,
     params_struct: String,
@@ -68,13 +69,14 @@ pub fn render_interface_with_path(
     match &interface.decl {
         hir::InterfaceDclInner::InterfaceForwardDcl(_) => Ok(JsonRpcRenderOutput::default()),
         hir::InterfaceDclInner::InterfaceDef(def) => {
-            render_interface_def(def, renderer, module_path)
+            render_interface_def(def, &interface.annotations, renderer, module_path)
         }
     }
 }
 
 fn render_interface_def(
     def: &hir::InterfaceDef,
+    interface_annotations: &[hir::Annotation],
     renderer: &JsonRpcRenderer,
     module_path: &[String],
 ) -> IdlcResult<JsonRpcRenderOutput> {
@@ -110,6 +112,7 @@ fn render_interface_def(
         "ident": rust_ident(&def.header.ident),
         "methods": methods,
         "watch_methods": watch_methods,
+        "rust_attrs": rust_passthrough_attrs_from_annotations(interface_annotations),
     });
     let rendered = renderer.render_template("interface.rs.j2", &ctx)?;
     out.source.push(rendered);
@@ -193,6 +196,7 @@ fn render_unary_op(op: &hir::OpDcl, interface_name: &str, module_path: &[String]
         kind: "rpc".to_string(),
         stream_mode: String::new(),
         name: method_name.clone(),
+        rust_attrs: rust_passthrough_attrs_from_annotations(&op.annotations),
         params: param_list,
         params_fields: param_fields,
         params_struct: params_struct_name(interface_name, &method_name),
@@ -297,6 +301,7 @@ fn render_stream_op(
         kind: "stream_op".to_string(),
         stream_mode: stream_mode_name(kind).to_string(),
         name: method_name.clone(),
+        rust_attrs: rust_passthrough_attrs_from_annotations(&op.annotations),
         params,
         params_fields: if matches!(kind, StreamKind::Server) {
             param_fields
@@ -335,6 +340,7 @@ fn render_attr(
     user_ops: &HashSet<&str>,
 ) -> IdlcResult<RenderedAttr> {
     let emit_watch = has_annotation(&attr.annotations, "server-stream");
+    let rust_attrs = rust_passthrough_attrs_from_annotations(&attr.annotations);
     match &attr.decl {
         hir::AttrDclInner::ReadonlyAttrSpec(spec) => {
             let mut out = Vec::new();
@@ -346,6 +352,7 @@ fn render_attr(
                     kind: "rpc".to_string(),
                     stream_mode: String::new(),
                     name: rust_ident(&names.raw_getter),
+                    rust_attrs: rust_attrs.clone(),
                     params: Vec::new(),
                     params_fields: Vec::new(),
                     params_struct: params_struct_name(interface_name, &names.raw_getter),
@@ -369,6 +376,7 @@ fn render_attr(
                         kind: "stream_source".to_string(),
                         stream_mode: String::new(),
                         name: stream_setter,
+                        rust_attrs: rust_attrs.clone(),
                         params: Vec::new(),
                         params_fields: Vec::new(),
                         params_struct: String::new(),
@@ -416,6 +424,7 @@ fn render_attr(
                             kind: "rpc".to_string(),
                             stream_mode: String::new(),
                             name: getter.clone(),
+                            rust_attrs: rust_attrs.clone(),
                             params: Vec::new(),
                             params_fields: Vec::new(),
                             params_struct: params_struct_name(interface_name, &getter),
@@ -436,6 +445,7 @@ fn render_attr(
                             kind: "rpc".to_string(),
                             stream_mode: String::new(),
                             name: setter.clone(),
+                            rust_attrs: rust_attrs.clone(),
                             params: vec![format!("{value_ident}: {param}")],
                             params_fields: vec![ParamField {
                                 name: value_ident.clone(),
@@ -458,6 +468,7 @@ fn render_attr(
                                 kind: "stream_source".to_string(),
                                 stream_mode: String::new(),
                                 name: stream_setter,
+                                rust_attrs: rust_attrs.clone(),
                                 params: Vec::new(),
                                 params_fields: Vec::new(),
                                 params_struct: String::new(),
@@ -500,6 +511,7 @@ fn render_attr(
                         kind: "rpc".to_string(),
                         stream_mode: String::new(),
                         name: getter.clone(),
+                        rust_attrs: rust_attrs.clone(),
                         params: Vec::new(),
                         params_fields: Vec::new(),
                         params_struct: params_struct_name(interface_name, &getter),
@@ -520,6 +532,7 @@ fn render_attr(
                         kind: "rpc".to_string(),
                         stream_mode: String::new(),
                         name: setter.clone(),
+                        rust_attrs: rust_attrs.clone(),
                         params: vec![format!("{value_ident}: {param}")],
                         params_fields: vec![ParamField {
                             name: value_ident.clone(),
@@ -542,6 +555,7 @@ fn render_attr(
                             kind: "stream_source".to_string(),
                             stream_mode: String::new(),
                             name: stream_setter,
+                            rust_attrs: rust_attrs.clone(),
                             params: Vec::new(),
                             params_fields: Vec::new(),
                             params_struct: String::new(),
