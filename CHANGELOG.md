@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.23.0](https://github.com/xidl/xidl/compare/v0.22.0...v0.23.0) (2026-03-15)
+
+
+### Features
+
+* **xidlc:** support [@rust](https://github.com/rust) annotation ([a8f10d6](https://github.com/xidl/xidl/commit/a8f10d64b2ad6770543c7ea96c37a8086f280bfd))
+* **xidlc:** support HIR include expansion ([42a715b](https://github.com/xidl/xidl/commit/42a715bfe6a2b7021f8392aca4e352a69efbb6ef))
+
 ## [0.22.0](https://github.com/xidl/xidl/compare/v0.21.0...v0.22.0) (2026-03-14)
 
 
