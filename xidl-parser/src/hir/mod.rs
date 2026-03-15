@@ -33,6 +33,8 @@ mod interface_codegen;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
+use std::fs;
+use std::path::{Path, PathBuf};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Specification(pub Vec<Definition>);
@@ -339,6 +341,25 @@ impl Specification {
             .unwrap_or(true);
         spec_from_typed_ast(value, expand_interface)
     }
+
+    pub fn from_typed_ast_with_properties_and_path(
+        value: crate::typed_ast::Specification,
+        properties: ParserProperties,
+        path: impl AsRef<Path>,
+    ) -> crate::error::ParserResult<Self> {
+        let expand_interface = properties
+            .get("expand_interface")
+            .and_then(Value::as_bool)
+            .unwrap_or(true);
+        spec_from_typed_ast_with_path(value, expand_interface, path.as_ref())
+    }
+
+    pub fn from_typed_ast_with_path(
+        value: crate::typed_ast::Specification,
+        path: impl AsRef<Path>,
+    ) -> crate::error::ParserResult<Self> {
+        spec_from_typed_ast_with_path(value, true, path.as_ref())
+    }
 }
 
 pub(crate) fn spec_from_typed_ast(
@@ -347,16 +368,46 @@ pub(crate) fn spec_from_typed_ast(
 ) -> Specification {
     let mut defs = Vec::new();
     let mut modules = Vec::new();
-    collect_defs(value.0, &mut modules, expand_interfaces, &mut defs);
+    collect_defs_with_context(
+        value.0,
+        &mut modules,
+        expand_interfaces,
+        &mut defs,
+        None,
+        None,
+    )
+    .expect("pathless HIR conversion should not fail");
     Specification(defs)
 }
 
-fn collect_defs(
+fn spec_from_typed_ast_with_path(
+    value: crate::typed_ast::Specification,
+    expand_interfaces: bool,
+    path: &Path,
+) -> crate::error::ParserResult<Specification> {
+    let mut defs = Vec::new();
+    let mut modules = Vec::new();
+    let root = normalize_path(path);
+    let mut include_stack = vec![root.clone()];
+    collect_defs_with_context(
+        value.0,
+        &mut modules,
+        expand_interfaces,
+        &mut defs,
+        Some(root.as_path()),
+        Some(&mut include_stack),
+    )?;
+    Ok(Specification(defs))
+}
+
+fn collect_defs_with_context(
     defs: Vec<crate::typed_ast::Definition>,
     modules: &mut Vec<String>,
     expand_interfaces: bool,
     out: &mut Vec<Definition>,
-) {
+    current_file: Option<&Path>,
+    mut include_stack: Option<&mut Vec<PathBuf>>,
+) -> crate::error::ParserResult<()> {
     for def in defs {
         match def {
             crate::typed_ast::Definition::ModuleDcl(module) => {
@@ -364,7 +415,14 @@ fn collect_defs(
                 let annotations = expand_annotations(module.annotations);
                 modules.push(ident.clone());
                 let mut inner = Vec::new();
-                collect_defs(module.definition, modules, expand_interfaces, &mut inner);
+                collect_defs_with_context(
+                    module.definition,
+                    modules,
+                    expand_interfaces,
+                    &mut inner,
+                    current_file,
+                    include_stack.as_deref_mut(),
+                )?;
                 modules.pop();
                 out.push(Definition::ModuleDcl(ModuleDcl {
                     annotations,
@@ -398,12 +456,97 @@ fn collect_defs(
                 }
                 out.push(Definition::InterfaceDcl(interface));
             }
+            crate::typed_ast::Definition::PreprocInclude(include) => {
+                let Some(current_file) = current_file else {
+                    continue;
+                };
+                let path = resolve_include_path(current_file, &include)?;
+                let source = fs::read_to_string(&path).map_err(|err| {
+                    crate::error::ParseError::Message(format!(
+                        "failed to read include '{}': {err}",
+                        path.display()
+                    ))
+                })?;
+                let typed = crate::parser::parser_text(&source).map_err(|err| {
+                    crate::error::ParseError::Message(format!(
+                        "failed to parse include '{}': {err}",
+                        path.display()
+                    ))
+                })?;
+
+                let stack = include_stack
+                    .as_deref_mut()
+                    .expect("include stack must exist when current file path is set");
+                if stack.contains(&path) {
+                    let chain = stack
+                        .iter()
+                        .chain(std::iter::once(&path))
+                        .map(|path| path.display().to_string())
+                        .collect::<Vec<_>>()
+                        .join(" -> ");
+                    return Err(crate::error::ParseError::Message(format!(
+                        "cyclic include detected: {chain}"
+                    )));
+                }
+                stack.push(path.clone());
+                collect_defs_with_context(
+                    typed.0,
+                    modules,
+                    expand_interfaces,
+                    out,
+                    Some(path.as_path()),
+                    Some(stack),
+                )?;
+                stack.pop();
+            }
             crate::typed_ast::Definition::TemplateModuleDcl(_)
             | crate::typed_ast::Definition::TemplateModuleInst(_)
-            | crate::typed_ast::Definition::PreprocInclude(_)
             | crate::typed_ast::Definition::PreprocDefine(_) => {}
         }
     }
+
+    Ok(())
+}
+
+fn resolve_include_path(
+    current_file: &Path,
+    include: &crate::typed_ast::PreprocInclude,
+) -> crate::error::ParserResult<PathBuf> {
+    let raw = match &include.path {
+        crate::typed_ast::PreprocIncludePath::StringLiteral(value) => trim_pragma_value(value),
+        crate::typed_ast::PreprocIncludePath::SystemLibString(value) => {
+            return Err(crate::error::ParseError::Message(format!(
+                "unsupported include path syntax {value}; only string literal includes are supported"
+            )));
+        }
+        crate::typed_ast::PreprocIncludePath::Identifier(value) => {
+            return Err(crate::error::ParseError::Message(format!(
+                "unsupported include identifier '{}'; only string literal includes are supported",
+                value.0
+            )));
+        }
+    };
+
+    let base = current_file.parent().unwrap_or_else(|| Path::new("."));
+    let path = normalize_path(&base.join(raw));
+    if !path.is_file() {
+        return Err(crate::error::ParseError::Message(format!(
+            "include path '{}' does not exist",
+            path.display()
+        )));
+    }
+    Ok(path)
+}
+
+fn normalize_path(path: &Path) -> PathBuf {
+    let path = if path.is_absolute() {
+        path.to_path_buf()
+    } else {
+        std::env::current_dir()
+            .unwrap_or_else(|_| PathBuf::from("."))
+            .join(path)
+    };
+    fs::canonicalize(&path).unwrap_or(path)
 }
 
 fn parse_xidlc_pragma(call: &crate::typed_ast::PreprocCall) -> Option<Pragma> {

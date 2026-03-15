@@ -1,0 +1,145 @@
+---
+source: xidl-parser/tests/test-include.rs
+assertion_line: 105
+expression: hir
+---
+Specification(
+    [
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
+                            annotations: [],
+                            ident: "Start",
+                            parent: [],
+                            member: [
+                                Member {
+                                    annotations: [],
+                                    ty: SimpleTypeSpec(
+                                        IntegerType(
+                                            I32,
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "value",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
+                            annotations: [],
+                            ident: "Middle",
+                            parent: [],
+                            member: [
+                                Member {
+                                    annotations: [],
+                                    ty: SimpleTypeSpec(
+                                        IntegerType(
+                                            I32,
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "value",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
+                            annotations: [],
+                            ident: "Leaf",
+                            parent: [],
+                            member: [
+                                Member {
+                                    annotations: [],
+                                    ty: SimpleTypeSpec(
+                                        IntegerType(
+                                            I32,
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "value",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
+                            annotations: [],
+                            ident: "End",
+                            parent: [],
+                            member: [
+                                Member {
+                                    annotations: [],
+                                    ty: SimpleTypeSpec(
+                                        IntegerType(
+                                            I32,
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "value",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+    ],
+)

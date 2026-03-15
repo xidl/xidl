@@ -1,0 +1,111 @@
+---
+source: xidl-parser/tests/test-include.rs
+assertion_line: 61
+expression: hir
+---
+Specification(
+    [
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
+                            annotations: [],
+                            ident: "Before",
+                            parent: [],
+                            member: [
+                                Member {
+                                    annotations: [],
+                                    ty: SimpleTypeSpec(
+                                        IntegerType(
+                                            I32,
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "value",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
+                            annotations: [],
+                            ident: "Shared",
+                            parent: [],
+                            member: [
+                                Member {
+                                    annotations: [],
+                                    ty: SimpleTypeSpec(
+                                        IntegerType(
+                                            I32,
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "value",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDcl {
+                            annotations: [],
+                            ident: "After",
+                            parent: [],
+                            member: [
+                                Member {
+                                    annotations: [],
+                                    ty: SimpleTypeSpec(
+                                        IntegerType(
+                                            I32,
+                                        ),
+                                    ),
+                                    ident: [
+                                        SimpleDeclarator(
+                                            SimpleDeclarator(
+                                                "value",
+                                            ),
+                                        ),
+                                    ],
+                                    default: None,
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                            ],
+                        },
+                    ),
+                ),
+            },
+        ),
+    ],
+)

@@ -1,4 +1,1 @@
-struct Point {
-    int32 x;
-    int32 y;
-};
+#include "../shared/basic.idl"

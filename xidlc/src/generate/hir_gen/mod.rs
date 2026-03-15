@@ -1,3 +1,4 @@
+use xidl_jsonrpc::{Error, ErrorCode};
 use xidl_parser::hir::{ParserProperties, Specification};
 
 use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactHir};
@@ -26,9 +27,21 @@ impl crate::jsonrpc::Codegen for HirGen {
         let target_lang: String =
             serde_json::from_value(props.get("target_lang").unwrap().clone()).unwrap();
 
-        let typed = xidl_parser::parser::parser_text(&source).unwrap();
-        let hir =
-            xidl_parser::hir::Specification::from_typed_ast_with_properties(typed, props.clone());
+        let typed = xidl_parser::parser::parser_text(&source).map_err(|err| Error::Rpc {
+            code: ErrorCode::InternalError,
+            message: err.to_string(),
+            data: None,
+        })?;
+        let hir = xidl_parser::hir::Specification::from_typed_ast_with_properties_and_path(
+            typed,
+            props.clone(),
+            std::path::Path::new(&_input),
+        )
+        .map_err(|err| Error::Rpc {
+            code: ErrorCode::InternalError,
+            message: err.to_string(),
+            data: None,
+        })?;
 
         if target_lang == "hir" {
             Ok(vec![Artifact::new_file(ArtifactFile {
