@@ -1,3 +1,1 @@
-bitmask A {};
-bitmask A { A, B, C};
-bitmask A { A, B, C,};
+#include "../shared/bitmask_def.idl"

@@ -1,1 +1,1 @@
-enum A { };
+#include "../shared/enum_empty.idl"

@@ -1,0 +1,9 @@
+interface HttpClientStreamService {
+  @client-stream
+  @stream-codec("ndjson")
+  @path("/upload/chunks")
+  string upload_chunk(
+    in string file_id,
+    in sequence<octet> chunk
+  );
+};

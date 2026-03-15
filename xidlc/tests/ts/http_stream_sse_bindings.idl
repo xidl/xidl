@@ -1,18 +1,1 @@
-#progma xidlc package xidlc
-#progma xidlc version v1.0.0
-
-struct ProjectEvent {
-    string id;
-    string payload;
-};
-
-interface HttpStreamSseBindingsService {
-    @server-stream
-    @stream-codec("sse")
-    @get(path = "/projects/{project_id}/events{?cursor}")
-    ProjectEvent watch_project(
-        @path("project_id") string project_id,
-        @query("cursor") @optional string cursor,
-        @header("X-Trace-Id") string trace_id
-    );
-};
+#include "../shared/http_stream_sse_bindings.idl"

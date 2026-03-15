@@ -1,6 +1,1 @@
-module A {};
-
-module B {
-const u8 a = 10;
-struct B;
-};
+#include "../shared/module_dcl.idl"

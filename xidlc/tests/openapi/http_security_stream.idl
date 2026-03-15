@@ -1,16 +1,1 @@
-#progma xidlc package xidlc
-#progma xidlc version v1.0.0
-
-@http-bearer
-interface HttpSecurityStreamService {
-    @server-stream
-    @stream-codec("sse")
-    @get(path = "/channels/{channel}/events")
-    string watch_channel(@path("channel") string channel);
-
-    @no-security
-    @server-stream
-    @stream-codec("sse")
-    @get(path = "/channels/public/events")
-    string watch_public();
-};
+#include "../shared/http_security_stream.idl"

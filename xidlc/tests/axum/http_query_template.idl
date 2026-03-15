@@ -1,17 +1,1 @@
-#progma xidlc package xidlc
-#progma xidlc version v1.0.0
-
-interface HttpQueryTemplateService {
-    @get(path = "/users/{id}{?lang,region}")
-    string get_user(
-        @path uint32 id,
-        string lang,
-        @query string region
-    );
-
-    @post(path = "/search{?keyword}")
-    string search(
-        string keyword,
-        string payload
-    );
-};
+#include "../shared/http_query_template.idl"
