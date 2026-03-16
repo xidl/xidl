@@ -10,6 +10,9 @@ categories.workspace = true
 repository.workspace = true
 publish = false
 
+[lints]
+workspace = true
+
 [dependencies]
 async-trait.workspace = true
 async-stream = "0.3"

@@ -12,6 +12,9 @@ repository.workspace = true
 [features]
 bindgen = []
 
+[lints]
+workspace = true
+
 [dependencies]
 thiserror = "2.0"
 paste = "1.0"
