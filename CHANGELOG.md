@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.25.0](https://github.com/xidl/xidl/compare/v0.24.0...v0.25.0) (2026-03-16)
+
+
+### Features
+
+* using underscore instead of - in annotation ([01e53bf](https://github.com/xidl/xidl/commit/01e53bf5e2310bd26e49aea6ab53c2b88f175104))
+* **xidl:** set lints.workspace=true ([2e63ba4](https://github.com/xidl/xidl/commit/2e63ba408b6a0d84887f3a8f09e887c13e39cadb))
+
 ## [0.24.0](https://github.com/xidl/xidl/compare/v0.23.0...v0.24.0) (2026-03-16)
 
 
