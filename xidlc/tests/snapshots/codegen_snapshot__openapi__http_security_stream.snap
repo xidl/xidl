@@ -206,7 +206,7 @@ openapi.json
       }
     },
     "securitySchemes": {
-      "http-bearer": {
+      "http_bearer": {
         "scheme": "bearer",
         "type": "http"
       }
@@ -283,7 +283,7 @@ openapi.json
         },
         "security": [
           {
-            "http-bearer": []
+            "http_bearer": []
           }
         ]
       }

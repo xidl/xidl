@@ -208,11 +208,11 @@ pub fn http_stream_config(annotations: &[hir::Annotation]) -> Result<HttpStreamC
         let Some(name) = annotation_name(annotation) else {
             continue;
         };
-        let current = if name.eq_ignore_ascii_case("server-stream") {
+        let current = if name.eq_ignore_ascii_case("server_stream") {
             Some(HttpStreamKind::Server)
-        } else if name.eq_ignore_ascii_case("client-stream") {
+        } else if name.eq_ignore_ascii_case("client_stream") {
             Some(HttpStreamKind::Client)
-        } else if name.eq_ignore_ascii_case("bidi-stream") {
+        } else if name.eq_ignore_ascii_case("bidi_stream") {
             Some(HttpStreamKind::Bidi)
         } else {
             None
@@ -225,7 +225,7 @@ pub fn http_stream_config(annotations: &[hir::Annotation]) -> Result<HttpStreamC
             Some(prev) if prev == current => {}
             Some(_) => {
                 return Err(
-                    "@server-stream/@client-stream/@bidi-stream are mutually exclusive".to_string(),
+                    "@server_stream/@client_stream/@bidi_stream are mutually exclusive".to_string(),
                 );
             }
         }
@@ -236,7 +236,7 @@ pub fn http_stream_config(annotations: &[hir::Annotation]) -> Result<HttpStreamC
         let Some(name) = annotation_name(annotation) else {
             continue;
         };
-        if !name.eq_ignore_ascii_case("stream-codec") {
+        if !name.eq_ignore_ascii_case("stream_codec") {
             continue;
         }
         let value = annotation_params(annotation)
@@ -248,7 +248,7 @@ pub fn http_stream_config(annotations: &[hir::Annotation]) -> Result<HttpStreamC
             "ndjson" => HttpStreamCodec::Ndjson,
             other => {
                 return Err(format!(
-                    "unsupported @stream-codec value '{other}', expected 'sse' or 'ndjson'"
+                    "unsupported @stream_codec value '{other}', expected 'sse' or 'ndjson'"
                 ));
             }
         };
@@ -264,26 +264,26 @@ pub fn validate_http_stream_target(
 ) -> Result<(), String> {
     match config.kind {
         Some(HttpStreamKind::Server) if config.codec != support.server_codec => Err(format!(
-            "{} currently supports only {} for @server-stream methods: '{}'",
+            "{} currently supports only {} for @server_stream methods: '{}'",
             support.target,
             stream_codec_name(support.server_codec),
             op_name
         )),
         Some(HttpStreamKind::Client) if config.codec != support.client_codec => Err(format!(
-            "{} currently supports only {} for @client-stream methods: '{}'",
+            "{} currently supports only {} for @client_stream methods: '{}'",
             support.target,
             stream_codec_name(support.client_codec),
             op_name
         )),
         Some(HttpStreamKind::Bidi) if !support.supports_bidi => Err(format!(
-            "{} currently does not support @bidi-stream methods: '{}'",
+            "{} currently does not support @bidi_stream methods: '{}'",
             support.target, op_name
         )),
         Some(HttpStreamKind::Client | HttpStreamKind::Bidi)
             if config.codec == HttpStreamCodec::Sse =>
         {
             Err(format!(
-                "@stream-codec(\"sse\") requires @server-stream on method '{}'",
+                "@stream_codec(\"sse\") requires @server_stream on method '{}'",
                 op_name
             ))
         }
@@ -300,15 +300,15 @@ pub fn validate_http_stream_method(
     let method = method.to_ascii_uppercase();
     match kind {
         Some(HttpStreamKind::Server) if method != support.server_method => Err(format!(
-            "@server-stream method '{}' must use {}",
+            "@server_stream method '{}' must use {}",
             op_name, support.server_method
         )),
         Some(HttpStreamKind::Client) if method != support.client_method => Err(format!(
-            "@client-stream method '{}' must use {}",
+            "@client_stream method '{}' must use {}",
             op_name, support.client_method
         )),
         Some(HttpStreamKind::Bidi) if method != support.bidi_method => Err(format!(
-            "@bidi-stream method '{}' must use {}",
+            "@bidi_stream method '{}' must use {}",
             op_name, support.bidi_method
         )),
         _ => Ok(()),
@@ -367,17 +367,17 @@ fn collect_security(annotations: &[hir::Annotation]) -> Result<SecurityCollectio
         let Some(name) = annotation_name(annotation) else {
             continue;
         };
-        if name.eq_ignore_ascii_case("no-security") {
+        if name.eq_ignore_ascii_case("no_security") {
             explicit_none = true;
             continue;
         }
-        let requirement = if name.eq_ignore_ascii_case("http-basic") {
-            ensure_singleton(&mut singleton_names, "http-basic")?;
+        let requirement = if name.eq_ignore_ascii_case("http_basic") {
+            ensure_singleton(&mut singleton_names, "http_basic")?;
             Some(HttpSecurityRequirement::HttpBasic)
-        } else if name.eq_ignore_ascii_case("http-bearer") {
-            ensure_singleton(&mut singleton_names, "http-bearer")?;
+        } else if name.eq_ignore_ascii_case("http_bearer") {
+            ensure_singleton(&mut singleton_names, "http_bearer")?;
             Some(HttpSecurityRequirement::HttpBearer)
-        } else if name.eq_ignore_ascii_case("api-key") {
+        } else if name.eq_ignore_ascii_case("api_key") {
             Some(parse_api_key(annotation)?)
         } else if name.eq_ignore_ascii_case("oauth2") {
             Some(parse_oauth2(annotation))
@@ -390,7 +390,7 @@ fn collect_security(annotations: &[hir::Annotation]) -> Result<SecurityCollectio
     }
 
     if explicit_none && !requirements.is_empty() {
-        return Err("@no-security cannot be combined with other security annotations".to_string());
+        return Err("@no_security cannot be combined with other security annotations".to_string());
     }
 
     Ok(SecurityCollection {
@@ -408,7 +408,7 @@ fn ensure_singleton(names: &mut BTreeSet<&'static str>, value: &'static str) -> 
 
 fn parse_api_key(annotation: &hir::Annotation) -> Result<HttpSecurityRequirement, String> {
     let params = annotation_params(annotation)
-        .ok_or_else(|| "@api-key requires in=... and name=...".to_string())?;
+        .ok_or_else(|| "@api_key requires in=... and name=...".to_string())?;
     let params = normalize_annotation_params(params);
     let location = match params.get("in").map(|value| value.to_ascii_lowercase()) {
         Some(value) if value == "header" => HttpApiKeyLocation::Header,
@@ -416,16 +416,16 @@ fn parse_api_key(annotation: &hir::Annotation) -> Result<HttpSecurityRequirement
         Some(value) if value == "cookie" => HttpApiKeyLocation::Cookie,
         Some(value) => {
             return Err(format!(
-                "@api-key(in=...) must be one of header|query|cookie, got '{value}'"
+                "@api_key(in=...) must be one of header|query|cookie, got '{value}'"
             ));
         }
-        None => return Err("@api-key requires non-empty in=...".to_string()),
+        None => return Err("@api_key requires non-empty in=...".to_string()),
     };
     let name = params
         .get("name")
         .cloned()
         .filter(|value| !value.is_empty())
-        .ok_or_else(|| "@api-key requires non-empty name=...".to_string())?;
+        .ok_or_else(|| "@api_key requires non-empty name=...".to_string())?;
     Ok(HttpSecurityRequirement::ApiKey { location, name })
 }
 

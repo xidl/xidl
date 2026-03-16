@@ -281,12 +281,12 @@ openapi.json
       }
     },
     "securitySchemes": {
-      "api-key-header-x-api-key": {
+      "api_key-header-x-api-key": {
         "in": "header",
         "name": "X-API-Key",
         "type": "apiKey"
       },
-      "http-basic": {
+      "http_basic": {
         "scheme": "basic",
         "type": "http"
       },
@@ -449,10 +449,10 @@ openapi.json
         },
         "security": [
           {
-            "http-basic": []
+            "http_basic": []
           },
           {
-            "api-key-header-x-api-key": []
+            "api_key-header-x-api-key": []
           }
         ]
       }

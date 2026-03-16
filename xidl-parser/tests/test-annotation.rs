@@ -30,14 +30,14 @@ const TEST_CASES: &[(&str, &str)] = &[
     (
         "annotation_http_rfc",
         r#"
-        @http-basic
-        @api-key(in = "header", name = "X-API-Key")
+        @http_basic
+        @api_key(in = "header", name = "X-API-Key")
         interface HttpApi {
             @deprecated
             void old_ping();
 
             @deprecated("2026-03-13")
-            @http-bearer
+            @http_bearer
             string get_user(
                 @query string id
             );
@@ -49,7 +49,7 @@ const TEST_CASES: &[(&str, &str)] = &[
                 string name
             );
 
-            @no-security
+            @no_security
             string health();
         };
     "#,

@@ -773,7 +773,7 @@ fn render_attr(
         &attr.annotations,
     )
     .unwrap_or_else(|err| panic!("{err}"));
-    let emit_watch = has_annotation(&attr.annotations, "server-stream");
+    let emit_watch = has_annotation(&attr.annotations, "server_stream");
     let summary = doc_summary(&attr.annotations);
     let description = doc_text(&attr.annotations);
     let deprecated = effective_deprecated(interface_annotations, &attr.annotations)
@@ -1192,10 +1192,10 @@ fn effective_deprecated(
 fn openapi_security_requirement(requirement: HttpSecurityRequirement) -> SecurityRequirement {
     match requirement {
         HttpSecurityRequirement::HttpBasic => {
-            SecurityRequirement::new("http-basic", Vec::<String>::new())
+            SecurityRequirement::new("http_basic", Vec::<String>::new())
         }
         HttpSecurityRequirement::HttpBearer => {
-            SecurityRequirement::new("http-bearer", Vec::<String>::new())
+            SecurityRequirement::new("http_bearer", Vec::<String>::new())
         }
         HttpSecurityRequirement::ApiKey { location, name } => {
             SecurityRequirement::new(api_key_scheme_name(&location, &name), Vec::<String>::new())
@@ -1212,12 +1212,12 @@ fn register_security_schemes(
         match requirement {
             HttpSecurityRequirement::HttpBasic => {
                 store
-                    .entry("http-basic".to_string())
+                    .entry("http_basic".to_string())
                     .or_insert_with(|| SecurityScheme::Http(Http::new(HttpAuthScheme::Basic)));
             }
             HttpSecurityRequirement::HttpBearer => {
                 store
-                    .entry("http-bearer".to_string())
+                    .entry("http_bearer".to_string())
                     .or_insert_with(|| SecurityScheme::Http(Http::new(HttpAuthScheme::Bearer)));
             }
             HttpSecurityRequirement::ApiKey { location, name } => {
@@ -1260,7 +1260,7 @@ fn api_key_scheme_name(location: &HttpApiKeyLocation, name: &str) -> String {
         HttpApiKeyLocation::Query => "query",
         HttpApiKeyLocation::Cookie => "cookie",
     };
-    format!("api-key-{location}-{}", name.to_ascii_lowercase())
+    format!("api_key-{location}-{}", name.to_ascii_lowercase())
 }
 
 #[cfg(test)]
@@ -1328,12 +1328,12 @@ mod tests {
         let spec = parse_spec(
             r#"
             interface StreamApi {
-              @server-stream
-              @stream-codec("sse")
+              @server_stream
+              @stream_codec("sse")
               string watch();
 
-              @client-stream
-              @stream-codec("ndjson")
+              @client_stream
+              @stream_codec("ndjson")
               string upload(
                 in string file_id,
                 in sequence<octet> chunk
@@ -1373,8 +1373,8 @@ mod tests {
         let spec = parse_spec(
             r#"
             interface StreamApi {
-              @server-stream
-              @stream-codec("yaml")
+              @server_stream
+              @stream_codec("yaml")
               string watch();
             };
             "#,
@@ -1382,7 +1382,7 @@ mod tests {
         let payload = panic::catch_unwind(AssertUnwindSafe(|| render_openapi_json(&spec)))
             .expect_err("invalid stream codec should panic");
         let message = panic_message(payload);
-        assert!(message.contains("unsupported @stream-codec value"));
+        assert!(message.contains("unsupported @stream_codec value"));
     }
 
     #[test]
@@ -1390,8 +1390,8 @@ mod tests {
         let spec = parse_spec(
             r#"
             interface StreamApi {
-              @server-stream
-              @stream-codec("sse")
+              @server_stream
+              @stream_codec("sse")
               @post(path = "/watch")
               string watch();
             };
@@ -1400,7 +1400,7 @@ mod tests {
         let payload = panic::catch_unwind(AssertUnwindSafe(|| render_openapi_json(&spec)))
             .expect_err("invalid stream method should panic");
         let message = panic_message(payload);
-        assert!(message.contains("@server-stream method 'watch' must use GET"));
+        assert!(message.contains("@server_stream method 'watch' must use GET"));
     }
 
     #[test]
@@ -1408,8 +1408,8 @@ mod tests {
         let spec = parse_spec(
             r#"
             interface SecurityApi {
-              @http-basic
-              @http-basic
+              @http_basic
+              @http_basic
               @get(path = "/reports")
               string list_reports();
             };
@@ -1418,7 +1418,7 @@ mod tests {
         let payload = panic::catch_unwind(AssertUnwindSafe(|| render_openapi_json(&spec)))
             .expect_err("duplicate security annotations should panic");
         let message = panic_message(payload);
-        assert!(message.contains("duplicate @http-basic annotation"));
+        assert!(message.contains("duplicate @http_basic annotation"));
     }
 
     #[test]
@@ -1426,8 +1426,8 @@ mod tests {
         let spec = parse_spec(
             r#"
             interface SecurityApi {
-              @no-security
-              @http-bearer
+              @no_security
+              @http_bearer
               @get(path = "/reports")
               string list_reports();
             };
@@ -1437,7 +1437,7 @@ mod tests {
             .expect_err("conflicting security annotations should panic");
         let message = panic_message(payload);
         assert!(
-            message.contains("@no-security cannot be combined with other security annotations")
+            message.contains("@no_security cannot be combined with other security annotations")
         );
     }
 
@@ -1504,8 +1504,8 @@ mod tests {
         let duplicate_bearer = parse_spec(
             r#"
             interface SecurityApi {
-              @http-bearer
-              @http-bearer
+              @http_bearer
+              @http_bearer
               @get(path = "/reports")
               string list_reports();
             };
@@ -1515,12 +1515,12 @@ mod tests {
             panic::catch_unwind(AssertUnwindSafe(|| render_openapi_json(&duplicate_bearer)))
                 .expect_err("duplicate bearer should panic");
         let message = panic_message(payload);
-        assert!(message.contains("duplicate @http-bearer annotation"));
+        assert!(message.contains("duplicate @http_bearer annotation"));
 
         let missing_name = parse_spec(
             r#"
             interface SecurityApi {
-              @api-key(in = "header")
+              @api_key(in = "header")
               @get(path = "/reports")
               string list_reports();
             };
@@ -1529,12 +1529,12 @@ mod tests {
         let payload = panic::catch_unwind(AssertUnwindSafe(|| render_openapi_json(&missing_name)))
             .expect_err("api key missing name should panic");
         let message = panic_message(payload);
-        assert!(message.contains("@api-key requires non-empty name=..."));
+        assert!(message.contains("@api_key requires non-empty name=..."));
 
         let invalid_location = parse_spec(
             r#"
             interface SecurityApi {
-              @api-key(in = "body", name = "auth")
+              @api_key(in = "body", name = "auth")
               @get(path = "/reports")
               string list_reports();
             };
@@ -1552,9 +1552,9 @@ mod tests {
         let mutually_exclusive = parse_spec(
             r#"
             interface StreamApi {
-              @server-stream
-              @client-stream
-              @stream-codec("ndjson")
+              @server_stream
+              @client_stream
+              @stream_codec("ndjson")
               @post(path = "/events")
               string exchange(string payload);
             };
@@ -1570,8 +1570,8 @@ mod tests {
         let client_sse = parse_spec(
             r#"
             interface StreamApi {
-              @client-stream
-              @stream-codec("sse")
+              @client_stream
+              @stream_codec("sse")
               @post(path = "/upload")
               string upload(sequence<octet> chunk);
             };
@@ -1581,8 +1581,8 @@ mod tests {
             .expect_err("client stream sse should panic");
         let message = panic_message(payload);
         assert!(
-            message.contains("supports only NDJSON for @client-stream methods")
-                || message.contains("@stream-codec(\"sse\") requires @server-stream")
+            message.contains("supports only NDJSON for @client_stream methods")
+                || message.contains("@stream_codec(\"sse\") requires @server_stream")
         );
     }
 }

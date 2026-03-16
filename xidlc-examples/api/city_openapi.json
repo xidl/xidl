@@ -32,7 +32,7 @@
         },
         "security": [
           {
-            "http-bearer": []
+            "http_bearer": []
           }
         ]
       }
@@ -64,7 +64,7 @@
         },
         "security": [
           {
-            "http-bearer": []
+            "http_bearer": []
           }
         ]
       }
@@ -98,7 +98,7 @@
         },
         "security": [
           {
-            "http-bearer": []
+            "http_bearer": []
           }
         ]
       }
@@ -169,7 +169,7 @@
         },
         "security": [
           {
-            "http-bearer": []
+            "http_bearer": []
           }
         ]
       }
@@ -231,7 +231,7 @@
         },
         "security": [
           {
-            "http-bearer": []
+            "http_bearer": []
           }
         ]
       },
@@ -288,7 +288,7 @@
         },
         "security": [
           {
-            "http-bearer": []
+            "http_bearer": []
           }
         ]
       }
@@ -370,7 +370,7 @@
         },
         "security": [
           {
-            "http-bearer": []
+            "http_bearer": []
           }
         ]
       }
@@ -452,7 +452,7 @@
         },
         "security": [
           {
-            "http-bearer": []
+            "http_bearer": []
           }
         ]
       }
@@ -529,7 +529,7 @@
         },
         "security": [
           {
-            "api-key-header-x-reserve-key": []
+            "api_key-header-x-reserve-key": []
           }
         ]
       }
@@ -605,7 +605,7 @@
         },
         "security": [
           {
-            "http-bearer": []
+            "http_bearer": []
           }
         ]
       }
@@ -650,7 +650,7 @@
         },
         "security": [
           {
-            "http-bearer": []
+            "http_bearer": []
           }
         ]
       }
@@ -1550,12 +1550,12 @@
       }
     },
     "securitySchemes": {
-      "api-key-header-x-reserve-key": {
+      "api_key-header-x-reserve-key": {
         "type": "apiKey",
         "in": "header",
         "name": "X-Reserve-Key"
       },
-      "http-bearer": {
+      "http_bearer": {
         "type": "http",
         "scheme": "bearer"
       }

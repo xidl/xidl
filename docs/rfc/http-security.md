@@ -42,19 +42,19 @@ This document does not define:
 
 The following annotations are proposed:
 
-- `@no-security`
-- `@http-basic`
-- `@http-bearer`
-- `@api-key(in = "header", name = "X-API-Key")`
-- `@api-key(in = "cookie", name = "sid")`
-- `@api-key(in = "query", name = "api_key")`
+- `@no_security`
+- `@http_basic`
+- `@http_bearer`
+- `@api_key(in = "header", name = "X-API-Key")`
+- `@api_key(in = "cookie", name = "sid")`
+- `@api_key(in = "query", name = "api_key")`
 - `@oauth2(scopes = ["scope1", "scope2"])`
 
 Annotation roles:
 
 - security annotations directly declare authentication requirements on an
   interface or operation
-- `@no-security` explicitly disables inherited security requirements
+- `@no_security` explicitly disables inherited security requirements
 
 This draft intentionally keeps the annotation surface small. It is designed to
 cover common production HTTP APIs without reproducing every OpenAPI security
@@ -65,7 +65,7 @@ feature.
 ### 4.1 HTTP Basic
 
 ```idl
-@http-basic
+@http_basic
 ```
 
 Semantics:
@@ -76,7 +76,7 @@ Semantics:
 ### 4.2 HTTP Bearer
 
 ```idl
-@http-bearer
+@http_bearer
 ```
 
 Semantics:
@@ -88,9 +88,9 @@ Semantics:
 ### 4.3 API Key
 
 ```idl
-@api-key(in = "header", name = "X-API-Key")
-@api-key(in = "cookie", name = "sid")
-@api-key(in = "query", name = "api_key")
+@api_key(in = "header", name = "X-API-Key")
+@api_key(in = "cookie", name = "sid")
+@api_key(in = "query", name = "api_key")
 ```
 
 Semantics:
@@ -124,10 +124,10 @@ Examples:
 
 ```idl
 interface UserApi {
-  @http-bearer
+  @http_bearer
   User me();
 
-  @no-security
+  @no_security
   string health();
 };
 ```
@@ -137,7 +137,7 @@ Rules:
 - interface-level security annotations define the default security requirements
   for all operations in that interface
 - operation-level security annotations replace inherited interface defaults
-- `@no-security` on an operation clears inherited interface-level security
+- `@no_security` on an operation clears inherited interface-level security
   requirements
 
 Recommended override model:
@@ -145,7 +145,7 @@ Recommended override model:
 - no operation-level security annotations -> inherit interface-level security
 - one or more operation-level security annotations -> replace inherited security
   requirements
-- `@no-security` -> require anonymous access
+- `@no_security` -> require anonymous access
 
 ## 6. Requirement Semantics
 
@@ -153,16 +153,16 @@ Each security annotation represents one security requirement.
 
 Default semantics:
 
-- if both `@http-basic` and `@http-bearer` are present on the same target, they
+- if both `@http_basic` and `@http_bearer` are present on the same target, they
   are interpreted as alternative requirements (logical OR)
-- `@api-key(...)` and `@oauth2(...)` participate in the same alternative-set
+- `@api_key(...)` and `@oauth2(...)` participate in the same alternative-set
   model as other security annotations
 - if no operation-level security annotations are present, the effective
   requirement is inherited from the interface
 - if one or more operation-level security annotations are present, the
   interface-level requirement is discarded and replaced by the operation-level
   requirement set
-- if `@no-security` is present on an operation, the effective requirement is
+- if `@no_security` is present on an operation, the effective requirement is
   anonymous access and no other security annotation may appear on that operation
 
 ## 7. HTTP Mapping
@@ -203,10 +203,10 @@ Generators targeting documentation formats should preserve security metadata.
 
 OpenAPI guidance:
 
-- `@http-basic`, `@http-bearer`, `@api-key`, and `@oauth2` map naturally to
+- `@http_basic`, `@http_bearer`, `@api_key`, and `@oauth2` map naturally to
   `components.securitySchemes`
 - interface and operation requirements map naturally to `security`
-- `@no-security` maps to an explicitly empty security requirement set
+- `@http_security` maps to an explicitly empty security requirement set
 
 This RFC does not require a generator to preserve every scheme-specific detail
 if the target format lacks a direct equivalent.
@@ -215,12 +215,12 @@ if the target format lacks a direct equivalent.
 
 The following are invalid:
 
-- `@no-security` combined with operation-level security annotations on the same
+- `@no_security` combined with operation-level security annotations on the same
   operation
-- duplicate `@http-basic` annotations on the same target
-- duplicate `@http-bearer` annotations on the same target
-- `@api-key` with empty `name`
-- `@api-key` with `in` outside `header|cookie|query`
+- duplicate `@http_basic` annotations on the same target
+- duplicate `@http_bearer` annotations on the same target
+- `@api_key` with empty `name`
+- `@api_key` with `in` outside `header|cookie|query`
 
 ## 11. Non-Goals and Future Work
 

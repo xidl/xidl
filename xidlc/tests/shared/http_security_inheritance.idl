@@ -1,8 +1,8 @@
 #progma xidlc package xidlc
 #progma xidlc version v1.0.0
 
-@http-basic
-@api-key(in = "header", name = "X-Org-Key")
+@http_basic
+@api_key(in = "header", name = "X-Org-Key")
 interface HttpSecurityInheritanceService {
     @get(path = "/reports/{id}")
     string get_report(@path("id") string id);
@@ -14,7 +14,7 @@ interface HttpSecurityInheritanceService {
         string body
     );
 
-    @no-security
+    @no_security
     @get(path = "/health")
     string health();
 };

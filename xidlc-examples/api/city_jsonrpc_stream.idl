@@ -2,19 +2,19 @@
 #progma xidlc version v1.0.0
 
 interface CityJsonrpcStreamApi {
-    @server-stream
+    @server_stream
     void alerts(
         in string district,
         out string message
     );
 
-    @client-stream
+    @client_stream
     void upload_sensor(
         in string sensor_id,
         in long value
     );
 
-    @bidi-stream
+    @bidi_stream
     void chat(
         in string room_id,
         in string text,
@@ -22,6 +22,6 @@ interface CityJsonrpcStreamApi {
         out string text
     );
 
-    @server-stream
+    @server_stream
     readonly attribute string ops_notice;
 };

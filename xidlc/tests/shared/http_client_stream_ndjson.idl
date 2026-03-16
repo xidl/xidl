@@ -1,6 +1,6 @@
 interface HttpClientStreamService {
-  @client-stream
-  @stream-codec("ndjson")
+  @client_stream
+  @stream_codec("ndjson")
   @path("/upload/chunks")
   string upload_chunk(
     in string file_id,

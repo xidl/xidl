@@ -12,8 +12,8 @@ struct UploadSummary {
 };
 
 interface HttpClientStreamReportService {
-    @client-stream
-    @stream-codec("ndjson")
+    @client_stream
+    @stream_codec("ndjson")
     @post(path = "/uploads/parts")
     UploadSummary upload_parts(UploadChunk chunk);
 };

@@ -2,8 +2,8 @@
 #progma xidlc version v1.0.0
 
 interface HttpSecurityService {
-    @http-basic
-    @api-key(in = "header", name = "X-API-Key")
+    @http_basic
+    @api_key(in = "header", name = "X-API-Key")
     @get(path = "/users/{id}")
     @deprecated("2026-03-13")
     string get_user(
@@ -19,7 +19,7 @@ interface HttpSecurityService {
         @optional uint32 page
     );
 
-    @no-security
+    @no_security
     @deprecated(since = "2026-03-13", after = "2026-03-14")
     string health();
 };

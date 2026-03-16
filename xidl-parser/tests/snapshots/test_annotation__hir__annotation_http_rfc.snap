@@ -1387,15 +1387,78 @@ Specification(
         InterfaceDcl(
             InterfaceDcl {
                 annotations: [
-                    Builtin {
-                        name: "http-basic",
+                    ScopedName {
+                        name: ScopedName {
+                            name: [
+                                "http_basic",
+                            ],
+                            is_root: false,
+                        },
                         params: None,
                     },
-                    Builtin {
-                        name: "api-key",
+                    ScopedName {
+                        name: ScopedName {
+                            name: [
+                                "api_key",
+                            ],
+                            is_root: false,
+                        },
                         params: Some(
-                            Raw(
-                                "in = \"header\", name = \"X-API-Key\"",
+                            Params(
+                                [
+                                    AnnotationParam {
+                                        ident: "in",
+                                        value: Some(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            Literal(
+                                                                                StringLiteral(
+                                                                                    "\"header\"",
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    },
+                                    AnnotationParam {
+                                        ident: "name",
+                                        value: Some(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            Literal(
+                                                                                StringLiteral(
+                                                                                    "\"X-API-Key\"",
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    },
+                                ],
                             ),
                         ),
                     },
@@ -1464,8 +1527,13 @@ Specification(
                                                         ),
                                                     ),
                                                 },
-                                                Builtin {
-                                                    name: "http-bearer",
+                                                ScopedName {
+                                                    name: ScopedName {
+                                                        name: [
+                                                            "http_bearer",
+                                                        ],
+                                                        is_root: false,
+                                                    },
                                                     params: None,
                                                 },
                                             ],
@@ -1674,8 +1742,13 @@ Specification(
                                     OpDcl(
                                         OpDcl {
                                             annotations: [
-                                                Builtin {
-                                                    name: "no-security",
+                                                ScopedName {
+                                                    name: ScopedName {
+                                                        name: [
+                                                            "no_security",
+                                                        ],
+                                                        is_root: false,
+                                                    },
                                                     params: None,
                                                 },
                                             ],

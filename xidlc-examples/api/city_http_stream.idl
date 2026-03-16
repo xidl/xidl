@@ -1,31 +1,31 @@
-@http-basic
+@http_basic
 interface CityHttpStreamApi {
-  @server-stream
-  @stream-codec("sse")
+  @server_stream
+  @stream_codec("sse")
   @path("/alerts/{district}{?lang}")
   string alerts(
     @path("district") string district,
     @query("lang") string lang
   );
 
-  @no-security
-  @server-stream
-  @stream-codec("sse")
+  @no_security
+  @server_stream
+  @stream_codec("sse")
   @path("/ticker")
   string ticker();
 
   attribute boolean maintenance_mode;
 
-  @client-stream
-  @stream-codec("ndjson")
-  @http-bearer
+  @client_stream
+  @stream_codec("ndjson")
+  @http_bearer
   @path("/assets/upload")
   string upload_asset(
     in string asset_id,
     in sequence<octet> chunk
   );
 
-  @bidi-stream
+  @bidi_stream
   @path("/chat")
   void chat(
     in string room,

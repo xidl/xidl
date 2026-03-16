@@ -339,7 +339,7 @@ fn render_attr(
     module_path: &[String],
     user_ops: &HashSet<&str>,
 ) -> IdlcResult<RenderedAttr> {
-    let emit_watch = has_annotation(&attr.annotations, "server-stream");
+    let emit_watch = has_annotation(&attr.annotations, "server_stream");
     let rust_attrs = rust_passthrough_attrs_from_annotations(&attr.annotations);
     match &attr.decl {
         hir::AttrDclInner::ReadonlyAttrSpec(spec) => {
@@ -648,11 +648,11 @@ fn stream_kind_from_annotations(annotations: &[hir::Annotation]) -> IdlcResult<O
         let Some(name) = annotation_name(annotation) else {
             continue;
         };
-        let current = if name.eq_ignore_ascii_case("server-stream") {
+        let current = if name.eq_ignore_ascii_case("server_stream") {
             Some(StreamKind::Server)
-        } else if name.eq_ignore_ascii_case("client-stream") {
+        } else if name.eq_ignore_ascii_case("client_stream") {
             Some(StreamKind::Client)
-        } else if name.eq_ignore_ascii_case("bidi-stream") {
+        } else if name.eq_ignore_ascii_case("bidi_stream") {
             Some(StreamKind::Bidi)
         } else {
             None
@@ -665,7 +665,7 @@ fn stream_kind_from_annotations(annotations: &[hir::Annotation]) -> IdlcResult<O
             Some(prev) if prev == current => {}
             Some(_) => {
                 return Err(IdlcError::rpc(
-                    "@server-stream/@client-stream/@bidi-stream are mutually exclusive",
+                    "@server_stream/@client_stream/@bidi_stream are mutually exclusive",
                 ));
             }
         }

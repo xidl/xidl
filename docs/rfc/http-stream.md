@@ -44,15 +44,15 @@ This document does not define:
 
 A method is treated as stream operation when it has:
 
-- `@server-stream`: server streaming
-- `@client-stream`: client streaming
+- `@server_stream`: server streaming
+- `@client_stream`: client streaming
 
 Optional annotations:
 
 - `@path("...")`: explicit route path (same normalization rules as HTTP RFC)
-- `@stream-codec("ndjson" | "sse")`: payload framing codec
+- `@stream_codec("ndjson" | "sse")`: payload framing codec
 - security annotations from the HTTP security mapping RFC, including
-  `@no-security`, `@http-basic`, `@http-bearer`, `@api-key(...)`, and
+  `@no_security`, `@http_basic`, `@http_bearer`, `@api_key(...)`, and
   `@oauth2(...)`
 
 Defaults:
@@ -63,11 +63,11 @@ Defaults:
 
 Validation:
 
-- `@server-stream` and `@client-stream` are mutually exclusive.
+- `@server_stream` and `@client_stream` are mutually exclusive.
 - A stream method must declare exactly one of the two annotations above.
-- `@client-stream` methods must declare exactly one streaming input parameter,
+- `@client_stream` methods must declare exactly one streaming input parameter,
   and that parameter type must be `sequence<T>` for some item type `T`.
-- `@server-stream` methods must declare a return type of `sequence<T>` for some
+- `@server_stream` methods must declare a return type of `sequence<T>` for some
   item type `T`.
 
 `@path` template compatibility:
@@ -83,7 +83,7 @@ Validation:
 Example:
 
 ```idl
-@server-stream
+@server_stream
 @path("/files/{*path}{?lang,follow}")
 sequence<string> tail_file(
   @path("path") string path,
@@ -104,9 +104,9 @@ sequence<string> tail_file(
 Sequence semantics:
 
 - The stream item type is derived from `sequence<T>`.
-- For `@client-stream`, `T` is the item type of the single streaming input
+- For `@client_stream`, `T` is the item type of the single streaming input
   parameter.
-- For `@server-stream`, `T` is the item type of the `sequence<T>` return value.
+- For `@server_stream`, `T` is the item type of the `sequence<T>` return value.
 - This RFC intentionally uses type-driven stream item semantics rather than a
   dedicated item annotation.
 
@@ -115,15 +115,15 @@ streaming is expected to use a separate WebSocket binding.
 
 ### 3.3 Security Model
 
-Stream operations support the same security annotations and effective-requirement
-rules defined by the HTTP security mapping RFC.
+Stream operations support the same security annotations and
+effective-requirement rules defined by the HTTP security mapping RFC.
 
 Supported annotations:
 
-- `@no-security`
-- `@http-basic`
-- `@http-bearer`
-- `@api-key(...)`
+- `@no_security`
+- `@http_basic`
+- `@http_bearer`
+- `@api_key(...)`
 - `@oauth2(...)`
 
 Inheritance and override rules:
@@ -131,7 +131,7 @@ Inheritance and override rules:
 - interface-level security annotations define the default security requirement
   for all stream operations in that interface
 - operation-level security annotations replace inherited interface defaults
-- `@no-security` on a stream operation clears inherited interface-level security
+- `@no_security` on a stream operation clears inherited interface-level security
   requirements
 - if no operation-level security annotations are present, the effective
   requirement is inherited from the interface
@@ -193,7 +193,7 @@ Rules:
 - `error` terminates the full stream immediately.
 - `cancel` requests remote termination (best effort).
 
-## 4.3 SSE Codec (server-stream only)
+## 4.3 SSE Codec (server_stream only)
 
 MIME:
 
@@ -207,19 +207,19 @@ SSE mapping:
 
 Constraints:
 
-- valid only for `@server-stream`
+- valid only for `@server_stream`
 - request body is normal unary JSON request (`application/json`)
 
 ## 5. Payload Mapping
 
 For `next` frames, payload shape is derived from the stream item type `T`.
 
-Request `next.data` shape for `@client-stream`:
+Request `next.data` shape for `@client_stream`:
 
 - is one serialized item of type `T`, where the operation declares exactly one
   streaming input parameter of type `sequence<T>`
 
-Response `next.data` shape for `@server-stream`:
+Response `next.data` shape for `@server_stream`:
 
 - is one serialized item of type `T`, where the operation return type is
   `sequence<T>`
@@ -230,10 +230,9 @@ media type `itemSchema`.
 Byte-stream mapping:
 
 - a byte stream is modeled by choosing `T = octet`
-- `@client-stream` byte streams therefore use an input parameter of type
+- `@client_stream` byte streams therefore use an input parameter of type
   `sequence<octet>`
-- `@server-stream` byte streams therefore use a return type of
-  `sequence<octet>`
+- `@server_stream` byte streams therefore use a return type of `sequence<octet>`
 - octet chunk values are transported as JSON arrays of octets in NDJSON-based
   profiles unless a companion codec profile specifies another representation
 
@@ -323,13 +322,13 @@ Application-level recommendations:
 
 Build-time validation:
 
-- `@stream-codec("sse")` is only valid with `@server-stream`
+- `@stream_codec("sse")` is only valid with `@server_stream`
 - duplicate stream routes after normalization are invalid
 - non-POST stream methods are discouraged and should emit warnings
-- `@client-stream` methods must declare exactly one streaming input parameter
+- `@client_stream` methods must declare exactly one streaming input parameter
 - that streaming input parameter must have type `sequence<T>`
-- `@server-stream` methods must return `sequence<T>`
-- `@no-security` must not be combined with other operation-level security
+- `@server_stream` methods must return `sequence<T>`
+- `@no_security` must not be combined with other operation-level security
   annotations on the same stream operation
 - security annotations on stream operations follow the same duplicate and
   argument validation rules defined by the HTTP security mapping RFC
@@ -355,17 +354,17 @@ Attributes are not streamed by default.
 
 Rule:
 
-- Only attributes marked with `@server-stream` are mapped to change-notification
+- Only attributes marked with `@server_stream` are mapped to change-notification
   streams.
-- The generated watch operation is server-stream (`@server-stream`) only.
+- The generated watch operation is server_stream (`@server_stream`) only.
 - Client-side attribute-change streaming is not supported in v1.
-- Attribute change notification should use SSE in v1 (`@stream-codec("sse")`).
+- Attribute change notification should use SSE in v1 (`@stream_codec("sse")`).
 - The generated watch operation returns `sequence<T>`, where `T` is the event
   item type for that attribute stream.
 
 Generated operation shape:
 
-- attribute `foo` with `@server-stream` maps to:
+- attribute `foo` with `@server_stream` maps to:
   - `watch_attribute_foo(...): sequence<AttributeFooEvent>`
 - default route follows normal stream route rules unless overridden by `@path`.
 - default codec for generated watch operation is SSE (`text/event-stream`).
@@ -388,7 +387,7 @@ Example:
 
 ```idl
 interface DeviceState {
-  @server-stream
+  @server_stream
   attribute boolean online;
 };
 ```
@@ -403,8 +402,8 @@ struct OnlineEvent {
 };
 
 interface DeviceState {
-  @server-stream
-  @stream-codec("sse")
+  @server_stream
+  @stream_codec("sse")
   sequence<OnlineEvent> watch_attribute_online();
 };
 ```
@@ -417,7 +416,7 @@ IDL:
 
 ```idl
 interface Metrics {
-  @server-stream
+  @server_stream
   @path("/metrics/tail")
   sequence<MetricSample> tail(@query("service") string service);
 };
@@ -446,7 +445,7 @@ IDL:
 
 ```idl
 interface Upload {
-  @client-stream
+  @client_stream
   UploadResult push(in sequence<octet> chunk);
 };
 ```
@@ -471,7 +470,7 @@ IDL:
 
 ```idl
 interface Download {
-  @server-stream
+  @server_stream
   sequence<octet> pull(@query("file") string file);
 };
 ```
@@ -488,7 +487,7 @@ Response frames:
 
 Minimum conformance (v1):
 
-- support `@server-stream` + NDJSON codec
+- support `@server_stream` + NDJSON codec
 - support frame types `next|error|complete`
 - enforce terminal and sequence rules
 

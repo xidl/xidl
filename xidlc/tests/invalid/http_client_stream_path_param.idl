@@ -2,8 +2,8 @@
 #progma xidlc version v1.0.0
 
 interface InvalidClientStreamPathService {
-    @client-stream
-    @stream-codec("ndjson")
+    @client_stream
+    @stream_codec("ndjson")
     @post(path = "/uploads/{bucket}")
     string upload(
         @path("bucket") string bucket,

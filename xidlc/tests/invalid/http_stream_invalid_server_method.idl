@@ -2,8 +2,8 @@
 #progma xidlc version v1.0.0
 
 interface InvalidServerStreamMethodService {
-    @server-stream
-    @stream-codec("sse")
+    @server_stream
+    @stream_codec("sse")
     @post(path = "/events")
     string watch();
 };

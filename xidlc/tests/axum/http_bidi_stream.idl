@@ -1,5 +1,5 @@
 interface HttpBidiStreamService {
-  @bidi-stream
+  @bidi_stream
   @path("/chat")
   void chat(
     in string room,

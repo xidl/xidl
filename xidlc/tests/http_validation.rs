@@ -49,7 +49,7 @@ fn rejects_invalid_stream_codecs_for_http_targets() {
     for lang in ["axum", "ts"] {
         let err = generate_error(lang, "http_stream_invalid_codec.idl");
         assert!(
-            err.contains("unsupported @stream-codec value"),
+            err.contains("unsupported @stream_codec value"),
             "{lang}: {err}"
         );
     }
@@ -59,7 +59,7 @@ fn rejects_invalid_stream_codecs_for_http_targets() {
 fn rejects_invalid_server_stream_methods_for_http_targets() {
     for lang in ["axum", "ts"] {
         let err = generate_error(lang, "http_stream_invalid_server_method.idl");
-        assert!(err.contains("@server-stream method"), "{lang}: {err}");
+        assert!(err.contains("@server_stream method"), "{lang}: {err}");
         assert!(err.contains("must use GET"), "{lang}: {err}");
     }
 }
@@ -67,7 +67,7 @@ fn rejects_invalid_server_stream_methods_for_http_targets() {
 #[test]
 fn rejects_typescript_bidi_stream_fixture() {
     let err = generate_error("ts", "http_stream_bidi_typescript.idl");
-    assert!(err.contains("does not support @bidi-stream"), "{err}");
+    assert!(err.contains("does not support @bidi_stream"), "{err}");
 }
 
 #[test]
@@ -83,7 +83,7 @@ fn rejects_duplicate_security_annotations() {
     for lang in ["axum"] {
         let err = generate_error(lang, "http_security_duplicate_basic.idl");
         assert!(
-            err.contains("duplicate @http-basic annotation"),
+            err.contains("duplicate @http_basic annotation"),
             "{lang}: {err}"
         );
     }
@@ -94,7 +94,7 @@ fn rejects_conflicting_no_security_annotations() {
     for lang in ["axum"] {
         let err = generate_error(lang, "http_security_conflict_no_security.idl");
         assert!(
-            err.contains("@no-security cannot be combined with other security annotations"),
+            err.contains("@no_security cannot be combined with other security annotations"),
             "{lang}: {err}"
         );
     }
@@ -134,13 +134,13 @@ fn rejects_duplicate_route_bindings_for_axum() {
 fn rejects_additional_invalid_security_annotations() {
     let duplicate_bearer = generate_error("axum", "http_security_duplicate_bearer.idl");
     assert!(
-        duplicate_bearer.contains("duplicate @http-bearer annotation"),
+        duplicate_bearer.contains("duplicate @http_bearer annotation"),
         "{duplicate_bearer}"
     );
 
     let missing_name = generate_error("axum", "http_security_api_key_missing_name.idl");
     assert!(
-        missing_name.contains("@api-key requires non-empty name=..."),
+        missing_name.contains("@api_key requires non-empty name=..."),
         "{missing_name}"
     );
 
@@ -161,8 +161,8 @@ fn rejects_additional_invalid_stream_shapes() {
     for lang in ["axum", "ts"] {
         let err = generate_error(lang, "http_stream_client_sse.idl");
         assert!(
-            err.contains("supports only NDJSON for @client-stream methods")
-                || err.contains("@stream-codec(\"sse\") requires @server-stream"),
+            err.contains("supports only NDJSON for @client_stream methods")
+                || err.contains("@stream_codec(\"sse\") requires @server_stream"),
             "{lang}: {err}"
         );
     }

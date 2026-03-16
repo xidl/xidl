@@ -2,7 +2,7 @@
 #progma xidlc version v1.0.0
 
 interface InvalidApiKeyLocationSecurityService {
-    @api-key(in = "body", name = "auth")
+    @api_key(in = "body", name = "auth")
     @get(path = "/reports")
     string list_reports();
 };

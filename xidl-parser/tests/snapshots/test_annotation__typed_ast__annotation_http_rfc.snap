@@ -8,20 +8,89 @@ Specification(
             InterfaceDcl {
                 annotations: [
                     AnnotationAppl {
-                        name: Builtin(
-                            "http-basic",
+                        name: ScopedName(
+                            ScopedName {
+                                scoped_name: None,
+                                identifier: Identifier(
+                                    "http_basic",
+                                ),
+                                node_text: "http_basic",
+                            },
                         ),
                         params: None,
                         is_extend: false,
                         extra: [],
                     },
                     AnnotationAppl {
-                        name: Builtin(
-                            "api-key",
+                        name: ScopedName(
+                            ScopedName {
+                                scoped_name: None,
+                                identifier: Identifier(
+                                    "api_key",
+                                ),
+                                node_text: "api_key",
+                            },
                         ),
                         params: Some(
-                            Raw(
-                                "in = \"header\", name = \"X-API-Key\"",
+                            Params(
+                                [
+                                    AnnotationApplParam {
+                                        ident: Identifier(
+                                            "in",
+                                        ),
+                                        value: Some(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            Literal(
+                                                                                StringLiteral(
+                                                                                    "\"header\"",
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    },
+                                    AnnotationApplParam {
+                                        ident: Identifier(
+                                            "name",
+                                        ),
+                                        value: Some(
+                                            ConstExpr(
+                                                XorExpr(
+                                                    AndExpr(
+                                                        ShiftExpr(
+                                                            AddExpr(
+                                                                MultExpr(
+                                                                    UnaryExpr(
+                                                                        PrimaryExpr(
+                                                                            Literal(
+                                                                                StringLiteral(
+                                                                                    "\"X-API-Key\"",
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    },
+                                ],
                             ),
                         ),
                         is_extend: false,
@@ -108,8 +177,14 @@ Specification(
                                                     extra: [],
                                                 },
                                                 AnnotationAppl {
-                                                    name: Builtin(
-                                                        "http-bearer",
+                                                    name: ScopedName(
+                                                        ScopedName {
+                                                            scoped_name: None,
+                                                            identifier: Identifier(
+                                                                "http_bearer",
+                                                            ),
+                                                            node_text: "http_bearer",
+                                                        },
                                                     ),
                                                     params: None,
                                                     is_extend: false,
@@ -355,8 +430,14 @@ Specification(
                                         OpDcl {
                                             annotations: [
                                                 AnnotationAppl {
-                                                    name: Builtin(
-                                                        "no-security",
+                                                    name: ScopedName(
+                                                        ScopedName {
+                                                            scoped_name: None,
+                                                            identifier: Identifier(
+                                                                "no_security",
+                                                            ),
+                                                            node_text: "no_security",
+                                                        },
                                                     ),
                                                     params: None,
                                                     is_extend: false,

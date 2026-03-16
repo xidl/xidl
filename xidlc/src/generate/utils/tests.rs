@@ -60,7 +60,7 @@ fn test_deprecated_info_normalizes_dates() {
 fn test_effective_security_parses_oauth_and_api_key() {
     let annotations = vec![
         hir::Annotation::Builtin {
-            name: "api-key".to_string(),
+            name: "api_key".to_string(),
             params: Some(hir::AnnotationParams::Raw(
                 "in = \"header\", name = \"X-API-Key\"".to_string(),
             )),
@@ -92,27 +92,27 @@ fn test_effective_security_parses_oauth_and_api_key() {
 fn test_validate_http_annotations_rejects_invalid_security_mix() {
     let annotations = vec![
         hir::Annotation::Builtin {
-            name: "no-security".to_string(),
+            name: "no_security".to_string(),
             params: None,
         },
         hir::Annotation::Builtin {
-            name: "http-basic".to_string(),
+            name: "http_basic".to_string(),
             params: None,
         },
     ];
     let err = validate_http_annotations("op foo", &annotations).unwrap_err();
-    assert!(err.contains("no-security"));
+    assert!(err.contains("no_security"));
 }
 
 #[test]
 fn test_http_stream_config_parses_and_validates() {
     let annotations = vec![
         hir::Annotation::Builtin {
-            name: "server-stream".to_string(),
+            name: "server_stream".to_string(),
             params: None,
         },
         hir::Annotation::Builtin {
-            name: "stream-codec".to_string(),
+            name: "stream_codec".to_string(),
             params: Some(hir::AnnotationParams::Raw("\"sse\"".to_string())),
         },
     ];
@@ -124,7 +124,7 @@ fn test_http_stream_config_parses_and_validates() {
 #[test]
 fn test_http_stream_target_rejects_unsupported_bidi() {
     let annotations = vec![hir::Annotation::Builtin {
-        name: "bidi-stream".to_string(),
+        name: "bidi_stream".to_string(),
         params: None,
     }];
     let config = http_stream_config(&annotations).unwrap();
@@ -142,7 +142,7 @@ fn test_http_stream_target_rejects_unsupported_bidi() {
         },
     )
     .unwrap_err();
-    assert!(err.contains("does not support @bidi-stream"));
+    assert!(err.contains("does not support @bidi_stream"));
 }
 
 #[test]

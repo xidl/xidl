@@ -2,8 +2,8 @@
 #progma xidlc version v1.0.0
 
 interface InvalidConflictingSecurityService {
-    @no-security
-    @http-bearer
+    @no_security
+    @http_bearer
     @get(path = "/reports")
     string list_reports();
 };

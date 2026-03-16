@@ -453,7 +453,7 @@ fn render_op(
     let request_ty = request_struct.clone().unwrap_or_else(|| "()".to_string());
     if is_client_stream && (!path_params.is_empty() || !query_params.is_empty()) {
         return Err(IdlcError::rpc(format!(
-            "@client-stream method '{}' currently supports body parameters only",
+            "@client_stream method '{}' currently supports body parameters only",
             op.ident
         )));
     }
@@ -464,7 +464,7 @@ fn render_op(
             || !cookie_params.is_empty())
     {
         return Err(IdlcError::rpc(format!(
-            "@bidi-stream method '{}' currently supports body parameters only",
+            "@bidi_stream method '{}' currently supports body parameters only",
             op.ident
         )));
     }
@@ -552,7 +552,7 @@ fn render_attr(
         &format!("attribute in interface '{interface_name}'"),
         &attr.annotations,
     );
-    let emit_watch = has_annotation(&attr.annotations, "server-stream");
+    let emit_watch = has_annotation(&attr.annotations, "server_stream");
     let rust_attrs = rust_passthrough_attrs_from_annotations(&attr.annotations);
     match &attr.decl {
         hir::AttrDclInner::ReadonlyAttrSpec(spec) => readonly_attr_names(spec)
