@@ -1,5 +1,8 @@
 # XIDL HTTP Security Mapping Specification (Draft)
 
+**Status:** Implementation-oriented RFC. This document specifies runtime
+behavior; generator and runtime support may vary by target.
+
 Reference specifications:
 
 - <https://www.rfc-editor.org/rfc/rfc9110>
