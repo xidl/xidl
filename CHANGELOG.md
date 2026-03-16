@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.24.0](https://github.com/xidl/xidl/compare/v0.23.0...v0.24.0) (2026-03-16)
+
+
+### Features
+
+* **openapi:** auto select openapi version ([6aad440](https://github.com/xidl/xidl/commit/6aad4400f232db1e2017983e7ccdb07015673e30))
+
 ## [0.23.0](https://github.com/xidl/xidl/compare/v0.22.0...v0.23.0) (2026-03-15)
 
 
