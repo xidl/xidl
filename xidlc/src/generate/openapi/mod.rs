@@ -57,14 +57,24 @@ impl crate::jsonrpc::Codegen for OpenApiCodegen {
 
 fn render_openapi_json(spec: &hir::Specification) -> Result<Value, serde_json::Error> {
     let ctx = render_openapi(spec);
+    let version = select_openapi_version(&ctx);
     let mut value = serde_json::to_value(ctx.document)?;
     if let Some(openapi) = value.get_mut("openapi") {
-        *openapi = Value::String("3.2.0".to_string());
+        *openapi = Value::String(version.to_string());
     }
     for patch in ctx.stream_patches {
         patch_openapi_stream_content(&mut value, &patch);
     }
     Ok(value)
+}
+
+fn select_openapi_version(ctx: &RenderedOpenApi) -> &'static str {
+    if ctx.stream_patches.is_empty() {
+        "3.1.0"
+    } else {
+        // Stream itemSchema requires OpenAPI 3.2.0.
+        "3.2.0"
+    }
 }
 
 pub fn render_openapi(spec: &hir::Specification) -> RenderedOpenApi {
@@ -1295,6 +1305,22 @@ mod tests {
             panic!("expected object property schema");
         };
         assert_eq!(prop_obj.description.as_deref(), Some("field doc"));
+    }
+
+    #[test]
+    fn render_openapi_json_defaults_to_31_without_streams() {
+        let spec = parse_spec(
+            r#"
+            interface HelloApi {
+              string hello();
+            };
+            "#,
+        );
+        let doc = render_openapi_json(&spec).expect("render openapi json");
+        assert_eq!(
+            doc.get("openapi"),
+            Some(&Value::String("3.1.0".to_string()))
+        );
     }
 
     #[test]

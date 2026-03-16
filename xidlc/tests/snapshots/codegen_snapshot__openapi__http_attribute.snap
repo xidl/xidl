@@ -269,7 +269,7 @@ openapi.json
     "title": "xidlc",
     "version": "v1.0.0"
   },
-  "openapi": "3.2.0",
+  "openapi": "3.1.0",
   "paths": {
     "/HttpAttributeService/name": {
       "get": {
