@@ -1,0 +1,27 @@
+#progma xidlc package XIDLC HTTP Example
+#progma xidlc version v0.0.1
+#progma xidlc service http://127.0.0.1:8081 localhost
+
+interface HttpServer {
+    /// host name
+    attribute string host;
+    /// port number
+    readonly attribute uint16 port;
+
+    string get_server_name();
+    void set_server_name(string name);
+
+
+    /// Get user info
+    @get(path = "/user/{id}")
+    @get(path = "/v1/user/{id}")
+    @get(path = "/legacy/user/{id}")
+    UserInfo get_user_info(uint64 id);
+
+};
+
+@derive(Debug, Clone, Serialize, Deserialize)
+struct UserInfo {
+    string name;
+    string email;
+};

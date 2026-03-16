@@ -27,8 +27,8 @@ fn build_jsonrpc(file_name: &str) {
 }
 
 fn main() {
-    println!("cargo:rerun-if-changed=../xidlc/**/*.j2");
     println!("cargo:rerun-if-changed=./examples");
+    println!("cargo:rerun-if-changed=./api");
     println!("cargo:rerun-if-changed=build.rs");
 
     for file in glob::glob("./api/http/*.idl").expect("failed to read glob pattern") {

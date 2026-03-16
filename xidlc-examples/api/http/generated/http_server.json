@@ -1,0 +1,740 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "XIDLC HTTP Example",
+    "version": "v0.0.1"
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8081",
+      "description": "localhost"
+    }
+  ],
+  "paths": {
+    "/HttpServer/host": {
+      "get": {
+        "summary": "host name",
+        "description": "host name",
+        "operationId": "HttpServer.host",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/HttpServer/port": {
+      "get": {
+        "summary": "port number",
+        "description": "port number",
+        "operationId": "HttpServer.port",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32",
+                  "minimum": 0
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/HttpServer/set_host": {
+      "post": {
+        "summary": "host name",
+        "description": "host name",
+        "operationId": "HttpServer.set_host",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get_server_name": {
+      "post": {
+        "operationId": "HttpServer.get_server_name",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/latency/user/{id}": {
+      "get": {
+        "summary": "Get user info",
+        "description": "Get user info",
+        "operationId": "HttpServer.get_user_info",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserInfo"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/set_server_name": {
+      "post": {
+        "operationId": "HttpServer.set_server_name",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/{id}": {
+      "get": {
+        "summary": "Get user info",
+        "description": "Get user info",
+        "operationId": "HttpServer.get_user_info",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserInfo"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/user/{id}": {
+      "get": {
+        "summary": "Get user info",
+        "description": "Get user info",
+        "operationId": "HttpServer.get_user_info",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserInfo"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "code",
+          "msg"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "details": {
+            "type": "object"
+          },
+          "msg": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpServer_Call": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_host"
+            ],
+            "properties": {
+              "get_attribute_host": {
+                "$ref": "#/components/schemas/HttpServer_get_attribute_host_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_host"
+            ],
+            "properties": {
+              "set_attribute_host": {
+                "$ref": "#/components/schemas/HttpServer_set_attribute_host_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_port"
+            ],
+            "properties": {
+              "get_attribute_port": {
+                "$ref": "#/components/schemas/HttpServer_get_attribute_port_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_server_name"
+            ],
+            "properties": {
+              "get_server_name": {
+                "$ref": "#/components/schemas/HttpServer_get_server_name_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_server_name"
+            ],
+            "properties": {
+              "set_server_name": {
+                "$ref": "#/components/schemas/HttpServer_set_server_name_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_user_info"
+            ],
+            "properties": {
+              "get_user_info": {
+                "$ref": "#/components/schemas/HttpServer_get_user_info_In"
+              }
+            }
+          }
+        ]
+      },
+      "HttpServer_Reply": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/HttpServer_Return"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
+          }
+        }
+      },
+      "HttpServer_Request": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/HttpServer_Call"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
+          }
+        }
+      },
+      "HttpServer_Return": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_host"
+            ],
+            "properties": {
+              "get_attribute_host": {
+                "$ref": "#/components/schemas/HttpServer_get_attribute_host_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_host"
+            ],
+            "properties": {
+              "set_attribute_host": {
+                "$ref": "#/components/schemas/HttpServer_set_attribute_host_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_port"
+            ],
+            "properties": {
+              "get_attribute_port": {
+                "$ref": "#/components/schemas/HttpServer_get_attribute_port_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_server_name"
+            ],
+            "properties": {
+              "get_server_name": {
+                "$ref": "#/components/schemas/HttpServer_get_server_name_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_server_name"
+            ],
+            "properties": {
+              "set_server_name": {
+                "$ref": "#/components/schemas/HttpServer_set_server_name_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_user_info"
+            ],
+            "properties": {
+              "get_user_info": {
+                "$ref": "#/components/schemas/HttpServer_get_user_info_Result"
+              }
+            }
+          }
+        ]
+      },
+      "HttpServer_get_attribute_host_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "HttpServer_get_attribute_host_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpServer_get_attribute_host_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpServer_get_attribute_host_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpServer_get_attribute_port_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "HttpServer_get_attribute_port_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          }
+        }
+      },
+      "HttpServer_get_attribute_port_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpServer_get_attribute_port_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpServer_get_server_name_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "HttpServer_get_server_name_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpServer_get_server_name_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpServer_get_server_name_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpServer_get_user_info_In": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          }
+        }
+      },
+      "HttpServer_get_user_info_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "$ref": "#/components/schemas/UserInfo"
+          }
+        }
+      },
+      "HttpServer_get_user_info_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpServer_get_user_info_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpServer_set_attribute_host_In": {
+        "type": "object",
+        "required": [
+          "host"
+        ],
+        "properties": {
+          "host": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpServer_set_attribute_host_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "HttpServer_set_attribute_host_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpServer_set_attribute_host_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpServer_set_server_name_In": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpServer_set_server_name_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "HttpServer_set_server_name_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpServer_set_server_name_Out"
+              }
+            }
+          }
+        ]
+      },
+      "UserInfo": {
+        "type": "object",
+        "required": [
+          "name",
+          "email"
+        ],
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

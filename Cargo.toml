@@ -43,3 +43,4 @@ tree-sitter-idl = "3.17.0"
 [workspace.lints.clippy]
 collapsible-if = "allow"
 if_same_then_else = "allow"
+single_element_loop = "allow"
