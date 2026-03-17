@@ -11,6 +11,9 @@ pub trait {{ ident }} {
                 #[{{ attr }}]
             {% endfor %}
         {% endif %}
+        {% if method.deprecated %}
+            #[deprecated{% if method.deprecated_note %}(note = "{{ method.deprecated_note }}"){% endif %}]
+        {% endif %}
         async fn {{ method.name }}(
         &self,
         req: xidl_rust_axum::Request<{% if method.is_client_stream %}xidl_rust_axum::stream::NdjsonStream<{{ method.request_item_ty }}>{% elif method.is_bidi_stream %}xidl_rust_axum::stream::BidiServerStream<{{ method.request_item_ty }}, {{ method.response_ty }}>{% else %}{{ method.request_ty }}{% endif %}>
@@ -280,7 +283,7 @@ pub trait {{ ident }} {
                 {% if method.is_bidi_stream %}
                     let req_headers = headers.clone();
                     let svc = svc.clone();
-                    return Ok(ws.on_upgrade(move |socket| async move {
+                    let mut resp = ws.on_upgrade(move |socket| async move {
                         let bidi = xidl_rust_axum::stream::open_bidi_server::<{{ method.request_item_ty }}, {{ method.response_ty }}>(socket);
                         let error_sender = bidi.error_sender();
                         let req = ::xidl_rust_axum::Request::new(req_headers, bidi);
@@ -289,7 +292,30 @@ pub trait {{ ident }} {
                                 let _ = tx.send(Err(err)).await;
                             }
                         }
-                    }));
+                    });
+                    {% if method.deprecated %}
+                        resp.headers_mut().insert(
+                            ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated"),
+                            ::xidl_rust_axum::axum::http::HeaderValue::from_static("true"),
+                        );
+                        {% if method.deprecated_since %}
+                            let value = ::xidl_rust_axum::axum::http::HeaderValue::from_str("{{ method.deprecated_since }}")
+                                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                            resp.headers_mut().insert(
+                                ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated-since"),
+                                value,
+                            );
+                        {% endif %}
+                        {% if method.deprecated_after %}
+                            let value = ::xidl_rust_axum::axum::http::HeaderValue::from_str("{{ method.deprecated_after }}")
+                                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                            resp.headers_mut().insert(
+                                ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated-from"),
+                                value,
+                            );
+                        {% endif %}
+                    {% endif %}
+                    return Ok(resp);
                 {% elif method.is_client_stream %}
                     let data = xidl_rust_axum::stream::decode_ndjson_body::<{{ method.request_item_ty }}>(body);
                 {% elif method.request_struct is defined and method.request_struct %}
@@ -303,17 +329,44 @@ pub trait {{ ident }} {
                 {% endif %}
                 {% if not method.is_bidi_stream %}
                     let req = ::xidl_rust_axum::Request::new(headers, data);
-                    let resp = svc.{{ method.name }}(req).await?;
-                    {% if method.is_server_stream %}
-                        Ok(xidl_rust_axum::stream::sse_response(resp))
-                    {% else %}
-                        {% if method.response_is_empty %}
-                            let _ = resp;
-                            Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT))
-                        {% else %}
-                            Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+                    let mut resp = match svc.{{ method.name }}(req).await {
+                        Ok(resp) => {
+                            {% if method.is_server_stream %}
+                                xidl_rust_axum::stream::sse_response(resp)
+                            {% else %}
+                                {% if method.response_is_empty %}
+                                    let _ = resp;
+                                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT)
+                                {% else %}
+                                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp))
+                                {% endif %}
+                            {% endif %}
+                        }
+                        Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+                    };
+                    {% if method.deprecated %}
+                        resp.headers_mut().insert(
+                            ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated"),
+                            ::xidl_rust_axum::axum::http::HeaderValue::from_static("true"),
+                        );
+                        {% if method.deprecated_since %}
+                            let value = ::xidl_rust_axum::axum::http::HeaderValue::from_str("{{ method.deprecated_since }}")
+                                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                            resp.headers_mut().insert(
+                                ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated-since"),
+                                value,
+                            );
+                        {% endif %}
+                        {% if method.deprecated_after %}
+                            let value = ::xidl_rust_axum::axum::http::HeaderValue::from_str("{{ method.deprecated_after }}")
+                                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                            resp.headers_mut().insert(
+                                ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated-from"),
+                                value,
+                            );
                         {% endif %}
                     {% endif %}
+                    Ok(resp)
                 {% endif %}
             }
         {% endfor %}

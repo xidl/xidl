@@ -99,17 +99,20 @@ async fn http_client_calls_all_endpoints() {
     assert_eq!(device.trace_echo, "trace-001");
     assert_eq!(device.session_echo, "sess-abc");
 
-    let api_version = client.api_version().await.expect("call api_version");
+    let api_version = client
+        .get_attribute_api_version()
+        .await
+        .expect("call api_version");
     assert_eq!(api_version, "v2.0.0");
 
     let maintenance_mode = client
-        .maintenance_mode()
+        .get_attribute_maintenance_mode()
         .await
         .expect("call maintenance_mode");
     assert!(!maintenance_mode);
 
     client
-        .set_maintenance_mode(true)
+        .set_attribute_maintenance_mode(true)
         .await
         .expect("call set_maintenance_mode");
 

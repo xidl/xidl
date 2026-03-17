@@ -11,7 +11,7 @@
     }
   ],
   "paths": {
-    "/HttpServer/host": {
+    "/attribute/host": {
       "get": {
         "summary": "host name",
         "description": "host name",
@@ -38,40 +38,7 @@
             }
           }
         }
-      }
-    },
-    "/HttpServer/port": {
-      "get": {
-        "summary": "port number",
-        "description": "port number",
-        "operationId": "HttpServer.port",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "integer",
-                  "format": "int32",
-                  "minimum": 0
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/HttpServer/set_host": {
+      },
       "post": {
         "summary": "host name",
         "description": "host name",
@@ -88,6 +55,37 @@
         "responses": {
           "204": {
             "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attribute/port": {
+      "get": {
+        "summary": "port number",
+        "description": "port number",
+        "operationId": "HttpServer.port",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32",
+                  "minimum": 0
+                }
+              }
+            }
           },
           "500": {
             "description": "Error",
@@ -129,7 +127,7 @@
         }
       }
     },
-    "/latency/user/{id}": {
+    "/legacy/user/{id}": {
       "get": {
         "summary": "Get user info",
         "description": "Get user info",
@@ -240,6 +238,380 @@
         }
       }
     },
+    "/v1/database/deprecated/1/{key}": {
+      "get": {
+        "description": "Deprecated.",
+        "operationId": "HttpServer.get_key_1",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/v1/database/deprecated/2/{key}": {
+      "get": {
+        "description": "Deprecated.",
+        "operationId": "HttpServer.get_key_2",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/v1/database/deprecated/3/{key}": {
+      "get": {
+        "description": "Deprecated. Since 2025-01-01T00:00:00Z.",
+        "operationId": "HttpServer.get_key_3",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/v1/database/deprecated/4/{key}": {
+      "get": {
+        "description": "Deprecated. Since 2025-01-01T00:00:00Z. After 2025-01-02T23:59:59Z.",
+        "operationId": "HttpServer.get_key_4",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/v1/database/{key}": {
+      "delete": {
+        "operationId": "HttpServer.delete_key",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "operationId": "HttpServer.get_key_options",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "head": {
+        "operationId": "HttpServer.is_key_exists",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "HttpServer.patch_key",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/database/{key}/{value}": {
+      "put": {
+        "operationId": "HttpServer.put_key_value",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "value",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/user": {
+      "post": {
+        "operationId": "HttpServer.post_user_info",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "minimum": 0
+                  },
+                  "info": {
+                    "$ref": "#/components/schemas/UserInfo"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/user/{id}": {
       "get": {
         "summary": "Get user info",
@@ -250,6 +622,45 @@
             "name": "id",
             "in": "path",
             "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserInfo"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/user": {
+      "get": {
+        "operationId": "HttpServer.query_user_info",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -380,6 +791,127 @@
                 "$ref": "#/components/schemas/HttpServer_get_user_info_In"
               }
             }
+          },
+          {
+            "type": "object",
+            "required": [
+              "query_user_info"
+            ],
+            "properties": {
+              "query_user_info": {
+                "$ref": "#/components/schemas/HttpServer_query_user_info_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "post_user_info"
+            ],
+            "properties": {
+              "post_user_info": {
+                "$ref": "#/components/schemas/HttpServer_post_user_info_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "put_key_value"
+            ],
+            "properties": {
+              "put_key_value": {
+                "$ref": "#/components/schemas/HttpServer_put_key_value_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "delete_key"
+            ],
+            "properties": {
+              "delete_key": {
+                "$ref": "#/components/schemas/HttpServer_delete_key_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "patch_key"
+            ],
+            "properties": {
+              "patch_key": {
+                "$ref": "#/components/schemas/HttpServer_patch_key_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "is_key_exists"
+            ],
+            "properties": {
+              "is_key_exists": {
+                "$ref": "#/components/schemas/HttpServer_is_key_exists_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_key_options"
+            ],
+            "properties": {
+              "get_key_options": {
+                "$ref": "#/components/schemas/HttpServer_get_key_options_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_key_1"
+            ],
+            "properties": {
+              "get_key_1": {
+                "$ref": "#/components/schemas/HttpServer_get_key_1_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_key_2"
+            ],
+            "properties": {
+              "get_key_2": {
+                "$ref": "#/components/schemas/HttpServer_get_key_2_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_key_3"
+            ],
+            "properties": {
+              "get_key_3": {
+                "$ref": "#/components/schemas/HttpServer_get_key_3_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_key_4"
+            ],
+            "properties": {
+              "get_key_4": {
+                "$ref": "#/components/schemas/HttpServer_get_key_4_In"
+              }
+            }
           }
         ]
       },
@@ -491,6 +1023,164 @@
                 "$ref": "#/components/schemas/HttpServer_get_user_info_Result"
               }
             }
+          },
+          {
+            "type": "object",
+            "required": [
+              "query_user_info"
+            ],
+            "properties": {
+              "query_user_info": {
+                "$ref": "#/components/schemas/HttpServer_query_user_info_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "post_user_info"
+            ],
+            "properties": {
+              "post_user_info": {
+                "$ref": "#/components/schemas/HttpServer_post_user_info_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "put_key_value"
+            ],
+            "properties": {
+              "put_key_value": {
+                "$ref": "#/components/schemas/HttpServer_put_key_value_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "delete_key"
+            ],
+            "properties": {
+              "delete_key": {
+                "$ref": "#/components/schemas/HttpServer_delete_key_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "patch_key"
+            ],
+            "properties": {
+              "patch_key": {
+                "$ref": "#/components/schemas/HttpServer_patch_key_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "is_key_exists"
+            ],
+            "properties": {
+              "is_key_exists": {
+                "$ref": "#/components/schemas/HttpServer_is_key_exists_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_key_options"
+            ],
+            "properties": {
+              "get_key_options": {
+                "$ref": "#/components/schemas/HttpServer_get_key_options_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_key_1"
+            ],
+            "properties": {
+              "get_key_1": {
+                "$ref": "#/components/schemas/HttpServer_get_key_1_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_key_2"
+            ],
+            "properties": {
+              "get_key_2": {
+                "$ref": "#/components/schemas/HttpServer_get_key_2_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_key_3"
+            ],
+            "properties": {
+              "get_key_3": {
+                "$ref": "#/components/schemas/HttpServer_get_key_3_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_key_4"
+            ],
+            "properties": {
+              "get_key_4": {
+                "$ref": "#/components/schemas/HttpServer_get_key_4_Result"
+              }
+            }
+          }
+        ]
+      },
+      "HttpServer_delete_key_In": {
+        "type": "object",
+        "required": [
+          "key"
+        ],
+        "properties": {
+          "key": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpServer_delete_key_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "HttpServer_delete_key_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpServer_delete_key_Out"
+              }
+            }
           }
         ]
       },
@@ -570,6 +1260,191 @@
           }
         ]
       },
+      "HttpServer_get_key_1_In": {
+        "type": "object",
+        "required": [
+          "key"
+        ],
+        "properties": {
+          "key": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpServer_get_key_1_Out": {
+        "type": "object",
+        "required": [
+          "value"
+        ],
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpServer_get_key_1_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpServer_get_key_1_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpServer_get_key_2_In": {
+        "type": "object",
+        "required": [
+          "key"
+        ],
+        "properties": {
+          "key": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpServer_get_key_2_Out": {
+        "type": "object",
+        "required": [
+          "value"
+        ],
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpServer_get_key_2_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpServer_get_key_2_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpServer_get_key_3_In": {
+        "type": "object",
+        "required": [
+          "key"
+        ],
+        "properties": {
+          "key": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpServer_get_key_3_Out": {
+        "type": "object",
+        "required": [
+          "value"
+        ],
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpServer_get_key_3_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpServer_get_key_3_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpServer_get_key_4_In": {
+        "type": "object",
+        "required": [
+          "key"
+        ],
+        "properties": {
+          "key": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpServer_get_key_4_Out": {
+        "type": "object",
+        "required": [
+          "value"
+        ],
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpServer_get_key_4_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpServer_get_key_4_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpServer_get_key_options_In": {
+        "type": "object",
+        "required": [
+          "key"
+        ],
+        "properties": {
+          "key": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpServer_get_key_options_Out": {
+        "type": "object",
+        "required": [
+          "exists"
+        ],
+        "properties": {
+          "exists": {
+            "type": "boolean"
+          }
+        }
+      },
+      "HttpServer_get_key_options_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpServer_get_key_options_Out"
+              }
+            }
+          }
+        ]
+      },
       "HttpServer_get_server_name_In": {
         "type": "object",
         "required": [
@@ -641,6 +1516,213 @@
             "properties": {
               "result": {
                 "$ref": "#/components/schemas/HttpServer_get_user_info_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpServer_is_key_exists_In": {
+        "type": "object",
+        "required": [
+          "key_alias"
+        ],
+        "properties": {
+          "key_alias": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpServer_is_key_exists_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "HttpServer_is_key_exists_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpServer_is_key_exists_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpServer_patch_key_In": {
+        "type": "object",
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpServer_patch_key_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "HttpServer_patch_key_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpServer_patch_key_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpServer_post_user_info_In": {
+        "type": "object",
+        "required": [
+          "id",
+          "info"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "info": {
+            "$ref": "#/components/schemas/UserInfo"
+          }
+        }
+      },
+      "HttpServer_post_user_info_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "HttpServer_post_user_info_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpServer_post_user_info_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpServer_put_key_value_In": {
+        "type": "object",
+        "required": [
+          "key",
+          "value",
+          "ttl"
+        ],
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "ttl": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpServer_put_key_value_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "HttpServer_put_key_value_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpServer_put_key_value_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpServer_query_user_info_In": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          }
+        }
+      },
+      "HttpServer_query_user_info_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "$ref": "#/components/schemas/UserInfo"
+          }
+        }
+      },
+      "HttpServer_query_user_info_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpServer_query_user_info_Out"
               }
             }
           }

@@ -28,16 +28,16 @@ impl CityHttpStreamApi for CityHttpStreamService {
         Ok(xidl_rust_axum::stream::boxed_sse(stream))
     }
 
-    async fn maintenance_mode(
+    async fn get_attribute_maintenance_mode(
         &self,
         _req: xidl_rust_axum::Request<()>,
     ) -> Result<bool, xidl_rust_axum::Error> {
         Ok(false)
     }
 
-    async fn set_maintenance_mode(
+    async fn set_attribute_maintenance_mode(
         &self,
-        _req: xidl_rust_axum::Request<CityHttpStreamApiSetMaintenanceModeRequest>,
+        _req: xidl_rust_axum::Request<CityHttpStreamApiSetAttributeMaintenanceModeRequest>,
     ) -> Result<(), xidl_rust_axum::Error> {
         Ok(())
     }

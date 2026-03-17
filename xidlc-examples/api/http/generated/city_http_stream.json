@@ -5,72 +5,6 @@
     "version": "0.1.0"
   },
   "paths": {
-    "/CityHttpStreamApi/maintenance_mode": {
-      "get": {
-        "operationId": "CityHttpStreamApi.maintenance_mode",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "boolean"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "http_basic": []
-          }
-        ]
-      }
-    },
-    "/CityHttpStreamApi/set_maintenance_mode": {
-      "post": {
-        "operationId": "CityHttpStreamApi.set_maintenance_mode",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "boolean"
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": "OK"
-          },
-          "500": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "http_basic": []
-          }
-        ]
-      }
-    },
     "/alerts/{district}": {
       "get": {
         "operationId": "CityHttpStreamApi.alerts",
@@ -171,6 +105,70 @@
         "security": [
           {
             "http_bearer": []
+          }
+        ]
+      }
+    },
+    "/attribute/maintenance_mode": {
+      "get": {
+        "operationId": "CityHttpStreamApi.maintenance_mode",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "http_basic": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "CityHttpStreamApi.set_maintenance_mode",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "http_basic": []
           }
         ]
       }

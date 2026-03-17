@@ -2,8 +2,8 @@ use crate::error::{IdlcError, IdlcResult};
 use crate::generate::rust::util::{rust_ident, rust_passthrough_attrs_from_annotations};
 use crate::generate::rust_axum::{RustAxumRenderOutput, RustAxumRenderer};
 use crate::generate::utils::{
-    HttpStreamCodec, HttpStreamKind, HttpStreamTargetSupport, http_stream_config,
-    validate_http_stream_method, validate_http_stream_target,
+    DeprecatedInfo, HttpStreamCodec, HttpStreamKind, HttpStreamTargetSupport, deprecated_info,
+    http_stream_config, validate_http_stream_method, validate_http_stream_target,
 };
 use convert_case::{Case, Casing};
 use serde::Serialize;
@@ -42,6 +42,10 @@ struct MethodContext {
     name: String,
     raw_name: String,
     rust_attrs: Vec<String>,
+    deprecated: bool,
+    deprecated_since: Option<String>,
+    deprecated_after: Option<String>,
+    deprecated_note: Option<String>,
     params: Vec<String>,
     param_names: Vec<String>,
     ret: String,
@@ -98,6 +102,13 @@ struct RouteTemplate {
     path: String,
     path_params: HashSet<String>,
     query_params: HashSet<String>,
+}
+
+struct DeprecatedContext {
+    deprecated: bool,
+    since: Option<String>,
+    after: Option<String>,
+    note: Option<String>,
 }
 
 pub fn render_interface_with_path(
@@ -203,6 +214,7 @@ fn render_op(
     let is_server_stream = matches!(stream.kind, Some(HttpStreamKind::Server));
     let is_client_stream = matches!(stream.kind, Some(HttpStreamKind::Client));
     let is_bidi_stream = matches!(stream.kind, Some(HttpStreamKind::Bidi));
+    let deprecated = deprecated_context(interface_annotations, &op.annotations)?;
     let ret = match &op.ty {
         hir::OpTypeSpec::Void => "()".to_string(),
         hir::OpTypeSpec::TypeSpec(ty) => axum_type(ty),
@@ -496,6 +508,10 @@ fn render_op(
         name: method_name,
         raw_name: op.ident.clone(),
         rust_attrs: rust_passthrough_attrs_from_annotations(&op.annotations),
+        deprecated: deprecated.deprecated,
+        deprecated_since: deprecated.since,
+        deprecated_after: deprecated.after,
+        deprecated_note: deprecated.note,
         params: param_list,
         param_names,
         ret,
@@ -544,7 +560,7 @@ fn render_op(
 
 fn render_attr(
     attr: &hir::AttrDcl,
-    _interface_annotations: &[hir::Annotation],
+    interface_annotations: &[hir::Annotation],
     interface_name: &str,
     module_path: &[String],
 ) -> Vec<MethodContext> {
@@ -554,18 +570,25 @@ fn render_attr(
     );
     let emit_watch = has_annotation(&attr.annotations, "server_stream");
     let rust_attrs = rust_passthrough_attrs_from_annotations(&attr.annotations);
+    let deprecated = deprecated_context(interface_annotations, &attr.annotations)
+        .unwrap_or_else(|err| panic!("{err}"));
     match &attr.decl {
         hir::AttrDclInner::ReadonlyAttrSpec(spec) => readonly_attr_names(spec)
             .into_iter()
             .flat_map(|names| {
                 let ret = attr_return_type(&spec.ty);
                 let raw = names.raw.clone();
-                let path = default_path(module_path, interface_name, &raw);
+                let getter_name = format!("get_attribute_{raw}");
+                let path = attribute_path(&raw);
                 let request_struct = None;
                 let mut methods = vec![MethodContext {
-                    name: names.rust.clone(),
+                    name: rust_ident(&getter_name),
                     raw_name: raw.clone(),
                     rust_attrs: rust_attrs.clone(),
+                    deprecated: deprecated.deprecated,
+                    deprecated_since: deprecated.since.clone(),
+                    deprecated_after: deprecated.after.clone(),
+                    deprecated_note: deprecated.note.clone(),
                     params: Vec::new(),
                     param_names: Vec::new(),
                     ret: ret.clone(),
@@ -603,6 +626,10 @@ fn render_attr(
                         name: rust_ident(&raw_watch),
                         raw_name: raw_watch.clone(),
                         rust_attrs: rust_attrs.clone(),
+                        deprecated: deprecated.deprecated,
+                        deprecated_since: deprecated.since.clone(),
+                        deprecated_after: deprecated.after.clone(),
+                        deprecated_note: deprecated.note.clone(),
                         params: Vec::new(),
                         param_names: Vec::new(),
                         ret: ret.clone(),
@@ -642,15 +669,19 @@ fn render_attr(
             match &spec.declarator {
                 hir::AttrDeclarator::SimpleDeclarator(list) => {
                     for decl in list {
-                        let name = rust_ident(&decl.0);
                         let raw_name = decl.0.clone();
+                        let getter_name = format!("get_attribute_{raw_name}");
                         let ret = attr_return_type(&spec.ty);
-                        let path = default_path(module_path, interface_name, &raw_name);
+                        let path = attribute_path(&raw_name);
                         let request_struct = None;
                         out.push(MethodContext {
-                            name: name.clone(),
+                            name: rust_ident(&getter_name),
                             raw_name: raw_name.clone(),
                             rust_attrs: rust_attrs.clone(),
+                            deprecated: deprecated.deprecated,
+                            deprecated_since: deprecated.since.clone(),
+                            deprecated_after: deprecated.after.clone(),
+                            deprecated_note: deprecated.note.clone(),
                             params: Vec::new(),
                             param_names: Vec::new(),
                             ret: ret.clone(),
@@ -681,18 +712,19 @@ fn render_attr(
                             request_content_type: "application/json".to_string(),
                             response_content_type: "application/json".to_string(),
                         });
-                        let raw_setter = format!("set_{raw_name}");
+                        let raw_setter = format!("set_attribute_{raw_name}");
                         let setter = rust_ident(&raw_setter);
                         let param = render_param_type(&spec.ty, None, false);
-                        let setter_path = default_path(module_path, interface_name, &raw_setter);
+                        let setter_path = attribute_path(&raw_name);
                         let request_struct = Some(format!(
                             "{}Request",
                             method_struct_prefix(interface_name, &raw_setter)
                         ));
+                        let param_name = rust_ident(&raw_name);
                         let request_param = ParamContext {
-                            name: "value".to_string(),
-                            raw_name: "value".to_string(),
-                            wire_name: "value".to_string(),
+                            name: param_name.clone(),
+                            raw_name: raw_name.clone(),
+                            wire_name: raw_name.clone(),
                             path_template_name: String::new(),
                             ty: param.clone(),
                             source: param_source_code(ParamSource::Body),
@@ -712,8 +744,12 @@ fn render_attr(
                             name: setter.clone(),
                             raw_name: raw_setter.clone(),
                             rust_attrs: rust_attrs.clone(),
-                            params: vec![format!("value: {param}")],
-                            param_names: vec!["value".to_string()],
+                            deprecated: deprecated.deprecated,
+                            deprecated_since: deprecated.since.clone(),
+                            deprecated_after: deprecated.after.clone(),
+                            deprecated_note: deprecated.note.clone(),
+                            params: vec![format!("{param_name}: {param}")],
+                            param_names: vec![param_name],
                             ret: "()".to_string(),
                             response_ty: "()".to_string(),
                             http_method: http_method_code(HttpMethod::Post),
@@ -749,6 +785,10 @@ fn render_attr(
                                 name: rust_ident(&raw_watch),
                                 raw_name: raw_watch.clone(),
                                 rust_attrs: rust_attrs.clone(),
+                                deprecated: deprecated.deprecated,
+                                deprecated_since: deprecated.since.clone(),
+                                deprecated_after: deprecated.after.clone(),
+                                deprecated_note: deprecated.note.clone(),
                                 params: Vec::new(),
                                 param_names: Vec::new(),
                                 ret: ret.clone(),
@@ -783,16 +823,20 @@ fn render_attr(
                     }
                 }
                 hir::AttrDeclarator::WithRaises { declarator, .. } => {
-                    let name = rust_ident(&declarator.0);
                     let raw_name = declarator.0.clone();
+                    let getter_name = format!("get_attribute_{raw_name}");
                     let ret = attr_return_type(&spec.ty);
-                    let path = default_path(module_path, interface_name, &raw_name);
+                    let path = attribute_path(&raw_name);
                     let param = render_param_type(&spec.ty, None, false);
                     let request_struct = None;
                     out.push(MethodContext {
-                        name: name.clone(),
+                        name: rust_ident(&getter_name),
                         raw_name: raw_name.clone(),
                         rust_attrs: rust_attrs.clone(),
+                        deprecated: deprecated.deprecated,
+                        deprecated_since: deprecated.since.clone(),
+                        deprecated_after: deprecated.after.clone(),
+                        deprecated_note: deprecated.note.clone(),
                         params: Vec::new(),
                         param_names: Vec::new(),
                         ret: ret.clone(),
@@ -823,17 +867,18 @@ fn render_attr(
                         request_content_type: "application/json".to_string(),
                         response_content_type: "application/json".to_string(),
                     });
-                    let raw_setter = format!("set_{raw_name}");
+                    let raw_setter = format!("set_attribute_{raw_name}");
                     let setter = rust_ident(&raw_setter);
-                    let setter_path = default_path(module_path, interface_name, &raw_setter);
+                    let setter_path = attribute_path(&raw_name);
                     let request_struct = Some(format!(
                         "{}Request",
                         method_struct_prefix(interface_name, &raw_setter)
                     ));
+                    let param_name = rust_ident(&raw_name);
                     let request_param = ParamContext {
-                        name: "value".to_string(),
-                        raw_name: "value".to_string(),
-                        wire_name: "value".to_string(),
+                        name: param_name.clone(),
+                        raw_name: raw_name.clone(),
+                        wire_name: raw_name.clone(),
                         path_template_name: String::new(),
                         ty: param.clone(),
                         source: param_source_code(ParamSource::Body),
@@ -853,8 +898,12 @@ fn render_attr(
                         name: setter.clone(),
                         raw_name: raw_setter.clone(),
                         rust_attrs: rust_attrs.clone(),
-                        params: vec![format!("value: {param}")],
-                        param_names: vec!["value".to_string()],
+                        deprecated: deprecated.deprecated,
+                        deprecated_since: deprecated.since.clone(),
+                        deprecated_after: deprecated.after.clone(),
+                        deprecated_note: deprecated.note.clone(),
+                        params: vec![format!("{param_name}: {param}")],
+                        param_names: vec![param_name],
                         ret: "()".to_string(),
                         response_ty: "()".to_string(),
                         http_method: http_method_code(HttpMethod::Post),
@@ -890,6 +939,10 @@ fn render_attr(
                             name: rust_ident(&raw_watch),
                             raw_name: raw_watch.clone(),
                             rust_attrs: rust_attrs.clone(),
+                            deprecated: deprecated.deprecated,
+                            deprecated_since: deprecated.since.clone(),
+                            deprecated_after: deprecated.after.clone(),
+                            deprecated_note: deprecated.note.clone(),
                             params: Vec::new(),
                             param_names: Vec::new(),
                             ret: ret.clone(),
@@ -930,14 +983,12 @@ fn render_attr(
 
 struct AttrNames {
     raw: String,
-    rust: String,
 }
 
 fn readonly_attr_names(spec: &hir::ReadonlyAttrSpec) -> Vec<AttrNames> {
     match &spec.declarator {
         hir::ReadonlyAttrDeclarator::SimpleDeclarator(decl) => vec![AttrNames {
             raw: decl.0.clone(),
-            rust: rust_ident(&decl.0),
         }],
         hir::ReadonlyAttrDeclarator::RaisesExpr(_) => Vec::new(),
     }
@@ -945,6 +996,43 @@ fn readonly_attr_names(spec: &hir::ReadonlyAttrSpec) -> Vec<AttrNames> {
 
 fn attr_return_type(ty: &hir::TypeSpec) -> String {
     axum_type(ty)
+}
+
+fn effective_deprecated(
+    interface_annotations: &[hir::Annotation],
+    method_annotations: &[hir::Annotation],
+) -> Result<Option<DeprecatedInfo>, String> {
+    if let Some(info) = deprecated_info(method_annotations)? {
+        return Ok(Some(info));
+    }
+    deprecated_info(interface_annotations)
+}
+
+fn deprecated_context(
+    interface_annotations: &[hir::Annotation],
+    method_annotations: &[hir::Annotation],
+) -> IdlcResult<DeprecatedContext> {
+    let info = effective_deprecated(interface_annotations, method_annotations)
+        .map_err(|err| IdlcError::rpc(err))?;
+    let deprecated = info.as_ref().map(|value| value.deprecated).unwrap_or(false);
+    let since = info.as_ref().and_then(|value| value.since.clone());
+    let after = info.as_ref().and_then(|value| value.after.clone());
+    let note = info.as_ref().map(|value| {
+        let mut note = String::from("Deprecated.");
+        if let Some(since) = &value.since {
+            note.push_str(&format!(" Since {since}."));
+        }
+        if let Some(after) = &value.after {
+            note.push_str(&format!(" After {after}."));
+        }
+        note
+    });
+    Ok(DeprecatedContext {
+        deprecated,
+        since,
+        after,
+        note,
+    })
 }
 
 fn render_param_type(
@@ -1061,6 +1149,10 @@ fn default_path(module_path: &[String], interface_name: &str, method_name: &str)
     parts.push(interface_name.to_string());
     parts.push(method_name.to_string());
     format!("/{}", parts.join("/"))
+}
+
+fn attribute_path(attr_name: &str) -> String {
+    format!("/attribute/{attr_name}")
 }
 
 fn route_from_annotations(

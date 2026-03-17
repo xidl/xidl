@@ -5,7 +5,7 @@
     "version": "v2.0.0"
   },
   "paths": {
-    "/SmartCityHttpApi/api_version": {
+    "/attribute/api_version": {
       "get": {
         "operationId": "SmartCityHttpApi.api_version",
         "responses": {
@@ -37,7 +37,7 @@
         ]
       }
     },
-    "/SmartCityHttpApi/maintenance_mode": {
+    "/attribute/maintenance_mode": {
       "get": {
         "operationId": "SmartCityHttpApi.maintenance_mode",
         "responses": {
@@ -67,9 +67,7 @@
             "http_bearer": []
           }
         ]
-      }
-    },
-    "/SmartCityHttpApi/set_maintenance_mode": {
+      },
       "post": {
         "operationId": "SmartCityHttpApi.set_maintenance_mode",
         "requestBody": {

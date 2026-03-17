@@ -324,6 +324,7 @@ impl OpenApiContext {
                 summary,
                 description,
                 deprecated,
+                deprecated_info,
                 security_requirements,
                 security,
                 response_content_type,
@@ -332,6 +333,7 @@ impl OpenApiContext {
                 register_security_schemes(&mut self.security_schemes, security_requirements);
             }
 
+            let description = apply_deprecation_note(description, deprecated_info.as_ref());
             for path in paths {
                 let key = format!("{} {path}", openapi_method_name(&http_method));
                 if let Some(previous) = route_bindings.insert(key.clone(), operation_id.clone()) {
@@ -436,6 +438,7 @@ struct MethodInfo {
     summary: Option<String>,
     description: Option<String>,
     deprecated: bool,
+    deprecated_info: Option<DeprecatedInfo>,
     security_requirements: Option<Vec<HttpSecurityRequirement>>,
     security: Option<Vec<SecurityRequirement>>,
     response_content_type: String,
@@ -714,8 +717,10 @@ fn render_op(
     } else {
         effective_media_type(interface_annotations, &op.annotations, "Produces")
     };
-    let deprecated = effective_deprecated(interface_annotations, &op.annotations)
-        .unwrap_or_else(|err| panic!("{err}"))
+    let deprecated_info = effective_deprecated(interface_annotations, &op.annotations)
+        .unwrap_or_else(|err| panic!("{err}"));
+    let deprecated = deprecated_info
+        .as_ref()
         .map(|value| value.deprecated)
         .unwrap_or(false);
     let security_requirements = effective_security(interface_annotations, &op.annotations)
@@ -756,6 +761,7 @@ fn render_op(
         summary: doc_summary(&op.annotations),
         description: doc_text(&op.annotations),
         deprecated,
+        deprecated_info,
         security_requirements,
         security,
         response_content_type,
@@ -776,8 +782,10 @@ fn render_attr(
     let emit_watch = has_annotation(&attr.annotations, "server_stream");
     let summary = doc_summary(&attr.annotations);
     let description = doc_text(&attr.annotations);
-    let deprecated = effective_deprecated(interface_annotations, &attr.annotations)
-        .unwrap_or_else(|err| panic!("{err}"))
+    let deprecated_info = effective_deprecated(interface_annotations, &attr.annotations)
+        .unwrap_or_else(|err| panic!("{err}"));
+    let deprecated = deprecated_info
+        .as_ref()
         .map(|value| value.deprecated)
         .unwrap_or(false);
     let security_requirements = effective_security(interface_annotations, &attr.annotations)
@@ -800,7 +808,7 @@ fn render_attr(
             .flat_map(|raw_name| {
                 let mut methods = vec![MethodInfo {
                     http_method: method_to_openapi(HttpMethod::Get),
-                    paths: vec![default_path(module_path, interface_name, &raw_name)],
+                    paths: vec![attribute_path(&raw_name)],
                     operation_id: operation_id(module_path, interface_name, &raw_name),
                     parameters: Vec::new(),
                     request_body: None,
@@ -811,6 +819,7 @@ fn render_attr(
                     summary: summary.clone(),
                     description: description.clone(),
                     deprecated,
+                    deprecated_info: deprecated_info.clone(),
                     security_requirements: security_requirements.clone(),
                     security: security.clone(),
                     response_content_type: "application/json".to_string(),
@@ -830,6 +839,7 @@ fn render_attr(
                         summary: summary.clone(),
                         description: description.clone(),
                         deprecated,
+                        deprecated_info: deprecated_info.clone(),
                         security_requirements: security_requirements.clone(),
                         security: security.clone(),
                         response_content_type: "text/event-stream".to_string(),
@@ -846,7 +856,7 @@ fn render_attr(
                         let raw_name = decl.0.clone();
                         out.push(MethodInfo {
                             http_method: method_to_openapi(HttpMethod::Get),
-                            paths: vec![default_path(module_path, interface_name, &raw_name)],
+                            paths: vec![attribute_path(&raw_name)],
                             operation_id: operation_id(module_path, interface_name, &raw_name),
                             parameters: Vec::new(),
                             request_body: None,
@@ -857,6 +867,7 @@ fn render_attr(
                             summary: summary.clone(),
                             description: description.clone(),
                             deprecated,
+                            deprecated_info: deprecated_info.clone(),
                             security_requirements: security_requirements.clone(),
                             security: security.clone(),
                             response_content_type: "application/json".to_string(),
@@ -866,7 +877,7 @@ fn render_attr(
                         let required = vec!["value".to_string()];
                         out.push(MethodInfo {
                             http_method: method_to_openapi(HttpMethod::Post),
-                            paths: vec![default_path(module_path, interface_name, &raw_setter)],
+                            paths: vec![attribute_path(&raw_name)],
                             operation_id: operation_id(module_path, interface_name, &raw_setter),
                             parameters: Vec::new(),
                             request_body: body_schema(props, required, "application/json"),
@@ -877,6 +888,7 @@ fn render_attr(
                             summary: summary.clone(),
                             description: description.clone(),
                             deprecated,
+                            deprecated_info: deprecated_info.clone(),
                             security_requirements: security_requirements.clone(),
                             security: security.clone(),
                             response_content_type: "application/json".to_string(),
@@ -896,6 +908,7 @@ fn render_attr(
                                 summary: summary.clone(),
                                 description: description.clone(),
                                 deprecated,
+                                deprecated_info: deprecated_info.clone(),
                                 security_requirements: security_requirements.clone(),
                                 security: security.clone(),
                                 response_content_type: "text/event-stream".to_string(),
@@ -907,7 +920,7 @@ fn render_attr(
                     let raw_name = declarator.0.clone();
                     out.push(MethodInfo {
                         http_method: method_to_openapi(HttpMethod::Get),
-                        paths: vec![default_path(module_path, interface_name, &raw_name)],
+                        paths: vec![attribute_path(&raw_name)],
                         operation_id: operation_id(module_path, interface_name, &raw_name),
                         parameters: Vec::new(),
                         request_body: None,
@@ -918,6 +931,7 @@ fn render_attr(
                         summary: summary.clone(),
                         description: description.clone(),
                         deprecated,
+                        deprecated_info: deprecated_info.clone(),
                         security_requirements: security_requirements.clone(),
                         security: security.clone(),
                         response_content_type: "application/json".to_string(),
@@ -927,7 +941,7 @@ fn render_attr(
                     let required = vec!["value".to_string()];
                     out.push(MethodInfo {
                         http_method: method_to_openapi(HttpMethod::Post),
-                        paths: vec![default_path(module_path, interface_name, &raw_setter)],
+                        paths: vec![attribute_path(&raw_name)],
                         operation_id: operation_id(module_path, interface_name, &raw_setter),
                         parameters: Vec::new(),
                         request_body: body_schema(props, required, "application/json"),
@@ -938,6 +952,7 @@ fn render_attr(
                         summary: summary.clone(),
                         description: description.clone(),
                         deprecated,
+                        deprecated_info: deprecated_info.clone(),
                         security_requirements: security_requirements.clone(),
                         security: security.clone(),
                         response_content_type: "application/json".to_string(),
@@ -957,6 +972,7 @@ fn render_attr(
                             summary: summary.clone(),
                             description: description.clone(),
                             deprecated,
+                            deprecated_info: deprecated_info.clone(),
                             security_requirements: security_requirements.clone(),
                             security: security.clone(),
                             response_content_type: "text/event-stream".to_string(),
@@ -1177,6 +1193,32 @@ fn doc_text(annotations: &[hir::Annotation]) -> Option<String> {
 fn doc_summary(annotations: &[hir::Annotation]) -> Option<String> {
     let lines = doc_lines_from_annotations(annotations);
     lines.first().cloned()
+}
+
+fn apply_deprecation_note(
+    description: Option<String>,
+    deprecated: Option<&DeprecatedInfo>,
+) -> Option<String> {
+    if description.is_some() {
+        return description;
+    }
+    let Some(info) = deprecated else {
+        return description;
+    };
+    let mut note = String::from("Deprecated.");
+    match (&info.since, &info.after) {
+        (Some(since), Some(after)) => {
+            note.push_str(&format!(" Since {since}. After {after}."));
+        }
+        (Some(since), None) => {
+            note.push_str(&format!(" Since {since}."));
+        }
+        (None, Some(after)) => {
+            note.push_str(&format!(" After {after}."));
+        }
+        (None, None) => {}
+    }
+    Some(note)
 }
 
 fn effective_deprecated(
@@ -1703,6 +1745,10 @@ fn default_path(module_path: &[String], interface_name: &str, method_name: &str)
     parts.push(interface_name.to_string());
     parts.push(method_name.to_string());
     format!("/{}", parts.join("/"))
+}
+
+fn attribute_path(attr_name: &str) -> String {
+    format!("/attribute/{attr_name}")
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
