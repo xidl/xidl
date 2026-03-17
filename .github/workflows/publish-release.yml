@@ -48,10 +48,10 @@ jobs:
           targets: ${{ matrix.platform.target }}
 
       - name: Install cross
-        if: matrix.platform.use_cross
-        uses: taiki-e/install-action@v2
+        uses: baptiste0928/cargo-install@v3
         with:
-          tool: cross
+          crate: cross
+          git: https://github.com/cross-rs/cross
 
       - name: Build xidlc (cross)
         if: matrix.platform.use_cross
