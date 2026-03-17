@@ -2,8 +2,9 @@ use crate::error::{IdlcError, IdlcResult};
 use crate::generate::rust::util::{rust_ident, rust_passthrough_attrs_from_annotations};
 use crate::generate::rust_axum::{RustAxumRenderOutput, RustAxumRenderer};
 use crate::generate::utils::{
-    DeprecatedInfo, HttpStreamCodec, HttpStreamKind, HttpStreamTargetSupport, deprecated_info,
-    http_stream_config, validate_http_stream_method, validate_http_stream_target,
+    DeprecatedInfo, HttpSecurityRequirement, HttpStreamCodec, HttpStreamKind,
+    HttpStreamTargetSupport, deprecated_info, effective_security, http_stream_config,
+    validate_http_stream_method, validate_http_stream_target,
 };
 use convert_case::{Case, Casing};
 use serde::Serialize;
@@ -62,10 +63,18 @@ struct MethodContext {
     cookie_params: Vec<ParamContext>,
     body_params: Vec<ParamContext>,
     request_ty: String,
+    request_payload_ty: String,
     request_struct: Option<String>,
+    auth_wrapper_struct: Option<String>,
+    auth_in_request_struct: bool,
+    has_basic_auth: bool,
+    basic_auth_realm: String,
     request_params: Vec<ParamContext>,
     response_struct: Option<String>,
     response_params: Vec<ParamContext>,
+    response_body_params: Vec<ParamContext>,
+    response_header_params: Vec<ParamContext>,
+    response_cookie_params: Vec<ParamContext>,
     response_include_return: bool,
     response_is_empty: bool,
     return_is_unit: bool,
@@ -220,6 +229,15 @@ fn render_op(
         hir::OpTypeSpec::TypeSpec(ty) => axum_type(ty),
     };
     let return_is_unit = matches!(&op.ty, hir::OpTypeSpec::Void);
+    let security =
+        effective_security(interface_annotations, &op.annotations).map_err(IdlcError::rpc)?;
+    let has_basic_auth = security
+        .as_ref()
+        .map(|reqs| {
+            reqs.iter()
+                .any(|req| matches!(req, HttpSecurityRequirement::HttpBasic))
+        })
+        .unwrap_or(false);
     let params = op
         .parameter
         .as_ref()
@@ -234,6 +252,9 @@ fn render_op(
     let mut body_params = Vec::new();
     let mut request_params = Vec::new();
     let mut response_params = Vec::new();
+    let mut response_body_params = Vec::new();
+    let mut response_header_params = Vec::new();
+    let mut response_cookie_params = Vec::new();
 
     let default_method = if is_server_stream || is_bidi_stream {
         HttpMethod::Get
@@ -316,26 +337,45 @@ fn render_op(
         let name = rust_ident(&param.declarator.0);
         let direction = param_direction(param.attr.as_ref());
         if matches!(direction, ParamDirection::Out | ParamDirection::InOut) {
-            response_params.push(ParamContext {
+            let binding = explicit_param_binding(param)?;
+            let (response_source, response_wire_name) = match binding {
+                Some(binding)
+                    if matches!(binding.source, ParamSource::Header | ParamSource::Cookie) =>
+                {
+                    (binding.source, binding.bound_name)
+                }
+                _ => (ParamSource::Body, param.declarator.0.clone()),
+            };
+            let response_ctx = ParamContext {
                 name: name.clone(),
                 raw_name: param.declarator.0.clone(),
-                wire_name: param.declarator.0.clone(),
+                wire_name: response_wire_name,
                 path_template_name: String::new(),
                 ty: inner_ty.clone(),
-                source: String::new(),
+                source: param_source_code(response_source),
                 serde_rename: field_rename(&param.annotations, &name)
                     .or_else(|| serde_rename(&param.declarator.0, &name)),
-                header_is_multi: false,
-                header_item_ty: inner_ty.clone(),
-                header_item_is_string: false,
-                header_item_is_primitive: false,
-                cookie_is_multi: false,
-                cookie_item_ty: inner_ty.clone(),
-                cookie_item_is_string: false,
-                cookie_item_is_primitive: false,
+                header_is_multi: header_is_multi(&param.ty),
+                header_item_ty: header_item_ty(&param.ty),
+                header_item_is_string: header_item_is_string(&param.ty),
+                header_item_is_primitive: header_item_is_primitive(&param.ty),
+                cookie_is_multi: cookie_is_multi(&param.ty),
+                cookie_item_ty: cookie_item_ty(&param.ty),
+                cookie_item_is_string: cookie_item_is_string(&param.ty),
+                cookie_item_is_primitive: cookie_item_is_primitive(&param.ty),
                 optional: false,
                 inner_ty: inner_ty.clone(),
-            });
+            };
+            if matches!(response_source, ParamSource::Header) {
+                response_header_params.push(response_ctx.clone());
+            }
+            if matches!(response_source, ParamSource::Cookie) {
+                response_cookie_params.push(response_ctx.clone());
+            }
+            if matches!(response_source, ParamSource::Body) {
+                response_body_params.push(response_ctx.clone());
+            }
+            response_params.push(response_ctx);
         }
         if matches!(direction, ParamDirection::Out) {
             continue;
@@ -454,7 +494,16 @@ fn render_op(
     }
 
     let method_name = rust_ident(&op.ident);
-    let request_struct = if request_params.is_empty() {
+    let auth_in_request_struct = has_basic_auth && !(is_client_stream || is_bidi_stream);
+    let auth_wrapper_struct = if has_basic_auth && (is_client_stream || is_bidi_stream) {
+        Some(format!(
+            "{}AuthRequest",
+            method_struct_prefix(interface_name, &op.ident)
+        ))
+    } else {
+        None
+    };
+    let mut request_struct = if request_params.is_empty() {
         None
     } else {
         Some(format!(
@@ -462,6 +511,12 @@ fn render_op(
             method_struct_prefix(interface_name, &op.ident)
         ))
     };
+    if auth_in_request_struct && request_struct.is_none() {
+        request_struct = Some(format!(
+            "{}Request",
+            method_struct_prefix(interface_name, &op.ident)
+        ));
+    }
     let request_ty = request_struct.clone().unwrap_or_else(|| "()".to_string());
     if is_client_stream && (!path_params.is_empty() || !query_params.is_empty()) {
         return Err(IdlcError::rpc(format!(
@@ -484,10 +539,11 @@ fn render_op(
         param_list.clear();
         param_names.clear();
     }
-    let response_output_count = usize::from(!return_is_unit) + response_params.len();
-    let response_is_empty = response_output_count == 0;
+    let response_value_count = usize::from(!return_is_unit) + response_params.len();
+    let response_body_count = usize::from(!return_is_unit) + response_body_params.len();
+    let response_is_empty = response_body_count == 0;
     let response_include_return = !return_is_unit;
-    let response_struct = if response_output_count > 1 {
+    let response_struct = if response_value_count > 1 {
         Some(format!(
             "{}Response",
             method_struct_prefix(interface_name, &op.ident)
@@ -503,6 +559,32 @@ fn render_op(
         param.ty.clone()
     } else {
         "()".to_string()
+    };
+    let request_item_ty = request_ty.clone();
+    let request_payload_ty = if is_client_stream {
+        if let Some(wrapper) = &auth_wrapper_struct {
+            wrapper.clone()
+        } else {
+            format!("xidl_rust_axum::stream::NdjsonStream<{}>", request_item_ty)
+        }
+    } else if is_bidi_stream {
+        if let Some(wrapper) = &auth_wrapper_struct {
+            wrapper.clone()
+        } else {
+            format!(
+                "xidl_rust_axum::stream::BidiServerStream<{}, {}>",
+                request_item_ty, response_ty
+            )
+        }
+    } else {
+        request_ty.clone()
+    };
+    let basic_auth_realm = if has_basic_auth {
+        find_basic_realm(&op.annotations)
+            .or_else(|| find_basic_realm(interface_annotations))
+            .unwrap_or_else(|| method_name.clone())
+    } else {
+        String::new()
     };
     Ok(MethodContext {
         name: method_name,
@@ -528,17 +610,25 @@ fn render_op(
         cookie_params,
         body_params,
         request_ty: request_ty.clone(),
+        request_payload_ty,
         request_struct,
+        auth_wrapper_struct,
+        auth_in_request_struct,
+        has_basic_auth,
+        basic_auth_realm,
         request_params,
         response_struct,
         response_params,
+        response_body_params,
+        response_header_params,
+        response_cookie_params,
         response_include_return,
         response_is_empty,
         return_is_unit,
         is_server_stream,
         is_client_stream,
         is_bidi_stream,
-        request_item_ty: request_ty,
+        request_item_ty,
         request_content_type: crate::generate::utils::effective_media_type(
             interface_annotations,
             &op.annotations,
@@ -568,6 +658,20 @@ fn render_attr(
         &format!("attribute in interface '{interface_name}'"),
         &attr.annotations,
     );
+    let security = effective_security(interface_annotations, &attr.annotations)
+        .unwrap_or_else(|err| panic!("{err}"));
+    let has_basic_auth = security
+        .as_ref()
+        .map(|reqs| {
+            reqs.iter()
+                .any(|req| matches!(req, HttpSecurityRequirement::HttpBasic))
+        })
+        .unwrap_or(false);
+    let realm_hint = if has_basic_auth {
+        find_basic_realm(&attr.annotations).or_else(|| find_basic_realm(interface_annotations))
+    } else {
+        None
+    };
     let emit_watch = has_annotation(&attr.annotations, "server_stream");
     let rust_attrs = rust_passthrough_attrs_from_annotations(&attr.annotations);
     let deprecated = deprecated_context(interface_annotations, &attr.annotations)
@@ -580,9 +684,23 @@ fn render_attr(
                 let raw = names.raw.clone();
                 let getter_name = format!("get_attribute_{raw}");
                 let path = attribute_path(&raw);
-                let request_struct = None;
+                let request_struct = if has_basic_auth {
+                    Some(format!(
+                        "{}Request",
+                        method_struct_prefix(interface_name, &raw)
+                    ))
+                } else {
+                    None
+                };
+                let request_ty = request_struct.clone().unwrap_or_else(|| "()".to_string());
+                let method_name = rust_ident(&getter_name);
+                let basic_auth_realm = if has_basic_auth {
+                    realm_hint.clone().unwrap_or_else(|| method_name.clone())
+                } else {
+                    String::new()
+                };
                 let mut methods = vec![MethodContext {
-                    name: rust_ident(&getter_name),
+                    name: method_name,
                     raw_name: raw.clone(),
                     rust_attrs: rust_attrs.clone(),
                     deprecated: deprecated.deprecated,
@@ -604,11 +722,19 @@ fn render_attr(
                     header_params: Vec::new(),
                     cookie_params: Vec::new(),
                     body_params: Vec::new(),
-                    request_ty: "()".to_string(),
+                    request_ty: request_ty.clone(),
+                    request_payload_ty: request_ty.clone(),
                     request_struct,
+                    auth_wrapper_struct: None,
+                    auth_in_request_struct: has_basic_auth,
+                    has_basic_auth,
+                    basic_auth_realm,
                     request_params: Vec::new(),
                     response_struct: None,
                     response_params: Vec::new(),
+                    response_body_params: Vec::new(),
+                    response_header_params: Vec::new(),
+                    response_cookie_params: Vec::new(),
                     response_include_return: true,
                     response_is_empty: false,
                     return_is_unit: false,
@@ -622,8 +748,23 @@ fn render_attr(
                 if emit_watch {
                     let raw_watch = format!("watch_attribute_{raw}");
                     let watch_path = default_path(module_path, interface_name, &raw_watch);
+                    let request_struct = if has_basic_auth {
+                        Some(format!(
+                            "{}Request",
+                            method_struct_prefix(interface_name, &raw_watch)
+                        ))
+                    } else {
+                        None
+                    };
+                    let request_ty = request_struct.clone().unwrap_or_else(|| "()".to_string());
+                    let method_name = rust_ident(&raw_watch);
+                    let basic_auth_realm = if has_basic_auth {
+                        realm_hint.clone().unwrap_or_else(|| method_name.clone())
+                    } else {
+                        String::new()
+                    };
                     methods.push(MethodContext {
-                        name: rust_ident(&raw_watch),
+                        name: method_name,
                         raw_name: raw_watch.clone(),
                         rust_attrs: rust_attrs.clone(),
                         deprecated: deprecated.deprecated,
@@ -645,11 +786,19 @@ fn render_attr(
                         header_params: Vec::new(),
                         cookie_params: Vec::new(),
                         body_params: Vec::new(),
-                        request_ty: "()".to_string(),
-                        request_struct: None,
+                        request_ty: request_ty.clone(),
+                        request_payload_ty: request_ty,
+                        request_struct,
+                        auth_wrapper_struct: None,
+                        auth_in_request_struct: has_basic_auth,
+                        has_basic_auth,
+                        basic_auth_realm,
                         request_params: Vec::new(),
                         response_struct: None,
                         response_params: Vec::new(),
+                        response_body_params: Vec::new(),
+                        response_header_params: Vec::new(),
+                        response_cookie_params: Vec::new(),
                         response_include_return: true,
                         response_is_empty: false,
                         return_is_unit: false,
@@ -673,9 +822,23 @@ fn render_attr(
                         let getter_name = format!("get_attribute_{raw_name}");
                         let ret = attr_return_type(&spec.ty);
                         let path = attribute_path(&raw_name);
-                        let request_struct = None;
+                        let request_struct = if has_basic_auth {
+                            Some(format!(
+                                "{}Request",
+                                method_struct_prefix(interface_name, &raw_name)
+                            ))
+                        } else {
+                            None
+                        };
+                        let request_ty = request_struct.clone().unwrap_or_else(|| "()".to_string());
+                        let method_name = rust_ident(&getter_name);
+                        let basic_auth_realm = if has_basic_auth {
+                            realm_hint.clone().unwrap_or_else(|| method_name.clone())
+                        } else {
+                            String::new()
+                        };
                         out.push(MethodContext {
-                            name: rust_ident(&getter_name),
+                            name: method_name,
                             raw_name: raw_name.clone(),
                             rust_attrs: rust_attrs.clone(),
                             deprecated: deprecated.deprecated,
@@ -697,11 +860,19 @@ fn render_attr(
                             header_params: Vec::new(),
                             cookie_params: Vec::new(),
                             body_params: Vec::new(),
-                            request_ty: "()".to_string(),
+                            request_ty: request_ty.clone(),
+                            request_payload_ty: request_ty,
                             request_struct,
+                            auth_wrapper_struct: None,
+                            auth_in_request_struct: has_basic_auth,
+                            has_basic_auth,
+                            basic_auth_realm,
                             request_params: Vec::new(),
                             response_struct: None,
                             response_params: Vec::new(),
+                            response_body_params: Vec::new(),
+                            response_header_params: Vec::new(),
+                            response_cookie_params: Vec::new(),
                             response_include_return: true,
                             response_is_empty: false,
                             return_is_unit: false,
@@ -721,6 +892,11 @@ fn render_attr(
                             method_struct_prefix(interface_name, &raw_setter)
                         ));
                         let param_name = rust_ident(&raw_name);
+                        let basic_auth_realm = if has_basic_auth {
+                            realm_hint.clone().unwrap_or_else(|| setter.clone())
+                        } else {
+                            String::new()
+                        };
                         let request_param = ParamContext {
                             name: param_name.clone(),
                             raw_name: raw_name.clone(),
@@ -764,10 +940,20 @@ fn render_attr(
                             cookie_params: Vec::new(),
                             body_params: vec![request_param.clone()],
                             request_ty: request_struct.clone().unwrap_or_else(|| "()".to_string()),
+                            request_payload_ty: request_struct
+                                .clone()
+                                .unwrap_or_else(|| "()".to_string()),
                             request_struct,
+                            auth_wrapper_struct: None,
+                            auth_in_request_struct: has_basic_auth,
+                            has_basic_auth,
+                            basic_auth_realm,
                             request_params: vec![request_param],
                             response_struct: None,
                             response_params: Vec::new(),
+                            response_body_params: Vec::new(),
+                            response_header_params: Vec::new(),
+                            response_cookie_params: Vec::new(),
                             response_include_return: false,
                             response_is_empty: true,
                             return_is_unit: true,
@@ -781,8 +967,24 @@ fn render_attr(
                         if emit_watch {
                             let raw_watch = format!("watch_attribute_{raw_name}");
                             let watch_path = default_path(module_path, interface_name, &raw_watch);
+                            let request_struct = if has_basic_auth {
+                                Some(format!(
+                                    "{}Request",
+                                    method_struct_prefix(interface_name, &raw_watch)
+                                ))
+                            } else {
+                                None
+                            };
+                            let request_ty =
+                                request_struct.clone().unwrap_or_else(|| "()".to_string());
+                            let method_name = rust_ident(&raw_watch);
+                            let basic_auth_realm = if has_basic_auth {
+                                realm_hint.clone().unwrap_or_else(|| method_name.clone())
+                            } else {
+                                String::new()
+                            };
                             out.push(MethodContext {
-                                name: rust_ident(&raw_watch),
+                                name: method_name,
                                 raw_name: raw_watch.clone(),
                                 rust_attrs: rust_attrs.clone(),
                                 deprecated: deprecated.deprecated,
@@ -804,11 +1006,19 @@ fn render_attr(
                                 header_params: Vec::new(),
                                 cookie_params: Vec::new(),
                                 body_params: Vec::new(),
-                                request_ty: "()".to_string(),
-                                request_struct: None,
+                                request_ty: request_ty.clone(),
+                                request_payload_ty: request_ty,
+                                request_struct,
+                                auth_wrapper_struct: None,
+                                auth_in_request_struct: has_basic_auth,
+                                has_basic_auth,
+                                basic_auth_realm,
                                 request_params: Vec::new(),
                                 response_struct: None,
                                 response_params: Vec::new(),
+                                response_body_params: Vec::new(),
+                                response_header_params: Vec::new(),
+                                response_cookie_params: Vec::new(),
                                 response_include_return: true,
                                 response_is_empty: false,
                                 return_is_unit: false,
@@ -828,9 +1038,23 @@ fn render_attr(
                     let ret = attr_return_type(&spec.ty);
                     let path = attribute_path(&raw_name);
                     let param = render_param_type(&spec.ty, None, false);
-                    let request_struct = None;
+                    let request_struct = if has_basic_auth {
+                        Some(format!(
+                            "{}Request",
+                            method_struct_prefix(interface_name, &raw_name)
+                        ))
+                    } else {
+                        None
+                    };
+                    let request_ty = request_struct.clone().unwrap_or_else(|| "()".to_string());
+                    let method_name = rust_ident(&getter_name);
+                    let basic_auth_realm = if has_basic_auth {
+                        realm_hint.clone().unwrap_or_else(|| method_name.clone())
+                    } else {
+                        String::new()
+                    };
                     out.push(MethodContext {
-                        name: rust_ident(&getter_name),
+                        name: method_name,
                         raw_name: raw_name.clone(),
                         rust_attrs: rust_attrs.clone(),
                         deprecated: deprecated.deprecated,
@@ -852,11 +1076,19 @@ fn render_attr(
                         header_params: Vec::new(),
                         cookie_params: Vec::new(),
                         body_params: Vec::new(),
-                        request_ty: "()".to_string(),
+                        request_ty: request_ty.clone(),
+                        request_payload_ty: request_ty,
                         request_struct,
+                        auth_wrapper_struct: None,
+                        auth_in_request_struct: has_basic_auth,
+                        has_basic_auth,
+                        basic_auth_realm,
                         request_params: Vec::new(),
                         response_struct: None,
                         response_params: Vec::new(),
+                        response_body_params: Vec::new(),
+                        response_header_params: Vec::new(),
+                        response_cookie_params: Vec::new(),
                         response_include_return: true,
                         response_is_empty: false,
                         return_is_unit: false,
@@ -875,6 +1107,11 @@ fn render_attr(
                         method_struct_prefix(interface_name, &raw_setter)
                     ));
                     let param_name = rust_ident(&raw_name);
+                    let basic_auth_realm = if has_basic_auth {
+                        realm_hint.clone().unwrap_or_else(|| setter.clone())
+                    } else {
+                        String::new()
+                    };
                     let request_param = ParamContext {
                         name: param_name.clone(),
                         raw_name: raw_name.clone(),
@@ -918,10 +1155,20 @@ fn render_attr(
                         cookie_params: Vec::new(),
                         body_params: vec![request_param.clone()],
                         request_ty: request_struct.clone().unwrap_or_else(|| "()".to_string()),
+                        request_payload_ty: request_struct
+                            .clone()
+                            .unwrap_or_else(|| "()".to_string()),
                         request_struct,
+                        auth_wrapper_struct: None,
+                        auth_in_request_struct: has_basic_auth,
+                        has_basic_auth,
+                        basic_auth_realm,
                         request_params: vec![request_param],
                         response_struct: None,
                         response_params: Vec::new(),
+                        response_body_params: Vec::new(),
+                        response_header_params: Vec::new(),
+                        response_cookie_params: Vec::new(),
                         response_include_return: false,
                         response_is_empty: true,
                         return_is_unit: true,
@@ -935,8 +1182,23 @@ fn render_attr(
                     if emit_watch {
                         let raw_watch = format!("watch_attribute_{raw_name}");
                         let watch_path = default_path(module_path, interface_name, &raw_watch);
+                        let request_struct = if has_basic_auth {
+                            Some(format!(
+                                "{}Request",
+                                method_struct_prefix(interface_name, &raw_watch)
+                            ))
+                        } else {
+                            None
+                        };
+                        let request_ty = request_struct.clone().unwrap_or_else(|| "()".to_string());
+                        let method_name = rust_ident(&raw_watch);
+                        let basic_auth_realm = if has_basic_auth {
+                            realm_hint.clone().unwrap_or_else(|| method_name.clone())
+                        } else {
+                            String::new()
+                        };
                         out.push(MethodContext {
-                            name: rust_ident(&raw_watch),
+                            name: method_name,
                             raw_name: raw_watch.clone(),
                             rust_attrs: rust_attrs.clone(),
                             deprecated: deprecated.deprecated,
@@ -958,11 +1220,19 @@ fn render_attr(
                             header_params: Vec::new(),
                             cookie_params: Vec::new(),
                             body_params: Vec::new(),
-                            request_ty: "()".to_string(),
-                            request_struct: None,
+                            request_ty: request_ty.clone(),
+                            request_payload_ty: request_ty,
+                            request_struct,
+                            auth_wrapper_struct: None,
+                            auth_in_request_struct: has_basic_auth,
+                            has_basic_auth,
+                            basic_auth_realm,
                             request_params: Vec::new(),
                             response_struct: None,
                             response_params: Vec::new(),
+                            response_body_params: Vec::new(),
+                            response_header_params: Vec::new(),
+                            response_cookie_params: Vec::new(),
                             response_include_return: true,
                             response_is_empty: false,
                             return_is_unit: false,
@@ -1033,6 +1303,34 @@ fn deprecated_context(
         after,
         note,
     })
+}
+
+fn find_basic_realm(annotations: &[hir::Annotation]) -> Option<String> {
+    for annotation in annotations {
+        let Some(name) = annotation_name(annotation) else {
+            continue;
+        };
+        if !name.eq_ignore_ascii_case("http_basic") {
+            continue;
+        }
+        let params = annotation_params(annotation)?;
+        let params = normalize_params(params);
+        if let Some(value) = params
+            .get("realm")
+            .cloned()
+            .filter(|value| !value.is_empty())
+        {
+            return Some(value);
+        }
+        if let Some(value) = params
+            .get("relm")
+            .cloned()
+            .filter(|value| !value.is_empty())
+        {
+            return Some(value);
+        }
+    }
+    None
 }
 
 fn render_param_type(

@@ -55,6 +55,15 @@ interface HttpServer {
     @get(path = "/v1/database/deprecated/4/{key}")
     @deprecated(since = "2025-01-01", after = "2025-01-02")
     void get_key_4(string key, out string value);
+
+    @http_basic
+    void login(
+        @cookie out string session_id
+    );
+
+    boolean is_logined(
+        @cookie string session_id
+    );
 };
 
 @derive(Debug, Default, Clone, Serialize, Deserialize)

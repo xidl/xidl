@@ -13,6 +13,8 @@ pub use request::Request;
 pub mod http;
 pub mod stream;
 
+pub mod auth;
+
 pub use axum;
 pub use futures_util;
 pub use reqwest;

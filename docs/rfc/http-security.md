@@ -75,6 +75,9 @@ Semantics:
 
 - request authentication uses the HTTP `Authorization` header
 - credential format is `Basic <base64(user:password)>`
+- unauthorized responses include `WWW-Authenticate: Basic realm="<realm>"`
+- `realm` MAY be supplied via `@http_basic(realm = "...")`; if omitted, the
+  handler function name is used
 
 ### 4.2 HTTP Bearer
 

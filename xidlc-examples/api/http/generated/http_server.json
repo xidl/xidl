@@ -127,6 +127,43 @@
         }
       }
     },
+    "/is_logined": {
+      "post": {
+        "operationId": "HttpServer.is_logined",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/legacy/user/{id}": {
       "get": {
         "summary": "Get user info",
@@ -166,6 +203,38 @@
             }
           }
         }
+      }
+    },
+    "/login": {
+      "post": {
+        "operationId": "HttpServer.login",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "http_basic": []
+          }
+        ]
       }
     },
     "/set_server_name": {
@@ -912,6 +981,28 @@
                 "$ref": "#/components/schemas/HttpServer_get_key_4_In"
               }
             }
+          },
+          {
+            "type": "object",
+            "required": [
+              "login"
+            ],
+            "properties": {
+              "login": {
+                "$ref": "#/components/schemas/HttpServer_login_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "is_logined"
+            ],
+            "properties": {
+              "is_logined": {
+                "$ref": "#/components/schemas/HttpServer_is_logined_In"
+              }
+            }
           }
         ]
       },
@@ -1142,6 +1233,28 @@
             "properties": {
               "get_key_4": {
                 "$ref": "#/components/schemas/HttpServer_get_key_4_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "login"
+            ],
+            "properties": {
+              "login": {
+                "$ref": "#/components/schemas/HttpServer_login_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "is_logined"
+            ],
+            "properties": {
+              "is_logined": {
+                "$ref": "#/components/schemas/HttpServer_is_logined_Result"
               }
             }
           }
@@ -1558,6 +1671,80 @@
           }
         ]
       },
+      "HttpServer_is_logined_In": {
+        "type": "object",
+        "required": [
+          "session_id"
+        ],
+        "properties": {
+          "session_id": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpServer_is_logined_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "boolean"
+          }
+        }
+      },
+      "HttpServer_is_logined_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpServer_is_logined_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpServer_login_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "HttpServer_login_Out": {
+        "type": "object",
+        "required": [
+          "session_id"
+        ],
+        "properties": {
+          "session_id": {
+            "type": "string"
+          }
+        }
+      },
+      "HttpServer_login_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpServer_login_Out"
+              }
+            }
+          }
+        ]
+      },
       "HttpServer_patch_key_In": {
         "type": "object",
         "required": [
@@ -1816,6 +2003,12 @@
             "type": "string"
           }
         }
+      }
+    },
+    "securitySchemes": {
+      "http_basic": {
+        "type": "http",
+        "scheme": "basic"
       }
     }
   }

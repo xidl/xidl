@@ -30,7 +30,7 @@ impl CityHttpStreamApi for CityHttpStreamService {
 
     async fn get_attribute_maintenance_mode(
         &self,
-        _req: xidl_rust_axum::Request<()>,
+        _req: xidl_rust_axum::Request<CityHttpStreamApiMaintenanceModeRequest>,
     ) -> Result<bool, xidl_rust_axum::Error> {
         Ok(false)
     }
@@ -63,13 +63,10 @@ impl CityHttpStreamApi for CityHttpStreamService {
 
     async fn chat(
         &self,
-        req: xidl_rust_axum::Request<
-            xidl_rust_axum::stream::BidiServerStream<
-                CityHttpStreamApiChatRequest,
-                CityHttpStreamApiChatResponse,
-            >,
-        >,
+        req: xidl_rust_axum::Request<CityHttpStreamApiChatAuthRequest>,
     ) -> Result<(), xidl_rust_axum::Error> {
+        let req = req.into_inner();
+        let _auth = req.xidl_auth;
         let mut stream = req.data;
         while let Some(item) = stream.read().await {
             let item = item?;

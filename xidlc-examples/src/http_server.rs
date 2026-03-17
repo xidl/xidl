@@ -195,4 +195,33 @@ impl HttpServer for SimpleHttpServer {
         })
         .await
     }
+
+    async fn login(
+        &self,
+        req: xidl_rust_axum::Request<HttpServerLoginRequest>,
+    ) -> Result<String, xidl_rust_axum::Error> {
+        let auth = req.into_inner().xidl_auth;
+        println!("login: {:?}", auth);
+        match auth.password {
+            None => {
+                return Err(xidl_rust_axum::Error::unauthorized());
+            }
+            Some(pass) if pass.is_empty() => {
+                return Err(xidl_rust_axum::Error::unauthorized());
+            }
+            _ => {}
+        }
+
+        Ok("simple_session_id".to_string())
+    }
+
+    async fn is_logined(
+        &self,
+        req: xidl_rust_axum::Request<HttpServerIsLoginedRequest>,
+    ) -> Result<bool, xidl_rust_axum::Error> {
+        let req = req.into_inner();
+
+        println!("is_logined: {}", req.session_id);
+        Ok(!req.session_id.is_empty())
+    }
 }
