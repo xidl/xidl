@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.26.0](https://github.com/xidl/xidl/compare/v0.25.0...v0.26.0) (2026-03-17)
+
+
+### Features
+
+* **axu,:** impl basic-auth ([43ecad3](https://github.com/xidl/xidl/commit/43ecad3abf01d594fc0a51a9f2aec0779522c029))
+* **axum:** update attribute generate ([1961984](https://github.com/xidl/xidl/commit/1961984053cb454378057d50fab5358ece270081))
+
 ## [0.25.0](https://github.com/xidl/xidl/compare/v0.24.0...v0.25.0) (2026-03-16)
 
 
