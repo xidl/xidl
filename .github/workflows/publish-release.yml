@@ -70,7 +70,7 @@ jobs:
           fi
           tar -czf dist/xidlc-${{ matrix.platform.target }}.tar.gz -C target/${{ matrix.platform.target }}/release ${BIN_NAME}
       - name: Upload cli artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: xidlc-${{ matrix.platform.target }}
           path: dist/*.tar.gz
