@@ -145,9 +145,18 @@ T:HttpEdgeCasesService+Send+Sync+'static,
             trace,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.health(req).await?;
-        let _ = resp;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT))
+        let mut resp = match svc.health(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    let _ = resp_value;
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT)
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
     async fn get_user(
@@ -175,8 +184,17 @@ T:HttpEdgeCasesService+Send+Sync+'static,
             locale,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.get_user(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.get_user(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
     async fn get_item(
@@ -200,8 +218,17 @@ T:HttpEdgeCasesService+Send+Sync+'static,
             item_id,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.get_item(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.get_item(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
     async fn lookup(
@@ -225,8 +252,17 @@ T:HttpEdgeCasesService+Send+Sync+'static,
             page_size,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.lookup(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.lookup(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 }
 

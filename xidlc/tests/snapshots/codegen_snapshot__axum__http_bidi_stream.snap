@@ -74,16 +74,22 @@ T:HttpBidiStreamService+Send+Sync+'static,
 
         let req_headers = headers.clone();
         let svc = svc.clone();
-        return Ok(ws.on_upgrade(move|socket|async move{
+        let mut resp = ws.on_upgrade(move|socket|async move{
             let bidi = xidl_rust_axum::stream::open_bidi_server::<HttpBidiStreamServiceChatRequest,HttpBidiStreamServiceChatResponse>(socket);
             let error_sender = bidi.error_sender();
-            let req = ::xidl_rust_axum::Request::new(req_headers,bidi);
+            let req = ::xidl_rust_axum::Request::new(
+            req_headers,
+
+            bidi
+
+            );
             if let Err(err) = svc.chat(req).await{
                 if let Some(tx) = error_sender{
                     let _ = tx.send(Err(err)).await;
                 }
             }
-        }));
+        });
+        return Ok(resp);
     }
 }
 

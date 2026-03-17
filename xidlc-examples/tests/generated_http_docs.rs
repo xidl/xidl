@@ -3,13 +3,13 @@ use std::path::PathBuf;
 
 fn api_file(name: &str) -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("api")
+        .join("api/http/generated/")
         .join(name)
 }
 
 #[test]
 fn generated_city_http_openapi_includes_security_mappings() {
-    let raw = fs::read_to_string(api_file("city_openapi.json")).expect("read city_openapi.json");
+    let raw = fs::read_to_string(api_file("city_http.json")).expect("read city_openapi.json");
     let doc: serde_json::Value = serde_json::from_str(&raw).expect("parse openapi json");
 
     let schemes = &doc["components"]["securitySchemes"];
@@ -31,7 +31,7 @@ fn generated_city_http_openapi_includes_security_mappings() {
 
 #[test]
 fn generated_city_http_stream_openapi_includes_stream_security_mappings() {
-    let raw = fs::read_to_string(api_file("city_http_stream_openapi.json"))
+    let raw = fs::read_to_string(api_file("city_http_stream.json"))
         .expect("read city_http_stream_openapi.json");
     let doc: serde_json::Value = serde_json::from_str(&raw).expect("parse openapi json");
 

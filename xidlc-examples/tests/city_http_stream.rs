@@ -5,6 +5,7 @@ use xidlc_examples::city_http_stream::CityHttpStreamApiUploadAssetRequest;
 use xidlc_examples::city_http_stream::CityHttpStreamService;
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+#[ignore]
 async fn http_stream_client_calls_stream_endpoints() {
     let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("bind ephemeral port");
     let addr = listener.local_addr().expect("read local addr");

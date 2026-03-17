@@ -11,13 +11,13 @@ pub trait HttpStreamSseService{
     &self,
     req:xidl_rust_axum::Request<HttpStreamSseServiceWatchTopicRequest>
     )->Result<xidl_rust_axum::stream::SseStream<String>,xidl_rust_axum::Error>;
-    async fn online(
+    async fn get_attribute_online(
     &self,
     req:xidl_rust_axum::Request<()>
     )->Result<bool,xidl_rust_axum::Error>;
-    async fn set_online(
+    async fn set_attribute_online(
     &self,
-    req:xidl_rust_axum::Request<HttpStreamSseServiceSetOnlineRequest>
+    req:xidl_rust_axum::Request<HttpStreamSseServiceSetAttributeOnlineRequest>
     )->Result<(),xidl_rust_axum::Error>;
     async fn watch_attribute_online(
     &self,
@@ -43,10 +43,10 @@ pub struct HttpStreamSseServiceWatchTopicRequest{
     pub lang:String,
 }
 
-type HttpStreamSseServiceSetOnlineBody = bool;
+type HttpStreamSseServiceSetAttributeOnlineBody = bool;
 #[derive(::serde::Serialize,::serde::Deserialize)]
-pub struct HttpStreamSseServiceSetOnlineRequest{
-    pub value:bool,
+pub struct HttpStreamSseServiceSetAttributeOnlineRequest{
+    pub online:bool,
 }
 
 pub struct HttpStreamSseServiceServer<T>{
@@ -74,9 +74,9 @@ T:HttpStreamSseService+Send+Sync+'static,
 
         .route("/events/{topic}",xidl_rust_axum::axum::routing::get(Self::watch_topic))
 
-        .route("/HttpStreamSseService/online",xidl_rust_axum::axum::routing::get(Self::online))
+        .route("/attribute/online",xidl_rust_axum::axum::routing::get(Self::get_attribute_online))
 
-        .route("/HttpStreamSseService/set_online",xidl_rust_axum::axum::routing::post(Self::set_online))
+        .route("/attribute/online",xidl_rust_axum::axum::routing::post(Self::set_attribute_online))
 
         .route("/HttpStreamSseService/watch_attribute_online",xidl_rust_axum::axum::routing::get(Self::watch_attribute_online))
 
@@ -108,11 +108,20 @@ T:HttpStreamSseService+Send+Sync+'static,
             lang,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.watch_topic(req).await?;
-        Ok(xidl_rust_axum::stream::sse_response(resp))
+        let mut resp = match svc.watch_topic(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    xidl_rust_axum::stream::sse_response(resp_value)
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
-    async fn online(
+    async fn get_attribute_online(
     ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
     headers: ::xidl_rust_axum::axum::http::HeaderMap
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
@@ -122,27 +131,45 @@ T:HttpStreamSseService+Send+Sync+'static,
 
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.online(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.get_attribute_online(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
-    async fn set_online(
+    async fn set_attribute_online(
     ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
     headers: ::xidl_rust_axum::axum::http::HeaderMap,
-    xidl_rust_axum::axum::Json(body):xidl_rust_axum::axum::Json<HttpStreamSseServiceSetOnlineBody>
+    xidl_rust_axum::axum::Json(body):xidl_rust_axum::axum::Json<HttpStreamSseServiceSetAttributeOnlineBody>
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
         if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
 
-        let value = body;
-        let data = HttpStreamSseServiceSetOnlineRequest{
-            value,
+        let online = body;
+        let data = HttpStreamSseServiceSetAttributeOnlineRequest{
+            online,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.set_online(req).await?;
-        let _ = resp;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT))
+        let mut resp = match svc.set_attribute_online(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    let _ = resp_value;
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT)
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
     async fn watch_attribute_online(
@@ -155,8 +182,17 @@ T:HttpStreamSseService+Send+Sync+'static,
 
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.watch_attribute_online(req).await?;
-        Ok(xidl_rust_axum::stream::sse_response(resp))
+        let mut resp = match svc.watch_attribute_online(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    xidl_rust_axum::stream::sse_response(resp_value)
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 }
 
@@ -209,8 +245,8 @@ impl HttpStreamSseServiceClient{
         xidl_rust_axum::stream::open_sse::<String>(self.client.http(),req).await
     }
 
-    pub async fn online(&self)->Result<bool,xidl_rust_axum::Error>{
-        let path = "/HttpStreamSseService/online".to_string();
+    pub async fn get_attribute_online(&self)->Result<bool,xidl_rust_axum::Error>{
+        let path = "/attribute/online".to_string();
         let url = self.client.url(&path);
         let mut req = self
         .client
@@ -240,8 +276,8 @@ impl HttpStreamSseServiceClient{
         }
     }
 
-    pub async fn set_online(&self,value:bool)->Result<(),xidl_rust_axum::Error>{
-        let path = "/HttpStreamSseService/set_online".to_string();
+    pub async fn set_attribute_online(&self,online:bool)->Result<(),xidl_rust_axum::Error>{
+        let path = "/attribute/online".to_string();
         let url = self.client.url(&path);
         let mut req = self
         .client
@@ -254,7 +290,7 @@ impl HttpStreamSseServiceClient{
         xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
         .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
         );
-        let body = value;
+        let body = online;
         let body = xidl_rust_axum::serde_json::to_vec(&body)
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(

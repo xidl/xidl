@@ -187,8 +187,17 @@ T:HttpDefaultsService+Send+Sync+'static,
             name,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.get_name(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.get_name(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
     async fn list_orders(
@@ -219,8 +228,17 @@ T:HttpDefaultsService+Send+Sync+'static,
             size,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.list_orders(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.list_orders(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
     async fn create_user(
@@ -237,8 +255,17 @@ T:HttpDefaultsService+Send+Sync+'static,
             req,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.create_user(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.create_user(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
     async fn search_user(
@@ -262,8 +289,17 @@ T:HttpDefaultsService+Send+Sync+'static,
             age,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.search_user(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.search_user(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
     async fn get_user(
@@ -291,8 +327,17 @@ T:HttpDefaultsService+Send+Sync+'static,
             lang,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.get_user(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.get_user(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
     async fn get_user_alias(
@@ -320,8 +365,17 @@ T:HttpDefaultsService+Send+Sync+'static,
             locale,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.get_user_alias(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.get_user_alias(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 }
 

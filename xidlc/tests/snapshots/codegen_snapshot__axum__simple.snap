@@ -119,8 +119,17 @@ T:HttpService+Send+Sync+'static,
 
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.get_health(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.get_health(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
     async fn get_version(
@@ -133,8 +142,17 @@ T:HttpService+Send+Sync+'static,
 
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.get_version(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.get_version(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
     async fn get_memory_info(
@@ -147,8 +165,17 @@ T:HttpService+Send+Sync+'static,
 
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.get_memory_info(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.get_memory_info(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
     async fn restart(
@@ -161,9 +188,18 @@ T:HttpService+Send+Sync+'static,
 
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.restart(req).await?;
-        let _ = resp;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT))
+        let mut resp = match svc.restart(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    let _ = resp_value;
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT)
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
     async fn get_state(
@@ -176,8 +212,17 @@ T:HttpService+Send+Sync+'static,
 
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.get_state(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.get_state(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
     async fn get_udp_stats(
@@ -190,8 +235,17 @@ T:HttpService+Send+Sync+'static,
 
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.get_udp_stats(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.get_udp_stats(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
     async fn create_simple(
@@ -215,8 +269,17 @@ T:HttpService+Send+Sync+'static,
             remote_port,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.create_simple(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.create_simple(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
     async fn stop_simple(
@@ -237,9 +300,18 @@ T:HttpService+Send+Sync+'static,
             id,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.stop_simple(req).await?;
-        let _ = resp;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT))
+        let mut resp = match svc.stop_simple(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    let _ = resp_value;
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT)
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 }
 

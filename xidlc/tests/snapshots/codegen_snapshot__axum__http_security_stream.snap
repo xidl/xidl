@@ -75,8 +75,17 @@ T:HttpSecurityStreamService+Send+Sync+'static,
             channel,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.watch_channel(req).await?;
-        Ok(xidl_rust_axum::stream::sse_response(resp))
+        let mut resp = match svc.watch_channel(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    xidl_rust_axum::stream::sse_response(resp_value)
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
     async fn watch_public(
@@ -89,8 +98,17 @@ T:HttpSecurityStreamService+Send+Sync+'static,
 
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.watch_public(req).await?;
-        Ok(xidl_rust_axum::stream::sse_response(resp))
+        let mut resp = match svc.watch_public(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    xidl_rust_axum::stream::sse_response(resp_value)
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 }
 

@@ -27,3 +27,9 @@ clap = { version = "4", features = ["derive"] }
 [build-dependencies]
 glob = "0.3.3"
 xidl-build = { workspace = true }
+
+[dev-dependencies]
+anyhow = "1.0"
+minijinja = "2.16.0"
+regex = "1.12.3"
+reqwest = { version = "0.13.2" }

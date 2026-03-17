@@ -1,0 +1,42 @@
+### get_attribute
+GET {{ base_url }}/attribute/host
+Accept: application/json
+
+### set_attribute
+POST {{ base_url }}/attribute/host
+Accept: application/json
+Content-Type: application/json
+
+{
+    "host": "127.0.0.1"
+}
+
+### get user info
+GET {{ base_url }}/user/7523
+Accept: application/json
+
+### get user info legacy
+GET {{ base_url }}/legacy/user/7523
+Accept: application/json
+
+### query user info legacy
+GET {{ base_url }}/v2/user?id=7523
+Accept: application/json
+
+### put_key_value
+POST {{ base_url }}/v1/database/name/bob
+Accept: application/json
+
+### delete_key_value
+DELETE {{ base_url }}/v1/database/name
+Accept: application/json
+
+### login
+POST {{ base_url }}/login
+Accept: application/json
+Authorization: Basic aGVsbG86MTEx
+
+### is_logined
+POST {{ base_url }}/is_logined
+Accept: application/json
+Cookie: session_id=simple_session_id

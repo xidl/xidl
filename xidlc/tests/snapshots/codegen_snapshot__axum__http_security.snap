@@ -7,6 +7,8 @@ http_security.rs
 ===============
 #[async_trait::async_trait]
 pub trait HttpSecurityService{
+    #[deprecated(note = "Deprecated. Since 2026-03-13T00:00:00Z.")]
+
     async fn get_user(
     &self,
     req:xidl_rust_axum::Request<HttpSecurityServiceGetUserRequest>
@@ -15,6 +17,8 @@ pub trait HttpSecurityService{
     &self,
     req:xidl_rust_axum::Request<HttpSecurityServiceSearchUserRequest>
     )->Result<String,xidl_rust_axum::Error>;
+    #[deprecated(note = "Deprecated. Since 2026-03-13T00:00:00Z. After 2026-03-14T23:59:59Z.")]
+
     async fn health(
     &self,
     req:xidl_rust_axum::Request<()>
@@ -38,6 +42,7 @@ pub struct HttpSecurityServiceGetUserRequest{
     pub id:u32,
     pub locale:Option<String>,
     pub trace_id:String,
+    pub xidl_auth:xidl_rust_axum::auth::basic::BasicAuth,
 }
 
 #[derive(::serde::Serialize,::serde::Deserialize)]
@@ -98,6 +103,14 @@ T:HttpSecurityService+Send+Sync+'static,
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
 
+        let xidl_auth = match xidl_rust_axum::auth::basic::extract_basic_auth(&headers){
+            Ok(auth) => auth,
+            Err(_) => {
+                let resp = xidl_rust_axum::auth::basic::unauthorized_response("get_user");
+                return Ok(resp);
+            }
+
+        };
         let HttpSecurityServiceGetUserPath{
 
         id,
@@ -122,10 +135,30 @@ T:HttpSecurityService+Send+Sync+'static,
             id,
             locale,
             trace_id,
+            xidl_auth,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.get_user(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.get_user(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        resp.headers_mut().insert(
+        ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated"),
+        ::xidl_rust_axum::axum::http::HeaderValue::from_static("true"),
+        );
+        let value = ::xidl_rust_axum::axum::http::HeaderValue::from_str("2026-03-13T00:00:00Z")
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        resp.headers_mut().insert(
+        ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated-since"),
+        value,
+        );
+        Ok(resp)
     }
 
     async fn search_user(
@@ -149,8 +182,17 @@ T:HttpSecurityService+Send+Sync+'static,
             page,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.search_user(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.search_user(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
     async fn health(
@@ -163,8 +205,33 @@ T:HttpSecurityService+Send+Sync+'static,
 
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.health(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.health(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        resp.headers_mut().insert(
+        ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated"),
+        ::xidl_rust_axum::axum::http::HeaderValue::from_static("true"),
+        );
+        let value = ::xidl_rust_axum::axum::http::HeaderValue::from_str("2026-03-13T00:00:00Z")
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        resp.headers_mut().insert(
+        ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated-since"),
+        value,
+        );
+        let value = ::xidl_rust_axum::axum::http::HeaderValue::from_str("2026-03-14T23:59:59Z")
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        resp.headers_mut().insert(
+        ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated-from"),
+        value,
+        );
+        Ok(resp)
     }
 }
 

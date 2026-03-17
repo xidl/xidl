@@ -173,8 +173,17 @@ pub mod test{
                 prefs,
             };
             let req = ::xidl_rust_axum::Request::new(headers,data);
-            let resp = svc.get_user(req).await?;
-            Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+            let mut resp = match svc.get_user(req).await{
+                Ok(resp_value) => {
+                    let mut resp = {
+                        ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                    };
+                    resp
+                }
+                Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+            };
+            Ok(resp)
         }
 
         async fn create_user(
@@ -230,9 +239,18 @@ pub mod test{
                 name,
             };
             let req = ::xidl_rust_axum::Request::new(headers,data);
-            let resp = svc.create_user(req).await?;
-            let _ = resp;
-            Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT))
+            let mut resp = match svc.create_user(req).await{
+                Ok(resp_value) => {
+                    let mut resp = {
+                        let _ = resp_value;
+                        ::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT)
+                    };
+                    resp
+                }
+                Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+            };
+            Ok(resp)
         }
     }
 

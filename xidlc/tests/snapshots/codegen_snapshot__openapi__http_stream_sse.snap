@@ -275,7 +275,34 @@ openapi.json
   },
   "openapi": "3.2.0",
   "paths": {
-    "/HttpStreamSseService/online": {
+    "/HttpStreamSseService/watch_attribute_online": {
+      "get": {
+        "operationId": "HttpStreamSseService.watch_attribute_online",
+        "responses": {
+          "200": {
+            "content": {
+              "text/event-stream": {
+                "itemSchema": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        }
+      }
+    },
+    "/attribute/online": {
       "get": {
         "operationId": "HttpStreamSseService.online",
         "responses": {
@@ -300,9 +327,7 @@ openapi.json
             "description": "Error"
           }
         }
-      }
-    },
-    "/HttpStreamSseService/set_online": {
+      },
       "post": {
         "operationId": "HttpStreamSseService.set_online",
         "requestBody": {
@@ -316,33 +341,6 @@ openapi.json
         },
         "responses": {
           "204": {
-            "description": "OK"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        }
-      }
-    },
-    "/HttpStreamSseService/watch_attribute_online": {
-      "get": {
-        "operationId": "HttpStreamSseService.watch_attribute_online",
-        "responses": {
-          "200": {
-            "content": {
-              "text/event-stream": {
-                "itemSchema": {
-                  "type": "boolean"
-                }
-              }
-            },
             "description": "OK"
           },
           "500": {

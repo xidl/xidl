@@ -236,8 +236,17 @@ T:HttpAnnoService+Send+Sync+'static,
             lang,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.get_user(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.get_user(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
     async fn create_user(
@@ -261,8 +270,17 @@ T:HttpAnnoService+Send+Sync+'static,
             age,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.create_user(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.create_user(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
     async fn get_name(
@@ -283,8 +301,17 @@ T:HttpAnnoService+Send+Sync+'static,
             name,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.get_name(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.get_name(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
     async fn search_user(
@@ -308,8 +335,17 @@ T:HttpAnnoService+Send+Sync+'static,
             page,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.search_user(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.search_user(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
     async fn get_user_alias(
@@ -337,8 +373,17 @@ T:HttpAnnoService+Send+Sync+'static,
             locale,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.get_user_alias(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.get_user_alias(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
     async fn add(
@@ -362,8 +407,17 @@ T:HttpAnnoService+Send+Sync+'static,
             b,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.add(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.add(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
     async fn bump(
@@ -380,8 +434,17 @@ T:HttpAnnoService+Send+Sync+'static,
             value,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.bump(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.bump(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
     async fn get_count(
@@ -394,8 +457,17 @@ T:HttpAnnoService+Send+Sync+'static,
 
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.get_count(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.get_count(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
     async fn ping(
@@ -408,9 +480,18 @@ T:HttpAnnoService+Send+Sync+'static,
 
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.ping(req).await?;
-        let _ = resp;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT))
+        let mut resp = match svc.ping(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    let _ = resp_value;
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT)
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 }
 

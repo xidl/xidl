@@ -29,6 +29,7 @@ struct HttpSecurityInheritanceServiceGetReportPath{
 #[derive(::serde::Serialize,::serde::Deserialize)]
 pub struct HttpSecurityInheritanceServiceGetReportRequest{
     pub id:String,
+    pub xidl_auth:xidl_rust_axum::auth::basic::BasicAuth,
 }
 
 #[derive(::serde::Serialize,::serde::Deserialize)]
@@ -84,6 +85,14 @@ T:HttpSecurityInheritanceService+Send+Sync+'static,
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
 
+        let xidl_auth = match xidl_rust_axum::auth::basic::extract_basic_auth(&headers){
+            Ok(auth) => auth,
+            Err(_) => {
+                let resp = xidl_rust_axum::auth::basic::unauthorized_response("get_report");
+                return Ok(resp);
+            }
+
+        };
         let HttpSecurityInheritanceServiceGetReportPath{
 
         id,
@@ -91,10 +100,20 @@ T:HttpSecurityInheritanceService+Send+Sync+'static,
         } = path;
         let data = HttpSecurityInheritanceServiceGetReportRequest{
             id,
+            xidl_auth,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.get_report(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.get_report(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
     async fn update_report(
@@ -118,8 +137,17 @@ T:HttpSecurityInheritanceService+Send+Sync+'static,
             body,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.update_report(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.update_report(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 
     async fn health(
@@ -132,8 +160,17 @@ T:HttpSecurityInheritanceService+Send+Sync+'static,
 
         let data = ();
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.health(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.health(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 }
 

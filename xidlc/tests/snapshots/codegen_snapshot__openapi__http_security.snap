@@ -313,6 +313,7 @@ openapi.json
     "/health": {
       "post": {
         "deprecated": true,
+        "description": "Deprecated. Since 2026-03-13T00:00:00Z. After 2026-03-14T23:59:59Z.",
         "operationId": "HttpSecurityService.health",
         "responses": {
           "200": {
@@ -396,6 +397,7 @@ openapi.json
     "/users/{id}": {
       "get": {
         "deprecated": true,
+        "description": "Deprecated. Since 2026-03-13T00:00:00Z.",
         "operationId": "HttpSecurityService.get_user",
         "parameters": [
           {

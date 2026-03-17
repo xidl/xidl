@@ -271,7 +271,7 @@ openapi.json
   },
   "openapi": "3.1.0",
   "paths": {
-    "/HttpAttributeService/name": {
+    "/attribute/name": {
       "get": {
         "operationId": "HttpAttributeService.name",
         "responses": {
@@ -296,9 +296,7 @@ openapi.json
             "description": "Error"
           }
         }
-      }
-    },
-    "/HttpAttributeService/set_name": {
+      },
       "post": {
         "operationId": "HttpAttributeService.set_name",
         "requestBody": {
@@ -327,7 +325,7 @@ openapi.json
         }
       }
     },
-    "/HttpAttributeService/version": {
+    "/attribute/version": {
       "get": {
         "operationId": "HttpAttributeService.version",
         "responses": {

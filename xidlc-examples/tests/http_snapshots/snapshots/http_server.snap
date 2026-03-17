@@ -1,0 +1,99 @@
+### get_attribute
+> GET /attribute/host HTTP/1.1
+> User-Agent: xidlc-http-snapshot
+> Accept: application/json
+>
+< HTTP/1.1 200 OK
+< content-length: 11
+< content-type: application/json
+<
+"localhost"
+---
+### set_attribute
+> POST /attribute/host HTTP/1.1
+> User-Agent: xidlc-http-snapshot
+> Accept: application/json
+> Content-Type: application/json
+>
+{
+    "host": "127.0.0.1"
+}
+
+< HTTP/1.1 422 Unprocessable Entity
+< content-length: 113
+< content-type: text/plain; charset=utf-8
+<
+Failed to deserialize the JSON body into the target type: invalid type: map, expected a string at line 1 column 0
+---
+### get user info
+> GET /user/7523 HTTP/1.1
+> User-Agent: xidlc-http-snapshot
+> Accept: application/json
+>
+< HTTP/1.1 404 Not Found
+< content-length: 30
+< content-type: application/json
+<
+{"code":404,"msg":"Not Found"}
+---
+### get user info legacy
+> GET /legacy/user/7523 HTTP/1.1
+> User-Agent: xidlc-http-snapshot
+> Accept: application/json
+>
+< HTTP/1.1 404 Not Found
+< content-length: 30
+< content-type: application/json
+<
+{"code":404,"msg":"Not Found"}
+---
+### query user info legacy
+> GET /v2/user?id=7523 HTTP/1.1
+> User-Agent: xidlc-http-snapshot
+> Accept: application/json
+>
+< HTTP/1.1 404 Not Found
+< content-length: 30
+< content-type: application/json
+<
+{"code":404,"msg":"Not Found"}
+---
+### put_key_value
+> POST /v1/database/name/bob HTTP/1.1
+> User-Agent: xidlc-http-snapshot
+> Accept: application/json
+>
+< HTTP/1.1 405 Method Not Allowed
+< allow: PUT
+< content-length: 0
+<
+---
+### delete_key_value
+> DELETE /v1/database/name HTTP/1.1
+> User-Agent: xidlc-http-snapshot
+> Accept: application/json
+>
+< HTTP/1.1 204 No Content
+<
+---
+### login
+> POST /login HTTP/1.1
+> User-Agent: xidlc-http-snapshot
+> Accept: application/json
+> Authorization: Basic aGVsbG86MTEx
+>
+< HTTP/1.1 204 No Content
+< set-cookie: session_id=simple_session_id
+<
+---
+### is_logined
+> POST /is_logined HTTP/1.1
+> User-Agent: xidlc-http-snapshot
+> Accept: application/json
+> Cookie: session_id=simple_session_id
+>
+< HTTP/1.1 200 OK
+< content-length: 4
+< content-type: application/json
+<
+true

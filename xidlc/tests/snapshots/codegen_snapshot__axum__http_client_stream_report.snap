@@ -56,10 +56,20 @@ T:HttpClientStreamReportService+Send+Sync+'static,
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
 
-        let data = xidl_rust_axum::stream::decode_ndjson_body::<HttpClientStreamReportServiceUploadPartsRequest>(body);
+        let stream = xidl_rust_axum::stream::decode_ndjson_body::<HttpClientStreamReportServiceUploadPartsRequest>(body);
+        let data = stream;
         let req = ::xidl_rust_axum::Request::new(headers,data);
-        let resp = svc.upload_parts(req).await?;
-        Ok(::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp)))
+        let mut resp = match svc.upload_parts(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
     }
 }
 
