@@ -44,6 +44,20 @@ POST {{ base_url }}/login
 Accept: application/json
 Authorization: Basic aGVsbG86MTEx
 
+### nologin_bearer
+POST {{ base_url }}/login_bearer
+Accept: application/json
+
+### bearer empty
+POST {{ base_url }}/login_bearer
+Accept: application/json
+Authorization: Bearer
+
+### login_bearer
+POST {{ base_url }}/login_bearer
+Accept: application/json
+Authorization: Bearer test_token
+
 ### is_logined
 POST {{ base_url }}/is_logined
 Accept: application/json

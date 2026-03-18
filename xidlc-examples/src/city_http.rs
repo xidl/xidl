@@ -95,14 +95,14 @@ impl SmartCityHttpApi for SmartCityHttpService {
 
     async fn get_attribute_api_version(
         &self,
-        _req: xidl_rust_axum::Request<()>,
+        _req: xidl_rust_axum::Request<SmartCityHttpApiApiVersionRequest>,
     ) -> Result<String, xidl_rust_axum::Error> {
         Ok("v2.0.0".to_string())
     }
 
     async fn get_attribute_maintenance_mode(
         &self,
-        _req: xidl_rust_axum::Request<()>,
+        _req: xidl_rust_axum::Request<SmartCityHttpApiMaintenanceModeRequest>,
     ) -> Result<bool, xidl_rust_axum::Error> {
         Ok(false)
     }

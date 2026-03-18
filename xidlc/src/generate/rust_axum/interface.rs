@@ -68,6 +68,8 @@ struct MethodContext {
     auth_wrapper_struct: Option<String>,
     auth_in_request_struct: bool,
     has_basic_auth: bool,
+    has_bearer_auth: bool,
+    auth_ty: String,
     basic_auth_realm: String,
     request_params: Vec<ParamContext>,
     response_struct: Option<String>,
@@ -238,6 +240,27 @@ fn render_op(
                 .any(|req| matches!(req, HttpSecurityRequirement::HttpBasic))
         })
         .unwrap_or(false);
+    let has_bearer_auth = security
+        .as_ref()
+        .map(|reqs| {
+            reqs.iter()
+                .any(|req| matches!(req, HttpSecurityRequirement::HttpBearer))
+        })
+        .unwrap_or(false);
+    if has_basic_auth && has_bearer_auth {
+        return Err(IdlcError::rpc(format!(
+            "operation '{}' cannot combine @http_basic and @http_bearer",
+            op.ident
+        )));
+    }
+    let has_auth = has_basic_auth || has_bearer_auth;
+    let auth_ty = if has_basic_auth {
+        "xidl_rust_axum::auth::basic::BasicAuth".to_string()
+    } else if has_bearer_auth {
+        "xidl_rust_axum::auth::bearer::BearerAuth".to_string()
+    } else {
+        String::new()
+    };
     let params = op
         .parameter
         .as_ref()
@@ -494,8 +517,8 @@ fn render_op(
     }
 
     let method_name = rust_ident(&op.ident);
-    let auth_in_request_struct = has_basic_auth && !(is_client_stream || is_bidi_stream);
-    let auth_wrapper_struct = if has_basic_auth && (is_client_stream || is_bidi_stream) {
+    let auth_in_request_struct = has_auth && !(is_client_stream || is_bidi_stream);
+    let auth_wrapper_struct = if has_auth && (is_client_stream || is_bidi_stream) {
         Some(format!(
             "{}AuthRequest",
             method_struct_prefix(interface_name, &op.ident)
@@ -615,6 +638,8 @@ fn render_op(
         auth_wrapper_struct,
         auth_in_request_struct,
         has_basic_auth,
+        has_bearer_auth,
+        auth_ty,
         basic_auth_realm,
         request_params,
         response_struct,
@@ -667,6 +692,26 @@ fn render_attr(
                 .any(|req| matches!(req, HttpSecurityRequirement::HttpBasic))
         })
         .unwrap_or(false);
+    let has_bearer_auth = security
+        .as_ref()
+        .map(|reqs| {
+            reqs.iter()
+                .any(|req| matches!(req, HttpSecurityRequirement::HttpBearer))
+        })
+        .unwrap_or(false);
+    if has_basic_auth && has_bearer_auth {
+        panic!(
+            "attribute in interface '{interface_name}' cannot combine @http_basic and @http_bearer"
+        );
+    }
+    let has_auth = has_basic_auth || has_bearer_auth;
+    let auth_ty = if has_basic_auth {
+        "xidl_rust_axum::auth::basic::BasicAuth".to_string()
+    } else if has_bearer_auth {
+        "xidl_rust_axum::auth::bearer::BearerAuth".to_string()
+    } else {
+        String::new()
+    };
     let realm_hint = if has_basic_auth {
         find_basic_realm(&attr.annotations).or_else(|| find_basic_realm(interface_annotations))
     } else {
@@ -684,7 +729,7 @@ fn render_attr(
                 let raw = names.raw.clone();
                 let getter_name = format!("get_attribute_{raw}");
                 let path = attribute_path(&raw);
-                let request_struct = if has_basic_auth {
+                let request_struct = if has_auth {
                     Some(format!(
                         "{}Request",
                         method_struct_prefix(interface_name, &raw)
@@ -726,8 +771,10 @@ fn render_attr(
                     request_payload_ty: request_ty.clone(),
                     request_struct,
                     auth_wrapper_struct: None,
-                    auth_in_request_struct: has_basic_auth,
+                    auth_in_request_struct: has_auth,
                     has_basic_auth,
+                    has_bearer_auth,
+                    auth_ty: auth_ty.clone(),
                     basic_auth_realm,
                     request_params: Vec::new(),
                     response_struct: None,
@@ -748,7 +795,7 @@ fn render_attr(
                 if emit_watch {
                     let raw_watch = format!("watch_attribute_{raw}");
                     let watch_path = default_path(module_path, interface_name, &raw_watch);
-                    let request_struct = if has_basic_auth {
+                    let request_struct = if has_auth {
                         Some(format!(
                             "{}Request",
                             method_struct_prefix(interface_name, &raw_watch)
@@ -790,8 +837,10 @@ fn render_attr(
                         request_payload_ty: request_ty,
                         request_struct,
                         auth_wrapper_struct: None,
-                        auth_in_request_struct: has_basic_auth,
+                        auth_in_request_struct: has_auth,
                         has_basic_auth,
+                        has_bearer_auth,
+                        auth_ty: auth_ty.clone(),
                         basic_auth_realm,
                         request_params: Vec::new(),
                         response_struct: None,
@@ -822,7 +871,7 @@ fn render_attr(
                         let getter_name = format!("get_attribute_{raw_name}");
                         let ret = attr_return_type(&spec.ty);
                         let path = attribute_path(&raw_name);
-                        let request_struct = if has_basic_auth {
+                        let request_struct = if has_auth {
                             Some(format!(
                                 "{}Request",
                                 method_struct_prefix(interface_name, &raw_name)
@@ -864,8 +913,10 @@ fn render_attr(
                             request_payload_ty: request_ty,
                             request_struct,
                             auth_wrapper_struct: None,
-                            auth_in_request_struct: has_basic_auth,
+                            auth_in_request_struct: has_auth,
                             has_basic_auth,
+                            has_bearer_auth,
+                            auth_ty: auth_ty.clone(),
                             basic_auth_realm,
                             request_params: Vec::new(),
                             response_struct: None,
@@ -945,8 +996,10 @@ fn render_attr(
                                 .unwrap_or_else(|| "()".to_string()),
                             request_struct,
                             auth_wrapper_struct: None,
-                            auth_in_request_struct: has_basic_auth,
+                            auth_in_request_struct: has_auth,
                             has_basic_auth,
+                            has_bearer_auth,
+                            auth_ty: auth_ty.clone(),
                             basic_auth_realm,
                             request_params: vec![request_param],
                             response_struct: None,
@@ -967,7 +1020,7 @@ fn render_attr(
                         if emit_watch {
                             let raw_watch = format!("watch_attribute_{raw_name}");
                             let watch_path = default_path(module_path, interface_name, &raw_watch);
-                            let request_struct = if has_basic_auth {
+                            let request_struct = if has_auth {
                                 Some(format!(
                                     "{}Request",
                                     method_struct_prefix(interface_name, &raw_watch)
@@ -1010,8 +1063,10 @@ fn render_attr(
                                 request_payload_ty: request_ty,
                                 request_struct,
                                 auth_wrapper_struct: None,
-                                auth_in_request_struct: has_basic_auth,
+                                auth_in_request_struct: has_auth,
                                 has_basic_auth,
+                                has_bearer_auth,
+                                auth_ty: auth_ty.clone(),
                                 basic_auth_realm,
                                 request_params: Vec::new(),
                                 response_struct: None,
@@ -1038,7 +1093,7 @@ fn render_attr(
                     let ret = attr_return_type(&spec.ty);
                     let path = attribute_path(&raw_name);
                     let param = render_param_type(&spec.ty, None, false);
-                    let request_struct = if has_basic_auth {
+                    let request_struct = if has_auth {
                         Some(format!(
                             "{}Request",
                             method_struct_prefix(interface_name, &raw_name)
@@ -1080,8 +1135,10 @@ fn render_attr(
                         request_payload_ty: request_ty,
                         request_struct,
                         auth_wrapper_struct: None,
-                        auth_in_request_struct: has_basic_auth,
+                        auth_in_request_struct: has_auth,
                         has_basic_auth,
+                        has_bearer_auth,
+                        auth_ty: auth_ty.clone(),
                         basic_auth_realm,
                         request_params: Vec::new(),
                         response_struct: None,
@@ -1160,8 +1217,10 @@ fn render_attr(
                             .unwrap_or_else(|| "()".to_string()),
                         request_struct,
                         auth_wrapper_struct: None,
-                        auth_in_request_struct: has_basic_auth,
+                        auth_in_request_struct: has_auth,
                         has_basic_auth,
+                        has_bearer_auth,
+                        auth_ty: auth_ty.clone(),
                         basic_auth_realm,
                         request_params: vec![request_param],
                         response_struct: None,
@@ -1182,7 +1241,7 @@ fn render_attr(
                     if emit_watch {
                         let raw_watch = format!("watch_attribute_{raw_name}");
                         let watch_path = default_path(module_path, interface_name, &raw_watch);
-                        let request_struct = if has_basic_auth {
+                        let request_struct = if has_auth {
                             Some(format!(
                                 "{}Request",
                                 method_struct_prefix(interface_name, &raw_watch)
@@ -1224,8 +1283,10 @@ fn render_attr(
                             request_payload_ty: request_ty,
                             request_struct,
                             auth_wrapper_struct: None,
-                            auth_in_request_struct: has_basic_auth,
+                            auth_in_request_struct: has_auth,
                             has_basic_auth,
+                            has_bearer_auth,
+                            auth_ty: auth_ty.clone(),
                             basic_auth_realm,
                             request_params: Vec::new(),
                             response_struct: None,

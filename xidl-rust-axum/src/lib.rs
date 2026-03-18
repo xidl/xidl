@@ -16,6 +16,7 @@ pub mod stream;
 pub mod auth;
 
 pub use axum;
+pub use axum_extra;
 pub use futures_util;
 pub use reqwest;
 pub use serde;

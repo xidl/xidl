@@ -79,14 +79,14 @@ pub trait {{ ident }} {
                 pub {{ param.name }}: {{ param.ty }},
             {% endfor %}
             {% if method.auth_in_request_struct %}
-                pub xidl_auth: xidl_rust_axum::auth::basic::BasicAuth,
+                pub xidl_auth: {{ method.auth_ty }},
             {% endif %}
         }
 
     {% endif %}
     {% if method.auth_wrapper_struct %}
         pub struct {{ method.auth_wrapper_struct }} {
-            pub xidl_auth: xidl_rust_axum::auth::basic::BasicAuth,
+            pub xidl_auth: {{ method.auth_ty }},
             pub data: {% if method.is_client_stream %}xidl_rust_axum::stream::NdjsonStream<{{ method.request_item_ty }}>{% elif method.is_bidi_stream %}xidl_rust_axum::stream::BidiServerStream<{{ method.request_item_ty }}, {{ method.response_ty }}>{% endif %},
         }
 
@@ -141,7 +141,8 @@ pub trait {{ ident }} {
         {% for method in methods %}
             async fn {{ method.name }}(
             ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
-            headers: ::xidl_rust_axum::axum::http::HeaderMap{% if method.path_params | length > 0 %},
+            headers: ::xidl_rust_axum::axum::http::HeaderMap{% if method.has_bearer_auth %},
+            auth_header: Option<::xidl_rust_axum::axum_extra::extract::TypedHeader<::xidl_rust_axum::auth::bearer::BearerHeader>>{% endif %}{% if method.path_params | length > 0 %},
             ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<{{ method.struct_prefix }}Path>{% endif %}{% if method.query_params | length > 0 %},
             xidl_rust_axum::axum::extract::Query(query): xidl_rust_axum::axum::extract::Query<{{ method.struct_prefix }}Query>{% endif %}{% if method.is_bidi_stream %},
             ws: ::xidl_rust_axum::axum::extract::ws::WebSocketUpgrade{% elif method.is_client_stream %},
@@ -158,6 +159,14 @@ pub trait {{ ident }} {
                             let resp = xidl_rust_axum::auth::basic::unauthorized_response("{{ method.basic_auth_realm }}");
                             return Ok(resp);
                         }
+                    };
+                {% endif %}
+                {% if method.has_bearer_auth %}
+                    let xidl_auth = match auth_header {
+                        Some(::xidl_rust_axum::axum_extra::extract::TypedHeader(auth_header)) => {
+                            xidl_rust_axum::auth::bearer::BearerAuth::from_header(auth_header)
+                        }
+                        None => return Err(xidl_rust_axum::Error::unauthorized()),
                     };
                 {% endif %}
                 {% if method.path_params | length > 0 %}
@@ -302,7 +311,7 @@ pub trait {{ ident }} {
                 {% if method.is_bidi_stream %}
                     let req_headers = headers.clone();
                     let svc = svc.clone();
-                    {% if method.has_basic_auth %}
+                    {% if method.has_basic_auth or method.has_bearer_auth %}
                         let xidl_auth = xidl_auth.clone();
                     {% endif %}
                     let mut resp = ws.on_upgrade(move |socket| async move {

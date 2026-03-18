@@ -44,10 +44,10 @@ impl CityHttpStreamApi for CityHttpStreamService {
 
     async fn upload_asset(
         &self,
-        req: xidl_rust_axum::Request<
-            xidl_rust_axum::stream::NdjsonStream<CityHttpStreamApiUploadAssetRequest>,
-        >,
+        req: xidl_rust_axum::Request<CityHttpStreamApiUploadAssetAuthRequest>,
     ) -> Result<String, xidl_rust_axum::Error> {
+        let req = req.into_inner();
+        let _auth = req.xidl_auth;
         let mut stream = req.data;
         let mut asset_id = String::new();
         let mut total = 0usize;

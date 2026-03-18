@@ -91,6 +91,15 @@ Semantics:
 - credential format is `Bearer <token>`
 - bearer format is intentionally opaque in this RFC
 
+Axum mapping guidance:
+
+- generated axum handlers extract `TypedHeader<BearerHeader>` (via `axum_extra`)
+  to allow empty tokens
+- the request payload type `T` includes `xidl_auth: BearerAuth` and is carried
+  inside `xidl_rust_axum::Request<T>`
+- if the header is `Authorization: Bearer` (empty token), the token value is the
+  default `String` value
+
 ### 4.3 API Key
 
 ```idl

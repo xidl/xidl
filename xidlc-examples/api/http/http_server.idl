@@ -70,6 +70,8 @@ interface HttpServer {
         @cookie string session_id
     );
 
+    @http_bearer
+    void login_bearer();
 };
 
 @derive(Debug, Default, Clone, Serialize, Deserialize)

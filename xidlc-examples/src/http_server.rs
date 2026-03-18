@@ -245,4 +245,15 @@ impl HttpServer for SimpleHttpServer {
         println!("is_logined: {}", req.session_id);
         Ok(!req.session_id.is_empty())
     }
+
+    async fn login_bearer(
+        &self,
+        req: xidl_rust_axum::Request<HttpServerLoginBearerRequest>,
+    ) -> Result<(), xidl_rust_axum::Error> {
+        let auth = req.into_inner().xidl_auth;
+        if auth.token.is_empty() {
+            return Err(xidl_rust_axum::Error::unauthorized());
+        }
+        Ok(())
+    }
 }

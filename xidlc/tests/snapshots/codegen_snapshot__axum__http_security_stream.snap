@@ -25,6 +25,7 @@ struct HttpSecurityStreamServiceWatchChannelPath{
 #[derive(::serde::Serialize,::serde::Deserialize)]
 pub struct HttpSecurityStreamServiceWatchChannelRequest{
     pub channel:String,
+    pub xidl_auth:xidl_rust_axum::auth::bearer::BearerAuth,
 }
 
 pub struct HttpSecurityStreamServiceServer<T>{
@@ -60,12 +61,20 @@ T:HttpSecurityStreamService+Send+Sync+'static,
     async fn watch_channel(
     ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
     headers: ::xidl_rust_axum::axum::http::HeaderMap,
+    auth_header:Option<::xidl_rust_axum::axum_extra::extract::TypedHeader<::xidl_rust_axum::auth::bearer::BearerHeader>>,
     ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<HttpSecurityStreamServiceWatchChannelPath>
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
         if!xidl_rust_axum::http::accepts_media_type(&headers,"text/event-stream"){
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
 
+        let xidl_auth = match auth_header{
+            Some(::xidl_rust_axum::axum_extra::extract::TypedHeader(auth_header)) => {
+                xidl_rust_axum::auth::bearer::BearerAuth::from_header(auth_header)
+            }
+            None => return Err(xidl_rust_axum::Error::unauthorized()),
+
+        };
         let HttpSecurityStreamServiceWatchChannelPath{
 
         channel,
@@ -73,6 +82,7 @@ T:HttpSecurityStreamService+Send+Sync+'static,
         } = path;
         let data = HttpSecurityStreamServiceWatchChannelRequest{
             channel,
+            xidl_auth,
         };
         let req = ::xidl_rust_axum::Request::new(headers,data);
         let mut resp = match svc.watch_channel(req).await{
