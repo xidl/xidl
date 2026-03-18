@@ -61,9 +61,15 @@ interface HttpServer {
         @cookie out string session_id
     );
 
+    @http_basic(realm = "request login with realm")
+    void login_realm(
+        @cookie out string session_id
+    );
+
     boolean is_logined(
         @cookie string session_id
     );
+
 };
 
 @derive(Debug, Default, Clone, Serialize, Deserialize)

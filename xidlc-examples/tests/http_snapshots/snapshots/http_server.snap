@@ -76,6 +76,30 @@ Failed to deserialize the JSON body into the target type: invalid type: map, exp
 < HTTP/1.1 204 No Content
 <
 ---
+### nologin
+> POST /login HTTP/1.1
+> User-Agent: xidlc-http-snapshot
+> Accept: application/json
+>
+< HTTP/1.1 401 Unauthorized
+< content-length: 33
+< content-type: application/json
+< www-authenticate: Basic realm="login"
+<
+{"code":401,"msg":"Unauthorized"}
+---
+### nologin_realm
+> POST /login_realm HTTP/1.1
+> User-Agent: xidlc-http-snapshot
+> Accept: application/json
+>
+< HTTP/1.1 401 Unauthorized
+< content-length: 33
+< content-type: application/json
+< www-authenticate: Basic realm="request login with realm"
+<
+{"code":401,"msg":"Unauthorized"}
+---
 ### login
 > POST /login HTTP/1.1
 > User-Agent: xidlc-http-snapshot

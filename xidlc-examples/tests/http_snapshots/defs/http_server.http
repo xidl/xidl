@@ -31,6 +31,14 @@ Accept: application/json
 DELETE {{ base_url }}/v1/database/name
 Accept: application/json
 
+### nologin
+POST {{ base_url }}/login
+Accept: application/json
+
+### nologin_realm
+POST {{ base_url }}/login_realm
+Accept: application/json
+
 ### login
 POST {{ base_url }}/login
 Accept: application/json
