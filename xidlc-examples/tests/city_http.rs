@@ -3,7 +3,6 @@ use xidlc_examples::city_http::SmartCityHttpApiServer;
 use xidlc_examples::city_http::SmartCityHttpService;
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-#[ignore]
 async fn http_client_calls_all_endpoints() {
     let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("bind ephemeral port");
     let addr = listener.local_addr().expect("read local addr");
