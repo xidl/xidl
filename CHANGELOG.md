@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.28.0](https://github.com/xidl/xidl/compare/v0.27.0...v0.28.0) (2026-03-18)
+
+
+### Features
+
+* **axum:** impl auth for client ([9612ce5](https://github.com/xidl/xidl/commit/9612ce5cf4f37627e2c3bc4228d5c8863df2878e))
+
 ## [0.27.0](https://github.com/xidl/xidl/compare/v0.26.0...v0.27.0) (2026-03-18)
 
 
