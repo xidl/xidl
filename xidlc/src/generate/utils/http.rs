@@ -31,6 +31,18 @@ pub enum HttpSecurityRequirement {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum HttpSecurityOrigin {
+    Interface,
+    Method,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct HttpSecurityProfile {
+    pub origin: HttpSecurityOrigin,
+    pub requirements: Vec<HttpSecurityRequirement>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum HttpStreamKind {
     Server,
     Client,
@@ -190,6 +202,40 @@ pub fn effective_security(
         Ok(None)
     } else {
         Ok(Some(interface_security.requirements))
+    }
+}
+
+pub fn effective_security_with_origin(
+    interface_annotations: &[hir::Annotation],
+    method_annotations: &[hir::Annotation],
+) -> Result<Option<HttpSecurityProfile>, String> {
+    let method_security = collect_security(method_annotations)?;
+    if method_security.explicit_none {
+        return Ok(Some(HttpSecurityProfile {
+            origin: HttpSecurityOrigin::Method,
+            requirements: Vec::new(),
+        }));
+    }
+    if !method_security.requirements.is_empty() {
+        return Ok(Some(HttpSecurityProfile {
+            origin: HttpSecurityOrigin::Method,
+            requirements: method_security.requirements,
+        }));
+    }
+    let interface_security = collect_security(interface_annotations)?;
+    if interface_security.explicit_none {
+        return Ok(Some(HttpSecurityProfile {
+            origin: HttpSecurityOrigin::Interface,
+            requirements: Vec::new(),
+        }));
+    }
+    if interface_security.requirements.is_empty() {
+        Ok(None)
+    } else {
+        Ok(Some(HttpSecurityProfile {
+            origin: HttpSecurityOrigin::Interface,
+            requirements: interface_security.requirements,
+        }))
     }
 }
 

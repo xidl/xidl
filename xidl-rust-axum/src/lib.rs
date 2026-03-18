@@ -2,7 +2,9 @@ mod error;
 pub use error::{Error, ErrorBody, Result};
 
 mod client;
-pub use client::Client;
+pub use client::{
+    ApiKeyAuth, Client, ClientApiKeyLocation, ClientAuth, ClientAuthRequirement,
+};
 
 mod server;
 pub use server::{Server, Service};

@@ -1,6 +1,7 @@
 use xidlc_examples::city_http::SmartCityHttpApiClient;
 use xidlc_examples::city_http::SmartCityHttpApiServer;
 use xidlc_examples::city_http::SmartCityHttpService;
+use xidl_rust_axum::{ApiKeyAuth, ClientApiKeyLocation, ClientAuth};
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn http_client_calls_all_endpoints() {
@@ -19,7 +20,16 @@ async fn http_client_calls_all_endpoints() {
     tokio::time::sleep(std::time::Duration::from_millis(100)).await;
 
     let base = format!("http://{}", addr);
-    let client = SmartCityHttpApiClient::new(base);
+    let auth = ClientAuth {
+        basic: None,
+        bearer: Some("test-token".to_string()),
+        api_keys: vec![ApiKeyAuth {
+            location: ClientApiKeyLocation::Header,
+            name: "X-Reserve-Key".to_string(),
+            value: "reserve-test".to_string(),
+        }],
+    };
+    let client = SmartCityHttpApiClient::with_auth(base, auth);
 
     let eta = client
         .get_stop_eta("S100".to_string(), "2".to_string(), "en".to_string())

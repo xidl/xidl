@@ -2,9 +2,10 @@ use crate::error::{IdlcError, IdlcResult};
 use crate::generate::rust::util::{rust_ident, rust_passthrough_attrs_from_annotations};
 use crate::generate::rust_axum::{RustAxumRenderOutput, RustAxumRenderer};
 use crate::generate::utils::{
-    DeprecatedInfo, HttpSecurityRequirement, HttpStreamCodec, HttpStreamKind,
-    HttpStreamTargetSupport, deprecated_info, effective_security, http_stream_config,
-    validate_http_stream_method, validate_http_stream_target,
+    DeprecatedInfo, HttpSecurityOrigin, HttpSecurityProfile, HttpSecurityRequirement,
+    HttpStreamCodec, HttpStreamKind, HttpStreamTargetSupport, deprecated_info,
+    effective_security_with_origin, http_stream_config, validate_http_stream_method,
+    validate_http_stream_target,
 };
 use convert_case::{Case, Casing};
 use serde::Serialize;
@@ -69,6 +70,11 @@ struct MethodContext {
     auth_in_request_struct: bool,
     has_basic_auth: bool,
     has_bearer_auth: bool,
+    api_key_requirements: Vec<ApiKeyContext>,
+    auth_source_interface: bool,
+    auth_source_method: bool,
+    auth_param: Option<String>,
+    auth_param_ty: String,
     auth_ty: String,
     basic_auth_realm: String,
     request_params: Vec<ParamContext>,
@@ -108,6 +114,14 @@ struct ParamContext {
     optional: bool,
     inner_ty: String,
 }
+
+#[derive(Serialize, Clone)]
+struct ApiKeyContext {
+    location: String,
+    name: String,
+}
+
+#[derive(Serialize, Clone)]
 
 struct RouteTemplate {
     path: String,
@@ -231,8 +245,16 @@ fn render_op(
         hir::OpTypeSpec::TypeSpec(ty) => axum_type(ty),
     };
     let return_is_unit = matches!(&op.ty, hir::OpTypeSpec::Void);
-    let security =
-        effective_security(interface_annotations, &op.annotations).map_err(IdlcError::rpc)?;
+    let security_profile =
+        effective_security_with_origin(interface_annotations, &op.annotations).map_err(IdlcError::rpc)?;
+    let (security, auth_source_interface, auth_source_method) = match security_profile {
+        None => (None, false, false),
+        Some(HttpSecurityProfile { origin, requirements }) => (
+            Some(requirements),
+            matches!(origin, HttpSecurityOrigin::Interface),
+            matches!(origin, HttpSecurityOrigin::Method),
+        ),
+    };
     let has_basic_auth = security
         .as_ref()
         .map(|reqs| {
@@ -247,6 +269,27 @@ fn render_op(
                 .any(|req| matches!(req, HttpSecurityRequirement::HttpBearer))
         })
         .unwrap_or(false);
+    let api_key_requirements = security
+        .as_ref()
+        .map(|reqs| {
+            reqs.iter()
+                .filter_map(|req| match req {
+                    HttpSecurityRequirement::ApiKey { location, name } => {
+                        let location = match location {
+                            crate::generate::utils::HttpApiKeyLocation::Header => "Header",
+                            crate::generate::utils::HttpApiKeyLocation::Query => "Query",
+                            crate::generate::utils::HttpApiKeyLocation::Cookie => "Cookie",
+                        };
+                        Some(ApiKeyContext {
+                            location: location.to_string(),
+                            name: name.clone(),
+                        })
+                    }
+                    _ => None,
+                })
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
     if has_basic_auth && has_bearer_auth {
         return Err(IdlcError::rpc(format!(
             "operation '{}' cannot combine @http_basic and @http_bearer",
@@ -477,6 +520,8 @@ fn render_op(
             ParamSource::Body => body_params.push(ctx),
         }
     }
+    let mut auth_param = None;
+    let mut auth_param_ty = String::new();
     for route_params in &path_param_sets {
         for route_param in route_params {
             match path_binding_count.get(route_param).copied().unwrap_or(0) {
@@ -562,6 +607,12 @@ fn render_op(
         param_list.clear();
         param_names.clear();
     }
+    if auth_source_method && (has_basic_auth || has_bearer_auth) {
+        let name = "xidl_auth".to_string();
+        param_list.push(format!("{name}: {auth_ty}"));
+        auth_param = Some(name);
+        auth_param_ty = auth_ty.clone();
+    }
     let response_value_count = usize::from(!return_is_unit) + response_params.len();
     let response_body_count = usize::from(!return_is_unit) + response_body_params.len();
     let response_is_empty = response_body_count == 0;
@@ -639,6 +690,11 @@ fn render_op(
         auth_in_request_struct,
         has_basic_auth,
         has_bearer_auth,
+        api_key_requirements,
+        auth_source_interface,
+        auth_source_method,
+        auth_param,
+        auth_param_ty,
         auth_ty,
         basic_auth_realm,
         request_params,
@@ -683,8 +739,17 @@ fn render_attr(
         &format!("attribute in interface '{interface_name}'"),
         &attr.annotations,
     );
-    let security = effective_security(interface_annotations, &attr.annotations)
-        .unwrap_or_else(|err| panic!("{err}"));
+    let security_profile =
+        effective_security_with_origin(interface_annotations, &attr.annotations)
+            .unwrap_or_else(|err| panic!("{err}"));
+    let (security, auth_source_interface, auth_source_method) = match security_profile {
+        None => (None, false, false),
+        Some(HttpSecurityProfile { origin, requirements }) => (
+            Some(requirements),
+            matches!(origin, HttpSecurityOrigin::Interface),
+            matches!(origin, HttpSecurityOrigin::Method),
+        ),
+    };
     let has_basic_auth = security
         .as_ref()
         .map(|reqs| {
@@ -699,6 +764,27 @@ fn render_attr(
                 .any(|req| matches!(req, HttpSecurityRequirement::HttpBearer))
         })
         .unwrap_or(false);
+    let api_key_requirements = security
+        .as_ref()
+        .map(|reqs| {
+            reqs.iter()
+                .filter_map(|req| match req {
+                    HttpSecurityRequirement::ApiKey { location, name } => {
+                        let location = match location {
+                            crate::generate::utils::HttpApiKeyLocation::Header => "Header",
+                            crate::generate::utils::HttpApiKeyLocation::Query => "Query",
+                            crate::generate::utils::HttpApiKeyLocation::Cookie => "Cookie",
+                        };
+                        Some(ApiKeyContext {
+                            location: location.to_string(),
+                            name: name.clone(),
+                        })
+                    }
+                    _ => None,
+                })
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
     if has_basic_auth && has_bearer_auth {
         panic!(
             "attribute in interface '{interface_name}' cannot combine @http_basic and @http_bearer"
@@ -712,6 +798,15 @@ fn render_attr(
     } else {
         String::new()
     };
+    let mut auth_param = None;
+    let mut auth_param_ty = String::new();
+    let mut auth_param_list = Vec::new();
+    if auth_source_method && (has_basic_auth || has_bearer_auth) {
+        let name = "xidl_auth".to_string();
+        auth_param_list.push(format!("{name}: {auth_ty}"));
+        auth_param = Some(name);
+        auth_param_ty = auth_ty.clone();
+    }
     let realm_hint = if has_basic_auth {
         find_basic_realm(&attr.annotations).or_else(|| find_basic_realm(interface_annotations))
     } else {
@@ -752,7 +847,7 @@ fn render_attr(
                     deprecated_since: deprecated.since.clone(),
                     deprecated_after: deprecated.after.clone(),
                     deprecated_note: deprecated.note.clone(),
-                    params: Vec::new(),
+                    params: auth_param_list.clone(),
                     param_names: Vec::new(),
                     ret: ret.clone(),
                     response_ty: ret.clone(),
@@ -774,6 +869,11 @@ fn render_attr(
                     auth_in_request_struct: has_auth,
                     has_basic_auth,
                     has_bearer_auth,
+                    api_key_requirements: api_key_requirements.clone(),
+                    auth_source_interface,
+                    auth_source_method,
+                    auth_param: auth_param.clone(),
+                    auth_param_ty: auth_param_ty.clone(),
                     auth_ty: auth_ty.clone(),
                     basic_auth_realm,
                     request_params: Vec::new(),
@@ -818,7 +918,7 @@ fn render_attr(
                         deprecated_since: deprecated.since.clone(),
                         deprecated_after: deprecated.after.clone(),
                         deprecated_note: deprecated.note.clone(),
-                        params: Vec::new(),
+                        params: auth_param_list.clone(),
                         param_names: Vec::new(),
                         ret: ret.clone(),
                         response_ty: ret.clone(),
@@ -840,6 +940,11 @@ fn render_attr(
                         auth_in_request_struct: has_auth,
                         has_basic_auth,
                         has_bearer_auth,
+                        api_key_requirements: api_key_requirements.clone(),
+                        auth_source_interface,
+                        auth_source_method,
+                        auth_param: auth_param.clone(),
+                        auth_param_ty: auth_param_ty.clone(),
                         auth_ty: auth_ty.clone(),
                         basic_auth_realm,
                         request_params: Vec::new(),
@@ -894,7 +999,7 @@ fn render_attr(
                             deprecated_since: deprecated.since.clone(),
                             deprecated_after: deprecated.after.clone(),
                             deprecated_note: deprecated.note.clone(),
-                            params: Vec::new(),
+                            params: auth_param_list.clone(),
                             param_names: Vec::new(),
                             ret: ret.clone(),
                             response_ty: ret.clone(),
@@ -916,6 +1021,11 @@ fn render_attr(
                             auth_in_request_struct: has_auth,
                             has_basic_auth,
                             has_bearer_auth,
+                            api_key_requirements: api_key_requirements.clone(),
+                            auth_source_interface,
+                            auth_source_method,
+                            auth_param: auth_param.clone(),
+                            auth_param_ty: auth_param_ty.clone(),
                             auth_ty: auth_ty.clone(),
                             basic_auth_realm,
                             request_params: Vec::new(),
@@ -967,6 +1077,8 @@ fn render_attr(
                             optional: false,
                             inner_ty: param.clone(),
                         };
+                        let mut params = auth_param_list.clone();
+                        params.push(format!("{param_name}: {param}"));
                         out.push(MethodContext {
                             name: setter.clone(),
                             raw_name: raw_setter.clone(),
@@ -975,7 +1087,7 @@ fn render_attr(
                             deprecated_since: deprecated.since.clone(),
                             deprecated_after: deprecated.after.clone(),
                             deprecated_note: deprecated.note.clone(),
-                            params: vec![format!("{param_name}: {param}")],
+                            params,
                             param_names: vec![param_name],
                             ret: "()".to_string(),
                             response_ty: "()".to_string(),
@@ -999,6 +1111,11 @@ fn render_attr(
                             auth_in_request_struct: has_auth,
                             has_basic_auth,
                             has_bearer_auth,
+                            api_key_requirements: api_key_requirements.clone(),
+                            auth_source_interface,
+                            auth_source_method,
+                            auth_param: auth_param.clone(),
+                            auth_param_ty: auth_param_ty.clone(),
                             auth_ty: auth_ty.clone(),
                             basic_auth_realm,
                             request_params: vec![request_param],
@@ -1044,7 +1161,7 @@ fn render_attr(
                                 deprecated_since: deprecated.since.clone(),
                                 deprecated_after: deprecated.after.clone(),
                                 deprecated_note: deprecated.note.clone(),
-                                params: Vec::new(),
+                                params: auth_param_list.clone(),
                                 param_names: Vec::new(),
                                 ret: ret.clone(),
                                 response_ty: ret.clone(),
@@ -1066,6 +1183,11 @@ fn render_attr(
                                 auth_in_request_struct: has_auth,
                                 has_basic_auth,
                                 has_bearer_auth,
+                                api_key_requirements: api_key_requirements.clone(),
+                                auth_source_interface,
+                                auth_source_method,
+                                auth_param: auth_param.clone(),
+                                auth_param_ty: auth_param_ty.clone(),
                                 auth_ty: auth_ty.clone(),
                                 basic_auth_realm,
                                 request_params: Vec::new(),
@@ -1116,7 +1238,7 @@ fn render_attr(
                         deprecated_since: deprecated.since.clone(),
                         deprecated_after: deprecated.after.clone(),
                         deprecated_note: deprecated.note.clone(),
-                        params: Vec::new(),
+                        params: auth_param_list.clone(),
                         param_names: Vec::new(),
                         ret: ret.clone(),
                         response_ty: ret.clone(),
@@ -1138,6 +1260,11 @@ fn render_attr(
                         auth_in_request_struct: has_auth,
                         has_basic_auth,
                         has_bearer_auth,
+                        api_key_requirements: api_key_requirements.clone(),
+                        auth_source_interface,
+                        auth_source_method,
+                        auth_param: auth_param.clone(),
+                        auth_param_ty: auth_param_ty.clone(),
                         auth_ty: auth_ty.clone(),
                         basic_auth_realm,
                         request_params: Vec::new(),
@@ -1188,6 +1315,8 @@ fn render_attr(
                         optional: false,
                         inner_ty: param.clone(),
                     };
+                    let mut params = auth_param_list.clone();
+                    params.push(format!("{param_name}: {param}"));
                     out.push(MethodContext {
                         name: setter.clone(),
                         raw_name: raw_setter.clone(),
@@ -1196,7 +1325,7 @@ fn render_attr(
                         deprecated_since: deprecated.since.clone(),
                         deprecated_after: deprecated.after.clone(),
                         deprecated_note: deprecated.note.clone(),
-                        params: vec![format!("{param_name}: {param}")],
+                        params,
                         param_names: vec![param_name],
                         ret: "()".to_string(),
                         response_ty: "()".to_string(),
@@ -1220,6 +1349,11 @@ fn render_attr(
                         auth_in_request_struct: has_auth,
                         has_basic_auth,
                         has_bearer_auth,
+                        api_key_requirements: api_key_requirements.clone(),
+                        auth_source_interface,
+                        auth_source_method,
+                        auth_param: auth_param.clone(),
+                        auth_param_ty: auth_param_ty.clone(),
                         auth_ty: auth_ty.clone(),
                         basic_auth_realm,
                         request_params: vec![request_param],
@@ -1264,7 +1398,7 @@ fn render_attr(
                             deprecated_since: deprecated.since.clone(),
                             deprecated_after: deprecated.after.clone(),
                             deprecated_note: deprecated.note.clone(),
-                            params: Vec::new(),
+                            params: auth_param_list.clone(),
                             param_names: Vec::new(),
                             ret: ret.clone(),
                             response_ty: ret.clone(),
@@ -1286,6 +1420,11 @@ fn render_attr(
                             auth_in_request_struct: has_auth,
                             has_basic_auth,
                             has_bearer_auth,
+                            api_key_requirements: api_key_requirements.clone(),
+                            auth_source_interface,
+                            auth_source_method,
+                            auth_param: auth_param.clone(),
+                            auth_param_ty: auth_param_ty.clone(),
                             auth_ty: auth_ty.clone(),
                             basic_auth_realm,
                             request_params: Vec::new(),
@@ -2030,6 +2169,7 @@ fn param_source_code(source: ParamSource) -> String {
         ParamSource::Cookie => "ParamSource::Cookie".to_string(),
     }
 }
+
 
 fn header_is_multi(ty: &hir::TypeSpec) -> bool {
     matches!(

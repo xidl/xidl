@@ -215,6 +215,43 @@ impl HttpStreamSseServiceClient{
             client:xidl_rust_axum::Client::new(base_url),
         }
     }
+
+    pub fn with_auth(
+    base_url:impl Into<String>,
+    auth:xidl_rust_axum::ClientAuth,
+    )->Self{
+        Self{
+            client:xidl_rust_axum::Client::with_auth(base_url,auth),
+        }
+    }
+
+    pub fn with_http(
+    base_url:impl Into<String>,
+    http:xidl_rust_axum::reqwest::Client,
+    )->Self{
+        Self{
+            client:xidl_rust_axum::Client::with_http(base_url,http),
+        }
+    }
+
+    pub fn with_http_and_auth(
+    base_url:impl Into<String>,
+    http:xidl_rust_axum::reqwest::Client,
+    auth:xidl_rust_axum::ClientAuth,
+    )->Self{
+        Self{
+            client:xidl_rust_axum::Client::with_http_and_auth(base_url,http,auth),
+        }
+    }
+
+    pub fn with_auth_override(
+    &self,
+    auth:Option<xidl_rust_axum::ClientAuth>,
+    )->Self{
+        Self{
+            client:self.client.with_auth_override(auth),
+        }
+    }
 }
 
 impl HttpStreamSseServiceClient{
@@ -242,6 +279,7 @@ impl HttpStreamSseServiceClient{
             req.url_mut().set_query(Some(&query));
         }
 
+        let auth_target = &self.client;
         xidl_rust_axum::stream::open_sse::<String>(self.client.http(),req).await
     }
 
@@ -259,6 +297,7 @@ impl HttpStreamSseServiceClient{
         xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
         .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
         );
+        let auth_target = &self.client;
         let resp = self
         .client
         .http()
@@ -290,6 +329,7 @@ impl HttpStreamSseServiceClient{
         xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
         .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
         );
+        let auth_target = &self.client;
         let body = online;
         let body = xidl_rust_axum::serde_json::to_vec(&body)
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
@@ -328,6 +368,7 @@ impl HttpStreamSseServiceClient{
         xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/event-stream")
         .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
         );
+        let auth_target = &self.client;
         xidl_rust_axum::stream::open_sse::<bool>(self.client.http(),req).await
     }
 }

@@ -3,6 +3,9 @@ use xidlc_examples::city_http_stream::CityHttpStreamApiClient;
 use xidlc_examples::city_http_stream::CityHttpStreamApiServer;
 use xidlc_examples::city_http_stream::CityHttpStreamApiUploadAssetRequest;
 use xidlc_examples::city_http_stream::CityHttpStreamService;
+use xidl_rust_axum::auth::basic::BasicAuth;
+use xidl_rust_axum::auth::bearer::BearerAuth;
+use xidl_rust_axum::ClientAuth;
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn http_stream_client_calls_stream_endpoints() {
@@ -21,7 +24,15 @@ async fn http_stream_client_calls_stream_endpoints() {
     tokio::time::sleep(std::time::Duration::from_millis(100)).await;
 
     let base = format!("http://{}", addr);
-    let client = CityHttpStreamApiClient::new(base);
+    let auth = ClientAuth {
+        basic: Some(BasicAuth {
+            username: "test".to_string(),
+            password: Some("test".to_string()),
+        }),
+        bearer: Some("test-token".to_string()),
+        api_keys: Vec::new(),
+    };
+    let client = CityHttpStreamApiClient::with_auth(base, auth);
 
     let mut alerts = client
         .alerts("pudong".to_string(), "en".to_string())
@@ -54,7 +65,12 @@ async fn http_stream_client_calls_stream_endpoints() {
     assert_eq!(t1, "tick-1");
     assert_eq!(t2, "tick-2");
 
-    let mut upload = client.upload_asset().await.expect("open upload_asset");
+    let mut upload = client
+        .upload_asset(BearerAuth {
+            token: "test-token".to_string(),
+        })
+        .await
+        .expect("open upload_asset");
     upload
         .write(CityHttpStreamApiUploadAssetRequest {
             asset_id: "asset-1".to_string(),

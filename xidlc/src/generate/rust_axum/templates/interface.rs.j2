@@ -549,6 +549,43 @@ pub trait {{ ident }} {
                 client: xidl_rust_axum::Client::new(base_url),
             }
         }
+
+        pub fn with_auth(
+            base_url: impl Into<String>,
+            auth: xidl_rust_axum::ClientAuth,
+        ) -> Self {
+            Self {
+                client: xidl_rust_axum::Client::with_auth(base_url, auth),
+            }
+        }
+
+        pub fn with_http(
+            base_url: impl Into<String>,
+            http: xidl_rust_axum::reqwest::Client,
+        ) -> Self {
+            Self {
+                client: xidl_rust_axum::Client::with_http(base_url, http),
+            }
+        }
+
+        pub fn with_http_and_auth(
+            base_url: impl Into<String>,
+            http: xidl_rust_axum::reqwest::Client,
+            auth: xidl_rust_axum::ClientAuth,
+        ) -> Self {
+            Self {
+                client: xidl_rust_axum::Client::with_http_and_auth(base_url, http, auth),
+            }
+        }
+
+        pub fn with_auth_override(
+            &self,
+            auth: Option<xidl_rust_axum::ClientAuth>,
+        ) -> Self {
+            Self {
+                client: self.client.with_auth_override(auth),
+            }
+        }
     }
 
     impl {{ ident }}Client {
@@ -645,6 +682,50 @@ pub trait {{ ident }} {
                         req.url_mut().set_query(Some(&query));
                     }
                 {% endif %}
+                {% if method.auth_source_method and method.auth_param %}
+                    let auth = xidl_rust_axum::ClientAuth {
+                        basic: {% if method.has_basic_auth %}Some({{ method.auth_param }}){% else %}None{% endif %},
+                        bearer: {% if method.has_bearer_auth %}Some({{ method.auth_param }}.token.clone()){% else %}None{% endif %},
+                        api_keys: vec![],
+                    };
+                    let auth_client = self.client.with_auth_override(Some(auth));
+                    let auth_target = &auth_client;
+                {% else %}
+                    let auth_target = &self.client;
+                {% endif %}
+                {% if method.auth_source_interface and (method.has_basic_auth or method.has_bearer_auth or method.api_key_requirements | length > 0) and not method.is_bidi_stream %}
+                    {% if method.has_basic_auth %}
+                        auth_target.apply_auth(&mut req, xidl_rust_axum::ClientAuthRequirement::Basic)?;
+                    {% endif %}
+                    {% if method.has_bearer_auth %}
+                        auth_target.apply_auth(&mut req, xidl_rust_axum::ClientAuthRequirement::Bearer)?;
+                    {% endif %}
+                    {% for api_key in method.api_key_requirements %}
+                        auth_target.apply_auth(
+                            &mut req,
+                            xidl_rust_axum::ClientAuthRequirement::ApiKey {
+                                location: xidl_rust_axum::ClientApiKeyLocation::{{ api_key.location }},
+                                name: "{{ api_key.name }}",
+                            },
+                        )?;
+                    {% endfor %}
+                {% elif method.auth_source_method and (method.has_basic_auth or method.has_bearer_auth or method.api_key_requirements | length > 0) and not method.is_bidi_stream %}
+                    {% if method.has_basic_auth %}
+                        auth_target.apply_auth(&mut req, xidl_rust_axum::ClientAuthRequirement::Basic)?;
+                    {% endif %}
+                    {% if method.has_bearer_auth %}
+                        auth_target.apply_auth(&mut req, xidl_rust_axum::ClientAuthRequirement::Bearer)?;
+                    {% endif %}
+                    {% for api_key in method.api_key_requirements %}
+                        auth_target.apply_auth(
+                            &mut req,
+                            xidl_rust_axum::ClientAuthRequirement::ApiKey {
+                                location: xidl_rust_axum::ClientApiKeyLocation::{{ api_key.location }},
+                                name: "{{ api_key.name }}",
+                            },
+                        )?;
+                    {% endfor %}
+                {% endif %}
                 {% if method.is_bidi_stream %}
                     let mut ws_url = self.client.ws_url(&path)?;
                     {% if method.query_params | length > 0 %}
@@ -660,7 +741,79 @@ pub trait {{ ident }} {
                             ws_url.push_str(&query);
                         }
                     {% endif %}
-                    return xidl_rust_axum::stream::open_bidi_client::<{{ method.request_item_ty }}, {{ method.response_ty }}>(&ws_url).await;
+                    {% if method.auth_source_interface and (method.has_basic_auth or method.has_bearer_auth or method.api_key_requirements | length > 0) %}
+                        {% if method.api_key_requirements | length > 0 %}
+                            {% for api_key in method.api_key_requirements %}
+                                auth_target.apply_auth_to_ws_url(
+                                    &mut ws_url,
+                                    xidl_rust_axum::ClientAuthRequirement::ApiKey {
+                                        location: xidl_rust_axum::ClientApiKeyLocation::{{ api_key.location }},
+                                        name: "{{ api_key.name }}",
+                                    },
+                                )?;
+                            {% endfor %}
+                        {% endif %}
+                        let mut auth_headers = xidl_rust_axum::reqwest::header::HeaderMap::new();
+                        {% if method.has_basic_auth %}
+                            auth_target.apply_auth_headers(
+                                &mut auth_headers,
+                                xidl_rust_axum::ClientAuthRequirement::Basic,
+                            )?;
+                        {% endif %}
+                        {% if method.has_bearer_auth %}
+                            auth_target.apply_auth_headers(
+                                &mut auth_headers,
+                                xidl_rust_axum::ClientAuthRequirement::Bearer,
+                            )?;
+                        {% endif %}
+                        {% for api_key in method.api_key_requirements %}
+                            auth_target.apply_auth_headers(
+                                &mut auth_headers,
+                                xidl_rust_axum::ClientAuthRequirement::ApiKey {
+                                    location: xidl_rust_axum::ClientApiKeyLocation::{{ api_key.location }},
+                                    name: "{{ api_key.name }}",
+                                },
+                            )?;
+                        {% endfor %}
+                        return xidl_rust_axum::stream::open_bidi_client_with_headers::<{{ method.request_item_ty }}, {{ method.response_ty }}>(&ws_url, auth_headers).await;
+                    {% elif method.auth_source_method and (method.has_basic_auth or method.has_bearer_auth or method.api_key_requirements | length > 0) %}
+                        {% if method.api_key_requirements | length > 0 %}
+                            {% for api_key in method.api_key_requirements %}
+                                auth_target.apply_auth_to_ws_url(
+                                    &mut ws_url,
+                                    xidl_rust_axum::ClientAuthRequirement::ApiKey {
+                                        location: xidl_rust_axum::ClientApiKeyLocation::{{ api_key.location }},
+                                        name: "{{ api_key.name }}",
+                                    },
+                                )?;
+                            {% endfor %}
+                        {% endif %}
+                        let mut auth_headers = xidl_rust_axum::reqwest::header::HeaderMap::new();
+                        {% if method.has_basic_auth %}
+                            auth_target.apply_auth_headers(
+                                &mut auth_headers,
+                                xidl_rust_axum::ClientAuthRequirement::Basic,
+                            )?;
+                        {% endif %}
+                        {% if method.has_bearer_auth %}
+                            auth_target.apply_auth_headers(
+                                &mut auth_headers,
+                                xidl_rust_axum::ClientAuthRequirement::Bearer,
+                            )?;
+                        {% endif %}
+                        {% for api_key in method.api_key_requirements %}
+                            auth_target.apply_auth_headers(
+                                &mut auth_headers,
+                                xidl_rust_axum::ClientAuthRequirement::ApiKey {
+                                    location: xidl_rust_axum::ClientApiKeyLocation::{{ api_key.location }},
+                                    name: "{{ api_key.name }}",
+                                },
+                            )?;
+                        {% endfor %}
+                        return xidl_rust_axum::stream::open_bidi_client_with_headers::<{{ method.request_item_ty }}, {{ method.response_ty }}>(&ws_url, auth_headers).await;
+                    {% else %}
+                        return xidl_rust_axum::stream::open_bidi_client::<{{ method.request_item_ty }}, {{ method.response_ty }}>(&ws_url).await;
+                    {% endif %}
                 {% elif method.is_client_stream %}
                     req.headers_mut().insert(
                         xidl_rust_axum::reqwest::header::CONTENT_TYPE,

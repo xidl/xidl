@@ -514,6 +514,43 @@ impl HttpAnnoServiceClient{
             client:xidl_rust_axum::Client::new(base_url),
         }
     }
+
+    pub fn with_auth(
+    base_url:impl Into<String>,
+    auth:xidl_rust_axum::ClientAuth,
+    )->Self{
+        Self{
+            client:xidl_rust_axum::Client::with_auth(base_url,auth),
+        }
+    }
+
+    pub fn with_http(
+    base_url:impl Into<String>,
+    http:xidl_rust_axum::reqwest::Client,
+    )->Self{
+        Self{
+            client:xidl_rust_axum::Client::with_http(base_url,http),
+        }
+    }
+
+    pub fn with_http_and_auth(
+    base_url:impl Into<String>,
+    http:xidl_rust_axum::reqwest::Client,
+    auth:xidl_rust_axum::ClientAuth,
+    )->Self{
+        Self{
+            client:xidl_rust_axum::Client::with_http_and_auth(base_url,http,auth),
+        }
+    }
+
+    pub fn with_auth_override(
+    &self,
+    auth:Option<xidl_rust_axum::ClientAuth>,
+    )->Self{
+        Self{
+            client:self.client.with_auth_override(auth),
+        }
+    }
 }
 
 impl HttpAnnoServiceClient{
@@ -541,6 +578,7 @@ impl HttpAnnoServiceClient{
             req.url_mut().set_query(Some(&query));
         }
 
+        let auth_target = &self.client;
         let resp = self
         .client
         .http()
@@ -572,6 +610,7 @@ impl HttpAnnoServiceClient{
         xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
         .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
         );
+        let auth_target = &self.client;
         let body = HttpAnnoServiceCreateUserBody{
             name,
             age,
@@ -624,6 +663,7 @@ impl HttpAnnoServiceClient{
             req.url_mut().set_query(Some(&query));
         }
 
+        let auth_target = &self.client;
         let resp = self
         .client
         .http()
@@ -665,6 +705,7 @@ impl HttpAnnoServiceClient{
             req.url_mut().set_query(Some(&query));
         }
 
+        let auth_target = &self.client;
         let resp = self
         .client
         .http()
@@ -706,6 +747,7 @@ impl HttpAnnoServiceClient{
             req.url_mut().set_query(Some(&query));
         }
 
+        let auth_target = &self.client;
         let resp = self
         .client
         .http()
@@ -737,6 +779,7 @@ impl HttpAnnoServiceClient{
         xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
         .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
         );
+        let auth_target = &self.client;
         let body = HttpAnnoServiceAddBody{
             a,
             b,
@@ -780,6 +823,7 @@ impl HttpAnnoServiceClient{
         xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
         .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
         );
+        let auth_target = &self.client;
         let body = value;
         let body = xidl_rust_axum::serde_json::to_vec(&body)
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
@@ -820,6 +864,7 @@ impl HttpAnnoServiceClient{
         xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
         .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
         );
+        let auth_target = &self.client;
         let resp = self
         .client
         .http()
@@ -851,6 +896,7 @@ impl HttpAnnoServiceClient{
         xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
         .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
         );
+        let auth_target = &self.client;
         let resp = self
         .client
         .http()

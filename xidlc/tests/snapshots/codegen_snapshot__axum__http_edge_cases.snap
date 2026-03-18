@@ -285,6 +285,43 @@ impl HttpEdgeCasesServiceClient{
             client:xidl_rust_axum::Client::new(base_url),
         }
     }
+
+    pub fn with_auth(
+    base_url:impl Into<String>,
+    auth:xidl_rust_axum::ClientAuth,
+    )->Self{
+        Self{
+            client:xidl_rust_axum::Client::with_auth(base_url,auth),
+        }
+    }
+
+    pub fn with_http(
+    base_url:impl Into<String>,
+    http:xidl_rust_axum::reqwest::Client,
+    )->Self{
+        Self{
+            client:xidl_rust_axum::Client::with_http(base_url,http),
+        }
+    }
+
+    pub fn with_http_and_auth(
+    base_url:impl Into<String>,
+    http:xidl_rust_axum::reqwest::Client,
+    auth:xidl_rust_axum::ClientAuth,
+    )->Self{
+        Self{
+            client:xidl_rust_axum::Client::with_http_and_auth(base_url,http,auth),
+        }
+    }
+
+    pub fn with_auth_override(
+    &self,
+    auth:Option<xidl_rust_axum::ClientAuth>,
+    )->Self{
+        Self{
+            client:self.client.with_auth_override(auth),
+        }
+    }
 }
 
 impl HttpEdgeCasesServiceClient{
@@ -311,6 +348,7 @@ impl HttpEdgeCasesServiceClient{
             req.url_mut().set_query(Some(&query));
         }
 
+        let auth_target = &self.client;
         let resp = self
         .client
         .http()
@@ -350,6 +388,7 @@ impl HttpEdgeCasesServiceClient{
             req.url_mut().set_query(Some(&query));
         }
 
+        let auth_target = &self.client;
         let resp = self
         .client
         .http()
@@ -383,6 +422,7 @@ impl HttpEdgeCasesServiceClient{
         xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
         .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
         );
+        let auth_target = &self.client;
         let resp = self
         .client
         .http()
@@ -424,6 +464,7 @@ impl HttpEdgeCasesServiceClient{
             req.url_mut().set_query(Some(&query));
         }
 
+        let auth_target = &self.client;
         let resp = self
         .client
         .http()

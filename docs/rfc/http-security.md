@@ -108,6 +108,36 @@ Axum mapping guidance:
 @api_key(in = "query", name = "api_key")
 ```
 
+## 7. Client Usage (rust-axum)
+
+Generated Rust HTTP/stream clients can be configured with `ClientAuth` to
+automatically attach required auth headers based on IDL annotations.
+
+```rust
+use xidl_rust_axum::{ClientAuth, ApiKeyAuth, ClientApiKeyLocation};
+use xidl_rust_axum::auth::basic::BasicAuth;
+
+let auth = ClientAuth {
+    basic: Some(BasicAuth {
+        username: "user".to_string(),
+        password: Some("pass".to_string()),
+    }),
+    bearer: Some("token".to_string()),
+    api_keys: vec![ApiKeyAuth {
+        location: ClientApiKeyLocation::Header,
+        name: "X-API-Key".to_string(),
+        value: "secret".to_string(),
+    }],
+};
+
+// Generated client (example)
+// let client = MyApiClient::with_auth(base_url, auth);
+```
+
+For per-call overrides, callers can create a temporary client with
+`with_auth_override(Some(...))` or `with_auth_override(None)` and use it for a
+single request.
+
 Semantics:
 
 - `in` selects where credentials are supplied:

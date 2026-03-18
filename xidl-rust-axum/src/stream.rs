@@ -12,6 +12,7 @@ use std::pin::Pin;
 use tokio::io::AsyncRead;
 use tokio::sync::mpsc;
 use tokio::task::JoinHandle;
+use tokio_tungstenite::tungstenite::client::IntoClientRequest;
 use tokio_tungstenite::tungstenite::Message as TungsteniteMessage;
 use tokio_util::codec::{FramedRead, LinesCodec};
 use tokio_util::io::StreamReader;
@@ -326,6 +327,90 @@ where
                         let _ = read_tx
                             .send(Err(Error::new(400, format!("invalid ws payload: {err}"))))
                             .await;
+                        break;
+                    }
+                },
+                TungsteniteMessage::Close(_) => break,
+                _ => {}
+            }
+        }
+    });
+
+    Ok(BidiClientStream {
+        writer: Some(write_tx),
+        reader: read_rx,
+        write_task: Some(write_task),
+        read_task: Some(read_task),
+    })
+}
+
+pub async fn open_bidi_client_with_headers<TIn, TOut>(
+    ws_url: &str,
+    headers: reqwest::header::HeaderMap,
+) -> Result<BidiClientStream<TIn, TOut>>
+where
+    TIn: Serialize + Send + 'static,
+    TOut: DeserializeOwned + Send + 'static,
+{
+    let mut req = ws_url
+        .into_client_request()
+        .map_err(|err| Error::new(500, err.to_string()))?;
+    req.headers_mut().extend(headers);
+    let (socket, _) = tokio_tungstenite::connect_async(req)
+        .await
+        .map_err(|err| Error::new(500, err.to_string()))?;
+    let (mut ws_tx, mut ws_rx) = socket.split();
+    let (write_tx, mut write_rx) = mpsc::channel::<Result<TIn>>(32);
+    let (read_tx, read_rx) = mpsc::channel::<Result<TOut>>(32);
+    let read_tx_writer = read_tx.clone();
+
+    let write_task = tokio::spawn(async move {
+        while let Some(item) = write_rx.recv().await {
+            let item = match item {
+                Ok(value) => value,
+                Err(err) => {
+                    let _ = read_tx_writer.send(Err(err)).await;
+                    break;
+                }
+            };
+            let text = match serde_json::to_string(&item) {
+                Ok(value) => value,
+                Err(err) => {
+                    let _ = read_tx_writer
+                        .send(Err(Error::new(500, err.to_string())))
+                        .await;
+                    break;
+                }
+            };
+            if ws_tx
+                .send(TungsteniteMessage::Text(text.into()))
+                .await
+                .is_err()
+            {
+                break;
+            }
+        }
+        let _ = ws_tx.send(TungsteniteMessage::Close(None)).await;
+    });
+
+    let read_task = tokio::spawn(async move {
+        while let Some(msg) = ws_rx.next().await {
+            let msg = match msg {
+                Ok(value) => value,
+                Err(err) => {
+                    let _ = read_tx.send(Err(Error::new(500, err.to_string()))).await;
+                    break;
+                }
+            };
+            match msg {
+                TungsteniteMessage::Text(text) => match serde_json::from_str::<TOut>(&text) {
+                    Ok(value) => {
+                        if read_tx.send(Ok(value)).await.is_err() {
+                            break;
+                        }
+                    }
+                    Err(err) => {
+                        let _ = read_tx.send(Err(Error::new(500, err.to_string()))).await;
                         break;
                     }
                 },
