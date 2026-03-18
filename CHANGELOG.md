@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.27.0](https://github.com/xidl/xidl/compare/v0.26.0...v0.27.0) (2026-03-18)
+
+
+### Features
+
+* **axum:** impl http_bearer ([275c165](https://github.com/xidl/xidl/commit/275c165bb043091c06fb89dbd6c50a0f8aa276d6))
+
 ## [0.26.0](https://github.com/xidl/xidl/compare/v0.25.0...v0.26.0) (2026-03-17)
 
 
