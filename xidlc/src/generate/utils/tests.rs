@@ -104,7 +104,6 @@ fn test_validate_http_annotations_rejects_invalid_security_mix() {
     assert!(err.contains("no_security"));
 }
 
-
 #[test]
 fn test_http_stream_config_parses_and_validates() {
     let annotations = vec![

@@ -23,6 +23,7 @@ artifacts.
 ## Capabilities
 
 ### New Capabilities
+
 - `http-stream-axum`: Defines RFC-aligned Rust Axum code generation and runtime
   behavior for HTTP server-stream and client-stream operations.
 - `http-stream-openapi`: Defines how HTTP stream operations appear in generated
@@ -32,6 +33,7 @@ artifacts.
   client helper behavior.
 
 ### Modified Capabilities
+
 - None.
 
 ## Impact
@@ -39,8 +41,8 @@ artifacts.
 - Affected code: `xidlc` stream metadata and generators, `xidl-rust-axum`
   streaming runtime/helpers, TypeScript client templates/helpers, OpenAPI
   emission, and example build outputs.
-- Affected APIs: generated Rust Axum server/client interfaces, generated
-  OpenAPI 3.2.0 stream descriptions, and generated TypeScript client method
+- Affected APIs: generated Rust Axum server/client interfaces, generated OpenAPI
+  3.2.0 stream descriptions, and generated TypeScript client method
   signatures/stream helpers.
 - Risk areas: keeping stream media types and method restrictions consistent
   across all three targets, preserving existing experimental examples, and

@@ -245,11 +245,14 @@ fn render_op(
         hir::OpTypeSpec::TypeSpec(ty) => axum_type(ty),
     };
     let return_is_unit = matches!(&op.ty, hir::OpTypeSpec::Void);
-    let security_profile =
-        effective_security_with_origin(interface_annotations, &op.annotations).map_err(IdlcError::rpc)?;
+    let security_profile = effective_security_with_origin(interface_annotations, &op.annotations)
+        .map_err(IdlcError::rpc)?;
     let (security, auth_source_interface, auth_source_method) = match security_profile {
         None => (None, false, false),
-        Some(HttpSecurityProfile { origin, requirements }) => (
+        Some(HttpSecurityProfile {
+            origin,
+            requirements,
+        }) => (
             Some(requirements),
             matches!(origin, HttpSecurityOrigin::Interface),
             matches!(origin, HttpSecurityOrigin::Method),
@@ -739,12 +742,14 @@ fn render_attr(
         &format!("attribute in interface '{interface_name}'"),
         &attr.annotations,
     );
-    let security_profile =
-        effective_security_with_origin(interface_annotations, &attr.annotations)
-            .unwrap_or_else(|err| panic!("{err}"));
+    let security_profile = effective_security_with_origin(interface_annotations, &attr.annotations)
+        .unwrap_or_else(|err| panic!("{err}"));
     let (security, auth_source_interface, auth_source_method) = match security_profile {
         None => (None, false, false),
-        Some(HttpSecurityProfile { origin, requirements }) => (
+        Some(HttpSecurityProfile {
+            origin,
+            requirements,
+        }) => (
             Some(requirements),
             matches!(origin, HttpSecurityOrigin::Interface),
             matches!(origin, HttpSecurityOrigin::Method),
@@ -2169,7 +2174,6 @@ fn param_source_code(source: ParamSource) -> String {
         ParamSource::Cookie => "ParamSource::Cookie".to_string(),
     }
 }
-
 
 fn header_is_multi(ty: &hir::TypeSpec) -> bool {
     matches!(

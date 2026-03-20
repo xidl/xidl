@@ -10,10 +10,10 @@ behavior:
   real HTTP or JSON-RPC flows
 
 Coverage for `http`, `http-security`, and `http-stream` exists, but it is not
-systematic. Unary HTTP mapping is stronger in `axum` and `openapi` than in
-`ts`, HTTP security is missing some invalid and target-spanning cases, and
-stream coverage is better than before but still leaves unsupported combinations
-and example-level regressions exposed. The user requirement is to make coverage
+systematic. Unary HTTP mapping is stronger in `axum` and `openapi` than in `ts`,
+HTTP security is missing some invalid and target-spanning cases, and stream
+coverage is better than before but still leaves unsupported combinations and
+example-level regressions exposed. The user requirement is to make coverage
 comprehensive against the three published specs, not just to add a few more
 happy-path fixtures.
 
@@ -36,8 +36,8 @@ happy-path fixtures.
 - changing the semantics of the HTTP, security, or stream generators
 - replacing the existing snapshot or example test harnesses with a new test
   framework
-- adding exhaustive coverage for non-HTTP capabilities that are unrelated to
-  the three target specs
+- adding exhaustive coverage for non-HTTP capabilities that are unrelated to the
+  three target specs
 
 ## Decisions
 
@@ -64,10 +64,10 @@ create more files without making it obvious which spec gap each file closes.
 
 ### Keep invalid coverage focused and target-aware
 
-Negative cases in `xidlc/tests` will continue to use targeted assertions
-instead of snapshot failures. Generator targets that return normal errors and
-targets such as OpenAPI that currently panic on invalid cases will each use the
-most direct assertion surface already present in the codebase.
+Negative cases in `xidlc/tests` will continue to use targeted assertions instead
+of snapshot failures. Generator targets that return normal errors and targets
+such as OpenAPI that currently panic on invalid cases will each use the most
+direct assertion surface already present in the codebase.
 
 This avoids overfitting a single harness to incompatible failure modes. The
 alternative of forcing every target through one generic invalid-IDL runner would
@@ -97,9 +97,9 @@ risk drifting back into ad hoc additions.
 - [Coverage expansion creates too many near-duplicate fixtures] -> Name fixtures
   by behavior class and avoid target copies when a case is irrelevant to that
   target.
-- [Target-specific invalid behavior differs between `Err` and `panic`] ->
-  Assert invalid paths at the most stable layer for each target and keep helper
-  code small and explicit.
+- [Target-specific invalid behavior differs between `Err` and `panic`] -> Assert
+  invalid paths at the most stable layer for each target and keep helper code
+  small and explicit.
 - [Example tests become noisy or flaky] -> Prefer deterministic in-process or
   ephemeral-port setups that already exist in `xidlc-examples/tests`.
 - [Spec coverage claims become stale] -> Tie each requirement to concrete

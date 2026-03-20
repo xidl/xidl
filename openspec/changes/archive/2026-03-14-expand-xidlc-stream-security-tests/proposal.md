@@ -20,12 +20,14 @@ tests instead of slipping into generated outputs unnoticed.
 ## Capabilities
 
 ### New Capabilities
+
 - `xidlc-stream-test-matrix`: Defines the required breadth of stream-oriented
   test fixtures across supported `xidlc` generator targets.
 - `xidlc-security-test-matrix`: Defines the required breadth of HTTP security
   test fixtures, including valid and invalid annotation combinations.
 
 ### Modified Capabilities
+
 - None.
 
 ## Impact

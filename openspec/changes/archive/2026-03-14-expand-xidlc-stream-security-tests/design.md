@@ -62,8 +62,8 @@ expectations, rather than relying on the snapshot loop to panic.
 
 This preserves the current snapshot ergonomics while improving failure
 localization for negative cases. The alternative of teaching the snapshot test
-to understand expected failures would overload a simple harness with
-per-fixture behavior.
+to understand expected failures would overload a simple harness with per-fixture
+behavior.
 
 ### Mirror cross-target coverage only where target behavior is expected to align
 

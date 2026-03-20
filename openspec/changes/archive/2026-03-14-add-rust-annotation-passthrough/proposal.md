@@ -10,8 +10,8 @@ teaching the compiler every Rust ecosystem convention.
 
 - Add a Rust-targeted `@rust(...)` annotation that emits `#[...]` into generated
   Rust code using the annotation body verbatim.
-- Apply `@rust(...)` passthrough on generated Rust items and fields for the
-  Rust backends that already materialize those annotated declarations.
+- Apply `@rust(...)` passthrough on generated Rust items and fields for the Rust
+  backends that already materialize those annotated declarations.
 - Preserve multiple `@rust(...)` annotations in source order so stacked Rust
   attributes remain expressible.
 - Add snapshot coverage and documentation for Rust attribute passthrough,
@@ -20,10 +20,12 @@ teaching the compiler every Rust ecosystem convention.
 ## Capabilities
 
 ### New Capabilities
-- `rust-annotation-passthrough`: Defines how `@rust(...)` annotations map to
-  raw Rust `#[...]` attributes in generated Rust code.
+
+- `rust-annotation-passthrough`: Defines how `@rust(...)` annotations map to raw
+  Rust `#[...]` attributes in generated Rust code.
 
 ### Modified Capabilities
+
 - None.
 
 ## Impact
@@ -33,5 +35,4 @@ teaching the compiler every Rust ecosystem convention.
 - Affected APIs: accepted IDL annotation syntax for Rust generation and the
   generated Rust source seen by downstream consumers.
 - Risk areas: preserving raw attribute text exactly, attaching attributes at the
-  correct emitted Rust item or field, and keeping non-Rust generators
-  unchanged.
+  correct emitted Rust item or field, and keeping non-Rust generators unchanged.

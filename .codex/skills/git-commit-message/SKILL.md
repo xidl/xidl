@@ -6,6 +6,7 @@ description: Draft or create git commit messages using conventional commits in a
 # Git Commit Message
 
 Use this skill when the user wants to:
+
 - draft a git commit message
 - choose a conventional commit type or scope
 - turn staged changes into a commit
@@ -13,22 +14,19 @@ Use this skill when the user wants to:
 
 ## Workflow
 
-1. Inspect the changes first.
-   Prefer `git diff --cached --stat` and `git diff --cached` when staged changes
-   exist. If nothing is staged, inspect `git status --short` and the relevant
-   diff before drafting a message.
-2. Identify the dominant intent of the change.
-   Choose one primary type such as `feat`, `fix`, `docs`, `refactor`, `test`,
-   `build`, `ci`, or `chore`.
-3. Choose a scope only when it adds useful precision.
-   Good scopes are small and concrete, such as `xidlc`, `openspec`, `http`, or
-   `skills`. Skip the scope when it adds noise.
+1. Inspect the changes first. Prefer `git diff --cached --stat` and
+   `git diff --cached` when staged changes exist. If nothing is staged, inspect
+   `git status --short` and the relevant diff before drafting a message.
+2. Identify the dominant intent of the change. Choose one primary type such as
+   `feat`, `fix`, `docs`, `refactor`, `test`, `build`, `ci`, or `chore`.
+3. Choose a scope only when it adds useful precision. Good scopes are small and
+   concrete, such as `xidlc`, `openspec`, `http`, or `skills`. Skip the scope
+   when it adds noise.
 4. Write the header as `type(scope): subject` or `type: subject`.
 5. Add a body only when it adds useful detail that is not obvious from the
    header.
-6. Add footers when required.
-   Use `BREAKING CHANGES:` for incompatible behavior or API changes. Do not use
-   `feat!:` or any other `!` shorthand in the header.
+6. Add footers when required. Use `BREAKING CHANGES:` for incompatible behavior
+   or API changes. Do not use `feat!:` or any other `!` shorthand in the header.
 
 ## Rules
 

@@ -3,8 +3,8 @@
 The unary HTTP mapping and the new HTTP security draft now define behavior that
 the compiler, OpenAPI generator, and `xidl-rust-axum` runtime do not yet
 implement consistently. This change aligns the implementation with the RFCs so
-the documented contract, generated artifacts, and runtime behavior stop
-drifting apart.
+the documented contract, generated artifacts, and runtime behavior stop drifting
+apart.
 
 ## What Changes
 
@@ -22,13 +22,15 @@ drifting apart.
 ## Capabilities
 
 ### New Capabilities
+
 - `unary-http-mapping`: Defines the normative unary HTTP contract for default
-  value decoding, optional value preservation, media-type rejection,
-  deprecation metadata, and default success/error status handling.
+  value decoding, optional value preservation, media-type rejection, deprecation
+  metadata, and default success/error status handling.
 - `http-security-mapping`: Defines unary HTTP security annotations and their
   inheritance, override, and OpenAPI mapping behavior.
 
 ### Modified Capabilities
+
 - None.
 
 ## Impact
@@ -44,13 +46,12 @@ drifting apart.
 
 ## Change Notes
 
-- Unary HTTP parsing now accepts hyphenated annotations such as
-  `@http-basic`, `@http-bearer`, `@api-key`, and `@no-security`.
-- Generated unary HTTP request models now default missing
-  query/header/cookie values to Rust `Default::default()` unless `@optional`
-  is present.
-- Generated unary HTTP body helper structs now default missing non-optional
-  JSON members and reject explicit `null` for those members.
+- Unary HTTP parsing now accepts hyphenated annotations such as `@http-basic`,
+  `@http-bearer`, `@api-key`, and `@no-security`.
+- Generated unary HTTP request models now default missing query/header/cookie
+  values to Rust `Default::default()` unless `@optional` is present.
+- Generated unary HTTP body helper structs now default missing non-optional JSON
+  members and reject explicit `null` for those members.
 - Generated unary HTTP clients now send `Accept` for the effective response
   media type.
 - OpenAPI output now emits deprecation flags and unary HTTP security schemes /
