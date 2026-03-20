@@ -1,7 +1,7 @@
 use crate::Error;
-use base64::engine::general_purpose::STANDARD;
 use base64::Engine;
-use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, COOKIE};
+use base64::engine::general_purpose::STANDARD;
+use reqwest::header::{AUTHORIZATION, COOKIE, HeaderMap, HeaderValue};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ClientApiKeyLocation {
@@ -105,7 +105,11 @@ impl Client {
         self.auth.as_ref()
     }
 
-    pub fn apply_auth(&self, req: &mut reqwest::Request, requirement: ClientAuthRequirement<'_>) -> crate::Result<()> {
+    pub fn apply_auth(
+        &self,
+        req: &mut reqwest::Request,
+        requirement: ClientAuthRequirement<'_>,
+    ) -> crate::Result<()> {
         match requirement {
             ClientAuthRequirement::ApiKey { location, name } => {
                 if location == ClientApiKeyLocation::Query {
@@ -166,8 +170,9 @@ impl Client {
                     .ok_or_else(|| Error::unauthorized())?;
                 match auth.location {
                     ClientApiKeyLocation::Header => {
-                        let header_name = reqwest::header::HeaderName::from_bytes(auth.name.as_bytes())
-                            .map_err(|err| Error::new(400, format!("{err:?}")))?;
+                        let header_name =
+                            reqwest::header::HeaderName::from_bytes(auth.name.as_bytes())
+                                .map_err(|err| Error::new(400, format!("{err:?}")))?;
                         let header_value = HeaderValue::from_str(&auth.value)
                             .map_err(|err| Error::new(400, format!("{err:?}")))?;
                         headers.insert(header_name, header_value);

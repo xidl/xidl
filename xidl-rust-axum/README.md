@@ -187,7 +187,8 @@ let user = client
 
 - `trait`: business interface definition (you implement it)
 - `Server`: Axum router wrapper that wires routes and request parsing
-- `Client`: HTTP client wrapper based on `reqwest`
+- `Client`: HTTP client wrapper based on `reqwest` (requires the `client`
+  feature)
 - `Request<T>`: carries headers and parsed request data
 
 To generate only server or client code:

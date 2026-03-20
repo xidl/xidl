@@ -1,10 +1,10 @@
 mod error;
 pub use error::{Error, ErrorBody, Result};
 
+#[cfg(feature = "client")]
 mod client;
-pub use client::{
-    ApiKeyAuth, Client, ClientApiKeyLocation, ClientAuth, ClientAuthRequirement,
-};
+#[cfg(feature = "client")]
+pub use client::{ApiKeyAuth, Client, ClientApiKeyLocation, ClientAuth, ClientAuthRequirement};
 
 mod server;
 pub use server::{Server, Service};
@@ -20,6 +20,7 @@ pub mod auth;
 pub use axum;
 pub use axum_extra;
 pub use futures_util;
+#[cfg(feature = "client")]
 pub use reqwest;
 pub use serde;
 pub use serde_json;

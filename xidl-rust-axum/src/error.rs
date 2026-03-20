@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
+use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
-use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 

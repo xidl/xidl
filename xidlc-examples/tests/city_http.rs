@@ -1,7 +1,7 @@
+use xidl_rust_axum::{ApiKeyAuth, ClientApiKeyLocation, ClientAuth};
 use xidlc_examples::city_http::SmartCityHttpApiClient;
 use xidlc_examples::city_http::SmartCityHttpApiServer;
 use xidlc_examples::city_http::SmartCityHttpService;
-use xidl_rust_axum::{ApiKeyAuth, ClientApiKeyLocation, ClientAuth};
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn http_client_calls_all_endpoints() {

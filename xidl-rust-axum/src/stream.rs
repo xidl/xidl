@@ -4,6 +4,7 @@ use axum::extract::ws::{Message as AxumWsMessage, WebSocket as AxumWebSocket};
 use axum::response::{IntoResponse, Sse, sse::Event};
 use futures_util::stream;
 use futures_util::{SinkExt, Stream, StreamExt, TryStreamExt};
+#[cfg(feature = "client")]
 use reqwest::Request;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
@@ -12,8 +13,8 @@ use std::pin::Pin;
 use tokio::io::AsyncRead;
 use tokio::sync::mpsc;
 use tokio::task::JoinHandle;
-use tokio_tungstenite::tungstenite::client::IntoClientRequest;
 use tokio_tungstenite::tungstenite::Message as TungsteniteMessage;
+use tokio_tungstenite::tungstenite::client::IntoClientRequest;
 use tokio_util::codec::{FramedRead, LinesCodec};
 use tokio_util::io::StreamReader;
 
@@ -346,7 +347,7 @@ where
 
 pub async fn open_bidi_client_with_headers<TIn, TOut>(
     ws_url: &str,
-    headers: reqwest::header::HeaderMap,
+    headers: axum::http::HeaderMap,
 ) -> Result<BidiClientStream<TIn, TOut>>
 where
     TIn: Serialize + Send + 'static,
@@ -451,6 +452,7 @@ where
     Sse::new(mapped.chain(complete)).into_response()
 }
 
+#[cfg(feature = "client")]
 pub async fn open_sse<T>(http: &reqwest::Client, req: Request) -> Result<Reader<T>>
 where
     T: DeserializeOwned + Send + 'static,
@@ -501,6 +503,7 @@ where
     decode_ndjson_reader(StreamReader::new(data_stream))
 }
 
+#[cfg(feature = "client")]
 pub fn encode_ndjson_body<T>(stream: NdjsonSendStream<T>) -> reqwest::Body
 where
     T: Serialize + Send + 'static,

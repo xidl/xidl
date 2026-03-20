@@ -1,11 +1,11 @@
+use xidl_rust_axum::ClientAuth;
+use xidl_rust_axum::auth::basic::BasicAuth;
+use xidl_rust_axum::auth::bearer::BearerAuth;
 use xidlc_examples::city_http_stream::CityHttpStreamApiChatRequest;
 use xidlc_examples::city_http_stream::CityHttpStreamApiClient;
 use xidlc_examples::city_http_stream::CityHttpStreamApiServer;
 use xidlc_examples::city_http_stream::CityHttpStreamApiUploadAssetRequest;
 use xidlc_examples::city_http_stream::CityHttpStreamService;
-use xidl_rust_axum::auth::basic::BasicAuth;
-use xidl_rust_axum::auth::bearer::BearerAuth;
-use xidl_rust_axum::ClientAuth;
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn http_stream_client_calls_stream_endpoints() {
