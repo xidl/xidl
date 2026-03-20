@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.29.0](https://github.com/xidl/xidl/compare/v0.28.0...v0.29.0) (2026-03-20)
+
+
+### Features
+
+* **xidl-rust-axum:** make reqwest as a optional dep ([743d5ad](https://github.com/xidl/xidl/commit/743d5ad917952d9b9a9c3ad9d3bdef115db0dc20))
+
 ## [0.28.0](https://github.com/xidl/xidl/compare/v0.27.0...v0.28.0) (2026-03-18)
 
 
