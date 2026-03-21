@@ -51,3 +51,10 @@ tokio = { version = "1.36", features = ["full"] }
 
 [dev-dependencies]
 insta = "1.44"
+
+[features]
+default = ["fmt"]
+fmt = ["fmt-rust", "fmt-cpp", "fmt-typescript"]
+fmt-rust = []
+fmt-cpp = []
+fmt-typescript = []

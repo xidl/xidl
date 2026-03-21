@@ -69,6 +69,7 @@ pub fn format_idl_source_with_name(source: &str, filename: &str) -> IdlcResult<S
     .format(source)
 }
 
+#[cfg(feature = "fmt-rust")]
 pub fn format_rust_source(source: &str) -> IdlcResult<String> {
     let output = Formatter::new(FormatConfig {
         language: tree_sitter_rust::LANGUAGE.into(),
@@ -82,6 +83,12 @@ pub fn format_rust_source(source: &str) -> IdlcResult<String> {
     Ok(Formatter::normalize_blank_lines(&output))
 }
 
+#[cfg(not(feature = "fmt-rust"))]
+pub fn format_rust_source(source: &str) -> IdlcResult<String> {
+    Ok(source.to_string())
+}
+
+#[cfg(feature = "fmt-cpp")]
 pub fn format_c_source(source: &str) -> IdlcResult<String> {
     let output = Formatter::new(FormatConfig {
         language: tree_sitter_cpp::LANGUAGE.into(),
@@ -95,6 +102,12 @@ pub fn format_c_source(source: &str) -> IdlcResult<String> {
     Ok(Formatter::normalize_blank_lines(&output))
 }
 
+#[cfg(not(feature = "fmt-cpp"))]
+pub fn format_c_source(source: &str) -> IdlcResult<String> {
+    Ok(source.to_string())
+}
+
+#[cfg(feature = "fmt-typescript")]
 pub fn format_typescript_source(source: &str) -> IdlcResult<String> {
     let output = Formatter::new(FormatConfig {
         language: tree_sitter_typescript::LANGUAGE_TYPESCRIPT.into(),
@@ -106,6 +119,11 @@ pub fn format_typescript_source(source: &str) -> IdlcResult<String> {
     })
     .format(source)?;
     Ok(Formatter::normalize_blank_lines(&output))
+}
+
+#[cfg(not(feature = "fmt-typescript"))]
+pub fn format_typescript_source(source: &str) -> IdlcResult<String> {
+    Ok(source.to_string())
 }
 
 pub fn format_jinja_source(source: &str) -> IdlcResult<String> {
