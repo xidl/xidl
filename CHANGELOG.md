@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.30.0](https://github.com/xidl/xidl/compare/v0.29.0...v0.30.0) (2026-03-21)
+
+
+### Features
+
+* **xidlc:** make fmt as a feature ([4ff313a](https://github.com/xidl/xidl/commit/4ff313a0ec01ce29f0a1a5b9d9a1b71c2e107345))
+
+
+### Bug Fixes
+
+* typo ([92ed86b](https://github.com/xidl/xidl/commit/92ed86b742fc9840337d0d75a4e5a9c7b94e9ed0))
+
 ## [0.29.0](https://github.com/xidl/xidl/compare/v0.28.0...v0.29.0) (2026-03-20)
 
 
