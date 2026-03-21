@@ -1,5 +1,5 @@
-#progma xidlc package xidlc
-#progma xidlc version v1.0.0
+#pragma xidlc package xidlc
+#pragma xidlc version v1.0.0
 
 @http_basic
 @api_key(in = "header", name = "X-Org-Key")

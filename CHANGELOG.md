@@ -146,7 +146,7 @@
 
 ### Features
 
-* **openapi:** support progma xidlc service ([649f542](https://github.com/xidl/xidl/commit/649f542540940b2ccf013e72c2613243ce54f87c))
+* **openapi:** support pragma xidlc service ([649f542](https://github.com/xidl/xidl/commit/649f542540940b2ccf013e72c2613243ce54f87c))
 
 ## [0.10.0](https://github.com/xidl/xidl/compare/v0.9.0...v0.10.0) (2026-03-09)
 
@@ -312,7 +312,7 @@
 * **rust:** remove typeobject ([e43969c](https://github.com/xidl/xidl/commit/e43969c7f72eff046c7d1853bf2e65c6c46ff857))
 * **rust:** support [@derive](https://github.com/derive) ([5992faf](https://github.com/xidl/xidl/commit/5992faf4141363474c31678b245e2febb5d3928a))
 * **scoped_name:** handle is_root ([58a7bcb](https://github.com/xidl/xidl/commit/58a7bcbce6459fdb3b2516728539f03e5173a98e))
-* support #progma xidlc package and #progma xidlc version ([fa3d418](https://github.com/xidl/xidl/commit/fa3d418921f03f647bd97ead0d75043a948a6c85))
+* support #pragma xidlc package and #pragma xidlc version ([fa3d418](https://github.com/xidl/xidl/commit/fa3d418921f03f647bd97ead0d75043a948a6c85))
 * support float ([49e42c5](https://github.com/xidl/xidl/commit/49e42c57ed2509a66f6dda140cdb5ab01b8f3ce0))
 * support more type ([5c42ffc](https://github.com/xidl/xidl/commit/5c42ffc8e71e70d632d890163dcf2a5f3a6a4225))
 * support more type ([686e0bc](https://github.com/xidl/xidl/commit/686e0bcbaefece57a56c14511f5836b35b7199f4))

@@ -1,6 +1,6 @@
-#progma xidlc package XIDLC HTTP Example
-#progma xidlc version v0.0.1
-#progma xidlc service http://127.0.0.1:8081 localhost
+#pragma xidlc package XIDLC HTTP Example
+#pragma xidlc version v0.0.1
+#pragma xidlc service http://127.0.0.1:8081 localhost
 
 interface HttpServer {
     /// host name

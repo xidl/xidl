@@ -1,5 +1,5 @@
-#progma xidlc package Smart City JSON-RPC Stream APIs
-#progma xidlc version v1.0.0
+#pragma xidlc package Smart City JSON-RPC Stream APIs
+#pragma xidlc version v1.0.0
 
 interface CityJsonrpcStreamApi {
     @server_stream

@@ -1,5 +1,5 @@
-#progma xidlc package demo
-#progma xidlc version v0.2.0
+#pragma xidlc package demo
+#pragma xidlc version v0.2.0
 
 module demo {
     struct User {

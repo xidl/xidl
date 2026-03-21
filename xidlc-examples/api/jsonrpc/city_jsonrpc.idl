@@ -1,5 +1,5 @@
-#progma xidlc package Smart City RPC APIs
-#progma xidlc version v2.0.0
+#pragma xidlc package Smart City RPC APIs
+#pragma xidlc version v2.0.0
 
 interface SmartCityRpcApi {
     string quote_trip(

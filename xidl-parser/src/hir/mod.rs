@@ -551,7 +551,7 @@ fn normalize_path(path: &Path) -> PathBuf {
 
 fn parse_xidlc_pragma(call: &crate::typed_ast::PreprocCall) -> Option<Pragma> {
     let directive = call.directive.0.as_str();
-    if !directive.eq_ignore_ascii_case("#pragma") && !directive.eq_ignore_ascii_case("#progma") {
+    if !directive.eq_ignore_ascii_case("#pragma") {
         return None;
     }
     let arg = call.argument.as_ref()?.0.as_str();
