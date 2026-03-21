@@ -52,6 +52,7 @@ jobs:
         with:
           crate: cross
           git: https://github.com/cross-rs/cross
+          rev: 8633ec65ab914015c2444c732568b414bd3c47cf
 
       - name: Build xidlc (cross)
         if: matrix.platform.use_cross
