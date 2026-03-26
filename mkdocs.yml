@@ -4,20 +4,39 @@ repo_url: https://github.com/xidl/xidl
 
 nav:
   - Overview: index.md
-  - Axum: rust-axum.md
-  - RUST-JSONRPC: rust-jsonrpc.md
-  - OpenAPI: openapi.md
-
-  - RFC:
+  - User Guides:
+      - Overview: user/index.md
+      - Installation: user/install.md
+      - Using xidlc: user/xidlc.md
+      - Using xidl-build: user/xidl-build.md
+      - IDL Guide: user/idl.md
+      - HTTP Guide: user/http.md
+      - JSON-RPC Guide: user/jsonrpc.md
+      - Axum Target Note: rust-axum.md
+      - Rust JSON-RPC Target Note: rust-jsonrpc.md
+  - Reference:
+      - Overview: reference/index.md
+      - IDL Elements: reference/idl-elements.md
+      - Annotations: reference/annotations.md
+      - Pragmas: reference/pragmas.md
+      - Targets: reference/targets.md
+      - OpenAPI Metadata Note: openapi.md
+      - XIDL Extensions: xidl-extend.md
+      - XCDR Background: xcdr.md
+      - Legacy Pragma Note: pragma.md
+  - RFCs:
       - HTTP: rfc/http.md
       - HTTP Security: rfc/http-security.md
       - HTTP Stream: rfc/http-stream.md
       - JSONRPC: rfc/jsonrpc.md
       - JSONRPC Stream: rfc/jsonrpc-stream.md
   - Development:
+      - Overview: development/index.md
+      - Documentation Audit: development/doc-audit.md
       - Plugin Development: plugin.md
-      - Compiler Spec: architecture.md
-      - Compiler Extensions: pragma.md
+      - Architecture: architecture.md
+  - AI Skills:
+      - XIDL Skill: ai/index.md
 
 theme:
   name: material

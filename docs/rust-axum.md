@@ -1,1 +1,58 @@
-{% include-markdown "../xidl-rust-axum/README.md" %}
+# xidlc `rust-axum`
+
+The `rust-axum` target generates Rust HTTP bindings for Axum-based services and
+clients.
+
+## Minimal flow
+
+```bash
+xidlc --lang rust-axum --out-dir generated hello_world.idl
+```
+
+Generate OpenAPI alongside it when you need a schema document:
+
+```bash
+xidlc --lang openapi --out-dir generated hello_world.idl
+```
+
+## What gets generated
+
+For each interface, the target currently emits:
+
+- a Rust trait for business logic
+- a server wrapper that wires routes and request parsing
+- a client wrapper
+- request payload types used by handlers
+
+## Minimal server shape
+
+```rust
+mod imp;
+
+use imp::HelloWorld;
+use imp::HelloWorldServer;
+
+struct HelloWorldImpl;
+
+#[async_trait::async_trait]
+impl HelloWorld for HelloWorldImpl {
+    async fn say_hello(
+        &self,
+        req: xidl_rust_axum::Request<imp::HelloWorldSayHelloRequest>,
+    ) -> Result<(), xidl_rust_axum::Error> {
+        println!("hello {}", req.data.name);
+        Ok(())
+    }
+}
+```
+
+## Runtime pairing
+
+Generated code is designed to work with `xidl-rust-axum`.
+
+Use this target with:
+
+- [HTTP Guide](user/http.md)
+- [HTTP RFC](rfc/http.md)
+- [HTTP Stream RFC](rfc/http-stream.md)
+- [HTTP Security RFC](rfc/http-security.md)

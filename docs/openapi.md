@@ -1,9 +1,31 @@
-# OpenAPI
+# OpenAPI Metadata Note
 
-## Pragma
+The `openapi` target emits `openapi.json` for HTTP-oriented interfaces.
+
+## Generate OpenAPI
+
+```bash
+xidlc --lang openapi --out-dir generated api.idl
+```
+
+## Metadata pragmas
+
+The current OpenAPI generator reads the following `#pragma xidlc` values:
 
 ```idl
-#pragma xidlc service "http://127.0.0.1:8080" "dev"
-#pragma xidlc service "http://192.168.1.20:8080" "product"
-#pragma xidlc service "http://192.168.1.30:8080"
+#pragma xidlc package "Smart City Public APIs"
+#pragma xidlc version "v2.0.0"
 ```
+
+Effects:
+
+- `package` sets `info.title`
+- `version` sets `info.version`
+
+If omitted, the generator falls back to default metadata values.
+
+## Related material
+
+- [HTTP Guide](user/http.md)
+- [Pragmas Reference](reference/pragmas.md)
+- [Targets Reference](reference/targets.md)

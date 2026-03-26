@@ -1,0 +1,57 @@
+# Install XIDL
+
+`xidlc` is the command-line entry point for the XIDL toolchain. Most users only
+need the compiler first, then add runtime crates or `xidl-build` when a target
+requires them.
+
+## Install `xidlc`
+
+### Release installer
+
+macOS and Linux:
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://xidl.github.io/xidl/public/install.sh | sh
+```
+
+Windows PowerShell:
+
+```powershell
+iwr -useb https://xidl.github.io/xidl/public/install.ps1 | iex
+```
+
+### Cargo
+
+```bash
+cargo install xidlc
+```
+
+### Cargo Binstall
+
+```bash
+cargo binstall xidlc
+```
+
+## Verify the install
+
+```bash
+xidlc --help
+```
+
+The compiler uses `idlc` as its clap command name internally, but the published
+binary in this repository is `xidlc`.
+
+## Add target-specific crates when needed
+
+Some generated outputs require companion crates at runtime.
+
+- `rust`: generated Rust data types are plain Rust code
+- `rust-jsonrpc`: pair generated code with `xidl-jsonrpc`
+- `rust-axum`: pair generated code with `xidl-rust-axum`
+- `openapi` and `openrpc`: emit schema files instead of a runtime crate
+- `xidl-build`: use in Rust `build.rs` when you want code generation during
+  compilation
+
+## Next step
+
+Continue with [Using xidlc](xidlc.md) for the main compiler workflow.
