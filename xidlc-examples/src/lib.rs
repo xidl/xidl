@@ -21,3 +21,4 @@ pub mod city_jsonrpc;
 pub mod city_jsonrpc_stream;
 
 pub mod http_server;
+pub mod hysteria2;
