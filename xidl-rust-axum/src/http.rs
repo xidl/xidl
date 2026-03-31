@@ -1,6 +1,9 @@
 use axum::http::{HeaderMap, header};
 
 pub fn accepts_media_type(headers: &HeaderMap, expected: &str) -> bool {
+    let Some(expected) = canonical_media_type(expected) else {
+        return false;
+    };
     let Some(expected_type) = parse_media_type(expected) else {
         return false;
     };
@@ -17,10 +20,10 @@ pub fn accepts_media_type(headers: &HeaderMap, expected: &str) -> bool {
             if media.is_empty() || media == "*/*" {
                 return true;
             }
-            if media.eq_ignore_ascii_case(expected) {
+            if media_type_eq(media, expected) {
                 return true;
             }
-            if let Some((ty, sub)) = media.split_once('/') {
+            if let Some((ty, sub)) = parse_media_type(media) {
                 if sub == "*" && ty.eq_ignore_ascii_case(expected_type.0) {
                     return true;
                 }
@@ -30,8 +33,34 @@ pub fn accepts_media_type(headers: &HeaderMap, expected: &str) -> bool {
     false
 }
 
-fn parse_media_type(value: &str) -> Option<(&str, &str)> {
+pub fn content_type_matches(headers: &HeaderMap, expected: &str) -> bool {
+    let Some(content_type) = headers.get(header::CONTENT_TYPE) else {
+        return false;
+    };
+    let Ok(content_type) = content_type.to_str() else {
+        return false;
+    };
+    media_type_eq(content_type, expected)
+}
+
+pub fn media_type_eq(actual: &str, expected: &str) -> bool {
+    match (canonical_media_type(actual), canonical_media_type(expected)) {
+        (Some(actual), Some(expected)) => actual.eq_ignore_ascii_case(expected),
+        _ => false,
+    }
+}
+
+pub fn canonical_media_type(value: &str) -> Option<&str> {
     let media = value.split(';').next()?.trim();
+    if media.contains('/') {
+        Some(media)
+    } else {
+        None
+    }
+}
+
+fn parse_media_type(value: &str) -> Option<(&str, &str)> {
+    let media = canonical_media_type(value)?;
     media.split_once('/')
 }
 

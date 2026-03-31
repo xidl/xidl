@@ -13,6 +13,8 @@ mod request;
 pub use request::Request;
 
 pub mod http;
+mod serde_factory;
+pub use serde_factory::{DeserializeFactory, SerializeFactory};
 pub mod stream;
 
 pub mod auth;

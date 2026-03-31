@@ -122,7 +122,16 @@ T:HttpService+Send+Sync+'static,
         let mut resp = match svc.get_health(req).await{
             Ok(resp_value) => {
                 let mut resp = {
-                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    .to_vec(&resp_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                    .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                    .header(
+                    ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                    "application/json",
+                    )
+                    .body(::xidl_rust_axum::axum::body::Body::from(body))
+                    .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?
                 };
                 resp
             }
@@ -145,7 +154,16 @@ T:HttpService+Send+Sync+'static,
         let mut resp = match svc.get_version(req).await{
             Ok(resp_value) => {
                 let mut resp = {
-                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    .to_vec(&resp_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                    .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                    .header(
+                    ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                    "application/json",
+                    )
+                    .body(::xidl_rust_axum::axum::body::Body::from(body))
+                    .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?
                 };
                 resp
             }
@@ -168,7 +186,16 @@ T:HttpService+Send+Sync+'static,
         let mut resp = match svc.get_memory_info(req).await{
             Ok(resp_value) => {
                 let mut resp = {
-                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    .to_vec(&resp_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                    .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                    .header(
+                    ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                    "application/json",
+                    )
+                    .body(::xidl_rust_axum::axum::body::Body::from(body))
+                    .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?
                 };
                 resp
             }
@@ -215,7 +242,16 @@ T:HttpService+Send+Sync+'static,
         let mut resp = match svc.get_state(req).await{
             Ok(resp_value) => {
                 let mut resp = {
-                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    .to_vec(&resp_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                    .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                    .header(
+                    ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                    "application/json",
+                    )
+                    .body(::xidl_rust_axum::axum::body::Body::from(body))
+                    .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?
                 };
                 resp
             }
@@ -238,7 +274,16 @@ T:HttpService+Send+Sync+'static,
         let mut resp = match svc.get_udp_stats(req).await{
             Ok(resp_value) => {
                 let mut resp = {
-                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    .to_vec(&resp_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                    .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                    .header(
+                    ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                    "application/json",
+                    )
+                    .body(::xidl_rust_axum::axum::body::Body::from(body))
+                    .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?
                 };
                 resp
             }
@@ -251,12 +296,21 @@ T:HttpService+Send+Sync+'static,
     async fn create_simple(
     ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
     headers: ::xidl_rust_axum::axum::http::HeaderMap,
-    xidl_rust_axum::axum::Json(body):xidl_rust_axum::axum::Json<HttpServiceCreateSimpleBody>
+    body: ::xidl_rust_axum::axum::body::Body
     )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
         if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
 
+        if!xidl_rust_axum::http::content_type_matches(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::unsupported_media_type());
+        }
+
+        let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body,usize::MAX)
+        .await
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
+        let body:HttpServiceCreateSimpleBody = xidl_rust_axum::DeserializeFactory::new("application/json")
+        .from_slice(&body_bytes)?;
         let HttpServiceCreateSimpleBody{
 
         local_addr,
@@ -272,7 +326,16 @@ T:HttpService+Send+Sync+'static,
         let mut resp = match svc.create_simple(req).await{
             Ok(resp_value) => {
                 let mut resp = {
-                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    .to_vec(&resp_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                    .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                    .header(
+                    ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                    "application/json",
+                    )
+                    .body(::xidl_rust_axum::axum::body::Body::from(body))
+                    .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?
                 };
                 resp
             }
@@ -396,9 +459,12 @@ impl HttpServiceClient{
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
-            resp.json::<HealthResponse>()
+            let body = resp
+            .bytes()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+            xidl_rust_axum::DeserializeFactory::new("application/json")
+            .from_slice(&body)
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -428,9 +494,12 @@ impl HttpServiceClient{
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
-            resp.json::<VersionResponse>()
+            let body = resp
+            .bytes()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+            xidl_rust_axum::DeserializeFactory::new("application/json")
+            .from_slice(&body)
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -460,9 +529,12 @@ impl HttpServiceClient{
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
-            resp.json::<MemoryResponse>()
+            let body = resp
+            .bytes()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+            xidl_rust_axum::DeserializeFactory::new("application/json")
+            .from_slice(&body)
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -522,9 +594,12 @@ impl HttpServiceClient{
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
-            resp.json::<crate::api::state::StateResponse>()
+            let body = resp
+            .bytes()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+            xidl_rust_axum::DeserializeFactory::new("application/json")
+            .from_slice(&body)
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -554,9 +629,12 @@ impl HttpServiceClient{
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
-            resp.json::<UdpStatsResponse>()
+            let body = resp
+            .bytes()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+            xidl_rust_axum::DeserializeFactory::new("application/json")
+            .from_slice(&body)
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -583,8 +661,8 @@ impl HttpServiceClient{
             local_addr,
             remote_port,
         };
-        let body = xidl_rust_axum::serde_json::to_vec(&body)
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        let body = xidl_rust_axum::SerializeFactory::new("application/json")
+        .to_vec(&body)?;
         req.headers_mut().insert(
         xidl_rust_axum::reqwest::header::CONTENT_TYPE,
         xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
@@ -598,9 +676,12 @@ impl HttpServiceClient{
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
-            resp.json::<CreateSimpleResponse>()
+            let body = resp
+            .bytes()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+            xidl_rust_axum::DeserializeFactory::new("application/json")
+            .from_slice(&body)
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();

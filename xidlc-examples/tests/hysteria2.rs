@@ -20,7 +20,11 @@ async fn hysteria2_auth_uses_headers_for_request_and_response() {
 
     let client = Hysteria2Client::new(format!("http://{}", addr));
     let response = client
-        .auth("user:password".to_string(), 114_514, "random-padding".to_string())
+        .auth(
+            "user:password".to_string(),
+            114_514,
+            "random-padding".to_string(),
+        )
         .await
         .expect("call hysteria2 auth");
 

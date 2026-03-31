@@ -187,7 +187,16 @@ T:HttpEdgeCasesService+Send+Sync+'static,
         let mut resp = match svc.get_user(req).await{
             Ok(resp_value) => {
                 let mut resp = {
-                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    .to_vec(&resp_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                    .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                    .header(
+                    ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                    "application/json",
+                    )
+                    .body(::xidl_rust_axum::axum::body::Body::from(body))
+                    .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?
                 };
                 resp
             }
@@ -221,7 +230,16 @@ T:HttpEdgeCasesService+Send+Sync+'static,
         let mut resp = match svc.get_item(req).await{
             Ok(resp_value) => {
                 let mut resp = {
-                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    .to_vec(&resp_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                    .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                    .header(
+                    ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                    "application/json",
+                    )
+                    .body(::xidl_rust_axum::axum::body::Body::from(body))
+                    .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?
                 };
                 resp
             }
@@ -255,7 +273,16 @@ T:HttpEdgeCasesService+Send+Sync+'static,
         let mut resp = match svc.lookup(req).await{
             Ok(resp_value) => {
                 let mut resp = {
-                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(xidl_rust_axum::axum::Json(resp_value))
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    .to_vec(&resp_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                    .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                    .header(
+                    ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                    "application/json",
+                    )
+                    .body(::xidl_rust_axum::axum::body::Body::from(body))
+                    .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?
                 };
                 resp
             }
@@ -396,9 +423,12 @@ impl HttpEdgeCasesServiceClient{
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
-            resp.json::<String>()
+            let body = resp
+            .bytes()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+            xidl_rust_axum::DeserializeFactory::new("application/json")
+            .from_slice(&body)
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -430,9 +460,12 @@ impl HttpEdgeCasesServiceClient{
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
-            resp.json::<String>()
+            let body = resp
+            .bytes()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+            xidl_rust_axum::DeserializeFactory::new("application/json")
+            .from_slice(&body)
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -472,9 +505,12 @@ impl HttpEdgeCasesServiceClient{
         .await
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         if resp.status().is_success(){
-            resp.json::<String>()
+            let body = resp
+            .bytes()
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+            xidl_rust_axum::DeserializeFactory::new("application/json")
+            .from_slice(&body)
         }else{
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
