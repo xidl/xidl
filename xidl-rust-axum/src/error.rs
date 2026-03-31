@@ -5,10 +5,16 @@ use axum::response::{IntoResponse, Response};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
+/// Runtime error type used by generated clients and servers.
+///
+/// The `code` field is interpreted as an HTTP status code when the error is
+/// converted into an Axum response.
 #[derive(Debug, Clone, Error)]
 #[error("{message}")]
 pub struct Error {
+    /// HTTP-like status code associated with the failure.
     pub code: u16,
+    /// Human-readable error message.
     pub message: Cow<'static, str>,
 }
 
@@ -29,6 +35,7 @@ macro_rules! status_codes {
 }
 
 impl Error {
+    /// Creates a new error with an explicit status code and message.
     pub fn new(code: u16, message: impl Into<Cow<'static, str>>) -> Self {
         Self {
             code,
@@ -36,10 +43,14 @@ impl Error {
         }
     }
 
+    /// Converts the stored code into an HTTP status.
+    ///
+    /// Invalid status codes fall back to `500 Internal Server Error`.
     pub fn http_status(&self) -> StatusCode {
         StatusCode::from_u16(self.code).unwrap_or(StatusCode::INTERNAL_SERVER_ERROR)
     }
 
+    /// Builds an [`struct@Error`] from an HTTP response status and optional error body.
     pub fn from_http_response(status: StatusCode, body: Option<ErrorBody>) -> Self {
         match body {
             Some(body) => Self::new(body.code, body.msg),
@@ -47,6 +58,7 @@ impl Error {
         }
     }
 
+    /// Creates an internal server error with the provided message.
     pub fn message(message: impl Into<Cow<'static, str>>) -> Self {
         Self::new(500, message)
     }
@@ -273,11 +285,15 @@ impl IntoResponse for Error {
     }
 }
 
+/// Convenient result alias for runtime operations.
 pub type Result<T> = std::result::Result<T, Error>;
 
+/// Serializable wire representation of [`struct@Error`].
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ErrorBody {
+    /// HTTP-like status code.
     pub code: u16,
+    /// Human-readable error message.
     pub msg: Cow<'static, str>,
 }
 

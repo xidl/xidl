@@ -5,24 +5,32 @@ use axum_extra::headers::{Error as HeaderError, Header};
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
 
+/// Parsed HTTP Basic auth credentials.
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct BasicAuth {
+    /// Username portion of the credential.
     pub username: String,
+    /// Optional password portion of the credential.
     pub password: Option<String>,
 }
 
+/// Errors returned while parsing Basic auth credentials.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BasicAuthError {
+    /// No `Authorization` header was present.
     Missing,
+    /// The header existed but was malformed.
     Invalid,
 }
 
+/// Extracts Basic auth credentials from request headers.
 pub fn extract_basic_auth(headers: &HeaderMap) -> Result<BasicAuth, BasicAuthError> {
     let value = headers.get(AUTHORIZATION).ok_or(BasicAuthError::Missing)?;
     let value = value.to_str().map_err(|_| BasicAuthError::Invalid)?;
     parse_basic_auth(value)
 }
 
+/// Parses an `Authorization: Basic ...` header value.
 pub fn parse_basic_auth(value: &str) -> Result<BasicAuth, BasicAuthError> {
     let value = value.trim();
     let (scheme, token) = value.split_once(' ').ok_or(BasicAuthError::Invalid)?;
@@ -43,12 +51,15 @@ pub fn parse_basic_auth(value: &str) -> Result<BasicAuth, BasicAuthError> {
     Ok(BasicAuth { username, password })
 }
 
+/// Serializable bearer token payload.
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct BearerAuth {
+    /// Bearer token without the scheme prefix.
     pub token: String,
 }
 
 impl BearerAuth {
+    /// Converts a decoded typed header into a serializable token wrapper.
     pub fn from_header(header: BearerHeader) -> Self {
         let token = header.token().to_string();
         let token = if token.is_empty() {
@@ -60,12 +71,14 @@ impl BearerAuth {
     }
 }
 
+/// Typed `Authorization: Bearer ...` header.
 #[derive(Debug, Clone)]
 pub struct BearerHeader {
     token: String,
 }
 
 impl BearerHeader {
+    /// Returns the bearer token value.
     pub fn token(&self) -> &str {
         &self.token
     }

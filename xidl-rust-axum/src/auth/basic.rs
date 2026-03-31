@@ -2,6 +2,7 @@ pub use crate::auth::bearer::{BasicAuth, BasicAuthError, extract_basic_auth, par
 use axum::http::HeaderValue;
 use axum::response::IntoResponse;
 
+/// Builds a `401 Unauthorized` response with a Basic auth challenge.
 pub fn unauthorized_response(realm: &str) -> axum::response::Response {
     let mut resp = crate::Error::unauthorized().into_response();
     let realm = sanitize_realm(realm);

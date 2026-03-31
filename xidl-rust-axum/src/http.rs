@@ -1,5 +1,8 @@
 use axum::http::{HeaderMap, header};
 
+/// Returns `true` when the request accepts `expected` according to `Accept`.
+///
+/// Missing `Accept` headers are treated as accepting any media type.
 pub fn accepts_media_type(headers: &HeaderMap, expected: &str) -> bool {
     let Some(expected) = canonical_media_type(expected) else {
         return false;
@@ -33,6 +36,7 @@ pub fn accepts_media_type(headers: &HeaderMap, expected: &str) -> bool {
     false
 }
 
+/// Returns `true` when `Content-Type` matches `expected`, ignoring parameters.
 pub fn content_type_matches(headers: &HeaderMap, expected: &str) -> bool {
     let Some(content_type) = headers.get(header::CONTENT_TYPE) else {
         return false;
@@ -43,6 +47,7 @@ pub fn content_type_matches(headers: &HeaderMap, expected: &str) -> bool {
     media_type_eq(content_type, expected)
 }
 
+/// Compares two media types case-insensitively after canonicalization.
 pub fn media_type_eq(actual: &str, expected: &str) -> bool {
     match (canonical_media_type(actual), canonical_media_type(expected)) {
         (Some(actual), Some(expected)) => actual.eq_ignore_ascii_case(expected),
@@ -50,6 +55,7 @@ pub fn media_type_eq(actual: &str, expected: &str) -> bool {
     }
 }
 
+/// Extracts the bare media type without parameters.
 pub fn canonical_media_type(value: &str) -> Option<&str> {
     let media = value.split(';').next()?.trim();
     if media.contains('/') {
@@ -64,10 +70,12 @@ fn parse_media_type(value: &str) -> Option<(&str, &str)> {
     media.split_once('/')
 }
 
+/// Serde helper functions used by generated request models.
 pub mod serde_ext {
     use serde::Deserialize;
     use serde::de::{self, Deserializer};
 
+    /// Uses the field default when absent, but rejects explicit `null`.
     pub fn default_on_missing_reject_null<'de, D, T>(deserializer: D) -> Result<T, D::Error>
     where
         D: Deserializer<'de>,

@@ -1,9 +1,50 @@
+//! Build-script support for invoking `xidlc` from `build.rs`.
+//!
+//! This crate wraps the `xidlc` code generator in a small builder API so Cargo
+//! build scripts can generate code or schema artifacts without shelling out to
+//! the `xidlc` binary.
+//!
+//! # Example
+//!
+//! ```no_run
+//! fn main() -> Result<(), xidl_build::IdlcError> {
+//!     println!("cargo:rerun-if-changed=idl/hello_world.idl");
+//!
+//!     xidl_build::Builder::new()
+//!         .with_lang("rust")
+//!         .compile(&["idl/hello_world.idl"])?;
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! By default, generated files are written to Cargo's `OUT_DIR`, and both
+//! client and server artifacts are enabled.
 use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+/// The error type returned by the underlying `xidlc` compiler driver.
 pub use xidlc::error::IdlcError;
 
+/// Configures and runs IDL code generation from a Cargo build script.
+///
+/// `Builder` provides a small fluent interface around `xidlc`'s generator
+/// options. The default configuration targets Rust output, writes into
+/// `OUT_DIR`, and enables both client and server generation.
+///
+/// # Example
+///
+/// ```no_run
+/// fn main() -> Result<(), xidl_build::IdlcError> {
+///     xidl_build::Builder::new()
+///         .with_lang("openapi")
+///         .with_output_filename("api.json")
+///         .compile(&["idl/petstore.idl"])?;
+///
+///     Ok(())
+/// }
+/// ```
 #[derive(Clone, Debug)]
 pub struct Builder {
     lang: String,
@@ -26,30 +67,54 @@ impl Default for Builder {
 }
 
 impl Builder {
+    /// Creates a builder with the default configuration.
+    ///
+    /// Defaults:
+    /// - language: `rust`
+    /// - output directory: Cargo `OUT_DIR`
+    /// - client generation: enabled
+    /// - server generation: enabled
     pub fn new() -> Self {
         Self::default()
     }
 
+    /// Selects the target generator language.
+    ///
+    /// The exact accepted values are defined by `xidlc`, such as `rust`,
+    /// `openapi`, and `openrpc`.
     pub fn with_lang(mut self, lang: impl Into<String>) -> Self {
         self.lang = lang.into();
         self
     }
 
+    /// Overrides the output directory used by the generator.
+    ///
+    /// When not set, [`compile`](Self::compile) reads Cargo's `OUT_DIR`
+    /// environment variable.
     pub fn with_out_dir(mut self, out_dir: impl Into<PathBuf>) -> Self {
         self.out_dir = Some(out_dir.into());
         self
     }
 
+    /// Renames the generated single-file artifact after generation.
+    ///
+    /// This currently only works for generators that emit exactly one known file:
+    /// `openapi` (`openapi.json`) and `openrpc` (`openrpc.json`).
+    ///
+    /// Relative paths are resolved against the final output directory. Absolute
+    /// paths are used as-is.
     pub fn with_output_filename(mut self, filename: impl Into<PathBuf>) -> Self {
         self.output_filename = Some(filename.into());
         self
     }
 
+    /// Enables or disables client-side artifact generation.
     pub fn with_client(mut self, value: bool) -> Self {
         self.client = value;
         self
     }
 
+    /// Enables or disables server-side artifact generation.
     pub fn with_server(mut self, value: bool) -> Self {
         self.server = value;
         self
@@ -57,6 +122,21 @@ impl Builder {
 }
 
 impl Builder {
+    /// Runs the configured generator for the provided IDL input files.
+    ///
+    /// If no output directory was configured with
+    /// [`with_out_dir`](Self::with_out_dir), this method requires Cargo's
+    /// `OUT_DIR` environment variable to be present.
+    ///
+    /// When [`with_output_filename`](Self::with_output_filename) is set, the
+    /// generated artifact is renamed after successful code generation.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if:
+    /// - `OUT_DIR` is required but missing
+    /// - code generation fails
+    /// - the requested output rename is unsupported or cannot be completed
     pub fn compile(&self, inputs: &[impl AsRef<Path>]) -> Result<(), IdlcError> {
         let out_dir = match &self.out_dir {
             Some(path) => path.clone(),

@@ -3,28 +3,41 @@ use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
 use reqwest::header::{AUTHORIZATION, COOKIE, HeaderMap, HeaderValue};
 
+/// Location of an API key credential in an outgoing request.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ClientApiKeyLocation {
+    /// Send the API key in a request header.
     Header,
+    /// Send the API key in the query string.
     Query,
+    /// Send the API key in the `Cookie` header.
     Cookie,
 }
 
+/// API key credential available to a generated client.
 #[derive(Clone, Debug)]
 pub struct ApiKeyAuth {
+    /// Where the API key should be written.
     pub location: ClientApiKeyLocation,
+    /// Header, query parameter, or cookie name.
     pub name: String,
+    /// Credential value.
     pub value: String,
 }
 
+/// Authentication material that generated clients can apply automatically.
 #[derive(Clone, Debug, Default)]
 pub struct ClientAuth {
+    /// Basic auth credential.
     pub basic: Option<crate::auth::basic::BasicAuth>,
+    /// Bearer token without the `Bearer ` prefix.
     pub bearer: Option<String>,
+    /// Available API keys.
     pub api_keys: Vec<ApiKeyAuth>,
 }
 
 impl ClientAuth {
+    /// Finds an API key matching the required location and name.
     pub fn api_key(&self, location: ClientApiKeyLocation, name: &str) -> Option<&ApiKeyAuth> {
         self.api_keys
             .iter()
@@ -32,16 +45,23 @@ impl ClientAuth {
     }
 }
 
+/// Authentication required by a specific generated endpoint.
 #[derive(Clone, Debug)]
 pub enum ClientAuthRequirement<'a> {
+    /// HTTP Basic auth.
     Basic,
+    /// HTTP Bearer auth.
     Bearer,
+    /// API key auth in a specific location.
     ApiKey {
+        /// Where the API key must be written.
         location: ClientApiKeyLocation,
+        /// Name of the required header, query parameter, or cookie.
         name: &'a str,
     },
 }
 
+/// Shared HTTP client used by generated service clients.
 pub struct Client {
     base_url: String,
     http: reqwest::Client,
@@ -49,6 +69,7 @@ pub struct Client {
 }
 
 impl Client {
+    /// Creates a client with a base URL and default `reqwest` client.
     pub fn new(base_url: impl Into<String>) -> Self {
         Self {
             base_url: base_url.into(),
@@ -57,6 +78,7 @@ impl Client {
         }
     }
 
+    /// Creates a client with authentication and a default `reqwest` client.
     pub fn with_auth(base_url: impl Into<String>, auth: ClientAuth) -> Self {
         Self {
             base_url: base_url.into(),
@@ -65,6 +87,7 @@ impl Client {
         }
     }
 
+    /// Creates a client with a caller-provided `reqwest` client.
     pub fn with_http(base_url: impl Into<String>, http: reqwest::Client) -> Self {
         Self {
             base_url: base_url.into(),
@@ -73,6 +96,7 @@ impl Client {
         }
     }
 
+    /// Creates a client with both a custom `reqwest` client and auth config.
     pub fn with_http_and_auth(
         base_url: impl Into<String>,
         http: reqwest::Client,
@@ -85,6 +109,7 @@ impl Client {
         }
     }
 
+    /// Clones the client while replacing its auth configuration.
     pub fn with_auth_override(&self, auth: Option<ClientAuth>) -> Self {
         Self {
             base_url: self.base_url.clone(),
@@ -93,18 +118,22 @@ impl Client {
         }
     }
 
+    /// Returns the configured base URL.
     pub fn base_url(&self) -> &str {
         &self.base_url
     }
 
+    /// Returns the underlying `reqwest` client.
     pub fn http(&self) -> &reqwest::Client {
         &self.http
     }
 
+    /// Returns the configured auth state, if any.
     pub fn auth(&self) -> Option<&ClientAuth> {
         self.auth.as_ref()
     }
 
+    /// Applies the required auth to a concrete HTTP request.
     pub fn apply_auth(
         &self,
         req: &mut reqwest::Request,
@@ -134,6 +163,7 @@ impl Client {
         Ok(())
     }
 
+    /// Applies the required auth to a mutable header map.
     pub fn apply_auth_headers(
         &self,
         headers: &mut HeaderMap,
@@ -204,6 +234,7 @@ impl Client {
         }
     }
 
+    /// Applies query-based auth to a WebSocket URL when required.
     pub fn apply_auth_to_ws_url(
         &self,
         ws_url: &mut String,
@@ -225,12 +256,14 @@ impl Client {
         Ok(())
     }
 
+    /// Builds an absolute HTTP URL for `path`.
     pub fn url(&self, path: &str) -> String {
         self.join_url(path)
             .map(|url| url.to_string())
             .unwrap_or_else(|| self.concat_url(path))
     }
 
+    /// Builds an absolute WebSocket URL for `path`.
     pub fn ws_url(&self, path: &str) -> crate::Result<String> {
         let mut url = self
             .join_url(path)

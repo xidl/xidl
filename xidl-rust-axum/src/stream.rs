@@ -18,37 +18,49 @@ use tokio_tungstenite::tungstenite::client::IntoClientRequest;
 use tokio_util::codec::{FramedRead, LinesCodec};
 use tokio_util::io::StreamReader;
 
+/// Boxed server-sent event stream used by generated handlers.
 pub type SseStream<T> = Pin<Box<dyn Stream<Item = Result<T>> + Send + 'static>>;
+/// Boxed server-sent event stream consumed by generated clients.
 pub type SseClientStream<T> = Pin<Box<dyn Stream<Item = Result<T>> + Send + 'static>>;
+/// Boxed NDJSON receive stream.
 pub type NdjsonStream<T> = Pin<Box<dyn Stream<Item = Result<T>> + Send + 'static>>;
+/// Boxed NDJSON send stream.
 pub type NdjsonSendStream<T> = Pin<Box<dyn Stream<Item = Result<T>> + Send + 'static>>;
+/// Alias for a client-stream writer.
 pub type Writer<T, R> = ClientStreamWriter<T, R>;
+/// Alias for a bidirectional client stream.
 pub type ReaderWriter<TIn, TOut> = BidiClientStream<TIn, TOut>;
 
+/// Client-side reader for SSE streams.
 pub struct Reader<T> {
     inner: SseClientStream<T>,
 }
 
 impl<T> Reader<T> {
+    /// Wraps a boxed SSE client stream.
     pub fn new(inner: SseClientStream<T>) -> Self {
         Self { inner }
     }
 
+    /// Reads the next item from the stream.
     pub async fn read(&mut self) -> Option<Result<T>> {
         self.inner.next().await
     }
 }
 
+/// Server-side handle for a bidirectional WebSocket stream.
 pub struct BidiServerStream<TIn, TOut> {
     inbound: mpsc::Receiver<Result<TIn>>,
     outbound: Option<mpsc::Sender<Result<TOut>>>,
 }
 
 impl<TIn, TOut> BidiServerStream<TIn, TOut> {
+    /// Reads the next client message.
     pub async fn read(&mut self) -> Option<Result<TIn>> {
         self.inbound.recv().await
     }
 
+    /// Sends a message to the client.
     pub async fn write(&mut self, item: TOut) -> Result<()> {
         let tx = self
             .outbound
@@ -59,10 +71,12 @@ impl<TIn, TOut> BidiServerStream<TIn, TOut> {
             .map_err(|_| Error::new(500, "bidi stream is closed"))
     }
 
+    /// Closes the outbound side of the stream.
     pub fn close(&mut self) {
         let _ = self.outbound.take();
     }
 
+    /// Returns a sender that can emit terminal stream errors.
     pub fn error_sender(&self) -> Option<mpsc::Sender<Result<TOut>>> {
         self.outbound.as_ref().cloned()
     }
@@ -74,6 +88,7 @@ impl<TIn, TOut> Drop for BidiServerStream<TIn, TOut> {
     }
 }
 
+/// Client-side handle for a bidirectional WebSocket stream.
 pub struct BidiClientStream<TIn, TOut> {
     writer: Option<mpsc::Sender<Result<TIn>>>,
     reader: mpsc::Receiver<Result<TOut>>,
@@ -82,6 +97,7 @@ pub struct BidiClientStream<TIn, TOut> {
 }
 
 impl<TIn, TOut> BidiClientStream<TIn, TOut> {
+    /// Sends a message to the server.
     pub async fn write(&mut self, item: TIn) -> Result<()> {
         let tx = self
             .writer
@@ -92,14 +108,17 @@ impl<TIn, TOut> BidiClientStream<TIn, TOut> {
             .map_err(|_| Error::new(500, "bidi stream is closed"))
     }
 
+    /// Reads the next message from the server.
     pub async fn read(&mut self) -> Option<Result<TOut>> {
         self.reader.recv().await
     }
 
+    /// Closes the outbound side of the stream.
     pub fn close(&mut self) {
         let _ = self.writer.take();
     }
 
+    /// Aborts the background read and write tasks immediately.
     pub fn cancel(&mut self) {
         let _ = self.writer.take();
         if let Some(handle) = self.write_task.take() {
@@ -117,12 +136,14 @@ impl<TIn, TOut> Drop for BidiClientStream<TIn, TOut> {
     }
 }
 
+/// Client-side writer for request-streaming endpoints.
 pub struct ClientStreamWriter<T, R> {
     tx: Option<mpsc::Sender<Result<T>>>,
     response: Option<JoinHandle<Result<R>>>,
 }
 
 impl<T, R> ClientStreamWriter<T, R> {
+    /// Creates a new writer from a send channel and response task.
     pub fn new(tx: mpsc::Sender<Result<T>>, response: JoinHandle<Result<R>>) -> Self {
         Self {
             tx: Some(tx),
@@ -130,6 +151,7 @@ impl<T, R> ClientStreamWriter<T, R> {
         }
     }
 
+    /// Sends a stream item to the server.
     pub async fn write(&mut self, item: T) -> Result<()> {
         let tx = self
             .tx
@@ -140,6 +162,7 @@ impl<T, R> ClientStreamWriter<T, R> {
             .map_err(|_| Error::new(500, "stream writer is closed"))
     }
 
+    /// Closes the request stream and awaits the final response.
     pub async fn close(mut self) -> Result<R> {
         let _ = self.tx.take();
         let response = self
@@ -151,6 +174,7 @@ impl<T, R> ClientStreamWriter<T, R> {
             .map_err(|err| Error::new(500, err.to_string()))?
     }
 
+    /// Aborts the request stream without waiting for a response.
     pub async fn cancel(mut self) -> Result<()> {
         let _ = self.tx.take();
         if let Some(response) = self.response.take() {
@@ -166,6 +190,7 @@ impl<T, R> Drop for ClientStreamWriter<T, R> {
     }
 }
 
+/// Boxes a server-sent event stream for runtime consumption.
 pub fn boxed_sse<T, S>(stream: S) -> SseStream<T>
 where
     S: Stream<Item = Result<T>> + Send + 'static,
@@ -173,6 +198,7 @@ where
     Box::pin(stream)
 }
 
+/// Boxes an NDJSON stream for runtime consumption.
 pub fn boxed_ndjson<T, S>(stream: S) -> NdjsonStream<T>
 where
     S: Stream<Item = Result<T>> + Send + 'static,
@@ -180,6 +206,7 @@ where
     Box::pin(stream)
 }
 
+/// Opens a server-side bidirectional WebSocket stream from an upgraded socket.
 pub fn open_bidi_server<TIn, TOut>(socket: AxumWebSocket) -> BidiServerStream<TIn, TOut>
 where
     TIn: DeserializeOwned + Send + 'static,
@@ -262,6 +289,7 @@ where
     }
 }
 
+/// Opens a client-side bidirectional WebSocket stream.
 pub async fn open_bidi_client<TIn, TOut>(ws_url: &str) -> Result<BidiClientStream<TIn, TOut>>
 where
     TIn: Serialize + Send + 'static,
@@ -345,6 +373,7 @@ where
     })
 }
 
+/// Opens a client-side bidirectional WebSocket stream with custom headers.
 pub async fn open_bidi_client_with_headers<TIn, TOut>(
     ws_url: &str,
     headers: axum::http::HeaderMap,
@@ -429,6 +458,7 @@ where
     })
 }
 
+/// Converts an item stream into an SSE HTTP response.
 pub fn sse_response<T>(stream: SseStream<T>) -> axum::response::Response
 where
     T: Serialize + 'static,
@@ -453,6 +483,7 @@ where
 }
 
 #[cfg(feature = "client")]
+/// Opens an SSE response as a typed client-side reader.
 pub async fn open_sse<T>(http: &reqwest::Client, req: Request) -> Result<Reader<T>>
 where
     T: DeserializeOwned + Send + 'static,
@@ -493,6 +524,7 @@ where
     Ok(Reader::new(Box::pin(out)))
 }
 
+/// Decodes an Axum request body as an NDJSON stream.
 pub fn decode_ndjson_body<T>(body: Body) -> NdjsonStream<T>
 where
     T: DeserializeOwned + Send + 'static,
@@ -504,6 +536,7 @@ where
 }
 
 #[cfg(feature = "client")]
+/// Encodes an outbound NDJSON stream as a `reqwest` request body.
 pub fn encode_ndjson_body<T>(stream: NdjsonSendStream<T>) -> reqwest::Body
 where
     T: Serialize + Send + 'static,

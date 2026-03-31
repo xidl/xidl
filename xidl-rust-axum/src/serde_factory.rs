@@ -11,18 +11,25 @@ enum SerdeKind {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+/// Serializes payloads according to a negotiated MIME type.
 pub struct SerializeFactory {
     mime: &'static str,
     kind: SerdeKind,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+/// Deserializes payloads according to a negotiated MIME type.
 pub struct DeserializeFactory {
     mime: &'static str,
     kind: SerdeKind,
 }
 
 impl SerializeFactory {
+    /// Creates a serializer for a supported MIME type.
+    ///
+    /// Supported values are `application/json`,
+    /// `application/x-www-form-urlencoded`, and `application/msgpack` when the
+    /// `msgpack` feature is enabled.
     pub const fn new(mime: &'static str) -> Self {
         Self {
             mime,
@@ -30,10 +37,12 @@ impl SerializeFactory {
         }
     }
 
+    /// Returns the configured MIME type.
     pub const fn mime(&self) -> &'static str {
         self.mime
     }
 
+    /// Serializes a value into bytes using the configured format.
     pub fn to_vec<T>(&self, value: &T) -> Result<Vec<u8>>
     where
         T: Serialize,
@@ -52,6 +61,7 @@ impl SerializeFactory {
 }
 
 impl DeserializeFactory {
+    /// Creates a deserializer for a supported MIME type.
     pub const fn new(mime: &'static str) -> Self {
         Self {
             mime,
@@ -59,10 +69,12 @@ impl DeserializeFactory {
         }
     }
 
+    /// Returns the configured MIME type.
     pub const fn mime(&self) -> &'static str {
         self.mime
     }
 
+    /// Deserializes bytes using the configured format.
     pub fn from_slice<T>(&self, bytes: &[u8]) -> Result<T>
     where
         T: DeserializeOwned,
