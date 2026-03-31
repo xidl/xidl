@@ -6,6 +6,7 @@ use minijinja::Environment;
 use regex::Regex;
 use serde::Deserialize;
 
+use similar::{ChangeTag, TextDiff};
 use xidlc_examples::http_server::{HttpServerServer, SimpleHttpServer};
 
 #[derive(Debug, Clone)]
@@ -326,5 +327,19 @@ fn assert_snapshot(snapshot_path: &Path, output: &str) {
     }
     let expected = fs::read_to_string(snapshot_path)
         .expect("snapshot missing; set UPDATE_HTTP_SNAPSHOTS=1 to create");
-    assert_eq!(expected, output, "snapshot mismatch for {snapshot_path:?}");
+    if expected != output {
+        let output = output.to_string();
+        let diff = TextDiff::from_lines(&expected, &output);
+
+        eprintln!("snapshot mismatch for {snapshot_path:?}");
+        for change in diff.iter_all_changes() {
+            let sign = match change.tag() {
+                ChangeTag::Delete => "-",
+                ChangeTag::Insert => "+",
+                ChangeTag::Equal => " ",
+            };
+            print!("{}{}", sign, change);
+        }
+        panic!("")
+    }
 }
