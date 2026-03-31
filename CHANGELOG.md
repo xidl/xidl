@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.31.0](https://github.com/xidl/xidl/compare/v0.30.0...v0.31.0) (2026-03-31)
+
+
+### Features
+
+* add hy2 ([b1c0100](https://github.com/xidl/xidl/commit/b1c0100b80d7155804a3001a4e4d53dcd7d6b04b))
+* add msgpack support ([bc5876c](https://github.com/xidl/xidl/commit/bc5876c5508844b06b5c6980161fa0e0c9a43051))
+* **axum:** support pluggable http body codecs ([f2a8cdd](https://github.com/xidl/xidl/commit/f2a8cdd824cf4ae89fab8b66aa9f9db80e900878))
+
 ## [0.30.0](https://github.com/xidl/xidl/compare/v0.29.0...v0.30.0) (2026-03-21)
 
 
