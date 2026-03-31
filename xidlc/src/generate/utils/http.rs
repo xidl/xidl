@@ -245,7 +245,35 @@ pub fn validate_http_annotations(
 ) -> Result<(), String> {
     let _ = deprecated_info(annotations).map_err(|err| format!("{target}: {err}"))?;
     let _ = collect_security(annotations).map_err(|err| format!("{target}: {err}"))?;
+    validate_http_media_types(target, annotations)?;
     Ok(())
+}
+
+fn validate_http_media_types(target: &str, annotations: &[hir::Annotation]) -> Result<(), String> {
+    for annotation in annotations {
+        let Some(name) = annotation_name(annotation) else {
+            continue;
+        };
+        if !name.eq_ignore_ascii_case("Consumes") && !name.eq_ignore_ascii_case("Produces") {
+            continue;
+        }
+        let Some(value) = annotation_value(std::slice::from_ref(annotation), name) else {
+            continue;
+        };
+        if is_supported_http_media_type(&value) {
+            continue;
+        }
+        return Err(format!(
+            "{target}: unsupported @{name}(\"{value}\") media type"
+        ));
+    }
+    Ok(())
+}
+
+fn is_supported_http_media_type(value: &str) -> bool {
+    value.eq_ignore_ascii_case("application/json")
+        || value.eq_ignore_ascii_case("application/x-www-form-urlencoded")
+        || value.eq_ignore_ascii_case("application/msgpack")
 }
 
 pub fn http_stream_config(annotations: &[hir::Annotation]) -> Result<HttpStreamConfig, String> {

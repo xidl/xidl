@@ -6,6 +6,8 @@ use serde::de::DeserializeOwned;
 enum SerdeKind {
     Json,
     Form,
+    #[cfg(feature = "msgpack")]
+    Msgpack,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -42,6 +44,9 @@ impl SerializeFactory {
             SerdeKind::Form => serde_urlencoded::to_string(value)
                 .map(|value| value.into_bytes())
                 .map_err(|err| Error::new(500, format!("serialize {} failed: {err}", self.mime))),
+            #[cfg(feature = "msgpack")]
+            SerdeKind::Msgpack => rmp_serde::to_vec(value)
+                .map_err(|err| Error::new(500, format!("serialize {} failed: {err}", self.mime))),
         }
     }
 }
@@ -67,6 +72,9 @@ impl DeserializeFactory {
                 .map_err(|err| Error::new(400, format!("deserialize {} failed: {err}", self.mime))),
             SerdeKind::Form => serde_urlencoded::from_bytes(bytes)
                 .map_err(|err| Error::new(400, format!("deserialize {} failed: {err}", self.mime))),
+            #[cfg(feature = "msgpack")]
+            SerdeKind::Msgpack => rmp_serde::from_slice(bytes)
+                .map_err(|err| Error::new(400, format!("deserialize {} failed: {err}", self.mime))),
         }
     }
 }
@@ -76,6 +84,17 @@ const fn supported_kind_from_mime(mime: &str) -> SerdeKind {
         SerdeKind::Json
     } else if eq_ignore_ascii_case(mime, "application/x-www-form-urlencoded") {
         SerdeKind::Form
+    } else if cfg!(feature = "msgpack") && eq_ignore_ascii_case(mime, "application/msgpack") {
+        #[cfg(feature = "msgpack")]
+        {
+            SerdeKind::Msgpack
+        }
+        #[cfg(not(feature = "msgpack"))]
+        {
+            panic!("unsupported mime type")
+        }
+    } else if eq_ignore_ascii_case(mime, "application/msgpack") {
+        panic!("unsupported mime type")
     } else {
         panic!("unsupported mime type")
     }
@@ -140,6 +159,22 @@ mod tests {
             .to_vec(&payload)
             .unwrap();
         let decoded: Payload = DeserializeFactory::new("application/x-www-form-urlencoded")
+            .from_slice(&bytes)
+            .unwrap();
+        assert_eq!(decoded, payload);
+    }
+
+    #[cfg(feature = "msgpack")]
+    #[test]
+    fn msgpack_factory_round_trip() {
+        let payload = Payload {
+            name: "alice".to_string(),
+            age: 3,
+        };
+        let bytes = SerializeFactory::new("application/msgpack")
+            .to_vec(&payload)
+            .unwrap();
+        let decoded: Payload = DeserializeFactory::new("application/msgpack")
             .from_slice(&bytes)
             .unwrap();
         assert_eq!(decoded, payload);
