@@ -105,6 +105,37 @@ fn test_validate_http_annotations_rejects_invalid_security_mix() {
 }
 
 #[test]
+fn test_validate_http_annotations_accepts_form_and_msgpack_media_types() {
+    let annotations = vec![
+        hir::Annotation::Builtin {
+            name: "Consumes".to_string(),
+            params: Some(hir::AnnotationParams::Raw(
+                "\"application/x-www-form-urlencoded\"".to_string(),
+            )),
+        },
+        hir::Annotation::Builtin {
+            name: "Produces".to_string(),
+            params: Some(hir::AnnotationParams::Raw(
+                "\"application/msgpack\"".to_string(),
+            )),
+        },
+    ];
+    validate_http_annotations("op foo", &annotations).unwrap();
+}
+
+#[test]
+fn test_validate_http_annotations_rejects_unknown_media_type() {
+    let annotations = vec![hir::Annotation::Builtin {
+        name: "Consumes".to_string(),
+        params: Some(hir::AnnotationParams::Raw(
+            "\"application/unknown\"".to_string(),
+        )),
+    }];
+    let err = validate_http_annotations("op foo", &annotations).unwrap_err();
+    assert!(err.contains("unsupported @Consumes"));
+}
+
+#[test]
 fn test_http_stream_config_parses_and_validates() {
     let annotations = vec![
         hir::Annotation::Builtin {

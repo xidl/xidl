@@ -1,0 +1,17 @@
+#pragma xidlc package xidlc
+#pragma xidlc version v1.0.0
+
+interface HttpMediaService {
+    @post
+    @Consumes("application/x-www-form-urlencoded")
+    string submit_form(
+        string name,
+        uint32 age
+    );
+
+    @post
+    @Produces("application/msgpack")
+    string fetch_msgpack(
+        @query string id
+    );
+};
