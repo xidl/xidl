@@ -1,0 +1,61 @@
+<svg width="1200" height="760" viewBox="0 0 1200 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="760" fill="#F6F7FB"/>
+  <text x="600" y="72" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="34" fill="#14342B">Generated Outputs</text>
+  <text x="600" y="108" text-anchor="middle" font-family="'Avenir Next', 'Segoe UI', sans-serif" font-size="18" fill="#4A5568">One XIDL contract radiates into protocols, specs, generated code, and implementation assets</text>
+
+  <g>
+    <circle cx="600" cy="390" r="122" fill="#14342B"/>
+    <circle cx="600" cy="390" r="136" stroke="#3C8D7A" stroke-width="4"/>
+    <text x="600" y="378" text-anchor="middle" font-family="'Avenir Next', 'Segoe UI', sans-serif" font-size="28" font-weight="700" fill="#F8FBFA">One XIDL</text>
+    <text x="600" y="412" text-anchor="middle" font-family="'Avenir Next', 'Segoe UI', sans-serif" font-size="28" font-weight="700" fill="#F8FBFA">IDL</text>
+  </g>
+
+  <g font-family="'Avenir Next', 'Segoe UI', sans-serif" font-size="22" font-weight="600" fill="#14342B">
+    <line x1="600" y1="246" x2="600" y2="186" stroke="#2F7E6A" stroke-width="3"/>
+    <circle cx="600" cy="160" r="64" fill="#FFFFFF" stroke="#2F7E6A" stroke-width="3"/>
+    <text x="600" y="154" text-anchor="middle">HTTP</text>
+    <text x="600" y="180" text-anchor="middle">APIs</text>
+
+    <line x1="500" y1="286" x2="442" y2="236" stroke="#2F7E6A" stroke-width="3"/>
+    <circle cx="410" cy="208" r="68" fill="#FFFFFF" stroke="#2F7E6A" stroke-width="3"/>
+    <text x="410" y="202" text-anchor="middle">Rust</text>
+    <text x="410" y="228" text-anchor="middle">SDKs</text>
+
+    <line x1="700" y1="286" x2="758" y2="236" stroke="#2F7E6A" stroke-width="3"/>
+    <circle cx="790" cy="208" r="88" fill="#FFFFFF" stroke="#2F7E6A" stroke-width="3"/>
+    <text x="790" y="202" text-anchor="middle">TypeScript</text>
+    <text x="790" y="228" text-anchor="middle">SDKs</text>
+
+    <line x1="454" y1="390" x2="358" y2="390" stroke="#2F7E6A" stroke-width="3"/>
+    <circle cx="312" cy="390" r="86" fill="#FFFFFF" stroke="#2F7E6A" stroke-width="3"/>
+    <text x="312" y="384" text-anchor="middle">Server</text>
+    <text x="312" y="410" text-anchor="middle">stubs</text>
+
+    <line x1="746" y1="390" x2="842" y2="390" stroke="#2F7E6A" stroke-width="3"/>
+    <circle cx="888" cy="390" r="64" fill="#FFFFFF" stroke="#2F7E6A" stroke-width="3"/>
+    <text x="888" y="384" text-anchor="middle">OpenRPC</text>
+    <text x="888" y="410" text-anchor="middle">specs</text>
+
+    <line x1="500" y1="494" x2="442" y2="544" stroke="#2F7E6A" stroke-width="3"/>
+    <circle cx="410" cy="572" r="86" fill="#FFFFFF" stroke="#2F7E6A" stroke-width="3"/>
+    <text x="410" y="566" text-anchor="middle">Examples</text>
+    <text x="410" y="592" text-anchor="middle">&amp; tests</text>
+
+    <line x1="700" y1="494" x2="758" y2="544" stroke="#2F7E6A" stroke-width="3"/>
+    <circle cx="790" cy="572" r="86" fill="#FFFFFF" stroke="#2F7E6A" stroke-width="3"/>
+    <text x="790" y="566" text-anchor="middle">JSON-RPC</text>
+    <text x="790" y="592" text-anchor="middle">APIs</text>
+
+    <line x1="600" y1="534" x2="600" y2="594" stroke="#2F7E6A" stroke-width="3"/>
+    <circle cx="600" cy="630" r="84" fill="#FFFFFF" stroke="#2F7E6A" stroke-width="3"/>
+    <text x="600" y="624" text-anchor="middle">C / C++</text>
+    <text x="600" y="650" text-anchor="middle">bindings</text>
+  </g>
+
+  <g font-family="'Avenir Next', 'Segoe UI', sans-serif" font-size="22" font-weight="600" fill="#14342B">
+    <circle cx="948" cy="300" r="64" fill="#FFFFFF" stroke="#2F7E6A" stroke-width="3"/>
+    <line x1="712" y1="336" x2="892" y2="312" stroke="#2F7E6A" stroke-width="3"/>
+    <text x="948" y="294" text-anchor="middle">OpenAPI</text>
+    <text x="948" y="320" text-anchor="middle">specs</text>
+  </g>
+</svg>

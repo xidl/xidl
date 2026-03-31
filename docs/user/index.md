@@ -10,10 +10,11 @@ This section teaches the normal XIDL workflow:
 ## Recommended reading order
 
 1. [Installation](install.md)
-2. [Using xidlc](xidlc.md)
-3. [IDL Guide](idl.md)
-4. [Using xidl-build in Rust](xidl-build.md)
-5. [HTTP Guide](http.md) or [JSON-RPC Guide](jsonrpc.md)
+2. [Quickstart](quickstart.md)
+3. [Using xidlc](xidlc.md)
+4. [IDL Guide](idl.md)
+5. [Using xidl-build in Rust](xidl-build.md)
+6. [HTTP Guide](http.md) or [JSON-RPC Guide](jsonrpc.md)
 
 ## What you can do after reading
 

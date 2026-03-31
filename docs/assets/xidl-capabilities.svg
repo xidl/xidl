@@ -1,0 +1,55 @@
+<svg width="1200" height="760" viewBox="0 0 1200 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="760" fill="#F5F1E8"/>
+  <text x="600" y="72" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="34" fill="#14213D">XIDL Capabilities</text>
+  <text x="600" y="108" text-anchor="middle" font-family="'Avenir Next', 'Segoe UI', sans-serif" font-size="18" fill="#4A5568">One contract system for authoring, generating, validating, and exploring APIs</text>
+
+  <g>
+    <circle cx="600" cy="390" r="118" fill="#14213D"/>
+    <circle cx="600" cy="390" r="132" stroke="#E07A5F" stroke-width="4"/>
+    <text x="600" y="382" text-anchor="middle" font-family="'Avenir Next', 'Segoe UI', sans-serif" font-size="44" font-weight="700" fill="#F8F5F0">XIDL</text>
+    <text x="600" y="416" text-anchor="middle" font-family="'Avenir Next', 'Segoe UI', sans-serif" font-size="18" fill="#D7E3F4">Contract platform</text>
+  </g>
+
+  <g font-family="'Avenir Next', 'Segoe UI', sans-serif" font-size="22" font-weight="600" fill="#14213D">
+    <line x1="600" y1="244" x2="600" y2="178" stroke="#C86B4A" stroke-width="3"/>
+    <circle cx="600" cy="156" r="58" fill="#FFFDF8" stroke="#C86B4A" stroke-width="3"/>
+    <text x="600" y="150" text-anchor="middle">Single source</text>
+    <text x="600" y="176" text-anchor="middle">of truth</text>
+
+    <line x1="494" y1="282" x2="438" y2="228" stroke="#C86B4A" stroke-width="3"/>
+    <circle cx="414" cy="204" r="58" fill="#FFFDF8" stroke="#C86B4A" stroke-width="3"/>
+    <text x="414" y="198" text-anchor="middle">fmt</text>
+    <text x="414" y="224" text-anchor="middle">&amp; lint</text>
+
+    <line x1="706" y1="282" x2="762" y2="228" stroke="#C86B4A" stroke-width="3"/>
+    <circle cx="786" cy="204" r="70" fill="#FFFDF8" stroke="#C86B4A" stroke-width="3"/>
+    <text x="786" y="198" text-anchor="middle">Code</text>
+    <text x="786" y="224" text-anchor="middle">generation</text>
+
+    <line x1="454" y1="390" x2="358" y2="390" stroke="#C86B4A" stroke-width="3"/>
+    <circle cx="320" cy="390" r="78" fill="#FFFDF8" stroke="#C86B4A" stroke-width="3"/>
+    <text x="320" y="384" text-anchor="middle">Protocol</text>
+    <text x="320" y="410" text-anchor="middle">mapping</text>
+
+    <line x1="746" y1="390" x2="842" y2="390" stroke="#C86B4A" stroke-width="3"/>
+    <circle cx="890" cy="390" r="78" fill="#FFFDF8" stroke="#C86B4A" stroke-width="3"/>
+    <text x="890" y="384" text-anchor="middle">Editor</text>
+    <text x="890" y="410" text-anchor="middle">workflows</text>
+
+    <line x1="494" y1="498" x2="438" y2="552" stroke="#C86B4A" stroke-width="3"/>
+    <circle cx="414" cy="576" r="64" fill="#FFFDF8" stroke="#C86B4A" stroke-width="3"/>
+    <text x="414" y="570" text-anchor="middle">Streaming</text>
+    <text x="414" y="596" text-anchor="middle">APIs</text>
+
+    <line x1="706" y1="498" x2="762" y2="552" stroke="#C86B4A" stroke-width="3"/>
+    <circle cx="786" cy="576" r="78" fill="#FFFDF8" stroke="#C86B4A" stroke-width="3"/>
+    <text x="786" y="570" text-anchor="middle">Interactive</text>
+    <text x="786" y="596" text-anchor="middle">client</text>
+
+    <line x1="600" y1="536" x2="600" y2="602" stroke="#C86B4A" stroke-width="3"/>
+    <circle cx="600" cy="632" r="92" fill="#FFFDF8" stroke="#C86B4A" stroke-width="3"/>
+    <text x="600" y="626" text-anchor="middle">Security and</text>
+    <text x="600" y="652" text-anchor="middle">validation</text>
+  </g>
+
+</svg>

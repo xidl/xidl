@@ -1,9 +1,12 @@
-XIDL (eXtensible IDL) is an OMG IDL-based code generator. It generates
-C/C++/Rust/Typescript code and also supports
-[HTTP](docs/rfc/http.md)/[JSONRPC](docs/rfc/jsonrpc.md).
+# XIDL
 
-> Currently,
-> [HTTP-STREAM](docs/rfc/http-stream.md)/[JSONRPC-STREAM](docs/rfc/jsonrpc-stream.md) are still in an implementation/experimental stage.
+Define interfaces once. Generate APIs, SDKs, specs, and tooling from one
+source of truth.
+
+XIDL is an IDL-first contract platform for teams that want one interface
+definition to drive HTTP, JSON-RPC, streaming APIs, security metadata,
+generated SDKs, and machine-readable specs. It combines contract authoring,
+protocol mapping, code generation, and interactive tooling into one workflow.
 
 [![publish-release](https://github.com/xidl/xidl/actions/workflows/publish-release.yml/badge.svg)](https://github.com/xidl/xidl/actions/workflows/publish-release.yml)
 [![publish-crates](https://github.com/xidl/xidl/actions/workflows/publish-crates.yml/badge.svg)](https://github.com/xidl/xidl/actions/workflows/publish-crates.yml)
@@ -11,46 +14,106 @@ C/C++/Rust/Typescript code and also supports
 ![Crates.io Version](<https://img.shields.io/crates/v/xidlc?label=xidlc(crates.io)>)
 ![Crates.io Version](<https://img.shields.io/crates/v/xidl-build?label=xidl-build(crates.io)>)
 ![GitHub Release](https://img.shields.io/github/v/release/xidl/xidl)
+[![VS Code Extension](https://img.shields.io/badge/Install-VS%20Code%20Extension-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=cathaysia.vscode-idl-language)
 [![GitHub](https://img.shields.io/badge/View_on-GitHub-181717?logo=github)](https://github.com/xidl/xidl)
 
-## Installation
+## What XIDL Makes Possible
 
-=== "Release (macOS / Linux)"
+![XIDL capabilities](docs/assets/xidl-capabilities.svg)
 
-    ```bash
-    curl --proto '=https' --tlsv1.2 -sSf https://xidl.github.io/xidl/public/install.sh | sh
-    ```
+XIDL works well as the contract layer for API teams because interface intent is
+explicit, structured, and centralized. That makes the system easier for humans
+to review and easier for tools and AI systems to understand, generate from,
+lint, and keep in sync.
 
-=== "Release (Windows PowerShell)"
+## Why Teams Use XIDL
 
-    ```powershell
-    iwr -useb https://xidl.github.io/xidl/public/install.ps1 | iex
-    ```
+- One contract drives multiple protocols and outputs.
+- HTTP and JSON-RPC live in the same interface system instead of separate toolchains.
+- Streaming and security annotations stay attached to the contract, not scattered across framework code.
+- Specs, SDKs, stubs, examples, and tests can all be generated from the same IDL.
+- Structured contracts are easier for automation, agents, and interactive tools to reason about.
 
-=== "Cargo"
+## Core Capabilities
 
-    ```bash
-    cargo install xidlc
-    ```
+- Interface-first development with OMG IDL-compatible foundations and XIDL extensions.
+- Protocol mappings for HTTP and JSON-RPC, plus stream-oriented workflows.
+- Generated outputs for Rust, TypeScript, C, C++, OpenAPI, and OpenRPC.
+- Security-aware contracts including HTTP auth and API key mappings.
+- Formatting support through `xidlc fmt`.
+- Editor and language tooling through [`idl-language-server`](https://github.com/xidl/idl-language-server).
+- Interactive HTTP exploration from IDL, including launching client workflows with tools such as Scalar.
 
-=== "Cargo Binstall"
+## What One IDL Produces
 
-    ```bash
-    cargo binstall xidlc
-    ```
+![XIDL generated outputs](docs/assets/xidl-outputs.svg)
+
+One XIDL contract can radiate into runtime surfaces, generated SDKs, machine
+readable specs, and implementation assets that stay aligned because they come
+from the same source.
+
+## What You Can Build
+
+- HTTP services and generated clients from one IDL contract.
+- JSON-RPC services and generated clients from the same modeling approach.
+- OpenAPI and OpenRPC specs that stay aligned with implementation contracts.
+- Stream-oriented APIs with shared contract semantics.
+- Contract-driven examples, tests, and review flows.
+
+## How Teams Use XIDL
+
+![XIDL workflow](docs/assets/xidl-workflow.svg)
+
+Teams author and review the contract once, then generate the artifacts they
+need to build servers, ship clients, publish specs, and keep examples and tests
+synchronized.
 
 ## Quick Start
 
+Install `xidlc`:
+
 ```bash
-# Generate code
-xidlc -l rust -o out your.idl
+cargo install xidlc
 ```
 
-## Built-in Targets
+Generate Rust types:
 
-- `c`
-- `cpp`
-- `rust`
-- `rust-jsonrpc`
-- `rust-axum`
-- `ts` / `typescript`
+```bash
+xidlc --lang rust --out-dir out api.idl
+```
+
+Generate an Axum HTTP surface:
+
+```bash
+xidlc --lang rust-axum --out-dir out api.idl
+```
+
+Generate OpenAPI:
+
+```bash
+xidlc --lang openapi --out-dir generated api.idl
+```
+
+## Documentation
+
+- [Quickstart](docs/user/quickstart.md)
+- [Installation](docs/user/install.md)
+- [Using xidlc](docs/user/xidlc.md)
+- [HTTP Guide](docs/user/http.md)
+- [JSON-RPC Guide](docs/user/jsonrpc.md)
+- [Targets Reference](docs/reference/targets.md)
+- [HTTP RFC](docs/rfc/http.md)
+- [JSON-RPC RFC](docs/rfc/jsonrpc.md)
+
+## Ecosystem
+
+- [`xidlc`](https://crates.io/crates/xidlc): compiler and generators
+- [`xidl-build`](https://crates.io/crates/xidl-build): Rust `build.rs` integration
+- [`xidl-rust-axum`](xidl-rust-axum/README.md): Axum runtime for generated HTTP services
+- `xidl-jsonrpc`: JSON-RPC runtime support
+- [`idl-language-server`](https://github.com/xidl/idl-language-server): editor support, diagnostics, and interactive workflows
+
+## Status
+
+HTTP and JSON-RPC are available today. Stream support exists and continues to
+evolve, especially in the more advanced transport and interactive workflows.

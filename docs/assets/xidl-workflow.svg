@@ -1,0 +1,45 @@
+<svg width="1200" height="620" viewBox="0 0 1200 620" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="620" fill="#FAF7F2"/>
+  <text x="600" y="68" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="34" fill="#1F2937">Typical XIDL Workflow</text>
+  <text x="600" y="104" text-anchor="middle" font-family="'Avenir Next', 'Segoe UI', sans-serif" font-size="18" fill="#5B6472">Author once, review once, then generate the artifacts needed to build and ship</text>
+
+  <g font-family="'Avenir Next', 'Segoe UI', sans-serif" font-size="26" font-weight="600" fill="#1F2937">
+    <rect x="430" y="142" width="340" height="74" rx="18" fill="#FFFFFF" stroke="#D97A57" stroke-width="3"/>
+    <text x="600" y="188" text-anchor="middle">Author IDL</text>
+
+    <line x1="600" y1="218" x2="600" y2="262" stroke="#D97A57" stroke-width="4"/>
+    <polygon points="600,278 588,254 612,254" fill="#D97A57"/>
+
+    <rect x="410" y="286" width="380" height="74" rx="18" fill="#FFFFFF" stroke="#D97A57" stroke-width="3"/>
+    <text x="600" y="332" text-anchor="middle">Review contract</text>
+
+    <line x1="600" y1="362" x2="600" y2="406" stroke="#D97A57" stroke-width="4"/>
+    <polygon points="600,422 588,398 612,398" fill="#D97A57"/>
+
+    <rect x="360" y="430" width="480" height="82" rx="20" fill="#14342B" stroke="#3C8D7A" stroke-width="4"/>
+    <text x="600" y="480" text-anchor="middle" fill="#F8FBFA">Generate code + specs</text>
+  </g>
+
+  <g stroke="#3C8D7A" stroke-width="3" fill="none">
+    <line x1="600" y1="514" x2="600" y2="548"/>
+    <line x1="300" y1="548" x2="900" y2="548"/>
+    <line x1="300" y1="548" x2="300" y2="566"/>
+    <line x1="500" y1="548" x2="500" y2="566"/>
+    <line x1="700" y1="548" x2="700" y2="566"/>
+    <line x1="900" y1="548" x2="900" y2="566"/>
+  </g>
+
+  <g font-family="'Avenir Next', 'Segoe UI', sans-serif" font-size="21" font-weight="600" fill="#14342B">
+    <rect x="210" y="566" width="180" height="34" rx="17" fill="#FFFFFF" stroke="#3C8D7A" stroke-width="3"/>
+    <text x="300" y="589" text-anchor="middle">server stubs</text>
+
+    <rect x="415" y="566" width="170" height="34" rx="17" fill="#FFFFFF" stroke="#3C8D7A" stroke-width="3"/>
+    <text x="500" y="589" text-anchor="middle">client SDKs</text>
+
+    <rect x="595" y="566" width="210" height="34" rx="17" fill="#FFFFFF" stroke="#3C8D7A" stroke-width="3"/>
+    <text x="700" y="589" text-anchor="middle">OpenAPI / OpenRPC</text>
+
+    <rect x="820" y="566" width="160" height="34" rx="17" fill="#FFFFFF" stroke="#3C8D7A" stroke-width="3"/>
+    <text x="900" y="589" text-anchor="middle">examples / tests</text>
+  </g>
+</svg>

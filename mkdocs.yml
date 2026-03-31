@@ -7,6 +7,7 @@ nav:
   - User Guides:
       - Overview: user/index.md
       - Installation: user/install.md
+      - Quickstart: user/quickstart.md
       - Using xidlc: user/xidlc.md
       - Using xidl-build: user/xidl-build.md
       - IDL Guide: user/idl.md
