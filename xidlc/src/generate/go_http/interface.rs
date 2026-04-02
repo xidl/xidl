@@ -819,6 +819,7 @@ fn render_method_types(
     writeln!(out, "}}").unwrap();
     writeln!(out).unwrap();
     super::definition::render_format_path_fn(out, method)?;
+    writeln!(out).unwrap();
     render_decode_response_fn(out, method, renderer)?;
     Ok(())
 }

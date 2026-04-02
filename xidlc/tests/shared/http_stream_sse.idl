@@ -11,4 +11,3 @@ interface HttpStreamSseService {
     @server_stream
     attribute boolean online;
 };
-

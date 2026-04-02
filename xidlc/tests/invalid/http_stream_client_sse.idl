@@ -9,4 +9,3 @@ interface InvalidClientStreamCodecService {
         sequence<octet> chunk
     );
 };
-

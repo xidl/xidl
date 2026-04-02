@@ -11,4 +11,3 @@ interface InvalidTypescriptBidiStreamService {
         out string reply
     );
 };
-

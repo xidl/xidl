@@ -10,4 +10,3 @@ module MyTemplModule<typename T, struct S, long m> {
     };
 
 };
-

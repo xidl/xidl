@@ -68,7 +68,7 @@ fn test_effective_security_parses_oauth_and_api_key() {
         hir::Annotation::Builtin {
             name: "oauth2".to_string(),
             params: Some(hir::AnnotationParams::Raw(
-                "scopes = [\"read:users\", \"write:users\"]".to_string(),
+                "scopes = \"read:users,write:users\"".to_string(),
             )),
         },
     ];

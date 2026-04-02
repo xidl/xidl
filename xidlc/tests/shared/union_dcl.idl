@@ -9,4 +9,3 @@ union C switch (int32) {
     case 1:
         string b;
 };
-

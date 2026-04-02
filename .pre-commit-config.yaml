@@ -14,7 +14,7 @@ repos:
       - id: xidlc-fmt
         name: xidlc fmt
         language: system
-        files: \.idl$
+        files: ^(xidlc-examples/api/|golang/xidlc-examples/api/|xidlc/src/jsonrpc/|xidl-typeobject/idl/).+\.idl$
         entry: cargo run -p xidlc -- fmt --inplace --lang idl
       - id: rustfmt
         name: rustfmt

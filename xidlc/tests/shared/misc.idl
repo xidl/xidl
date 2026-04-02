@@ -138,4 +138,3 @@ interface C: A, B {
     attribute A::string_t Name;
     attribute B::string_t City;
 };
-

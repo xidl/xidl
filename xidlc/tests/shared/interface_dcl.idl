@@ -44,4 +44,3 @@ interface A {
         in L1 l_1
     );
 };
-

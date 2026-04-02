@@ -45,4 +45,3 @@ interface HttpAnnoService {
     );
     void ping();
 };
-

@@ -66,11 +66,15 @@ func NewHttpQueryTemplateServiceHandler(svc HttpQueryTemplateServiceService) htt
  		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
  		return
  	}
-		if _, err := svc.GetUser(r.Context(), req); err != nil {
+		resp, err := svc.GetUser(r.Context(), req)
+		if err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
-		w.WriteHeader(http.StatusNoContent)
+
+	if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
+		xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+	}
 	})
 	mux.HandleFunc("POST /search", func(w http.ResponseWriter, r *http.Request) {
 		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
@@ -94,11 +98,15 @@ func NewHttpQueryTemplateServiceHandler(svc HttpQueryTemplateServiceService) htt
 		return
 	}
 	req.Payload = body
-		if _, err := svc.Search(r.Context(), req); err != nil {
+		resp, err := svc.Search(r.Context(), req)
+		if err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
-		w.WriteHeader(http.StatusNoContent)
+
+	if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
+		xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+	}
 	})
 	return mux
 }
@@ -195,7 +203,8 @@ func decodeHttpQueryTemplateServiceGetUserResponse(resp *http.Response) (HttpQue
 	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil { return out, err }
 	out.Return = body
 	return out, nil
-}type HttpQueryTemplateServiceSearchRequest struct {
+}
+type HttpQueryTemplateServiceSearchRequest struct {
 	Keyword string `json:"keyword" form:"keyword"`
 	Payload string `json:"payload" form:"payload"`
 }

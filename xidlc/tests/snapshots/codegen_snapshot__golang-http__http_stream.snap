@@ -159,7 +159,8 @@ func decodeHttpStreamApiAlertsResponse(resp *http.Response) (HttpStreamApiAlerts
 	if err := xidlgohttp.MustCodecForMime("text/event-stream").Decode(resp.Body, &body); err != nil { return out, err }
 	out.Return = body
 	return out, nil
-}type HttpStreamApiUploadAssetRequest struct {
+}
+type HttpStreamApiUploadAssetRequest struct {
 	AssetId string `json:"asset_id" form:"asset_id"`
 	Chunk []uint8 `json:"chunk" form:"chunk"`
 }

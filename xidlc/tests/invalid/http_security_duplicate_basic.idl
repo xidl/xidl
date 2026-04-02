@@ -7,4 +7,3 @@ interface InvalidDuplicateSecurityService {
     @get(path = "/reports")
     string list_reports();
 };
-

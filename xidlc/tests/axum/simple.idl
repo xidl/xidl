@@ -60,4 +60,3 @@ struct CreateTcpReverseRequest {
 struct CreateSimpleResponse {
     uint32 id;
 };
-

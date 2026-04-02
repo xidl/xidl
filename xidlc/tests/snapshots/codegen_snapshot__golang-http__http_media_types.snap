@@ -190,7 +190,8 @@ func decodeHttpMediaTypesApiSubmitProfileResponse(resp *http.Response) (HttpMedi
 	out.Return = body.Return
 	out.NormalizedName = body.NormalizedName
 	return out, nil
-}type HttpMediaTypesApiGetMsgpackUserRequest struct {
+}
+type HttpMediaTypesApiGetMsgpackUserRequest struct {
 	UserId string `json:"user_id" form:"user_id"`
 }
 

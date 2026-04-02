@@ -9,4 +9,3 @@ interface InvalidUnaryBindingService {
         string id
     );
 };
-

@@ -7,4 +7,3 @@ interface HttpClientStreamService {
         in sequence<octet> chunk
     );
 };
-

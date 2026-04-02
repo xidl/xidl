@@ -51,11 +51,15 @@ func NewHttpCatchAllServiceHandler(svc HttpCatchAllServiceService) http.Handler 
  		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
  		return
  	}
-		if _, err := svc.ReadFile(r.Context(), req); err != nil {
+		resp, err := svc.ReadFile(r.Context(), req)
+		if err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
-		w.WriteHeader(http.StatusNoContent)
+
+	if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
+		xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+	}
 	})
 	mux.HandleFunc("GET /assets/{key}", func(w http.ResponseWriter, r *http.Request) {
 		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
@@ -74,11 +78,15 @@ func NewHttpCatchAllServiceHandler(svc HttpCatchAllServiceService) http.Handler 
  		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
  		return
  	}
-		if _, err := svc.ReadAsset(r.Context(), req); err != nil {
+		resp, err := svc.ReadAsset(r.Context(), req)
+		if err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
-		w.WriteHeader(http.StatusNoContent)
+
+	if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
+		xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+	}
 	})
 	return mux
 }
@@ -161,7 +169,8 @@ func decodeHttpCatchAllServiceReadFileResponse(resp *http.Response) (HttpCatchAl
 	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil { return out, err }
 	out.Return = body
 	return out, nil
-}type HttpCatchAllServiceReadAssetRequest struct {
+}
+type HttpCatchAllServiceReadAssetRequest struct {
 	Key string `json:"key" form:"key"`
 	Version string `json:"version" form:"version"`
 }

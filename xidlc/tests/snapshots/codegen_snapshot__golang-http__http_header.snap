@@ -89,11 +89,15 @@ func NewTestHeaderServiceHandler(svc TestHeaderServiceService) http.Handler {
  		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
  		return
  	}
-		if _, err := svc.GetUser(r.Context(), req); err != nil {
+		resp, err := svc.GetUser(r.Context(), req)
+		if err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
-		w.WriteHeader(http.StatusNoContent)
+
+	if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
+		xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+	}
 	})
 	mux.HandleFunc("POST /v1/headers", func(w http.ResponseWriter, r *http.Request) {
 		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
@@ -222,7 +226,8 @@ func decodeTestHeaderServiceGetUserResponse(resp *http.Response) (TestHeaderServ
 	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil { return out, err }
 	out.Return = body
 	return out, nil
-}type TestHeaderServiceCreateUserRequest struct {
+}
+type TestHeaderServiceCreateUserRequest struct {
 	Token string `json:"token" form:"token"`
 	SessionId string `json:"session_id" form:"session_id"`
 	Name string `json:"name" form:"name"`

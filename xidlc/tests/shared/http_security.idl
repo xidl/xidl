@@ -12,7 +12,7 @@ interface HttpSecurityService {
         @header("X-Trace-Id") string trace_id
     );
 
-    @oauth2(scopes = ["write:users", "read:users"])
+    @oauth2(scopes = "write:users,read:users")
     @post(path = "/users/search")
     string search_user(
         string keyword,

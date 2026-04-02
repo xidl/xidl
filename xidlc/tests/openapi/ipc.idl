@@ -34,4 +34,3 @@ interface Codegen {
         in ::xidl_parser::hir::ParserProperties props
     );
 };
-

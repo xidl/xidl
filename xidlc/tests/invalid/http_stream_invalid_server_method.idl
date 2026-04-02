@@ -7,4 +7,3 @@ interface InvalidServerStreamMethodService {
     @post(path = "/events")
     string watch();
 };
-

@@ -58,11 +58,15 @@ func NewHttpSecurityInheritanceServiceHandler(svc HttpSecurityInheritanceService
  		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
  		return
  	}
-		if _, err := svc.GetReport(r.Context(), req); err != nil {
+		resp, err := svc.GetReport(r.Context(), req)
+		if err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
-		w.WriteHeader(http.StatusNoContent)
+
+	if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
+		xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+	}
 	})
 	mux.HandleFunc("POST /reports/{id}", func(w http.ResponseWriter, r *http.Request) {
 		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
@@ -92,11 +96,15 @@ func NewHttpSecurityInheritanceServiceHandler(svc HttpSecurityInheritanceService
 		return
 	}
 	req.Body = body
-		if _, err := svc.UpdateReport(r.Context(), req); err != nil {
+		resp, err := svc.UpdateReport(r.Context(), req)
+		if err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
-		w.WriteHeader(http.StatusNoContent)
+
+	if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
+		xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+	}
 	})
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
@@ -105,11 +113,15 @@ func NewHttpSecurityInheritanceServiceHandler(svc HttpSecurityInheritanceService
 		}
 
 	req := &HttpSecurityInheritanceServiceHealthRequest{}
-		if _, err := svc.Health(r.Context(), req); err != nil {
+		resp, err := svc.Health(r.Context(), req)
+		if err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
-		w.WriteHeader(http.StatusNoContent)
+
+	if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
+		xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+	}
 	})
 	return mux
 }
@@ -208,7 +220,8 @@ func decodeHttpSecurityInheritanceServiceGetReportResponse(resp *http.Response) 
 	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil { return out, err }
 	out.Return = body
 	return out, nil
-}type HttpSecurityInheritanceServiceUpdateReportRequest struct {
+}
+type HttpSecurityInheritanceServiceUpdateReportRequest struct {
 	Id string `json:"id" form:"id"`
 	Body string `json:"body" form:"body"`
 }
@@ -241,7 +254,8 @@ func decodeHttpSecurityInheritanceServiceUpdateReportResponse(resp *http.Respons
 	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil { return out, err }
 	out.Return = body
 	return out, nil
-}type HttpSecurityInheritanceServiceHealthRequest struct {
+}
+type HttpSecurityInheritanceServiceHealthRequest struct {
 }
 
 type HttpSecurityInheritanceServiceHealthResponse struct {

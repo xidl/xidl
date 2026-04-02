@@ -60,11 +60,15 @@ func NewHttpDefaultsServiceHandler(svc HttpDefaultsServiceService) http.Handler 
  		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
  		return
  	}
-		if _, err := svc.GetName(r.Context(), req); err != nil {
+		resp, err := svc.GetName(r.Context(), req)
+		if err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
-		w.WriteHeader(http.StatusNoContent)
+
+	if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
+		xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+	}
 	})
 	mux.HandleFunc("GET /list_orders/{uid}", func(w http.ResponseWriter, r *http.Request) {
 		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
@@ -103,11 +107,15 @@ func NewHttpDefaultsServiceHandler(svc HttpDefaultsServiceService) http.Handler 
  		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
  		return
  	}
-		if _, err := svc.ListOrders(r.Context(), req); err != nil {
+		resp, err := svc.ListOrders(r.Context(), req)
+		if err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
-		w.WriteHeader(http.StatusNoContent)
+
+	if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
+		xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+	}
 	})
 	mux.HandleFunc("POST /users", func(w http.ResponseWriter, r *http.Request) {
 		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
@@ -126,11 +134,15 @@ func NewHttpDefaultsServiceHandler(svc HttpDefaultsServiceService) http.Handler 
 		return
 	}
 	req.Req = body
-		if _, err := svc.CreateUser(r.Context(), req); err != nil {
+		resp, err := svc.CreateUser(r.Context(), req)
+		if err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
-		w.WriteHeader(http.StatusNoContent)
+
+	if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
+		xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+	}
 	})
 	mux.HandleFunc("POST /users/search", func(w http.ResponseWriter, r *http.Request) {
 		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
@@ -150,11 +162,15 @@ func NewHttpDefaultsServiceHandler(svc HttpDefaultsServiceService) http.Handler 
 	}
 	req.Name = body.Name
 	req.Age = body.Age
-		if _, err := svc.SearchUser(r.Context(), req); err != nil {
+		resp, err := svc.SearchUser(r.Context(), req)
+		if err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
-		w.WriteHeader(http.StatusNoContent)
+
+	if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
+		xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+	}
 	})
 	mux.HandleFunc("GET /v1/users/{id}", func(w http.ResponseWriter, r *http.Request) {
 		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
@@ -178,11 +194,15 @@ func NewHttpDefaultsServiceHandler(svc HttpDefaultsServiceService) http.Handler 
  		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
  		return
  	}
-		if _, err := svc.GetUser(r.Context(), req); err != nil {
+		resp, err := svc.GetUser(r.Context(), req)
+		if err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
-		w.WriteHeader(http.StatusNoContent)
+
+	if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
+		xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+	}
 	})
 	mux.HandleFunc("POST /get_user_alias/{id}", func(w http.ResponseWriter, r *http.Request) {
 		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
@@ -206,11 +226,15 @@ func NewHttpDefaultsServiceHandler(svc HttpDefaultsServiceService) http.Handler 
  		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
  		return
  	}
-		if _, err := svc.GetUserAlias(r.Context(), req); err != nil {
+		resp, err := svc.GetUserAlias(r.Context(), req)
+		if err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
-		w.WriteHeader(http.StatusNoContent)
+
+	if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
+		xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+	}
 	})
 	return mux
 }
@@ -378,7 +402,8 @@ func decodeHttpDefaultsServiceGetNameResponse(resp *http.Response) (HttpDefaults
 	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil { return out, err }
 	out.Return = body
 	return out, nil
-}type HttpDefaultsServiceListOrdersRequest struct {
+}
+type HttpDefaultsServiceListOrdersRequest struct {
 	UserId uint32 `json:"user_id" form:"user_id"`
 	Page uint32 `json:"page" form:"page"`
 	Size uint32 `json:"size" form:"size"`
@@ -411,7 +436,8 @@ func decodeHttpDefaultsServiceListOrdersResponse(resp *http.Response) (HttpDefau
 	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil { return out, err }
 	out.Return = body
 	return out, nil
-}type HttpDefaultsServiceCreateUserRequest struct {
+}
+type HttpDefaultsServiceCreateUserRequest struct {
 	Req CreateUserRequest `json:"req" form:"req"`
 }
 
@@ -440,7 +466,8 @@ func decodeHttpDefaultsServiceCreateUserResponse(resp *http.Response) (HttpDefau
 	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil { return out, err }
 	out.Return = body
 	return out, nil
-}type HttpDefaultsServiceSearchUserRequest struct {
+}
+type HttpDefaultsServiceSearchUserRequest struct {
 	Name string `json:"name" form:"name"`
 	Age uint32 `json:"age" form:"age"`
 }
@@ -475,7 +502,8 @@ func decodeHttpDefaultsServiceSearchUserResponse(resp *http.Response) (HttpDefau
 	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil { return out, err }
 	out.Return = body
 	return out, nil
-}type HttpDefaultsServiceGetUserRequest struct {
+}
+type HttpDefaultsServiceGetUserRequest struct {
 	Id uint32 `json:"id" form:"id"`
 	Lang string `json:"lang" form:"lang"`
 }
@@ -507,7 +535,8 @@ func decodeHttpDefaultsServiceGetUserResponse(resp *http.Response) (HttpDefaults
 	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil { return out, err }
 	out.Return = body
 	return out, nil
-}type HttpDefaultsServiceGetUserAliasRequest struct {
+}
+type HttpDefaultsServiceGetUserAliasRequest struct {
 	UserId uint32 `json:"user_id" form:"user_id"`
 	Locale string `json:"locale" form:"locale"`
 }

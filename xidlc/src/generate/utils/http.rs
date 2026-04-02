@@ -544,13 +544,10 @@ fn parse_raw_params(raw: &str) -> Vec<(String, String)> {
 
 fn parse_string_array(raw: &str) -> Vec<String> {
     let trimmed = raw.trim();
-    let inner = trimmed
-        .strip_prefix('[')
-        .and_then(|value| value.strip_suffix(']'))
-        .unwrap_or(trimmed);
-    split_top_level(inner, ',')
+    let unquoted = trim_quotes(trimmed).unwrap_or_else(|| trimmed.to_string());
+    split_top_level(&unquoted, ',')
         .into_iter()
-        .map(|value| trim_quotes(value.trim()).unwrap_or_else(|| value.trim().to_string()))
+        .map(|value| value.trim().to_string())
         .filter(|value| !value.is_empty())
         .collect()
 }

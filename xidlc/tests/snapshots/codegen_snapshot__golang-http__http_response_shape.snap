@@ -49,11 +49,15 @@ func NewHttpResponseShapeServiceHandler(svc HttpResponseShapeServiceService) htt
 		}
 
 	req := &HttpResponseShapeServiceHelloRequest{}
-		if _, err := svc.Hello(r.Context(), req); err != nil {
+		resp, err := svc.Hello(r.Context(), req)
+		if err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
-		w.WriteHeader(http.StatusNoContent)
+
+	if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
+		xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+	}
 	})
 	mux.HandleFunc("POST /get_count", func(w http.ResponseWriter, r *http.Request) {
 		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
@@ -62,11 +66,15 @@ func NewHttpResponseShapeServiceHandler(svc HttpResponseShapeServiceService) htt
 		}
 
 	req := &HttpResponseShapeServiceGetCountRequest{}
-		if _, err := svc.GetCount(r.Context(), req); err != nil {
+		resp, err := svc.GetCount(r.Context(), req)
+		if err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
-		w.WriteHeader(http.StatusNoContent)
+
+	if err := xidlgohttp.EncodeBody(w, "application/json", resp.Count); err != nil {
+		xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+	}
 	})
 	mux.HandleFunc("POST /add", func(w http.ResponseWriter, r *http.Request) {
 		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
@@ -269,7 +277,8 @@ func decodeHttpResponseShapeServiceHelloResponse(resp *http.Response) (HttpRespo
 	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil { return out, err }
 	out.Return = body
 	return out, nil
-}type HttpResponseShapeServiceGetCountRequest struct {
+}
+type HttpResponseShapeServiceGetCountRequest struct {
 }
 
 type HttpResponseShapeServiceGetCountResponse struct {
@@ -297,7 +306,8 @@ func decodeHttpResponseShapeServiceGetCountResponse(resp *http.Response) (HttpRe
 	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil { return out, err }
 	out.Count = body
 	return out, nil
-}type HttpResponseShapeServiceAddRequest struct {
+}
+type HttpResponseShapeServiceAddRequest struct {
 	A int32 `json:"a" form:"a"`
 	B int32 `json:"b" form:"b"`
 }
@@ -339,7 +349,8 @@ func decodeHttpResponseShapeServiceAddResponse(resp *http.Response) (HttpRespons
 	out.Return = body.Return
 	out.Sum = body.Sum
 	return out, nil
-}type HttpResponseShapeServiceBumpRequest struct {
+}
+type HttpResponseShapeServiceBumpRequest struct {
 	Value int32 `json:"value" form:"value"`
 }
 
@@ -375,7 +386,8 @@ func decodeHttpResponseShapeServiceBumpResponse(resp *http.Response) (HttpRespon
 	out.Return = body.Return
 	out.Value = body.Value
 	return out, nil
-}type HttpResponseShapeServicePingRequest struct {
+}
+type HttpResponseShapeServicePingRequest struct {
 }
 
 type HttpResponseShapeServicePingResponse struct {

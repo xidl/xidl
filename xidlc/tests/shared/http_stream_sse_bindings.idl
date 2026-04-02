@@ -20,4 +20,3 @@ interface HttpStreamSseBindingsService {
         string trace_id
     );
 };
-

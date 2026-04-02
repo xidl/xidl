@@ -21,4 +21,3 @@ interface HttpResponseShapeService {
     // output count = 0 -> 204 no body
     void ping();
 };
-

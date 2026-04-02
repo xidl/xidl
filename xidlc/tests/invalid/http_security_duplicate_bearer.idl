@@ -7,4 +7,3 @@ interface InvalidDuplicateBearerSecurityService {
     @get(path = "/reports")
     string list_reports();
 };
-
