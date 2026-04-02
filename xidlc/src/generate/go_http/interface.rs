@@ -301,6 +301,7 @@ fn render_server(
                 Some(HttpStreamKind::Bidi) => {}
                 None => {
                     if method.response_body_struct.is_some()
+                        || method.response_body_direct_field.is_some()
                         || !method.response_header_params.is_empty()
                         || !method.response_cookie_params.is_empty()
                     {
@@ -601,6 +602,7 @@ fn render_decode_response_fn(
         },
     };
     out.push_str(&renderer.render_template("decode_response.go.j2", &ctx)?);
+    out.push('\n');
     Ok(())
 }
 

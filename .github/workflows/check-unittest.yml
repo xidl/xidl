@@ -17,6 +17,12 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: golang/xidlc-examples/go.mod
+          cache: true
+
       - name: Cache Rust
         uses: Swatinem/rust-cache@v2
 
@@ -25,6 +31,10 @@ jobs:
         with:
           tool: cross
 
+      - name: Make test-go
+        run: |
+          make test-go
+
       - name: Cargo test
         run: |
-          cargo test --all
+          make test

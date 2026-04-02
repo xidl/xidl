@@ -37,11 +37,13 @@ func NewHttpStreamApiHandler(svc HttpStreamApiService) http.Handler {
 			return
 		}
 		r = r.WithContext(ctx)
+
 	req := &HttpStreamApiAlertsRequest{}
-	if value, err := xidlgohttp.PathString(r, "district"); err == nil { req.District = value } else {
-		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
-		return
-	}
+
+ 	if value, err := xidlgohttp.PathString(r, "district"); err == nil { req.District = value } else {
+ 		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+ 		return
+ 	}
 		stream := xidlgohttp.NewSSEServerStreamWriter[string](w)
 		if err := svc.Alerts(r.Context(), req, stream); err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
@@ -64,16 +66,15 @@ func NewHttpStreamApiHandler(svc HttpStreamApiService) http.Handler {
 			xidlgohttp.WriteJSONError(w, http.StatusUnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE", err.Error())
 			return
 		}
+
 		stream := xidlgohttp.NewClientStreamReader[HttpStreamApiUploadAssetRequest](r.Context(), r.Body)
 		resp, err := svc.UploadAsset(r.Context(), stream)
 		if err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
-	respBody := HttpStreamApiUploadAssetResponseBody{
-		Return: resp.Return,
-	}
-	if err := xidlgohttp.EncodeBody(w, "application/json", respBody); err != nil {
+
+	if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
 		xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
 	}
 	})
@@ -127,13 +128,15 @@ type HttpStreamApiAlertsResponse struct {
 	Return string `json:"return"`
 }
 
-type HttpStreamApiAlertsResponseBody struct {
-	Return string `json:"return"`
-}
-
 func HttpStreamApiAlertsSecurityRequirements() []xidlgohttp.SecurityRequirement {
 	return []xidlgohttp.SecurityRequirement{
 		{Kind: xidlgohttp.SecurityBasic, Realm: "Alerts"},
+	}
+}
+
+func HttpStreamApiAlertsDeprecated() xidlgohttp.DeprecatedInfo {
+	return xidlgohttp.DeprecatedInfo{
+		Deprecated: false,
 	}
 }
 
@@ -143,15 +146,13 @@ func formatHttpStreamApiAlertsPath(req *HttpStreamApiAlertsRequest) string {
 	path = strings.ReplaceAll(path, "{*district}", req.District)
 	return path
 }
-
 func decodeHttpStreamApiAlertsResponse(resp *http.Response) (HttpStreamApiAlertsResponse, error) {
 	out := HttpStreamApiAlertsResponse{}
-	body := HttpStreamApiAlertsResponseBody{}
+	var body string
 	if err := xidlgohttp.MustCodecForMime("text/event-stream").Decode(resp.Body, &body); err != nil { return out, err }
-	out.Return = body.Return
+	out.Return = body
 	return out, nil
 }
-
 type HttpStreamApiUploadAssetRequest struct {
 	AssetId string `json:"asset_id" form:"asset_id"`
 	Chunk []uint8 `json:"chunk" form:"chunk"`
@@ -161,13 +162,15 @@ type HttpStreamApiUploadAssetResponse struct {
 	Return string `json:"return"`
 }
 
-type HttpStreamApiUploadAssetResponseBody struct {
-	Return string `json:"return"`
-}
-
 func HttpStreamApiUploadAssetSecurityRequirements() []xidlgohttp.SecurityRequirement {
 	return []xidlgohttp.SecurityRequirement{
 		{Kind: xidlgohttp.SecurityBearer},
+	}
+}
+
+func HttpStreamApiUploadAssetDeprecated() xidlgohttp.DeprecatedInfo {
+	return xidlgohttp.DeprecatedInfo{
+		Deprecated: false,
 	}
 }
 
@@ -175,11 +178,10 @@ func formatHttpStreamApiUploadAssetPath(req *HttpStreamApiUploadAssetRequest) st
 	path := "/upload"
 	return path
 }
-
 func decodeHttpStreamApiUploadAssetResponse(resp *http.Response) (HttpStreamApiUploadAssetResponse, error) {
 	out := HttpStreamApiUploadAssetResponse{}
-	body := HttpStreamApiUploadAssetResponseBody{}
+	var body string
 	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil { return out, err }
-	out.Return = body.Return
+	out.Return = body
 	return out, nil
 }
