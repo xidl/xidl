@@ -1,16 +1,16 @@
 {%- if not method.is_client_stream %}
 	req := &{{ method.request_struct }}{}
 {%- if method.path_bindings %}
-{{ method.path_bindings | indent(width=1, first=true) }}
+{{ method.path_bindings | indent(1, true) }}
 {%- endif %}
 {%- if method.query_bindings %}
-{{ method.query_bindings | indent(width=1, first=true) }}
+{{ method.query_bindings | indent(1, true) }}
 {%- endif %}
 {%- if method.header_bindings %}
-{{ method.header_bindings | indent(width=1, first=true) }}
+{{ method.header_bindings | indent(1, true) }}
 {%- endif %}
 {%- if method.cookie_bindings %}
-{{ method.cookie_bindings | indent(width=1, first=true) }}
+{{ method.cookie_bindings | indent(1, true) }}
 {%- endif %}
 {%- if method.request_body_struct %}
 	body := {{ method.request_body_struct }}{}

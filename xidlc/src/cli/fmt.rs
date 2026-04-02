@@ -45,7 +45,7 @@ impl ArgsFormat {
             if self.inplace {
                 std::fs::write(file, formatted)?;
             } else {
-                println!("{}", formatted);
+                print!("{}", formatted);
             }
         }
 

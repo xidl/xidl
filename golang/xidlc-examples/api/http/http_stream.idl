@@ -16,4 +16,3 @@ interface HttpStreamApi {
         in sequence<octet> chunk
     );
 };
-

@@ -4,4 +4,3 @@ interface HelloWorld {
         in string name
     );
 };
-

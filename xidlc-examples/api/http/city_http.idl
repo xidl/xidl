@@ -85,4 +85,3 @@ interface SmartCityHttpApi {
     readonly attribute string api_version;
     attribute boolean maintenance_mode;
 };
-

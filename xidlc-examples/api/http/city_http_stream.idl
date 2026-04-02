@@ -32,4 +32,3 @@ interface CityHttpStreamApi {
         out string text
     );
 };
-

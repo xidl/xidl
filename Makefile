@@ -1,10 +1,12 @@
 GO_CACHE ?= /tmp/xidl-go-cache
 GO_PATH ?= /tmp/xidl-go-path
 
-.PHONY: test test-go test-go-codegen test-go-runtime test-update build-xtypes docs-dev docs-build
+.PHONY: test test-rust test-go test-go-codegen test-go-runtime test-update build-xtypes docs-dev docs-build
 
-test:
+test-rust:
 	cargo test --all
+
+test: test-rust test-go
 
 test-go: test-go-codegen test-go-runtime
 

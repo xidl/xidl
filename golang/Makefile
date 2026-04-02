@@ -7,7 +7,7 @@ XIDLC_BIN ?= ../target/debug/xidlc
 test: test-go-codegen test-go-runtime
 
 test-go-codegen:
-	RUSTC_WRAPPER= cargo build -p xidlc
+	cargo build -p xidlc
 	tmpdir=$$(mktemp -d); \
 	trap 'rm -rf "$$tmpdir"' EXIT; \
 	$(XIDLC_BIN) --lang go-http --out-dir "$$tmpdir/hello_world" xidlc-examples/api/http/hello_world.idl; \

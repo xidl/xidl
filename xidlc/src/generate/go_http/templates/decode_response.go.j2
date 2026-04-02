@@ -1,10 +1,10 @@
 func decode{{ method.struct_prefix }}Response(resp *http.Response) ({{ method.response_struct }}, error) {
 	out := {{ method.response_struct }}{}
 {%- if method.response_header_decode %}
-{{ method.response_header_decode | indent(width=1, first=true) }}
+{{ method.response_header_decode | indent(1, true) }}
 {%- endif %}
 {%- if method.response_cookie_decode %}
-{{ method.response_cookie_decode | indent(width=1, first=true) }}
+{{ method.response_cookie_decode | indent(1, true) }}
 {%- endif %}
 {%- if method.response_body_struct %}
 	body := {{ method.response_body_struct }}{}

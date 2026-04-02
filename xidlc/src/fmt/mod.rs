@@ -67,6 +67,7 @@ pub fn format_idl_source_with_name(source: &str, filename: &str) -> IdlcResult<S
         normalize_indent: true,
     })
     .format(source)
+    .map(|output| Formatter::ensure_trailing_newline(&output))
 }
 
 #[cfg(feature = "fmt-rust")]
@@ -584,7 +585,11 @@ impl<'a> Formatter<'a> {
         while out.ends_with('\n') {
             out.pop();
         }
-        out
+        Self::ensure_trailing_newline(&out)
+    }
+
+    fn ensure_trailing_newline(input: &str) -> String {
+        format!("{}\n", input.trim_end())
     }
 
     fn normalize_jinja_indentation(input: &str) -> String {

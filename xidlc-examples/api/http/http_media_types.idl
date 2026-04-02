@@ -17,4 +17,3 @@ interface HttpMediaTypesApi {
         out uint32 score
     );
 };
-

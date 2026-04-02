@@ -19,4 +19,3 @@ interface Hysteria2 {
         out string padding
     );
 };
-
