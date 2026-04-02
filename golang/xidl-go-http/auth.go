@@ -37,10 +37,11 @@ type ClientAuth struct {
 type SecurityKind string
 
 const (
-	SecurityBasic   SecurityKind = "basic"
-	SecurityBearer  SecurityKind = "bearer"
-	SecurityAPIKey  SecurityKind = "api_key"
-	SecurityNone    SecurityKind = "none"
+	SecurityBasic  SecurityKind = "basic"
+	SecurityBearer SecurityKind = "bearer"
+	SecurityAPIKey SecurityKind = "api_key"
+	SecurityOAuth2 SecurityKind = "oauth2"
+	SecurityNone   SecurityKind = "none"
 )
 
 type SecurityRequirement struct {
@@ -48,14 +49,15 @@ type SecurityRequirement struct {
 	Name     string
 	Location ApiKeyLocation
 	Realm    string
+	Scopes   []string
 }
 
 type contextKey string
 
 const (
-	basicAuthContextKey  contextKey = "xidl.basic_auth"
-	bearerContextKey     contextKey = "xidl.bearer"
-	apiKeysContextKey    contextKey = "xidl.api_keys"
+	basicAuthContextKey contextKey = "xidl.basic_auth"
+	bearerContextKey    contextKey = "xidl.bearer"
+	apiKeysContextKey   contextKey = "xidl.api_keys"
 )
 
 func ApplyClientAuth(req *http.Request, auth ClientAuth, requirements []SecurityRequirement) {
@@ -67,6 +69,10 @@ func ApplyClientAuth(req *http.Request, auth ClientAuth, requirements []Security
 				req.Header.Set("Authorization", "Basic "+token)
 			}
 		case SecurityBearer:
+			if auth.Bearer != "" {
+				req.Header.Set("Authorization", "Bearer "+auth.Bearer)
+			}
+		case SecurityOAuth2:
 			if auth.Bearer != "" {
 				req.Header.Set("Authorization", "Bearer "+auth.Bearer)
 			}
@@ -123,6 +129,10 @@ func RequireAuth(r *http.Request, requirements []SecurityRequirement) (context.C
 			if bearer != "" {
 				return context.WithValue(ctx, bearerContextKey, bearer), nil
 			}
+		case SecurityOAuth2:
+			if bearer != "" {
+				return context.WithValue(ctx, bearerContextKey, bearer), nil
+			}
 		case SecurityAPIKey:
 			if value, ok := findAPIKey(r, requirement); ok {
 				foundAPIKeys = append(foundAPIKeys, ApiKeyAuth{
@@ -150,6 +160,10 @@ func Unauthorized(w http.ResponseWriter, requirements []SecurityRequirement) {
 			break
 		}
 		if requirement.Kind == SecurityBearer {
+			w.Header().Set("WWW-Authenticate", "Bearer")
+			break
+		}
+		if requirement.Kind == SecurityOAuth2 {
 			w.Header().Set("WWW-Authenticate", "Bearer")
 			break
 		}

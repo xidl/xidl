@@ -1,0 +1,13 @@
+#pragma xidlc package xidlc
+#pragma xidlc version v1.0.0
+
+interface HttpStreamSseBindingsService {
+    @server_stream
+    @stream_codec("sse")
+    @get(path = "/files/{*path}{?lang,follow}")
+    sequence<string> tail_file(
+        @path("path") string path,
+        @query("lang") string lang,
+        @query("follow") boolean follow
+    );
+};

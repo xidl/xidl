@@ -13,9 +13,11 @@
 		{{ param.field_name }}: req.{{ param.field_name }},
 {%- endfor %}
 	}
+{%- elif method.request_body_direct_field %}
+	body := req.{{ method.request_body_direct_field }}
 {%- endif %}
 	var requestBody bytes.Buffer
-{%- if method.request_body_struct %}
+{%- if method.request_body_struct or method.request_body_direct_field %}
 	if err := xidlgohttp.MustCodecForMime("{{ method.request_content_type }}").Encode(&requestBody, body); err != nil { return nil, err }
 {%- endif %}
 	httpReq, err := http.NewRequestWithContext(ctx, "{{ method.http_method_name }}", requestURL, &requestBody)

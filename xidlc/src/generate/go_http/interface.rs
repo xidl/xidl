@@ -1,13 +1,13 @@
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::utils::{
     HttpApiKeyLocation, HttpSecurityProfile, HttpSecurityRequirement, HttpStreamCodec,
-    HttpStreamKind, HttpStreamTargetSupport, effective_media_type, effective_security_with_origin,
-    http_stream_config, validate_http_annotations, validate_http_stream_method,
-    validate_http_stream_target,
+    HttpStreamKind, HttpStreamTargetSupport, deprecated_info, effective_media_type,
+    effective_security_with_origin, http_stream_config, validate_http_annotations,
+    validate_http_stream_method, validate_http_stream_target,
 };
 use convert_case::{Case, Casing};
 use serde::Serialize;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::fmt::Write;
 use xidl_parser::hir;
 
@@ -94,6 +94,8 @@ struct ClientBuildRequestMethod<'a> {
     struct_prefix: &'a str,
     http_method_name: &'a str,
     request_body_struct: Option<&'a str>,
+    request_body_direct_field: Option<&'a str>,
+    request_body_direct_ty: Option<&'a str>,
     request_content_type: &'a str,
     response_content_type: &'a str,
     body_params: Vec<MethodTemplateParam>,
@@ -115,6 +117,8 @@ struct DecodeResponseMethod<'a> {
     struct_prefix: &'a str,
     response_struct: &'a str,
     response_body_struct: Option<&'a str>,
+    response_body_direct_field: Option<&'a str>,
+    response_body_direct_ty: Option<&'a str>,
     response_content_type: &'a str,
     return_ty: Option<&'a str>,
     response_body_params: Vec<MethodTemplateParam>,
@@ -132,6 +136,8 @@ struct RequestBindingMethod<'a> {
     is_client_stream: bool,
     request_struct: &'a str,
     request_body_struct: Option<&'a str>,
+    request_body_direct_field: Option<&'a str>,
+    request_body_direct_ty: Option<&'a str>,
     request_content_type: &'a str,
     body_params: Vec<MethodTemplateParam>,
     path_bindings: String,
@@ -149,6 +155,8 @@ struct ResponseWriteTemplate<'a> {
 #[derive(Serialize)]
 struct ResponseWriteMethod<'a> {
     response_body_struct: Option<&'a str>,
+    response_body_direct_field: Option<&'a str>,
+    response_body_direct_ty: Option<&'a str>,
     response_content_type: &'a str,
     return_ty: Option<&'a str>,
     response_body_params: Vec<MethodTemplateParam>,
@@ -168,8 +176,22 @@ fn render_server(
     )
     .unwrap();
     writeln!(out, "\tmux := http.NewServeMux()").unwrap();
+    let mut seen_routes = HashMap::<String, String>::new();
     for method in methods {
         for path in &method.paths {
+            let route_key = format!(
+                "{} {}",
+                super::definition::http_method_name(method.http_method),
+                path
+            );
+            if let Some(previous) =
+                seen_routes.insert(route_key.clone(), method.method_name.clone())
+            {
+                return Err(IdlcError::rpc(format!(
+                    "duplicate HTTP route binding: {route_key} (methods: {previous}, {})",
+                    method.method_name
+                )));
+            }
             writeln!(
                 out,
                 "\tmux.HandleFunc(\"{} {}\", func(w http.ResponseWriter, r *http.Request) {{",
@@ -521,6 +543,8 @@ fn render_client_build_request(
             struct_prefix: &method.struct_prefix,
             http_method_name: super::definition::http_method_name(method.http_method),
             request_body_struct: method.request_body_struct.as_deref(),
+            request_body_direct_field: method.request_body_direct_field.as_deref(),
+            request_body_direct_ty: method.request_body_direct_ty.as_deref(),
             request_content_type: &method.request_content_type,
             response_content_type: &method.response_content_type,
             body_params: template_params(&method.body_params),
@@ -567,6 +591,8 @@ fn render_decode_response_fn(
             struct_prefix: &method.struct_prefix,
             response_struct: &method.response_struct,
             response_body_struct: method.response_body_struct.as_deref(),
+            response_body_direct_field: method.response_body_direct_field.as_deref(),
+            response_body_direct_ty: method.response_body_direct_ty.as_deref(),
             response_content_type: &method.response_content_type,
             return_ty: method.return_ty.as_deref(),
             response_body_params: template_params(&method.response_body_params),
@@ -604,6 +630,8 @@ fn render_request_binding(
             is_client_stream: matches!(method.stream_kind, Some(HttpStreamKind::Client)),
             request_struct: &method.request_struct,
             request_body_struct: method.request_body_struct.as_deref(),
+            request_body_direct_field: method.request_body_direct_field.as_deref(),
+            request_body_direct_ty: method.request_body_direct_ty.as_deref(),
             request_content_type: &method.request_content_type,
             body_params: template_params(&method.body_params),
             path_bindings,
@@ -634,6 +662,8 @@ fn render_response_write(
     let ctx = ResponseWriteTemplate {
         method: ResponseWriteMethod {
             response_body_struct: method.response_body_struct.as_deref(),
+            response_body_direct_field: method.response_body_direct_field.as_deref(),
+            response_body_direct_ty: method.response_body_direct_ty.as_deref(),
             response_content_type: &method.response_content_type,
             return_ty: method.return_ty.as_deref(),
             response_body_params: template_params(&method.response_body_params),
@@ -749,8 +779,39 @@ fn render_method_types(
                 )
                 .unwrap();
             }
-            HttpSecurityRequirement::OAuth2 { .. } => {}
+            HttpSecurityRequirement::OAuth2 { scopes } => {
+                writeln!(
+                    out,
+                    "\t\t{{Kind: xidlgohttp.SecurityOAuth2, Scopes: []string{{{}}}}},",
+                    scopes
+                        .iter()
+                        .map(|scope| format!("{scope:?}"))
+                        .collect::<Vec<_>>()
+                        .join(", ")
+                )
+                .unwrap();
+            }
         }
+    }
+    writeln!(out, "\t}}").unwrap();
+    writeln!(out, "}}").unwrap();
+    writeln!(out).unwrap();
+    writeln!(
+        out,
+        "func {}Deprecated() xidlgohttp.DeprecatedInfo {{",
+        method.struct_prefix
+    )
+    .unwrap();
+    writeln!(out, "\treturn xidlgohttp.DeprecatedInfo{{").unwrap();
+    writeln!(out, "\t\tDeprecated: {},", method.deprecated).unwrap();
+    if let Some(since) = &method.deprecated_since {
+        writeln!(out, "\t\tSince: {:?},", since).unwrap();
+    }
+    if let Some(after) = &method.deprecated_after {
+        writeln!(out, "\t\tAfter: {:?},", after).unwrap();
+    }
+    if let Some(note) = &method.deprecated_note {
+        writeln!(out, "\t\tNote: {:?},", note).unwrap();
     }
     writeln!(out, "\t}}").unwrap();
     writeln!(out, "}}").unwrap();
@@ -832,6 +893,7 @@ pub(crate) fn build_method_meta(
         .flat_map(|item| item.query_params.iter().cloned())
         .collect();
     let default_source = super::definition::default_param_source(http_method);
+    let deprecated = deprecated_context(interface_annotations, &op.annotations)?;
 
     let security_profile = effective_security_with_origin(interface_annotations, &op.annotations)
         .map_err(IdlcError::rpc)?;
@@ -901,26 +963,38 @@ pub(crate) fn build_method_meta(
             op.ident
         )));
     }
+    validate_query_template_bindings(&op.ident, &all_query_template_names, &query_params)?;
 
     let struct_prefix = format!("{}{}", interface_name, op.ident.to_case(Case::Pascal));
     let request_struct = format!("{struct_prefix}Request");
     let response_struct = format!("{struct_prefix}Response");
-    let request_body_struct =
+    let (request_body_struct, request_body_direct_field, request_body_direct_ty) =
         if body_params.is_empty() || matches!(stream.kind, Some(HttpStreamKind::Client)) {
-            None
+            (None, None, None)
+        } else if body_params.len() == 1 {
+            let param = &body_params[0];
+            (None, Some(param.field_name.clone()), Some(param.ty.clone()))
         } else {
-            Some(format!("{struct_prefix}RequestBody"))
-        };
-    let response_body_struct =
-        if response_body_params.is_empty() && !matches!(op.ty, hir::OpTypeSpec::TypeSpec(_)) {
-            None
-        } else {
-            Some(format!("{struct_prefix}ResponseBody"))
+            (Some(format!("{struct_prefix}RequestBody")), None, None)
         };
     let return_ty = match &op.ty {
         hir::OpTypeSpec::Void => None,
         hir::OpTypeSpec::TypeSpec(ty) => Some(super::definition::go_type(ty)),
     };
+    let response_output_count = response_body_params.len() + usize::from(return_ty.is_some());
+    let (response_body_struct, response_body_direct_field, response_body_direct_ty) =
+        if response_output_count == 0 {
+            (None, None, None)
+        } else if response_output_count == 1 {
+            if let Some(return_ty) = &return_ty {
+                (None, Some("Return".to_string()), Some(return_ty.clone()))
+            } else {
+                let param = &response_body_params[0];
+                (None, Some(param.field_name.clone()), Some(param.ty.clone()))
+            }
+        } else {
+            (Some(format!("{struct_prefix}ResponseBody")), None, None)
+        };
     Ok(MethodMeta {
         method_name: op.ident.to_case(Case::Pascal),
         struct_prefix,
@@ -931,8 +1005,12 @@ pub(crate) fn build_method_meta(
             .collect(),
         request_struct,
         request_body_struct,
+        request_body_direct_field,
+        request_body_direct_ty,
         response_struct,
         response_body_struct,
+        response_body_direct_field,
+        response_body_direct_ty,
         request_content_type: effective_media_type(
             interface_annotations,
             &op.annotations,
@@ -961,5 +1039,72 @@ pub(crate) fn build_method_meta(
         stream_codec: stream.codec,
         security,
         basic_realm,
+        deprecated: deprecated.deprecated,
+        deprecated_since: deprecated.since,
+        deprecated_after: deprecated.after,
+        deprecated_note: deprecated.note,
     })
+}
+
+struct DeprecatedContext {
+    deprecated: bool,
+    since: Option<String>,
+    after: Option<String>,
+    note: Option<String>,
+}
+
+fn deprecated_context(
+    interface_annotations: &[hir::Annotation],
+    method_annotations: &[hir::Annotation],
+) -> IdlcResult<DeprecatedContext> {
+    let info = if let Some(info) = deprecated_info(method_annotations).map_err(IdlcError::rpc)? {
+        Some(info)
+    } else {
+        deprecated_info(interface_annotations).map_err(IdlcError::rpc)?
+    };
+    let deprecated = info.as_ref().map(|value| value.deprecated).unwrap_or(false);
+    let since = info.as_ref().and_then(|value| value.since.clone());
+    let after = info.as_ref().and_then(|value| value.after.clone());
+    let note = info.as_ref().map(|value| {
+        let mut note = String::from("Deprecated.");
+        if let Some(since) = &value.since {
+            note.push_str(&format!(" Since {since}."));
+        }
+        if let Some(after) = &value.after {
+            note.push_str(&format!(" After {after}."));
+        }
+        note
+    });
+    Ok(DeprecatedContext {
+        deprecated,
+        since,
+        after,
+        note,
+    })
+}
+
+fn validate_query_template_bindings(
+    method_name: &str,
+    query_template_names: &HashSet<String>,
+    query_params: &[super::ParamMeta],
+) -> IdlcResult<()> {
+    for name in query_template_names {
+        let count = query_params
+            .iter()
+            .filter(|param| param.wire_name == *name)
+            .count();
+        if count == 0 {
+            return Err(IdlcError::rpc(format!(
+                "query template variable '{}' has no matching request-side query parameter in method '{}'",
+                name, method_name
+            )));
+        }
+        if count > 1 {
+            return Err(IdlcError::rpc(format!(
+                "query template variable '{}' is bound by multiple request-side query parameters in method '{}'",
+                name, method_name
+            )));
+        }
+    }
+    Ok(())
 }

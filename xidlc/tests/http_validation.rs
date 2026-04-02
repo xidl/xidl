@@ -83,7 +83,7 @@ fn rejects_non_body_client_stream_inputs_for_axum_and_typescript() {
 
 #[test]
 fn rejects_duplicate_security_annotations() {
-    for lang in ["axum"] {
+    for lang in ["axum", "go-http"] {
         let err = generate_error(lang, "http_security_duplicate_basic.idl");
         assert!(
             err.contains("duplicate @http_basic annotation"),
@@ -94,7 +94,7 @@ fn rejects_duplicate_security_annotations() {
 
 #[test]
 fn rejects_conflicting_no_security_annotations() {
-    for lang in ["axum"] {
+    for lang in ["axum", "go-http"] {
         let err = generate_error(lang, "http_security_conflict_no_security.idl");
         assert!(
             err.contains("@no_security cannot be combined with other security annotations"),
@@ -105,7 +105,7 @@ fn rejects_conflicting_no_security_annotations() {
 
 #[test]
 fn rejects_unary_conflicting_param_sources() {
-    for lang in ["axum", "ts"] {
+    for lang in ["axum", "ts", "go-http"] {
         let err = generate_error(lang, "http_unary_conflicting_param_source.idl");
         assert!(
             err.contains("conflicting source annotations"),
@@ -116,7 +116,7 @@ fn rejects_unary_conflicting_param_sources() {
 
 #[test]
 fn rejects_missing_query_template_bindings() {
-    for lang in ["axum", "ts"] {
+    for lang in ["axum", "ts", "go-http"] {
         let err = generate_error(lang, "http_unary_query_template_missing_binding.idl");
         assert!(
             err.contains(
@@ -129,29 +129,36 @@ fn rejects_missing_query_template_bindings() {
 
 #[test]
 fn rejects_duplicate_route_bindings_for_axum() {
-    let err = generate_error("axum", "http_unary_duplicate_route_binding.idl");
-    assert!(err.contains("duplicate HTTP route binding"), "{err}");
+    for lang in ["axum", "go-http"] {
+        let err = generate_error(lang, "http_unary_duplicate_route_binding.idl");
+        assert!(
+            err.contains("duplicate HTTP route binding"),
+            "{lang}: {err}"
+        );
+    }
 }
 
 #[test]
 fn rejects_additional_invalid_security_annotations() {
-    let duplicate_bearer = generate_error("axum", "http_security_duplicate_bearer.idl");
-    assert!(
-        duplicate_bearer.contains("duplicate @http_bearer annotation"),
-        "{duplicate_bearer}"
-    );
+    for lang in ["axum", "go-http"] {
+        let duplicate_bearer = generate_error(lang, "http_security_duplicate_bearer.idl");
+        assert!(
+            duplicate_bearer.contains("duplicate @http_bearer annotation"),
+            "{lang}: {duplicate_bearer}"
+        );
 
-    let missing_name = generate_error("axum", "http_security_api_key_missing_name.idl");
-    assert!(
-        missing_name.contains("@api_key requires non-empty name=..."),
-        "{missing_name}"
-    );
+        let missing_name = generate_error(lang, "http_security_api_key_missing_name.idl");
+        assert!(
+            missing_name.contains("@api_key requires non-empty name=..."),
+            "{lang}: {missing_name}"
+        );
 
-    let invalid_location = generate_error("axum", "http_security_api_key_invalid_location.idl");
-    assert!(
-        invalid_location.contains("must be one of header|query|cookie"),
-        "{invalid_location}"
-    );
+        let invalid_location = generate_error(lang, "http_security_api_key_invalid_location.idl");
+        assert!(
+            invalid_location.contains("must be one of header|query|cookie"),
+            "{lang}: {invalid_location}"
+        );
+    }
 }
 
 #[test]

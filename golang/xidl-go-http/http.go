@@ -10,6 +10,13 @@ import (
 	"strings"
 )
 
+type DeprecatedInfo struct {
+	Deprecated bool
+	Since      string
+	After      string
+	Note       string
+}
+
 func WriteJSONError(w http.ResponseWriter, status int, code string, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)

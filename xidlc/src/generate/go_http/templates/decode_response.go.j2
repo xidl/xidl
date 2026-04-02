@@ -15,7 +15,10 @@ func decode{{ method.struct_prefix }}Response(resp *http.Response) ({{ method.re
 {%- for param in method.response_body_params %}
 	out.{{ param.field_name }} = body.{{ param.field_name }}
 {%- endfor %}
+{%- elif method.response_body_direct_field %}
+	var body {{ method.response_body_direct_ty }}
+	if err := xidlgohttp.MustCodecForMime("{{ method.response_content_type }}").Decode(resp.Body, &body); err != nil { return out, err }
+	out.{{ method.response_body_direct_field }} = body
 {%- endif %}
 	return out, nil
 }
-

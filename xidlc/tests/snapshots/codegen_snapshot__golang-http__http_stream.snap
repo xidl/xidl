@@ -81,10 +81,7 @@ func NewHttpStreamApiHandler(svc HttpStreamApiService) http.Handler {
 			return
 		}
 
-	respBody := HttpStreamApiUploadAssetResponseBody{
-		Return: resp.Return,
-	}
-	if err := xidlgohttp.EncodeBody(w, "application/json", respBody); err != nil {
+	if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
 		xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
 	}
 	})
@@ -138,13 +135,15 @@ type HttpStreamApiAlertsResponse struct {
 	Return string `json:"return"`
 }
 
-type HttpStreamApiAlertsResponseBody struct {
-	Return string `json:"return"`
-}
-
 func HttpStreamApiAlertsSecurityRequirements() []xidlgohttp.SecurityRequirement {
 	return []xidlgohttp.SecurityRequirement{
 		{Kind: xidlgohttp.SecurityBasic, Realm: "Alerts"},
+	}
+}
+
+func HttpStreamApiAlertsDeprecated() xidlgohttp.DeprecatedInfo {
+	return xidlgohttp.DeprecatedInfo{
+		Deprecated: false,
 	}
 }
 
@@ -156,21 +155,16 @@ func formatHttpStreamApiAlertsPath(req *HttpStreamApiAlertsRequest) string {
 }
 func decodeHttpStreamApiAlertsResponse(resp *http.Response) (HttpStreamApiAlertsResponse, error) {
 	out := HttpStreamApiAlertsResponse{}
-	body := HttpStreamApiAlertsResponseBody{}
+	var body string
 	if err := xidlgohttp.MustCodecForMime("text/event-stream").Decode(resp.Body, &body); err != nil { return out, err }
-	out.Return = body.Return
+	out.Return = body
 	return out, nil
-}
-type HttpStreamApiUploadAssetRequest struct {
+}type HttpStreamApiUploadAssetRequest struct {
 	AssetId string `json:"asset_id" form:"asset_id"`
 	Chunk []uint8 `json:"chunk" form:"chunk"`
 }
 
 type HttpStreamApiUploadAssetResponse struct {
-	Return string `json:"return"`
-}
-
-type HttpStreamApiUploadAssetResponseBody struct {
 	Return string `json:"return"`
 }
 
@@ -180,14 +174,20 @@ func HttpStreamApiUploadAssetSecurityRequirements() []xidlgohttp.SecurityRequire
 	}
 }
 
+func HttpStreamApiUploadAssetDeprecated() xidlgohttp.DeprecatedInfo {
+	return xidlgohttp.DeprecatedInfo{
+		Deprecated: false,
+	}
+}
+
 func formatHttpStreamApiUploadAssetPath(req *HttpStreamApiUploadAssetRequest) string {
 	path := "/upload"
 	return path
 }
 func decodeHttpStreamApiUploadAssetResponse(resp *http.Response) (HttpStreamApiUploadAssetResponse, error) {
 	out := HttpStreamApiUploadAssetResponse{}
-	body := HttpStreamApiUploadAssetResponseBody{}
+	var body string
 	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil { return out, err }
-	out.Return = body.Return
+	out.Return = body
 	return out, nil
 }

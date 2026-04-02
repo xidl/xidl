@@ -125,8 +125,12 @@ pub(crate) struct MethodMeta {
     pub(crate) paths: Vec<String>,
     pub(crate) request_struct: String,
     pub(crate) request_body_struct: Option<String>,
+    pub(crate) request_body_direct_field: Option<String>,
+    pub(crate) request_body_direct_ty: Option<String>,
     pub(crate) response_struct: String,
     pub(crate) response_body_struct: Option<String>,
+    pub(crate) response_body_direct_field: Option<String>,
+    pub(crate) response_body_direct_ty: Option<String>,
     pub(crate) request_content_type: String,
     pub(crate) response_content_type: String,
     pub(crate) request_params: Vec<ParamMeta>,
@@ -143,6 +147,10 @@ pub(crate) struct MethodMeta {
     pub(crate) stream_codec: crate::generate::utils::HttpStreamCodec,
     pub(crate) security: Vec<crate::generate::utils::HttpSecurityRequirement>,
     pub(crate) basic_realm: Option<String>,
+    pub(crate) deprecated: bool,
+    pub(crate) deprecated_since: Option<String>,
+    pub(crate) deprecated_after: Option<String>,
+    pub(crate) deprecated_note: Option<String>,
 }
 
 pub(crate) struct RouteTemplate {
