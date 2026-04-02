@@ -1,0 +1,38 @@
+	requestURL := c.baseURL + format{{ method.struct_prefix }}Path(req)
+{%- if method.has_query_params %}
+	query := url.Values{}
+{{ method.query_encode | indent(width=1, first=true) }}
+	if encoded := query.Encode(); encoded != "" {
+		requestURL += "?" + encoded
+	}
+{%- endif %}
+{%- if method.has_body_params %}
+{%- if method.request_body_struct %}
+	body := {{ method.request_body_struct }}{
+{%- for param in method.body_params %}
+		{{ param.field_name }}: req.{{ param.field_name }},
+{%- endfor %}
+	}
+{%- endif %}
+	var requestBody bytes.Buffer
+{%- if method.request_body_struct %}
+	if err := xidlgohttp.MustCodecForMime("{{ method.request_content_type }}").Encode(&requestBody, body); err != nil { return nil, err }
+{%- endif %}
+	httpReq, err := http.NewRequestWithContext(ctx, "{{ method.http_method_name }}", requestURL, &requestBody)
+{%- else %}
+	httpReq, err := http.NewRequestWithContext(ctx, "{{ method.http_method_name }}", requestURL, nil)
+{%- endif %}
+	if err != nil { return nil, err }
+{%- if method.has_body_params %}
+	httpReq.Header.Set("Content-Type", "{{ method.request_content_type }}")
+{%- endif %}
+	httpReq.Header.Set("Accept", "{{ method.response_content_type }}")
+{%- if method.header_encode %}
+{{ method.header_encode | indent(width=1, first=true) }}
+{%- endif %}
+{%- if method.cookie_encode %}
+{{ method.cookie_encode | indent(width=1, first=true) }}
+{%- endif %}
+{%- if method.has_security %}
+	xidlgohttp.ApplyClientAuth(httpReq, c.auth, {{ method.struct_prefix }}SecurityRequirements())
+{%- endif %}

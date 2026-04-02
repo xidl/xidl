@@ -29,6 +29,10 @@ pub enum Plugin {
     Axum,
     #[serde(alias = "ts", alias = "typescript")]
     Typescript,
+    #[serde(alias = "go", alias = "golang")]
+    Go,
+    #[serde(alias = "go_http", alias = "go-http")]
+    GoHttp,
     #[serde(alias = "openapi")]
     Openapi,
     #[serde(alias = "openrpc", alias = "open-rpc")]
@@ -67,6 +71,10 @@ mod tests {
             ("rs-axum", Plugin::Axum),
             ("ts", Plugin::Typescript),
             ("typescript", Plugin::Typescript),
+            ("go", Plugin::Go),
+            ("golang", Plugin::Go),
+            ("go_http", Plugin::GoHttp),
+            ("go-http", Plugin::GoHttp),
             ("openapi", Plugin::Openapi),
             ("openrpc", Plugin::Openrpc),
             ("open-rpc", Plugin::Openrpc),

@@ -8,6 +8,8 @@ fn lang_and_codegen(folder: &str) -> Option<&'static str> {
         "cpp" => Some("cpp"),
         "rust" => Some("rs"),
         "ts" => Some("ts"),
+        "golang" => Some("go"),
+        "golang-http" => Some("go-http"),
         "axum" => Some("axum"),
         "openapi" => Some("openapi"),
         "openrpc" => Some("openrpc"),

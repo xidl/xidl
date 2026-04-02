@@ -1,0 +1,5 @@
+{%- if ty == "string" %}
+	httpReq.Header.Set("{{ wire_name }}", {{ field }})
+{%- elif ty == "uint32" %}
+	httpReq.Header.Set("{{ wire_name }}", xidlgohttp.FormatUint32({{ field }}))
+{%- endif %}

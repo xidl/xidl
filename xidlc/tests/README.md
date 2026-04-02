@@ -4,8 +4,8 @@ This directory contains IDL-driven snapshot tests for code generation.
 
 ## Layout
 
-- `c/`, `cpp/`, `rust/`, `ts/`, `axum/`, `openapi/`, `openrpc/`: input `.idl`
-  test cases
+- `c/`, `cpp/`, `rust/`, `ts/`, `golang/`, `golang-http/`, `axum/`, `openapi/`,
+  `openrpc/`: input `.idl` test cases
 - `shared/`: reusable IDL fragments consumed via `#include`; these are not
   discovered as standalone snapshot cases
 - `snapshots/`: generated `insta` snapshots

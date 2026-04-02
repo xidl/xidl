@@ -1,0 +1,14 @@
+func format{{ struct_prefix }}Path(req *{{ request_struct }}) string {
+	path := "{{ raw_path }}"
+{%- for item in replacements %}
+	path = strings.ReplaceAll(path, "{{ item.replacement }}", {{ item.expr }})
+	path = strings.ReplaceAll(path, "{{ item.replacement_catchall }}", {{ item.expr }})
+{%- endfor %}
+{%- if trim_query_template %}
+	if idx := strings.Index(path, "{?"); idx >= 0 {
+		path = path[:idx]
+	}
+{%- endif %}
+	return path
+}
+

@@ -1,0 +1,3 @@
+{%- if ty == "string" %}
+	if cookie, err := resp.Request.Cookie("{{ wire_name }}"); err == nil { out.{{ field_name }} = cookie.Value }
+{%- endif %}

@@ -1,5 +1,7 @@
 pub mod c;
 pub mod cpp;
+pub mod go;
+pub mod go_http;
 pub mod hir_gen;
 pub mod openapi;
 pub mod openrpc;

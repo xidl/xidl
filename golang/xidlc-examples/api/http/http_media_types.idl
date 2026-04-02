@@ -1,0 +1,19 @@
+#pragma xidlc package xidlc examples go
+#pragma xidlc version v1.0.0
+
+interface HttpMediaTypesApi {
+    @post(path = "/v1/forms/profile")
+    @Consumes("application/x-www-form-urlencoded")
+    string submit_profile(
+        string name,
+        uint32 age,
+        out string normalized_name
+    );
+
+    @get(path = "/v1/msgpack/users/{user_id}")
+    @Produces("application/msgpack")
+    string get_msgpack_user(
+        @path("user_id") string user_id,
+        out uint32 score
+    );
+};
