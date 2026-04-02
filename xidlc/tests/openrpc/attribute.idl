@@ -3,4 +3,6 @@ module book {
         readonly attribute string title;
         attribute long count;
     };
+
 };
+

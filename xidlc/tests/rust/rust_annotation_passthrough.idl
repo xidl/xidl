@@ -18,3 +18,4 @@ interface Api {
     @rust-cfg(feature = "client")
     void ping();
 };
+

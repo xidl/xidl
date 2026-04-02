@@ -4,12 +4,15 @@
 interface HttpCatchAllService {
     @get(path = "/files/{*path}")
     string read_file(
-        @path("path") string rel_path
+        @path("path")
+        string rel_path
     );
-
     @get(path = "/assets/{*key}")
     string read_asset(
-        @path("key") string key,
-        @query("v") string version
+        @path("key")
+        string key,
+        @query("v")
+        string version
     );
 };
+

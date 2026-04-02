@@ -8,11 +8,12 @@ interface HttpMediaTypesApi {
         uint32 age,
         out string normalized_name
     );
-
     @get(path = "/v1/msgpack/users/{user_id}")
     @Produces("application/msgpack")
     string get_msgpack_user(
-        @path("user_id") string user_id,
+        @path("user_id")
+        string user_id,
         out uint32 score
     );
 };
+

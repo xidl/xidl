@@ -1,0 +1,6 @@
+- id: xidlc-fmt
+  name: xidlc fmt
+  description: Format XIDL/IDL files with xidlc fmt.
+  entry: xidlc fmt --inplace --lang idl
+  language: rust
+  files: \.idl$

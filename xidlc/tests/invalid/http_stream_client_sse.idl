@@ -5,5 +5,8 @@ interface InvalidClientStreamCodecService {
     @client_stream
     @stream_codec("sse")
     @post(path = "/upload")
-    string upload(sequence<octet> chunk);
+    string upload(
+        sequence<octet> chunk
+    );
 };
+

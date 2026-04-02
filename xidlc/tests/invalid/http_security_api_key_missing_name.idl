@@ -6,3 +6,4 @@ interface InvalidApiKeySecurityService {
     @get(path = "/reports")
     string list_reports();
 };
+

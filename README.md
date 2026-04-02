@@ -76,6 +76,22 @@ Install `xidlc`:
 cargo install xidlc
 ```
 
+Format IDL files:
+
+```bash
+xidlc fmt --inplace api.idl
+```
+
+Use this repository as a `pre-commit` hook:
+
+```yaml
+repos:
+  - repo: https://github.com/xidl/xidl
+    rev: v0.31.0
+    hooks:
+      - id: xidlc-fmt
+```
+
 Generate Rust types:
 
 ```bash

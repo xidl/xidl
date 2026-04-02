@@ -5,8 +5,11 @@
 interface RustHttp {
     @get(path = "/users/{user_id}")
     @rust-cfg(feature = "server")
-    string get_user(@path uint32 user_id);
-
+    string get_user(
+        @path
+        uint32 user_id
+    );
     @rust-cfg(feature = "server")
     attribute string display_name;
 };
+

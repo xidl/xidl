@@ -11,6 +11,11 @@ repos:
 
   - repo: local
     hooks:
+      - id: xidlc-fmt
+        name: xidlc fmt
+        language: system
+        files: \.idl$
+        entry: cargo run -p xidlc -- fmt --inplace --lang idl
       - id: rustfmt
         name: rustfmt
         language: system

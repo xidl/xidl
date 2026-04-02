@@ -2,8 +2,12 @@
 
 #ifdef BASIC
 
-module A {};
+module A {
+};
 
 #program once
 
-module A {}; #endif
+module A {
+};
+
+#endif

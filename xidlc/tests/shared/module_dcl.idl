@@ -1,6 +1,10 @@
-module A {};
+module A {
+};
 
 module B {
-const u8 a = 10;
-struct B;
+    const u8 a = 10;
+
+    struct B;
+
 };
+

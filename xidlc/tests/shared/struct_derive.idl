@@ -1,5 +1,8 @@
 @derive(Debug)
-struct A {};
+struct A {
+};
 
 @derive(Debug, Serialize)
-struct A {};
+struct A {
+};
+

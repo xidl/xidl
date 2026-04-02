@@ -8,6 +8,10 @@ module demo {
     };
 
     interface UserService {
-        User get_user(in long id);
+        User get_user(
+            in long id
+        );
     };
+
 };
+

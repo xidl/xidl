@@ -4,14 +4,16 @@
 interface HttpQueryTemplateService {
     @get(path = "/users/{id}{?lang,region}")
     string get_user(
-        @path uint32 id,
+        @path
+        uint32 id,
         string lang,
-        @query string region
+        @query
+        string region
     );
-
     @post(path = "/search{?keyword}")
     string search(
         string keyword,
         string payload
     );
 };
+

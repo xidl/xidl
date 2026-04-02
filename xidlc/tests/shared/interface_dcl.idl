@@ -1,16 +1,30 @@
 interface HelloWorld;
-interface HelloWorld {};
 
-interface HelloWorld: Parent {};
-interface HelloWorld: Parent1, Parent2, Parent3 {};
+interface HelloWorld {
+};
+
+interface HelloWorld: Parent {
+};
+
+interface HelloWorld: Parent1, Parent2, Parent3 {
+};
 
 interface A: B, C, D {
     void func1();
     void func1() raises(A);
-    void func1() raises(A,B,C);
-    void func1(in u8 attr, out u16 attr);
-    void func1(in u8 attr, out u16 attr) raises(A);
-    void func1(in u8 attr, out u16 attr) raises(A,B,C);
+    void func1() raises(A, B, C);
+    void func1(
+        in u8 attr,
+        out u16 attr
+    );
+    void func1(
+        in u8 attr,
+        out u16 attr
+    ) raises(A);
+    void func1(
+        in u8 attr,
+        out u16 attr
+    ) raises(A, B, C);
     readonly attribute u8 attr1, attr2, attr3;
     readonly attribute u8 attr1 raises(A);
     readonly attribute u8 attr1 raises(A, B, C);
@@ -26,5 +40,8 @@ interface A {
     exception A {
         int a;
     };
-    short opA(in L1 l_1);
+    short opA(
+        in L1 l_1
+    );
 };
+

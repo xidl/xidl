@@ -11,8 +11,13 @@ interface HttpStreamSseBindingsService {
     @stream_codec("sse")
     @get(path = "/projects/{project_id}/events{?cursor}")
     ProjectEvent watch_project(
-        @path("project_id") string project_id,
-        @query("cursor") @optional string cursor,
-        @header("X-Trace-Id") string trace_id
+        @path("project_id")
+        string project_id,
+        @query("cursor")
+        @optional
+        string cursor,
+        @header("X-Trace-Id")
+        string trace_id
     );
 };
+

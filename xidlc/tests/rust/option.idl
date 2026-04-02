@@ -1,3 +1,4 @@
 struct A {
     Option<string> a;
 };
+

@@ -4,6 +4,9 @@
 interface InvalidUnaryBindingService {
     @get(path = "/users/{id}")
     string get_user(
-        @path("id") @query("user_id") string id
+        @path("id")
+        @query("user_id")
+        string id
     );
 };
+

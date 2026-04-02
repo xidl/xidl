@@ -2,14 +2,21 @@ interface Hysteria2 {
     @post(path = "auth")
     void auth(
         /// Authentication credentials.
-        @header("Hysteria-Auth") string auth,
+        @header("Hysteria-Auth")
+        string auth,
         /// Client's maximum receive rate in bytes per second. A value of 0 indicates unknown.
-        @header("Hysteria-CC-RX") uint32 rx,
+        @header("Hysteria-CC-RX")
+        uint32 rx,
         /// A random padding string of variable length.
-        @header("Hysteria-Padding") string padding,
+        @header("Hysteria-Padding")
+        string padding,
         /// Whether the server supports UDP relay.
-        @header("Hysteria-UDP") out boolean udp,
-        @header("Hysteria-CC-RX") out uint32 rx,
-        @header("Hysteria-Padding") out string padding
+        @header("Hysteria-UDP")
+        out boolean udp,
+        @header("Hysteria-CC-RX")
+        out uint32 rx,
+        @header("Hysteria-Padding")
+        out string padding
     );
 };
+

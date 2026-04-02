@@ -3,8 +3,14 @@
 
 interface InvalidDuplicateRouteService {
     @get(path = "/users/{id}")
-    string get_user(@path("id") string id);
-
+    string get_user(
+        @path("id")
+        string id
+    );
     @get(path = "/users/{id}")
-    string fetch_user(@path("id") string id);
+    string fetch_user(
+        @path("id")
+        string id
+    );
 };
+

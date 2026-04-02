@@ -8,10 +8,11 @@ interface HttpMediaService {
         string name,
         uint32 age
     );
-
     @post
     @Produces("application/msgpack")
     string fetch_msgpack(
-        @query string id
+        @query
+        string id
     );
 };
+
