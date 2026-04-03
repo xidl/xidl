@@ -41,13 +41,15 @@ async fn http_snapshot_tests() {
         Err(err) => panic!("bind ephemeral port: {err}"),
     };
     let addr = listener.local_addr().expect("read local addr");
-    drop(listener);
+    listener
+        .set_nonblocking(true)
+        .expect("set listener nonblocking");
+    let listener = tokio::net::TcpListener::from_std(listener).expect("adopt listener for tokio");
 
-    let server_addr = addr.to_string();
     let task = tokio::spawn(async move {
         xidl_rust_axum::Server::builder()
             .with_service(HttpServerServer::new(SimpleHttpServer::new()))
-            .serve(&server_addr)
+            .serve_with_listener(listener)
             .await
     });
 
@@ -223,7 +225,10 @@ fn split_method_line(line: &str) -> anyhow::Result<(String, String)> {
 }
 
 async fn run_tests(tests: &[HttpTest], config: &SnapshotConfig) -> String {
-    let client = reqwest::Client::new();
+    let client = reqwest::Client::builder()
+        .no_proxy()
+        .build()
+        .expect("build reqwest client without proxy");
     let mut sections = Vec::new();
     for test in tests {
         let section = run_test(&client, test, config).await;

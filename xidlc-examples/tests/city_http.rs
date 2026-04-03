@@ -7,19 +7,25 @@ use xidlc_examples::city_http::SmartCityHttpService;
 async fn http_client_calls_all_endpoints() {
     let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("bind ephemeral port");
     let addr = listener.local_addr().expect("read local addr");
-    drop(listener);
+    listener
+        .set_nonblocking(true)
+        .expect("set listener nonblocking");
+    let listener = tokio::net::TcpListener::from_std(listener).expect("adopt listener for tokio");
 
-    let server_addr = addr.to_string();
     let task = tokio::spawn(async move {
         xidl_rust_axum::Server::builder()
             .with_service(SmartCityHttpApiServer::new(SmartCityHttpService))
-            .serve(&server_addr)
+            .serve_with_listener(listener)
             .await
     });
 
     tokio::time::sleep(std::time::Duration::from_millis(100)).await;
 
     let base = format!("http://{}", addr);
+    let http = xidl_rust_axum::reqwest::Client::builder()
+        .no_proxy()
+        .build()
+        .expect("build reqwest client without proxy");
     let auth = ClientAuth {
         basic: None,
         bearer: Some("test-token".to_string()),
@@ -29,7 +35,7 @@ async fn http_client_calls_all_endpoints() {
             value: "reserve-test".to_string(),
         }],
     };
-    let client = SmartCityHttpApiClient::with_auth(base, auth);
+    let client = SmartCityHttpApiClient::with_http_and_auth(base, http, auth);
 
     let eta = client
         .get_stop_eta("S100".to_string(), "2".to_string(), "en".to_string())
