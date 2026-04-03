@@ -1,0 +1,15 @@
+---
+source: xidlc/src/openapi/request_body.rs
+expression: request_body
+---
+{
+  "description": "A sample requestBody",
+  "content": {
+    "application/json": {
+      "schema": {
+        "$ref": "#/components/schemas/EmailPayload"
+      }
+    }
+  },
+  "required": true
+}

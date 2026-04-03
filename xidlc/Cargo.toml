@@ -42,15 +42,15 @@ tree-sitter-rust = "=0.23.3"
 tree-sitter-cpp = "=0.23.4"
 tree-sitter-typescript = "=0.23.2"
 md5.workspace = true
+indexmap = { version = "2", features = ["serde"] }
 
-utoipa = "5.4.0"
 semver = "1.0"
 jiff = "0.2"
 enum_dispatch = "0.3.13"
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 
 [dev-dependencies]
-insta.workspace = true
+insta = { workspace = true, features = ["json", "redactions"] }
 
 [features]
 default = ["fmt"]

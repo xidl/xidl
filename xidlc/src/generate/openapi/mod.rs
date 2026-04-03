@@ -1,22 +1,22 @@
-use serde_json::Value;
-use std::collections::{BTreeMap, HashMap, HashSet};
-use std::mem;
-use utoipa::openapi::path::{
+use crate::openapi::path::{
     HttpMethod as OpenApiHttpMethod, OperationBuilder, ParameterBuilder, ParameterIn, PathItem,
     PathsBuilder,
 };
-use utoipa::openapi::request_body::RequestBody;
-use utoipa::openapi::response::ResponseBuilder;
-use utoipa::openapi::schema::{
+use crate::openapi::request_body::RequestBody;
+use crate::openapi::response::ResponseBuilder;
+use crate::openapi::schema::{
     ArrayBuilder, KnownFormat, ObjectBuilder, OneOf, Schema, SchemaFormat, Type,
 };
-use utoipa::openapi::security::{
+use crate::openapi::security::{
     ApiKey, ApiKeyValue, Http, HttpAuthScheme, OAuth2, Scopes, SecurityRequirement, SecurityScheme,
 };
-use utoipa::openapi::server::Server;
-use utoipa::openapi::{
+use crate::openapi::server::Server;
+use crate::openapi::{
     Content, InfoBuilder, OpenApi, OpenApiBuilder, Ref, RefOr, Required, ResponsesBuilder,
 };
+use serde_json::Value;
+use std::collections::{BTreeMap, HashMap, HashSet};
+use std::mem;
 use xidl_parser::hir;
 use xidl_parser::hir::{ParserProperties, Specification};
 
@@ -81,7 +81,7 @@ pub fn render_openapi(spec: &hir::Specification) -> RenderedOpenApi {
     let mut ctx = OpenApiContext::default();
     ctx.collect_spec(spec, &[]);
 
-    let mut components = utoipa::openapi::ComponentsBuilder::new();
+    let mut components = crate::openapi::ComponentsBuilder::new();
     for (name, schema) in ctx.schemas {
         components = components.schema(name, schema);
     }
@@ -373,7 +373,7 @@ impl OpenApiContext {
                 let mut operation = OperationBuilder::new()
                     .operation_id(Some(operation_id.clone()))
                     .deprecated(if deprecated {
-                        Some(utoipa::openapi::Deprecated::True)
+                        Some(crate::openapi::Deprecated::True)
                     } else {
                         None
                     })
@@ -429,7 +429,7 @@ struct MethodInfo {
     http_method: OpenApiHttpMethod,
     paths: Vec<String>,
     operation_id: String,
-    parameters: Vec<utoipa::openapi::path::Parameter>,
+    parameters: Vec<crate::openapi::path::Parameter>,
     request_body: Option<RequestBody>,
     request_stream_item_schema: Option<RefOr<Schema>>,
     response_status: &'static str,
@@ -1081,7 +1081,7 @@ fn parameter_schema(
     schema: RefOr<Schema>,
     required: bool,
     description: Option<String>,
-) -> utoipa::openapi::path::Parameter {
+) -> crate::openapi::path::Parameter {
     let required = if required {
         Required::True
     } else {
@@ -1283,8 +1283,8 @@ fn register_security_schemes(
                         .map(|scope| (scope.clone(), scope.clone()))
                         .collect::<Vec<_>>();
                     SecurityScheme::OAuth2(OAuth2::new([
-                        utoipa::openapi::security::Flow::ClientCredentials(
-                            utoipa::openapi::security::ClientCredentials::new(
+                        crate::openapi::security::Flow::ClientCredentials(
+                            crate::openapi::security::ClientCredentials::new(
                                 "https://example.invalid/token",
                                 Scopes::from_iter(scopes),
                             ),
