@@ -159,30 +159,29 @@ impl CodegenSession {
         format!("xidlc.codegen.{lang}.{nanos}")
     }
 
+    #[cfg(unix)]
     fn rpc_endpoint(lang: &str) -> IdlcResult<String> {
         let nanos = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .expect("system time before epoch")
             .as_nanos();
-        #[cfg(unix)]
-        {
-            let path = std::path::Path::new("/tmp").join(format!("xidlc.{lang}.{nanos}.sock"));
-            let path = path
-                .into_os_string()
-                .into_string()
-                .map_err(|_| IdlcError::rpc("invalid ipc socket path".to_string()))?;
-            Ok(format!("ipc://{path}"))
-        }
-        #[cfg(windows)]
-        {
-            let probe = std::net::TcpListener::bind("127.0.0.1:0")
-                .map_err(|err| IdlcError::rpc(err.to_string()))?;
-            let addr = probe
-                .local_addr()
-                .map_err(|err| IdlcError::rpc(err.to_string()))?;
-            drop(probe);
-            Ok(format!("tcp://{addr}"))
-        }
+        let path = std::path::Path::new("/tmp").join(format!("xidlc.{lang}.{nanos}.sock"));
+        let path = path
+            .into_os_string()
+            .into_string()
+            .map_err(|_| IdlcError::rpc("invalid ipc socket path".to_string()))?;
+        Ok(format!("ipc://{path}"))
+    }
+
+    #[cfg(windows)]
+    fn rpc_endpoint(_lang: &str) -> IdlcResult<String> {
+        let probe = std::net::TcpListener::bind("127.0.0.1:0")
+            .map_err(|err| IdlcError::rpc(err.to_string()))?;
+        let addr = probe
+            .local_addr()
+            .map_err(|err| IdlcError::rpc(err.to_string()))?;
+        drop(probe);
+        Ok(format!("tcp://{addr}"))
     }
 
     async fn verify_engine_version(client: &CodegenClient<RpcReader, RpcWriter>) -> IdlcResult<()> {
