@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.34.0](https://github.com/xidl/xidl/compare/v0.33.1...v0.34.0) (2026-04-03)
+
+
+### Features
+
+* **xidlc:** update format ([0695679](https://github.com/xidl/xidl/commit/0695679d823da801e0473c465b586d026701f21f))
+
 ## [0.33.1](https://github.com/xidl/xidl/compare/v0.33.0...v0.33.1) (2026-04-03)
 
 
