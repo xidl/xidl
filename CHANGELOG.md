@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.32.0](https://github.com/xidl/xidl/compare/v0.31.0...v0.32.0) (2026-04-03)
+
+
+### Features
+
+* **go-http:** complete HTTP RFC support ([f9f7896](https://github.com/xidl/xidl/commit/f9f7896f63ae92d4cbfb6f0da96cec8f9c0f2aec))
+* **pre-commit:** support pre-commit ([a82ca67](https://github.com/xidl/xidl/commit/a82ca6700b7b338133e126869629f12c033f5ae3))
+* **xidlc:** add go and go-http targets ([2c4d4c4](https://github.com/xidl/xidl/commit/2c4d4c4a28076127334da203d5d62ccd14553e64))
+
+
+### Bug Fixes
+
+* **go:** add delegated go test targets and ci coverage ([38acb67](https://github.com/xidl/xidl/commit/38acb671537301330bb3199eb6dfed22fc180305))
+* **idl:** normalize oauth scopes for fmt and pre-commit ([76e3fbc](https://github.com/xidl/xidl/commit/76e3fbcc41cd5762d2beaff70399f355536146b8))
+
 ## [0.31.0](https://github.com/xidl/xidl/compare/v0.30.0...v0.31.0) (2026-03-31)
 
 
