@@ -62,22 +62,12 @@ jobs:
           persist-credentials: false
           ref: ${{ github.event.release.tag_name }}
 
-      - name: Install Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1.15.4
-
-      - uses: taiki-e/setup-cross-toolchain-action@v1.39.2
-        if: startsWith(matrix.os, 'ubuntu') && !contains(matrix.target, '-musl') && matrix.target != 'x86_64-unknown-linux-gnu'
+      - name: Setup CLI build toolchain
+        uses: ./.github/actions/setup-cli-build
         with:
           target: ${{ matrix.target }}
-
-      - uses: taiki-e/install-action@v2.70.1
-        if: contains(matrix.target, '-musl')
-        with:
-          tool: cross
-
-      - name: Enable static CRT for Windows builds
-        if: endsWith(matrix.target, 'windows-msvc')
-        run: echo "RUSTFLAGS=${RUSTFLAGS} -C target-feature=+crt-static" >> "${GITHUB_ENV}"
+          use_cross: ${{ matrix.use_cross }}
+          setup_cross_toolchain: ${{ matrix.setup_cross_toolchain }}
 
       - uses: taiki-e/upload-rust-binary-action@v1.29.1
         with:
@@ -172,7 +162,7 @@ jobs:
 
   nightly-build-cli:
     needs: release-targets
-    name: nightly-${{ matrix.platform.target }}
+    name: nightly-${{ matrix.target }}
     if: github.repository_owner == 'xidl' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag == '')) && github.ref == 'refs/heads/master'
     strategy:
       fail-fast: false
@@ -182,25 +172,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: 1.92.0
-          targets: ${{ matrix.target }}
-
-      - name: Setup cross toolchain
-        if: matrix.setup_cross_toolchain
-        uses: taiki-e/setup-cross-toolchain-action@v1.39.2
+      - name: Setup CLI build toolchain
+        uses: ./.github/actions/setup-cli-build
         with:
           target: ${{ matrix.target }}
-
-      - name: Install cross
-        if: matrix.use_cross
-        uses: baptiste0928/cargo-install@v3
-        with:
-          crate: cross
-          git: https://github.com/cross-rs/cross
-          rev: 8633ec65ab914015c2444c732568b414bd3c47cf
+          use_cross: ${{ matrix.use_cross }}
+          setup_cross_toolchain: ${{ matrix.setup_cross_toolchain }}
 
       - name: Build xidlc (cross)
         if: matrix.use_cross
@@ -257,7 +234,9 @@ jobs:
           tag_name: nightly
           name: nightly
           prerelease: true
-          files: dist/*/*.tar.gz
+          files: |
+            dist/*/*.tar.gz
+            dist/*/*.zip
           body_path: release/body.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
