@@ -156,7 +156,7 @@ impl Client {
             .auth
             .as_ref()
             .and_then(|auth| auth.api_key(ClientApiKeyLocation::Query, name))
-            .ok_or_else(|| Error::unauthorized())?;
+            .ok_or_else(Error::unauthorized)?;
         req.url_mut()
             .query_pairs_mut()
             .append_pair(&auth.name, &auth.value);
@@ -175,7 +175,7 @@ impl Client {
                     .auth
                     .as_ref()
                     .and_then(|auth| auth.basic.as_ref())
-                    .ok_or_else(|| Error::unauthorized())?;
+                    .ok_or_else(Error::unauthorized)?;
                 let header_value = basic_auth_header_value(auth)?;
                 headers.insert(AUTHORIZATION, header_value);
                 Ok(())
@@ -185,7 +185,7 @@ impl Client {
                     .auth
                     .as_ref()
                     .and_then(|auth| auth.bearer.as_deref())
-                    .ok_or_else(|| Error::unauthorized())?;
+                    .ok_or_else(Error::unauthorized)?;
                 let value = format!("Bearer {token}");
                 let header_value = HeaderValue::from_str(&value)
                     .map_err(|err| Error::new(400, format!("{err:?}")))?;
@@ -197,7 +197,7 @@ impl Client {
                     .auth
                     .as_ref()
                     .and_then(|auth| auth.api_key(location, name))
-                    .ok_or_else(|| Error::unauthorized())?;
+                    .ok_or_else(Error::unauthorized)?;
                 match auth.location {
                     ClientApiKeyLocation::Header => {
                         let header_name =
@@ -246,7 +246,7 @@ impl Client {
                     .auth
                     .as_ref()
                     .and_then(|auth| auth.api_key(location, name))
-                    .ok_or_else(|| Error::unauthorized())?;
+                    .ok_or_else(Error::unauthorized)?;
                 let mut url = reqwest::Url::parse(ws_url)
                     .map_err(|err| Error::new(500, format!("{err:?}")))?;
                 url.query_pairs_mut().append_pair(&auth.name, &auth.value);

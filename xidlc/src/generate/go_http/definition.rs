@@ -382,7 +382,27 @@ pub(crate) fn http_method_name(method: HttpMethod) -> &'static str {
 }
 
 pub(crate) fn go_pattern_path(path: &str) -> String {
-    path.replace("{*", "{").replace('}', "}")
+    let mut out = String::with_capacity(path.len());
+    let mut chars = path.chars().peekable();
+
+    while let Some(ch) = chars.next() {
+        if ch == '{' && chars.peek() == Some(&'*') {
+            chars.next();
+            out.push('{');
+            while let Some(token) = chars.next() {
+                if token == '}' {
+                    out.push_str("...}");
+                    break;
+                }
+                out.push(token);
+            }
+            continue;
+        }
+
+        out.push(ch);
+    }
+
+    out
 }
 
 pub(crate) fn annotation_name(annotation: &hir::Annotation) -> Option<&str> {

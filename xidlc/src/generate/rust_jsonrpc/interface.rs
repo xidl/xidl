@@ -108,9 +108,16 @@ fn render_interface_def(
         }
     }
 
+    let bidi_method_names = methods
+        .iter()
+        .filter(|method| matches!(method.kind.as_str(), "stream_op" | "stream_source"))
+        .map(|method| method.rpc_name.clone())
+        .collect::<Vec<_>>();
+
     let ctx = serde_json::json!({
         "ident": rust_ident(&def.header.ident),
         "methods": methods,
+        "bidi_method_names": bidi_method_names,
         "watch_methods": watch_methods,
         "rust_attrs": rust_passthrough_attrs_from_annotations(interface_annotations),
     });

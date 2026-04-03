@@ -39,7 +39,7 @@ type HttpCatchAllServiceService interface {
 
 func NewHttpCatchAllServiceHandler(svc HttpCatchAllServiceService) http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /files/{path}", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("GET /files/{path...}", func(w http.ResponseWriter, r *http.Request) {
 		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return
@@ -61,7 +61,7 @@ func NewHttpCatchAllServiceHandler(svc HttpCatchAllServiceService) http.Handler 
 		xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
 	}
 	})
-	mux.HandleFunc("GET /assets/{key}", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("GET /assets/{key...}", func(w http.ResponseWriter, r *http.Request) {
 		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return

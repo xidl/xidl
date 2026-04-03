@@ -38,7 +38,7 @@ type HttpStreamSseBindingsServiceService interface {
 
 func NewHttpStreamSseBindingsServiceHandler(svc HttpStreamSseBindingsServiceService) http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /files/{path}", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("GET /files/{path...}", func(w http.ResponseWriter, r *http.Request) {
 		if err := xidlgohttp.RequireAccept(r, "text/event-stream"); err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return

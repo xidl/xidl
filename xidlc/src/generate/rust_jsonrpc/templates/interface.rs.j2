@@ -106,14 +106,16 @@ T: {{ ident }} + Send + Sync,
     }
 
     fn accepts_bidi(&self, method: &str) -> bool {
-        match method {
-            {% for method in methods %}
-                {% if (method.kind == "stream_op") or (method.kind == "stream_source") %}
-                "{{ method.rpc_name }}" => true,
-                {% endif %}
+        {% if bidi_method_names and bidi_method_names | length > 0 %}
+        matches!(
+            method,
+            {% for rpc_name in bidi_method_names %}
+            "{{ rpc_name }}"{% if not loop.last %} |{% endif %}
             {% endfor %}
-            _ => false,
-        }
+        )
+        {% else %}
+        false
+        {% endif %}
     }
 
     async fn handle_bidi(
