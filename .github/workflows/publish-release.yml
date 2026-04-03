@@ -105,16 +105,17 @@ jobs:
     needs: resolve-publish-context
     permissions:
       contents: write
-    if: github.repository_owner == 'xidl' && needs.resolve-publish-context.outputs.should_ensure_release == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source ref
+        if: needs.resolve-publish-context.outputs.should_ensure_release == 'true'
         uses: actions/checkout@v6
         with:
           persist-credentials: false
           ref: ${{ needs.resolve-publish-context.outputs.source_ref }}
 
       - name: Generate release body
+        if: needs.resolve-publish-context.outputs.should_ensure_release == 'true'
         run: |
           mkdir -p release
           sed \
@@ -123,6 +124,7 @@ jobs:
             ./.github/release_template.md > release/body.md
 
       - name: Create or update managed prerelease
+        if: needs.resolve-publish-context.outputs.should_ensure_release == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_NAME: ${{ needs.resolve-publish-context.outputs.release_name }}
@@ -156,12 +158,6 @@ jobs:
     name: ${{ matrix.target }}
     permissions:
       contents: write
-    if: |
-      github.repository_owner == 'xidl' &&
-      (
-        github.event_name == 'release' ||
-        needs.ensure-managed-release.result == 'success'
-      )
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
