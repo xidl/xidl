@@ -1,0 +1,58 @@
+{
+  "include": [
+    {
+      "target": "x86_64-apple-darwin",
+      "os": "macos-13",
+      "use_cross": false,
+      "setup_cross_toolchain": false
+    },
+    {
+      "target": "aarch64-apple-darwin",
+      "os": "macos-14",
+      "use_cross": false,
+      "setup_cross_toolchain": false
+    },
+    {
+      "target": "x86_64-pc-windows-msvc",
+      "os": "windows-2022",
+      "use_cross": false,
+      "setup_cross_toolchain": false
+    },
+    {
+      "target": "aarch64-pc-windows-msvc",
+      "os": "windows-2022",
+      "use_cross": false,
+      "setup_cross_toolchain": false
+    },
+    {
+      "target": "x86_64-unknown-linux-gnu",
+      "os": "ubuntu-22.04",
+      "use_cross": false,
+      "setup_cross_toolchain": false
+    },
+    {
+      "target": "aarch64-unknown-linux-gnu",
+      "os": "ubuntu-22.04",
+      "use_cross": false,
+      "setup_cross_toolchain": true
+    },
+    {
+      "target": "x86_64-unknown-linux-musl",
+      "os": "ubuntu-22.04",
+      "use_cross": true,
+      "setup_cross_toolchain": false
+    },
+    {
+      "target": "aarch64-unknown-linux-musl",
+      "os": "ubuntu-22.04",
+      "use_cross": true,
+      "setup_cross_toolchain": false
+    },
+    {
+      "target": "riscv64gc-unknown-linux-musl",
+      "os": "ubuntu-22.04",
+      "use_cross": true,
+      "setup_cross_toolchain": false
+    }
+  ]
+}

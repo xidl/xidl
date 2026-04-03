@@ -1,40 +1,183 @@
 name: publish-release
 
 on:
+  release:
+    types: [published]
   schedule:
     - cron: "0 0 * * *"
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "CLI release tag to sync package manager manifests for"
+        required: false
+        type: string
 
-permissions:
-  contents: write
+env:
+  CARGO_INCREMENTAL: 0
+  CARGO_NET_GIT_FETCH_WITH_CLI: true
+  CARGO_NET_RETRY: 10
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+  RUSTFLAGS: -D warnings
+  RUSTUP_MAX_RETRIES: 10
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
-  build-cli:
-    if: github.ref == 'refs/heads/master'
+  release-targets:
+    name: Release Targets
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.targets.outputs.matrix }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Define release targets
+        id: targets
+        run: |
+          echo "matrix=$(python3 -c 'import json, sys; print(json.dumps(json.load(open(sys.argv[1])), separators=(\",\", \":\")))' .github/release-targets.json)" >> "$GITHUB_OUTPUT"
+
+  upload-assets:
+    needs: release-targets
+    name: ${{ matrix.target }}
+    permissions:
+      contents: write
+    if: github.repository_owner == 'xidl' && github.event_name == 'release'
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
-      matrix:
-        platform:
-          - runner: ubuntu-latest
-            target: x86_64-unknown-linux-musl
-            use_cross: true
-          - runner: ubuntu-latest
-            target: aarch64-unknown-linux-musl
-            use_cross: true
-          - runner: ubuntu-latest
-            target: riscv64gc-unknown-linux-musl
-            use_cross: true
-          - runner: ubuntu-latest
-            target: x86_64-pc-windows-gnu
-            use_cross: true
-          # - runner: ubuntu-latest
-          #   target: aarch64-pc-windows-gnullvm
-          #   use_cross: true
-          - runner: macos-latest
-            target: aarch64-apple-darwin
-            use_cross: false
-    name: build-cli-${{ matrix.platform.target }}
-    runs-on: ${{ matrix.platform.runner }}
+      matrix: ${{ fromJson(needs.release-targets.outputs.matrix) }}
+    timeout-minutes: 60
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Install Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1.15.4
+
+      - uses: taiki-e/setup-cross-toolchain-action@v1.39.2
+        if: startsWith(matrix.os, 'ubuntu') && !contains(matrix.target, '-musl') && matrix.target != 'x86_64-unknown-linux-gnu'
+        with:
+          target: ${{ matrix.target }}
+
+      - uses: taiki-e/install-action@v2.70.1
+        if: contains(matrix.target, '-musl')
+        with:
+          tool: cross
+
+      - name: Enable static CRT for Windows builds
+        if: endsWith(matrix.target, 'windows-msvc')
+        run: echo "RUSTFLAGS=${RUSTFLAGS} -C target-feature=+crt-static" >> "${GITHUB_ENV}"
+
+      - uses: taiki-e/upload-rust-binary-action@v1.29.1
+        with:
+          package: xidlc
+          bin: xidlc
+          profile: release
+          target: ${{ matrix.target }}
+          tar: all
+          zip: windows
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  sync-package-manifests:
+    name: Sync Package Manifests
+    needs: upload-assets
+    permissions:
+      contents: write
+    if: |
+      always() &&
+      github.repository_owner == 'xidl' &&
+      (
+        (github.event_name == 'release' && needs.upload-assets.result == 'success') ||
+        (github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag != '')
+      )
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Setup Python 3
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+
+      - name: Resolve GitHub auth token
+        id: resolve-token
+        env:
+          GH_TOKEN_OVERRIDE: ${{ secrets.GH_TOKEN }}
+          DEFAULT_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          if [[ -n "${GH_TOKEN_OVERRIDE:-}" ]]; then
+            echo "token=${GH_TOKEN_OVERRIDE}" >> "$GITHUB_OUTPUT"
+            echo "source=gh_token_secret" >> "$GITHUB_OUTPUT"
+          else
+            echo "token=${DEFAULT_TOKEN}" >> "$GITHUB_OUTPUT"
+            echo "source=github_token" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Resolve release tag
+        id: resolve-release-tag
+        run: |
+          set -euo pipefail
+
+          if [[ "${GITHUB_EVENT_NAME}" == "release" ]]; then
+            echo "tag=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${{ github.event.inputs.release_tag }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate package manager manifests
+        env:
+          GITHUB_TOKEN: ${{ steps.resolve-token.outputs.token }}
+          RELEASE_TAG: ${{ steps.resolve-release-tag.outputs.tag }}
+        run: |
+          set -euo pipefail
+          echo "Using auth source: ${{ steps.resolve-token.outputs.source }}"
+          python3 scripts/sync-package-manifests.py --tag "$RELEASE_TAG"
+
+      - name: Commit manifest updates
+        env:
+          PUSH_TOKEN: ${{ steps.resolve-token.outputs.token }}
+          RELEASE_TAG: ${{ steps.resolve-release-tag.outputs.tag }}
+        run: |
+          set -euo pipefail
+
+          if git diff --quiet -- Formula packaging; then
+            echo "Package manager manifests already up to date."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin "https://x-access-token:${PUSH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
+          git add Formula packaging
+          git commit -m "chore: sync package manager manifests for ${RELEASE_TAG}"
+          git push origin "${{ github.event.repository.default_branch }}"
+
+  nightly-build-cli:
+    needs: release-targets
+    name: nightly-${{ matrix.platform.target }}
+    if: github.repository_owner == 'xidl' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag == '')) && github.ref == 'refs/heads/master'
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.release-targets.outputs.matrix) }}
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -43,9 +186,16 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: 1.92.0
-          targets: ${{ matrix.platform.target }}
+          targets: ${{ matrix.target }}
+
+      - name: Setup cross toolchain
+        if: matrix.setup_cross_toolchain
+        uses: taiki-e/setup-cross-toolchain-action@v1.39.2
+        with:
+          target: ${{ matrix.target }}
 
       - name: Install cross
+        if: matrix.use_cross
         uses: baptiste0928/cargo-install@v3
         with:
           crate: cross
@@ -53,31 +203,36 @@ jobs:
           rev: 8633ec65ab914015c2444c732568b414bd3c47cf
 
       - name: Build xidlc (cross)
-        if: matrix.platform.use_cross
-        run: cross build -p xidlc --target ${{ matrix.platform.target }} --profile release
+        if: matrix.use_cross
+        run: cross build -p xidlc --target ${{ matrix.target }} --profile release
 
       - name: Build xidlc (cargo)
-        if: matrix.platform.use_cross == false
-        run: cargo build -p xidlc --target ${{ matrix.platform.target }} --profile release
+        if: matrix.use_cross == false
+        run: cargo build -p xidlc --target ${{ matrix.target }} --profile release
 
-      - name: Package cli artifact
+      - name: Package cli artifact (Unix)
+        if: ${{ !endsWith(matrix.target, 'windows-msvc') }}
         run: |
           mkdir -p dist
-          BIN_NAME=xidlc
-          if [ "${{ matrix.platform.target }}" = "x86_64-pc-windows-gnu" ] || [ "${{ matrix.platform.target }}" = "aarch64-pc-windows-gnu" ]; then
-            BIN_NAME="xidlc.exe"
-          fi
-          tar -czf dist/xidlc-${{ matrix.platform.target }}.tar.gz -C target/${{ matrix.platform.target }}/release ${BIN_NAME}
+          tar -czf dist/xidlc-${{ matrix.target }}.tar.gz -C target/${{ matrix.target }}/release xidlc
+
+      - name: Package cli artifact (Windows)
+        if: endsWith(matrix.target, 'windows-msvc')
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Compress-Archive -Path "target/${{ matrix.target }}/release/xidlc.exe" -DestinationPath "dist/xidlc-${{ matrix.target }}.zip" -Force
+
       - name: Upload cli artifact
         uses: actions/upload-artifact@v7
         with:
-          name: xidlc-${{ matrix.platform.target }}
-          path: dist/*.tar.gz
+          name: xidlc-${{ matrix.target }}
+          path: dist/*
 
-  release:
-    needs:
-      - build-cli
-    if: github.ref == 'refs/heads/master'
+  nightly-release:
+    name: nightly-release
+    needs: nightly-build-cli
+    if: github.repository_owner == 'xidl' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag == '')) && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -91,19 +246,12 @@ jobs:
       - name: Generate release body
         run: |
           mkdir -p release
-          if [ "${GITHUB_REF}" != "refs/heads/master" ]; then
-            echo "Skip release body for ref ${GITHUB_REF}"
-            exit 0
-          fi
-          RELEASE_TAG="nightly"
-
           sed \
             -e "s|REPOSITORY|${GITHUB_REPOSITORY}|g" \
-            -e "s|RELEASE_TAG|${RELEASE_TAG}|g" \
+            -e "s|RELEASE_TAG|nightly|g" \
             ./.github/release_template.md > release/body.md
 
       - name: Release nightly
-        if: github.ref == 'refs/heads/master'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: nightly
