@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Code Design"
+  short_description: "Guide code design toward simple, maintainable structure"
+  default_prompt: "Use $clean-code-design to plan a simpler, cleaner implementation before coding."
