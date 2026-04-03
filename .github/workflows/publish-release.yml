@@ -6,11 +6,6 @@ on:
   schedule:
     - cron: "0 0 * * *"
   workflow_dispatch:
-    inputs:
-      release_tag:
-        description: "CLI release tag to sync package manager manifests for"
-        required: false
-        type: string
 
 env:
   CARGO_INCREMENTAL: 0
@@ -79,103 +74,10 @@ jobs:
           zip: windows
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  sync-package-manifests:
-    name: Sync Package Manifests
-    needs: upload-assets
-    permissions:
-      contents: write
-    if: |
-      always() &&
-      github.repository_owner == 'xidl' &&
-      (
-        (github.event_name == 'release' && needs.upload-assets.result == 'success') ||
-        (github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag != '')
-      )
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout default branch
-        uses: actions/checkout@v6
-        with:
-          persist-credentials: false
-          ref: ${{ github.event.repository.default_branch }}
-
-      - name: Setup Python 3
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.x"
-
-      - name: Resolve GitHub auth token
-        id: resolve-token
-        env:
-          GH_TOKEN_OVERRIDE: ${{ secrets.GH_TOKEN }}
-          DEFAULT_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-
-          if [[ -n "${GH_TOKEN_OVERRIDE:-}" ]]; then
-            echo "token=${GH_TOKEN_OVERRIDE}" >> "$GITHUB_OUTPUT"
-            echo "source=gh_token_secret" >> "$GITHUB_OUTPUT"
-          else
-            echo "token=${DEFAULT_TOKEN}" >> "$GITHUB_OUTPUT"
-            echo "source=github_token" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Resolve release metadata
-        id: resolve-release
-        run: |
-          set -euo pipefail
-
-          if [[ "${GITHUB_EVENT_NAME}" == "release" ]]; then
-            tag="${{ github.event.release.tag_name }}"
-          else
-            tag="${{ github.event.inputs.release_tag }}"
-          fi
-
-          tag="${tag#refs/tags/}"
-          version="${tag#v}"
-
-          if [[ -z "${version}" ]]; then
-            echo "failed to derive version from release tag '${tag}'" >&2
-            exit 1
-          fi
-
-          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
-          echo "version=${version}" >> "$GITHUB_OUTPUT"
-
-      - name: Generate package manager manifests
-        env:
-          GITHUB_TOKEN: ${{ steps.resolve-token.outputs.token }}
-          RELEASE_TAG: ${{ steps.resolve-release.outputs.tag }}
-          RELEASE_VERSION: ${{ steps.resolve-release.outputs.version }}
-        run: |
-          set -euo pipefail
-          echo "Using auth source: ${{ steps.resolve-token.outputs.source }}"
-          python3 scripts/sync-package-manifests.py --tag "$RELEASE_TAG" --version "$RELEASE_VERSION"
-
-      - name: Commit manifest updates
-        env:
-          PUSH_TOKEN: ${{ steps.resolve-token.outputs.token }}
-          RELEASE_TAG: ${{ steps.resolve-release.outputs.tag }}
-        run: |
-          set -euo pipefail
-
-          if git diff --quiet -- Formula packaging; then
-            echo "Package manager manifests already up to date."
-            exit 0
-          fi
-
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git remote set-url origin "https://x-access-token:${PUSH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-
-          git add Formula packaging
-          git commit -m "chore: sync package manager manifests for ${RELEASE_TAG}"
-          git push origin "${{ github.event.repository.default_branch }}"
-
   nightly-build-cli:
     needs: release-targets
     name: nightly-${{ matrix.target }}
-    if: github.repository_owner == 'xidl' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag == '')) && github.ref == 'refs/heads/master'
+    if: github.repository_owner == 'xidl' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/master'
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.release-targets.outputs.matrix) }}
@@ -221,7 +123,7 @@ jobs:
   nightly-release:
     name: nightly-release
     needs: nightly-build-cli
-    if: github.repository_owner == 'xidl' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag == '')) && github.ref == 'refs/heads/master'
+    if: github.repository_owner == 'xidl' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
