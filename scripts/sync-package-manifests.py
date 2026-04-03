@@ -5,6 +5,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import sys
 import textwrap
 import tomllib
@@ -44,6 +45,10 @@ WINDOWS_ASSET_CANDIDATES = {
         }
     ],
 }
+
+TAG_VERSION_RE = re.compile(
+    r"^(?:refs/tags/)?v?(?P<version>\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)$"
+)
 
 
 class SyncError(RuntimeError):
@@ -114,8 +119,19 @@ def release_url(repo: str, tag: str) -> str:
     return f"https://api.github.com/repos/{repo}/releases/tags/{tag}"
 
 
-def tag_archive_url(repo: str, tag: str) -> str:
-    return f"https://api.github.com/repos/{repo}/tarball/{tag}"
+def normalize_tag(tag: str) -> str:
+    return tag.removeprefix("refs/tags/")
+
+
+def version_from_tag(tag: str) -> str | None:
+    match = TAG_VERSION_RE.fullmatch(tag.strip())
+    if match is None:
+        return None
+    return match.group("version")
+
+
+def formula_source_archive_url(repo: str, tag: str) -> str:
+    return f"https://github.com/{repo}/archive/refs/tags/{tag}.tar.gz"
 
 
 def asset_sha256(asset: dict[str, object], token: str | None) -> str:
@@ -140,7 +156,7 @@ def render_formula(repo: str, tag: str, source_sha256: str) -> str:
         class Xidlc < Formula
           desc "XIDL compiler and multi-target code generator"
           homepage "{repo_url}"
-          url "{repo_url}/archive/refs/tags/{tag}.tar.gz"
+          url "{formula_source_archive_url(repo, tag)}"
           sha256 "{source_sha256}"
           license "Apache-2.0"
           head "{repo_url}.git", branch: "master"
@@ -305,8 +321,28 @@ def resolve_windows_assets(
 def main() -> int:
     args = parse_args()
     token = os.getenv("GITHUB_TOKEN") or os.getenv("GH_TOKEN")
-    version = args.version or cli_version()
-    tag = args.tag or f"v{version}"
+    tag = normalize_tag(args.tag) if args.tag else None
+    derived_version = version_from_tag(tag) if tag else None
+
+    if args.version is None:
+        if tag is None:
+            version = cli_version()
+            tag = f"v{version}"
+        elif derived_version is not None:
+            version = derived_version
+        else:
+            raise SyncError(
+                f"cannot derive version from tag {tag!r}; pass --version explicitly"
+            )
+    else:
+        version = args.version
+        if tag is None:
+            tag = f"v{version}"
+        elif derived_version is not None and derived_version != version:
+            raise SyncError(
+                f"tag {tag!r} resolves to version {derived_version!r}, "
+                f"which does not match --version {version!r}"
+            )
 
     release = fetch_json(release_url(args.repo, tag), token)
     if not isinstance(release, dict):
@@ -323,7 +359,7 @@ def main() -> int:
 
     windows_assets = resolve_windows_assets(args.repo, assets, token)
 
-    source_sha256 = sha256_url(tag_archive_url(args.repo, tag), token)
+    source_sha256 = sha256_url(formula_source_archive_url(args.repo, tag), token)
 
     changed = False
     changed |= write_text(FORMULA_PATH, render_formula(args.repo, tag, source_sha256), args.check)
