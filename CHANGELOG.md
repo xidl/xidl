@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.33.0](https://github.com/xidl/xidl/compare/v0.32.0...v0.33.0) (2026-04-03)
+
+
+### Features
+
+* add CD workflow and improve release automation ([755d4be](https://github.com/xidl/xidl/commit/755d4be6068188b2763e6976643a61282d1a7d90))
+* add Homebrew formula and improve Windows package support ([4ad1161](https://github.com/xidl/xidl/commit/4ad116103c09680e680b1ecaca848cec4e88f477))
+* **rust-jsonrpc:** add conditional compilation for unsupported platforms ([a27084c](https://github.com/xidl/xidl/commit/a27084ca0a162af4813fb1a5b85987869b172f75))
+* **rust-jsonrpc:** optimize bidirectional method matching ([a27084c](https://github.com/xidl/xidl/commit/a27084ca0a162af4813fb1a5b85987869b172f75))
+* **workflow:** add dynamic release context resolution and manual dispatch support ([f9d0d24](https://github.com/xidl/xidl/commit/f9d0d24a02e5f4a0da40c6731673472673caa5b2))
+
+
+### Bug Fixes
+
+* **formula:** update xidlc.rb SHA256 checksum for v0.32.0 ([3b3c71c](https://github.com/xidl/xidl/commit/3b3c71c05a53b1875b03f0f115a5baebf4cda0df))
+* **go-http:** correct path parameter pattern replacement logic ([a27084c](https://github.com/xidl/xidl/commit/a27084ca0a162af4813fb1a5b85987869b172f75))
+* **workflow:** enhance release metadata resolution with version parsing ([3b3c71c](https://github.com/xidl/xidl/commit/3b3c71c05a53b1875b03f0f115a5baebf4cda0df))
+
 ## [0.32.0](https://github.com/xidl/xidl/compare/v0.31.0...v0.32.0) (2026-04-03)
 
 
