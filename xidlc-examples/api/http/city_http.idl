@@ -14,11 +14,13 @@ interface SmartCityHttpApi {
         out uint32 eta_seconds,
         out string destination
     );
+
     @get(path = "/v1/stops/{stop_id}/nearby")
     sequence<string> list_nearby_stops(
         @path("stop_id")
         string stop_id
     );
+
     @get(path = "/v1/assets/{*path}")
     sequence<uint8> download_asset(
         @path("path")
@@ -28,6 +30,7 @@ interface SmartCityHttpApi {
         out string content_type,
         out string etag
     );
+
     @head(path = "/v1/parking/lots/{lot_id}")
     @no_security
     void probe_lot(
@@ -36,6 +39,7 @@ interface SmartCityHttpApi {
         @query("trace_id")
         string trace_id
     );
+
     @post(path = "/v1/parking/lots/{lot_id}/reserve")
     @api_key(in = "header", name = "X-Reserve-Key")
     string reserve_lot(
@@ -46,6 +50,7 @@ interface SmartCityHttpApi {
         out string reservation_state,
         out string expires_at
     );
+
     @delete(path = "/v1/parking/lots/{lot_id}/reservations/{reservation_id}")
     void cancel_reservation(
         @path("lot_id")
@@ -53,6 +58,7 @@ interface SmartCityHttpApi {
         @path("reservation_id")
         string reservation_id
     );
+
     @get(path = "/v1/citizens/{citizen_id}")
     string get_profile(
         @path("citizen_id")
@@ -61,6 +67,7 @@ interface SmartCityHttpApi {
         out string phone_number,
         out string language
     );
+
     @patch(path = "/v1/citizens/{citizen_id}")
     void update_profile(
         @path("citizen_id")
@@ -69,6 +76,7 @@ interface SmartCityHttpApi {
         string phone_number,
         out string audit_id
     );
+
     @get(path = "/v1/devices/{device_id}{?locale}")
     string get_device_status(
         @path("device_id")
@@ -82,6 +90,7 @@ interface SmartCityHttpApi {
         out string trace_echo,
         out string session_echo
     );
+
     readonly attribute string api_version;
     attribute boolean maintenance_mode;
 };

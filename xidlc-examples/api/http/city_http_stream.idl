@@ -9,11 +9,13 @@ interface CityHttpStreamApi {
         @query("lang")
         string lang
     );
+
     @no_security
     @server_stream
     @stream_codec("sse")
     @path("/ticker")
     string ticker();
+
     attribute boolean maintenance_mode;
     @client_stream
     @stream_codec("ndjson")
@@ -23,6 +25,7 @@ interface CityHttpStreamApi {
         in string asset_id,
         in sequence<octet> chunk
     );
+
     @bidi_stream
     @path("/chat")
     void chat(
@@ -31,4 +34,5 @@ interface CityHttpStreamApi {
         out string from,
         out string text
     );
+
 };

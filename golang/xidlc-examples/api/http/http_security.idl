@@ -8,6 +8,7 @@ interface HttpSecurityApi {
         @header("X-Trace-Id")
         string trace_id
     );
+
     @oauth2(scopes = "reports:write")
     @post(path = "/reports/{id}")
     string update_report(
@@ -15,7 +16,9 @@ interface HttpSecurityApi {
         string id,
         string body
     );
+
     @no_security
     @get(path = "/health")
     string health();
+
 };

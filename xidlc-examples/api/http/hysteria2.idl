@@ -18,4 +18,5 @@ interface Hysteria2 {
         @header("Hysteria-Padding")
         out string padding
     );
+
 };

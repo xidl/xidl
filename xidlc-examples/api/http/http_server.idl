@@ -8,6 +8,7 @@ interface HttpServer {
     /// port number
     readonly attribute uint16 port;
     string get_server_name();
+
     void set_server_name(
         string name
     );
@@ -18,80 +19,96 @@ interface HttpServer {
     UserInfo get_user_info(
         uint64 id
     );
+
     @get(path = "/v2/user/{?id}")
     UserInfo query_user_info(
         uint64 id
     );
+
     @post(path = "/v1/user")
     void post_user_info(
         uint64 id,
         UserInfo info
     );
+
     @put(path = "/v1/database/{key}/{value}")
     void put_key_value(
         string key,
         string value,
         in uint64 ttl
     );
+
     @delete(path = "/v1/database/{key}")
     void delete_key(
         string key
     );
+
     @patch(path = "/v1/database/{key}")
     void patch_key(
         string key,
         string value
     );
+
     @head(path = "/v1/database/{key}")
     void is_key_exists(
         @path("key")
         string key_alias
     );
+
     @options(path = "/v1/database/{key}")
     void get_key_options(
         string key,
         out boolean exists
     );
+
     @get(path = "/v1/database/deprecated/1/{key}")
     @deprecated
     void get_key_1(
         string key,
         out string value
     );
+
     @get(path = "/v1/database/deprecated/2/{key}")
     @deprecated
     void get_key_2(
         string key,
         out string value
     );
+
     @get(path = "/v1/database/deprecated/3/{key}")
     @deprecated("2025-01-01")
     void get_key_3(
         string key,
         out string value
     );
+
     @get(path = "/v1/database/deprecated/4/{key}")
     @deprecated(since = "2025-01-01", after = "2025-01-02")
     void get_key_4(
         string key,
         out string value
     );
+
     @http_basic
     void login(
         @cookie
         out string session_id
     );
+
     @http_basic(realm = "request login with realm")
     void login_realm(
         @cookie
         out string session_id
     );
+
     boolean is_logined(
         @cookie
         string session_id
     );
+
     @http_bearer
     void login_bearer();
+
 };
 
 @derive(Debug, Default, Clone, Serialize, Deserialize)

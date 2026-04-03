@@ -61,6 +61,7 @@
 (enum_dcl "," @append-newline)
 
 (op_dcl "(" @append-newline @add-ident (parameter_dcls) ")" @prepend-newline @dec-ident)
+(export(op_dcl)) @append-newline
 (parameter_dcls "," @append-newline)
 (type_declarator (simple_type_spec) @append-space)
 (type_declarator (template_type_spec) @append-space)
