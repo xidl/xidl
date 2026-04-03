@@ -1,9 +1,6 @@
 name: publish-release
 
 on:
-  push:
-    tags:
-      - "v*"
   schedule:
     - cron: "0 0 * * *"
   workflow_dispatch:
@@ -13,6 +10,7 @@ permissions:
 
 jobs:
   build-cli:
+    if: github.ref == 'refs/heads/master'
     strategy:
       fail-fast: false
       matrix:
@@ -79,6 +77,7 @@ jobs:
   release:
     needs:
       - build-cli
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -92,14 +91,11 @@ jobs:
       - name: Generate release body
         run: |
           mkdir -p release
-          if [ "${GITHUB_REF}" = "refs/heads/master" ]; then
-            RELEASE_TAG="nightly"
-          elif [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-            RELEASE_TAG="${GITHUB_REF_NAME}"
-          else
+          if [ "${GITHUB_REF}" != "refs/heads/master" ]; then
             echo "Skip release body for ref ${GITHUB_REF}"
             exit 0
           fi
+          RELEASE_TAG="nightly"
 
           sed \
             -e "s|REPOSITORY|${GITHUB_REPOSITORY}|g" \
@@ -113,15 +109,6 @@ jobs:
           tag_name: nightly
           name: nightly
           prerelease: true
-          files: dist/*/*.tar.gz
-          body_path: release/body.md
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Release tag
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
           files: dist/*/*.tar.gz
           body_path: release/body.md
         env:

@@ -1,0 +1,217 @@
+name: CD
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "CLI release tag to sync package manager manifests for"
+        required: false
+        type: string
+
+env:
+  CARGO_INCREMENTAL: 0
+  CARGO_NET_GIT_FETCH_WITH_CLI: true
+  CARGO_NET_RETRY: 10
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+  RUSTFLAGS: -D warnings
+  RUSTUP_MAX_RETRIES: 10
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  upload-assets:
+    name: ${{ matrix.target }}
+    permissions:
+      contents: write
+    if: github.repository_owner == 'xidl' && github.event_name == 'release'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-apple-darwin
+            os: macos-13
+          - target: aarch64-apple-darwin
+            os: macos-14
+          - target: x86_64-pc-windows-msvc
+            os: windows-2022
+          - target: aarch64-pc-windows-msvc
+            os: windows-2022
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-22.04
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-22.04
+          - target: x86_64-unknown-linux-musl
+            os: ubuntu-22.04
+          - target: aarch64-unknown-linux-musl
+            os: ubuntu-22.04
+          - target: riscv64gc-unknown-linux-musl
+            os: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Install Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1.15.4
+
+      - uses: taiki-e/setup-cross-toolchain-action@v1.39.2
+        if: startsWith(matrix.os, 'ubuntu') && !contains(matrix.target, '-musl') && matrix.target != 'x86_64-unknown-linux-gnu'
+        with:
+          target: ${{ matrix.target }}
+
+      - uses: taiki-e/install-action@v2.70.1
+        if: contains(matrix.target, '-musl')
+        with:
+          tool: cross
+
+      - name: Enable static CRT for Windows builds
+        if: endsWith(matrix.target, 'windows-msvc')
+        run: echo "RUSTFLAGS=${RUSTFLAGS} -C target-feature=+crt-static" >> "${GITHUB_ENV}"
+
+      - uses: taiki-e/upload-rust-binary-action@v1.29.1
+        with:
+          package: xidlc
+          bin: xidlc
+          profile: release
+          target: ${{ matrix.target }}
+          tar: all
+          zip: windows
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  sync-package-manifests:
+    name: Sync Package Manifests
+    needs: upload-assets
+    permissions:
+      contents: write
+    if: github.repository_owner == 'xidl' && github.event_name == 'release'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Setup Python 3
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+
+      - name: Resolve GitHub auth token
+        id: resolve-token
+        env:
+          GH_TOKEN_OVERRIDE: ${{ secrets.GH_TOKEN }}
+          DEFAULT_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          if [[ -n "${GH_TOKEN_OVERRIDE:-}" ]]; then
+            echo "token=${GH_TOKEN_OVERRIDE}" >> "$GITHUB_OUTPUT"
+            echo "source=gh_token_secret" >> "$GITHUB_OUTPUT"
+          else
+            echo "token=${DEFAULT_TOKEN}" >> "$GITHUB_OUTPUT"
+            echo "source=github_token" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate package manager manifests
+        env:
+          GITHUB_TOKEN: ${{ steps.resolve-token.outputs.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          echo "Using auth source: ${{ steps.resolve-token.outputs.source }}"
+          python3 scripts/sync-package-manifests.py --tag "$RELEASE_TAG"
+
+      - name: Commit manifest updates
+        env:
+          PUSH_TOKEN: ${{ steps.resolve-token.outputs.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+
+          if git diff --quiet -- Formula packaging; then
+            echo "Package manager manifests already up to date."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin "https://x-access-token:${PUSH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
+          git add Formula packaging
+          git commit -m "chore: sync package manager manifests for ${RELEASE_TAG}"
+          git push origin "${{ github.event.repository.default_branch }}"
+
+  sync-package-manifests-manual:
+    name: Sync Package Manifests (Manual)
+    permissions:
+      contents: write
+    if: github.repository_owner == 'xidl' && github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Setup Python 3
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+
+      - name: Resolve GitHub auth token
+        id: resolve-token
+        env:
+          GH_TOKEN_OVERRIDE: ${{ secrets.GH_TOKEN }}
+          DEFAULT_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          if [[ -n "${GH_TOKEN_OVERRIDE:-}" ]]; then
+            echo "token=${GH_TOKEN_OVERRIDE}" >> "$GITHUB_OUTPUT"
+            echo "source=gh_token_secret" >> "$GITHUB_OUTPUT"
+          else
+            echo "token=${DEFAULT_TOKEN}" >> "$GITHUB_OUTPUT"
+            echo "source=github_token" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate package manager manifests
+        env:
+          GITHUB_TOKEN: ${{ steps.resolve-token.outputs.token }}
+          RELEASE_TAG: ${{ github.event.inputs.release_tag }}
+        run: |
+          set -euo pipefail
+          echo "Using auth source: ${{ steps.resolve-token.outputs.source }}"
+          python3 scripts/sync-package-manifests.py --tag "$RELEASE_TAG"
+
+      - name: Commit manifest updates
+        env:
+          PUSH_TOKEN: ${{ steps.resolve-token.outputs.token }}
+          RELEASE_TAG: ${{ github.event.inputs.release_tag }}
+        run: |
+          set -euo pipefail
+
+          if git diff --quiet -- Formula packaging; then
+            echo "Package manager manifests already up to date."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin "https://x-access-token:${PUSH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
+          git add Formula packaging
+          git commit -m "chore: sync package manager manifests for ${RELEASE_TAG}"
+          git push origin "${{ github.event.repository.default_branch }}"
