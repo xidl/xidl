@@ -151,7 +151,7 @@ fn load_template(name: &str) -> std::result::Result<String, Error> {
 }
 
 fn md5_prefix(input: &[u8], len: usize) -> Vec<u8> {
-    let digest = md5::compute(input);
-    let end = len.min(digest.0.len());
-    digest.0[..end].to_vec()
+    let digest = md5::compute(input).0;
+    let end = len.min(digest.len());
+    digest[..end].to_vec()
 }

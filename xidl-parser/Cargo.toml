@@ -13,15 +13,15 @@ repository.workspace = true
 workspace = true
 
 [dependencies]
-tree-sitter = "=0.25.0"
+tree-sitter.workspace = true
 tree-sitter-idl = { workspace = true }
 xidl-parser-derive = { workspace = true }
-thiserror = "2.0"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-md5 = "0.7"
-minijinja = "1.0"
-rust-embed = "8.5"
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+md5.workspace = true
+minijinja = { workspace = true }
+rust-embed.workspace = true
 
 [dev-dependencies]
-insta = "1.44"
+insta.workspace = true

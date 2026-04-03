@@ -26,31 +26,31 @@ xidl-jsonrpc = { version = "0.34.0", path = "../xidl-jsonrpc", default-features 
   "tokio-net",
 ] }
 miette = { version = "7.6.0", features = ["fancy"] }
-minijinja = { version = "2.14", features = ["loader"] }
-convert_case = "0.11"
-clap = { version = "4.5", features = ["derive"] }
-rust-embed = "8.5"
-md5 = "0.8"
+minijinja = { workspace = true, features = ["loader"] }
+convert_case = { workspace = true }
+clap = { workspace = true, features = ["derive"] }
+rust-embed.workspace = true
 scopeguard = "1.2.0"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 itertools = "0.14.0"
-tree-sitter = "=0.25.0"
+tree-sitter.workspace = true
 tree-sitter-highlight = "=0.25.0"
 owo-colors = "4.2"
 tree-sitter-idl = { workspace = true }
 tree-sitter-rust = "=0.23.3"
 tree-sitter-cpp = "=0.23.4"
 tree-sitter-typescript = "=0.23.2"
+md5.workspace = true
 
 utoipa = "5.4.0"
 semver = "1.0"
 jiff = "0.2"
 enum_dispatch = "0.3.13"
-tokio = { version = "1.36", features = ["full"] }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 
 [dev-dependencies]
-insta = "1.44"
+insta.workspace = true
 
 [features]
 default = ["fmt"]

@@ -9,8 +9,7 @@ pub fn op_hash_const_name(interface: &str, op_name: &str) -> String {
 }
 
 pub fn hash_string(value: &str) -> u32 {
-    let digest = md5::compute(value.as_bytes());
-    let bytes = digest.0;
+    let bytes = md5::compute(value.as_bytes()).0;
     (bytes[0] as u32)
         + ((bytes[1] as u32) << 8)
         + ((bytes[2] as u32) << 16)

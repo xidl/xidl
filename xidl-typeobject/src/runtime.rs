@@ -50,9 +50,9 @@ pub struct BitfieldDesc<'a> {
 }
 
 pub fn name_hash(name: &str) -> [u8; 4] {
-    let digest = md5::compute(name.as_bytes());
+    let digest = md5::compute(name.as_bytes()).0;
     let mut out = [0u8; 4];
-    out.copy_from_slice(&digest.0[..4]);
+    out.copy_from_slice(&digest[..4]);
     out
 }
 
@@ -1049,9 +1049,9 @@ fn hash_minimal_type_object(value: &xt::MinimalTypeObject) -> [u8; 14] {
 
 fn hash_xcdr2<T: xidl_xcdr::XcdrSerialize>(value: &T) -> [u8; 14] {
     let bytes = serialize_xcdr2(value);
-    let digest = md5::compute(bytes);
+    let digest = md5::compute(&bytes).0;
     let mut out = [0u8; 14];
-    out.copy_from_slice(&digest.0[..14]);
+    out.copy_from_slice(&digest[..14]);
     out
 }
 

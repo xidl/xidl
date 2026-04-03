@@ -13,5 +13,5 @@ repository.workspace = true
 workspace = true
 
 [dependencies]
-tokio = "1.49.0"
+tokio.workspace = true
 xidlc = { workspace = true }

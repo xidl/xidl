@@ -16,17 +16,16 @@ workspace = true
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
-async-trait.workspace = true
-futures-util = "0.3"
+futures-util.workspace = true
 base64 = "0.22"
 
 axum = { version = "0.8", features = ["macros", "ws"] }
 axum-extra = { version = "0.10", features = ["typed-header"] }
-reqwest = { version = "0.13.2", features = ["json", "stream"], optional = true }
+reqwest = { workspace = true, features = ["json", "stream"], optional = true }
 serde_urlencoded = "0.7"
-tokio = { version = "1", features = ["net", "rt", "rt-multi-thread", "sync"] }
+tokio = { workspace = true, features = ["net", "rt", "rt-multi-thread", "sync"] }
 tokio-util = { version = "0.7", features = ["codec", "io"] }
-tokio-tungstenite = "0.27"
+tokio-tungstenite = { workspace = true }
 rmp-serde = { version = "1", optional = true }
 
 [features]

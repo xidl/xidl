@@ -10,15 +10,15 @@ categories.workspace = true
 repository.workspace = true
 
 [features]
-bindgen = []
+bindgen = ["dep:cbindgen"]
 
 [lints]
 workspace = true
 
 [dependencies]
-thiserror = "2.0"
+thiserror.workspace = true
 paste = "1.0"
 bytes = "1.11.0"
 
 [build-dependencies]
-cbindgen = "0.28"
+cbindgen = { version = "0.28", optional = true }

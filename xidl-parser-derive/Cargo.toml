@@ -16,7 +16,7 @@ proc-macro = true
 workspace = true
 
 [dependencies]
-convert_case = "0.8.0"
+convert_case = { workspace = true }
 darling = "0.21.0"
 proc-macro2 = "1.0"
 quote = "1.0"

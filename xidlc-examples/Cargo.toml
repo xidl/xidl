@@ -15,14 +15,14 @@ workspace = true
 
 [dependencies]
 async-trait.workspace = true
-async-stream = "0.3"
+async-stream.workspace = true
 serde.workspace = true
 xidl-rust-axum = { workspace = true, features = ["msgpack"] }
 serde_json.workspace = true
 xidl-jsonrpc = { workspace = true, features = ["tokio-net"] }
 
-tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
-clap = { version = "4", features = ["derive"] }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+clap = { workspace = true, features = ["derive"] }
 
 [build-dependencies]
 glob = "0.3.3"
@@ -30,7 +30,7 @@ xidl-build = { workspace = true }
 
 [dev-dependencies]
 anyhow = "1.0"
-minijinja = "2.16.0"
+minijinja.workspace = true
 regex = "1.12.3"
-reqwest = { version = "0.13.2" }
+reqwest.workspace = true
 similar = "2.7.0"
