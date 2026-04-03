@@ -23,9 +23,26 @@ WINGET_DIR = ROOT / "packaging" / "winget" / "manifests" / "x" / "xidl" / "xidlc
 PACKAGE_IDENTIFIER = "xidl.xidlc"
 WINGET_MANIFEST_VERSION = "1.12.0"
 
-WINDOWS_TARGETS = {
-    "64bit": "x86_64-pc-windows-msvc",
-    "arm64": "aarch64-pc-windows-msvc",
+WINDOWS_ASSET_CANDIDATES = {
+    "64bit": [
+        {
+            "target": "x86_64-pc-windows-msvc",
+            "archive": "zip",
+            "winget_supported": True,
+        },
+        {
+            "target": "x86_64-pc-windows-gnu",
+            "archive": "tar.gz",
+            "winget_supported": False,
+        },
+    ],
+    "arm64": [
+        {
+            "target": "aarch64-pc-windows-msvc",
+            "archive": "zip",
+            "winget_supported": True,
+        }
+    ],
 }
 
 
@@ -163,12 +180,8 @@ def render_scoop(repo: str, version: str, windows_assets: dict[str, dict[str, st
         },
         "autoupdate": {
             "architecture": {
-                "64bit": {
-                    "url": f"{repo_url}/releases/download/v$version/xidlc-{WINDOWS_TARGETS['64bit']}.zip"
-                },
-                "arm64": {
-                    "url": f"{repo_url}/releases/download/v$version/xidlc-{WINDOWS_TARGETS['arm64']}.zip"
-                },
+                arch: {"url": asset["autoupdate_url"]}
+                for arch, asset in windows_assets.items()
             }
         },
     }
@@ -222,7 +235,9 @@ def render_winget_installer(version: str, windows_assets: dict[str, dict[str, st
         "Installers:",
     ]
     for arch, winget_arch in (("64bit", "x64"), ("arm64", "arm64")):
-        asset = windows_assets[arch]
+        asset = windows_assets.get(arch)
+        if asset is None:
+            continue
         lines.extend(
             [
                 f"  - Architecture: {winget_arch}",
@@ -260,6 +275,33 @@ def write_text(path: Path, content: str, check: bool) -> bool:
     return True
 
 
+def resolve_windows_assets(
+    repo: str,
+    assets: dict[str, dict[str, object]],
+    token: str | None,
+) -> dict[str, dict[str, str | bool]]:
+    resolved: dict[str, dict[str, str | bool]] = {}
+    repo_url = f"https://github.com/{repo}"
+    for arch, candidates in WINDOWS_ASSET_CANDIDATES.items():
+        for candidate in candidates:
+            asset_name = f"xidlc-{candidate['target']}.{candidate['archive']}"
+            asset = assets.get(asset_name)
+            if asset is None:
+                continue
+            resolved[arch] = {
+                "url": str(asset["browser_download_url"]),
+                "sha256": asset_sha256(asset, token),
+                "target": str(candidate["target"]),
+                "archive": str(candidate["archive"]),
+                "autoupdate_url": f"{repo_url}/releases/download/v$version/{asset_name}",
+                "winget_supported": bool(candidate["winget_supported"]),
+            }
+            break
+    if not resolved:
+        raise SyncError("release payload is missing supported Windows assets")
+    return resolved
+
+
 def main() -> int:
     args = parse_args()
     token = os.getenv("GITHUB_TOKEN") or os.getenv("GH_TOKEN")
@@ -279,13 +321,7 @@ def main() -> int:
         if isinstance(asset, dict) and isinstance(asset.get("name"), str)
     }
 
-    windows_assets: dict[str, dict[str, str]] = {}
-    for arch, target in WINDOWS_TARGETS.items():
-        asset = require_asset(assets, f"xidlc-{target}.zip")
-        windows_assets[arch] = {
-            "url": str(asset["browser_download_url"]),
-            "sha256": asset_sha256(asset, token),
-        }
+    windows_assets = resolve_windows_assets(args.repo, assets, token)
 
     source_sha256 = sha256_url(tag_archive_url(args.repo, tag), token)
 
@@ -293,22 +329,30 @@ def main() -> int:
     changed |= write_text(FORMULA_PATH, render_formula(args.repo, tag, source_sha256), args.check)
     changed |= write_text(SCOOP_PATH, render_scoop(args.repo, version, windows_assets), args.check)
 
-    winget_version_dir = WINGET_DIR / version
-    changed |= write_text(
-        winget_version_dir / f"{PACKAGE_IDENTIFIER}.yaml",
-        render_winget_version(version),
-        args.check,
-    )
-    changed |= write_text(
-        winget_version_dir / f"{PACKAGE_IDENTIFIER}.locale.en-US.yaml",
-        render_winget_default_locale(args.repo, version),
-        args.check,
-    )
-    changed |= write_text(
-        winget_version_dir / f"{PACKAGE_IDENTIFIER}.installer.yaml",
-        render_winget_installer(version, windows_assets),
-        args.check,
-    )
+    winget_assets = {
+        arch: asset
+        for arch, asset in windows_assets.items()
+        if bool(asset["winget_supported"])
+    }
+    if winget_assets:
+        winget_version_dir = WINGET_DIR / version
+        changed |= write_text(
+            winget_version_dir / f"{PACKAGE_IDENTIFIER}.yaml",
+            render_winget_version(version),
+            args.check,
+        )
+        changed |= write_text(
+            winget_version_dir / f"{PACKAGE_IDENTIFIER}.locale.en-US.yaml",
+            render_winget_default_locale(args.repo, version),
+            args.check,
+        )
+        changed |= write_text(
+            winget_version_dir / f"{PACKAGE_IDENTIFIER}.installer.yaml",
+            render_winget_installer(version, winget_assets),
+            args.check,
+        )
+    else:
+        print("skipped packaging/winget because no supported Windows zip assets were found")
 
     if args.check:
         print("package manager manifests are up to date")

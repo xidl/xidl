@@ -1,0 +1,43 @@
+name: Setup CLI Build
+description: Prepare Rust toolchain and cross-build helpers for a release target.
+
+inputs:
+  target:
+    description: Rust compilation target triple.
+    required: true
+  use_cross:
+    description: Whether the target should build with cross.
+    required: true
+  setup_cross_toolchain:
+    description: Whether the target needs taiki-e/setup-cross-toolchain-action.
+    required: true
+  toolchain:
+    description: Rust toolchain version to install.
+    required: false
+    default: "1.92.0"
+
+runs:
+  using: composite
+  steps:
+    - name: Install Rust toolchain
+      uses: actions-rust-lang/setup-rust-toolchain@v1.15.4
+      with:
+        toolchain: ${{ inputs.toolchain }}
+        target: ${{ inputs.target }}
+
+    - name: Setup cross toolchain
+      if: ${{ inputs.setup_cross_toolchain == 'true' }}
+      uses: taiki-e/setup-cross-toolchain-action@v1.39.2
+      with:
+        target: ${{ inputs.target }}
+
+    - name: Install cross
+      if: ${{ inputs.use_cross == 'true' }}
+      uses: taiki-e/install-action@v2.70.1
+      with:
+        tool: cross
+
+    - name: Enable static CRT for Windows builds
+      if: ${{ endsWith(inputs.target, 'windows-msvc') }}
+      shell: bash
+      run: echo "RUSTFLAGS=${RUSTFLAGS} -C target-feature=+crt-static" >> "${GITHUB_ENV}"

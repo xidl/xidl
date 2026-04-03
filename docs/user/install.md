@@ -48,6 +48,10 @@ tagged GitHub Release is published:
 - `packaging/scoop/xidlc.json`
 - `packaging/winget/manifests/x/xidl/xidlc/`
 
+The current stable release `v0.32.0` already supports Homebrew and Scoop. The
+winget manifests are emitted once the published release assets include the
+Windows MSVC zip archives expected by the release workflow.
+
 ## Verify the install
 
 ```bash
