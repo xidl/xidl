@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.33.1](https://github.com/xidl/xidl/compare/v0.33.0...v0.33.1) (2026-04-03)
+
+
+### Bug Fixes
+
+* **workflow:** ensure publish-release workflow runs on all events ([fd99ec7](https://github.com/xidl/xidl/commit/fd99ec79216bf49b31f6554adff2f7a0dd6a99f7))
+
 ## [0.33.0](https://github.com/xidl/xidl/compare/v0.32.0...v0.33.0) (2026-04-03)
 
 
