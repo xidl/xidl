@@ -124,15 +124,30 @@ jobs:
             ./.github/release_template.md > release/body.md
 
       - name: Create or update managed prerelease
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ needs.resolve-publish-context.outputs.release_tag }}
-          name: ${{ needs.resolve-publish-context.outputs.release_name }}
-          prerelease: true
-          target_commitish: ${{ github.sha }}
-          body_path: release/body.md
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_NAME: ${{ needs.resolve-publish-context.outputs.release_name }}
+          RELEASE_TAG: ${{ needs.resolve-publish-context.outputs.release_tag }}
+          SOURCE_REF: ${{ needs.resolve-publish-context.outputs.source_ref }}
+        run: |
+          set -euo pipefail
+
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release edit "$RELEASE_TAG" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "$RELEASE_NAME" \
+              --notes-file release/body.md \
+              --prerelease \
+              --target "$SOURCE_REF"
+          else
+            gh release create "$RELEASE_TAG" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "$RELEASE_NAME" \
+              --notes-file release/body.md \
+              --prerelease \
+              --latest=false \
+              --target "$SOURCE_REF"
+          fi
 
   upload-assets:
     needs:
