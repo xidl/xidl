@@ -40,6 +40,14 @@ pub(crate) fn loopback_peer_addr() -> SocketAddr {
     SocketAddr::from(([127, 0, 0, 1], 0))
 }
 
+#[cfg(any(
+    windows,
+    not(unix),
+    not(feature = "tokio-net"),
+    not(feature = "quic-s2n"),
+    not(feature = "tokio-tls"),
+    not(feature = "tokio-websocket")
+))]
 pub(crate) fn unsupported(message: &'static str) -> std::io::Error {
     std::io::Error::new(std::io::ErrorKind::Unsupported, message)
 }

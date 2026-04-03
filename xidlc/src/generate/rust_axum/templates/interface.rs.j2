@@ -11,8 +11,8 @@ pub trait {{ ident }} {
                 #[{{ attr }}]
             {% endfor %}
         {% endif %}
-        {% if method.deprecated %}
-            #[deprecated{% if method.deprecated_note %}(note = "{{ method.deprecated_note }}"){% endif %}]
+        {% if method.deprecated -%}
+        #[deprecated{% if method.deprecated_note %}(note = "{{ method.deprecated_note }}"){% endif %}]
         {% endif %}
         async fn {{ method.name }}(
         &self,

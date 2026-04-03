@@ -122,7 +122,6 @@ struct ApiKeyContext {
 }
 
 #[derive(Serialize, Clone)]
-
 struct RouteTemplate {
     path: String,
     path_params: HashSet<String>,
@@ -1487,8 +1486,8 @@ fn deprecated_context(
     interface_annotations: &[hir::Annotation],
     method_annotations: &[hir::Annotation],
 ) -> IdlcResult<DeprecatedContext> {
-    let info = effective_deprecated(interface_annotations, method_annotations)
-        .map_err(|err| IdlcError::rpc(err))?;
+    let info =
+        effective_deprecated(interface_annotations, method_annotations).map_err(IdlcError::rpc)?;
     let deprecated = info.as_ref().map(|value| value.deprecated).unwrap_or(false);
     let since = info.as_ref().and_then(|value| value.since.clone());
     let after = info.as_ref().and_then(|value| value.after.clone());
