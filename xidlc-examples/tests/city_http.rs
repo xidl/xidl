@@ -23,7 +23,6 @@ async fn http_client_calls_all_endpoints() {
 
     let base = format!("http://{}", addr);
     let http = xidl_rust_axum::reqwest::Client::builder()
-        .no_proxy()
         .build()
         .expect("build reqwest client without proxy");
     let auth = ClientAuth {

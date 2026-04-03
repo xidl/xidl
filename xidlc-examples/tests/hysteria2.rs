@@ -21,7 +21,6 @@ async fn hysteria2_auth_uses_headers_for_request_and_response() {
     tokio::time::sleep(std::time::Duration::from_millis(100)).await;
 
     let http = xidl_rust_axum::reqwest::Client::builder()
-        .no_proxy()
         .build()
         .expect("build reqwest client without proxy");
     let client = Hysteria2Client::with_http(format!("http://{}", addr), http);
