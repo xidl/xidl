@@ -6,6 +6,11 @@ on:
   schedule:
     - cron: "0 0 * * *"
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Optional prerelease tag for manual test runs; leave blank to refresh nightly on the default branch"
+        required: false
+        type: string
 
 env:
   CARGO_INCREMENTAL: 0
@@ -37,14 +42,112 @@ jobs:
       - name: Define release targets
         id: targets
         run: |
-          echo "matrix=$(python3 -c 'import json, sys; print(json.dumps(json.load(open(sys.argv[1])), separators=(\",\", \":\")))' .github/release-targets.json)" >> "$GITHUB_OUTPUT"
+          matrix="$(python3 -c 'import json, sys; print(json.dumps(json.load(open(sys.argv[1], encoding="utf-8")), separators=(",", ":")))' .github/release-targets.json)"
+          echo "matrix=${matrix}" >> "$GITHUB_OUTPUT"
+
+  resolve-publish-context:
+    name: Resolve Publish Context
+    runs-on: ubuntu-latest
+    outputs:
+      release_tag: ${{ steps.resolve.outputs.release_tag }}
+      release_ref: ${{ steps.resolve.outputs.release_ref }}
+      release_name: ${{ steps.resolve.outputs.release_name }}
+      should_ensure_release: ${{ steps.resolve.outputs.should_ensure_release }}
+      source_ref: ${{ steps.resolve.outputs.source_ref }}
+    steps:
+      - name: Resolve publish target
+        id: resolve
+        env:
+          CURRENT_REF: ${{ github.ref }}
+          CURRENT_REF_NAME: ${{ github.ref_name }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          DISPATCH_TAG: ${{ github.event.inputs.release_tag }}
+          EVENT_NAME: ${{ github.event_name }}
+          RELEASE_EVENT_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+
+          if [[ "${EVENT_NAME}" == "release" ]]; then
+            release_tag="${RELEASE_EVENT_TAG}"
+            source_ref="${release_tag}"
+            should_ensure_release="false"
+            release_name="${release_tag}"
+          elif [[ "${EVENT_NAME}" == "schedule" ]]; then
+            release_tag="nightly"
+            source_ref="${DEFAULT_BRANCH}"
+            should_ensure_release="true"
+            release_name="nightly"
+          else
+            release_tag="${DISPATCH_TAG#refs/tags/}"
+            if [[ -n "${release_tag}" ]]; then
+              source_ref="${CURRENT_REF_NAME}"
+              should_ensure_release="true"
+              release_name="${release_tag}"
+            else
+              if [[ "${CURRENT_REF}" != "refs/heads/${DEFAULT_BRANCH}" ]]; then
+                echo "workflow_dispatch without release_tag must run on ${DEFAULT_BRANCH}" >&2
+                exit 1
+              fi
+              release_tag="nightly"
+              source_ref="${DEFAULT_BRANCH}"
+              should_ensure_release="true"
+              release_name="nightly"
+            fi
+          fi
+
+          echo "release_tag=${release_tag}" >> "$GITHUB_OUTPUT"
+          echo "release_ref=refs/tags/${release_tag}" >> "$GITHUB_OUTPUT"
+          echo "release_name=${release_name}" >> "$GITHUB_OUTPUT"
+          echo "should_ensure_release=${should_ensure_release}" >> "$GITHUB_OUTPUT"
+          echo "source_ref=${source_ref}" >> "$GITHUB_OUTPUT"
+
+  ensure-managed-release:
+    name: Ensure Managed Release
+    needs: resolve-publish-context
+    permissions:
+      contents: write
+    if: github.repository_owner == 'xidl' && needs.resolve-publish-context.outputs.should_ensure_release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source ref
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          ref: ${{ needs.resolve-publish-context.outputs.source_ref }}
+
+      - name: Generate release body
+        run: |
+          mkdir -p release
+          sed \
+            -e "s|REPOSITORY|${GITHUB_REPOSITORY}|g" \
+            -e "s|RELEASE_TAG|${{ needs.resolve-publish-context.outputs.release_tag }}|g" \
+            ./.github/release_template.md > release/body.md
+
+      - name: Create or update managed prerelease
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.resolve-publish-context.outputs.release_tag }}
+          name: ${{ needs.resolve-publish-context.outputs.release_name }}
+          prerelease: true
+          target_commitish: ${{ github.sha }}
+          body_path: release/body.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   upload-assets:
-    needs: release-targets
+    needs:
+      - release-targets
+      - resolve-publish-context
+      - ensure-managed-release
     name: ${{ matrix.target }}
     permissions:
       contents: write
-    if: github.repository_owner == 'xidl' && github.event_name == 'release'
+    if: |
+      github.repository_owner == 'xidl' &&
+      (
+        github.event_name == 'release' ||
+        needs.ensure-managed-release.result == 'success'
+      )
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -55,7 +158,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           persist-credentials: false
-          ref: ${{ github.event.release.tag_name }}
+          ref: ${{ needs.resolve-publish-context.outputs.source_ref }}
 
       - name: Setup CLI build toolchain
         uses: ./.github/actions/setup-cli-build
@@ -73,84 +176,4 @@ jobs:
           tar: all
           zip: windows
           token: ${{ secrets.GITHUB_TOKEN }}
-
-  nightly-build-cli:
-    needs: release-targets
-    name: nightly-${{ matrix.target }}
-    if: github.repository_owner == 'xidl' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/master'
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.release-targets.outputs.matrix) }}
-    runs-on: ${{ matrix.os }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Setup CLI build toolchain
-        uses: ./.github/actions/setup-cli-build
-        with:
-          target: ${{ matrix.target }}
-          use_cross: ${{ matrix.use_cross }}
-          setup_cross_toolchain: ${{ matrix.setup_cross_toolchain }}
-
-      - name: Build xidlc (cross)
-        if: matrix.use_cross
-        run: cross build -p xidlc --target ${{ matrix.target }} --profile release
-
-      - name: Build xidlc (cargo)
-        if: matrix.use_cross == false
-        run: cargo build -p xidlc --target ${{ matrix.target }} --profile release
-
-      - name: Package cli artifact (Unix)
-        if: ${{ !endsWith(matrix.target, 'windows-msvc') }}
-        run: |
-          mkdir -p dist
-          tar -czf dist/xidlc-${{ matrix.target }}.tar.gz -C target/${{ matrix.target }}/release xidlc
-
-      - name: Package cli artifact (Windows)
-        if: endsWith(matrix.target, 'windows-msvc')
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force -Path dist | Out-Null
-          Compress-Archive -Path "target/${{ matrix.target }}/release/xidlc.exe" -DestinationPath "dist/xidlc-${{ matrix.target }}.zip" -Force
-
-      - name: Upload cli artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: xidlc-${{ matrix.target }}
-          path: dist/*
-
-  nightly-release:
-    name: nightly-release
-    needs: nightly-build-cli
-    if: github.repository_owner == 'xidl' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/master'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v8
-        with:
-          path: dist
-
-      - name: Generate release body
-        run: |
-          mkdir -p release
-          sed \
-            -e "s|REPOSITORY|${GITHUB_REPOSITORY}|g" \
-            -e "s|RELEASE_TAG|nightly|g" \
-            ./.github/release_template.md > release/body.md
-
-      - name: Release nightly
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: nightly
-          name: nightly
-          prerelease: true
-          files: |
-            dist/*/*.tar.gz
-            dist/*/*.zip
-          body_path: release/body.md
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ needs.resolve-publish-context.outputs.release_ref }}
