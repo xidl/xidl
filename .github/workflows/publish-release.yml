@@ -120,30 +120,42 @@ jobs:
             echo "source=github_token" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Resolve release tag
-        id: resolve-release-tag
+      - name: Resolve release metadata
+        id: resolve-release
         run: |
           set -euo pipefail
 
           if [[ "${GITHUB_EVENT_NAME}" == "release" ]]; then
-            echo "tag=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+            tag="${{ github.event.release.tag_name }}"
           else
-            echo "tag=${{ github.event.inputs.release_tag }}" >> "$GITHUB_OUTPUT"
+            tag="${{ github.event.inputs.release_tag }}"
           fi
+
+          tag="${tag#refs/tags/}"
+          version="${tag#v}"
+
+          if [[ -z "${version}" ]]; then
+            echo "failed to derive version from release tag '${tag}'" >&2
+            exit 1
+          fi
+
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
 
       - name: Generate package manager manifests
         env:
           GITHUB_TOKEN: ${{ steps.resolve-token.outputs.token }}
-          RELEASE_TAG: ${{ steps.resolve-release-tag.outputs.tag }}
+          RELEASE_TAG: ${{ steps.resolve-release.outputs.tag }}
+          RELEASE_VERSION: ${{ steps.resolve-release.outputs.version }}
         run: |
           set -euo pipefail
           echo "Using auth source: ${{ steps.resolve-token.outputs.source }}"
-          python3 scripts/sync-package-manifests.py --tag "$RELEASE_TAG"
+          python3 scripts/sync-package-manifests.py --tag "$RELEASE_TAG" --version "$RELEASE_VERSION"
 
       - name: Commit manifest updates
         env:
           PUSH_TOKEN: ${{ steps.resolve-token.outputs.token }}
-          RELEASE_TAG: ${{ steps.resolve-release-tag.outputs.tag }}
+          RELEASE_TAG: ${{ steps.resolve-release.outputs.tag }}
         run: |
           set -euo pipefail
 
