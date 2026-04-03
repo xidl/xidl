@@ -226,7 +226,6 @@ fn split_method_line(line: &str) -> anyhow::Result<(String, String)> {
 
 async fn run_tests(tests: &[HttpTest], config: &SnapshotConfig) -> String {
     let client = reqwest::Client::builder()
-        .no_proxy()
         .build()
         .expect("build reqwest client without proxy");
     let mut sections = Vec::new();

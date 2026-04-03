@@ -21,7 +21,6 @@ async fn http_client_supports_form_and_msgpack_media_types() {
     tokio::time::sleep(std::time::Duration::from_millis(100)).await;
 
     let http = xidl_rust_axum::reqwest::Client::builder()
-        .no_proxy()
         .build()
         .expect("build reqwest client without proxy");
     let client = HttpMediaTypesApiClient::with_http(format!("http://{}", addr), http);
