@@ -68,9 +68,8 @@ async fn run_http_snapshots(vars: &serde_json::Map<String, serde_json::Value>) {
     let out_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/http_snapshots/snapshots");
     fs::create_dir_all(&out_root).expect("create snapshot output dir");
 
-    let mut entries = fs::read_dir(&defs_root).expect("read http snapshot defs");
     let mut files = Vec::new();
-    while let Some(entry) = entries.next() {
+    for entry in fs::read_dir(&defs_root).expect("read http snapshot defs") {
         let entry = entry.expect("dir entry");
         let path = entry.path();
         if path.extension().and_then(|ext| ext.to_str()) == Some("http") {
@@ -118,7 +117,7 @@ fn load_snapshot_config(path: &Path) -> anyhow::Result<SnapshotConfig> {
     }
     let raw = fs::read_to_string(config_path)?;
     let mut config: SnapshotConfig = serde_json::from_str(&raw)?;
-    config.drop_headers.extend(["date".to_string()].into_iter());
+    config.drop_headers.extend(["date".to_string()]);
     Ok(config)
 }
 

@@ -389,7 +389,7 @@ pub(crate) fn go_pattern_path(path: &str) -> String {
         if ch == '{' && chars.peek() == Some(&'*') {
             chars.next();
             out.push('{');
-            while let Some(token) = chars.next() {
+            for token in chars.by_ref() {
                 if token == '}' {
                     out.push_str("...}");
                     break;

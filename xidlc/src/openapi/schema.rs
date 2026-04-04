@@ -259,6 +259,7 @@ impl ComponentsBuilder {
 #[non_exhaustive]
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 #[serde(untagged, rename_all = "camelCase")]
+#[allow(clippy::large_enum_variant)]
 pub enum Schema {
     /// Defines array schema from another schema. Typically used with
     /// [`Schema::Object`]. Slice and Vec types are translated to [`Schema::Array`] types.

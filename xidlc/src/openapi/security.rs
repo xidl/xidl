@@ -302,10 +302,11 @@ impl HttpBuilder {
 /// Implements types according [RFC7235](https://datatracker.ietf.org/doc/html/rfc7235#section-5.1).
 ///
 /// Types are maintained at <https://www.iana.org/assignments/http-authschemes/http-authschemes.xhtml>.
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Default)]
 #[serde(rename_all = "lowercase")]
 #[allow(missing_docs)]
 pub enum HttpAuthScheme {
+    #[default]
     Basic,
     Bearer,
     Digest,
@@ -318,12 +319,6 @@ pub enum HttpAuthScheme {
     #[serde(rename = "scram-sha-256")]
     ScramSha256,
     Vapid,
-}
-
-impl Default for HttpAuthScheme {
-    fn default() -> Self {
-        Self::Basic
-    }
 }
 
 /// Open id connect [`SecurityScheme`].

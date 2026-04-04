@@ -59,6 +59,7 @@ impl<T> xidl_jsonrpc::Handler for {{ ident }}Server<T>
 where
 T: {{ ident }} + Send + Sync,
 {
+    #[allow(clippy::match_single_binding)]
     async fn handle(&self, method: &str, params: ::serde_json::Value) -> Result<::serde_json::Value, xidl_jsonrpc::Error> {
         match method {
             {% for method in methods %}
@@ -118,6 +119,7 @@ T: {{ ident }} + Send + Sync,
         {% endif %}
     }
 
+    #[allow(clippy::match_single_binding)]
     async fn handle_bidi(
         &self,
         method: &str,
@@ -187,6 +189,12 @@ type {{ ident }}WriteHalf = tokio::io::WriteHalf<{{ ident }}Transport>;
 
 pub struct {{ ident }}ClientBuilder {
     endpoint: Option<String>,
+}
+
+impl Default for {{ ident }}ClientBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl {{ ident }}ClientBuilder {
