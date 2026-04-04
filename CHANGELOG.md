@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.35.0](https://github.com/xidl/xidl/compare/v0.34.0...v0.35.0) (2026-04-04)
+
+
+### Features
+
+* make build faster ([908a6d7](https://github.com/xidl/xidl/commit/908a6d74bacdd7614a8fbea1551fad6a54163e84))
+
 ## [0.34.0](https://github.com/xidl/xidl/compare/v0.33.1...v0.34.0) (2026-04-03)
 
 
