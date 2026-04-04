@@ -1,11 +1,9 @@
 use super::context::TemplateContext;
 use crate::error::{ParseError, ParserResult};
+use include_dir::{Dir, include_dir};
 use minijinja::{Environment, Error, ErrorKind};
-use rust_embed::RustEmbed;
 
-#[derive(RustEmbed, Clone)]
-#[folder = "src/hir/templates"]
-struct Templates;
+static TEMPLATES: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/src/hir/templates");
 
 pub fn render_template(name: &str, ctx: &TemplateContext) -> ParserResult<String> {
     let mut env = Environment::new();
@@ -21,17 +19,17 @@ pub fn render_template(name: &str, ctx: &TemplateContext) -> ParserResult<String
 }
 
 fn load_template(name: &str) -> std::result::Result<String, Error> {
-    let file = Templates::get(name).ok_or_else(|| {
+    let file = TEMPLATES.get_file(name).ok_or_else(|| {
         Error::new(
             ErrorKind::TemplateNotFound,
             format!("missing template {name}"),
         )
     })?;
-    let content = String::from_utf8(file.data.to_vec()).map_err(|err| {
+    let content = file.contents_utf8().ok_or_else(|| {
         Error::new(
             ErrorKind::InvalidOperation,
-            format!("template {name} is not valid utf-8: {err}"),
+            format!("template {name} is not valid utf-8"),
         )
     })?;
-    Ok(content)
+    Ok(content.to_string())
 }

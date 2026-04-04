@@ -2,13 +2,11 @@ use std::collections::HashMap;
 
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::utils::{format_timestamp_filter, rust_format_filter};
+use include_dir::{Dir, include_dir};
 use minijinja::{Environment, Error, ErrorKind};
-use rust_embed::RustEmbed;
 use serde::Serialize;
 
-#[derive(RustEmbed)]
-#[folder = "src/generate/rust_axum/templates"]
-struct Templates;
+static TEMPLATES: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/src/generate/rust_axum/templates");
 
 #[derive(Default)]
 pub struct RustAxumRenderOutput {
@@ -47,18 +45,16 @@ impl RustAxumRenderer {
 }
 
 fn load_template(name: &str) -> std::result::Result<String, Error> {
-    let file = Templates::get(name).ok_or_else(|| {
+    let file = TEMPLATES.get_file(name).ok_or_else(|| {
         Error::new(
             ErrorKind::TemplateNotFound,
             format!("missing template {name}"),
         )
     })?;
-    let data = file.data.as_ref();
-    let content = String::from_utf8(data.to_vec()).map_err(|err| {
+    file.contents_utf8().map(str::to_owned).ok_or_else(|| {
         Error::new(
             ErrorKind::InvalidOperation,
-            format!("template {name} is not valid utf-8: {err}"),
+            format!("template {name} is not valid utf-8"),
         )
-    })?;
-    Ok(content)
+    })
 }

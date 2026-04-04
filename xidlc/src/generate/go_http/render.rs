@@ -1,13 +1,11 @@
 use crate::error::{IdlcError, IdlcResult};
+use include_dir::{Dir, include_dir};
 use minijinja::{Environment, Error, ErrorKind};
-use rust_embed::RustEmbed;
 use serde::Serialize;
 
 use super::GoHttpRenderOutput;
 
-#[derive(RustEmbed)]
-#[folder = "src/generate/go_http/templates"]
-struct Templates;
+static TEMPLATES: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/src/generate/go_http/templates");
 
 pub struct GoHttpRenderer {
     env: Environment<'static>,
@@ -34,16 +32,16 @@ impl GoHttpRenderer {
 }
 
 fn load_template(name: &str) -> std::result::Result<String, Error> {
-    let file = Templates::get(name).ok_or_else(|| {
+    let file = TEMPLATES.get_file(name).ok_or_else(|| {
         Error::new(
             ErrorKind::TemplateNotFound,
             format!("missing template {name}"),
         )
     })?;
-    String::from_utf8(file.data.as_ref().to_vec()).map_err(|err| {
+    file.contents_utf8().map(str::to_owned).ok_or_else(|| {
         Error::new(
             ErrorKind::InvalidOperation,
-            format!("template {name} is not valid utf-8: {err}"),
+            format!("template {name} is not valid utf-8"),
         )
     })
 }

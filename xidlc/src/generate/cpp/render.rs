@@ -2,8 +2,8 @@ use crate::{
     error::{IdlcError, IdlcResult},
     generate::utils::{clang_format_filter, format_timestamp_filter, to_case},
 };
+use include_dir::{Dir, include_dir};
 use minijinja::{Environment, Error, ErrorKind};
-use rust_embed::RustEmbed;
 use serde::Serialize;
 
 #[derive(Default)]
@@ -34,9 +34,7 @@ pub trait CppRender {
     fn render(&self, renderer: &CppRenderer) -> IdlcResult<CppRenderOutput>;
 }
 
-#[derive(RustEmbed)]
-#[folder = "src/generate/cpp/templates"]
-struct Templates;
+static TEMPLATES: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/src/generate/cpp/templates");
 
 pub struct CppRenderer {
     env: Environment<'static>,
@@ -66,18 +64,16 @@ impl CppRenderer {
 }
 
 fn load_template(name: &str) -> std::result::Result<String, Error> {
-    let file = Templates::get(name).ok_or_else(|| {
+    let file = TEMPLATES.get_file(name).ok_or_else(|| {
         Error::new(
             ErrorKind::TemplateNotFound,
             format!("missing template {name}"),
         )
     })?;
-    let data = file.data.as_ref();
-    let content = String::from_utf8(data.to_vec()).map_err(|err| {
+    file.contents_utf8().map(str::to_owned).ok_or_else(|| {
         Error::new(
             ErrorKind::InvalidOperation,
-            format!("template {name} is not valid utf-8: {err}"),
+            format!("template {name} is not valid utf-8"),
         )
-    })?;
-    Ok(content)
+    })
 }
