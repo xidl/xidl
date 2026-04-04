@@ -23,13 +23,6 @@ impl DiagnosticRunner {
         }
     }
 
-    pub fn new_cpp() -> Self {
-        Self {
-            language: tree_sitter_cpp::LANGUAGE.into(),
-            label: "cpp",
-        }
-    }
-
     pub fn run(&self, source: &str, filename: &str) -> IdlcResult<()> {
         let tree = self.parse(source)?;
         self.ensure_tree(tree, source, filename)

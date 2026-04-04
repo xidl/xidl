@@ -10,20 +10,25 @@ categories.workspace = true
 repository.workspace = true
 exclude = ["**/*.snap"]
 
+[features]
+default = []
+fmt = ["fmt-rust", "fmt-cpp", "fmt-typescript"]
+fmt-rust = ["tree-sitter-rust"]
+fmt-cpp = ["tree-sitter-cpp"]
+fmt-typescript = ["tree-sitter-typescript"]
+
 [lints]
 workspace = true
 
 [dependencies]
 async-trait.workspace = true
 xidl-parser.workspace = true
-xidl-xcdr.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
 
 xidl-jsonrpc = { version = "0.34.0", path = "../xidl-jsonrpc", default-features = false, features = [
   "tokio",
-  "tokio-net",
 ] }
 miette = { version = "7.6.0", features = ["fancy"] }
 minijinja = { workspace = true, features = ["loader"] }
@@ -38,9 +43,9 @@ tree-sitter.workspace = true
 tree-sitter-highlight = "=0.25.0"
 owo-colors = "4.2"
 tree-sitter-idl = { workspace = true }
-tree-sitter-rust = "=0.23.3"
-tree-sitter-cpp = "=0.23.4"
-tree-sitter-typescript = "=0.23.2"
+tree-sitter-rust = { version = "=0.23.3", optional = true }
+tree-sitter-cpp = { version = "=0.23.4", optional = true }
+tree-sitter-typescript = { version = "=0.23.2", optional = true }
 md5.workspace = true
 indexmap = { version = "2", features = ["serde"] }
 
@@ -51,10 +56,3 @@ tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 
 [dev-dependencies]
 insta = { workspace = true, features = ["json", "redactions"] }
-
-[features]
-default = ["fmt"]
-fmt = ["fmt-rust", "fmt-cpp", "fmt-typescript"]
-fmt-rust = []
-fmt-cpp = []
-fmt-typescript = []

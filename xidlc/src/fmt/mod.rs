@@ -9,8 +9,11 @@ use std::collections::HashMap;
 use tree_sitter::{Parser, Query, QueryCursor, StreamingIterator};
 
 const IDL_QUERY: &str = include_str!("queries/idl.scm");
+#[cfg(feature = "fmt-rust")]
 const RUST_QUERY: &str = include_str!("queries/rust.scm");
+#[cfg(feature = "fmt-cpp")]
 const CPP_QUERY: &str = include_str!("queries/cpp.scm");
+#[cfg(feature = "fmt-typescript")]
 const TYPESCRIPT_QUERY: &str = include_str!("queries/typescript.scm");
 const INDENT: &str = "    ";
 
