@@ -145,7 +145,7 @@ impl Builder {
                     .map_err(|err| IdlcError::fmt(format!("OUT_DIR is not set: {err}")))?,
             ),
         };
-        let args = xidlc::cli::ArgsGenerate {
+        let args = xidlc::driver::ArgsGenerate {
             lang: self.lang.clone(),
             out_dir: out_dir.to_string_lossy().to_string(),
             files: inputs.iter().map(|p| p.as_ref().to_path_buf()).collect(),

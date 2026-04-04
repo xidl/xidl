@@ -1,7 +1,11 @@
+#[cfg(feature = "cli")]
 mod colors;
+#[cfg(feature = "cli")]
 mod theme;
 
+#[cfg(feature = "cli")]
 mod highlight;
+#[cfg(feature = "cli")]
 pub use highlight::TreeSitterMietteHighlighter;
 
 use crate::error::{DiagnosticError, IdlcError, IdlcResult};

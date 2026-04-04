@@ -1,9 +1,7 @@
 mod fmt;
 
-mod generate;
-pub use generate::ArgsGenerate;
-
 use crate::driver;
+use crate::driver::ArgsGenerate;
 use crate::error::IdlcResult;
 use clap::{CommandFactory, Parser, Subcommand};
 

@@ -5,11 +5,33 @@ pub use generate::Generator;
 mod generate_session;
 mod out_file;
 
-use crate::cli::ArgsGenerate;
 use crate::driver::out_file::OutputTargetTrait;
 use crate::error::IdlcResult;
 use std::collections::HashMap;
 use std::fs;
+use std::path::PathBuf;
+
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "cli", derive(clap::Args))]
+pub struct ArgsGenerate {
+    #[cfg_attr(
+        feature = "cli",
+        arg(long = "lang", short = 'l', default_value = "rust")
+    )]
+    pub lang: String,
+    #[cfg_attr(
+        feature = "cli",
+        arg(long = "out-dir", short = 'o', default_value = ".")
+    )]
+    pub out_dir: String,
+    #[cfg_attr(feature = "cli", arg(long = "client", default_value_t = false))]
+    pub client: bool,
+    #[cfg_attr(feature = "cli", arg(long = "server", default_value_t = true))]
+    pub server: bool,
+    #[cfg_attr(feature = "cli", arg(long = "dry-run", default_value_t = false))]
+    pub dry_run: bool,
+    pub files: Vec<PathBuf>,
+}
 
 pub struct File {
     path: String,

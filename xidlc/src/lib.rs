@@ -1,3 +1,4 @@
+#[cfg(feature = "cli")]
 pub mod cli;
 pub mod diagnostic;
 pub mod driver;
