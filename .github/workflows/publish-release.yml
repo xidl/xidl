@@ -187,3 +187,4 @@ jobs:
           zip: windows
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ needs.resolve-publish-context.outputs.release_ref }}
+          features: fmt,cli
