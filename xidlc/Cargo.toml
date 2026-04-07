@@ -70,3 +70,4 @@ tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 
 [dev-dependencies]
 insta = { workspace = true, features = ["json", "redactions"] }
+xidlc = { path = "./", features = ["fmt"] }
