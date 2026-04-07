@@ -11,8 +11,9 @@ pub use filter::{
 };
 pub use http::{
     DeprecatedInfo, HttpApiKeyLocation, HttpSecurityOrigin, HttpSecurityProfile,
-    HttpSecurityRequirement, HttpStreamCodec, HttpStreamKind, HttpStreamTargetSupport,
-    deprecated_info, effective_media_type, effective_security, effective_security_with_origin,
-    has_optional_annotation, http_stream_config, validate_http_annotations,
-    validate_http_stream_method, validate_http_stream_target,
+    HttpSecurityRequirement, HttpStreamCodec, HttpStreamConfig, HttpStreamKind,
+    HttpStreamTargetSupport, annotation_name, annotation_params, deprecated_info,
+    effective_media_type, effective_security, effective_security_with_origin,
+    has_optional_annotation, http_stream_config, normalize_annotation_params,
+    validate_http_annotations, validate_http_stream_method, validate_http_stream_target,
 };

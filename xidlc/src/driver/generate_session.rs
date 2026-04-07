@@ -77,6 +77,8 @@ impl CodegenSession {
             Plugin::Cpp => run_server!(crate::generate::cpp::CppCodegen),
             Plugin::Go => run_server!(crate::generate::go::GoCodegen),
             Plugin::GoHttp => run_server!(crate::generate::go_http::GoHttpCodegen),
+            Plugin::Python => run_server!(crate::generate::python::PythonCodegen),
+            Plugin::PythonHttp => run_server!(crate::generate::python_http::PythonHttpCodegen),
             Plugin::Rust => run_server!(crate::generate::rust::RustCodegen),
             Plugin::RustJsonRpc => {
                 run_server!(crate::generate::rust_jsonrpc::RustJsonRpcCodegen)

@@ -5,6 +5,8 @@ pub mod go_http;
 pub mod hir_gen;
 pub mod openapi;
 pub mod openrpc;
+pub mod python;
+pub mod python_http;
 pub mod rust;
 pub mod rust_axum;
 pub mod rust_jsonrpc;

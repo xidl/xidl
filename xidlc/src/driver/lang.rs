@@ -33,6 +33,10 @@ pub enum Plugin {
     Go,
     #[serde(alias = "go_http", alias = "go-http")]
     GoHttp,
+    #[serde(alias = "py", alias = "python")]
+    Python,
+    #[serde(alias = "py_http", alias = "py-http", alias = "python_http", alias = "python-http")]
+    PythonHttp,
     #[serde(alias = "openapi")]
     Openapi,
     #[serde(alias = "openrpc", alias = "open-rpc")]
@@ -75,6 +79,12 @@ mod tests {
             ("golang", Plugin::Go),
             ("go_http", Plugin::GoHttp),
             ("go-http", Plugin::GoHttp),
+            ("py", Plugin::Python),
+            ("python", Plugin::Python),
+            ("py_http", Plugin::PythonHttp),
+            ("py-http", Plugin::PythonHttp),
+            ("python_http", Plugin::PythonHttp),
+            ("python-http", Plugin::PythonHttp),
             ("openapi", Plugin::Openapi),
             ("openrpc", Plugin::Openrpc),
             ("open-rpc", Plugin::Openrpc),

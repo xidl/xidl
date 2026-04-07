@@ -1,0 +1,14 @@
+from __future__ import annotations
+
+import abc
+import enum
+from dataclasses import dataclass, field
+from typing import Any, Optional
+
+# generated module: hello_world
+
+class HelloWorld(abc.ABC):
+    @abc.abstractmethod
+    def say_hello(self, name: str) -> None:
+        raise NotImplementedError
+

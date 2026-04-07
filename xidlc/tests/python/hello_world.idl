@@ -1,0 +1,5 @@
+interface HelloWorld {
+    void say_hello(
+        string name
+    );
+};

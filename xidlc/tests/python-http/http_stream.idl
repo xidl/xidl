@@ -1,0 +1,18 @@
+@http_basic
+interface HttpStreamApi {
+    @server_stream
+    @stream_codec("sse")
+    @path("/alerts/{district}")
+    string alerts(
+        @path("district")
+        string district
+    );
+    @client_stream
+    @stream_codec("ndjson")
+    @http_bearer
+    @path("/upload")
+    string upload_asset(
+        in string asset_id,
+        in sequence<octet> chunk
+    );
+};
