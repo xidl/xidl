@@ -112,7 +112,7 @@ jobs:
           use_cross: ${{ matrix.use_cross }}
           setup_cross_toolchain: ${{ matrix.setup_cross_toolchain }}
 
-      - uses: taiki-e/upload-rust-binary-action@v1.29.1
+      - uses: taiki-e/upload-rust-binary-action@v1.30.0
         with:
           package: xidlc
           bin: xidlc
