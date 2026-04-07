@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.36.0](https://github.com/xidl/xidl/compare/v0.35.0...v0.36.0) (2026-04-07)
+
+
+### Features
+
+* **xildc-jsonrpc:** rename feature ([b5e3f9a](https://github.com/xidl/xidl/commit/b5e3f9a503153c4d0105bd6cdd7360f61f9236e8))
+
 ## [0.35.0](https://github.com/xidl/xidl/compare/v0.34.0...v0.35.0) (2026-04-04)
 
 
