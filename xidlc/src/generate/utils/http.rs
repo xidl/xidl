@@ -183,6 +183,7 @@ pub fn deprecated_info(annotations: &[hir::Annotation]) -> Result<Option<Depreca
     }))
 }
 
+#[cfg(any(feature = "gen-openapi", test))]
 pub fn effective_security(
     interface_annotations: &[hir::Annotation],
     method_annotations: &[hir::Annotation],

@@ -2,10 +2,10 @@ use crate::error::{IdlcError, IdlcResult};
 use crate::generate::python_http::PythonHttpRenderer;
 use crate::generate::utils::{
     HttpApiKeyLocation, HttpSecurityProfile, HttpSecurityRequirement, HttpStreamCodec,
-    HttpStreamConfig, HttpStreamKind, HttpStreamTargetSupport, annotation_name,
-    annotation_params, effective_media_type, effective_security_with_origin,
-    has_optional_annotation, http_stream_config, normalize_annotation_params,
-    validate_http_annotations, validate_http_stream_method, validate_http_stream_target,
+    HttpStreamConfig, HttpStreamKind, HttpStreamTargetSupport, annotation_name, annotation_params,
+    effective_media_type, effective_security_with_origin, has_optional_annotation,
+    http_stream_config, normalize_annotation_params, validate_http_annotations,
+    validate_http_stream_method, validate_http_stream_target,
 };
 use convert_case::{Case, Casing};
 use serde::Serialize;
@@ -104,7 +104,11 @@ fn render_interface(out: &mut String, interface: &hir::InterfaceDcl) -> IdlcResu
     if let Some(body) = &def.interface_body {
         for export in &body.0 {
             if let hir::Export::OpDcl(op) = export {
-                methods.push(build_method(interface.annotations.as_slice(), op, &interface_name)?);
+                methods.push(build_method(
+                    interface.annotations.as_slice(),
+                    op,
+                    &interface_name,
+                )?);
             }
         }
     }
@@ -238,10 +242,15 @@ fn build_method(
     }
 
     let paths = collect_paths(op, &bindings, &method)?;
-    let path_param_sets = paths.iter().map(|path| parse_path_params(path)).collect::<Vec<_>>();
+    let path_param_sets = paths
+        .iter()
+        .map(|path| parse_path_params(path))
+        .collect::<Vec<_>>();
     for binding in &bindings {
         if matches!(binding.source, ParamSource::Path)
-            && !path_param_sets.iter().all(|set| set.contains(&binding.wire_name))
+            && !path_param_sets
+                .iter()
+                .all(|set| set.contains(&binding.wire_name))
         {
             return Err(IdlcError::rpc(format!(
                 "parameter '{}' is annotated with @path but '{}' is not present in every route template of method '{}'",
@@ -259,8 +268,11 @@ fn build_method(
         Some(HttpStreamKind::Bidi) => "BidiStreamResponse".to_string(),
     };
     let request_content_type = request_content_type(interface_annotations, &op.annotations, stream);
-    let response_content_type = response_content_type(interface_annotations, &op.annotations, stream);
-    let requires_request_content_type = bindings.iter().any(|value| matches!(value.source, ParamSource::Body))
+    let response_content_type =
+        response_content_type(interface_annotations, &op.annotations, stream);
+    let requires_request_content_type = bindings
+        .iter()
+        .any(|value| matches!(value.source, ParamSource::Body))
         || matches!(stream.kind, Some(HttpStreamKind::Client));
     let security = effective_security_with_origin(interface_annotations, &op.annotations)
         .map_err(IdlcError::rpc)?;
@@ -378,7 +390,11 @@ fn render_endpoint_helper(
         )
         .unwrap();
     }
-    if method.params.iter().any(|param| matches!(param.source, ParamSource::Body)) {
+    if method
+        .params
+        .iter()
+        .any(|param| matches!(param.source, ParamSource::Body))
+    {
         writeln!(out, "    body = read_json_body(request)").unwrap();
     }
     if method.params.is_empty() {
@@ -419,7 +435,11 @@ fn render_endpoint_helper(
     Ok(())
 }
 
-fn render_route_builder(out: &mut String, interface_name: &str, method: &MethodContext) -> IdlcResult<()> {
+fn render_route_builder(
+    out: &mut String,
+    interface_name: &str,
+    method: &MethodContext,
+) -> IdlcResult<()> {
     writeln!(
         out,
         "def {}(service: {}Service) -> Route:",
@@ -572,7 +592,11 @@ fn default_param_source(method: &str) -> ParamSource {
     }
 }
 
-fn collect_paths(op: &hir::OpDcl, params: &[ParamContext], method: &str) -> IdlcResult<Vec<String>> {
+fn collect_paths(
+    op: &hir::OpDcl,
+    params: &[ParamContext],
+    method: &str,
+) -> IdlcResult<Vec<String>> {
     let mut paths = Vec::new();
     for annotation in &op.annotations {
         let Some(name) = annotation_name(annotation) else {
@@ -631,10 +655,16 @@ fn validate_route_template(path: &str, query_names: &[String]) -> IdlcResult<()>
         let close = path[open + 1..]
             .find('}')
             .map(|value| open + 1 + value)
-            .ok_or_else(|| IdlcError::rpc(format!("route template has unmatched '{{' in '{path}'")))?;
+            .ok_or_else(|| {
+                IdlcError::rpc(format!("route template has unmatched '{{' in '{path}'"))
+            })?;
         let token = &path[open + 1..close];
         if token.starts_with('?') {
-            for name in token[1..].split(',').map(str::trim).filter(|value| !value.is_empty()) {
+            for name in token[1..]
+                .split(',')
+                .map(str::trim)
+                .filter(|value| !value.is_empty())
+            {
                 if !query_names.iter().any(|candidate| candidate == name) {
                     return Err(IdlcError::rpc(format!(
                         "query template variable '{}' has no matching request-side query parameter in route '{}'",
@@ -727,9 +757,7 @@ fn security_expr(value: Option<&HttpSecurityProfile>) -> String {
         .requirements
         .iter()
         .map(|requirement| match requirement {
-            HttpSecurityRequirement::HttpBasic => {
-                "SecurityRequirement(kind=\"basic\")".to_string()
-            }
+            HttpSecurityRequirement::HttpBasic => "SecurityRequirement(kind=\"basic\")".to_string(),
             HttpSecurityRequirement::HttpBearer => {
                 "SecurityRequirement(kind=\"bearer\")".to_string()
             }
@@ -738,10 +766,9 @@ fn security_expr(value: Option<&HttpSecurityProfile>) -> String {
                 name,
                 api_key_location(location)
             ),
-            HttpSecurityRequirement::OAuth2 { scopes } => format!(
-                "SecurityRequirement(kind=\"oauth2\", scopes={:?})",
-                scopes
-            ),
+            HttpSecurityRequirement::OAuth2 { scopes } => {
+                format!("SecurityRequirement(kind=\"oauth2\", scopes={:?})", scopes)
+            }
         })
         .collect::<Vec<_>>()
         .join(", ");
@@ -795,11 +822,7 @@ fn maybe_optional_type(optional: bool, ty: &str) -> String {
 }
 
 fn py_bool(value: bool) -> &'static str {
-    if value {
-        "True"
-    } else {
-        "False"
-    }
+    if value { "True" } else { "False" }
 }
 
 fn validate_header_name(bound_name: &str, param_name: &str) -> IdlcResult<()> {
@@ -870,7 +893,12 @@ fn py_type(value: &TypeSpec) -> String {
                     format!(
                         "{}[{}]",
                         py_type_name(&value.ident),
-                        value.args.iter().map(py_type).collect::<Vec<_>>().join(", ")
+                        value
+                            .args
+                            .iter()
+                            .map(py_type)
+                            .collect::<Vec<_>>()
+                            .join(", ")
                     )
                 }
             }

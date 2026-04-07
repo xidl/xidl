@@ -35,7 +35,12 @@ pub enum Plugin {
     GoHttp,
     #[serde(alias = "py", alias = "python")]
     Python,
-    #[serde(alias = "py_http", alias = "py-http", alias = "python_http", alias = "python-http")]
+    #[serde(
+        alias = "py_http",
+        alias = "py-http",
+        alias = "python_http",
+        alias = "python-http"
+    )]
     PythonHttp,
     #[serde(alias = "openapi")]
     Openapi,

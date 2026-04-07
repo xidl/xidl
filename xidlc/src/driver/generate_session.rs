@@ -70,30 +70,38 @@ impl CodegenSession {
             }};
         }
 
+        #[allow(unreachable_patterns)]
         match lang {
+            #[cfg(feature = "gen-hir")]
             Plugin::Hir => run_server!(crate::generate::hir_gen::HirGen),
+            #[cfg(feature = "gen-typed-ast")]
             Plugin::TypedAst => run_server!(crate::generate::typed_ast_gen::TypedAstGen),
+            #[cfg(feature = "gen-c")]
             Plugin::C => run_server!(crate::generate::c::CCodegen),
+            #[cfg(feature = "gen-cpp")]
             Plugin::Cpp => run_server!(crate::generate::cpp::CppCodegen),
+            #[cfg(feature = "gen-go")]
             Plugin::Go => run_server!(crate::generate::go::GoCodegen),
+            #[cfg(feature = "gen-go-http")]
             Plugin::GoHttp => run_server!(crate::generate::go_http::GoHttpCodegen),
+            #[cfg(feature = "gen-python")]
             Plugin::Python => run_server!(crate::generate::python::PythonCodegen),
+            #[cfg(feature = "gen-python-http")]
             Plugin::PythonHttp => run_server!(crate::generate::python_http::PythonHttpCodegen),
+            #[cfg(feature = "gen-rust")]
             Plugin::Rust => run_server!(crate::generate::rust::RustCodegen),
-            Plugin::RustJsonRpc => {
-                run_server!(crate::generate::rust_jsonrpc::RustJsonRpcCodegen)
-            }
-            Plugin::Axum => {
-                run_server!(crate::generate::rust_axum::RustAxumCodegen)
-            }
-            Plugin::Openapi => {
-                run_server!(crate::generate::openapi::OpenApiCodegen)
-            }
-            Plugin::Openrpc => {
-                run_server!(crate::generate::openrpc::OpenRpcCodegen)
-            }
+            #[cfg(feature = "gen-rust-jsonrpc")]
+            Plugin::RustJsonRpc => run_server!(crate::generate::rust_jsonrpc::RustJsonRpcCodegen),
+            #[cfg(feature = "gen-rust-axum")]
+            Plugin::Axum => run_server!(crate::generate::rust_axum::RustAxumCodegen),
+            #[cfg(feature = "gen-openapi")]
+            Plugin::Openapi => run_server!(crate::generate::openapi::OpenApiCodegen),
+            #[cfg(feature = "gen-openrpc")]
+            Plugin::Openrpc => run_server!(crate::generate::openrpc::OpenRpcCodegen),
+            #[cfg(feature = "gen-typescript")]
             Plugin::Typescript => run_server!(crate::generate::typescript::TypescriptCodegen),
             Plugin::Custom(_) => unreachable!("custom plugins use spawn_custom_codegen_server"),
+            _ => unreachable!(),
         }
     }
 

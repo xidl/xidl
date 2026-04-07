@@ -1,16 +1,30 @@
+#[cfg(feature = "gen-c")]
 pub mod c;
+#[cfg(feature = "gen-cpp")]
 pub mod cpp;
+#[cfg(feature = "gen-go")]
 pub mod go;
+#[cfg(feature = "gen-go-http")]
 pub mod go_http;
+#[cfg(feature = "gen-hir")]
 pub mod hir_gen;
+#[cfg(feature = "gen-openapi")]
 pub mod openapi;
+#[cfg(feature = "gen-openrpc")]
 pub mod openrpc;
+#[cfg(feature = "gen-python")]
 pub mod python;
+#[cfg(feature = "gen-python-http")]
 pub mod python_http;
+#[cfg(feature = "gen-rust")]
 pub mod rust;
+#[cfg(feature = "gen-rust-axum")]
 pub mod rust_axum;
+#[cfg(feature = "gen-rust-jsonrpc")]
 pub mod rust_jsonrpc;
+#[cfg(feature = "gen-typed-ast")]
 pub mod typed_ast_gen;
+#[cfg(feature = "gen-typescript")]
 pub mod typescript;
 mod utils;
 

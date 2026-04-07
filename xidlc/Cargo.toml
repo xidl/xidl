@@ -16,7 +16,36 @@ path = "src/main.rs"
 required-features = ["cli", "fmt"]
 
 [features]
-default = []
+default = [
+  "gen-hir",
+  "gen-typed-ast",
+  "gen-c",
+  "gen-cpp",
+  "gen-rust",
+  "gen-rust-jsonrpc",
+  "gen-rust-axum",
+  "gen-typescript",
+  "gen-go",
+  "gen-go-http",
+  "gen-python",
+  "gen-python-http",
+  "gen-openapi",
+  "gen-openrpc",
+]
+gen-hir = []
+gen-typed-ast = []
+gen-c = []
+gen-cpp = []
+gen-rust = []
+gen-rust-jsonrpc = []
+gen-rust-axum = []
+gen-typescript = []
+gen-go = []
+gen-go-http = []
+gen-python = []
+gen-python-http = []
+gen-openapi = []
+gen-openrpc = []
 cli = [
   "dep:clap",
   "dep:tracing-subscriber",

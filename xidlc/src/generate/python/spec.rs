@@ -58,7 +58,12 @@ fn render_constr_type(out: &mut String, constr: &hir::ConstrTypeDcl) {
         hir::ConstrTypeDcl::UnionDef(value) => {
             writeln!(out, "@dataclass").unwrap();
             writeln!(out, "class {}:", py_type_name(&value.ident)).unwrap();
-            writeln!(out, "    discriminator: {}", py_switch_type(&value.switch_type_spec)).unwrap();
+            writeln!(
+                out,
+                "    discriminator: {}",
+                py_switch_type(&value.switch_type_spec)
+            )
+            .unwrap();
             writeln!(out, "    value: Any").unwrap();
             writeln!(out).unwrap();
         }
@@ -68,7 +73,13 @@ fn render_constr_type(out: &mut String, constr: &hir::ConstrTypeDcl) {
                 writeln!(out, "    pass").unwrap();
             } else {
                 for (index, member) in value.value.iter().enumerate() {
-                    writeln!(out, "    {} = {}", py_const_name(&member.ident), 1usize << index).unwrap();
+                    writeln!(
+                        out,
+                        "    {} = {}",
+                        py_const_name(&member.ident),
+                        1usize << index
+                    )
+                    .unwrap();
                 }
             }
             writeln!(out).unwrap();
@@ -123,13 +134,7 @@ fn render_type_decl(out: &mut String, type_dcl: &hir::TypeDcl) {
                         writeln!(out, "{} = {}", py_type_name(&name.0), ty).unwrap();
                     }
                     hir::Declarator::ArrayDeclarator(name) => {
-                        writeln!(
-                            out,
-                            "{} = list[{}]",
-                            py_type_name(&name.ident),
-                            ty
-                        )
-                        .unwrap();
+                        writeln!(out, "{} = list[{}]", py_type_name(&name.ident), ty).unwrap();
                     }
                 }
             }
@@ -158,7 +163,11 @@ fn render_struct(out: &mut String, value: &hir::StructDcl) {
                             "    {}: {} = {}",
                             py_field_name(&name.0),
                             optional_type(member.is_optional(), &member_ty),
-                            default_value(member.is_optional(), member.default.as_ref(), &member_ty)
+                            default_value(
+                                member.is_optional(),
+                                member.default.as_ref(),
+                                &member_ty
+                            )
                         )
                         .unwrap();
                     }
@@ -222,8 +231,13 @@ fn render_exception(out: &mut String, value: &hir::ExceptDcl) {
                         writeln!(out, "    {}: {}", py_field_name(&name.0), member_ty).unwrap();
                     }
                     hir::Declarator::ArrayDeclarator(name) => {
-                        writeln!(out, "    {}: list[{}]", py_field_name(&name.ident), member_ty)
-                            .unwrap();
+                        writeln!(
+                            out,
+                            "    {}: list[{}]",
+                            py_field_name(&name.ident),
+                            member_ty
+                        )
+                        .unwrap();
                     }
                 }
             }
@@ -256,7 +270,13 @@ fn render_interface(out: &mut String, value: &hir::InterfaceDcl) {
                     params
                         .0
                         .iter()
-                        .map(|param| format!("{}: {}", py_field_name(&param.declarator.0), py_type(&param.ty)))
+                        .map(|param| {
+                            format!(
+                                "{}: {}",
+                                py_field_name(&param.declarator.0),
+                                py_type(&param.ty)
+                            )
+                        })
                         .collect::<Vec<_>>()
                         .join(", ")
                 })
@@ -267,7 +287,14 @@ fn render_interface(out: &mut String, value: &hir::InterfaceDcl) {
                 format!("self, {params}")
             };
             writeln!(out, "    @abc.abstractmethod").unwrap();
-            writeln!(out, "    def {}({}) -> {}:", py_field_name(&op.ident), suffix, ret).unwrap();
+            writeln!(
+                out,
+                "    def {}({}) -> {}:",
+                py_field_name(&op.ident),
+                suffix,
+                ret
+            )
+            .unwrap();
             writeln!(out, "        raise NotImplementedError").unwrap();
             writeln!(out).unwrap();
         }
@@ -295,9 +322,9 @@ fn py_type(value: &TypeSpec) -> String {
                 _ => "str".to_string(),
             },
             hir::SimpleTypeSpec::Boolean => "bool".to_string(),
-            hir::SimpleTypeSpec::AnyType | hir::SimpleTypeSpec::ObjectType | hir::SimpleTypeSpec::ValueBaseType => {
-                "Any".to_string()
-            }
+            hir::SimpleTypeSpec::AnyType
+            | hir::SimpleTypeSpec::ObjectType
+            | hir::SimpleTypeSpec::ValueBaseType => "Any".to_string(),
         },
         TypeSpec::TemplateTypeSpec(value) => match value {
             hir::TemplateTypeSpec::SequenceType(value) => format!("list[{}]", py_type(&value.ty)),
@@ -315,7 +342,12 @@ fn py_type(value: &TypeSpec) -> String {
                     format!(
                         "{}[{}]",
                         py_type_name(&value.ident),
-                        value.args.iter().map(py_type).collect::<Vec<_>>().join(", ")
+                        value
+                            .args
+                            .iter()
+                            .map(py_type)
+                            .collect::<Vec<_>>()
+                            .join(", ")
                     )
                 }
             }
@@ -338,33 +370,33 @@ fn py_const_type(value: &hir::ConstType) -> String {
 }
 
 fn py_const_expr(expr: &hir::ConstExpr) -> String {
-    crate::generate::render_const_expr(
-        expr,
-        &py_scoped_name,
-        &|literal| match literal {
-            hir::Literal::IntegerLiteral(value) => match value {
-                hir::IntegerLiteral::BinNumber(value)
-                | hir::IntegerLiteral::OctNumber(value)
-                | hir::IntegerLiteral::DecNumber(value)
-                | hir::IntegerLiteral::HexNumber(value) => value.clone(),
-            },
-            hir::Literal::FloatingPtLiteral(value) => {
-                let sign = value.sign.as_ref().map(|value| value.0.as_str()).unwrap_or("");
-                format!("{sign}{}.{}", value.integer.0, value.fraction.0)
-            }
-            hir::Literal::CharLiteral(value)
-            | hir::Literal::WideCharacterLiteral(value)
-            | hir::Literal::StringLiteral(value)
-            | hir::Literal::WideStringLiteral(value) => format!("{value:?}"),
-            hir::Literal::BooleanLiteral(value) => {
-                if value.eq_ignore_ascii_case("true") {
-                    "True".to_string()
-                } else {
-                    "False".to_string()
-                }
-            }
+    crate::generate::render_const_expr(expr, &py_scoped_name, &|literal| match literal {
+        hir::Literal::IntegerLiteral(value) => match value {
+            hir::IntegerLiteral::BinNumber(value)
+            | hir::IntegerLiteral::OctNumber(value)
+            | hir::IntegerLiteral::DecNumber(value)
+            | hir::IntegerLiteral::HexNumber(value) => value.clone(),
         },
-    )
+        hir::Literal::FloatingPtLiteral(value) => {
+            let sign = value
+                .sign
+                .as_ref()
+                .map(|value| value.0.as_str())
+                .unwrap_or("");
+            format!("{sign}{}.{}", value.integer.0, value.fraction.0)
+        }
+        hir::Literal::CharLiteral(value)
+        | hir::Literal::WideCharacterLiteral(value)
+        | hir::Literal::StringLiteral(value)
+        | hir::Literal::WideStringLiteral(value) => format!("{value:?}"),
+        hir::Literal::BooleanLiteral(value) => {
+            if value.eq_ignore_ascii_case("true") {
+                "True".to_string()
+            } else {
+                "False".to_string()
+            }
+        }
+    })
 }
 
 fn optional_type(optional: bool, ty: &str) -> String {

@@ -14,4 +14,9 @@ workspace = true
 
 [dependencies]
 tokio.workspace = true
-xidlc = { workspace = true }
+xidlc = { version = "0.36.1", path = "../xidlc", default-features = false, features = [
+  "gen-rust",
+  "gen-rust-axum",
+  "gen-openapi",
+  "gen-openrpc",
+] }
