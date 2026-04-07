@@ -22,23 +22,6 @@ defaults:
     shell: bash
 
 jobs:
-  release-targets:
-    name: Release Targets
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.targets.outputs.matrix }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-        with:
-          persist-credentials: false
-
-      - name: Define release targets
-        id: targets
-        run: |
-          matrix="$(python3 -c 'import json, sys; print(json.dumps(json.load(open(sys.argv[1], encoding="utf-8")), separators=(",", ":")))' .github/release-targets.json)"
-          echo "matrix=${matrix}" >> "$GITHUB_OUTPUT"
-
   resolve-publish-context:
     name: Resolve Publish Context
     runs-on: ubuntu-latest
@@ -138,7 +121,6 @@ jobs:
 
   upload-assets:
     needs:
-      - release-targets
       - resolve-publish-context
       - ensure-managed-release
     name: ${{ matrix.target }}
@@ -147,7 +129,32 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.release-targets.outputs.matrix) }}
+      matrix:
+        include:
+          - target: x86_64-apple-darwin
+            os: macos-15-intel
+            use_cross: false
+            setup_cross_toolchain: false
+          - target: aarch64-apple-darwin
+            os: macos-14
+            use_cross: false
+            setup_cross_toolchain: false
+          - target: x86_64-pc-windows-msvc
+            os: windows-2022
+            use_cross: false
+            setup_cross_toolchain: false
+          - target: aarch64-pc-windows-msvc
+            os: windows-2022
+            use_cross: false
+            setup_cross_toolchain: false
+          - target: x86_64-unknown-linux-musl
+            os: ubuntu-latest
+            use_cross: true
+            setup_cross_toolchain: false
+          - target: aarch64-unknown-linux-musl
+            os: ubuntu-latest
+            use_cross: true
+            setup_cross_toolchain: false
     timeout-minutes: 60
     steps:
       - name: Checkout repository
