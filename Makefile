@@ -4,7 +4,7 @@ GO_PATH ?= /tmp/xidl-go-path
 .PHONY: test test-rust test-go test-go-codegen test-go-runtime test-update build-xtypes docs-dev docs-build
 
 test-rust:
-	cargo test --all
+	cargo test --all -F transport-all -F fmt
 
 test: test-rust test-go
 

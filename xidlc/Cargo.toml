@@ -68,6 +68,20 @@ jiff = "0.2"
 enum_dispatch = "0.3.13"
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 
+[[test]]
+name = "codegen_snapshot"
+path = "tests/codegen_snapshot.rs"
+required-features = ["fmt"]
+
+[[test]]
+name = "go_examples"
+path = "tests/go_examples.rs"
+required-features = ["fmt"]
+
+[[test]]
+name = "http_validation"
+path = "tests/http_validation.rs"
+required-features = ["fmt"]
+
 [dev-dependencies]
 insta = { workspace = true, features = ["json", "redactions"] }
-xidlc = { path = "./", features = ["fmt"] }

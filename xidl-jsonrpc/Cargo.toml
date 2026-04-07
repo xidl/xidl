@@ -69,7 +69,11 @@ transport-websocket = [
   "dep:url",
 ]
 
+[[test]]
+name = "serve_on"
+path = "tests/serve_on.rs"
+required-features = ["transport-all"]
+
 [dev-dependencies]
 clap = { workspace = true, features = ["derive"] }
 tokio = { workspace = true, features = ["full"] }
-xidl-jsonrpc = { workspace = true, features = ["transport-all"] }
