@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.37.0](https://github.com/xidl/xidl/compare/v0.36.1...v0.37.0) (2026-04-07)
+
+
+### Features
+
+* **xidlc:** add python http generators and runtime ([1cdff5a](https://github.com/xidl/xidl/commit/1cdff5a0a8f1f9ce4d7dfda9cead47396a06efb4))
+
 ## [0.36.1](https://github.com/xidl/xidl/compare/v0.36.0...v0.36.1) (2026-04-07)
 
 
