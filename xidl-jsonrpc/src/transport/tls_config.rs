@@ -1,16 +1,16 @@
 use std::collections::HashMap;
-#[cfg(any(feature = "tokio-tls", feature = "tokio-websocket"))]
+#[cfg(any(feature = "transport-tls", feature = "transport-websocket"))]
 use std::fs::File;
-#[cfg(any(feature = "tokio-tls", feature = "tokio-websocket"))]
+#[cfg(any(feature = "transport-tls", feature = "transport-websocket"))]
 use std::io::BufReader;
-#[cfg(any(feature = "tokio-tls", feature = "tokio-websocket"))]
+#[cfg(any(feature = "transport-tls", feature = "transport-websocket"))]
 use std::sync::Arc;
 
-#[cfg(any(feature = "tokio-tls", feature = "tokio-websocket"))]
+#[cfg(any(feature = "transport-tls", feature = "transport-websocket"))]
 use rustls::pki_types::{CertificateDer, PrivateKeyDer, ServerName};
-#[cfg(any(feature = "tokio-tls", feature = "tokio-websocket"))]
+#[cfg(any(feature = "transport-tls", feature = "transport-websocket"))]
 use rustls::{ClientConfig, RootCertStore, ServerConfig};
-#[cfg(any(feature = "tokio-tls", feature = "tokio-websocket"))]
+#[cfg(any(feature = "transport-tls", feature = "transport-websocket"))]
 use tokio_rustls::{TlsAcceptor, TlsConnector};
 use url::Url;
 
@@ -18,7 +18,7 @@ pub(crate) fn io_other<E: std::fmt::Display>(err: E) -> std::io::Error {
     std::io::Error::other(err.to_string())
 }
 
-#[cfg(any(feature = "tokio-tls", feature = "tokio-websocket"))]
+#[cfg(any(feature = "transport-tls", feature = "transport-websocket"))]
 pub(crate) fn socket_bind_addr(host: &str, port: u16) -> String {
     let bind_host = if host.contains(':') {
         format!("[{host}]")
@@ -52,12 +52,12 @@ impl TransportUrl {
         Ok(Self { url, params })
     }
 
-    #[cfg(any(feature = "tokio-tls", feature = "tokio-websocket"))]
+    #[cfg(any(feature = "transport-tls", feature = "transport-websocket"))]
     pub(crate) fn scheme(&self) -> &str {
         self.url.scheme()
     }
 
-    #[cfg(feature = "tokio-websocket")]
+    #[cfg(feature = "transport-websocket")]
     pub(crate) fn as_str(&self) -> &str {
         self.url.as_str()
     }
@@ -72,13 +72,13 @@ impl TransportUrl {
         Ok((host.to_string(), port))
     }
 
-    #[cfg(any(feature = "tokio-tls", feature = "tokio-websocket"))]
+    #[cfg(any(feature = "transport-tls", feature = "transport-websocket"))]
     pub(crate) fn bind_addr(&self) -> std::io::Result<String> {
         let (host, port) = self.host_port()?;
         Ok(socket_bind_addr(&host, port))
     }
 
-    #[cfg(any(feature = "tokio-tls", feature = "tokio-websocket"))]
+    #[cfg(any(feature = "transport-tls", feature = "transport-websocket"))]
     pub(crate) fn required_param(&self, key: &str, env: &str) -> std::io::Result<String> {
         self.params
             .get(key)
@@ -92,12 +92,12 @@ impl TransportUrl {
             })
     }
 
-    #[cfg(feature = "tokio-tls")]
+    #[cfg(feature = "transport-tls")]
     pub(crate) fn optional_param(&self, key: &str) -> Option<&str> {
         self.params.get(key).map(String::as_str)
     }
 
-    #[cfg(feature = "quic-s2n")]
+    #[cfg(feature = "transport-quic")]
     pub(crate) fn param_or_env_or(&self, key: &str, env: &str, default: &str) -> String {
         self.params
             .get(key)
@@ -107,7 +107,7 @@ impl TransportUrl {
     }
 }
 
-#[cfg(any(feature = "tokio-tls", feature = "tokio-websocket"))]
+#[cfg(any(feature = "transport-tls", feature = "transport-websocket"))]
 fn load_certs(path: &str) -> std::io::Result<Vec<CertificateDer<'static>>> {
     let file = File::open(path)?;
     let mut reader = BufReader::new(file);
@@ -123,7 +123,7 @@ fn load_certs(path: &str) -> std::io::Result<Vec<CertificateDer<'static>>> {
     Ok(certs)
 }
 
-#[cfg(any(feature = "tokio-tls", feature = "tokio-websocket"))]
+#[cfg(any(feature = "transport-tls", feature = "transport-websocket"))]
 fn load_private_key(path: &str) -> std::io::Result<PrivateKeyDer<'static>> {
     let file = File::open(path)?;
     let mut reader = BufReader::new(file);
@@ -136,7 +136,7 @@ fn load_private_key(path: &str) -> std::io::Result<PrivateKeyDer<'static>> {
     ))
 }
 
-#[cfg(any(feature = "tokio-tls", feature = "tokio-websocket"))]
+#[cfg(any(feature = "transport-tls", feature = "transport-websocket"))]
 pub(crate) fn build_server_acceptor(
     cert_path: &str,
     key_path: &str,
@@ -150,7 +150,7 @@ pub(crate) fn build_server_acceptor(
     Ok(TlsAcceptor::from(Arc::new(config)))
 }
 
-#[cfg(any(feature = "tokio-tls", feature = "tokio-websocket"))]
+#[cfg(any(feature = "transport-tls", feature = "transport-websocket"))]
 pub(crate) fn build_client_config(ca_path: &str) -> std::io::Result<Arc<ClientConfig>> {
     let mut roots = RootCertStore::empty();
     for cert in load_certs(ca_path)? {
@@ -162,12 +162,12 @@ pub(crate) fn build_client_config(ca_path: &str) -> std::io::Result<Arc<ClientCo
     Ok(Arc::new(config))
 }
 
-#[cfg(any(feature = "tokio-tls", feature = "tokio-websocket"))]
+#[cfg(any(feature = "transport-tls", feature = "transport-websocket"))]
 pub(crate) fn build_client_connector(ca_path: &str) -> std::io::Result<TlsConnector> {
     Ok(TlsConnector::from(build_client_config(ca_path)?))
 }
 
-#[cfg(any(feature = "tokio-tls", feature = "tokio-websocket"))]
+#[cfg(any(feature = "transport-tls", feature = "transport-websocket"))]
 pub(crate) fn server_name(
     host: &str,
     override_name: Option<&str>,

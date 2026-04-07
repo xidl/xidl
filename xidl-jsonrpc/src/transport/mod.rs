@@ -1,35 +1,35 @@
 mod inproc;
 mod io;
-#[cfg(all(feature = "tokio-net", unix))]
+#[cfg(all(feature = "transport-ipc", unix))]
 mod ipc;
-#[cfg(feature = "quic-s2n")]
+#[cfg(feature = "transport-quic")]
 mod quic;
-#[cfg(feature = "tokio-net")]
+#[cfg(feature = "transport-tcp")]
 mod tcp;
-#[cfg(feature = "tokio-tls")]
+#[cfg(feature = "transport-tls")]
 mod tls;
 #[cfg(any(
-    feature = "tokio-tls",
-    feature = "tokio-websocket",
-    feature = "quic-s2n"
+    feature = "transport-tls",
+    feature = "transport-websocket",
+    feature = "transport-quic"
 ))]
 mod tls_config;
-#[cfg(feature = "tokio-websocket")]
+#[cfg(feature = "transport-websocket")]
 mod websocket;
 
 use std::net::SocketAddr;
 
 pub use inproc::{InprocListener, connect_inproc};
 pub use io::IoListener;
-#[cfg(all(feature = "tokio-net", unix))]
+#[cfg(all(feature = "transport-ipc", unix))]
 pub use ipc::{IpcListener, connect_ipc};
-#[cfg(feature = "quic-s2n")]
+#[cfg(feature = "transport-quic")]
 pub use quic::{QuicListener, connect_quic};
-#[cfg(feature = "tokio-net")]
+#[cfg(feature = "transport-tcp")]
 pub use tcp::TcpListener;
-#[cfg(feature = "tokio-tls")]
+#[cfg(feature = "transport-tls")]
 pub use tls::{TlsListener, connect_tls};
-#[cfg(feature = "tokio-websocket")]
+#[cfg(feature = "transport-websocket")]
 pub use websocket::{WebSocketListener, connect_websocket};
 
 pub trait Stream: tokio::io::AsyncRead + tokio::io::AsyncWrite {}
@@ -43,10 +43,10 @@ pub(crate) fn loopback_peer_addr() -> SocketAddr {
 #[cfg(any(
     windows,
     not(unix),
-    not(feature = "tokio-net"),
-    not(feature = "quic-s2n"),
-    not(feature = "tokio-tls"),
-    not(feature = "tokio-websocket")
+    not(feature = "transport-tcp"),
+    not(feature = "transport-quic"),
+    not(feature = "transport-tls"),
+    not(feature = "transport-websocket")
 ))]
 pub(crate) fn unsupported(message: &'static str) -> std::io::Error {
     std::io::Error::new(std::io::ErrorKind::Unsupported, message)
@@ -107,70 +107,66 @@ impl Endpoint {
         let listener: Box<dyn Listener> = match self {
             Endpoint::Inproc(name) => Box::new(InprocListener::bind(name)?),
             Endpoint::Ipc(path) => {
-                #[cfg(all(feature = "tokio-net", unix))]
+                #[cfg(feature = "transport-ipc")]
                 {
                     Box::new(IpcListener::bind(path)?)
                 }
-                #[cfg(all(feature = "tokio-net", windows))]
+                #[cfg(not(feature = "transport-ipc"))]
                 {
                     let _ = path;
                     return Err(unsupported("ipc transport is unsupported on windows"));
                 }
-                #[cfg(not(feature = "tokio-net"))]
-                {
-                    let _ = path;
-                    return Err(unsupported("ipc transport requires `tokio-net` feature"));
-                }
-                #[cfg(all(feature = "tokio-net", not(any(unix, windows))))]
-                {
-                    let _ = path;
-                    return Err(unsupported("ipc transport is unsupported on this platform"));
-                }
             }
             Endpoint::Quic(endpoint) => {
-                #[cfg(feature = "quic-s2n")]
+                #[cfg(feature = "transport-quic")]
                 {
                     Box::new(QuicListener::bind(&endpoint)?)
                 }
-                #[cfg(not(feature = "quic-s2n"))]
-                {
-                    let _ = endpoint;
-                    return Err(unsupported("quic transport requires `quic-s2n` feature"));
-                }
-            }
-            Endpoint::Tls(endpoint) => {
-                #[cfg(feature = "tokio-tls")]
-                {
-                    Box::new(TlsListener::bind(&endpoint).await?)
-                }
-                #[cfg(not(feature = "tokio-tls"))]
-                {
-                    let _ = endpoint;
-                    return Err(unsupported("tls transport requires `tokio-tls` feature"));
-                }
-            }
-            Endpoint::WebSocket(endpoint) => {
-                #[cfg(feature = "tokio-websocket")]
-                {
-                    Box::new(WebSocketListener::bind(&endpoint).await?)
-                }
-                #[cfg(not(feature = "tokio-websocket"))]
+                #[cfg(not(feature = "transport-quic"))]
                 {
                     let _ = endpoint;
                     return Err(unsupported(
-                        "websocket transport requires `tokio-websocket` feature",
+                        "quic transport requires `transport-quic` feature",
+                    ));
+                }
+            }
+            Endpoint::Tls(endpoint) => {
+                #[cfg(feature = "transport-tls")]
+                {
+                    Box::new(TlsListener::bind(&endpoint).await?)
+                }
+                #[cfg(not(feature = "transport-tls"))]
+                {
+                    let _ = endpoint;
+                    return Err(unsupported(
+                        "tls transport requires `transport-tls` feature",
+                    ));
+                }
+            }
+            Endpoint::WebSocket(endpoint) => {
+                #[cfg(feature = "transport-websocket")]
+                {
+                    Box::new(WebSocketListener::bind(&endpoint).await?)
+                }
+                #[cfg(not(feature = "transport-websocket"))]
+                {
+                    let _ = endpoint;
+                    return Err(unsupported(
+                        "websocket transport requires `transport-websocket` feature",
                     ));
                 }
             }
             Endpoint::Tcp(addr) => {
-                #[cfg(feature = "tokio-net")]
+                #[cfg(feature = "transport-tcp")]
                 {
                     Box::new(TcpListener::bind(&addr).await?)
                 }
-                #[cfg(not(feature = "tokio-net"))]
+                #[cfg(not(feature = "transport-tcp"))]
                 {
                     let _ = addr;
-                    return Err(unsupported("tcp transport requires `tokio-net` feature"));
+                    return Err(unsupported(
+                        "tcp transport requires `transport-tcp` feature",
+                    ));
                 }
             }
         };
@@ -186,71 +182,79 @@ impl Endpoint {
         match self {
             Endpoint::Inproc(name) => Ok(Box::new(connect_inproc(&name)?)),
             Endpoint::Ipc(path) => {
-                #[cfg(all(feature = "tokio-net", unix))]
+                #[cfg(all(feature = "transport-ipc", unix))]
                 {
                     connect_ipc(&path).await
                 }
-                #[cfg(all(feature = "tokio-net", windows))]
+                #[cfg(all(feature = "transport-tcp", windows))]
                 {
                     let _ = path;
                     Err(unsupported("ipc transport is unsupported on windows"))
                 }
-                #[cfg(not(feature = "tokio-net"))]
+                #[cfg(not(feature = "transport-ipc"))]
                 {
                     let _ = path;
-                    Err(unsupported("ipc transport requires `tokio-net` feature"))
+                    Err(unsupported(
+                        "ipc transport requires `transport-ipc` feature",
+                    ))
                 }
-                #[cfg(all(feature = "tokio-net", not(any(unix, windows))))]
+                #[cfg(all(feature = "transport-ipc", not(any(unix, windows))))]
                 {
                     let _ = path;
                     Err(unsupported("ipc transport is unsupported on this platform"))
                 }
             }
             Endpoint::Quic(endpoint) => {
-                #[cfg(feature = "quic-s2n")]
+                #[cfg(feature = "transport-quic")]
                 {
                     connect_quic(&endpoint).await
                 }
-                #[cfg(not(feature = "quic-s2n"))]
-                {
-                    let _ = endpoint;
-                    Err(unsupported("quic transport requires `quic-s2n` feature"))
-                }
-            }
-            Endpoint::WebSocket(endpoint) => {
-                #[cfg(feature = "tokio-websocket")]
-                {
-                    connect_websocket(&endpoint).await
-                }
-                #[cfg(not(feature = "tokio-websocket"))]
+                #[cfg(not(feature = "transport-quic"))]
                 {
                     let _ = endpoint;
                     Err(unsupported(
-                        "websocket transport requires `tokio-websocket` feature",
+                        "quic transport requires `transport-quic` feature",
+                    ))
+                }
+            }
+            Endpoint::WebSocket(endpoint) => {
+                #[cfg(feature = "transport-websocket")]
+                {
+                    connect_websocket(&endpoint).await
+                }
+                #[cfg(not(feature = "transport-websocket"))]
+                {
+                    let _ = endpoint;
+                    Err(unsupported(
+                        "websocket transport requires `transport-websocket` feature",
                     ))
                 }
             }
             Endpoint::Tls(endpoint) => {
-                #[cfg(feature = "tokio-tls")]
+                #[cfg(feature = "transport-tls")]
                 {
                     connect_tls(&endpoint).await
                 }
-                #[cfg(not(feature = "tokio-tls"))]
+                #[cfg(not(feature = "transport-tls"))]
                 {
                     let _ = endpoint;
-                    Err(unsupported("tls transport requires `tokio-tls` feature"))
+                    Err(unsupported(
+                        "tls transport requires `transport-tls` feature",
+                    ))
                 }
             }
             Endpoint::Tcp(addr) => {
-                #[cfg(feature = "tokio-net")]
+                #[cfg(feature = "transport-tcp")]
                 {
                     let stream = tokio::net::TcpStream::connect(&addr).await?;
                     Ok(Box::new(stream))
                 }
-                #[cfg(not(feature = "tokio-net"))]
+                #[cfg(not(feature = "transport-tcp"))]
                 {
                     let _ = addr;
-                    Err(unsupported("tcp transport requires `tokio-net` feature"))
+                    Err(unsupported(
+                        "tcp transport requires `transport-tcp` feature",
+                    ))
                 }
             }
         }

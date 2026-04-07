@@ -1,5 +1,5 @@
 use tokio::io::{BufReader, split};
-#[cfg(feature = "tokio-net")]
+#[cfg(feature = "transport-tcp")]
 use tokio::net::TcpStream;
 use xidl_jsonrpc::Client;
 use xidl_jsonrpc::Error;
@@ -33,6 +33,7 @@ where
         .await
 }
 
+#[cfg(any(feature = "transport-tcp", feature = "transport-ipc"))]
 async fn connect_with_retry(
     endpoint: &str,
 ) -> std::io::Result<Box<dyn xidl_jsonrpc::transport::Stream + Unpin + Send + 'static>> {
@@ -59,7 +60,7 @@ fn random_endpoint(prefix: &str) -> String {
     format!("{prefix}-{nanos}")
 }
 
-#[cfg(all(feature = "tokio-net", unix))]
+#[cfg(all(feature = "transport-tcp", unix))]
 fn random_ipc_uri(prefix: &str) -> String {
     let path =
         std::path::Path::new("/tmp").join(format!("xj-{prefix}-{}.sock", random_endpoint("ipc")));
@@ -101,7 +102,7 @@ async fn build_on_inproc_exposes_endpoint() {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-#[cfg(all(feature = "tokio-net", unix))]
+#[cfg(all(feature = "transport-ipc", unix))]
 async fn serve_on_ipc_uri() {
     let uri = random_ipc_uri("serve-on-ipc");
     let connect_uri = uri.clone();
@@ -135,7 +136,7 @@ async fn serve_on_ipc_uri() {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-#[cfg(all(feature = "tokio-net", windows))]
+#[cfg(all(feature = "transport-tcp", windows))]
 async fn ipc_uri_is_unsupported() {
     let endpoint = "ipc://xidl-jsonrpc-unsupported";
     let err = xidl_jsonrpc::Server::builder()
@@ -183,7 +184,7 @@ async fn inproc_connect_before_bind() {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-#[cfg(feature = "tokio-net")]
+#[cfg(feature = "transport-tcp")]
 async fn serve_on_tcp_uri() {
     let probe = match std::net::TcpListener::bind("127.0.0.1:0") {
         Ok(probe) => probe,
@@ -211,7 +212,7 @@ async fn serve_on_tcp_uri() {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-#[cfg(feature = "tokio-net")]
+#[cfg(feature = "transport-tcp")]
 async fn build_tcp_zero_exposes_bound_endpoint() {
     let server = match xidl_jsonrpc::Server::builder()
         .with_service(EchoHandler)
@@ -239,7 +240,7 @@ async fn build_tcp_zero_exposes_bound_endpoint() {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-#[cfg(feature = "tokio-websocket")]
+#[cfg(feature = "transport-websocket")]
 async fn serve_on_websocket_uri() {
     let probe = std::net::TcpListener::bind("127.0.0.1:0").expect("bind probe");
     let addr = probe.local_addr().expect("probe addr");
@@ -266,7 +267,7 @@ async fn serve_on_websocket_uri() {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-#[cfg(feature = "tokio-websocket")]
+#[cfg(feature = "transport-websocket")]
 async fn wss_requires_cert_and_key() {
     let endpoint = "wss://127.0.0.1:18443/rpc";
     let err = xidl_jsonrpc::Server::builder()
@@ -278,7 +279,7 @@ async fn wss_requires_cert_and_key() {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-#[cfg(feature = "tokio-tls")]
+#[cfg(feature = "transport-tls")]
 async fn tls_requires_cert_and_key() {
     let endpoint = "tls://127.0.0.1:19443";
     let err = xidl_jsonrpc::Server::builder()
@@ -290,7 +291,7 @@ async fn tls_requires_cert_and_key() {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-#[cfg(feature = "tokio-websocket")]
+#[cfg(feature = "transport-websocket")]
 async fn wss_connect_requires_ca() {
     let endpoint = "wss://127.0.0.1:18443/rpc";
     let err = match xidl_jsonrpc::transport::connect(endpoint).await {
@@ -301,7 +302,7 @@ async fn wss_connect_requires_ca() {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-#[cfg(feature = "tokio-tls")]
+#[cfg(feature = "transport-tls")]
 async fn tls_connect_requires_ca() {
     let endpoint = "tls://127.0.0.1:19443";
     let err = match xidl_jsonrpc::transport::connect(endpoint).await {
