@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.36.1](https://github.com/xidl/xidl/compare/v0.36.0...v0.36.1) (2026-04-07)
+
+
+### Bug Fixes
+
+* fix cargo publish ([60f576e](https://github.com/xidl/xidl/commit/60f576eae160676e2e2b25306de5c2708da4a968))
+
 ## [0.36.0](https://github.com/xidl/xidl/compare/v0.35.0...v0.36.0) (2026-04-07)
 
 
