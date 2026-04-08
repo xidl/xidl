@@ -1592,7 +1592,7 @@ fn axum_type(ty: &hir::TypeSpec) -> String {
             hir::TemplateTypeSpec::FixedPtType(_) => "f64".to_string(),
             hir::TemplateTypeSpec::MapType(map) => {
                 format!(
-                    "BTreeMap<{}, {}>",
+                    "::std::collections::BTreeMap<{}, {}>",
                     axum_type(&map.key),
                     axum_type(&map.value)
                 )

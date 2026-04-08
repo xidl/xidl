@@ -92,7 +92,7 @@ pub fn rust_type(ty: &hir::TypeSpec) -> String {
             hir::TemplateTypeSpec::FixedPtType(_) => "f64".to_string(),
             hir::TemplateTypeSpec::MapType(map) => {
                 format!(
-                    "BTreeMap<{}, {}>",
+                    "::std::collections::BTreeMap<{}, {}>",
                     rust_type(&map.key),
                     rust_type(&map.value)
                 )
