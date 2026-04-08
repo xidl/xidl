@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.39.0](https://github.com/xidl/xidl/compare/v0.38.0...v0.39.0) (2026-04-08)
+
+
+### Features
+
+* add http hir layer ([0f3a307](https://github.com/xidl/xidl/commit/0f3a307537f96b9d0b9e56739098805c7c45f7fe))
+* **http:** add body and flatten annotations ([8753d92](https://github.com/xidl/xidl/commit/8753d929c5ad9829e796700b39d781b1689f88ce))
+
+
+### Bug Fixes
+
+* **http:** wrap void out responses as objects ([b5ef38d](https://github.com/xidl/xidl/commit/b5ef38d454d941c18c98453bf5be492459c77922))
+* remove gen-hir and gen-typed-ast feature ([c8a14d7](https://github.com/xidl/xidl/commit/c8a14d7719beb3a930a8c4ddf09a3e90d9ce2d31))
+* **rust-axum:** fix template ([bac9a85](https://github.com/xidl/xidl/commit/bac9a85412b81c28e480edc70138dcc7a02d74b4))
+* **rust:** qualify generated BTreeMap paths ([6ff8293](https://github.com/xidl/xidl/commit/6ff8293950da728bf5801e87ac2dce028cc2a861))
+
 ## [0.38.0](https://github.com/xidl/xidl/compare/v0.37.0...v0.38.0) (2026-04-08)
 
 
