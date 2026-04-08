@@ -77,8 +77,10 @@ impl SmartCityHttpApi for SmartCityHttpService {
     async fn update_profile(
         &self,
         _req: xidl_rust_axum::Request<SmartCityHttpApiUpdateProfileRequest>,
-    ) -> Result<String, xidl_rust_axum::Error> {
-        Ok("audit-20260307-001".to_string())
+    ) -> Result<SmartCityHttpApiUpdateProfileResponse, xidl_rust_axum::Error> {
+        Ok(SmartCityHttpApiUpdateProfileResponse {
+            audit_id: "audit-20260307-001".to_string(),
+        })
     }
 
     async fn get_device_status(

@@ -19,11 +19,8 @@
     "host": "127.0.0.1"
 }
 
-< HTTP/1.1 400 Bad Request
-< content-length: 113
-< content-type: application/json
+< HTTP/1.1 204 No Content
 <
-{"code":400,"msg":"deserialize application/json failed: invalid type: map, expected a string at line 1 column 0"}
 ---
 ### get user info
 > GET /user/7523 HTTP/1.1

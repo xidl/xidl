@@ -82,12 +82,12 @@ func NewHttpSecurityApiHandler(svc HttpSecurityApiService) http.Handler {
  		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
  		return
  	}
-	var body string
+	body := HttpSecurityApiUpdateReportRequestBody{}
 	if err := xidlgohttp.DecodeBody(r, "application/json", &body); err != nil {
 		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 		return
 	}
-	req.Body = body
+	req.Body = body.Body
 		resp, err := svc.UpdateReport(r.Context(), req)
 		if err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
@@ -150,7 +150,9 @@ func (c *HttpSecurityApiClient) GetReport(ctx context.Context, req *HttpSecurity
 
 func (c *HttpSecurityApiClient) UpdateReport(ctx context.Context, req *HttpSecurityApiUpdateReportRequest) (*HttpSecurityApiUpdateReportResponse, error) {
 	requestURL := c.baseURL + formatHttpSecurityApiUpdateReportPath(req)
-	body := req.Body
+	body := HttpSecurityApiUpdateReportRequestBody{
+		Body: req.Body,
+	}
 	var requestBody bytes.Buffer
 	if err := xidlgohttp.MustCodecForMime("application/json").Encode(&requestBody, body); err != nil { return nil, err }
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", requestURL, &requestBody)
@@ -218,6 +220,10 @@ func decodeHttpSecurityApiGetReportResponse(resp *http.Response) (HttpSecurityAp
 }
 type HttpSecurityApiUpdateReportRequest struct {
 	Id string `json:"id" form:"id"`
+	Body string `json:"body" form:"body"`
+}
+
+type HttpSecurityApiUpdateReportRequestBody struct {
 	Body string `json:"body" form:"body"`
 }
 

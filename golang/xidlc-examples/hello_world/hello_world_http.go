@@ -36,12 +36,12 @@ func NewHelloWorldHandler(svc HelloWorldService) http.Handler {
 		}
 
 	req := &HelloWorldSayHelloRequest{}
-	var body string
+	body := HelloWorldSayHelloRequestBody{}
 	if err := xidlgohttp.DecodeBody(r, "application/json", &body); err != nil {
 		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 		return
 	}
-	req.Name = body
+	req.Name = body.Name
 		if _, err := svc.SayHello(r.Context(), req); err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
@@ -66,7 +66,9 @@ func NewHelloWorldClient(baseURL string, httpClient *http.Client, auth xidlgohtt
 
 func (c *HelloWorldClient) SayHello(ctx context.Context, req *HelloWorldSayHelloRequest) (*HelloWorldSayHelloResponse, error) {
 	requestURL := c.baseURL + formatHelloWorldSayHelloPath(req)
-	body := req.Name
+	body := HelloWorldSayHelloRequestBody{
+		Name: req.Name,
+	}
 	var requestBody bytes.Buffer
 	if err := xidlgohttp.MustCodecForMime("application/json").Encode(&requestBody, body); err != nil { return nil, err }
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", requestURL, &requestBody)
@@ -83,6 +85,10 @@ func (c *HelloWorldClient) SayHello(ctx context.Context, req *HelloWorldSayHello
 }
 
 type HelloWorldSayHelloRequest struct {
+	Name string `json:"name" form:"name"`
+}
+
+type HelloWorldSayHelloRequestBody struct {
 	Name string `json:"name" form:"name"`
 }
 

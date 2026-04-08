@@ -99,7 +99,7 @@ async fn http_client_calls_all_endpoints() {
         )
         .await
         .expect("call update_profile");
-    assert_eq!(update, "audit-20260307-001");
+    assert_eq!(update.audit_id, "audit-20260307-001");
 
     let device = client
         .get_device_status(

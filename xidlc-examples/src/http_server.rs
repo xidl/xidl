@@ -148,18 +148,22 @@ impl HttpServer for SimpleHttpServer {
     async fn get_key_options(
         &self,
         req: xidl_rust_axum::Request<HttpServerGetKeyOptionsRequest>,
-    ) -> Result<bool, xidl_rust_axum::Error> {
+    ) -> Result<HttpServerGetKeyOptionsResponse, xidl_rust_axum::Error> {
         let req = req.into_inner();
-        Ok(self.key_store.lock().await.contains_key(&req.key))
+        Ok(HttpServerGetKeyOptionsResponse {
+            exists: self.key_store.lock().await.contains_key(&req.key),
+        })
     }
 
     async fn get_key_1(
         &self,
         req: xidl_rust_axum::Request<HttpServerGetKey1Request>,
-    ) -> Result<String, xidl_rust_axum::Error> {
+    ) -> Result<HttpServerGetKey1Response, xidl_rust_axum::Error> {
         let req = req.into_inner();
         if let Some(value) = self.key_store.lock().await.get(&req.key) {
-            return Ok(value.clone());
+            return Ok(HttpServerGetKey1Response {
+                value: value.clone(),
+            });
         }
 
         Err(xidl_rust_axum::Error::not_found())
@@ -168,40 +172,52 @@ impl HttpServer for SimpleHttpServer {
     async fn get_key_2(
         &self,
         req: xidl_rust_axum::Request<HttpServerGetKey2Request>,
-    ) -> Result<String, xidl_rust_axum::Error> {
-        self.get_key_1(xidl_rust_axum::Request {
-            headers: req.headers,
-            data: HttpServerGetKey1Request { key: req.data.key },
+    ) -> Result<HttpServerGetKey2Response, xidl_rust_axum::Error> {
+        let response = self
+            .get_key_1(xidl_rust_axum::Request {
+                headers: req.headers,
+                data: HttpServerGetKey1Request { key: req.data.key },
+            })
+            .await?;
+        Ok(HttpServerGetKey2Response {
+            value: response.value,
         })
-        .await
     }
 
     async fn get_key_3(
         &self,
         req: xidl_rust_axum::Request<HttpServerGetKey3Request>,
-    ) -> Result<String, xidl_rust_axum::Error> {
-        self.get_key_1(xidl_rust_axum::Request {
-            headers: req.headers,
-            data: HttpServerGetKey1Request { key: req.data.key },
+    ) -> Result<HttpServerGetKey3Response, xidl_rust_axum::Error> {
+        let response = self
+            .get_key_1(xidl_rust_axum::Request {
+                headers: req.headers,
+                data: HttpServerGetKey1Request { key: req.data.key },
+            })
+            .await?;
+        Ok(HttpServerGetKey3Response {
+            value: response.value,
         })
-        .await
     }
 
     async fn get_key_4(
         &self,
         req: xidl_rust_axum::Request<HttpServerGetKey4Request>,
-    ) -> Result<String, xidl_rust_axum::Error> {
-        self.get_key_1(xidl_rust_axum::Request {
-            headers: req.headers,
-            data: HttpServerGetKey1Request { key: req.data.key },
+    ) -> Result<HttpServerGetKey4Response, xidl_rust_axum::Error> {
+        let response = self
+            .get_key_1(xidl_rust_axum::Request {
+                headers: req.headers,
+                data: HttpServerGetKey1Request { key: req.data.key },
+            })
+            .await?;
+        Ok(HttpServerGetKey4Response {
+            value: response.value,
         })
-        .await
     }
 
     async fn login(
         &self,
         req: xidl_rust_axum::Request<HttpServerLoginRequest>,
-    ) -> Result<String, xidl_rust_axum::Error> {
+    ) -> Result<HttpServerLoginResponse, xidl_rust_axum::Error> {
         let auth = req.into_inner().xidl_auth;
         println!("login: {:?}", auth);
         match auth.password {
@@ -214,13 +230,15 @@ impl HttpServer for SimpleHttpServer {
             _ => {}
         }
 
-        Ok("simple_session_id".to_string())
+        Ok(HttpServerLoginResponse {
+            session_id: "simple_session_id".to_string(),
+        })
     }
 
     async fn login_realm(
         &self,
         req: xidl_rust_axum::Request<HttpServerLoginRealmRequest>,
-    ) -> Result<String, xidl_rust_axum::Error> {
+    ) -> Result<HttpServerLoginRealmResponse, xidl_rust_axum::Error> {
         let auth = req.into_inner().xidl_auth;
         println!("login: {:?}", auth);
         match auth.password {
@@ -233,7 +251,9 @@ impl HttpServer for SimpleHttpServer {
             _ => {}
         }
 
-        Ok("simple_session_id".to_string())
+        Ok(HttpServerLoginRealmResponse {
+            session_id: "simple_session_id".to_string(),
+        })
     }
 
     async fn is_logined(
