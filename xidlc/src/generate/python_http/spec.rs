@@ -1,15 +1,15 @@
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::python_http::PythonHttpRenderer;
-use crate::generate::utils::{
-    HttpApiKeyLocation, HttpSecurityProfile, HttpSecurityRequirement, HttpStreamCodec,
-    HttpStreamConfig, HttpStreamKind, HttpStreamTargetSupport, annotation_name, annotation_params,
-    effective_media_type, effective_security_with_origin, has_optional_annotation,
-    http_stream_config, normalize_annotation_params, validate_http_annotations,
-    validate_http_stream_method, validate_http_stream_target,
+use crate::generate::http_hir::{
+    HttpHirDocument, HttpMethod, HttpOperation, HttpParam, HttpParamSource,
+    semantics::{
+        HttpApiKeyLocation, HttpSecurityProfile, HttpSecurityRequirement, HttpStreamCodec,
+        HttpStreamConfig, HttpStreamKind,
+    },
 };
+use crate::generate::python_http::PythonHttpRenderer;
 use convert_case::{Case, Casing};
 use serde::Serialize;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::fmt::Write;
 use xidl_parser::hir;
 use xidl_parser::hir::TypeSpec;
@@ -27,11 +27,6 @@ enum ParamSource {
     Header,
     Cookie,
     Body,
-}
-
-struct SourceBinding {
-    source: ParamSource,
-    bound_name: String,
 }
 
 #[derive(Clone)]
@@ -65,19 +60,14 @@ struct MethodContext {
     return_ty: Option<String>,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
-enum ParamDirection {
-    In,
-    Out,
-    InOut,
-}
-
-pub(crate) fn render_spec(spec: &hir::Specification, module_name: &str) -> IdlcResult<String> {
+pub(crate) fn render_spec(
+    spec: &hir::Specification,
+    module_name: &str,
+    http_hir: &HttpHirDocument,
+) -> IdlcResult<String> {
     let renderer = PythonHttpRenderer::new()?;
     let mut body = String::new();
-    for def in &spec.0 {
-        render_definition(&mut body, def)?;
-    }
+    render_definitions(&mut body, &spec.0, &[], http_hir)?;
     renderer.render_template(
         "spec.py.j2",
         &PythonHttpSpecTemplate {
@@ -87,42 +77,55 @@ pub(crate) fn render_spec(spec: &hir::Specification, module_name: &str) -> IdlcR
     )
 }
 
-fn render_definition(out: &mut String, def: &hir::Definition) -> IdlcResult<()> {
-    match def {
-        hir::Definition::ModuleDcl(module) => {
-            for inner in &module.definition {
-                render_definition(out, inner)?;
+fn render_definitions(
+    out: &mut String,
+    defs: &[hir::Definition],
+    module_path: &[String],
+    http_hir: &HttpHirDocument,
+) -> IdlcResult<()> {
+    for def in defs {
+        match def {
+            hir::Definition::ModuleDcl(module) => {
+                let mut next = module_path.to_vec();
+                next.push(module.ident.clone());
+                render_definitions(out, &module.definition, &next, http_hir)?;
             }
+            hir::Definition::InterfaceDcl(interface) => {
+                render_interface(out, interface, module_path, http_hir)?
+            }
+            _ => {}
         }
-        hir::Definition::InterfaceDcl(interface) => render_interface(out, interface)?,
-        _ => {}
     }
     Ok(())
 }
 
-fn render_interface(out: &mut String, interface: &hir::InterfaceDcl) -> IdlcResult<()> {
+fn render_interface(
+    out: &mut String,
+    interface: &hir::InterfaceDcl,
+    module_path: &[String],
+    http_hir: &HttpHirDocument,
+) -> IdlcResult<()> {
     let hir::InterfaceDclInner::InterfaceDef(def) = &interface.decl else {
         return Ok(());
     };
-    validate_http_annotations(
-        &format!("interface '{}'", def.header.ident),
-        &interface.annotations,
-    )
-    .map_err(IdlcError::rpc)?;
+    let Some(http_interface) = http_hir.find_interface(module_path, &def.header.ident) else {
+        return Ok(());
+    };
 
     let interface_name = py_type_name(&def.header.ident);
-    let mut methods = Vec::new();
-    if let Some(body) = &def.interface_body {
-        for export in &body.0 {
-            if let hir::Export::OpDcl(op) = export {
-                methods.push(build_method(
-                    interface.annotations.as_slice(),
-                    op,
-                    &interface_name,
-                )?);
-            }
-        }
-    }
+    let methods = http_interface
+        .operations
+        .iter()
+        .filter(|operation| {
+            !matches!(
+                operation.source,
+                crate::generate::http_hir::HttpOperationSource::AttributeGet
+                    | crate::generate::http_hir::HttpOperationSource::AttributeSet
+                    | crate::generate::http_hir::HttpOperationSource::AttributeWatch
+            )
+        })
+        .map(|operation| build_method(operation, &interface_name))
+        .collect::<IdlcResult<Vec<_>>>()?;
 
     let mut route_bindings = HashMap::<String, String>::new();
     for method in &methods {
@@ -138,7 +141,7 @@ fn render_interface(out: &mut String, interface: &hir::InterfaceDcl) -> IdlcResu
     }
 
     for method in &methods {
-        render_method_types(out, method, def)?;
+        render_method_types(out, method)?;
     }
 
     writeln!(out, "class {}Service(abc.ABC):", interface_name).unwrap();
@@ -183,188 +186,105 @@ fn render_interface(out: &mut String, interface: &hir::InterfaceDcl) -> IdlcResu
     Ok(())
 }
 
-fn build_method(
-    interface_annotations: &[hir::Annotation],
-    op: &hir::OpDcl,
-    interface_name: &str,
-) -> IdlcResult<MethodContext> {
-    validate_http_annotations(&format!("operation '{}'", op.ident), &op.annotations)
-        .map_err(IdlcError::rpc)?;
-    let stream = http_stream_config(&op.annotations).map_err(IdlcError::rpc)?;
-    let method = http_method(&op.annotations);
-    validate_http_stream_target(
-        &op.ident,
-        stream,
-        HttpStreamTargetSupport {
-            target: "python-http",
-            supports_bidi: false,
-            server_codec: HttpStreamCodec::Sse,
-            client_codec: HttpStreamCodec::Ndjson,
-            server_method: "GET",
-            client_method: "POST",
-            bidi_method: "GET",
-        },
-    )
-    .map_err(IdlcError::rpc)?;
-    validate_http_stream_method(
-        &op.ident,
-        stream.kind,
-        &method,
-        HttpStreamTargetSupport {
-            target: "python-http",
-            supports_bidi: false,
-            server_codec: HttpStreamCodec::Sse,
-            client_codec: HttpStreamCodec::Ndjson,
-            server_method: "GET",
-            client_method: "POST",
-            bidi_method: "GET",
-        },
-    )
-    .map_err(IdlcError::rpc)?;
-
-    let params = op
-        .parameter
-        .as_ref()
-        .map(|value| value.0.as_slice())
-        .unwrap_or(&[]);
-    let mut request_params = Vec::new();
-    let mut response_params = Vec::new();
-    for param in params {
-        let direction = param_direction(param.attr.as_ref());
-        let flatten = has_flatten_annotation(&param.annotations);
-        if flatten && matches!(direction, ParamDirection::Out) {
-            return Err(IdlcError::rpc(format!(
-                "@flatten can only be applied to request-side body parameter '{}' of method '{}'",
-                param.declarator.0, op.ident
-            )));
-        }
-        let binding = explicit_param_binding(param)?;
-        let default_source = default_param_source(&method);
-        let (source, wire_name) = match binding {
-            Some(value) => (value.source, value.bound_name),
-            None => (default_source, param.declarator.0.clone()),
-        };
-        if matches!(stream.kind, Some(HttpStreamKind::Client))
-            && !matches!(direction, ParamDirection::Out)
-            && !matches!(source, ParamSource::Body)
-        {
-            return Err(IdlcError::rpc(format!(
-                "python-http @client_stream methods currently support body parameters only: '{}'",
-                op.ident
-            )));
-        }
-        let context = ParamContext {
-            field_name: py_field_name(&param.declarator.0),
-            wire_name,
-            ty: py_type(&param.ty),
-            optional: has_optional_annotation(&param.annotations),
-            source,
-            flatten,
-        };
-        if !matches!(direction, ParamDirection::Out) {
-            request_params.push(context.clone());
-        }
-        if matches!(direction, ParamDirection::Out | ParamDirection::InOut) {
-            response_params.push(context);
-        }
-    }
-
-    let paths = collect_paths(op, &request_params, &method)?;
-    let path_param_sets = paths
-        .iter()
-        .map(|path| parse_path_params(path))
-        .collect::<Vec<_>>();
-    for binding in &request_params {
-        if matches!(binding.source, ParamSource::Path)
-            && !path_param_sets
-                .iter()
-                .all(|set| set.contains(&binding.wire_name))
-        {
-            return Err(IdlcError::rpc(format!(
-                "parameter '{}' is annotated with @path but '{}' is not present in every route template of method '{}'",
-                binding.field_name, binding.wire_name, op.ident
-            )));
-        }
-    }
-
-    let request_type = format!("{}{}Request", interface_name, py_type_name(&op.ident));
-    let response_type = match stream.kind {
-        Some(HttpStreamKind::Server) => "ServerStreamResponse".to_string(),
-        Some(HttpStreamKind::Client) | None => {
-            format!("{}{}Response", interface_name, py_type_name(&op.ident))
-        }
-        Some(HttpStreamKind::Bidi) => "BidiStreamResponse".to_string(),
-    };
-    let body_param_count = request_params
-        .iter()
-        .filter(|value| matches!(value.source, ParamSource::Body))
-        .count();
-    for param in &request_params {
-        if param.flatten && !matches!(param.source, ParamSource::Body) {
-            return Err(IdlcError::rpc(format!(
-                "@flatten can only be applied to body parameter '{}' of method '{}'",
-                param.field_name, op.ident
-            )));
-        }
-    }
-    if body_param_count != 1 && request_params.iter().any(|value| value.flatten) {
+fn build_method(operation: &HttpOperation, interface_name: &str) -> IdlcResult<MethodContext> {
+    let stream_kind = operation.stream.kind;
+    let stream_codec = operation.stream.codec;
+    if matches!(stream_kind, Some(HttpStreamKind::Bidi)) {
         return Err(IdlcError::rpc(format!(
-            "@flatten requires exactly one request-side body parameter, but method '{}' has {}",
-            op.ident, body_param_count
+            "python-http currently does not support @bidi_stream methods: '{}'",
+            operation.name
         )));
     }
-    let return_ty = match &op.ty {
-        hir::OpTypeSpec::Void => None,
-        hir::OpTypeSpec::TypeSpec(ty) => Some(py_type(ty)),
-    };
-    let request_content_type = request_content_type(interface_annotations, &op.annotations, stream);
-    let response_content_type =
-        response_content_type(interface_annotations, &op.annotations, stream);
-    let requires_request_content_type = request_params
+    if matches!(stream_kind, Some(HttpStreamKind::Server)) && stream_codec != HttpStreamCodec::Sse {
+        return Err(IdlcError::rpc(format!(
+            "python-http currently supports only SSE for @server_stream methods: '{}'",
+            operation.name
+        )));
+    }
+    if matches!(stream_kind, Some(HttpStreamKind::Client))
+        && stream_codec != HttpStreamCodec::Ndjson
+    {
+        return Err(IdlcError::rpc(format!(
+            "python-http currently supports only NDJSON for @client_stream methods: '{}'",
+            operation.name
+        )));
+    }
+
+    let request_params = operation
+        .request_params
         .iter()
-        .any(|value| matches!(value.source, ParamSource::Body))
-        || matches!(stream.kind, Some(HttpStreamKind::Client));
-    let security = effective_security_with_origin(interface_annotations, &op.annotations)
-        .map_err(IdlcError::rpc)?;
+        .map(param_context)
+        .collect::<Vec<_>>();
+    let response_params = operation
+        .response_params
+        .iter()
+        .map(param_context)
+        .collect::<Vec<_>>();
+
+    let request_type = format!("{}{}Request", interface_name, py_type_name(&operation.name));
+    let response_type = match stream_kind {
+        Some(HttpStreamKind::Server) => "ServerStreamResponse".to_string(),
+        Some(HttpStreamKind::Client) | None => {
+            format!(
+                "{}{}Response",
+                interface_name,
+                py_type_name(&operation.name)
+            )
+        }
+        Some(HttpStreamKind::Bidi) => unreachable!(),
+    };
+    let return_ty = operation.return_type.as_ref().map(py_type);
+    let request_content_type = request_content_type(operation);
+    let response_content_type = response_content_type(operation);
+    let requires_request_content_type = !operation.request_body_params.is_empty()
+        || matches!(stream_kind, Some(HttpStreamKind::Client));
 
     Ok(MethodContext {
-        method_name: py_field_name(&op.ident),
-        raw_name: op.ident.clone(),
+        method_name: py_field_name(&operation.name),
+        raw_name: operation.name.clone(),
         endpoint_name: format!(
             "_{}_{}_endpoint",
             py_field_name(interface_name),
-            py_field_name(&op.ident)
+            py_field_name(&operation.name)
         ),
         route_builder_name: format!(
             "_{}_{}_route",
             py_field_name(interface_name),
-            py_field_name(&op.ident)
+            py_field_name(&operation.name)
         ),
-        http_method: method.clone(),
-        paths,
+        http_method: http_method_name(operation.method).to_string(),
+        paths: operation
+            .routes
+            .iter()
+            .map(|route| route.path.clone())
+            .collect(),
         request_type,
         response_type,
         request_content_type,
         response_content_type,
         requires_request_content_type,
-        security_expr: security_expr(security.as_ref()),
-        stream_expr: stream_expr(stream),
-        stream_kind: stream.kind,
-        stream_codec: stream.codec,
+        security_expr: security_expr(operation.security.as_ref()),
+        stream_expr: stream_expr(operation.stream),
+        stream_kind,
+        stream_codec,
         request_params,
         response_params,
         return_ty,
     })
 }
 
-fn render_method_types(
-    out: &mut String,
-    method: &MethodContext,
-    def: &hir::InterfaceDef,
-) -> IdlcResult<()> {
-    let Some(_body) = &def.interface_body else {
-        return Ok(());
-    };
+fn param_context(param: &HttpParam) -> ParamContext {
+    ParamContext {
+        field_name: py_field_name(&param.name),
+        wire_name: param.wire_name.clone(),
+        ty: py_type(&param.ty),
+        optional: param.optional,
+        source: param_source(param.source),
+        flatten: param.flatten,
+    }
+}
+
+fn render_method_types(out: &mut String, method: &MethodContext) -> IdlcResult<()> {
     writeln!(out, "@dataclass").unwrap();
     writeln!(out, "class {}:", method.request_type).unwrap();
     if method.request_params.is_empty() {
@@ -584,255 +504,18 @@ fn render_param_binding(param: &ParamContext) -> String {
     }
 }
 
-fn explicit_param_binding(param: &hir::ParamDcl) -> IdlcResult<Option<SourceBinding>> {
-    let mut found = None;
-    for annotation in &param.annotations {
-        let Some(name) = annotation_name(annotation) else {
-            continue;
-        };
-        let current = if name.eq_ignore_ascii_case("path") {
-            Some(ParamSource::Path)
-        } else if name.eq_ignore_ascii_case("query") {
-            Some(ParamSource::Query)
-        } else if name.eq_ignore_ascii_case("body") {
-            Some(ParamSource::Body)
-        } else if name.eq_ignore_ascii_case("header") {
-            Some(ParamSource::Header)
-        } else if name.eq_ignore_ascii_case("cookie") {
-            Some(ParamSource::Cookie)
-        } else {
-            None
-        };
-        let Some(current) = current else {
-            continue;
-        };
-        let bound_name = annotation_params(annotation)
-            .map(normalize_annotation_params)
-            .and_then(|params| params.get("value").cloned())
-            .unwrap_or_else(|| param.declarator.0.clone());
-        if matches!(current, ParamSource::Header) {
-            validate_header_name(&bound_name, &param.declarator.0)?;
-        }
-        if matches!(current, ParamSource::Cookie) {
-            validate_cookie_name(&bound_name, &param.declarator.0)?;
-        }
-        match found {
-            None => {
-                found = Some(SourceBinding {
-                    source: current,
-                    bound_name,
-                })
-            }
-            Some(ref previous)
-                if previous.source == current && previous.bound_name == bound_name => {}
-            Some(_) => {
-                return Err(IdlcError::rpc(format!(
-                    "parameter '{}' has conflicting source annotations (@path/@query/@body/@header/@cookie)",
-                    param.declarator.0
-                )));
-            }
-        }
-    }
-    Ok(found)
-}
-
-fn request_content_type(
-    interface_annotations: &[hir::Annotation],
-    method_annotations: &[hir::Annotation],
-    stream: HttpStreamConfig,
-) -> String {
-    match stream.kind {
+fn request_content_type(operation: &HttpOperation) -> String {
+    match operation.stream.kind {
         Some(HttpStreamKind::Client) => "application/x-ndjson".to_string(),
-        _ => effective_media_type(interface_annotations, method_annotations, "Consumes"),
+        _ => operation.request_content_type.clone(),
     }
 }
 
-fn response_content_type(
-    interface_annotations: &[hir::Annotation],
-    method_annotations: &[hir::Annotation],
-    stream: HttpStreamConfig,
-) -> String {
-    match (stream.kind, stream.codec) {
+fn response_content_type(operation: &HttpOperation) -> String {
+    match (operation.stream.kind, operation.stream.codec) {
         (Some(HttpStreamKind::Server), HttpStreamCodec::Sse) => "text/event-stream".to_string(),
-        _ => effective_media_type(interface_annotations, method_annotations, "Produces"),
+        _ => operation.response_content_type.clone(),
     }
-}
-
-fn has_flatten_annotation(annotations: &[hir::Annotation]) -> bool {
-    annotations.iter().any(|annotation| {
-        annotation_name(annotation)
-            .map(|name| name.eq_ignore_ascii_case("flatten"))
-            .unwrap_or(false)
-    })
-}
-
-fn param_direction(attr: Option<&hir::ParamAttribute>) -> ParamDirection {
-    match attr.map(|value| value.0.as_str()) {
-        Some("out") => ParamDirection::Out,
-        Some("inout") => ParamDirection::InOut,
-        _ => ParamDirection::In,
-    }
-}
-
-fn default_param_source(method: &str) -> ParamSource {
-    match method {
-        "GET" | "DELETE" | "HEAD" | "OPTIONS" => ParamSource::Query,
-        _ => ParamSource::Body,
-    }
-}
-
-fn collect_paths(
-    op: &hir::OpDcl,
-    params: &[ParamContext],
-    method: &str,
-) -> IdlcResult<Vec<String>> {
-    let mut paths = Vec::new();
-    for annotation in &op.annotations {
-        let Some(name) = annotation_name(annotation) else {
-            continue;
-        };
-        if ["get", "post", "put", "patch", "delete", "head", "options"]
-            .iter()
-            .any(|candidate| name.eq_ignore_ascii_case(candidate))
-        {
-            if let Some(params) = annotation_params(annotation) {
-                let params = normalize_annotation_params(params);
-                if let Some(path) = params.get("path") {
-                    paths.push(normalize_path(path));
-                }
-            }
-        } else if name.eq_ignore_ascii_case("path") {
-            if let Some(params) = annotation_params(annotation) {
-                let params = normalize_annotation_params(params);
-                if let Some(path) = params.get("value") {
-                    paths.push(normalize_path(path));
-                }
-            }
-        }
-    }
-    if paths.is_empty() {
-        let mut default_path = format!("/{}", op.ident);
-        for param in params {
-            if matches!(param.source, ParamSource::Path) {
-                default_path.push('/');
-                default_path.push('{');
-                default_path.push_str(&param.wire_name);
-                default_path.push('}');
-            }
-        }
-        paths.push(normalize_path(&default_path));
-    }
-    if matches!(default_param_source(method), ParamSource::Query) {
-        let query_names = params
-            .iter()
-            .filter(|param| matches!(param.source, ParamSource::Query))
-            .map(|param| param.wire_name.clone())
-            .collect::<Vec<_>>();
-        for path in &paths {
-            validate_route_template(path, &query_names)?;
-        }
-    }
-    paths.sort();
-    paths.dedup();
-    Ok(paths)
-}
-
-fn validate_route_template(path: &str, query_names: &[String]) -> IdlcResult<()> {
-    let mut start = 0usize;
-    while let Some(open_rel) = path[start..].find('{') {
-        let open = start + open_rel;
-        let close = path[open + 1..]
-            .find('}')
-            .map(|value| open + 1 + value)
-            .ok_or_else(|| {
-                IdlcError::rpc(format!("route template has unmatched '{{' in '{path}'"))
-            })?;
-        let token = &path[open + 1..close];
-        if token.starts_with('?') {
-            for name in token[1..]
-                .split(',')
-                .map(str::trim)
-                .filter(|value| !value.is_empty())
-            {
-                if !query_names.iter().any(|candidate| candidate == name) {
-                    return Err(IdlcError::rpc(format!(
-                        "query template variable '{}' has no matching request-side query parameter in route '{}'",
-                        name, path
-                    )));
-                }
-            }
-        }
-        start = close + 1;
-    }
-    Ok(())
-}
-
-fn parse_path_params(path: &str) -> HashSet<String> {
-    let mut out = HashSet::new();
-    let mut buf = String::new();
-    let mut in_param = false;
-
-    for ch in strip_query_template(path).chars() {
-        match ch {
-            '{' if !in_param => {
-                in_param = true;
-                buf.clear();
-            }
-            '}' if in_param => {
-                if !buf.is_empty() && !buf.starts_with('?') {
-                    out.insert(buf.trim_start_matches('*').to_string());
-                }
-                in_param = false;
-            }
-            _ => {
-                if in_param {
-                    buf.push(ch);
-                }
-            }
-        }
-    }
-
-    out
-}
-
-fn strip_query_template(path: &str) -> &str {
-    if let Some(pos) = path.find("{?") {
-        &path[..pos]
-    } else {
-        path
-    }
-}
-
-fn http_method(annotations: &[hir::Annotation]) -> String {
-    for annotation in annotations {
-        let Some(name) = annotation_name(annotation) else {
-            continue;
-        };
-        if ["get", "post", "put", "patch", "delete", "head", "options"]
-            .iter()
-            .any(|candidate| name.eq_ignore_ascii_case(candidate))
-        {
-            return name.to_ascii_uppercase();
-        }
-    }
-    match http_stream_config(annotations) {
-        Ok(HttpStreamConfig {
-            kind: Some(HttpStreamKind::Server),
-            ..
-        }) => "GET".to_string(),
-        _ => "POST".to_string(),
-    }
-}
-
-fn normalize_path(path: &str) -> String {
-    let mut out = path.trim().replace("//", "/");
-    if !out.starts_with('/') {
-        out = format!("/{out}");
-    }
-    while out.len() > 1 && out.ends_with('/') {
-        out.pop();
-    }
-    out
 }
 
 fn security_expr(value: Option<&HttpSecurityProfile>) -> String {
@@ -886,6 +569,28 @@ fn stream_codec_name(value: HttpStreamCodec) -> &'static str {
     }
 }
 
+fn http_method_name(method: HttpMethod) -> &'static str {
+    match method {
+        HttpMethod::Get => "GET",
+        HttpMethod::Post => "POST",
+        HttpMethod::Put => "PUT",
+        HttpMethod::Patch => "PATCH",
+        HttpMethod::Delete => "DELETE",
+        HttpMethod::Head => "HEAD",
+        HttpMethod::Options => "OPTIONS",
+    }
+}
+
+fn param_source(source: HttpParamSource) -> ParamSource {
+    match source {
+        HttpParamSource::Path => ParamSource::Path,
+        HttpParamSource::Query => ParamSource::Query,
+        HttpParamSource::Header => ParamSource::Header,
+        HttpParamSource::Cookie => ParamSource::Cookie,
+        HttpParamSource::Body => ParamSource::Body,
+    }
+}
+
 fn api_key_location(value: &HttpApiKeyLocation) -> &'static str {
     match value {
         HttpApiKeyLocation::Header => "header",
@@ -912,41 +617,6 @@ fn maybe_optional_type(optional: bool, ty: &str) -> String {
 
 fn py_bool(value: bool) -> &'static str {
     if value { "True" } else { "False" }
-}
-
-fn validate_header_name(bound_name: &str, param_name: &str) -> IdlcResult<()> {
-    if bound_name.is_empty() {
-        return Err(IdlcError::rpc(format!(
-            "parameter '{}' has empty @header name",
-            param_name
-        )));
-    }
-    if bound_name.starts_with(':') {
-        return Err(IdlcError::rpc(format!(
-            "parameter '{}' uses reserved pseudo-header name '{}'",
-            param_name, bound_name
-        )));
-    }
-    Ok(())
-}
-
-fn validate_cookie_name(bound_name: &str, param_name: &str) -> IdlcResult<()> {
-    if bound_name.is_empty() {
-        return Err(IdlcError::rpc(format!(
-            "parameter '{}' has empty @cookie name",
-            param_name
-        )));
-    }
-    if bound_name
-        .chars()
-        .any(|ch| ch.is_ascii_whitespace() || ch == ';' || ch == '=')
-    {
-        return Err(IdlcError::rpc(format!(
-            "parameter '{}' has invalid @cookie name '{}'",
-            param_name, bound_name
-        )));
-    }
-    Ok(())
 }
 
 fn py_type(value: &TypeSpec) -> String {
@@ -979,16 +649,7 @@ fn py_type(value: &TypeSpec) -> String {
                 if value.args.is_empty() {
                     py_type_name(&value.ident)
                 } else {
-                    format!(
-                        "{}[{}]",
-                        py_type_name(&value.ident),
-                        value
-                            .args
-                            .iter()
-                            .map(py_type)
-                            .collect::<Vec<_>>()
-                            .join(", ")
-                    )
+                    "Any".to_string()
                 }
             }
         },

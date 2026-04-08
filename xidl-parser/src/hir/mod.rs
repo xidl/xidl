@@ -581,6 +581,23 @@ fn parse_xidlc_pragma(call: &crate::typed_ast::PreprocCall) -> Option<Pragma> {
         }
         return None;
     }
+    if token.eq_ignore_ascii_case("openapi") {
+        let mut nested = rest.split_whitespace();
+        let nested_token = nested.next()?;
+        let nested_rest = nested.collect::<Vec<_>>().join(" ");
+        if nested_token.eq_ignore_ascii_case("version") && !nested_rest.is_empty() {
+            return Some(Pragma::XidlcOpenApiVersion(trim_pragma_value(&nested_rest)));
+        }
+        if nested_token.eq_ignore_ascii_case("service") {
+            if let Some((base_url, description)) = parse_pragma_service(&nested_rest) {
+                return Some(Pragma::XidlcOpenApiService {
+                    base_url,
+                    description,
+                });
+            }
+        }
+        return None;
+    }
     if token.eq_ignore_ascii_case("service") {
         if let Some((base_url, description)) = parse_pragma_service(&rest) {
             return Some(Pragma::XidlcOpenApiService {

@@ -1,23 +1,24 @@
 use std::collections::{BTreeSet, HashMap};
 
 use jiff::{Timestamp, civil, tz::TimeZone};
+use serde::{Deserialize, Serialize};
 use xidl_parser::hir;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct DeprecatedInfo {
     pub deprecated: bool,
     pub since: Option<String>,
     pub after: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum HttpApiKeyLocation {
     Header,
     Query,
     Cookie,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum HttpSecurityRequirement {
     HttpBasic,
     HttpBearer,
@@ -30,32 +31,32 @@ pub enum HttpSecurityRequirement {
     },
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum HttpSecurityOrigin {
     Interface,
     Method,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct HttpSecurityProfile {
     pub origin: HttpSecurityOrigin,
     pub requirements: Vec<HttpSecurityRequirement>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum HttpStreamKind {
     Server,
     Client,
     Bidi,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum HttpStreamCodec {
     Sse,
     Ndjson,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct HttpStreamConfig {
     pub kind: Option<HttpStreamKind>,
     pub codec: HttpStreamCodec,
@@ -183,7 +184,6 @@ pub fn deprecated_info(annotations: &[hir::Annotation]) -> Result<Option<Depreca
     }))
 }
 
-#[cfg(any(feature = "gen-openapi", test))]
 pub fn effective_security(
     interface_annotations: &[hir::Annotation],
     method_annotations: &[hir::Annotation],
@@ -306,7 +306,10 @@ pub fn http_stream_config(annotations: &[hir::Annotation]) -> Result<HttpStreamC
         }
     }
 
-    let mut codec = HttpStreamCodec::Ndjson;
+    let mut codec = match kind {
+        Some(HttpStreamKind::Server) => HttpStreamCodec::Sse,
+        Some(HttpStreamKind::Client | HttpStreamKind::Bidi) | None => HttpStreamCodec::Ndjson,
+    };
     for annotation in annotations {
         let Some(name) = annotation_name(annotation) else {
             continue;

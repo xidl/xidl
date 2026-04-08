@@ -294,7 +294,7 @@ def _http_defaults_service_preview_user_route(service: HttpDefaultsServiceServic
 async def _http_defaults_service_get_user_endpoint(service: HttpDefaultsServiceService, request: Request):
     require_accept(request, "application/json")
     request_value = HttpDefaultsServiceGetUserRequest(
-        id=read_scalar(query_value(request, "id"), "int", optional=False, default_on_missing=False, wire_name="id"),
+        id=read_scalar(path_value(request, "id"), "int", optional=False, default_on_missing=False, wire_name="id"),
         lang=read_scalar(query_value(request, "lang"), "str", optional=False, default_on_missing=False, wire_name="lang"),
     )
     response_value = await service.get_user(request_value)

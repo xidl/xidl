@@ -80,6 +80,24 @@ impl Generator {
                     let data = file.into_hir();
                     let mut props = properties.clone();
                     props.extend(data.props);
+                    let next_lang = if Self::uses_http_hir(&data.lang) {
+                        "http-hir"
+                    } else {
+                        data.lang.as_str()
+                    };
+                    ret.extend(
+                        Box::pin(self.generate_for_lang(next_lang, data.hir, input, props)).await?,
+                    );
+                }
+                crate::jsonrpc::ArtifactKind::HttpHir => {
+                    let data = file.into_http_hir();
+                    let mut props = properties.clone();
+                    props.extend(data.props);
+                    props.insert(
+                        "http_hir".to_string(),
+                        serde_json::to_value(&data.http_hir)
+                            .map_err(|err| IdlcError::rpc(err.to_string()))?,
+                    );
                     ret.extend(
                         Box::pin(self.generate_for_lang(&data.lang, data.hir, input, props))
                             .await?,
@@ -96,6 +114,13 @@ impl Generator {
         }
         session.finish().await;
         Ok(ret)
+    }
+
+    fn uses_http_hir(lang: &str) -> bool {
+        matches!(
+            lang,
+            "axum" | "rust-axum" | "go-http" | "python-http" | "openapi"
+        )
     }
 
     async fn get_properties_for_lang(&mut self) -> IdlcResult<HashMap<String, serde_json::Value>> {

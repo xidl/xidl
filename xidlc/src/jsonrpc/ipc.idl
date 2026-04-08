@@ -6,6 +6,14 @@ struct ArtifactHir {
 };
 
 @derive(Debug, Serialize, Deserialize)
+struct ArtifactHttpHir {
+    string lang;
+    ::xidl_parser::hir::Specification hir;
+    ::xidlc::generate::http_hir::HttpHirDocument http_hir;
+    ::xidl_parser::hir::ParserProperties props;
+};
+
+@derive(Debug, Serialize, Deserialize)
 struct ArtifactFile {
     string path;
     string content;
@@ -14,6 +22,7 @@ struct ArtifactFile {
 @derive(Debug, Serialize, Deserialize)
 enum ArtifactKind {
     Hir,
+    HttpHir,
     File
 };
 
@@ -21,6 +30,8 @@ enum ArtifactKind {
 union Artifact switch (ArtifactKind) {
     case ArtifactKind::Hir:
         ArtifactHir hir;
+    case ArtifactKind::HttpHir:
+        ArtifactHttpHir http_hir;
     case ArtifactKind::File:
         ArtifactFile file;
 };

@@ -1,9 +1,10 @@
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::typescript::{TsMode, TypescriptRenderOutput, TypescriptRenderer};
-use crate::generate::utils::{
-    HttpStreamCodec, HttpStreamKind, HttpStreamTargetSupport, doc_lines_from_annotations,
-    http_stream_config, validate_http_stream_method, validate_http_stream_target,
+use crate::generate::http_hir::semantics::{
+    HttpStreamCodec, HttpStreamKind, HttpStreamTargetSupport, http_stream_config,
+    validate_http_stream_method, validate_http_stream_target,
 };
+use crate::generate::typescript::{TsMode, TypescriptRenderOutput, TypescriptRenderer};
+use crate::generate::utils::doc_lines_from_annotations;
 use convert_case::{Case, Casing};
 use serde::Serialize;
 use std::collections::{HashMap, HashSet};

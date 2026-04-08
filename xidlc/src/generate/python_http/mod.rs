@@ -2,6 +2,7 @@ mod render;
 mod spec;
 
 use crate::error::IdlcResult;
+use crate::generate::http_hir::HttpHirDocument;
 use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactHir};
 use crate::macros::hashmap;
 use convert_case::{Case, Casing};
@@ -14,15 +15,16 @@ pub use render::PythonHttpRenderer;
 pub fn generate(
     spec: hir::Specification,
     input_path: &Path,
-    _props: ParserProperties,
+    props: ParserProperties,
 ) -> IdlcResult<Vec<Artifact>> {
+    let http_hir = HttpHirDocument::from_props(&props)?;
     let stem = input_path
         .file_stem()
         .and_then(|value| value.to_str())
         .unwrap_or("output");
     let filename = format!("{}_http.py", stem.replace('-', "_"));
     let module_name = stem.to_case(Case::Snake).replace('-', "_");
-    let content = spec::render_spec(&spec, &module_name)?;
+    let content = spec::render_spec(&spec, &module_name, &http_hir)?;
 
     let mut artifacts = vec![Artifact::new_file(ArtifactFile {
         path: filename,

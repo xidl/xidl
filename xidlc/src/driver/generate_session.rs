@@ -73,6 +73,7 @@ impl CodegenSession {
         #[allow(unreachable_patterns)]
         match lang {
             Plugin::Hir => run_server!(crate::generate::hir_gen::HirGen),
+            Plugin::HttpHir => run_server!(crate::generate::http_hir::HttpHirCodegen),
             Plugin::TypedAst => run_server!(crate::generate::typed_ast_gen::TypedAstGen),
             #[cfg(feature = "gen-c")]
             Plugin::C => run_server!(crate::generate::c::CCodegen),

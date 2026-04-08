@@ -7,6 +7,7 @@ pub mod go;
 #[cfg(feature = "gen-go-http")]
 pub mod go_http;
 pub mod hir_gen;
+pub mod http_hir;
 #[cfg(feature = "gen-openapi")]
 pub mod openapi;
 #[cfg(feature = "gen-openrpc")]

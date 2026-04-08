@@ -4,12 +4,13 @@ mod render;
 mod spec;
 
 use crate::error::IdlcResult;
+use crate::generate::http_hir::HttpHirDocument;
 use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactHir};
 use crate::macros::hashmap;
 use convert_case::{Case, Casing};
 pub use render::GoHttpRenderer;
 use serde::Serialize;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::path::Path;
 use xidl_parser::hir;
 use xidl_parser::hir::{ParserProperties, Specification};
@@ -17,15 +18,16 @@ use xidl_parser::hir::{ParserProperties, Specification};
 pub fn generate(
     spec: hir::Specification,
     input_path: &Path,
-    _props: HashMap<String, serde_json::Value>,
+    props: HashMap<String, serde_json::Value>,
 ) -> IdlcResult<Vec<Artifact>> {
+    let http_hir = HttpHirDocument::from_props(&props)?;
     let stem = input_path
         .file_stem()
         .and_then(|value| value.to_str())
         .unwrap_or("output");
     let filename = format!("{}_http.go", stem.replace('-', "_"));
     let package = stem.replace('-', "_").to_case(Case::Snake);
-    let content = spec::render_spec(&spec, &package)?;
+    let content = spec::render_spec(&spec, &package, &http_hir)?;
 
     let mut artifacts = vec![Artifact::new_file(ArtifactFile {
         path: filename,
@@ -101,13 +103,6 @@ pub(crate) enum ParamSource {
     Body,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub(crate) enum ParamDirection {
-    In,
-    Out,
-    InOut,
-}
-
 #[derive(Clone)]
 pub(crate) struct ParamMeta {
     pub(crate) field_name: String,
@@ -144,25 +139,14 @@ pub(crate) struct MethodMeta {
     pub(crate) response_header_params: Vec<ParamMeta>,
     pub(crate) response_cookie_params: Vec<ParamMeta>,
     pub(crate) return_ty: Option<String>,
-    pub(crate) stream_kind: Option<crate::generate::utils::HttpStreamKind>,
-    pub(crate) stream_codec: crate::generate::utils::HttpStreamCodec,
-    pub(crate) security: Vec<crate::generate::utils::HttpSecurityRequirement>,
+    pub(crate) stream_kind: Option<crate::generate::http_hir::semantics::HttpStreamKind>,
+    pub(crate) stream_codec: crate::generate::http_hir::semantics::HttpStreamCodec,
+    pub(crate) security: Vec<crate::generate::http_hir::semantics::HttpSecurityRequirement>,
     pub(crate) basic_realm: Option<String>,
     pub(crate) deprecated: bool,
     pub(crate) deprecated_since: Option<String>,
     pub(crate) deprecated_after: Option<String>,
     pub(crate) deprecated_note: Option<String>,
-}
-
-pub(crate) struct RouteTemplate {
-    pub(crate) path: String,
-    pub(crate) path_params: HashSet<String>,
-    pub(crate) query_params: HashSet<String>,
-}
-
-pub(crate) struct SourceBinding {
-    pub(crate) source: ParamSource,
-    pub(crate) bound_name: String,
 }
 
 #[derive(Serialize)]

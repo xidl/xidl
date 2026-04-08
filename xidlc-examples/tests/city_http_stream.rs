@@ -71,9 +71,13 @@ async fn http_stream_client_calls_stream_endpoints() {
     assert_eq!(t2, "tick-2");
 
     let mut upload = client
-        .upload_asset(BearerAuth {
-            token: "test-token".to_string(),
-        })
+        .upload_asset(
+            "asset-1".to_string(),
+            vec![1, 2, 3],
+            BearerAuth {
+                token: "test-token".to_string(),
+            },
+        )
         .await
         .expect("open upload_asset");
     upload
@@ -93,7 +97,10 @@ async fn http_stream_client_calls_stream_endpoints() {
     let upload_resp = upload.close().await.expect("close upload_asset");
     assert_eq!(upload_resp, "uploaded:asset-1:5");
 
-    let mut chat = client.chat().await.expect("open chat");
+    let mut chat = client
+        .chat("ops".to_string(), "hello".to_string())
+        .await
+        .expect("open chat");
     chat.write(CityHttpStreamApiChatRequest {
         room: "ops".to_string(),
         message: "hello".to_string(),

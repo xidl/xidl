@@ -30,7 +30,7 @@ impl CityHttpStreamApi for CityHttpStreamService {
 
     async fn get_attribute_maintenance_mode(
         &self,
-        _req: xidl_rust_axum::Request<CityHttpStreamApiMaintenanceModeRequest>,
+        _req: xidl_rust_axum::Request<CityHttpStreamApiGetAttributeMaintenanceModeRequest>,
     ) -> Result<bool, xidl_rust_axum::Error> {
         Ok(false)
     }

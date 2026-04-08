@@ -147,7 +147,7 @@ impl HttpClientStreamReportServiceClient{
 }
 
 impl HttpClientStreamReportServiceClient{
-    pub async fn upload_parts(&self)->Result<xidl_rust_axum::stream::Writer<HttpClientStreamReportServiceUploadPartsRequest,UploadSummary>,xidl_rust_axum::Error>{
+    pub async fn upload_parts(&self,chunk:UploadChunk)->Result<xidl_rust_axum::stream::Writer<HttpClientStreamReportServiceUploadPartsRequest,UploadSummary>,xidl_rust_axum::Error>{
         let path = "/uploads/parts".to_string();
         let mut req = self
         .client

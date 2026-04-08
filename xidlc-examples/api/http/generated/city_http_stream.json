@@ -111,7 +111,7 @@
     },
     "/attribute/maintenance_mode": {
       "get": {
-        "operationId": "CityHttpStreamApi.maintenance_mode",
+        "operationId": "CityHttpStreamApi.get_attribute_maintenance_mode",
         "responses": {
           "200": {
             "description": "OK",
@@ -141,7 +141,7 @@
         ]
       },
       "post": {
-        "operationId": "CityHttpStreamApi.set_maintenance_mode",
+        "operationId": "CityHttpStreamApi.set_attribute_maintenance_mode",
         "requestBody": {
           "content": {
             "application/json": {

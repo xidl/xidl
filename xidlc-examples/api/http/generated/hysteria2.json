@@ -12,7 +12,6 @@
           {
             "name": "Hysteria-Auth",
             "in": "header",
-            "description": "Authentication credentials.",
             "required": false,
             "schema": {
               "type": "string"
@@ -21,7 +20,6 @@
           {
             "name": "Hysteria-CC-RX",
             "in": "header",
-            "description": "Client's maximum receive rate in bytes per second. A value of 0 indicates unknown.",
             "required": false,
             "schema": {
               "type": "integer",
@@ -32,7 +30,6 @@
           {
             "name": "Hysteria-Padding",
             "in": "header",
-            "description": "A random padding string of variable length.",
             "required": false,
             "schema": {
               "type": "string"
@@ -47,20 +44,20 @@
                 "schema": {
                   "type": "object",
                   "required": [
-                    "udp",
-                    "rx",
-                    "padding"
+                    "Hysteria-UDP",
+                    "Hysteria-CC-RX",
+                    "Hysteria-Padding"
                   ],
                   "properties": {
-                    "padding": {
-                      "type": "string"
-                    },
-                    "rx": {
+                    "Hysteria-CC-RX": {
                       "type": "integer",
                       "format": "int32",
                       "minimum": 0
                     },
-                    "udp": {
+                    "Hysteria-Padding": {
+                      "type": "string"
+                    },
+                    "Hysteria-UDP": {
                       "type": "boolean"
                     }
                   }

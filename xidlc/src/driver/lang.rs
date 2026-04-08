@@ -4,6 +4,8 @@ use serde::Deserialize;
 pub enum Plugin {
     #[serde(alias = "hir")]
     Hir,
+    #[serde(alias = "http_hir", alias = "http-hir")]
+    HttpHir,
     #[serde(alias = "typed_ast", alias = "typed-ast")]
     TypedAst,
     #[serde(alias = "c", alias = "cc")]
@@ -63,6 +65,8 @@ mod tests {
     fn test_plugin_from_str() {
         let cases = [
             ("hir", Plugin::Hir),
+            ("http_hir", Plugin::HttpHir),
+            ("http-hir", Plugin::HttpHir),
             ("typed_ast", Plugin::TypedAst),
             ("typed-ast", Plugin::TypedAst),
             ("c", Plugin::C),

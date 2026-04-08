@@ -13,9 +13,7 @@
   "paths": {
     "/attribute/host": {
       "get": {
-        "summary": "host name",
-        "description": "host name",
-        "operationId": "HttpServer.host",
+        "operationId": "HttpServer.get_attribute_host",
         "responses": {
           "200": {
             "description": "OK",
@@ -40,9 +38,7 @@
         }
       },
       "post": {
-        "summary": "host name",
-        "description": "host name",
-        "operationId": "HttpServer.set_host",
+        "operationId": "HttpServer.set_attribute_host",
         "requestBody": {
           "content": {
             "application/json": {
@@ -71,9 +67,7 @@
     },
     "/attribute/port": {
       "get": {
-        "summary": "port number",
-        "description": "port number",
-        "operationId": "HttpServer.port",
+        "operationId": "HttpServer.get_attribute_port",
         "responses": {
           "200": {
             "description": "OK",
@@ -166,8 +160,6 @@
     },
     "/legacy/user/{id}": {
       "get": {
-        "summary": "Get user info",
-        "description": "Get user info",
         "operationId": "HttpServer.get_user_info",
         "parameters": [
           {
@@ -325,8 +317,6 @@
     },
     "/user/{id}": {
       "get": {
-        "summary": "Get user info",
-        "description": "Get user info",
         "operationId": "HttpServer.get_user_info",
         "parameters": [
           {
@@ -740,8 +730,6 @@
     },
     "/v1/user/{id}": {
       "get": {
-        "summary": "Get user info",
-        "description": "Get user info",
         "operationId": "HttpServer.get_user_info",
         "parameters": [
           {

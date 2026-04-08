@@ -833,16 +833,15 @@ openapi.json
     "/users/preview": {
       "get": {
         "operationId": "HttpDefaultsService.preview_user",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "req",
-            "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/CreateUserRequest"
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRequest"
+              }
             }
           }
-        ],
+        },
         "responses": {
           "200": {
             "content": {

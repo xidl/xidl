@@ -1,46 +1,37 @@
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::utils::{
-    HttpApiKeyLocation, HttpSecurityProfile, HttpSecurityRequirement, HttpStreamCodec,
-    HttpStreamKind, HttpStreamTargetSupport, deprecated_info, effective_media_type,
-    effective_security_with_origin, http_stream_config, validate_http_annotations,
-    validate_http_stream_method, validate_http_stream_target,
+use crate::generate::http_hir::{
+    HttpHirDocument, HttpMethod as HttpHirMethod, HttpOperation, HttpOperationSource,
+    HttpParamSource as HttpHirParamSource,
+    semantics::{HttpApiKeyLocation, HttpSecurityRequirement, HttpStreamCodec, HttpStreamKind},
 };
 use convert_case::{Case, Casing};
 use serde::Serialize;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::fmt::Write;
 use xidl_parser::hir;
 
-use super::{GoHttpRenderer, HttpMethod, MethodMeta, ParamDirection, ParamSource};
+use super::{GoHttpRenderer, HttpMethod, MethodMeta, ParamMeta, ParamSource};
 
 pub(crate) fn render_interface(
     out: &mut String,
     interface: &hir::InterfaceDcl,
     prefix: &[String],
     renderer: &GoHttpRenderer,
+    http_hir: &HttpHirDocument,
 ) -> IdlcResult<()> {
     let hir::InterfaceDclInner::InterfaceDef(def) = &interface.decl else {
         return Ok(());
     };
-    validate_http_annotations(
-        &format!("interface '{}'", def.header.ident),
-        &interface.annotations,
-    )
-    .map_err(IdlcError::rpc)?;
-
     let interface_name = super::definition::export_name(prefix, &def.header.ident);
-    let mut methods = Vec::new();
-    if let Some(body) = &def.interface_body {
-        for export in &body.0 {
-            if let hir::Export::OpDcl(op) = export {
-                methods.push(build_method_meta(
-                    &interface_name,
-                    &interface.annotations,
-                    op,
-                )?);
-            }
-        }
-    }
+    let Some(http_interface) = http_hir.find_interface(prefix, &def.header.ident) else {
+        return Ok(());
+    };
+    let methods = http_interface
+        .operations
+        .iter()
+        .filter(|operation| matches!(operation.source, HttpOperationSource::Method))
+        .map(|operation| build_method_meta(&interface_name, operation))
+        .collect::<IdlcResult<Vec<_>>>()?;
 
     writeln!(out, "type {interface_name}Service interface {{").unwrap();
     for method in &methods {
@@ -837,81 +828,35 @@ fn template_params(params: &[super::ParamMeta]) -> Vec<MethodTemplateParam> {
 
 pub(crate) fn build_method_meta(
     interface_name: &str,
-    interface_annotations: &[hir::Annotation],
-    op: &hir::OpDcl,
+    op: &HttpOperation,
 ) -> IdlcResult<MethodMeta> {
-    validate_http_annotations(&format!("operation '{}'", op.ident), &op.annotations)
-        .map_err(IdlcError::rpc)?;
-    let stream = http_stream_config(&op.annotations).map_err(IdlcError::rpc)?;
-    validate_http_stream_target(
-        &op.ident,
-        stream,
-        HttpStreamTargetSupport {
-            target: "go-http",
-            supports_bidi: false,
-            server_codec: HttpStreamCodec::Sse,
-            client_codec: HttpStreamCodec::Ndjson,
-            server_method: "GET",
-            client_method: "POST",
-            bidi_method: "GET",
-        },
-    )
-    .map_err(IdlcError::rpc)?;
-    let default_method = if matches!(stream.kind, Some(HttpStreamKind::Server)) {
-        HttpMethod::Get
-    } else {
-        HttpMethod::Post
-    };
-    let (http_method, mut paths) =
-        super::definition::route_from_annotations(&op.annotations, default_method)?;
-    validate_http_stream_method(
-        &op.ident,
-        stream.kind,
-        super::definition::http_method_name(http_method),
-        HttpStreamTargetSupport {
-            target: "go-http",
-            supports_bidi: false,
-            server_codec: HttpStreamCodec::Sse,
-            client_codec: HttpStreamCodec::Ndjson,
-            server_method: "GET",
-            client_method: "POST",
-            bidi_method: "GET",
-        },
-    )
-    .map_err(IdlcError::rpc)?;
-    if paths.is_empty() {
-        paths.push(super::definition::auto_default_method_path(
-            op,
-            http_method,
-        )?);
+    let stream = op.stream;
+    match stream.kind {
+        Some(HttpStreamKind::Server) if stream.codec != HttpStreamCodec::Sse => {
+            return Err(IdlcError::rpc(format!(
+                "go-http currently supports only SSE for @server_stream methods: '{}'",
+                op.name
+            )));
+        }
+        Some(HttpStreamKind::Client) if stream.codec != HttpStreamCodec::Ndjson => {
+            return Err(IdlcError::rpc(format!(
+                "go-http currently supports only NDJSON for @client_stream methods: '{}'",
+                op.name
+            )));
+        }
+        Some(HttpStreamKind::Bidi) => {
+            return Err(IdlcError::rpc(format!(
+                "go-http currently does not support @bidi_stream methods: '{}'",
+                op.name
+            )));
+        }
+        _ => {}
     }
-    let route_templates = paths
-        .iter()
-        .map(|path| super::definition::parse_route_template(path))
-        .collect::<IdlcResult<Vec<_>>>()?;
-    let all_path_param_names: HashSet<String> = route_templates
-        .iter()
-        .flat_map(|item| item.path_params.iter().cloned())
-        .collect();
-    let all_query_template_names: HashSet<String> = route_templates
-        .iter()
-        .flat_map(|item| item.query_params.iter().cloned())
-        .collect();
-    let default_source = super::definition::default_param_source(http_method);
-    let deprecated = deprecated_context(interface_annotations, &op.annotations)?;
-
-    let security_profile = effective_security_with_origin(interface_annotations, &op.annotations)
-        .map_err(IdlcError::rpc)?;
-    let (security, basic_realm) = match security_profile {
+    let http_method = http_method(op.method);
+    let deprecated = deprecated_context(op);
+    let (security, basic_realm) = match &op.security {
         None => (Vec::new(), None),
-        Some(HttpSecurityProfile {
-            origin: _,
-            requirements,
-        }) => (
-            requirements,
-            super::definition::find_basic_realm(&op.annotations)
-                .or_else(|| super::definition::find_basic_realm(interface_annotations)),
-        ),
+        Some(profile) => (profile.requirements.clone(), op.basic_auth_realm.clone()),
     };
 
     let mut request_params = Vec::new();
@@ -923,36 +868,8 @@ pub(crate) fn build_method_meta(
     let mut response_body_params = Vec::new();
     let mut response_header_params = Vec::new();
     let mut response_cookie_params = Vec::new();
-    let params = op
-        .parameter
-        .as_ref()
-        .map(|value| value.0.as_slice())
-        .unwrap_or(&[]);
-    for param in params {
-        let direction = super::definition::param_direction(param.attr.as_ref());
-        let meta = super::definition::param_meta(
-            param,
-            direction,
-            default_source,
-            &all_path_param_names,
-            &all_query_template_names,
-        )?;
-        if meta.flatten && matches!(direction, ParamDirection::Out) {
-            return Err(IdlcError::rpc(format!(
-                "@flatten can only be applied to request-side body parameter '{}' of method '{}'",
-                param.declarator.0, op.ident
-            )));
-        }
-        if matches!(direction, ParamDirection::Out | ParamDirection::InOut) {
-            match meta.source {
-                ParamSource::Header => response_header_params.push(meta.clone()),
-                ParamSource::Cookie => response_cookie_params.push(meta.clone()),
-                _ => response_body_params.push(meta.clone()),
-            }
-        }
-        if matches!(direction, ParamDirection::Out) {
-            continue;
-        }
+    for param in &op.request_params {
+        let meta = param_meta(param);
         request_params.push(meta.clone());
         match meta.source {
             ParamSource::Path => path_params.push(meta),
@@ -962,36 +879,17 @@ pub(crate) fn build_method_meta(
             ParamSource::Body => body_params.push(meta),
         }
     }
+    for param in &op.response_params {
+        let meta = param_meta(param);
+        response_params_from_meta(
+            &mut response_body_params,
+            &mut response_header_params,
+            &mut response_cookie_params,
+            meta,
+        );
+    }
 
-    if matches!(stream.kind, Some(HttpStreamKind::Client))
-        && (!path_params.is_empty()
-            || !query_params.is_empty()
-            || !header_params.is_empty()
-            || !cookie_params.is_empty())
-    {
-        return Err(IdlcError::rpc(format!(
-            "@client_stream method '{}' currently supports body parameters only",
-            op.ident
-        )));
-    }
-    for param in &request_params {
-        if param.flatten && !matches!(param.source, ParamSource::Body) {
-            return Err(IdlcError::rpc(format!(
-                "@flatten can only be applied to body parameter '{}' of method '{}'",
-                param.raw_name, op.ident
-            )));
-        }
-    }
-    if body_params.len() != 1 && body_params.iter().any(|param| param.flatten) {
-        return Err(IdlcError::rpc(format!(
-            "@flatten requires exactly one request-side body parameter, but method '{}' has {}",
-            op.ident,
-            body_params.len()
-        )));
-    }
-    validate_query_template_bindings(&op.ident, &all_query_template_names, &query_params)?;
-
-    let struct_prefix = format!("{}{}", interface_name, op.ident.to_case(Case::Pascal));
+    let struct_prefix = format!("{}{}", interface_name, op.name.to_case(Case::Pascal));
     let request_struct = format!("{struct_prefix}Request");
     let response_struct = format!("{struct_prefix}Response");
     let (request_body_struct, request_body_direct_field, request_body_direct_ty) =
@@ -1003,10 +901,7 @@ pub(crate) fn build_method_meta(
         } else {
             (Some(format!("{struct_prefix}RequestBody")), None, None)
         };
-    let return_ty = match &op.ty {
-        hir::OpTypeSpec::Void => None,
-        hir::OpTypeSpec::TypeSpec(ty) => Some(super::definition::go_type(ty)),
-    };
+    let return_ty = op.return_type.as_ref().map(super::definition::go_type);
     let response_output_count = response_body_params.len() + usize::from(return_ty.is_some());
     let (response_body_struct, response_body_direct_field, response_body_direct_ty) =
         if response_output_count == 0 {
@@ -1021,13 +916,10 @@ pub(crate) fn build_method_meta(
             (Some(format!("{struct_prefix}ResponseBody")), None, None)
         };
     Ok(MethodMeta {
-        method_name: op.ident.to_case(Case::Pascal),
+        method_name: op.name.to_case(Case::Pascal),
         struct_prefix,
         http_method,
-        paths: route_templates
-            .iter()
-            .map(|item| item.path.clone())
-            .collect(),
+        paths: op.routes.iter().map(|item| item.path.clone()).collect(),
         request_struct,
         request_body_struct,
         request_body_direct_field,
@@ -1036,11 +928,11 @@ pub(crate) fn build_method_meta(
         response_body_struct,
         response_body_direct_field,
         response_body_direct_ty,
-        request_content_type: effective_media_type(
-            interface_annotations,
-            &op.annotations,
-            "Consumes",
-        ),
+        request_content_type: if matches!(stream.kind, Some(HttpStreamKind::Client)) {
+            "application/x-ndjson".to_string()
+        } else {
+            op.request_content_type.clone()
+        },
         response_content_type: if matches!(stream.kind, Some(HttpStreamKind::Server))
             && stream.codec == HttpStreamCodec::Sse
         {
@@ -1048,7 +940,7 @@ pub(crate) fn build_method_meta(
         } else if matches!(stream.kind, Some(HttpStreamKind::Client)) {
             "application/json".to_string()
         } else {
-            effective_media_type(interface_annotations, &op.annotations, "Produces")
+            op.response_content_type.clone()
         },
         request_params,
         path_params,
@@ -1071,6 +963,19 @@ pub(crate) fn build_method_meta(
     })
 }
 
+fn response_params_from_meta(
+    response_body_params: &mut Vec<ParamMeta>,
+    response_header_params: &mut Vec<ParamMeta>,
+    response_cookie_params: &mut Vec<ParamMeta>,
+    meta: ParamMeta,
+) {
+    match meta.source {
+        ParamSource::Header => response_header_params.push(meta),
+        ParamSource::Cookie => response_cookie_params.push(meta),
+        _ => response_body_params.push(meta),
+    }
+}
+
 struct DeprecatedContext {
     deprecated: bool,
     since: Option<String>,
@@ -1078,15 +983,8 @@ struct DeprecatedContext {
     note: Option<String>,
 }
 
-fn deprecated_context(
-    interface_annotations: &[hir::Annotation],
-    method_annotations: &[hir::Annotation],
-) -> IdlcResult<DeprecatedContext> {
-    let info = if let Some(info) = deprecated_info(method_annotations).map_err(IdlcError::rpc)? {
-        Some(info)
-    } else {
-        deprecated_info(interface_annotations).map_err(IdlcError::rpc)?
-    };
+fn deprecated_context(op: &HttpOperation) -> DeprecatedContext {
+    let info = op.deprecated.as_ref();
     let deprecated = info.as_ref().map(|value| value.deprecated).unwrap_or(false);
     let since = info.as_ref().and_then(|value| value.since.clone());
     let after = info.as_ref().and_then(|value| value.after.clone());
@@ -1100,36 +998,40 @@ fn deprecated_context(
         }
         note
     });
-    Ok(DeprecatedContext {
+    DeprecatedContext {
         deprecated,
         since,
         after,
         note,
-    })
+    }
 }
 
-fn validate_query_template_bindings(
-    method_name: &str,
-    query_template_names: &HashSet<String>,
-    query_params: &[super::ParamMeta],
-) -> IdlcResult<()> {
-    for name in query_template_names {
-        let count = query_params
-            .iter()
-            .filter(|param| param.wire_name == *name)
-            .count();
-        if count == 0 {
-            return Err(IdlcError::rpc(format!(
-                "query template variable '{}' has no matching request-side query parameter in method '{}'",
-                name, method_name
-            )));
-        }
-        if count > 1 {
-            return Err(IdlcError::rpc(format!(
-                "query template variable '{}' is bound by multiple request-side query parameters in method '{}'",
-                name, method_name
-            )));
-        }
+fn http_method(method: HttpHirMethod) -> HttpMethod {
+    match method {
+        HttpHirMethod::Get => HttpMethod::Get,
+        HttpHirMethod::Post => HttpMethod::Post,
+        HttpHirMethod::Put => HttpMethod::Put,
+        HttpHirMethod::Patch => HttpMethod::Patch,
+        HttpHirMethod::Delete => HttpMethod::Delete,
+        HttpHirMethod::Head => HttpMethod::Head,
+        HttpHirMethod::Options => HttpMethod::Options,
     }
-    Ok(())
+}
+
+fn param_meta(param: &crate::generate::http_hir::HttpParam) -> ParamMeta {
+    ParamMeta {
+        field_name: param.name.to_case(Case::Pascal),
+        raw_name: param.name.clone(),
+        wire_name: param.wire_name.clone(),
+        ty: super::definition::go_type(&param.ty),
+        optional: param.optional,
+        source: match param.source {
+            HttpHirParamSource::Path => ParamSource::Path,
+            HttpHirParamSource::Query => ParamSource::Query,
+            HttpHirParamSource::Header => ParamSource::Header,
+            HttpHirParamSource::Cookie => ParamSource::Cookie,
+            HttpHirParamSource::Body => ParamSource::Body,
+        },
+        flatten: param.flatten,
+    }
 }

@@ -160,6 +160,16 @@ pub struct ArtifactHir {
 impl ArtifactHir {}
 
 #[derive(Debug, ::serde::Serialize, ::serde::Deserialize)]
+pub struct ArtifactHttpHir {
+    pub lang: String,
+    pub hir: ::xidl_parser::hir::Specification,
+    pub http_hir: crate::generate::http_hir::HttpHirDocument,
+    pub props: ::xidl_parser::hir::ParserProperties,
+}
+
+impl ArtifactHttpHir {}
+
+#[derive(Debug, ::serde::Serialize, ::serde::Deserialize)]
 pub struct ArtifactFile {
     pub path: String,
     pub content: String,
@@ -170,6 +180,7 @@ impl ArtifactFile {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, ::serde::Serialize, ::serde::Deserialize)]
 pub enum ArtifactKind {
     Hir,
+    HttpHir,
     File,
 }
 
@@ -180,6 +191,7 @@ pub struct Artifact {
 
 union ArtifactData {
     hir: core::mem::ManuallyDrop<ArtifactHir>,
+    http_hir: core::mem::ManuallyDrop<ArtifactHttpHir>,
     file: core::mem::ManuallyDrop<ArtifactFile>,
 }
 
@@ -188,6 +200,9 @@ impl Drop for Artifact {
         match self.tag {
             ArtifactKind::Hir => unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.hir);
+            },
+            ArtifactKind::HttpHir => unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.http_hir);
             },
             ArtifactKind::File => unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.file);
@@ -225,6 +240,37 @@ impl Artifact {
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
             core::mem::ManuallyDrop::take(&mut forget.data.hir)
+        }
+    }
+
+    pub fn new_http_hir(value: ArtifactHttpHir) -> Self {
+        Self {
+            tag: ArtifactKind::HttpHir,
+            data: ArtifactData {
+                http_hir: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+
+    pub fn is_http_hir(&self) -> bool {
+        matches!(self.tag, ArtifactKind::HttpHir)
+    }
+
+    pub fn as_http_hir(&self) -> &ArtifactHttpHir {
+        debug_assert!(self.is_http_hir());
+        unsafe { &self.data.http_hir }
+    }
+
+    pub fn as_http_hir_mut(&mut self) -> &mut ArtifactHttpHir {
+        debug_assert!(self.is_http_hir());
+        unsafe { &mut self.data.http_hir }
+    }
+
+    pub fn into_http_hir(self) -> ArtifactHttpHir {
+        debug_assert!(self.is_http_hir());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.http_hir)
         }
     }
 
@@ -286,11 +332,27 @@ impl serde::Serialize for Artifact {
                 )?;
                 serde::ser::SerializeStructVariant::end(s)
             }
-            ArtifactKind::File => {
+            ArtifactKind::HttpHir => {
                 let mut s = serde::Serializer::serialize_struct_variant(
                     __serializer,
                     "Artifact",
                     1,
+                    "ArtifactKind::HttpHir",
+                    size_of::<ArtifactHttpHir>(),
+                )?;
+                let x = unsafe { std::ops::Deref::deref(&self.data.http_hir) };
+                serde::ser::SerializeStructVariant::serialize_field(
+                    &mut s,
+                    "ArtifactKind::HttpHir",
+                    x,
+                )?;
+                serde::ser::SerializeStructVariant::end(s)
+            }
+            ArtifactKind::File => {
+                let mut s = serde::Serializer::serialize_struct_variant(
+                    __serializer,
+                    "Artifact",
+                    2,
                     "ArtifactKind::File",
                     size_of::<ArtifactFile>(),
                 )?;
@@ -311,10 +373,15 @@ impl<'de> serde::Deserialize<'de> for Artifact {
     where
         D: serde::Deserializer<'de>,
     {
-        const VARIANTS: &[&str] = &["ArtifactKind::Hir", "ArtifactKind::File"];
+        const VARIANTS: &[&str] = &[
+            "ArtifactKind::Hir",
+            "ArtifactKind::HttpHir",
+            "ArtifactKind::File",
+        ];
         enum __Variant {
             __Case0,
             __Case1,
+            __Case2,
         }
 
         impl<'de> serde::Deserialize<'de> for __Variant {
@@ -335,7 +402,8 @@ impl<'de> serde::Deserialize<'de> for Artifact {
                     {
                         match value {
                             "ArtifactKind::Hir" => Ok(__Variant::__Case0),
-                            "ArtifactKind::File" => Ok(__Variant::__Case1),
+                            "ArtifactKind::HttpHir" => Ok(__Variant::__Case1),
+                            "ArtifactKind::File" => Ok(__Variant::__Case2),
                             _ => Err(E::unknown_variant(value, VARIANTS)),
                         }
                     }
@@ -406,6 +474,53 @@ impl<'de> serde::Deserialize<'de> for Artifact {
                         })
                     }
                     __Variant::__Case1 => {
+                        struct __CaseVisitor;
+                        impl<'de> serde::de::Visitor<'de> for __CaseVisitor {
+                            type Value = ArtifactHttpHir;
+                            fn expecting(
+                                &self,
+                                formatter: &mut core::fmt::Formatter,
+                            ) -> core::fmt::Result {
+                                formatter.write_str("struct variant ArtifactKind::HttpHir")
+                            }
+
+                            fn visit_map<M>(self, mut map: M) -> Result<Self::Value, M::Error>
+                            where
+                                M: serde::de::MapAccess<'de>,
+                            {
+                                let mut value = None;
+                                while let Some(key) = map.next_key::<String>()? {
+                                    if key == "ArtifactKind::HttpHir" {
+                                        if value.is_some() {
+                                            return Err(serde::de::Error::duplicate_field(
+                                                "ArtifactKind::HttpHir",
+                                            ));
+                                        }
+                                        value = Some(map.next_value()?);
+                                    } else {
+                                        let _: serde::de::IgnoredAny = map.next_value()?;
+                                    }
+                                }
+                                value.ok_or_else(|| {
+                                    serde::de::Error::missing_field("ArtifactKind::HttpHir")
+                                })
+                            }
+                        }
+
+                        let value = serde::de::VariantAccess::struct_variant(
+                            variant_access,
+                            &["ArtifactKind::HttpHir"],
+                            __CaseVisitor,
+                        )?;
+                        let tag = ArtifactKind::HttpHir;
+                        Ok(Artifact {
+                            tag,
+                            data: ArtifactData {
+                                http_hir: core::mem::ManuallyDrop::new(value),
+                            },
+                        })
+                    }
+                    __Variant::__Case2 => {
                         struct __CaseVisitor;
                         impl<'de> serde::de::Visitor<'de> for __CaseVisitor {
                             type Value = ArtifactFile;

@@ -151,7 +151,7 @@ impl HttpClientStreamServiceClient{
 }
 
 impl HttpClientStreamServiceClient{
-    pub async fn upload_chunk(&self)->Result<xidl_rust_axum::stream::Writer<HttpClientStreamServiceUploadChunkRequest,String>,xidl_rust_axum::Error>{
+    pub async fn upload_chunk(&self,file_id:String,chunk:Vec<u8>)->Result<xidl_rust_axum::stream::Writer<HttpClientStreamServiceUploadChunkRequest,String>,xidl_rust_axum::Error>{
         let path = "/upload/chunks".to_string();
         let mut req = self
         .client

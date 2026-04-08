@@ -1,12 +1,17 @@
 use crate::error::{IdlcError, IdlcResult};
+use crate::generate::http_hir::{
+    HttpMethod as HttpHirMethod, HttpOperation, HttpOperationSource, HttpParam as HttpHirParam,
+    HttpParamSource as HttpHirParamSource,
+    semantics::{
+        DeprecatedInfo, HttpApiKeyLocation, HttpSecurityOrigin, HttpSecurityProfile,
+        HttpSecurityRequirement, HttpStreamCodec, HttpStreamKind, HttpStreamTargetSupport,
+        deprecated_info, effective_media_type, effective_security_with_origin,
+        has_optional_annotation, http_stream_config, validate_http_annotations,
+        validate_http_stream_method, validate_http_stream_target,
+    },
+};
 use crate::generate::rust::util::{rust_ident, rust_passthrough_attrs_from_annotations};
 use crate::generate::rust_axum::{RustAxumRenderOutput, RustAxumRenderer};
-use crate::generate::utils::{
-    DeprecatedInfo, HttpSecurityOrigin, HttpSecurityProfile, HttpSecurityRequirement,
-    HttpStreamCodec, HttpStreamKind, HttpStreamTargetSupport, deprecated_info,
-    effective_security_with_origin, http_stream_config, validate_http_stream_method,
-    validate_http_stream_target,
-};
 use convert_case::{Case, Casing};
 use serde::Serialize;
 use std::collections::{HashMap, HashSet};
@@ -123,6 +128,7 @@ struct ApiKeyContext {
     name: String,
 }
 
+#[allow(dead_code)]
 #[derive(Serialize, Clone)]
 struct RouteTemplate {
     path: String,
@@ -158,32 +164,47 @@ fn render_interface_def(
 ) -> IdlcResult<RustAxumRenderOutput> {
     let mut out = RustAxumRenderOutput::default();
     let mut methods = Vec::new();
+    let http_hir = renderer.http_hir()?;
+    let Some(http_interface) = http_hir.find_interface(module_path, &def.header.ident) else {
+        return Ok(out);
+    };
 
     if let Some(body) = &def.interface_body {
-        crate::generate::utils::validate_http_annotations(
-            &format!("interface '{}'", def.header.ident),
-            interface_annotations,
-        )
-        .map_err(IdlcError::rpc)?;
-        for export in &body.0 {
-            match export {
-                hir::Export::OpDcl(op) => {
-                    methods.push(render_op(
-                        op,
-                        interface_annotations,
+        for operation in &http_interface.operations {
+            match operation.source {
+                HttpOperationSource::Method => {
+                    let op = body
+                        .0
+                        .iter()
+                        .find_map(|export| match export {
+                            hir::Export::OpDcl(op) if op.ident == operation.name => Some(op),
+                            _ => None,
+                        })
+                        .ok_or_else(|| {
+                            IdlcError::rpc(format!(
+                                "missing source operation '{}' for rust-axum rendering",
+                                operation.name
+                            ))
+                        })?;
+                    methods.push(render_op_from_http(op, operation, &def.header.ident)?);
+                }
+                HttpOperationSource::AttributeGet
+                | HttpOperationSource::AttributeSet
+                | HttpOperationSource::AttributeWatch => {
+                    let attr = body.0.iter().find_map(|export| match export {
+                        hir::Export::AttrDcl(attr)
+                            if attr_operation_names(attr).contains(&operation.name) =>
+                        {
+                            Some(attr)
+                        }
+                        _ => None,
+                    });
+                    methods.push(render_attr_operation_from_http(
+                        attr,
+                        operation,
                         &def.header.ident,
-                        module_path,
                     )?);
                 }
-                hir::Export::AttrDcl(attr) => {
-                    methods.extend(render_attr(
-                        attr,
-                        interface_annotations,
-                        &def.header.ident,
-                        module_path,
-                    ));
-                }
-                _ => {}
             }
         }
     }
@@ -211,17 +232,664 @@ fn render_interface_def(
     Ok(out)
 }
 
+fn render_op_from_http(
+    op: &hir::OpDcl,
+    http_op: &HttpOperation,
+    interface_name: &str,
+) -> IdlcResult<MethodContext> {
+    let stream = http_op.stream;
+    let is_server_stream = matches!(stream.kind, Some(HttpStreamKind::Server));
+    let is_client_stream = matches!(stream.kind, Some(HttpStreamKind::Client));
+    let is_bidi_stream = matches!(stream.kind, Some(HttpStreamKind::Bidi));
+    let deprecated = deprecated_context_from_http(http_op);
+    let ret = match &op.ty {
+        hir::OpTypeSpec::Void => "()".to_string(),
+        hir::OpTypeSpec::TypeSpec(ty) => axum_type(ty),
+    };
+    let return_is_unit = matches!(&op.ty, hir::OpTypeSpec::Void);
+    let (security, auth_source_interface, auth_source_method) = match &http_op.security {
+        None => (None, false, false),
+        Some(HttpSecurityProfile {
+            origin,
+            requirements,
+        }) => (
+            Some(requirements.clone()),
+            matches!(origin, HttpSecurityOrigin::Interface),
+            matches!(origin, HttpSecurityOrigin::Method),
+        ),
+    };
+    let has_basic_auth = security
+        .as_ref()
+        .map(|reqs| {
+            reqs.iter()
+                .any(|req| matches!(req, HttpSecurityRequirement::HttpBasic))
+        })
+        .unwrap_or(false);
+    let has_bearer_auth = security
+        .as_ref()
+        .map(|reqs| {
+            reqs.iter()
+                .any(|req| matches!(req, HttpSecurityRequirement::HttpBearer))
+        })
+        .unwrap_or(false);
+    let api_key_requirements = security
+        .as_ref()
+        .map(|reqs| {
+            reqs.iter()
+                .filter_map(|req| match req {
+                    HttpSecurityRequirement::ApiKey { location, name } => {
+                        let location = match location {
+                            HttpApiKeyLocation::Header => "Header",
+                            HttpApiKeyLocation::Query => "Query",
+                            HttpApiKeyLocation::Cookie => "Cookie",
+                        };
+                        Some(ApiKeyContext {
+                            location: location.to_string(),
+                            name: name.clone(),
+                        })
+                    }
+                    _ => None,
+                })
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+    if has_basic_auth && has_bearer_auth {
+        return Err(IdlcError::rpc(format!(
+            "operation '{}' cannot combine @http_basic and @http_bearer",
+            op.ident
+        )));
+    }
+    let has_auth = has_basic_auth || has_bearer_auth;
+    let auth_ty = if has_basic_auth {
+        "xidl_rust_axum::auth::basic::BasicAuth".to_string()
+    } else if has_bearer_auth {
+        "xidl_rust_axum::auth::bearer::BearerAuth".to_string()
+    } else {
+        String::new()
+    };
+    let routes = &http_op.routes;
+    let paths = routes
+        .iter()
+        .map(|route| route.path.clone())
+        .collect::<Vec<_>>();
+    let path = paths
+        .first()
+        .cloned()
+        .unwrap_or_else(|| format!("/{}", op.ident));
+    let _path_param_sets = routes
+        .iter()
+        .map(|route| route.path_params.iter().cloned().collect::<HashSet<_>>())
+        .collect::<Vec<_>>();
+    let _all_query_template_names = routes
+        .iter()
+        .flat_map(|route| route.query_params.iter().cloned())
+        .collect::<HashSet<_>>();
+
+    let mut param_list = Vec::new();
+    let mut param_names = Vec::new();
+    let mut path_params = Vec::new();
+    let mut query_params = Vec::new();
+    let mut header_params = Vec::new();
+    let mut cookie_params = Vec::new();
+    let mut body_params = Vec::new();
+    let mut request_params = Vec::new();
+    let mut response_params = Vec::new();
+    let mut response_body_params = Vec::new();
+    let mut response_header_params = Vec::new();
+    let mut response_cookie_params = Vec::new();
+    let mut path_binding_count = HashMap::<String, usize>::new();
+    let mut query_binding_count = HashMap::<String, usize>::new();
+
+    let params = op
+        .parameter
+        .as_ref()
+        .map(|value| value.0.as_slice())
+        .unwrap_or(&[]);
+
+    for param in params {
+        let optional = has_optional_annotation(&param.annotations);
+        let flatten = has_flatten_annotation(&param.annotations);
+        let inner_ty = axum_type(&param.ty);
+        let ty = render_param_type(&param.ty, param.attr.as_ref(), optional);
+        let name = rust_ident(&param.declarator.0);
+        let direction = param_direction(param.attr.as_ref());
+
+        if matches!(direction, ParamDirection::Out | ParamDirection::InOut)
+            && let Some(shared) = find_http_param(&http_op.response_params, &param.declarator.0)
+        {
+            let response_ctx = ParamContext {
+                name: name.clone(),
+                raw_name: param.declarator.0.clone(),
+                wire_name: shared.wire_name.clone(),
+                path_template_name: String::new(),
+                ty: inner_ty.clone(),
+                source: param_source_code(http_param_source(shared.source)),
+                serde_rename: field_rename(&param.annotations, &name)
+                    .or_else(|| serde_rename(&param.declarator.0, &name)),
+                header_is_multi: header_is_multi(&param.ty),
+                header_item_ty: header_item_ty(&param.ty),
+                header_item_is_string: header_item_is_string(&param.ty),
+                header_item_is_primitive: header_item_is_primitive(&param.ty),
+                cookie_is_multi: cookie_is_multi(&param.ty),
+                cookie_item_ty: cookie_item_ty(&param.ty),
+                cookie_item_is_string: cookie_item_is_string(&param.ty),
+                cookie_item_is_primitive: cookie_item_is_primitive(&param.ty),
+                optional: false,
+                inner_ty: inner_ty.clone(),
+                flatten: false,
+            };
+            match http_param_source(shared.source) {
+                ParamSource::Header => response_header_params.push(response_ctx.clone()),
+                ParamSource::Cookie => response_cookie_params.push(response_ctx.clone()),
+                _ => response_body_params.push(response_ctx.clone()),
+            }
+            response_params.push(response_ctx);
+        }
+        if matches!(direction, ParamDirection::Out) {
+            continue;
+        }
+        let Some(shared) = find_http_param(&http_op.request_params, &param.declarator.0) else {
+            continue;
+        };
+        let source = http_param_source(shared.source);
+        let wire_name = shared.wire_name.clone();
+        param_list.push(format!("{name}: {ty}"));
+        param_names.push(name.clone());
+        let serde_name = if matches!(source, ParamSource::Body) {
+            field_rename_raw(&param.annotations).unwrap_or_else(|| wire_name.clone())
+        } else {
+            wire_name.clone()
+        };
+        let ctx = ParamContext {
+            name: name.clone(),
+            raw_name: param.declarator.0.clone(),
+            path_template_name: if matches!(source, ParamSource::Path)
+                && path_param_is_catch_all(&path, &wire_name)
+            {
+                format!("*{wire_name}")
+            } else {
+                wire_name.clone()
+            },
+            wire_name,
+            ty,
+            inner_ty: inner_ty.clone(),
+            source: param_source_code(source),
+            serde_rename: serde_rename(&serde_name, &name),
+            header_is_multi: header_is_multi(&param.ty),
+            header_item_ty: header_item_ty(&param.ty),
+            header_item_is_string: header_item_is_string(&param.ty),
+            header_item_is_primitive: header_item_is_primitive(&param.ty),
+            cookie_is_multi: cookie_is_multi(&param.ty),
+            cookie_item_ty: cookie_item_ty(&param.ty),
+            cookie_item_is_string: cookie_item_is_string(&param.ty),
+            cookie_item_is_primitive: cookie_item_is_primitive(&param.ty),
+            optional,
+            flatten,
+        };
+        request_params.push(ctx.clone());
+        match source {
+            ParamSource::Path => {
+                *path_binding_count.entry(ctx.wire_name.clone()).or_insert(0) += 1;
+                path_params.push(ctx);
+            }
+            ParamSource::Query => {
+                *query_binding_count
+                    .entry(ctx.wire_name.clone())
+                    .or_insert(0) += 1;
+                query_params.push(ctx);
+            }
+            ParamSource::Header => header_params.push(ctx),
+            ParamSource::Cookie => cookie_params.push(ctx),
+            ParamSource::Body => body_params.push(ctx),
+        }
+    }
+
+    if is_client_stream
+        && (!path_params.is_empty()
+            || !query_params.is_empty()
+            || !header_params.is_empty()
+            || !cookie_params.is_empty())
+    {
+        return Err(IdlcError::rpc(format!(
+            "@client_stream method '{}' currently supports body parameters only",
+            op.ident
+        )));
+    }
+    if (is_client_stream || is_bidi_stream)
+        && (!path_params.is_empty()
+            || !query_params.is_empty()
+            || !header_params.is_empty()
+            || !cookie_params.is_empty())
+    {
+        return Err(IdlcError::rpc(format!(
+            "@bidi_stream method '{}' currently supports body parameters only",
+            op.ident
+        )));
+    }
+    let method = http_method_from_hir(http_op.method);
+    let method_name = rust_ident(&op.ident);
+    let auth_in_request_struct = has_auth && !(is_client_stream || is_bidi_stream);
+    let auth_wrapper_struct = if has_auth && (is_client_stream || is_bidi_stream) {
+        Some(format!(
+            "{}AuthRequest",
+            method_struct_prefix(interface_name, &op.ident)
+        ))
+    } else {
+        None
+    };
+    let mut request_struct = if request_params.is_empty() {
+        None
+    } else {
+        Some(format!(
+            "{}Request",
+            method_struct_prefix(interface_name, &op.ident)
+        ))
+    };
+    if auth_in_request_struct && request_struct.is_none() {
+        request_struct = Some(format!(
+            "{}Request",
+            method_struct_prefix(interface_name, &op.ident)
+        ));
+    }
+    let request_ty = request_struct.clone().unwrap_or_else(|| "()".to_string());
+    let mut auth_param = None;
+    let mut auth_param_ty = String::new();
+    if auth_source_method && (has_basic_auth || has_bearer_auth) {
+        let name = "xidl_auth".to_string();
+        param_list.push(format!("{name}: {auth_ty}"));
+        auth_param = Some(name);
+        auth_param_ty = auth_ty.clone();
+    }
+    let response_value_count = usize::from(!return_is_unit) + response_params.len();
+    let response_body_count = usize::from(!return_is_unit) + response_body_params.len();
+    let request_body_flatten = body_params.len() == 1 && body_params[0].flatten;
+    let response_is_empty = response_body_count == 0;
+    let response_include_return = !return_is_unit;
+    let response_struct =
+        if response_value_count > 1 || (return_is_unit && response_value_count == 1) {
+            Some(format!(
+                "{}Response",
+                method_struct_prefix(interface_name, &op.ident)
+            ))
+        } else {
+            None
+        };
+    let response_ty = if let Some(response_struct) = &response_struct {
+        response_struct.clone()
+    } else if !return_is_unit {
+        ret.clone()
+    } else if let Some(param) = response_params.first() {
+        param.ty.clone()
+    } else {
+        "()".to_string()
+    };
+    let request_item_ty = request_ty.clone();
+    let request_payload_ty = if is_client_stream {
+        if let Some(wrapper) = &auth_wrapper_struct {
+            wrapper.clone()
+        } else {
+            format!("xidl_rust_axum::stream::NdjsonStream<{}>", request_item_ty)
+        }
+    } else if is_bidi_stream {
+        if let Some(wrapper) = &auth_wrapper_struct {
+            wrapper.clone()
+        } else {
+            format!(
+                "xidl_rust_axum::stream::BidiServerStream<{}, {}>",
+                request_item_ty, response_ty
+            )
+        }
+    } else {
+        request_ty.clone()
+    };
+    let basic_auth_realm = if has_basic_auth {
+        http_op
+            .basic_auth_realm
+            .clone()
+            .unwrap_or_else(|| method_name.clone())
+    } else {
+        String::new()
+    };
+    Ok(MethodContext {
+        name: method_name,
+        raw_name: op.ident.clone(),
+        rust_attrs: rust_passthrough_attrs_from_annotations(&op.annotations),
+        deprecated: deprecated.deprecated,
+        deprecated_since: deprecated.since,
+        deprecated_after: deprecated.after,
+        deprecated_note: deprecated.note,
+        params: param_list,
+        param_names,
+        ret,
+        response_ty,
+        request_body_flatten,
+        http_method: http_method_code(method),
+        http_method_fn: http_method_fn(method),
+        reqwest_method: reqwest_method_code(method),
+        path,
+        paths,
+        struct_prefix: method_struct_prefix(interface_name, &op.ident),
+        path_params,
+        query_params,
+        header_params,
+        cookie_params,
+        body_params,
+        request_ty: request_ty.clone(),
+        request_payload_ty,
+        request_struct,
+        auth_wrapper_struct,
+        auth_in_request_struct,
+        has_basic_auth,
+        has_bearer_auth,
+        api_key_requirements,
+        auth_source_interface,
+        auth_source_method,
+        auth_param,
+        auth_param_ty,
+        auth_ty,
+        basic_auth_realm,
+        request_params,
+        response_struct,
+        response_params,
+        response_body_params,
+        response_header_params,
+        response_cookie_params,
+        response_include_return,
+        response_is_empty,
+        return_is_unit,
+        is_server_stream,
+        is_client_stream,
+        is_bidi_stream,
+        request_item_ty,
+        request_content_type: if is_client_stream {
+            "application/x-ndjson".to_string()
+        } else {
+            http_op.request_content_type.clone()
+        },
+        response_content_type: if is_server_stream {
+            "text/event-stream".to_string()
+        } else if is_client_stream {
+            "application/json".to_string()
+        } else {
+            http_op.response_content_type.clone()
+        },
+    })
+}
+
+fn render_attr_operation_from_http(
+    attr: Option<&hir::AttrDcl>,
+    http_op: &HttpOperation,
+    interface_name: &str,
+) -> IdlcResult<MethodContext> {
+    let rust_attrs = attr
+        .map(|attr| rust_passthrough_attrs_from_annotations(&attr.annotations))
+        .unwrap_or_default();
+    let deprecated = deprecated_context_from_http(http_op);
+    let (security, auth_source_interface, auth_source_method) = match &http_op.security {
+        None => (None, false, false),
+        Some(HttpSecurityProfile {
+            origin,
+            requirements,
+        }) => (
+            Some(requirements.clone()),
+            matches!(origin, HttpSecurityOrigin::Interface),
+            matches!(origin, HttpSecurityOrigin::Method),
+        ),
+    };
+    let has_basic_auth = security
+        .as_ref()
+        .map(|reqs| {
+            reqs.iter()
+                .any(|req| matches!(req, HttpSecurityRequirement::HttpBasic))
+        })
+        .unwrap_or(false);
+    let has_bearer_auth = security
+        .as_ref()
+        .map(|reqs| {
+            reqs.iter()
+                .any(|req| matches!(req, HttpSecurityRequirement::HttpBearer))
+        })
+        .unwrap_or(false);
+    let api_key_requirements = security
+        .as_ref()
+        .map(|reqs| {
+            reqs.iter()
+                .filter_map(|req| match req {
+                    HttpSecurityRequirement::ApiKey { location, name } => {
+                        let location = match location {
+                            HttpApiKeyLocation::Header => "Header",
+                            HttpApiKeyLocation::Query => "Query",
+                            HttpApiKeyLocation::Cookie => "Cookie",
+                        };
+                        Some(ApiKeyContext {
+                            location: location.to_string(),
+                            name: name.clone(),
+                        })
+                    }
+                    _ => None,
+                })
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+    let has_auth = has_basic_auth || has_bearer_auth;
+    let auth_ty = if has_basic_auth {
+        "xidl_rust_axum::auth::basic::BasicAuth".to_string()
+    } else if has_bearer_auth {
+        "xidl_rust_axum::auth::bearer::BearerAuth".to_string()
+    } else {
+        String::new()
+    };
+    let request_struct = if has_auth {
+        Some(format!(
+            "{}Request",
+            method_struct_prefix(interface_name, &http_op.name)
+        ))
+    } else if !http_op.request_params.is_empty() {
+        Some(format!(
+            "{}Request",
+            method_struct_prefix(interface_name, &http_op.name)
+        ))
+    } else {
+        None
+    };
+    let request_ty = request_struct.clone().unwrap_or_else(|| "()".to_string());
+    let mut params = Vec::new();
+    let mut param_names = Vec::new();
+    let mut request_params = Vec::new();
+    let mut body_params = Vec::new();
+    if let Some(param) = http_op.request_body_params.first() {
+        let param_name = rust_ident(&param.name);
+        let ty = axum_type(&param.ty);
+        params.push(format!("{param_name}: {ty}"));
+        param_names.push(param_name.clone());
+        let request_param = ParamContext {
+            name: param_name,
+            raw_name: param.name.clone(),
+            wire_name: param.wire_name.clone(),
+            path_template_name: String::new(),
+            ty: ty.clone(),
+            source: param_source_code(ParamSource::Body),
+            serde_rename: None,
+            header_is_multi: false,
+            header_item_ty: ty.clone(),
+            header_item_is_string: false,
+            header_item_is_primitive: false,
+            cookie_is_multi: false,
+            cookie_item_ty: ty.clone(),
+            cookie_item_is_string: false,
+            cookie_item_is_primitive: false,
+            optional: false,
+            inner_ty: ty.clone(),
+            flatten: false,
+        };
+        request_params.push(request_param.clone());
+        body_params.push(request_param);
+    }
+    let ret = http_op
+        .return_type
+        .as_ref()
+        .map(axum_type)
+        .unwrap_or_else(|| "()".to_string());
+    let return_is_unit = http_op.return_type.is_none();
+    Ok(MethodContext {
+        name: rust_ident(&http_op.name),
+        raw_name: http_op.name.clone(),
+        rust_attrs,
+        deprecated: deprecated.deprecated,
+        deprecated_since: deprecated.since,
+        deprecated_after: deprecated.after,
+        deprecated_note: deprecated.note,
+        params,
+        param_names,
+        ret: ret.clone(),
+        response_ty: ret.clone(),
+        request_body_flatten: false,
+        http_method: http_method_code(http_method_from_hir(http_op.method)),
+        http_method_fn: http_method_fn(http_method_from_hir(http_op.method)),
+        reqwest_method: reqwest_method_code(http_method_from_hir(http_op.method)),
+        paths: http_op
+            .routes
+            .iter()
+            .map(|route| route.path.clone())
+            .collect(),
+        path: http_op
+            .routes
+            .first()
+            .map(|route| route.path.clone())
+            .unwrap_or_default(),
+        struct_prefix: method_struct_prefix(interface_name, &http_op.name),
+        path_params: Vec::new(),
+        query_params: Vec::new(),
+        header_params: Vec::new(),
+        cookie_params: Vec::new(),
+        body_params,
+        request_ty: request_ty.clone(),
+        request_payload_ty: request_ty.clone(),
+        request_struct,
+        auth_wrapper_struct: None,
+        auth_in_request_struct: has_auth,
+        has_basic_auth,
+        has_bearer_auth,
+        api_key_requirements,
+        auth_source_interface,
+        auth_source_method,
+        auth_param: None,
+        auth_param_ty: String::new(),
+        auth_ty,
+        basic_auth_realm: http_op.basic_auth_realm.clone().unwrap_or_default(),
+        request_params,
+        response_struct: None,
+        response_params: Vec::new(),
+        response_body_params: Vec::new(),
+        response_header_params: Vec::new(),
+        response_cookie_params: Vec::new(),
+        response_include_return: !return_is_unit,
+        response_is_empty: return_is_unit,
+        return_is_unit,
+        is_server_stream: matches!(http_op.stream.kind, Some(HttpStreamKind::Server)),
+        is_client_stream: matches!(http_op.stream.kind, Some(HttpStreamKind::Client)),
+        is_bidi_stream: matches!(http_op.stream.kind, Some(HttpStreamKind::Bidi)),
+        request_item_ty: "()".to_string(),
+        request_content_type: if matches!(http_op.stream.kind, Some(HttpStreamKind::Client)) {
+            "application/x-ndjson".to_string()
+        } else {
+            http_op.request_content_type.clone()
+        },
+        response_content_type: if matches!(http_op.stream.kind, Some(HttpStreamKind::Server)) {
+            "text/event-stream".to_string()
+        } else {
+            http_op.response_content_type.clone()
+        },
+    })
+}
+
+fn find_http_param<'a>(params: &'a [HttpHirParam], name: &str) -> Option<&'a HttpHirParam> {
+    params.iter().find(|param| param.name == name)
+}
+
+fn http_param_source(source: HttpHirParamSource) -> ParamSource {
+    match source {
+        HttpHirParamSource::Path => ParamSource::Path,
+        HttpHirParamSource::Query => ParamSource::Query,
+        HttpHirParamSource::Header => ParamSource::Header,
+        HttpHirParamSource::Cookie => ParamSource::Cookie,
+        HttpHirParamSource::Body => ParamSource::Body,
+    }
+}
+
+fn http_method_from_hir(method: HttpHirMethod) -> HttpMethod {
+    match method {
+        HttpHirMethod::Get => HttpMethod::Get,
+        HttpHirMethod::Post => HttpMethod::Post,
+        HttpHirMethod::Put => HttpMethod::Put,
+        HttpHirMethod::Patch => HttpMethod::Patch,
+        HttpHirMethod::Delete => HttpMethod::Delete,
+        HttpHirMethod::Head => HttpMethod::Head,
+        HttpHirMethod::Options => HttpMethod::Options,
+    }
+}
+
+fn deprecated_context_from_http(http_op: &HttpOperation) -> DeprecatedContext {
+    let info = http_op.deprecated.as_ref();
+    let deprecated = info.as_ref().map(|value| value.deprecated).unwrap_or(false);
+    let since = info.as_ref().and_then(|value| value.since.clone());
+    let after = info.as_ref().and_then(|value| value.after.clone());
+    let note = info.as_ref().map(|value| {
+        let mut note = String::from("Deprecated.");
+        if let Some(since) = &value.since {
+            note.push_str(&format!(" Since {since}."));
+        }
+        if let Some(after) = &value.after {
+            note.push_str(&format!(" After {after}."));
+        }
+        note
+    });
+    DeprecatedContext {
+        deprecated,
+        since,
+        after,
+        note,
+    }
+}
+
+fn attr_operation_names(attr: &hir::AttrDcl) -> Vec<String> {
+    match &attr.decl {
+        hir::AttrDclInner::ReadonlyAttrSpec(spec) => match &spec.declarator {
+            hir::ReadonlyAttrDeclarator::SimpleDeclarator(decl) => vec![
+                format!("get_attribute_{}", decl.0),
+                format!("watch_attribute_{}", decl.0),
+            ],
+            hir::ReadonlyAttrDeclarator::RaisesExpr(_) => Vec::new(),
+        },
+        hir::AttrDclInner::AttrSpec(spec) => match &spec.declarator {
+            hir::AttrDeclarator::SimpleDeclarator(list) => list
+                .iter()
+                .flat_map(|decl| {
+                    [
+                        format!("get_attribute_{}", decl.0),
+                        format!("set_attribute_{}", decl.0),
+                        format!("watch_attribute_{}", decl.0),
+                    ]
+                })
+                .collect(),
+            hir::AttrDeclarator::WithRaises { declarator, .. } => vec![
+                format!("get_attribute_{}", declarator.0),
+                format!("set_attribute_{}", declarator.0),
+                format!("watch_attribute_{}", declarator.0),
+            ],
+        },
+    }
+}
+
+#[allow(dead_code)]
 fn render_op(
     op: &hir::OpDcl,
     interface_annotations: &[hir::Annotation],
     interface_name: &str,
     _module_path: &[String],
 ) -> IdlcResult<MethodContext> {
-    crate::generate::utils::validate_http_annotations(
-        &format!("operation '{}'", op.ident),
-        &op.annotations,
-    )
-    .map_err(IdlcError::rpc)?;
+    validate_http_annotations(&format!("operation '{}'", op.ident), &op.annotations)
+        .map_err(IdlcError::rpc)?;
     let stream = http_stream_config(&op.annotations).map_err(IdlcError::rpc)?;
     validate_http_stream_target(
         &op.ident,
@@ -280,9 +948,9 @@ fn render_op(
                 .filter_map(|req| match req {
                     HttpSecurityRequirement::ApiKey { location, name } => {
                         let location = match location {
-                            crate::generate::utils::HttpApiKeyLocation::Header => "Header",
-                            crate::generate::utils::HttpApiKeyLocation::Query => "Query",
-                            crate::generate::utils::HttpApiKeyLocation::Cookie => "Cookie",
+                            HttpApiKeyLocation::Header => "Header",
+                            HttpApiKeyLocation::Query => "Query",
+                            HttpApiKeyLocation::Cookie => "Cookie",
                         };
                         Some(ApiKeyContext {
                             location: location.to_string(),
@@ -401,7 +1069,7 @@ fn render_op(
     }
 
     for param in params {
-        let optional = crate::generate::utils::has_optional_annotation(&param.annotations);
+        let optional = has_optional_annotation(&param.annotations);
         let flatten = has_flatten_annotation(&param.annotations);
         let inner_ty = axum_type(&param.ty);
         let ty = render_param_type(&param.ty, param.attr.as_ref(), optional);
@@ -741,7 +1409,7 @@ fn render_op(
         is_client_stream,
         is_bidi_stream,
         request_item_ty,
-        request_content_type: crate::generate::utils::effective_media_type(
+        request_content_type: effective_media_type(
             interface_annotations,
             &op.annotations,
             "Consumes",
@@ -751,22 +1419,19 @@ fn render_op(
         } else if is_client_stream {
             "application/json".to_string()
         } else {
-            crate::generate::utils::effective_media_type(
-                interface_annotations,
-                &op.annotations,
-                "Produces",
-            )
+            effective_media_type(interface_annotations, &op.annotations, "Produces")
         },
     })
 }
 
+#[allow(dead_code)]
 fn render_attr(
     attr: &hir::AttrDcl,
     interface_annotations: &[hir::Annotation],
     interface_name: &str,
     module_path: &[String],
 ) -> Vec<MethodContext> {
-    let _ = crate::generate::utils::validate_http_annotations(
+    let _ = validate_http_annotations(
         &format!("attribute in interface '{interface_name}'"),
         &attr.annotations,
     );
@@ -804,9 +1469,9 @@ fn render_attr(
                 .filter_map(|req| match req {
                     HttpSecurityRequirement::ApiKey { location, name } => {
                         let location = match location {
-                            crate::generate::utils::HttpApiKeyLocation::Header => "Header",
-                            crate::generate::utils::HttpApiKeyLocation::Query => "Query",
-                            crate::generate::utils::HttpApiKeyLocation::Cookie => "Cookie",
+                            HttpApiKeyLocation::Header => "Header",
+                            HttpApiKeyLocation::Query => "Query",
+                            HttpApiKeyLocation::Cookie => "Cookie",
                         };
                         Some(ApiKeyContext {
                             location: location.to_string(),
@@ -1494,10 +2159,12 @@ fn render_attr(
     }
 }
 
+#[allow(dead_code)]
 struct AttrNames {
     raw: String,
 }
 
+#[allow(dead_code)]
 fn readonly_attr_names(spec: &hir::ReadonlyAttrSpec) -> Vec<AttrNames> {
     match &spec.declarator {
         hir::ReadonlyAttrDeclarator::SimpleDeclarator(decl) => vec![AttrNames {
@@ -1507,10 +2174,12 @@ fn readonly_attr_names(spec: &hir::ReadonlyAttrSpec) -> Vec<AttrNames> {
     }
 }
 
+#[allow(dead_code)]
 fn attr_return_type(ty: &hir::TypeSpec) -> String {
     axum_type(ty)
 }
 
+#[allow(dead_code)]
 fn effective_deprecated(
     interface_annotations: &[hir::Annotation],
     method_annotations: &[hir::Annotation],
@@ -1521,6 +2190,7 @@ fn effective_deprecated(
     deprecated_info(interface_annotations)
 }
 
+#[allow(dead_code)]
 fn deprecated_context(
     interface_annotations: &[hir::Annotation],
     method_annotations: &[hir::Annotation],
@@ -1548,6 +2218,7 @@ fn deprecated_context(
     })
 }
 
+#[allow(dead_code)]
 fn find_basic_realm(annotations: &[hir::Annotation]) -> Option<String> {
     for annotation in annotations {
         let Some(name) = annotation_name(annotation) else {
@@ -1685,6 +2356,7 @@ fn rust_integer_type(value: &hir::IntegerType) -> String {
     }
 }
 
+#[allow(dead_code)]
 fn default_path(module_path: &[String], interface_name: &str, method_name: &str) -> String {
     let mut parts = module_path.to_vec();
     parts.push(interface_name.to_string());
@@ -1692,10 +2364,12 @@ fn default_path(module_path: &[String], interface_name: &str, method_name: &str)
     format!("/{}", parts.join("/"))
 }
 
+#[allow(dead_code)]
 fn attribute_path(attr_name: &str) -> String {
     format!("/attribute/{attr_name}")
 }
 
+#[allow(dead_code)]
 fn route_from_annotations(
     annotations: &[hir::Annotation],
     default_method: HttpMethod,
@@ -1740,6 +2414,7 @@ fn route_from_annotations(
     Ok((verb_method.unwrap_or(default_method), paths))
 }
 
+#[allow(dead_code)]
 fn method_from_annotation(annotation: &hir::Annotation) -> Option<HttpMethod> {
     let name = annotation_name(annotation)?;
     match name.to_ascii_lowercase().as_str() {
@@ -1770,6 +2445,7 @@ fn annotation_params(annotation: &hir::Annotation) -> Option<&hir::AnnotationPar
     }
 }
 
+#[allow(dead_code)]
 fn has_annotation(annotations: &[hir::Annotation], target: &str) -> bool {
     annotations.iter().any(|annotation| {
         annotation_name(annotation)
@@ -1813,11 +2489,13 @@ fn has_flatten_annotation(annotations: &[hir::Annotation]) -> bool {
     })
 }
 
+#[allow(dead_code)]
 struct SourceBinding {
     source: ParamSource,
     bound_name: String,
 }
 
+#[allow(dead_code)]
 fn explicit_param_binding(param: &hir::ParamDcl) -> IdlcResult<Option<SourceBinding>> {
     let mut found = None;
     for annotation in &param.annotations {
@@ -1869,6 +2547,7 @@ fn explicit_param_binding(param: &hir::ParamDcl) -> IdlcResult<Option<SourceBind
     Ok(found)
 }
 
+#[allow(dead_code)]
 fn auto_default_method_path(op: &hir::OpDcl, method: HttpMethod) -> IdlcResult<String> {
     let params = op
         .parameter
@@ -2010,6 +2689,7 @@ fn trim_quotes(value: &str) -> Option<String> {
     None
 }
 
+#[allow(dead_code)]
 fn normalize_path(path: &str) -> String {
     let path = path.trim();
     let with_leading = if path.starts_with('/') {
@@ -2040,10 +2720,12 @@ fn normalize_path(path: &str) -> String {
     }
 }
 
+#[allow(dead_code)]
 fn path_name_in_all_routes(name: &str, route_sets: &[HashSet<String>]) -> bool {
     route_sets.iter().all(|set| set.contains(name))
 }
 
+#[allow(dead_code)]
 fn validate_head_constraints(op: &hir::OpDcl, method: HttpMethod) -> IdlcResult<()> {
     if !matches!(method, HttpMethod::Head) {
         return Ok(());
@@ -2090,6 +2772,7 @@ fn serde_rename(raw: &str, rust: &str) -> Option<String> {
     }
 }
 
+#[allow(dead_code)]
 fn parse_path_params(path: &str) -> HashSet<String> {
     let mut out = HashSet::new();
     let mut buf = String::new();
@@ -2118,6 +2801,7 @@ fn parse_path_params(path: &str) -> HashSet<String> {
     out
 }
 
+#[allow(dead_code)]
 fn strip_path_param_prefix(value: &str) -> String {
     value.strip_prefix('*').unwrap_or(value).to_string()
 }
@@ -2126,6 +2810,7 @@ fn path_param_is_catch_all(path: &str, name: &str) -> bool {
     path.contains(&format!("{{*{name}}}"))
 }
 
+#[allow(dead_code)]
 fn validate_route_template(path: &str) -> IdlcResult<()> {
     let (path, _) = split_query_template(path)?;
     let mut start = 0usize;
@@ -2164,6 +2849,7 @@ fn validate_route_template(path: &str) -> IdlcResult<()> {
     Ok(())
 }
 
+#[allow(dead_code)]
 fn split_query_template(path: &str) -> IdlcResult<(String, HashSet<String>)> {
     let mut query_params = HashSet::new();
     if let Some(pos) = path.find("{?") {
@@ -2192,6 +2878,7 @@ fn split_query_template(path: &str) -> IdlcResult<(String, HashSet<String>)> {
     }
 }
 
+#[allow(dead_code)]
 fn parse_route_template(path: &str) -> IdlcResult<RouteTemplate> {
     validate_route_template(path)?;
     let (path, query_params) = split_query_template(path)?;
@@ -2204,6 +2891,7 @@ fn parse_route_template(path: &str) -> IdlcResult<RouteTemplate> {
     })
 }
 
+#[allow(dead_code)]
 fn default_param_source(method: HttpMethod) -> ParamSource {
     match method {
         HttpMethod::Get | HttpMethod::Delete | HttpMethod::Head | HttpMethod::Options => {
@@ -2278,6 +2966,7 @@ fn cookie_item_is_primitive(ty: &hir::TypeSpec) -> bool {
     header_item_is_primitive(ty)
 }
 
+#[allow(dead_code)]
 fn validate_header_name(bound_name: &str, param_name: &str) -> IdlcResult<()> {
     if bound_name.is_empty() {
         return Err(IdlcError::rpc(format!(
@@ -2294,6 +2983,7 @@ fn validate_header_name(bound_name: &str, param_name: &str) -> IdlcResult<()> {
     Ok(())
 }
 
+#[allow(dead_code)]
 fn validate_cookie_name(bound_name: &str, param_name: &str) -> IdlcResult<()> {
     if bound_name.is_empty() {
         return Err(IdlcError::rpc(format!(
@@ -2349,6 +3039,7 @@ fn reqwest_method_code(method: HttpMethod) -> String {
     }
 }
 
+#[allow(dead_code)]
 fn method_name(method: HttpMethod) -> &'static str {
     match method {
         HttpMethod::Get => "GET",

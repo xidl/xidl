@@ -304,7 +304,7 @@ openapi.json
     },
     "/attribute/online": {
       "get": {
-        "operationId": "HttpStreamSseService.online",
+        "operationId": "HttpStreamSseService.get_attribute_online",
         "responses": {
           "200": {
             "content": {
@@ -329,7 +329,7 @@ openapi.json
         }
       },
       "post": {
-        "operationId": "HttpStreamSseService.set_online",
+        "operationId": "HttpStreamSseService.set_attribute_online",
         "requestBody": {
           "content": {
             "application/json": {

@@ -1,0 +1,321 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+http_hir_shared_semantics.rs
+===============
+#[async_trait::async_trait]
+pub trait ReportApi{
+    async fn get_report(
+    &self,
+    req:xidl_rust_axum::Request<ReportApiGetReportRequest>
+    )->Result<String,xidl_rust_axum::Error>;
+    async fn watch_report(
+    &self,
+    req:xidl_rust_axum::Request<ReportApiWatchReportRequest>
+    )->Result<xidl_rust_axum::stream::SseStream<String>,xidl_rust_axum::Error>;
+}
+
+#[derive(::serde::Serialize,::serde::Deserialize)]
+struct ReportApiGetReportPath{
+    id:String,
+}
+
+#[derive(::serde::Serialize,::serde::Deserialize,::core::default::Default)]
+struct ReportApiGetReportQuery{
+    #[serde(default)]
+
+    lang:Option<String>,
+}
+
+#[derive(::serde::Serialize,::serde::Deserialize)]
+pub struct ReportApiGetReportRequest{
+    pub id:String,
+    pub lang:Option<String>,
+    pub trace_id:String,
+    pub xidl_auth:xidl_rust_axum::auth::bearer::BearerAuth,
+}
+
+#[derive(::serde::Serialize,::serde::Deserialize)]
+struct ReportApiWatchReportPath{
+    id:String,
+}
+
+#[derive(::serde::Serialize,::serde::Deserialize)]
+pub struct ReportApiWatchReportRequest{
+    pub id:String,
+    pub xidl_auth:xidl_rust_axum::auth::bearer::BearerAuth,
+}
+
+pub struct ReportApiServer<T>{
+    inner: ::std::sync::Arc<T>,
+}
+
+impl<T>ReportApiServer<T>
+where
+T:ReportApi+Send+Sync+'static,
+{
+    pub fn new(inner:T)->Self{
+        Self{
+            inner: ::std::sync::Arc::new(inner),
+        }
+    }
+
+    pub fn from_arc(inner: ::std::sync::Arc<T>)->Self{
+        Self{
+            inner}
+    }
+
+    pub fn router(self)->xidl_rust_axum::axum::Router{
+        let svc = self.inner;
+        xidl_rust_axum::axum::Router::new()
+
+        .route("/reports/{id}",xidl_rust_axum::axum::routing::get(Self::get_report))
+
+        .route("/reports/{id}/events",xidl_rust_axum::axum::routing::get(Self::watch_report))
+
+        .with_state(svc)
+    }
+
+    async fn get_report(
+    ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+    headers: ::xidl_rust_axum::axum::http::HeaderMap,
+    auth_header:Option<::xidl_rust_axum::axum_extra::extract::TypedHeader<::xidl_rust_axum::auth::bearer::BearerHeader>>,
+    ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<ReportApiGetReportPath>,
+    xidl_rust_axum::axum::extract::Query(query):xidl_rust_axum::axum::extract::Query<ReportApiGetReportQuery>
+    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
+        let xidl_auth = match auth_header{
+            Some(::xidl_rust_axum::axum_extra::extract::TypedHeader(auth_header)) => {
+                xidl_rust_axum::auth::bearer::BearerAuth::from_header(auth_header)
+            }
+            None => return Err(xidl_rust_axum::Error::unauthorized()),
+
+        };
+        let ReportApiGetReportPath{
+
+        id,
+
+        } = path;
+        let ReportApiGetReportQuery{
+
+        lang,
+
+        } = query;
+        let trace_id:String = match headers.get("X-Trace-Id"){
+            Some(header_value) => {
+                let header_str = header_value
+                .to_str()
+                .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
+                header_str.to_string()
+            }
+            None => ::core::default::Default::default(),
+
+        };
+        let data = ReportApiGetReportRequest{
+            id,
+            lang,
+            trace_id,
+            xidl_auth,
+        };
+        let req = ::xidl_rust_axum::Request::new(headers,data);
+        let mut resp = match svc.get_report(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                    .to_vec(&resp_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                    .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                    .header(
+                    ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                    "application/json",
+                    )
+                    .body(::xidl_rust_axum::axum::body::Body::from(body))
+                    .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
+    }
+
+    async fn watch_report(
+    ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+    headers: ::xidl_rust_axum::axum::http::HeaderMap,
+    auth_header:Option<::xidl_rust_axum::axum_extra::extract::TypedHeader<::xidl_rust_axum::auth::bearer::BearerHeader>>,
+    ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<ReportApiWatchReportPath>
+    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
+        if!xidl_rust_axum::http::accepts_media_type(&headers,"text/event-stream"){
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+
+        let xidl_auth = match auth_header{
+            Some(::xidl_rust_axum::axum_extra::extract::TypedHeader(auth_header)) => {
+                xidl_rust_axum::auth::bearer::BearerAuth::from_header(auth_header)
+            }
+            None => return Err(xidl_rust_axum::Error::unauthorized()),
+
+        };
+        let ReportApiWatchReportPath{
+
+        id,
+
+        } = path;
+        let data = ReportApiWatchReportRequest{
+            id,
+            xidl_auth,
+        };
+        let req = ::xidl_rust_axum::Request::new(headers,data);
+        let mut resp = match svc.watch_report(req).await{
+            Ok(resp_value) => {
+                let mut resp = {
+                    xidl_rust_axum::stream::sse_response(resp_value)
+                };
+                resp
+            }
+            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+
+        };
+        Ok(resp)
+    }
+}
+
+impl<T>xidl_rust_axum::Service for ReportApiServer<T>
+where
+T:ReportApi+Send+Sync+'static,
+{
+    fn into_router(self)->xidl_rust_axum::axum::Router{
+        self.router()
+    }
+}
+
+pub struct ReportApiClient{
+    client:xidl_rust_axum::Client,
+}
+
+impl ReportApiClient{
+    pub fn new(base_url:impl Into<String>)->Self{
+        Self{
+            client:xidl_rust_axum::Client::new(base_url),
+        }
+    }
+
+    pub fn with_auth(
+    base_url:impl Into<String>,
+    auth:xidl_rust_axum::ClientAuth,
+    )->Self{
+        Self{
+            client:xidl_rust_axum::Client::with_auth(base_url,auth),
+        }
+    }
+
+    pub fn with_http(
+    base_url:impl Into<String>,
+    http:xidl_rust_axum::reqwest::Client,
+    )->Self{
+        Self{
+            client:xidl_rust_axum::Client::with_http(base_url,http),
+        }
+    }
+
+    pub fn with_http_and_auth(
+    base_url:impl Into<String>,
+    http:xidl_rust_axum::reqwest::Client,
+    auth:xidl_rust_axum::ClientAuth,
+    )->Self{
+        Self{
+            client:xidl_rust_axum::Client::with_http_and_auth(base_url,http,auth),
+        }
+    }
+
+    pub fn with_auth_override(
+    &self,
+    auth:Option<xidl_rust_axum::ClientAuth>,
+    )->Self{
+        Self{
+            client:self.client.with_auth_override(auth),
+        }
+    }
+}
+
+impl ReportApiClient{
+    pub async fn get_report(&self,id:String,lang:Option<String>,trace_id:String)->Result<String,xidl_rust_axum::Error>{
+        let path = "/reports/{id}".to_string();
+        let path = path.replace("{id}",&id.to_string());
+        let mut req = self
+        .client
+        .http()
+        .request(xidl_rust_axum::reqwest::Method::GET,&self.client.url(&path))
+        .build()
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
+        let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
+        "X-Trace-Id".as_bytes(),
+        )
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
+        let header_value_str = trace_id;
+        let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+        &header_value_str,
+        )
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
+        req.headers_mut().insert(header_name,header_value);
+        let query = ReportApiGetReportQuery{
+            lang,
+        };
+        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        if!query.is_empty(){
+            req.url_mut().set_query(Some(&query));
+        }
+
+        let auth_target = &self.client;
+        auth_target.apply_auth(&mut req,xidl_rust_axum::ClientAuthRequirement::Bearer)?;
+        let resp = self
+        .client
+        .http()
+        .execute(req)
+        .await
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        if resp.status().is_success(){
+            let body = resp
+            .bytes()
+            .await
+            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+            xidl_rust_axum::DeserializeFactory::new("application/json")
+            .from_slice(&body)
+        }else{
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status,body))
+        }
+    }
+
+    pub async fn watch_report(&self,id:String)->Result<xidl_rust_axum::stream::Reader<String>,xidl_rust_axum::Error>{
+        let path = "/reports/{id}/events".to_string();
+        let path = path.replace("{id}",&id.to_string());
+        let mut req = self
+        .client
+        .http()
+        .request(xidl_rust_axum::reqwest::Method::GET,&self.client.url(&path))
+        .build()
+        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+        req.headers_mut().insert(
+        xidl_rust_axum::reqwest::header::ACCEPT,
+        xidl_rust_axum::reqwest::header::HeaderValue::from_str("text/event-stream")
+        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
+        );
+        let auth_target = &self.client;
+        auth_target.apply_auth(&mut req,xidl_rust_axum::ClientAuthRequirement::Bearer)?;
+        xidl_rust_axum::stream::open_sse::<String>(self.client.http(),req).await
+    }
+}
