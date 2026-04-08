@@ -17,8 +17,6 @@ required-features = ["cli", "fmt"]
 
 [features]
 default = [
-  "gen-hir",
-  "gen-typed-ast",
   "gen-c",
   "gen-cpp",
   "gen-rust",
@@ -32,8 +30,6 @@ default = [
   "gen-openapi",
   "gen-openrpc",
 ]
-gen-hir = []
-gen-typed-ast = []
 gen-c = []
 gen-cpp = []
 gen-rust = []

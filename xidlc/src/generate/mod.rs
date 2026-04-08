@@ -6,7 +6,6 @@ pub mod cpp;
 pub mod go;
 #[cfg(feature = "gen-go-http")]
 pub mod go_http;
-#[cfg(feature = "gen-hir")]
 pub mod hir_gen;
 #[cfg(feature = "gen-openapi")]
 pub mod openapi;
@@ -22,7 +21,6 @@ pub mod rust;
 pub mod rust_axum;
 #[cfg(feature = "gen-rust-jsonrpc")]
 pub mod rust_jsonrpc;
-#[cfg(feature = "gen-typed-ast")]
 pub mod typed_ast_gen;
 #[cfg(feature = "gen-typescript")]
 pub mod typescript;

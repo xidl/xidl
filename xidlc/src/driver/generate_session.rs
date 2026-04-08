@@ -72,9 +72,7 @@ impl CodegenSession {
 
         #[allow(unreachable_patterns)]
         match lang {
-            #[cfg(feature = "gen-hir")]
             Plugin::Hir => run_server!(crate::generate::hir_gen::HirGen),
-            #[cfg(feature = "gen-typed-ast")]
             Plugin::TypedAst => run_server!(crate::generate::typed_ast_gen::TypedAstGen),
             #[cfg(feature = "gen-c")]
             Plugin::C => run_server!(crate::generate::c::CCodegen),
@@ -101,7 +99,7 @@ impl CodegenSession {
             #[cfg(feature = "gen-typescript")]
             Plugin::Typescript => run_server!(crate::generate::typescript::TypescriptCodegen),
             Plugin::Custom(_) => unreachable!("custom plugins use spawn_custom_codegen_server"),
-            _ => unreachable!(),
+            var => panic!("does not support {var:?}"),
         }
     }
 
