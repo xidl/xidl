@@ -474,7 +474,10 @@ Response rules:
   - all `out` and `inout` parameters
 - Output shaping:
   - if output count is `0`: no response body
-  - if output count is `1`: return that value directly
+  - if output count is `1` and that output is the method return value: return
+    that value directly
+  - if output count is `1` and that output is an `out`/`inout` parameter:
+    return an object containing that field
   - if output count is `>1`: return an object
     - return value field name is fixed as `return` (when return value exists)
     - each `out/inout` parameter uses its parameter name as field name
@@ -488,7 +491,8 @@ Response rules:
 Examples:
 
 - `string hello()` -> `"ok"`
-- `void get_count(out long count)` -> `3`
+- `void get_count(out long count)` -> `{"count":3}`
+- `void get_files(out sequence<File> files)` -> `{"files":[...]}`
 - `long add(long a, long b, out long sum)` -> `{"return":0,"sum":3}`
 
 ## 8. Attribute Mapping
