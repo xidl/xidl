@@ -614,11 +614,10 @@ pub trait {{ ident }} {
                 {% for param in method.path_params %}
                     let path = path.replace("{{ ['{', param.path_template_name, '}'] | join}}", &{{ param.name }}.to_string());
                 {% endfor %}
-                let url = self.client.url(&path);
                 let mut req = self
                     .client
                     .http()
-                    .request(xidl_rust_axum::reqwest::Method::{{ method.reqwest_method }}, url)
+                    .request(xidl_rust_axum::reqwest::Method::{{ method.reqwest_method }}, &self.client.url(&path))
                     .build()
                     .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 req.headers_mut().insert(
