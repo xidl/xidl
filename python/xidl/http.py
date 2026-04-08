@@ -414,7 +414,20 @@ def ensure_response_header(response: Response, name: str, value: str) -> Respons
 
 def to_body(value: Any) -> Any:
     if is_dataclass(value):
-        return asdict(value)
+        return _normalize_body(asdict(value))
+    return _normalize_body(value)
+
+
+def _normalize_body(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {
+            ("return" if key == "return_" else key): _normalize_body(item)
+            for key, item in value.items()
+        }
+    if isinstance(value, list):
+        return [_normalize_body(item) for item in value]
+    if isinstance(value, tuple):
+        return [_normalize_body(item) for item in value]
     return value
 
 

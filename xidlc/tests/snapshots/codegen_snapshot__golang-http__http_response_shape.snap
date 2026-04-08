@@ -72,7 +72,10 @@ func NewHttpResponseShapeServiceHandler(svc HttpResponseShapeServiceService) htt
 			return
 		}
 
-	if err := xidlgohttp.EncodeBody(w, "application/json", resp.Count); err != nil {
+	respBody := HttpResponseShapeServiceGetCountResponseBody{
+		Count: resp.Count,
+	}
+	if err := xidlgohttp.EncodeBody(w, "application/json", respBody); err != nil {
 		xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
 	}
 	})
@@ -285,6 +288,10 @@ type HttpResponseShapeServiceGetCountResponse struct {
 	Count int32 `json:"count"`
 }
 
+type HttpResponseShapeServiceGetCountResponseBody struct {
+	Count int32 `json:"count"`
+}
+
 func HttpResponseShapeServiceGetCountSecurityRequirements() []xidlgohttp.SecurityRequirement {
 	return []xidlgohttp.SecurityRequirement{
 	}
@@ -302,9 +309,9 @@ func formatHttpResponseShapeServiceGetCountPath(req *HttpResponseShapeServiceGet
 }
 func decodeHttpResponseShapeServiceGetCountResponse(resp *http.Response) (HttpResponseShapeServiceGetCountResponse, error) {
 	out := HttpResponseShapeServiceGetCountResponse{}
-	var body int32
+	body := HttpResponseShapeServiceGetCountResponseBody{}
 	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil { return out, err }
-	out.Count = body
+	out.Count = body.Count
 	return out, nil
 }
 type HttpResponseShapeServiceAddRequest struct {

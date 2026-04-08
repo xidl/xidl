@@ -38,7 +38,7 @@ pub trait HttpAnnoService{
     async fn get_count(
     &self,
     req:xidl_rust_axum::Request<()>
-    )->Result<i32,xidl_rust_axum::Error>;
+    )->Result<HttpAnnoServiceGetCountResponse,xidl_rust_axum::Error>;
     async fn ping(
     &self,
     req:xidl_rust_axum::Request<()>
@@ -161,6 +161,11 @@ pub struct HttpAnnoServiceBumpRequest{
 pub struct HttpAnnoServiceBumpResponse{
     pub r#return:i32,
     pub value:i32,
+}
+
+#[derive(::serde::Serialize,::serde::Deserialize)]
+pub struct HttpAnnoServiceGetCountResponse{
+    pub count:i32,
 }
 
 pub struct HttpAnnoServiceServer<T>{
@@ -970,7 +975,7 @@ impl HttpAnnoServiceClient{
         }
     }
 
-    pub async fn get_count(&self)->Result<i32,xidl_rust_axum::Error>{
+    pub async fn get_count(&self)->Result<HttpAnnoServiceGetCountResponse,xidl_rust_axum::Error>{
         let path = "/get_count".to_string();
         let url = self.client.url(&path);
         let mut req = self

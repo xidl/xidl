@@ -1,10 +1,11 @@
 import base64
 import json
 import unittest
+from dataclasses import dataclass
 
 from xidl.django import DjangoAdapter
 from xidl.fastapi import FastAPIAdapter
-from xidl.http import register_routes
+from xidl.http import encode_json_response, register_routes
 from xidlc_examples.http_security.http_security_http import (
     HttpSecurityServiceGetUserResponse,
     HttpSecurityServiceHealthResponse,
@@ -81,6 +82,16 @@ class FakeFastAPIApp:
 
 
 class AdapterTests(unittest.IsolatedAsyncioTestCase):
+    async def test_encode_json_response_renames_return_field(self):
+        @dataclass
+        class Payload:
+            return_: int
+            count: int
+
+        response = encode_json_response(Payload(return_=1, count=2))
+        self.assertEqual(200, response.status_code)
+        self.assertEqual({"return": 1, "count": 2}, response.body)
+
     async def test_django_adapter_executes_security_route(self):
         adapter = DjangoAdapter()
         register_routes(adapter, http_security_service_routes(SecurityService()))

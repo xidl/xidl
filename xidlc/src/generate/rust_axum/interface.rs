@@ -619,14 +619,15 @@ fn render_op(
     let response_body_count = usize::from(!return_is_unit) + response_body_params.len();
     let response_is_empty = response_body_count == 0;
     let response_include_return = !return_is_unit;
-    let response_struct = if response_value_count > 1 {
-        Some(format!(
-            "{}Response",
-            method_struct_prefix(interface_name, &op.ident)
-        ))
-    } else {
-        None
-    };
+    let response_struct =
+        if response_value_count > 1 || (return_is_unit && response_value_count == 1) {
+            Some(format!(
+                "{}Response",
+                method_struct_prefix(interface_name, &op.ident)
+            ))
+        } else {
+            None
+        };
     let response_ty = if let Some(response_struct) = &response_struct {
         response_struct.clone()
     } else if !return_is_unit {

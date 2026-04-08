@@ -992,8 +992,7 @@ pub(crate) fn build_method_meta(
             if let Some(return_ty) = &return_ty {
                 (None, Some("Return".to_string()), Some(return_ty.clone()))
             } else {
-                let param = &response_body_params[0];
-                (None, Some(param.field_name.clone()), Some(param.ty.clone()))
+                (Some(format!("{struct_prefix}ResponseBody")), None, None)
             }
         } else {
             (Some(format!("{struct_prefix}ResponseBody")), None, None)

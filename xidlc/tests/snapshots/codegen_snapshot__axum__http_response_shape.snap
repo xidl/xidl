@@ -14,7 +14,7 @@ pub trait HttpResponseShapeService{
     async fn get_count(
     &self,
     req:xidl_rust_axum::Request<()>
-    )->Result<i32,xidl_rust_axum::Error>;
+    )->Result<HttpResponseShapeServiceGetCountResponse,xidl_rust_axum::Error>;
     async fn add(
     &self,
     req:xidl_rust_axum::Request<HttpResponseShapeServiceAddRequest>
@@ -27,6 +27,11 @@ pub trait HttpResponseShapeService{
     &self,
     req:xidl_rust_axum::Request<()>
     )->Result<(),xidl_rust_axum::Error>;
+}
+
+#[derive(::serde::Serialize,::serde::Deserialize)]
+pub struct HttpResponseShapeServiceGetCountResponse{
+    pub count:i32,
 }
 
 #[derive(::serde::Serialize,::serde::Deserialize)]
@@ -379,7 +384,7 @@ impl HttpResponseShapeServiceClient{
         }
     }
 
-    pub async fn get_count(&self)->Result<i32,xidl_rust_axum::Error>{
+    pub async fn get_count(&self)->Result<HttpResponseShapeServiceGetCountResponse,xidl_rust_axum::Error>{
         let path = "/get_count".to_string();
         let url = self.client.url(&path);
         let mut req = self

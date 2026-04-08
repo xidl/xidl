@@ -34,6 +34,7 @@ struct SourceBinding {
     bound_name: String,
 }
 
+#[derive(Clone)]
 struct ParamContext {
     field_name: String,
     wire_name: String,
@@ -58,7 +59,16 @@ struct MethodContext {
     stream_expr: String,
     stream_kind: Option<HttpStreamKind>,
     stream_codec: HttpStreamCodec,
-    params: Vec<ParamContext>,
+    request_params: Vec<ParamContext>,
+    response_params: Vec<ParamContext>,
+    return_ty: Option<String>,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum ParamDirection {
+    In,
+    Out,
+    InOut,
 }
 
 pub(crate) fn render_spec(spec: &hir::Specification, module_name: &str) -> IdlcResult<String> {
@@ -216,8 +226,10 @@ fn build_method(
         .as_ref()
         .map(|value| value.0.as_slice())
         .unwrap_or(&[]);
-    let mut bindings = Vec::new();
+    let mut request_params = Vec::new();
+    let mut response_params = Vec::new();
     for param in params {
+        let direction = param_direction(param.attr.as_ref());
         let binding = explicit_param_binding(param)?;
         let default_source = default_param_source(&method);
         let (source, wire_name) = match binding {
@@ -225,6 +237,7 @@ fn build_method(
             None => (default_source, param.declarator.0.clone()),
         };
         if matches!(stream.kind, Some(HttpStreamKind::Client))
+            && !matches!(direction, ParamDirection::Out)
             && !matches!(source, ParamSource::Body)
         {
             return Err(IdlcError::rpc(format!(
@@ -232,21 +245,27 @@ fn build_method(
                 op.ident
             )));
         }
-        bindings.push(ParamContext {
+        let context = ParamContext {
             field_name: py_field_name(&param.declarator.0),
             wire_name,
             ty: py_type(&param.ty),
             optional: has_optional_annotation(&param.annotations),
             source,
-        });
+        };
+        if !matches!(direction, ParamDirection::Out) {
+            request_params.push(context.clone());
+        }
+        if matches!(direction, ParamDirection::Out | ParamDirection::InOut) {
+            response_params.push(context);
+        }
     }
 
-    let paths = collect_paths(op, &bindings, &method)?;
+    let paths = collect_paths(op, &request_params, &method)?;
     let path_param_sets = paths
         .iter()
         .map(|path| parse_path_params(path))
         .collect::<Vec<_>>();
-    for binding in &bindings {
+    for binding in &request_params {
         if matches!(binding.source, ParamSource::Path)
             && !path_param_sets
                 .iter()
@@ -267,10 +286,14 @@ fn build_method(
         }
         Some(HttpStreamKind::Bidi) => "BidiStreamResponse".to_string(),
     };
+    let return_ty = match &op.ty {
+        hir::OpTypeSpec::Void => None,
+        hir::OpTypeSpec::TypeSpec(ty) => Some(py_type(ty)),
+    };
     let request_content_type = request_content_type(interface_annotations, &op.annotations, stream);
     let response_content_type =
         response_content_type(interface_annotations, &op.annotations, stream);
-    let requires_request_content_type = bindings
+    let requires_request_content_type = request_params
         .iter()
         .any(|value| matches!(value.source, ParamSource::Body))
         || matches!(stream.kind, Some(HttpStreamKind::Client));
@@ -301,7 +324,9 @@ fn build_method(
         stream_expr: stream_expr(stream),
         stream_kind: stream.kind,
         stream_codec: stream.codec,
-        params: bindings,
+        request_params,
+        response_params,
+        return_ty,
     })
 }
 
@@ -310,24 +335,15 @@ fn render_method_types(
     method: &MethodContext,
     def: &hir::InterfaceDef,
 ) -> IdlcResult<()> {
-    let Some(body) = &def.interface_body else {
+    let Some(_body) = &def.interface_body else {
         return Ok(());
     };
-    let op = body
-        .0
-        .iter()
-        .find_map(|export| match export {
-            hir::Export::OpDcl(op) if op.ident == method.raw_name => Some(op),
-            _ => None,
-        })
-        .expect("method metadata should have matching op");
-
     writeln!(out, "@dataclass").unwrap();
     writeln!(out, "class {}:", method.request_type).unwrap();
-    if method.params.is_empty() {
+    if method.request_params.is_empty() {
         writeln!(out, "    pass").unwrap();
     } else {
-        for param in &method.params {
+        for param in &method.request_params {
             writeln!(
                 out,
                 "    {}: {}",
@@ -345,12 +361,29 @@ fn render_method_types(
 
     writeln!(out, "@dataclass").unwrap();
     writeln!(out, "class {}:", method.response_type).unwrap();
-    match &op.ty {
-        hir::OpTypeSpec::Void => {
-            writeln!(out, "    pass").unwrap();
+    let response_field_count =
+        method.response_params.len() + usize::from(method.return_ty.is_some());
+    if response_field_count == 0 {
+        writeln!(out, "    pass").unwrap();
+    } else if response_field_count == 1 && method.return_ty.is_some() {
+        writeln!(
+            out,
+            "    value: {}",
+            method.return_ty.as_deref().unwrap_or("Any")
+        )
+        .unwrap();
+    } else {
+        if let Some(return_ty) = &method.return_ty {
+            writeln!(out, "    return_: {}", return_ty).unwrap();
         }
-        hir::OpTypeSpec::TypeSpec(ty) => {
-            writeln!(out, "    value: {}", py_type(ty)).unwrap();
+        for param in &method.response_params {
+            writeln!(
+                out,
+                "    {}: {}",
+                param.field_name,
+                maybe_optional_type(param.optional, &param.ty)
+            )
+            .unwrap();
         }
     }
     writeln!(out).unwrap();
@@ -391,17 +424,17 @@ fn render_endpoint_helper(
         .unwrap();
     }
     if method
-        .params
+        .request_params
         .iter()
         .any(|param| matches!(param.source, ParamSource::Body))
     {
         writeln!(out, "    body = read_json_body(request)").unwrap();
     }
-    if method.params.is_empty() {
+    if method.request_params.is_empty() {
         writeln!(out, "    request_value = {}()", method.request_type).unwrap();
     } else {
         writeln!(out, "    request_value = {}(", method.request_type).unwrap();
-        for param in &method.params {
+        for param in &method.request_params {
             writeln!(
                 out,
                 "        {}={},",
@@ -582,6 +615,14 @@ fn response_content_type(
     match (stream.kind, stream.codec) {
         (Some(HttpStreamKind::Server), HttpStreamCodec::Sse) => "text/event-stream".to_string(),
         _ => effective_media_type(interface_annotations, method_annotations, "Produces"),
+    }
+}
+
+fn param_direction(attr: Option<&hir::ParamAttribute>) -> ParamDirection {
+    match attr.map(|value| value.0.as_str()) {
+        Some("out") => ParamDirection::Out,
+        Some("inout") => ParamDirection::InOut,
+        _ => ParamDirection::In,
     }
 }
 
