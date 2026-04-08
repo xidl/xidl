@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.38.0](https://github.com/xidl/xidl/compare/v0.37.0...v0.38.0) (2026-04-08)
+
+
+### Features
+
+* **git:** add Cargo.lock ([87b3497](https://github.com/xidl/xidl/commit/87b3497fed31d92f57b0b1b603f75f87333392bd))
+
+
+### Bug Fixes
+
+* fix release problem ([c35f9ac](https://github.com/xidl/xidl/commit/c35f9ac0c3fff69d297d2f0508663e8736e07e97))
+
 ## [0.37.0](https://github.com/xidl/xidl/compare/v0.36.1...v0.37.0) (2026-04-07)
 
 
