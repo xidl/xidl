@@ -38,3 +38,7 @@ jobs:
       - name: Cargo test
         run: |
           make test
+
+      - name: Check release
+        run: |
+          cargo publish --workspace --dry-run
