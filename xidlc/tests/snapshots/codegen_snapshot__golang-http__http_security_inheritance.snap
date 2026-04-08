@@ -90,12 +90,12 @@ func NewHttpSecurityInheritanceServiceHandler(svc HttpSecurityInheritanceService
  		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
  		return
  	}
-	var body string
+	body := HttpSecurityInheritanceServiceUpdateReportRequestBody{}
 	if err := xidlgohttp.DecodeBody(r, "application/json", &body); err != nil {
 		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 		return
 	}
-	req.Body = body
+	req.Body = body.Body
 		resp, err := svc.UpdateReport(r.Context(), req)
 		if err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
@@ -156,7 +156,9 @@ func (c *HttpSecurityInheritanceServiceClient) GetReport(ctx context.Context, re
 
 func (c *HttpSecurityInheritanceServiceClient) UpdateReport(ctx context.Context, req *HttpSecurityInheritanceServiceUpdateReportRequest) (*HttpSecurityInheritanceServiceUpdateReportResponse, error) {
 	requestURL := c.baseURL + formatHttpSecurityInheritanceServiceUpdateReportPath(req)
-	body := req.Body
+	body := HttpSecurityInheritanceServiceUpdateReportRequestBody{
+		Body: req.Body,
+	}
 	var requestBody bytes.Buffer
 	if err := xidlgohttp.MustCodecForMime("application/json").Encode(&requestBody, body); err != nil { return nil, err }
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", requestURL, &requestBody)
@@ -223,6 +225,10 @@ func decodeHttpSecurityInheritanceServiceGetReportResponse(resp *http.Response) 
 }
 type HttpSecurityInheritanceServiceUpdateReportRequest struct {
 	Id string `json:"id" form:"id"`
+	Body string `json:"body" form:"body"`
+}
+
+type HttpSecurityInheritanceServiceUpdateReportRequestBody struct {
 	Body string `json:"body" form:"body"`
 }
 

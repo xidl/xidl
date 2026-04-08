@@ -92,12 +92,12 @@ func NewHttpQueryTemplateServiceHandler(svc HttpQueryTemplateServiceService) htt
  		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
  		return
  	}
-	var body string
+	body := HttpQueryTemplateServiceSearchRequestBody{}
 	if err := xidlgohttp.DecodeBody(r, "application/json", &body); err != nil {
 		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 		return
 	}
-	req.Payload = body
+	req.Payload = body.Payload
 		resp, err := svc.Search(r.Context(), req)
 		if err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
@@ -154,7 +154,9 @@ func (c *HttpQueryTemplateServiceClient) Search(ctx context.Context, req *HttpQu
 	if encoded := query.Encode(); encoded != "" {
 		requestURL += "?" + encoded
 	}
-	body := req.Payload
+	body := HttpQueryTemplateServiceSearchRequestBody{
+		Payload: req.Payload,
+	}
 	var requestBody bytes.Buffer
 	if err := xidlgohttp.MustCodecForMime("application/json").Encode(&requestBody, body); err != nil { return nil, err }
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", requestURL, &requestBody)
@@ -206,6 +208,10 @@ func decodeHttpQueryTemplateServiceGetUserResponse(resp *http.Response) (HttpQue
 }
 type HttpQueryTemplateServiceSearchRequest struct {
 	Keyword string `json:"keyword" form:"keyword"`
+	Payload string `json:"payload" form:"payload"`
+}
+
+type HttpQueryTemplateServiceSearchRequestBody struct {
 	Payload string `json:"payload" form:"payload"`
 }
 

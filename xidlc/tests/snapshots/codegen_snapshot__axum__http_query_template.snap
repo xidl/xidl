@@ -46,7 +46,13 @@ struct HttpQueryTemplateServiceSearchQuery{
     keyword:String,
 }
 
-type HttpQueryTemplateServiceSearchBody = String;
+#[derive(::serde::Serialize,::serde::Deserialize)]
+struct HttpQueryTemplateServiceSearchBody{
+    #[serde(default,deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null")]
+
+    payload:String,
+}
+
 #[derive(::serde::Serialize,::serde::Deserialize)]
 pub struct HttpQueryTemplateServiceSearchRequest{
     pub keyword:String,
@@ -157,7 +163,11 @@ T:HttpQueryTemplateService+Send+Sync+'static,
         .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
         let body:HttpQueryTemplateServiceSearchBody = xidl_rust_axum::DeserializeFactory::new("application/json")
         .from_slice(&body_bytes)?;
-        let payload = body;
+        let HttpQueryTemplateServiceSearchBody{
+
+        payload,
+
+        } = body;
         let data = HttpQueryTemplateServiceSearchRequest{
             keyword,
             payload,
@@ -248,11 +258,10 @@ impl HttpQueryTemplateServiceClient{
     pub async fn get_user(&self,id:u32,lang:String,region:String)->Result<String,xidl_rust_axum::Error>{
         let path = "/users/{id}".to_string();
         let path = path.replace("{id}",&id.to_string());
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,url)
+        .request(xidl_rust_axum::reqwest::Method::GET,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
@@ -293,11 +302,10 @@ impl HttpQueryTemplateServiceClient{
 
     pub async fn search(&self,keyword:String,payload:String)->Result<String,xidl_rust_axum::Error>{
         let path = "/search".to_string();
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,url)
+        .request(xidl_rust_axum::reqwest::Method::POST,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
@@ -315,7 +323,9 @@ impl HttpQueryTemplateServiceClient{
         }
 
         let auth_target = &self.client;
-        let body = payload;
+        let body = HttpQueryTemplateServiceSearchBody{
+            payload,
+        };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
         .to_vec(&body)?;
         req.headers_mut().insert(

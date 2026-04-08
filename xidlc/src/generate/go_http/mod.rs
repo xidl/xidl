@@ -116,6 +116,7 @@ pub(crate) struct ParamMeta {
     pub(crate) ty: String,
     pub(crate) optional: bool,
     pub(crate) source: ParamSource,
+    pub(crate) flatten: bool,
 }
 
 pub(crate) struct MethodMeta {

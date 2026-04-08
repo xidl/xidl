@@ -52,6 +52,7 @@ struct MethodContext {
     param_names: Vec<String>,
     ret: String,
     response_ty: String,
+    request_body_flatten: bool,
     http_method: String,
     http_method_fn: String,
     reqwest_method: String,
@@ -113,6 +114,7 @@ struct ParamContext {
     cookie_item_is_primitive: bool,
     optional: bool,
     inner_ty: String,
+    flatten: bool,
 }
 
 #[derive(Serialize, Clone)]
@@ -400,10 +402,17 @@ fn render_op(
 
     for param in params {
         let optional = crate::generate::utils::has_optional_annotation(&param.annotations);
+        let flatten = has_flatten_annotation(&param.annotations);
         let inner_ty = axum_type(&param.ty);
         let ty = render_param_type(&param.ty, param.attr.as_ref(), optional);
         let name = rust_ident(&param.declarator.0);
         let direction = param_direction(param.attr.as_ref());
+        if flatten && matches!(direction, ParamDirection::Out) {
+            return Err(IdlcError::rpc(format!(
+                "@flatten can only be applied to request-side body parameter '{}' of method '{}'",
+                param.declarator.0, op.ident
+            )));
+        }
         if matches!(direction, ParamDirection::Out | ParamDirection::InOut) {
             let binding = explicit_param_binding(param)?;
             let (response_source, response_wire_name) = match binding {
@@ -433,6 +442,7 @@ fn render_op(
                 cookie_item_is_primitive: cookie_item_is_primitive(&param.ty),
                 optional: false,
                 inner_ty: inner_ty.clone(),
+                flatten: false,
             };
             if matches!(response_source, ParamSource::Header) {
                 response_header_params.push(response_ctx.clone());
@@ -470,7 +480,7 @@ fn render_op(
             )));
         }
         let serde_name = if matches!(source, ParamSource::Body) {
-            field_rename_raw(&param.annotations).unwrap_or_else(|| param.declarator.0.clone())
+            field_rename_raw(&param.annotations).unwrap_or_else(|| wire_name.clone())
         } else {
             wire_name.clone()
         };
@@ -498,6 +508,7 @@ fn render_op(
             cookie_item_is_string: cookie_item_is_string(&param.ty),
             cookie_item_is_primitive: cookie_item_is_primitive(&param.ty),
             optional,
+            flatten,
         };
         if ctx.optional && matches!(source, ParamSource::Path) {
             return Err(IdlcError::rpc(format!(
@@ -605,6 +616,21 @@ fn render_op(
             op.ident
         )));
     }
+    for param in &request_params {
+        if param.flatten && param.source != param_source_code(ParamSource::Body) {
+            return Err(IdlcError::rpc(format!(
+                "@flatten can only be applied to body parameter '{}' of method '{}'",
+                param.raw_name, op.ident
+            )));
+        }
+    }
+    if body_params.len() != 1 && body_params.iter().any(|param| param.flatten) {
+        return Err(IdlcError::rpc(format!(
+            "@flatten requires exactly one request-side body parameter, but method '{}' has {}",
+            op.ident,
+            body_params.len()
+        )));
+    }
     if is_client_stream || is_bidi_stream {
         param_list.clear();
         param_names.clear();
@@ -617,6 +643,7 @@ fn render_op(
     }
     let response_value_count = usize::from(!return_is_unit) + response_params.len();
     let response_body_count = usize::from(!return_is_unit) + response_body_params.len();
+    let request_body_flatten = body_params.len() == 1 && body_params[0].flatten;
     let response_is_empty = response_body_count == 0;
     let response_include_return = !return_is_unit;
     let response_struct =
@@ -675,6 +702,7 @@ fn render_op(
         param_names,
         ret,
         response_ty,
+        request_body_flatten,
         http_method: http_method_code(method),
         http_method_fn: http_method_fn(method),
         reqwest_method: reqwest_method_code(method),
@@ -856,6 +884,7 @@ fn render_attr(
                     param_names: Vec::new(),
                     ret: ret.clone(),
                     response_ty: ret.clone(),
+                    request_body_flatten: false,
                     http_method: http_method_code(HttpMethod::Get),
                     http_method_fn: http_method_fn(HttpMethod::Get),
                     reqwest_method: reqwest_method_code(HttpMethod::Get),
@@ -927,6 +956,7 @@ fn render_attr(
                         param_names: Vec::new(),
                         ret: ret.clone(),
                         response_ty: ret.clone(),
+                        request_body_flatten: false,
                         http_method: http_method_code(HttpMethod::Get),
                         http_method_fn: http_method_fn(HttpMethod::Get),
                         reqwest_method: reqwest_method_code(HttpMethod::Get),
@@ -1008,6 +1038,7 @@ fn render_attr(
                             param_names: Vec::new(),
                             ret: ret.clone(),
                             response_ty: ret.clone(),
+                            request_body_flatten: false,
                             http_method: http_method_code(HttpMethod::Get),
                             http_method_fn: http_method_fn(HttpMethod::Get),
                             reqwest_method: reqwest_method_code(HttpMethod::Get),
@@ -1081,6 +1112,7 @@ fn render_attr(
                             cookie_item_is_primitive: false,
                             optional: false,
                             inner_ty: param.clone(),
+                            flatten: false,
                         };
                         let mut params = auth_param_list.clone();
                         params.push(format!("{param_name}: {param}"));
@@ -1096,6 +1128,7 @@ fn render_attr(
                             param_names: vec![param_name],
                             ret: "()".to_string(),
                             response_ty: "()".to_string(),
+                            request_body_flatten: false,
                             http_method: http_method_code(HttpMethod::Post),
                             http_method_fn: http_method_fn(HttpMethod::Post),
                             reqwest_method: reqwest_method_code(HttpMethod::Post),
@@ -1170,6 +1203,7 @@ fn render_attr(
                                 param_names: Vec::new(),
                                 ret: ret.clone(),
                                 response_ty: ret.clone(),
+                                request_body_flatten: false,
                                 http_method: http_method_code(HttpMethod::Get),
                                 http_method_fn: http_method_fn(HttpMethod::Get),
                                 reqwest_method: reqwest_method_code(HttpMethod::Get),
@@ -1247,6 +1281,7 @@ fn render_attr(
                         param_names: Vec::new(),
                         ret: ret.clone(),
                         response_ty: ret.clone(),
+                        request_body_flatten: false,
                         http_method: http_method_code(HttpMethod::Get),
                         http_method_fn: http_method_fn(HttpMethod::Get),
                         reqwest_method: reqwest_method_code(HttpMethod::Get),
@@ -1319,6 +1354,7 @@ fn render_attr(
                         cookie_item_is_primitive: false,
                         optional: false,
                         inner_ty: param.clone(),
+                        flatten: false,
                     };
                     let mut params = auth_param_list.clone();
                     params.push(format!("{param_name}: {param}"));
@@ -1334,6 +1370,7 @@ fn render_attr(
                         param_names: vec![param_name],
                         ret: "()".to_string(),
                         response_ty: "()".to_string(),
+                        request_body_flatten: false,
                         http_method: http_method_code(HttpMethod::Post),
                         http_method_fn: http_method_fn(HttpMethod::Post),
                         reqwest_method: reqwest_method_code(HttpMethod::Post),
@@ -1407,6 +1444,7 @@ fn render_attr(
                             param_names: Vec::new(),
                             ret: ret.clone(),
                             response_ty: ret.clone(),
+                            request_body_flatten: false,
                             http_method: http_method_code(HttpMethod::Get),
                             http_method_fn: http_method_fn(HttpMethod::Get),
                             reqwest_method: reqwest_method_code(HttpMethod::Get),
@@ -1767,6 +1805,14 @@ fn field_rename(annotations: &[hir::Annotation], rust_name: &str) -> Option<Stri
     field_rename_raw(annotations).and_then(|value| serde_rename(&value, rust_name))
 }
 
+fn has_flatten_annotation(annotations: &[hir::Annotation]) -> bool {
+    annotations.iter().any(|annotation| {
+        annotation_name(annotation)
+            .map(|name| name.eq_ignore_ascii_case("flatten"))
+            .unwrap_or(false)
+    })
+}
+
 struct SourceBinding {
     source: ParamSource,
     bound_name: String,
@@ -1782,6 +1828,8 @@ fn explicit_param_binding(param: &hir::ParamDcl) -> IdlcResult<Option<SourceBind
             Some(ParamSource::Path)
         } else if name.eq_ignore_ascii_case("query") {
             Some(ParamSource::Query)
+        } else if name.eq_ignore_ascii_case("body") {
+            Some(ParamSource::Body)
         } else if name.eq_ignore_ascii_case("header") {
             Some(ParamSource::Header)
         } else if name.eq_ignore_ascii_case("cookie") {
@@ -1812,7 +1860,7 @@ fn explicit_param_binding(param: &hir::ParamDcl) -> IdlcResult<Option<SourceBind
             Some(ref prev) if prev.source == current && prev.bound_name == bound_name => {}
             Some(_) => {
                 return Err(IdlcError::rpc(format!(
-                    "parameter '{}' has conflicting source annotations (@path/@query/@header/@cookie)",
+                    "parameter '{}' has conflicting source annotations (@path/@query/@body/@header/@cookie)",
                     param.declarator.0
                 )));
             }

@@ -229,11 +229,10 @@ impl HttpCatchAllServiceClient{
     pub async fn read_file(&self,rel_path:String)->Result<String,xidl_rust_axum::Error>{
         let path = "/files/{*path}".to_string();
         let path = path.replace("{*path}",&rel_path.to_string());
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,url)
+        .request(xidl_rust_axum::reqwest::Method::GET,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
@@ -265,11 +264,10 @@ impl HttpCatchAllServiceClient{
     pub async fn read_asset(&self,key:String,version:String)->Result<String,xidl_rust_axum::Error>{
         let path = "/assets/{*key}".to_string();
         let path = path.replace("{*key}",&key.to_string());
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,url)
+        .request(xidl_rust_axum::reqwest::Method::GET,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(

@@ -39,7 +39,13 @@ pub struct RustHttpGetUserRequest{
     pub user_id:u32,
 }
 
-type RustHttpSetAttributeDisplayNameBody = String;
+#[derive(::serde::Serialize,::serde::Deserialize)]
+struct RustHttpSetAttributeDisplayNameBody{
+    #[serde(default,deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null")]
+
+    display_name:String,
+}
+
 #[derive(::serde::Serialize,::serde::Deserialize)]
 pub struct RustHttpSetAttributeDisplayNameRequest{
     pub display_name:String,
@@ -167,7 +173,11 @@ T:RustHttp+Send+Sync+'static,
         .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
         let body:RustHttpSetAttributeDisplayNameBody = xidl_rust_axum::DeserializeFactory::new("application/json")
         .from_slice(&body_bytes)?;
-        let display_name = body;
+        let RustHttpSetAttributeDisplayNameBody{
+
+        display_name,
+
+        } = body;
         let data = RustHttpSetAttributeDisplayNameRequest{
             display_name,
         };
@@ -249,11 +259,10 @@ impl RustHttpClient{
     pub async fn get_user(&self,user_id:u32)->Result<String,xidl_rust_axum::Error>{
         let path = "/users/{user_id}".to_string();
         let path = path.replace("{user_id}",&user_id.to_string());
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,url)
+        .request(xidl_rust_axum::reqwest::Method::GET,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
@@ -284,11 +293,10 @@ impl RustHttpClient{
 
     pub async fn get_attribute_display_name(&self)->Result<String,xidl_rust_axum::Error>{
         let path = "/attribute/display_name".to_string();
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,url)
+        .request(xidl_rust_axum::reqwest::Method::GET,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
@@ -319,11 +327,10 @@ impl RustHttpClient{
 
     pub async fn set_attribute_display_name(&self,display_name:String)->Result<(),xidl_rust_axum::Error>{
         let path = "/attribute/display_name".to_string();
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,url)
+        .request(xidl_rust_axum::reqwest::Method::POST,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
@@ -332,7 +339,9 @@ impl RustHttpClient{
         .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
         );
         let auth_target = &self.client;
-        let body = display_name;
+        let body = RustHttpSetAttributeDisplayNameBody{
+            display_name,
+        };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
         .to_vec(&body)?;
         req.headers_mut().insert(

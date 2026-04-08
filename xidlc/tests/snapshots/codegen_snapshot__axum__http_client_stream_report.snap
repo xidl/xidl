@@ -13,7 +13,13 @@ pub trait HttpClientStreamReportService{
     )->Result<UploadSummary,xidl_rust_axum::Error>;
 }
 
-type HttpClientStreamReportServiceUploadPartsBody = UploadChunk;
+#[derive(::serde::Serialize,::serde::Deserialize)]
+struct HttpClientStreamReportServiceUploadPartsBody{
+    #[serde(default,deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null")]
+
+    chunk:UploadChunk,
+}
+
 #[derive(::serde::Serialize,::serde::Deserialize)]
 pub struct HttpClientStreamReportServiceUploadPartsRequest{
     pub chunk:UploadChunk,
@@ -143,11 +149,10 @@ impl HttpClientStreamReportServiceClient{
 impl HttpClientStreamReportServiceClient{
     pub async fn upload_parts(&self)->Result<xidl_rust_axum::stream::Writer<HttpClientStreamReportServiceUploadPartsRequest,UploadSummary>,xidl_rust_axum::Error>{
         let path = "/uploads/parts".to_string();
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,url)
+        .request(xidl_rust_axum::reqwest::Method::POST,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(

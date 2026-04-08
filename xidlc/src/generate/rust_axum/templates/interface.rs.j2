@@ -52,7 +52,7 @@ pub trait {{ ident }} {
 
     {% endif %}
     {% if method.body_params | length > 0 %}
-        {% if method.body_params | length == 1 %}
+        {% if method.request_body_flatten %}
             type {{ method.struct_prefix }}Body = {{ method.body_params[0].ty }};
         {% else %}
             #[derive(::serde::Serialize, ::serde::Deserialize)]
@@ -308,7 +308,7 @@ pub trait {{ ident }} {
                         .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
                     let body: {{ method.struct_prefix }}Body = xidl_rust_axum::DeserializeFactory::new("{{ method.request_content_type }}")
                         .from_slice(&body_bytes)?;
-                    {% if method.body_params | length == 1 %}
+                    {% if method.request_body_flatten %}
                         let {{ method.body_params[0].name }} = body;
                     {% else %}
                         let {{ method.struct_prefix }}Body {
@@ -867,7 +867,7 @@ pub trait {{ ident }} {
                     });
                     return Ok(xidl_rust_axum::stream::Writer::new(tx, response_task));
                 {% elif method.body_params | length > 0 %}
-                    {% if method.body_params | length == 1 %}
+                    {% if method.request_body_flatten %}
                         let body = {{ method.body_params[0].name }};
                     {% else %}
                         let body = {{ method.struct_prefix }}Body {

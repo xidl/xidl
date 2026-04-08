@@ -91,12 +91,34 @@ openapi.json
           },
           {
             "properties": {
+              "create_user_flat": {
+                "$ref": "#/components/schemas/HttpDefaultsService_create_user_flat_In"
+              }
+            },
+            "required": [
+              "create_user_flat"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
               "search_user": {
                 "$ref": "#/components/schemas/HttpDefaultsService_search_user_In"
               }
             },
             "required": [
               "search_user"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "preview_user": {
+                "$ref": "#/components/schemas/HttpDefaultsService_preview_user_In"
+              }
+            },
+            "required": [
+              "preview_user"
             ],
             "type": "object"
           },
@@ -202,12 +224,34 @@ openapi.json
           },
           {
             "properties": {
+              "create_user_flat": {
+                "$ref": "#/components/schemas/HttpDefaultsService_create_user_flat_Result"
+              }
+            },
+            "required": [
+              "create_user_flat"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
               "search_user": {
                 "$ref": "#/components/schemas/HttpDefaultsService_search_user_Result"
               }
             },
             "required": [
               "search_user"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "preview_user": {
+                "$ref": "#/components/schemas/HttpDefaultsService_preview_user_Result"
+              }
+            },
+            "required": [
+              "preview_user"
             ],
             "type": "object"
           },
@@ -263,6 +307,43 @@ openapi.json
             "properties": {
               "result": {
                 "$ref": "#/components/schemas/HttpDefaultsService_create_user_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpDefaultsService_create_user_flat_In": {
+        "properties": {
+          "req": {
+            "$ref": "#/components/schemas/CreateUserRequest"
+          }
+        },
+        "required": [
+          "req"
+        ],
+        "type": "object"
+      },
+      "HttpDefaultsService_create_user_flat_Out": {
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "return_"
+        ],
+        "type": "object"
+      },
+      "HttpDefaultsService_create_user_flat_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpDefaultsService_create_user_flat_Out"
               }
             },
             "required": [
@@ -437,6 +518,43 @@ openapi.json
             "properties": {
               "result": {
                 "$ref": "#/components/schemas/HttpDefaultsService_list_orders_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpDefaultsService_preview_user_In": {
+        "properties": {
+          "req": {
+            "$ref": "#/components/schemas/CreateUserRequest"
+          }
+        },
+        "required": [
+          "req"
+        ],
+        "type": "object"
+      },
+      "HttpDefaultsService_preview_user_Out": {
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "return_"
+        ],
+        "type": "object"
+      },
+      "HttpDefaultsService_preview_user_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpDefaultsService_preview_user_Out"
               }
             },
             "required": [
@@ -652,6 +770,79 @@ openapi.json
             }
           }
         },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        }
+      }
+    },
+    "/users/flat": {
+      "post": {
+        "operationId": "HttpDefaultsService.create_user_flat",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        }
+      }
+    },
+    "/users/preview": {
+      "get": {
+        "operationId": "HttpDefaultsService.preview_user",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "req",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/CreateUserRequest"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {

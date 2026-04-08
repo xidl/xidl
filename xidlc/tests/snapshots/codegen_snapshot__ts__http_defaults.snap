@@ -547,6 +547,46 @@ export class HttpDefaultsServiceClient{
         return data as string;
     }
 
+    async create_user_flat(
+    req : types.CreateUserRequest
+    ) : Promise<
+    string
+    >{
+        const parsed = zodSchemas.HttpDefaultsServiceCreateUserFlatRequestSchema.parse(
+        {
+            "req" : req
+        }
+        );
+        let path = "/users/flat";
+        const body = parsed["req"];
+        const headers = new Headers(
+        this.defaultHeaders
+        );
+        headers.set(
+        "Content-Type", "application/json"
+        );
+        const options = {
+            method : "POST", headers, body : JSON.stringify(
+            body
+            )
+        };
+        const url = joinUrl(
+        this.baseUrl, path
+        );
+        const resp = await this.fetchImpl(
+        url, options
+        );
+        if(!resp.ok){
+            throw await parseXidlError(
+            resp
+            );
+        }
+        const data = await resp.json(
+
+        );
+        return data as string;
+    }
+
     async search_user(
     name : string, age : number
     ) : Promise<
@@ -571,6 +611,54 @@ export class HttpDefaultsServiceClient{
             method : "POST", headers, body : JSON.stringify(
             body
             )
+        };
+        const url = joinUrl(
+        this.baseUrl, path
+        );
+        const resp = await this.fetchImpl(
+        url, options
+        );
+        if(!resp.ok){
+            throw await parseXidlError(
+            resp
+            );
+        }
+        const data = await resp.json(
+
+        );
+        return data as string;
+    }
+
+    async preview_user(
+    req : types.CreateUserRequest
+    ) : Promise<
+    string
+    >{
+        const parsed = zodSchemas.HttpDefaultsServicePreviewUserRequestSchema.parse(
+        {
+            "req" : req
+        }
+        );
+        let path = "/users/preview";
+        const query = new URLSearchParams(
+
+        );
+        query.set(
+        "req", encodeQueryValue(
+        parsed["req"]
+        )
+        );
+        const queryString = query.toString(
+
+        );
+        if(queryString.length>0){
+            path = `${path}?${queryString}`;
+        }
+        const headers = new Headers(
+        this.defaultHeaders
+        );
+        const options = {
+            method : "GET", headers
         };
         const url = joinUrl(
         this.baseUrl, path
@@ -721,9 +809,17 @@ export interface HttpDefaultsServiceCreateUserRequest{
     req : CreateUserRequest;
 }
 
+export interface HttpDefaultsServiceCreateUserFlatRequest{
+    req : CreateUserRequest;
+}
+
 export interface HttpDefaultsServiceSearchUserRequest{
     name : string;
     age : number;
+}
+
+export interface HttpDefaultsServicePreviewUserRequest{
+    req : CreateUserRequest;
 }
 
 export interface HttpDefaultsServiceGetUserRequest{
@@ -784,6 +880,14 @@ export const HttpDefaultsServiceCreateUserRequestSchema = z.object(
 export type HttpDefaultsServiceCreateUserRequest = z.infer<
 typeof HttpDefaultsServiceCreateUserRequestSchema
 >;
+export const HttpDefaultsServiceCreateUserFlatRequestSchema = z.object(
+{
+    req : CreateUserRequestSchema,
+}
+);
+export type HttpDefaultsServiceCreateUserFlatRequest = z.infer<
+typeof HttpDefaultsServiceCreateUserFlatRequestSchema
+>;
 export const HttpDefaultsServiceSearchUserRequestSchema = z.object(
 {
     name : z.string(
@@ -799,6 +903,14 @@ export const HttpDefaultsServiceSearchUserRequestSchema = z.object(
 );
 export type HttpDefaultsServiceSearchUserRequest = z.infer<
 typeof HttpDefaultsServiceSearchUserRequestSchema
+>;
+export const HttpDefaultsServicePreviewUserRequestSchema = z.object(
+{
+    req : CreateUserRequestSchema,
+}
+);
+export type HttpDefaultsServicePreviewUserRequest = z.infer<
+typeof HttpDefaultsServicePreviewUserRequestSchema
 >;
 export const HttpDefaultsServiceGetUserRequestSchema = z.object(
 {

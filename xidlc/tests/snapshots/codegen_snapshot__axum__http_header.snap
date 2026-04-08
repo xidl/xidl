@@ -33,7 +33,13 @@ pub mod test{
         pub prefs:Vec<String>,
     }
 
-    type HeaderServiceCreateUserBody = String;
+    #[derive(::serde::Serialize,::serde::Deserialize)]
+    struct HeaderServiceCreateUserBody{
+        #[serde(default,deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null")]
+
+        name:String,
+    }
+
     #[derive(::serde::Serialize,::serde::Deserialize)]
     pub struct HeaderServiceCreateUserRequest{
         pub token:String,
@@ -250,7 +256,11 @@ pub mod test{
             .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
             let body:HeaderServiceCreateUserBody = xidl_rust_axum::DeserializeFactory::new("application/json")
             .from_slice(&body_bytes)?;
-            let name = body;
+            let HeaderServiceCreateUserBody{
+
+            name,
+
+            } = body;
             let data = HeaderServiceCreateUserRequest{
                 token,
                 session_id,
@@ -334,11 +344,10 @@ pub mod test{
         pub async fn get_user(&self,id:u32,req_id:String,flags:Vec<String>,age:u32,session_id:String,prefs:Vec<String>)->Result<User,xidl_rust_axum::Error>{
             let path = "/v1/headers/{id}".to_string();
             let path = path.replace("{id}",&id.to_string());
-            let url = self.client.url(&path);
             let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::GET,url)
+            .request(xidl_rust_axum::reqwest::Method::GET,&self.client.url(&path))
             .build()
             .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
             req.headers_mut().insert(
@@ -432,11 +441,10 @@ pub mod test{
 
         pub async fn create_user(&self,token:String,session_id:String,name:String)->Result<(),xidl_rust_axum::Error>{
             let path = "/v1/headers".to_string();
-            let url = self.client.url(&path);
             let mut req = self
             .client
             .http()
-            .request(xidl_rust_axum::reqwest::Method::POST,url)
+            .request(xidl_rust_axum::reqwest::Method::POST,&self.client.url(&path))
             .build()
             .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
             req.headers_mut().insert(
@@ -480,7 +488,9 @@ pub mod test{
             }
 
             let auth_target = &self.client;
-            let body = name;
+            let body = HeaderServiceCreateUserBody{
+                name,
+            };
             let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;
             req.headers_mut().insert(

@@ -128,12 +128,12 @@ func NewHttpDefaultsServiceHandler(svc HttpDefaultsServiceService) http.Handler 
 		}
 
 	req := &HttpDefaultsServiceCreateUserRequest{}
-	var body CreateUserRequest
+	body := HttpDefaultsServiceCreateUserRequestBody{}
 	if err := xidlgohttp.DecodeBody(r, "application/json", &body); err != nil {
 		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 		return
 	}
-	req.Req = body
+	req.Req = body.Req
 		resp, err := svc.CreateUser(r.Context(), req)
 		if err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
@@ -296,7 +296,9 @@ func (c *HttpDefaultsServiceClient) ListOrders(ctx context.Context, req *HttpDef
 
 func (c *HttpDefaultsServiceClient) CreateUser(ctx context.Context, req *HttpDefaultsServiceCreateUserRequest) (*HttpDefaultsServiceCreateUserResponse, error) {
 	requestURL := c.baseURL + formatHttpDefaultsServiceCreateUserPath(req)
-	body := req.Req
+	body := HttpDefaultsServiceCreateUserRequestBody{
+		Req: req.Req,
+	}
 	var requestBody bytes.Buffer
 	if err := xidlgohttp.MustCodecForMime("application/json").Encode(&requestBody, body); err != nil { return nil, err }
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", requestURL, &requestBody)
@@ -438,6 +440,10 @@ func decodeHttpDefaultsServiceListOrdersResponse(resp *http.Response) (HttpDefau
 	return out, nil
 }
 type HttpDefaultsServiceCreateUserRequest struct {
+	Req CreateUserRequest `json:"req" form:"req"`
+}
+
+type HttpDefaultsServiceCreateUserRequestBody struct {
 	Req CreateUserRequest `json:"req" form:"req"`
 }
 

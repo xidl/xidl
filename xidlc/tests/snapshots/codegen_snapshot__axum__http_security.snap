@@ -333,11 +333,10 @@ impl HttpSecurityServiceClient{
     pub async fn get_user(&self,id:u32,locale:Option<String>,trace_id:String,xidl_auth:xidl_rust_axum::auth::basic::BasicAuth)->Result<String,xidl_rust_axum::Error>{
         let path = "/users/{id}".to_string();
         let path = path.replace("{id}",&id.to_string());
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,url)
+        .request(xidl_rust_axum::reqwest::Method::GET,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
@@ -401,11 +400,10 @@ impl HttpSecurityServiceClient{
 
     pub async fn search_user(&self,keyword:String,page:Option<u32>)->Result<String,xidl_rust_axum::Error>{
         let path = "/users/search".to_string();
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,url)
+        .request(xidl_rust_axum::reqwest::Method::POST,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
@@ -448,11 +446,10 @@ impl HttpSecurityServiceClient{
 
     pub async fn health(&self)->Result<String,xidl_rust_axum::Error>{
         let path = "/health".to_string();
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,url)
+        .request(xidl_rust_axum::reqwest::Method::POST,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(

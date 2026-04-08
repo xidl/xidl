@@ -82,6 +82,7 @@ pub(crate) fn render_interface(
 #[derive(Serialize)]
 struct MethodTemplateParam {
     field_name: String,
+    wire_name: String,
 }
 
 #[derive(Serialize)]
@@ -702,7 +703,7 @@ fn render_method_types(
             writeln!(
                 out,
                 "\t{} {} `json:\"{}\" form:\"{}\"`",
-                param.field_name, param.ty, param.raw_name, param.raw_name
+                param.field_name, param.ty, param.wire_name, param.wire_name
             )
             .unwrap();
         }
@@ -829,6 +830,7 @@ fn template_params(params: &[super::ParamMeta]) -> Vec<MethodTemplateParam> {
         .iter()
         .map(|param| MethodTemplateParam {
             field_name: param.field_name.clone(),
+            wire_name: param.wire_name.clone(),
         })
         .collect()
 }
@@ -935,6 +937,12 @@ pub(crate) fn build_method_meta(
             &all_path_param_names,
             &all_query_template_names,
         )?;
+        if meta.flatten && matches!(direction, ParamDirection::Out) {
+            return Err(IdlcError::rpc(format!(
+                "@flatten can only be applied to request-side body parameter '{}' of method '{}'",
+                param.declarator.0, op.ident
+            )));
+        }
         if matches!(direction, ParamDirection::Out | ParamDirection::InOut) {
             match meta.source {
                 ParamSource::Header => response_header_params.push(meta.clone()),
@@ -966,6 +974,21 @@ pub(crate) fn build_method_meta(
             op.ident
         )));
     }
+    for param in &request_params {
+        if param.flatten && !matches!(param.source, ParamSource::Body) {
+            return Err(IdlcError::rpc(format!(
+                "@flatten can only be applied to body parameter '{}' of method '{}'",
+                param.raw_name, op.ident
+            )));
+        }
+    }
+    if body_params.len() != 1 && body_params.iter().any(|param| param.flatten) {
+        return Err(IdlcError::rpc(format!(
+            "@flatten requires exactly one request-side body parameter, but method '{}' has {}",
+            op.ident,
+            body_params.len()
+        )));
+    }
     validate_query_template_bindings(&op.ident, &all_query_template_names, &query_params)?;
 
     let struct_prefix = format!("{}{}", interface_name, op.ident.to_case(Case::Pascal));
@@ -974,7 +997,7 @@ pub(crate) fn build_method_meta(
     let (request_body_struct, request_body_direct_field, request_body_direct_ty) =
         if body_params.is_empty() || matches!(stream.kind, Some(HttpStreamKind::Client)) {
             (None, None, None)
-        } else if body_params.len() == 1 {
+        } else if body_params.len() == 1 && body_params[0].flatten {
             let param = &body_params[0];
             (None, Some(param.field_name.clone()), Some(param.ty.clone()))
         } else {

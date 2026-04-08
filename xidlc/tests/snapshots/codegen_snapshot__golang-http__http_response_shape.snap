@@ -122,12 +122,12 @@ func NewHttpResponseShapeServiceHandler(svc HttpResponseShapeServiceService) htt
 		}
 
 	req := &HttpResponseShapeServiceBumpRequest{}
-	var body int32
+	body := HttpResponseShapeServiceBumpRequestBody{}
 	if err := xidlgohttp.DecodeBody(r, "application/json", &body); err != nil {
 		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 		return
 	}
-	req.Value = body
+	req.Value = body.Value
 		resp, err := svc.Bump(r.Context(), req)
 		if err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
@@ -222,7 +222,9 @@ func (c *HttpResponseShapeServiceClient) Add(ctx context.Context, req *HttpRespo
 
 func (c *HttpResponseShapeServiceClient) Bump(ctx context.Context, req *HttpResponseShapeServiceBumpRequest) (*HttpResponseShapeServiceBumpResponse, error) {
 	requestURL := c.baseURL + formatHttpResponseShapeServiceBumpPath(req)
-	body := req.Value
+	body := HttpResponseShapeServiceBumpRequestBody{
+		Value: req.Value,
+	}
 	var requestBody bytes.Buffer
 	if err := xidlgohttp.MustCodecForMime("application/json").Encode(&requestBody, body); err != nil { return nil, err }
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", requestURL, &requestBody)
@@ -358,6 +360,10 @@ func decodeHttpResponseShapeServiceAddResponse(resp *http.Response) (HttpRespons
 	return out, nil
 }
 type HttpResponseShapeServiceBumpRequest struct {
+	Value int32 `json:"value" form:"value"`
+}
+
+type HttpResponseShapeServiceBumpRequestBody struct {
 	Value int32 `json:"value" form:"value"`
 }
 

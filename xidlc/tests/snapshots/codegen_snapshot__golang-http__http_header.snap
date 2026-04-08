@@ -120,12 +120,12 @@ func NewTestHeaderServiceHandler(svc TestHeaderServiceService) http.Handler {
  		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
  		return
  	}
-	var body string
+	body := TestHeaderServiceCreateUserRequestBody{}
 	if err := xidlgohttp.DecodeBody(r, "application/json", &body); err != nil {
 		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 		return
 	}
-	req.Name = body
+	req.Name = body.Name
 		if _, err := svc.CreateUser(r.Context(), req); err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
@@ -170,7 +170,9 @@ func (c *TestHeaderServiceClient) GetUser(ctx context.Context, req *TestHeaderSe
 
 func (c *TestHeaderServiceClient) CreateUser(ctx context.Context, req *TestHeaderServiceCreateUserRequest) (*TestHeaderServiceCreateUserResponse, error) {
 	requestURL := c.baseURL + formatTestHeaderServiceCreateUserPath(req)
-	body := req.Name
+	body := TestHeaderServiceCreateUserRequestBody{
+		Name: req.Name,
+	}
 	var requestBody bytes.Buffer
 	if err := xidlgohttp.MustCodecForMime("application/json").Encode(&requestBody, body); err != nil { return nil, err }
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", requestURL, &requestBody)
@@ -230,6 +232,10 @@ func decodeTestHeaderServiceGetUserResponse(resp *http.Response) (TestHeaderServ
 type TestHeaderServiceCreateUserRequest struct {
 	Token string `json:"token" form:"token"`
 	SessionId string `json:"session_id" form:"session_id"`
+	Name string `json:"name" form:"name"`
+}
+
+type TestHeaderServiceCreateUserRequestBody struct {
 	Name string `json:"name" form:"name"`
 }
 

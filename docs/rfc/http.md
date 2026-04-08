@@ -51,12 +51,16 @@ Parameter annotations:
 - `@query` (parameter-level source declaration)
 - `@query("name")` (parameter-level source declaration with explicit route/query
   name)
+- `@body` (parameter-level source declaration)
+- `@body("name")` (parameter-level source declaration with explicit body field
+  name)
 - `@header` (parameter-level source declaration)
 - `@header("name")` (parameter-level source declaration with explicit header
   name)
 - `@cookie` (parameter-level source declaration)
 - `@cookie("name")` (parameter-level source declaration with explicit cookie
   name)
+- `@flatten` (request-body shaping hint for a single Body parameter)
 - `@optional` (parameter may be omitted and is represented as an optional value)
 
 Rules:
@@ -255,12 +259,13 @@ Each parameter is assigned to a source by the following priority:
 
 1. If the parameter is explicitly annotated with `@path`, source is Path.
 2. If the parameter is explicitly annotated with `@query`, source is Query.
-3. If the parameter is explicitly annotated with `@header`, source is Header.
-4. If the parameter is explicitly annotated with `@cookie`, source is Cookie.
-5. If the parameter name appears in a route template `{name}`, source is Path.
-6. If the parameter name appears in a query-template suffix `{?name,...}`,
+3. If the parameter is explicitly annotated with `@body`, source is Body.
+4. If the parameter is explicitly annotated with `@header`, source is Header.
+5. If the parameter is explicitly annotated with `@cookie`, source is Cookie.
+6. If the parameter name appears in a route template `{name}`, source is Path.
+7. If the parameter name appears in a query-template suffix `{?name,...}`,
    source is Query.
-7. Otherwise, apply HTTP-method defaults:
+8. Otherwise, apply HTTP-method defaults:
    - `GET/DELETE/HEAD/OPTIONS` -> Query
    - `POST/PUT/PATCH` -> Body
 
@@ -271,13 +276,15 @@ Direction interaction (`in/out/inout`):
 - `in` and `inout` parameters participate in request-side source resolution
   using the priority rules above.
 
-Name binding rules for `@path` / `@query` / `@header` / `@cookie`:
+Name binding rules for `@path` / `@query` / `@body` / `@header` / `@cookie`:
 
-- Without argument (`@path`, `@query`): the bound name is the parameter name.
-- With argument (`@path("id")`, `@query("id")`, `@header("X-Req-Id")`,
-  `@cookie("sid")`): the bound name is the annotation argument.
-- The bound name is used for route template variables, query keys, header field
-  names, or cookie names.
+- Without argument (`@path`, `@query`, `@body`): the bound name is the parameter
+  name.
+- With argument (`@path("id")`, `@query("id")`, `@body("req")`,
+  `@header("X-Req-Id")`, `@cookie("sid")`): the bound name is the annotation
+  argument.
+- The bound name is used for route template variables, query keys, request body
+  object field names, header field names, or cookie names.
 
 Constraints:
 
@@ -296,6 +303,10 @@ Constraints:
   one request-side parameter resolved to Query source.
 - A route template may contain at most one query-template suffix (`{?...}`), and
   it SHOULD appear at the end of route template.
+- `@flatten` may be applied only to a request-side parameter resolved to Body
+  source.
+- `@flatten` is valid only when the operation has exactly one request-side Body
+  parameter.
 - Header bound names MUST be non-empty and MUST NOT start with `:` (pseudo
   header field names are reserved for HTTP/2 and HTTP/3).
 - Header name matching is case-insensitive for incoming requests.
@@ -415,17 +426,27 @@ Body parameters / JSON object fields:
 
 ### 6.3 Body Encoding
 
-Body parameters are encoded by parameter count:
+Body parameters are encoded by parameter count and `@flatten`:
 
 - No Body parameters: no request body.
-- Exactly 1 Body parameter: encode that value directly.
-- 2+ Body parameters: encode an object keyed by parameter names.
+- Exactly 1 Body parameter without `@flatten`: encode an object containing one
+  field keyed by that parameter's bound name.
+- Exactly 1 Body parameter with `@flatten`: encode that parameter value directly
+  as the request body.
+- 2+ Body parameters: encode an object keyed by parameter bound names.
+- `@flatten` does not change source resolution; it only changes request body
+  shaping after the parameter has already been resolved to Body source.
 - missing-value and `null` handling follows section 6.1 and the selected
   effective request media type.
 
 Examples:
 
-- Single parameter: `create(User req)` -> body is `{"id":1,"name":"a"}`
+- Single parameter (default wrapped): `create(User req)` -> body is
+  `{"req":{"id":1,"name":"a"}}`
+- Single parameter with explicit body name: `create(@body("user") User req)` ->
+  body is `{"user":{"id":1,"name":"a"}}`
+- Single parameter with flatten: `create(@flatten User req)` -> body is
+  `{"id":1,"name":"a"}`
 - Multiple parameters: `create(string name, uint32 age)` -> body is
   `{"name":"a","age":18}`
 
@@ -476,8 +497,8 @@ Response rules:
   - if output count is `0`: no response body
   - if output count is `1` and that output is the method return value: return
     that value directly
-  - if output count is `1` and that output is an `out`/`inout` parameter:
-    return an object containing that field
+  - if output count is `1` and that output is an `out`/`inout` parameter: return
+    an object containing that field
   - if output count is `>1`: return an object
     - return value field name is fixed as `return` (when return value exists)
     - each `out/inout` parameter uses its parameter name as field name
@@ -570,6 +591,9 @@ interface UserService {
     @post(path="/users")
     User create_user(User req);
 
+    @post(path="/users/flat")
+    User create_user_flat(@flatten User req);
+
     @post(path="/users/search")
     sequence<User> search_user(string name, uint32 age);
 
@@ -581,7 +605,9 @@ interface UserService {
 Behavior:
 
 - `get_user`: `id` is from Path, returns `User`
-- `create_user`: single Body parameter, body is direct `User` JSON
+- `create_user`: single Body parameter, body is `{"req":{...}}`
+- `create_user_flat`: single flattened Body parameter, body is direct `User`
+  JSON
 - `search_user`: multiple Body parameters, body is `{"name":"...","age":...}`
 - `version`: readonly attribute generates `GET`
 - `name`: generates `GET` + `POST set_name`
@@ -615,6 +641,9 @@ traffic:
 - `@path` parameter names that do not appear in any bound route template.
 - For multi-route methods, any `@path` parameter name missing from one or more
   bound route templates.
+- `@flatten` applied to a non-Body parameter.
+- `@flatten` used when the operation does not have exactly one request-side Body
+  parameter.
 - Any route template variable that has no matching request-side parameter bound
   to Path source.
 - A route template containing more than one catch-all variable.

@@ -21,7 +21,13 @@ pub trait HttpAttributeService{
     )->Result<(),xidl_rust_axum::Error>;
 }
 
-type HttpAttributeServiceSetAttributeNameBody = String;
+#[derive(::serde::Serialize,::serde::Deserialize)]
+struct HttpAttributeServiceSetAttributeNameBody{
+    #[serde(default,deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null")]
+
+    name:String,
+}
+
 #[derive(::serde::Serialize,::serde::Deserialize)]
 pub struct HttpAttributeServiceSetAttributeNameRequest{
     pub name:String,
@@ -141,7 +147,11 @@ T:HttpAttributeService+Send+Sync+'static,
         .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
         let body:HttpAttributeServiceSetAttributeNameBody = xidl_rust_axum::DeserializeFactory::new("application/json")
         .from_slice(&body_bytes)?;
-        let name = body;
+        let HttpAttributeServiceSetAttributeNameBody{
+
+        name,
+
+        } = body;
         let data = HttpAttributeServiceSetAttributeNameRequest{
             name,
         };
@@ -222,11 +232,10 @@ impl HttpAttributeServiceClient{
 impl HttpAttributeServiceClient{
     pub async fn get_attribute_version(&self)->Result<String,xidl_rust_axum::Error>{
         let path = "/attribute/version".to_string();
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,url)
+        .request(xidl_rust_axum::reqwest::Method::GET,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
@@ -257,11 +266,10 @@ impl HttpAttributeServiceClient{
 
     pub async fn get_attribute_name(&self)->Result<String,xidl_rust_axum::Error>{
         let path = "/attribute/name".to_string();
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,url)
+        .request(xidl_rust_axum::reqwest::Method::GET,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
@@ -292,11 +300,10 @@ impl HttpAttributeServiceClient{
 
     pub async fn set_attribute_name(&self,name:String)->Result<(),xidl_rust_axum::Error>{
         let path = "/attribute/name".to_string();
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,url)
+        .request(xidl_rust_axum::reqwest::Method::POST,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
@@ -305,7 +312,9 @@ impl HttpAttributeServiceClient{
         .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
         );
         let auth_target = &self.client;
-        let body = name;
+        let body = HttpAttributeServiceSetAttributeNameBody{
+            name,
+        };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
         .to_vec(&body)?;
         req.headers_mut().insert(

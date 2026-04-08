@@ -56,7 +56,13 @@ pub struct HttpResponseShapeServiceAddResponse{
     pub sum:i32,
 }
 
-type HttpResponseShapeServiceBumpBody = i32;
+#[derive(::serde::Serialize,::serde::Deserialize)]
+struct HttpResponseShapeServiceBumpBody{
+    #[serde(default,deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null")]
+
+    value:i32,
+}
+
 #[derive(::serde::Serialize,::serde::Deserialize)]
 pub struct HttpResponseShapeServiceBumpRequest{
     pub value:i32,
@@ -238,7 +244,11 @@ T:HttpResponseShapeService+Send+Sync+'static,
         .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
         let body:HttpResponseShapeServiceBumpBody = xidl_rust_axum::DeserializeFactory::new("application/json")
         .from_slice(&body_bytes)?;
-        let value = body;
+        let HttpResponseShapeServiceBumpBody{
+
+        value,
+
+        } = body;
         let data = HttpResponseShapeServiceBumpRequest{
             value,
         };
@@ -351,11 +361,10 @@ impl HttpResponseShapeServiceClient{
 impl HttpResponseShapeServiceClient{
     pub async fn hello(&self)->Result<String,xidl_rust_axum::Error>{
         let path = "/hello".to_string();
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,url)
+        .request(xidl_rust_axum::reqwest::Method::POST,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
@@ -386,11 +395,10 @@ impl HttpResponseShapeServiceClient{
 
     pub async fn get_count(&self)->Result<HttpResponseShapeServiceGetCountResponse,xidl_rust_axum::Error>{
         let path = "/get_count".to_string();
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,url)
+        .request(xidl_rust_axum::reqwest::Method::POST,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
@@ -421,11 +429,10 @@ impl HttpResponseShapeServiceClient{
 
     pub async fn add(&self,a:i32,b:i32)->Result<HttpResponseShapeServiceAddResponse,xidl_rust_axum::Error>{
         let path = "/add".to_string();
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,url)
+        .request(xidl_rust_axum::reqwest::Method::POST,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
@@ -468,11 +475,10 @@ impl HttpResponseShapeServiceClient{
 
     pub async fn bump(&self,value:i32)->Result<HttpResponseShapeServiceBumpResponse,xidl_rust_axum::Error>{
         let path = "/bump".to_string();
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,url)
+        .request(xidl_rust_axum::reqwest::Method::POST,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
@@ -481,7 +487,9 @@ impl HttpResponseShapeServiceClient{
         .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
         );
         let auth_target = &self.client;
-        let body = value;
+        let body = HttpResponseShapeServiceBumpBody{
+            value,
+        };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
         .to_vec(&body)?;
         req.headers_mut().insert(
@@ -512,11 +520,10 @@ impl HttpResponseShapeServiceClient{
 
     pub async fn ping(&self)->Result<(),xidl_rust_axum::Error>{
         let path = "/ping".to_string();
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,url)
+        .request(xidl_rust_axum::reqwest::Method::POST,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(

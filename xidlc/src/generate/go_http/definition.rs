@@ -1,5 +1,6 @@
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::utils::has_optional_annotation;
+use crate::generate::utils::http::has_annotation;
 use convert_case::Casing;
 use serde::Serialize;
 use std::collections::{HashMap, HashSet};
@@ -93,6 +94,7 @@ pub(crate) fn param_meta(
         ty: go_type(&param.ty),
         optional: has_optional_annotation(&param.annotations),
         source,
+        flatten: has_annotation(&param.annotations, "flatten"),
     })
 }
 
@@ -106,6 +108,8 @@ pub(crate) fn explicit_param_binding(param: &hir::ParamDcl) -> IdlcResult<Option
             Some(ParamSource::Path)
         } else if name.eq_ignore_ascii_case("query") {
             Some(ParamSource::Query)
+        } else if name.eq_ignore_ascii_case("body") {
+            Some(ParamSource::Body)
         } else if name.eq_ignore_ascii_case("header") {
             Some(ParamSource::Header)
         } else if name.eq_ignore_ascii_case("cookie") {
@@ -123,7 +127,7 @@ pub(crate) fn explicit_param_binding(param: &hir::ParamDcl) -> IdlcResult<Option
         if let Some(existing) = &found {
             if existing.source != source || existing.bound_name != bound_name {
                 return Err(IdlcError::rpc(format!(
-                    "parameter '{}' has conflicting source annotations",
+                    "parameter '{}' has conflicting source annotations (@path/@query/@body/@header/@cookie)",
                     param.declarator.0
                 )));
             }

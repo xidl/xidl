@@ -172,11 +172,10 @@ impl HttpStreamSseBindingsServiceClient{
     pub async fn watch_project(&self,project_id:String,cursor:Option<String>,trace_id:String)->Result<xidl_rust_axum::stream::Reader<ProjectEvent>,xidl_rust_axum::Error>{
         let path = "/projects/{project_id}/events".to_string();
         let path = path.replace("{project_id}",&project_id.to_string());
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,url)
+        .request(xidl_rust_axum::reqwest::Method::GET,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(

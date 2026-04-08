@@ -21,9 +21,15 @@ interface HttpDefaultsService {
         uint32 page,
         uint32 size
     );
-    // single body parameter -> encode the object directly
+    // single body parameter -> encode as object keyed by parameter name
     @post(path = "/users")
     string create_user(
+        CreateUserRequest req
+    );
+    // single body parameter with flatten -> encode object directly
+    @post(path = "/users/flat")
+    string create_user_flat(
+        @flatten
         CreateUserRequest req
     );
     // multiple body parameters -> encode as object by parameter names
@@ -31,6 +37,12 @@ interface HttpDefaultsService {
     string search_user(
         string name,
         uint32 age
+    );
+    // explicit body source on GET
+    @get(path = "/users/preview")
+    string preview_user(
+        @body("user")
+        CreateUserRequest req
     );
     // route template source inference
     @get(path = "/v1/users/{id}")

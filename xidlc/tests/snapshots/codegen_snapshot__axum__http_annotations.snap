@@ -151,7 +151,13 @@ pub struct HttpAnnoServiceAddResponse{
     pub sum:i32,
 }
 
-type HttpAnnoServiceBumpBody = i32;
+#[derive(::serde::Serialize,::serde::Deserialize)]
+struct HttpAnnoServiceBumpBody{
+    #[serde(default,deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null")]
+
+    value:i32,
+}
+
 #[derive(::serde::Serialize,::serde::Deserialize)]
 pub struct HttpAnnoServiceBumpRequest{
     pub value:i32,
@@ -515,7 +521,11 @@ T:HttpAnnoService+Send+Sync+'static,
         .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
         let body:HttpAnnoServiceBumpBody = xidl_rust_axum::DeserializeFactory::new("application/json")
         .from_slice(&body_bytes)?;
-        let value = body;
+        let HttpAnnoServiceBumpBody{
+
+        value,
+
+        } = body;
         let data = HttpAnnoServiceBumpRequest{
             value,
         };
@@ -661,11 +671,10 @@ impl HttpAnnoServiceClient{
     pub async fn get_user(&self,id:u32,lang:String)->Result<String,xidl_rust_axum::Error>{
         let path = "/v1/users/{id}".to_string();
         let path = path.replace("{id}",&id.to_string());
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,url)
+        .request(xidl_rust_axum::reqwest::Method::GET,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
@@ -705,11 +714,10 @@ impl HttpAnnoServiceClient{
 
     pub async fn create_user(&self,name:String,age:u32)->Result<String,xidl_rust_axum::Error>{
         let path = "/create_user".to_string();
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,url)
+        .request(xidl_rust_axum::reqwest::Method::POST,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
@@ -752,11 +760,10 @@ impl HttpAnnoServiceClient{
 
     pub async fn get_name(&self,name:String)->Result<String,xidl_rust_axum::Error>{
         let path = "/get_name".to_string();
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,url)
+        .request(xidl_rust_axum::reqwest::Method::POST,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
@@ -796,11 +803,10 @@ impl HttpAnnoServiceClient{
 
     pub async fn search_user(&self,keyword:String,page:u32)->Result<String,xidl_rust_axum::Error>{
         let path = "/search_user".to_string();
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,url)
+        .request(xidl_rust_axum::reqwest::Method::GET,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
@@ -842,11 +848,10 @@ impl HttpAnnoServiceClient{
     pub async fn get_user_alias(&self,user_id:u32,locale:String)->Result<String,xidl_rust_axum::Error>{
         let path = "/get_user_alias/{id}".to_string();
         let path = path.replace("{id}",&user_id.to_string());
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,url)
+        .request(xidl_rust_axum::reqwest::Method::POST,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
@@ -886,11 +891,10 @@ impl HttpAnnoServiceClient{
 
     pub async fn add(&self,a:i32,b:i32)->Result<HttpAnnoServiceAddResponse,xidl_rust_axum::Error>{
         let path = "/add".to_string();
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,url)
+        .request(xidl_rust_axum::reqwest::Method::POST,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
@@ -933,11 +937,10 @@ impl HttpAnnoServiceClient{
 
     pub async fn bump(&self,value:i32)->Result<HttpAnnoServiceBumpResponse,xidl_rust_axum::Error>{
         let path = "/bump".to_string();
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,url)
+        .request(xidl_rust_axum::reqwest::Method::POST,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
@@ -946,7 +949,9 @@ impl HttpAnnoServiceClient{
         .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
         );
         let auth_target = &self.client;
-        let body = value;
+        let body = HttpAnnoServiceBumpBody{
+            value,
+        };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
         .to_vec(&body)?;
         req.headers_mut().insert(
@@ -977,11 +982,10 @@ impl HttpAnnoServiceClient{
 
     pub async fn get_count(&self)->Result<HttpAnnoServiceGetCountResponse,xidl_rust_axum::Error>{
         let path = "/get_count".to_string();
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,url)
+        .request(xidl_rust_axum::reqwest::Method::POST,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
@@ -1012,11 +1016,10 @@ impl HttpAnnoServiceClient{
 
     pub async fn ping(&self)->Result<(),xidl_rust_axum::Error>{
         let path = "/ping".to_string();
-        let url = self.client.url(&path);
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,url)
+        .request(xidl_rust_axum::reqwest::Method::POST,&self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(

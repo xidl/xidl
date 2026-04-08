@@ -41,6 +41,7 @@ struct ParamContext {
     ty: String,
     optional: bool,
     source: ParamSource,
+    flatten: bool,
 }
 
 struct MethodContext {
@@ -230,6 +231,13 @@ fn build_method(
     let mut response_params = Vec::new();
     for param in params {
         let direction = param_direction(param.attr.as_ref());
+        let flatten = has_flatten_annotation(&param.annotations);
+        if flatten && matches!(direction, ParamDirection::Out) {
+            return Err(IdlcError::rpc(format!(
+                "@flatten can only be applied to request-side body parameter '{}' of method '{}'",
+                param.declarator.0, op.ident
+            )));
+        }
         let binding = explicit_param_binding(param)?;
         let default_source = default_param_source(&method);
         let (source, wire_name) = match binding {
@@ -251,6 +259,7 @@ fn build_method(
             ty: py_type(&param.ty),
             optional: has_optional_annotation(&param.annotations),
             source,
+            flatten,
         };
         if !matches!(direction, ParamDirection::Out) {
             request_params.push(context.clone());
@@ -286,6 +295,24 @@ fn build_method(
         }
         Some(HttpStreamKind::Bidi) => "BidiStreamResponse".to_string(),
     };
+    let body_param_count = request_params
+        .iter()
+        .filter(|value| matches!(value.source, ParamSource::Body))
+        .count();
+    for param in &request_params {
+        if param.flatten && !matches!(param.source, ParamSource::Body) {
+            return Err(IdlcError::rpc(format!(
+                "@flatten can only be applied to body parameter '{}' of method '{}'",
+                param.field_name, op.ident
+            )));
+        }
+    }
+    if body_param_count != 1 && request_params.iter().any(|value| value.flatten) {
+        return Err(IdlcError::rpc(format!(
+            "@flatten requires exactly one request-side body parameter, but method '{}' has {}",
+            op.ident, body_param_count
+        )));
+    }
     let return_ty = match &op.ty {
         hir::OpTypeSpec::Void => None,
         hir::OpTypeSpec::TypeSpec(ty) => Some(py_type(ty)),
@@ -537,12 +564,23 @@ fn render_param_binding(param: &ParamContext) -> String {
             py_bool(param.optional),
             param.wire_name
         ),
-        ParamSource::Body => format!(
-            "read_json_field(body, {:?}, {:?}, optional={})",
-            param.wire_name,
-            param.ty,
-            py_bool(param.optional)
-        ),
+        ParamSource::Body => {
+            if param.flatten {
+                format!(
+                    "read_json_value(body, {:?}, optional={}, wire_name={:?})",
+                    param.ty,
+                    py_bool(param.optional),
+                    param.wire_name
+                )
+            } else {
+                format!(
+                    "read_json_field(body, {:?}, {:?}, optional={})",
+                    param.wire_name,
+                    param.ty,
+                    py_bool(param.optional)
+                )
+            }
+        }
     }
 }
 
@@ -556,6 +594,8 @@ fn explicit_param_binding(param: &hir::ParamDcl) -> IdlcResult<Option<SourceBind
             Some(ParamSource::Path)
         } else if name.eq_ignore_ascii_case("query") {
             Some(ParamSource::Query)
+        } else if name.eq_ignore_ascii_case("body") {
+            Some(ParamSource::Body)
         } else if name.eq_ignore_ascii_case("header") {
             Some(ParamSource::Header)
         } else if name.eq_ignore_ascii_case("cookie") {
@@ -587,7 +627,7 @@ fn explicit_param_binding(param: &hir::ParamDcl) -> IdlcResult<Option<SourceBind
                 if previous.source == current && previous.bound_name == bound_name => {}
             Some(_) => {
                 return Err(IdlcError::rpc(format!(
-                    "parameter '{}' has conflicting source annotations (@path/@query/@header/@cookie)",
+                    "parameter '{}' has conflicting source annotations (@path/@query/@body/@header/@cookie)",
                     param.declarator.0
                 )));
             }
@@ -616,6 +656,14 @@ fn response_content_type(
         (Some(HttpStreamKind::Server), HttpStreamCodec::Sse) => "text/event-stream".to_string(),
         _ => effective_media_type(interface_annotations, method_annotations, "Produces"),
     }
+}
+
+fn has_flatten_annotation(annotations: &[hir::Annotation]) -> bool {
+    annotations.iter().any(|annotation| {
+        annotation_name(annotation)
+            .map(|name| name.eq_ignore_ascii_case("flatten"))
+            .unwrap_or(false)
+    })
 }
 
 fn param_direction(attr: Option<&hir::ParamAttribute>) -> ParamDirection {
