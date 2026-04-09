@@ -1,8 +1,9 @@
 use super::File;
 use crate::diagnostic::DiagnosticRunner;
 use crate::driver::generate_session::CodegenSession;
+use crate::driver::lang::Plugin;
 use crate::error::{IdlcError, IdlcResult};
-use crate::jsonrpc::Codegen;
+use crate::jsonrpc::{Artifact, ArtifactKind, Codegen};
 use crate::macros::hashmap;
 use std::collections::HashMap;
 use std::path::Path;
@@ -34,19 +35,28 @@ impl Generator {
                 .unwrap_or_default()
                 .as_secs()
         };
-        let metadata = hashmap! {
+        let mut target_props = self.get_properties_for_lang().await?;
+        target_props.extend(self.metadata(source, props, ts));
+
+        let empty = xidl_parser::hir::Specification(vec![]);
+        self.generate_for_lang("hir", empty, path, target_props)
+            .await
+    }
+
+    fn metadata(
+        &self,
+        source: &str,
+        props: HashMap<String, serde_json::Value>,
+        ts: u64,
+    ) -> HashMap<String, serde_json::Value> {
+        let mut metadata = hashmap! {
             "idl" => source,
             "target_lang" => self.lang.clone(),
             "xidlc_version" => env!("CARGO_PKG_VERSION"),
             "xidlc_timestamp" => ts
         };
-        let mut target_props = self.get_properties_for_lang().await?;
-        target_props.extend(metadata);
-        target_props.extend(props);
-
-        let empty = xidl_parser::hir::Specification(vec![]);
-        self.generate_for_lang("hir", empty, path, target_props)
-            .await
+        metadata.extend(props);
+        metadata
     }
 
     async fn generate_for_lang(
@@ -59,68 +69,91 @@ impl Generator {
         tracing::info!("generate for lang: {lang}");
         let input_str = input.to_string_lossy();
         let session = CodegenSession::spawn(lang).await?;
-        let mut properties = session
+        let properties = session
             .client
             .get_properties()
             .await
             .map_err(|err| IdlcError::rpc(err.to_string()))?;
 
-        properties.extend(base);
+        let properties = self.merge_properties(properties, base);
 
-        let artifacts: Vec<crate::jsonrpc::Artifact> = session
+        let artifacts: Vec<Artifact> = session
             .client
             .generate(hir, input_str.to_string(), properties.clone())
             .await
             .map_err(|err| IdlcError::rpc(err.to_string()))?;
 
-        let mut ret: Vec<File> = vec![];
-        for file in artifacts {
-            match file.tag() {
-                crate::jsonrpc::ArtifactKind::Hir => {
-                    let data = file.into_hir();
-                    let mut props = properties.clone();
-                    props.extend(data.props);
-                    let next_lang = if Self::uses_http_hir(&data.lang) {
-                        "http-hir"
-                    } else {
-                        data.lang.as_str()
-                    };
-                    ret.extend(
-                        Box::pin(self.generate_for_lang(next_lang, data.hir, input, props)).await?,
-                    );
-                }
-                crate::jsonrpc::ArtifactKind::HttpHir => {
-                    let data = file.into_http_hir();
-                    let mut props = properties.clone();
-                    props.extend(data.props);
-                    props.insert(
-                        "http_hir".to_string(),
-                        serde_json::to_value(&data.http_hir)
-                            .map_err(|err| IdlcError::rpc(err.to_string()))?,
-                    );
-                    ret.extend(
-                        Box::pin(self.generate_for_lang(&data.lang, data.hir, input, props))
-                            .await?,
-                    );
-                }
-                crate::jsonrpc::ArtifactKind::File => {
-                    let data = file.into_file();
-                    ret.push(File {
-                        path: data.path.clone(),
-                        content: data.content.clone(),
-                    })
-                }
-            }
+        let mut ret = Vec::new();
+        for artifact in artifacts {
+            ret.extend(Box::pin(self.expand_artifact(artifact, input, &properties)).await?);
         }
         session.finish().await;
         Ok(ret)
     }
 
-    fn uses_http_hir(lang: &str) -> bool {
-        matches!(
-            lang,
-            "axum" | "rust-axum" | "go-http" | "python-http" | "openapi"
-        )
+    fn merge_properties(
+        &self,
+        mut properties: HashMap<String, serde_json::Value>,
+        extra: HashMap<String, serde_json::Value>,
+    ) -> HashMap<String, serde_json::Value> {
+        properties.extend(extra);
+        properties
+    }
+
+    async fn expand_artifact(
+        &mut self,
+        artifact: Artifact,
+        input: &Path,
+        properties: &HashMap<String, serde_json::Value>,
+    ) -> IdlcResult<Vec<File>> {
+        match artifact.tag() {
+            ArtifactKind::Hir => self.expand_hir_artifact(artifact, input, properties).await,
+            ArtifactKind::HttpHir => {
+                self.expand_http_hir_artifact(artifact, input, properties)
+                    .await
+            }
+            ArtifactKind::File => Ok(vec![Self::artifact_to_file(artifact)]),
+        }
+    }
+
+    async fn expand_hir_artifact(
+        &mut self,
+        artifact: Artifact,
+        input: &Path,
+        properties: &HashMap<String, serde_json::Value>,
+    ) -> IdlcResult<Vec<File>> {
+        let data = artifact.into_hir();
+        let mut props = properties.clone();
+        props.extend(data.props);
+        let next_lang = match Plugin::from(data.lang.as_str()).uses_http_hir() {
+            true => "http-hir",
+            false => data.lang.as_str(),
+        };
+        Box::pin(self.generate_for_lang(next_lang, data.hir, input, props)).await
+    }
+
+    async fn expand_http_hir_artifact(
+        &mut self,
+        artifact: Artifact,
+        input: &Path,
+        properties: &HashMap<String, serde_json::Value>,
+    ) -> IdlcResult<Vec<File>> {
+        let data = artifact.into_http_hir();
+        let mut props = properties.clone();
+        props.extend(data.props);
+        props.insert(
+            "http_hir".to_string(),
+            serde_json::to_value(&data.http_hir).map_err(|err| IdlcError::rpc(err.to_string()))?,
+        );
+        Box::pin(self.generate_for_lang(&data.lang, data.hir, input, props)).await
+    }
+
+    fn artifact_to_file(artifact: Artifact) -> File {
+        let data = artifact.into_file();
+        File {
+            path: data.path,
+            content: data.content,
+        }
     }
 
     async fn get_properties_for_lang(&mut self) -> IdlcResult<HashMap<String, serde_json::Value>> {
@@ -130,8 +163,7 @@ impl Generator {
             .client
             .get_properties()
             .await
-            .map_err(|err| IdlcError::rpc(err.to_string()))
-            .unwrap();
+            .map_err(|err| IdlcError::rpc(err.to_string()))?;
         session.finish().await;
         Ok(props)
     }

@@ -1,13 +1,19 @@
 use crate::driver::lang::Plugin;
-use crate::error::{IdlcError, IdlcResult};
-use crate::jsonrpc::{Codegen, CodegenClient};
-use semver::{Version, VersionReq};
-use std::future::Future;
+use crate::error::IdlcResult;
+use crate::jsonrpc::CodegenClient;
 use tokio::io::{AsyncRead, AsyncWrite};
 use tokio::task::JoinHandle;
 
+mod support;
+
 type RpcReader = Box<dyn AsyncRead + Unpin + Send>;
 type RpcWriter = Box<dyn AsyncWrite + Unpin + Send>;
+type RpcStream = Box<dyn xidl_jsonrpc::transport::Stream + Unpin + Send + 'static>;
+
+struct SessionParts {
+    client: CodegenClient<RpcReader, RpcWriter>,
+    server: JoinHandle<IdlcResult<()>>,
+}
 
 pub struct CodegenSession {
     pub client: CodegenClient<RpcReader, RpcWriter>,
@@ -17,35 +23,52 @@ pub struct CodegenSession {
 impl CodegenSession {
     pub async fn spawn(lang: &str) -> IdlcResult<Self> {
         let plugin = Plugin::from(lang);
-        let (client, server) = match plugin {
-            Plugin::Custom(custom_lang) => {
-                let endpoint = Self::rpc_endpoint(lang)?;
-                let server = Self::spawn_custom_codegen_server(&custom_lang, endpoint.clone())?;
-                let stream = Self::connect_with_retry(&endpoint).await?;
-                let (reader, writer) = tokio::io::split(stream);
-                let reader: RpcReader = Box::new(reader);
-                let writer: RpcWriter = Box::new(writer);
-                let client = CodegenClient::new(reader, writer);
-                (client, server)
-            }
-            plugin => {
-                let endpoint = Self::random_inproc_endpoint(lang);
-                let server = Self::spawn_builtin_codegen_server(plugin, endpoint.clone()).await?;
-                let stream = Self::connect_inproc_with_retry(&endpoint).await?;
-                let (reader, writer) = tokio::io::split(stream);
-                let reader: RpcReader = Box::new(reader);
-                let writer: RpcWriter = Box::new(writer);
-                let client = CodegenClient::new(reader, writer);
-                (client, server)
-            }
+        let session = match plugin {
+            Plugin::Custom(custom_lang) => Self::spawn_custom_session(lang, &custom_lang).await?,
+            plugin => Self::spawn_builtin_session(lang, plugin).await?,
         };
-        Self::verify_engine_version(&client).await?;
-        Ok(Self { client, server })
+        support::verify_engine_version(&session.client).await?;
+        Ok(Self {
+            client: session.client,
+            server: session.server,
+        })
     }
 
     pub async fn finish(self) {
         drop(self.client);
         self.server.abort();
+    }
+
+    async fn spawn_custom_session(lang: &str, custom_lang: &str) -> IdlcResult<SessionParts> {
+        let endpoint = support::rpc_endpoint(lang)?;
+        let server = Self::spawn_custom_codegen_server(custom_lang, endpoint.clone())?;
+        let stream = Self::connect_with_retry(&endpoint).await?;
+        Ok(SessionParts {
+            client: Self::client_from_stream(stream),
+            server,
+        })
+    }
+
+    async fn spawn_builtin_session(lang: &str, plugin: Plugin) -> IdlcResult<SessionParts> {
+        let endpoint = support::random_inproc_endpoint(lang);
+        let server = Self::spawn_builtin_codegen_server(plugin, endpoint.clone()).await?;
+        let stream = Self::connect_inproc_with_retry(&endpoint).await?;
+        Ok(SessionParts {
+            client: Self::client_from_duplex_stream(stream),
+            server,
+        })
+    }
+
+    fn client_from_stream(stream: RpcStream) -> CodegenClient<RpcReader, RpcWriter> {
+        let (reader, writer) = tokio::io::split(stream);
+        CodegenClient::new(Box::new(reader), Box::new(writer))
+    }
+
+    fn client_from_duplex_stream(
+        stream: tokio::io::DuplexStream,
+    ) -> CodegenClient<RpcReader, RpcWriter> {
+        let (reader, writer) = tokio::io::split(stream);
+        CodegenClient::new(Box::new(reader), Box::new(writer))
     }
 
     async fn spawn_builtin_codegen_server(
@@ -123,10 +146,8 @@ impl CodegenSession {
         Ok(server)
     }
 
-    async fn connect_with_retry(
-        endpoint: &str,
-    ) -> IdlcResult<Box<dyn xidl_jsonrpc::transport::Stream + Unpin + Send + 'static>> {
-        Self::retry_connect(
+    async fn connect_with_retry(endpoint: &str) -> IdlcResult<RpcStream> {
+        support::retry_connect(
             || xidl_jsonrpc::transport::connect(endpoint),
             format!("failed to connect rpc endpoint: {endpoint}"),
         )
@@ -134,86 +155,10 @@ impl CodegenSession {
     }
 
     async fn connect_inproc_with_retry(endpoint: &str) -> IdlcResult<tokio::io::DuplexStream> {
-        Self::retry_connect(
+        support::retry_connect(
             || std::future::ready(xidl_jsonrpc::transport::connect_inproc(endpoint)),
             "failed to connect inproc endpoint".to_string(),
         )
         .await
-    }
-
-    async fn retry_connect<T, F, Fut>(mut connect: F, error_message: String) -> IdlcResult<T>
-    where
-        F: FnMut() -> Fut,
-        Fut: Future<Output = std::io::Result<T>>,
-    {
-        let mut last_err = None;
-        for _ in 0..50 {
-            match connect().await {
-                Ok(stream) => return Ok(stream),
-                Err(err) => {
-                    last_err = Some(err);
-                    tokio::time::sleep(std::time::Duration::from_millis(10)).await;
-                }
-            }
-        }
-        let err = last_err.unwrap_or_else(|| std::io::Error::other(error_message));
-        Err(IdlcError::rpc(err.to_string()))
-    }
-
-    fn random_inproc_endpoint(lang: &str) -> String {
-        let nanos = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .expect("system time before epoch")
-            .as_nanos();
-        format!("xidlc.codegen.{lang}.{nanos}")
-    }
-
-    #[cfg(unix)]
-    fn rpc_endpoint(lang: &str) -> IdlcResult<String> {
-        let nanos = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .expect("system time before epoch")
-            .as_nanos();
-        let path = std::path::Path::new("/tmp").join(format!("xidlc.{lang}.{nanos}.sock"));
-        let path = path
-            .into_os_string()
-            .into_string()
-            .map_err(|_| IdlcError::rpc("invalid ipc socket path".to_string()))?;
-        Ok(format!("ipc://{path}"))
-    }
-
-    #[cfg(windows)]
-    fn rpc_endpoint(_lang: &str) -> IdlcResult<String> {
-        let probe = std::net::TcpListener::bind("127.0.0.1:0")
-            .map_err(|err| IdlcError::rpc(err.to_string()))?;
-        let addr = probe
-            .local_addr()
-            .map_err(|err| IdlcError::rpc(err.to_string()))?;
-        drop(probe);
-        Ok(format!("tcp://{addr}"))
-    }
-
-    async fn verify_engine_version(client: &CodegenClient<RpcReader, RpcWriter>) -> IdlcResult<()> {
-        let engine_req: String = client
-            .get_engine_version()
-            .await
-            .map_err(|err| IdlcError::rpc(err.to_string()))?;
-        let req = VersionReq::parse(&engine_req).map_err(|err| {
-            IdlcError::rpc(format!(
-                "invalid engine version requirement \"{engine_req}\": {err}"
-            ))
-        })?;
-        let version = Version::parse(env!("CARGO_PKG_VERSION")).map_err(|err| {
-            IdlcError::rpc(format!(
-                "invalid xidlc version \"{}\": {err}",
-                env!("CARGO_PKG_VERSION")
-            ))
-        })?;
-        if !req.matches(&version) {
-            return Err(IdlcError::rpc(format!(
-                "xidlc {version} is not compatible with engine requirement {engine_req}"
-            )));
-        }
-        Ok(())
     }
 }

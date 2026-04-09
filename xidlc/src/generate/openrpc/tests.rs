@@ -1,3 +1,4 @@
+use super::schema::schema_for_struct;
 use super::*;
 use xidl_parser::hir;
 

@@ -90,19 +90,21 @@ fn select_openapi_version(ctx: &RenderedOpenApi) -> &'static str {
 }
 
 pub fn render_openapi(spec: &hir::Specification, http_hir: &HttpHirDocument) -> RenderedOpenApi {
-    let mut ctx = OpenApiContext::default();
-    ctx.info_title = http_hir.document.package.clone();
-    ctx.info_version = http_hir.document.version.clone();
-    ctx.servers = http_hir
-        .document
-        .servers
-        .iter()
-        .map(|server| {
-            let mut item = Server::new(&server.base_url);
-            item.description = server.description.clone();
-            item
-        })
-        .collect();
+    let mut ctx = OpenApiContext {
+        info_title: http_hir.document.package.clone(),
+        info_version: http_hir.document.version.clone(),
+        servers: http_hir
+            .document
+            .servers
+            .iter()
+            .map(|server| {
+                let mut item = Server::new(&server.base_url);
+                item.description = server.description.clone();
+                item
+            })
+            .collect(),
+        ..Default::default()
+    };
     ctx.collect_spec(spec, &[], http_hir);
 
     let mut components = crate::openapi::ComponentsBuilder::new();

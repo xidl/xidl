@@ -1,146 +1,34 @@
-use std::collections::{BTreeSet, HashMap};
+#[path = "semantics_annotation_parse.rs"]
+mod semantics_annotation_parse;
+#[path = "semantics_annotations.rs"]
+mod semantics_annotations;
+#[path = "semantics_security.rs"]
+mod semantics_security;
+#[path = "semantics_stream.rs"]
+mod semantics_stream;
 
 use jiff::{Timestamp, civil, tz::TimeZone};
 use serde::{Deserialize, Serialize};
 use xidl_parser::hir;
+
+pub use self::semantics_annotations::{
+    annotation_name, annotation_params, effective_media_type, has_annotation,
+    has_optional_annotation, normalize_annotation_params,
+};
+pub use self::semantics_security::{
+    HttpApiKeyLocation, HttpSecurityOrigin, HttpSecurityProfile, HttpSecurityRequirement,
+    effective_security, effective_security_with_origin,
+};
+pub use self::semantics_stream::{
+    HttpStreamCodec, HttpStreamConfig, HttpStreamKind, HttpStreamTargetSupport, http_stream_config,
+    validate_http_stream_method, validate_http_stream_target,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct DeprecatedInfo {
     pub deprecated: bool,
     pub since: Option<String>,
     pub after: Option<String>,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum HttpApiKeyLocation {
-    Header,
-    Query,
-    Cookie,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum HttpSecurityRequirement {
-    HttpBasic,
-    HttpBearer,
-    ApiKey {
-        location: HttpApiKeyLocation,
-        name: String,
-    },
-    OAuth2 {
-        scopes: Vec<String>,
-    },
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum HttpSecurityOrigin {
-    Interface,
-    Method,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct HttpSecurityProfile {
-    pub origin: HttpSecurityOrigin,
-    pub requirements: Vec<HttpSecurityRequirement>,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum HttpStreamKind {
-    Server,
-    Client,
-    Bidi,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum HttpStreamCodec {
-    Sse,
-    Ndjson,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub struct HttpStreamConfig {
-    pub kind: Option<HttpStreamKind>,
-    pub codec: HttpStreamCodec,
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct HttpStreamTargetSupport<'a> {
-    pub target: &'a str,
-    pub supports_bidi: bool,
-    pub server_codec: HttpStreamCodec,
-    pub client_codec: HttpStreamCodec,
-    pub server_method: &'a str,
-    pub client_method: &'a str,
-    pub bidi_method: &'a str,
-}
-
-pub fn annotation_name(annotation: &hir::Annotation) -> Option<&str> {
-    match annotation {
-        hir::Annotation::Builtin { name, .. } => Some(name.as_str()),
-        hir::Annotation::ScopedName { name, .. } => name.name.last().map(|value| value.as_str()),
-        _ => None,
-    }
-}
-
-pub fn annotation_params(annotation: &hir::Annotation) -> Option<&hir::AnnotationParams> {
-    match annotation {
-        hir::Annotation::Builtin { params, .. } => params.as_ref(),
-        hir::Annotation::ScopedName { params, .. } => params.as_ref(),
-        _ => None,
-    }
-}
-
-pub fn has_annotation(annotations: &[hir::Annotation], target: &str) -> bool {
-    annotations.iter().any(|annotation| {
-        annotation_name(annotation)
-            .map(|name| name.eq_ignore_ascii_case(target))
-            .unwrap_or(false)
-    })
-}
-
-pub fn has_optional_annotation(annotations: &[hir::Annotation]) -> bool {
-    has_annotation(annotations, "optional")
-}
-
-pub fn normalize_annotation_params(params: &hir::AnnotationParams) -> HashMap<String, String> {
-    let mut out = HashMap::new();
-    match params {
-        hir::AnnotationParams::Raw(value) => {
-            for (key, value) in parse_raw_params(value) {
-                out.insert(key.to_ascii_lowercase(), value);
-            }
-        }
-        hir::AnnotationParams::Params(values) => {
-            for value in values {
-                let raw = value
-                    .value
-                    .as_ref()
-                    .map(render_const_expr)
-                    .unwrap_or_default();
-                out.insert(
-                    value.ident.to_ascii_lowercase(),
-                    trim_quotes(&raw).unwrap_or(raw),
-                );
-            }
-        }
-        hir::AnnotationParams::ConstExpr(expr) => {
-            let rendered = render_const_expr(expr);
-            out.insert(
-                "value".to_string(),
-                trim_quotes(&rendered).unwrap_or(rendered),
-            );
-        }
-    }
-    out
-}
-
-pub fn effective_media_type(
-    interface_annotations: &[hir::Annotation],
-    method_annotations: &[hir::Annotation],
-    target: &str,
-) -> String {
-    annotation_value(method_annotations, target)
-        .or_else(|| annotation_value(interface_annotations, target))
-        .unwrap_or_else(|| "application/json".to_string())
 }
 
 pub fn deprecated_info(annotations: &[hir::Annotation]) -> Result<Option<DeprecatedInfo>, String> {
@@ -167,15 +55,7 @@ pub fn deprecated_info(annotations: &[hir::Annotation]) -> Result<Option<Depreca
         }
     }
     if let (Some(since), Some(after)) = (&since, &after) {
-        let since_ts: Timestamp = since
-            .parse()
-            .map_err(|_| format!("invalid @deprecated(since) timestamp '{since}'"))?;
-        let after_ts: Timestamp = after
-            .parse()
-            .map_err(|_| format!("invalid @deprecated(after) timestamp '{after}'"))?;
-        if since_ts > after_ts {
-            return Err("@deprecated(since=..., after=...) requires since <= after".to_string());
-        }
+        validate_deprecated_range(since, after)?;
     }
     Ok(Some(DeprecatedInfo {
         deprecated: true,
@@ -184,68 +64,13 @@ pub fn deprecated_info(annotations: &[hir::Annotation]) -> Result<Option<Depreca
     }))
 }
 
-pub fn effective_security(
-    interface_annotations: &[hir::Annotation],
-    method_annotations: &[hir::Annotation],
-) -> Result<Option<Vec<HttpSecurityRequirement>>, String> {
-    let method_security = collect_security(method_annotations)?;
-    if method_security.explicit_none {
-        return Ok(Some(Vec::new()));
-    }
-    if !method_security.requirements.is_empty() {
-        return Ok(Some(method_security.requirements));
-    }
-    let interface_security = collect_security(interface_annotations)?;
-    if interface_security.explicit_none {
-        return Ok(Some(Vec::new()));
-    }
-    if interface_security.requirements.is_empty() {
-        Ok(None)
-    } else {
-        Ok(Some(interface_security.requirements))
-    }
-}
-
-pub fn effective_security_with_origin(
-    interface_annotations: &[hir::Annotation],
-    method_annotations: &[hir::Annotation],
-) -> Result<Option<HttpSecurityProfile>, String> {
-    let method_security = collect_security(method_annotations)?;
-    if method_security.explicit_none {
-        return Ok(Some(HttpSecurityProfile {
-            origin: HttpSecurityOrigin::Method,
-            requirements: Vec::new(),
-        }));
-    }
-    if !method_security.requirements.is_empty() {
-        return Ok(Some(HttpSecurityProfile {
-            origin: HttpSecurityOrigin::Method,
-            requirements: method_security.requirements,
-        }));
-    }
-    let interface_security = collect_security(interface_annotations)?;
-    if interface_security.explicit_none {
-        return Ok(Some(HttpSecurityProfile {
-            origin: HttpSecurityOrigin::Interface,
-            requirements: Vec::new(),
-        }));
-    }
-    if interface_security.requirements.is_empty() {
-        Ok(None)
-    } else {
-        Ok(Some(HttpSecurityProfile {
-            origin: HttpSecurityOrigin::Interface,
-            requirements: interface_security.requirements,
-        }))
-    }
-}
-
 pub fn validate_http_annotations(
     target: &str,
     annotations: &[hir::Annotation],
 ) -> Result<(), String> {
     let _ = deprecated_info(annotations).map_err(|err| format!("{target}: {err}"))?;
-    let _ = collect_security(annotations).map_err(|err| format!("{target}: {err}"))?;
+    let _ = semantics_security::collect_security(annotations)
+        .map_err(|err| format!("{target}: {err}"))?;
     validate_http_media_types(target, annotations)?;
     Ok(())
 }
@@ -258,7 +83,9 @@ fn validate_http_media_types(target: &str, annotations: &[hir::Annotation]) -> R
         if !name.eq_ignore_ascii_case("Consumes") && !name.eq_ignore_ascii_case("Produces") {
             continue;
         }
-        let Some(value) = annotation_value(std::slice::from_ref(annotation), name) else {
+        let Some(value) =
+            semantics_annotations::annotation_value(std::slice::from_ref(annotation), name)
+        else {
             continue;
         };
         if is_supported_http_media_type(&value) {
@@ -277,142 +104,17 @@ fn is_supported_http_media_type(value: &str) -> bool {
         || value.eq_ignore_ascii_case("application/msgpack")
 }
 
-pub fn http_stream_config(annotations: &[hir::Annotation]) -> Result<HttpStreamConfig, String> {
-    let mut kind = None;
-    for annotation in annotations {
-        let Some(name) = annotation_name(annotation) else {
-            continue;
-        };
-        let current = if name.eq_ignore_ascii_case("server_stream") {
-            Some(HttpStreamKind::Server)
-        } else if name.eq_ignore_ascii_case("client_stream") {
-            Some(HttpStreamKind::Client)
-        } else if name.eq_ignore_ascii_case("bidi_stream") {
-            Some(HttpStreamKind::Bidi)
-        } else {
-            None
-        };
-        let Some(current) = current else {
-            continue;
-        };
-        match kind {
-            None => kind = Some(current),
-            Some(prev) if prev == current => {}
-            Some(_) => {
-                return Err(
-                    "@server_stream/@client_stream/@bidi_stream are mutually exclusive".to_string(),
-                );
-            }
-        }
+fn validate_deprecated_range(since: &str, after: &str) -> Result<(), String> {
+    let since_ts: Timestamp = since
+        .parse()
+        .map_err(|_| format!("invalid @deprecated(since) timestamp '{since}'"))?;
+    let after_ts: Timestamp = after
+        .parse()
+        .map_err(|_| format!("invalid @deprecated(after) timestamp '{after}'"))?;
+    if since_ts > after_ts {
+        return Err("@deprecated(since=..., after=...) requires since <= after".to_string());
     }
-
-    let mut codec = match kind {
-        Some(HttpStreamKind::Server) => HttpStreamCodec::Sse,
-        Some(HttpStreamKind::Client | HttpStreamKind::Bidi) | None => HttpStreamCodec::Ndjson,
-    };
-    for annotation in annotations {
-        let Some(name) = annotation_name(annotation) else {
-            continue;
-        };
-        if !name.eq_ignore_ascii_case("stream_codec") {
-            continue;
-        }
-        let value = annotation_params(annotation)
-            .map(normalize_annotation_params)
-            .and_then(|params| params.get("value").cloned())
-            .unwrap_or_else(|| "sse".to_string());
-        codec = match value.to_ascii_lowercase().as_str() {
-            "sse" => HttpStreamCodec::Sse,
-            "ndjson" => HttpStreamCodec::Ndjson,
-            other => {
-                return Err(format!(
-                    "unsupported @stream_codec value '{other}', expected 'sse' or 'ndjson'"
-                ));
-            }
-        };
-    }
-
-    Ok(HttpStreamConfig { kind, codec })
-}
-
-pub fn validate_http_stream_target(
-    op_name: &str,
-    config: HttpStreamConfig,
-    support: HttpStreamTargetSupport<'_>,
-) -> Result<(), String> {
-    match config.kind {
-        Some(HttpStreamKind::Server) if config.codec != support.server_codec => Err(format!(
-            "{} currently supports only {} for @server_stream methods: '{}'",
-            support.target,
-            stream_codec_name(support.server_codec),
-            op_name
-        )),
-        Some(HttpStreamKind::Client) if config.codec != support.client_codec => Err(format!(
-            "{} currently supports only {} for @client_stream methods: '{}'",
-            support.target,
-            stream_codec_name(support.client_codec),
-            op_name
-        )),
-        Some(HttpStreamKind::Bidi) if !support.supports_bidi => Err(format!(
-            "{} currently does not support @bidi_stream methods: '{}'",
-            support.target, op_name
-        )),
-        Some(HttpStreamKind::Client | HttpStreamKind::Bidi)
-            if config.codec == HttpStreamCodec::Sse =>
-        {
-            Err(format!(
-                "@stream_codec(\"sse\") requires @server_stream on method '{}'",
-                op_name
-            ))
-        }
-        _ => Ok(()),
-    }
-}
-
-pub fn validate_http_stream_method(
-    op_name: &str,
-    kind: Option<HttpStreamKind>,
-    method: &str,
-    support: HttpStreamTargetSupport<'_>,
-) -> Result<(), String> {
-    let method = method.to_ascii_uppercase();
-    match kind {
-        Some(HttpStreamKind::Server) if method != support.server_method => Err(format!(
-            "@server_stream method '{}' must use {}",
-            op_name, support.server_method
-        )),
-        Some(HttpStreamKind::Client) if method != support.client_method => Err(format!(
-            "@client_stream method '{}' must use {}",
-            op_name, support.client_method
-        )),
-        Some(HttpStreamKind::Bidi) if method != support.bidi_method => Err(format!(
-            "@bidi_stream method '{}' must use {}",
-            op_name, support.bidi_method
-        )),
-        _ => Ok(()),
-    }
-}
-
-fn annotation_value(annotations: &[hir::Annotation], target: &str) -> Option<String> {
-    annotations.iter().find_map(|annotation| {
-        let name = annotation_name(annotation)?;
-        if !name.eq_ignore_ascii_case(target) {
-            return None;
-        }
-        let params = annotation_params(annotation)?;
-        let params = normalize_annotation_params(params);
-        params
-            .get("value")
-            .cloned()
-            .or_else(|| params.get(target).cloned())
-    })
-}
-
-fn stream_codec_name(codec: HttpStreamCodec) -> &'static str {
-    match codec {
-        HttpStreamCodec::Sse => "SSE",
-        HttpStreamCodec::Ndjson => "NDJSON",
-    }
+    Ok(())
 }
 
 fn normalize_deprecated_timestamp(value: &str, end_of_day: bool) -> Result<String, String> {
@@ -429,206 +131,4 @@ fn normalize_deprecated_timestamp(value: &str, end_of_day: bool) -> Result<Strin
     };
     let zoned = dt.to_zoned(TimeZone::UTC).map_err(|err| err.to_string())?;
     Ok(zoned.timestamp().to_string())
-}
-
-struct SecurityCollection {
-    explicit_none: bool,
-    requirements: Vec<HttpSecurityRequirement>,
-}
-
-fn collect_security(annotations: &[hir::Annotation]) -> Result<SecurityCollection, String> {
-    let mut explicit_none = false;
-    let mut requirements = Vec::new();
-    let mut singleton_names = BTreeSet::new();
-
-    for annotation in annotations {
-        let Some(name) = annotation_name(annotation) else {
-            continue;
-        };
-        if name.eq_ignore_ascii_case("no_security") {
-            explicit_none = true;
-            continue;
-        }
-        let requirement = if name.eq_ignore_ascii_case("http_basic") {
-            ensure_singleton(&mut singleton_names, "http_basic")?;
-            Some(HttpSecurityRequirement::HttpBasic)
-        } else if name.eq_ignore_ascii_case("http_bearer") {
-            ensure_singleton(&mut singleton_names, "http_bearer")?;
-            Some(HttpSecurityRequirement::HttpBearer)
-        } else if name.eq_ignore_ascii_case("api_key") {
-            Some(parse_api_key(annotation)?)
-        } else if name.eq_ignore_ascii_case("oauth2") {
-            Some(parse_oauth2(annotation))
-        } else {
-            None
-        };
-        if let Some(requirement) = requirement {
-            requirements.push(requirement);
-        }
-    }
-
-    if explicit_none && !requirements.is_empty() {
-        return Err("@no_security cannot be combined with other security annotations".to_string());
-    }
-
-    Ok(SecurityCollection {
-        explicit_none,
-        requirements,
-    })
-}
-
-fn ensure_singleton(names: &mut BTreeSet<&'static str>, value: &'static str) -> Result<(), String> {
-    if !names.insert(value) {
-        return Err(format!("duplicate @{value} annotation"));
-    }
-    Ok(())
-}
-
-fn parse_api_key(annotation: &hir::Annotation) -> Result<HttpSecurityRequirement, String> {
-    let params = annotation_params(annotation)
-        .ok_or_else(|| "@api_key requires in=... and name=...".to_string())?;
-    let params = normalize_annotation_params(params);
-    let location = match params.get("in").map(|value| value.to_ascii_lowercase()) {
-        Some(value) if value == "header" => HttpApiKeyLocation::Header,
-        Some(value) if value == "query" => HttpApiKeyLocation::Query,
-        Some(value) if value == "cookie" => HttpApiKeyLocation::Cookie,
-        Some(value) => {
-            return Err(format!(
-                "@api_key(in=...) must be one of header|query|cookie, got '{value}'"
-            ));
-        }
-        None => return Err("@api_key requires non-empty in=...".to_string()),
-    };
-    let name = params
-        .get("name")
-        .cloned()
-        .filter(|value| !value.is_empty())
-        .ok_or_else(|| "@api_key requires non-empty name=...".to_string())?;
-    Ok(HttpSecurityRequirement::ApiKey { location, name })
-}
-
-fn parse_oauth2(annotation: &hir::Annotation) -> HttpSecurityRequirement {
-    let params = annotation_params(annotation)
-        .map(normalize_annotation_params)
-        .unwrap_or_default();
-    let scopes = params
-        .get("scopes")
-        .map(|value| parse_string_array(value))
-        .unwrap_or_default();
-    HttpSecurityRequirement::OAuth2 { scopes }
-}
-
-fn parse_raw_params(raw: &str) -> Vec<(String, String)> {
-    let trimmed = raw.trim();
-    if trimmed.is_empty() {
-        return Vec::new();
-    }
-    if !trimmed.contains('=') {
-        return vec![(
-            "value".to_string(),
-            trim_quotes(trimmed).unwrap_or_else(|| trimmed.to_string()),
-        )];
-    }
-    split_top_level(trimmed, ',')
-        .into_iter()
-        .filter_map(|part| {
-            let (key, value) = part.split_once('=')?;
-            let key = key.trim();
-            if key.is_empty() {
-                return None;
-            }
-            let value = value.trim();
-            Some((
-                key.to_string(),
-                trim_quotes(value).unwrap_or_else(|| value.to_string()),
-            ))
-        })
-        .collect()
-}
-
-fn parse_string_array(raw: &str) -> Vec<String> {
-    let trimmed = raw.trim();
-    let unquoted = trim_quotes(trimmed).unwrap_or_else(|| trimmed.to_string());
-    split_top_level(&unquoted, ',')
-        .into_iter()
-        .map(|value| value.trim().to_string())
-        .filter(|value| !value.is_empty())
-        .collect()
-}
-
-fn split_top_level(raw: &str, separator: char) -> Vec<String> {
-    let mut parts = Vec::new();
-    let mut current = String::new();
-    let mut quote = None;
-    let mut bracket_depth = 0usize;
-    let mut paren_depth = 0usize;
-    let mut escaped = false;
-    for ch in raw.chars() {
-        if let Some(q) = quote {
-            current.push(ch);
-            if escaped {
-                escaped = false;
-                continue;
-            }
-            if ch == '\\' {
-                escaped = true;
-                continue;
-            }
-            if ch == q {
-                quote = None;
-            }
-            continue;
-        }
-        match ch {
-            '"' | '\'' => {
-                quote = Some(ch);
-                current.push(ch);
-            }
-            '[' => {
-                bracket_depth += 1;
-                current.push(ch);
-            }
-            ']' => {
-                bracket_depth = bracket_depth.saturating_sub(1);
-                current.push(ch);
-            }
-            '(' => {
-                paren_depth += 1;
-                current.push(ch);
-            }
-            ')' => {
-                paren_depth = paren_depth.saturating_sub(1);
-                current.push(ch);
-            }
-            _ if ch == separator && bracket_depth == 0 && paren_depth == 0 => {
-                parts.push(current.trim().to_string());
-                current.clear();
-            }
-            _ => current.push(ch),
-        }
-    }
-    if !current.trim().is_empty() {
-        parts.push(current.trim().to_string());
-    }
-    parts
-}
-
-fn trim_quotes(value: &str) -> Option<String> {
-    let value = value.trim();
-    if value.len() >= 2 {
-        let first = value.chars().next().unwrap();
-        let last = value.chars().last().unwrap();
-        if (first == '"' && last == '"') || (first == '\'' && last == '\'') {
-            return Some(value[1..value.len() - 1].to_string());
-        }
-    }
-    None
-}
-
-fn render_const_expr(expr: &hir::ConstExpr) -> String {
-    crate::generate::render_const_expr(
-        expr,
-        &crate::generate::rust::util::rust_scoped_name,
-        &crate::generate::rust::util::rust_literal,
-    )
 }
