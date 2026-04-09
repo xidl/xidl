@@ -17,7 +17,7 @@ test-go-runtime:
 	$(MAKE) -C golang test-go-runtime GO_CACHE=$(GO_CACHE) GO_PATH=$(GO_PATH)
 
 test-update:
-	INSTA_UPDATE=always cargo test
+	INSTA_UPDATE=always make test-rust
 
 build-xtypes:
 	cargo r -p xidlc -- --lang rust --out-dir ./xidl-typeobject/src/ ./xidl-typeobject/idl/dds-xtypes_typeobject.idl

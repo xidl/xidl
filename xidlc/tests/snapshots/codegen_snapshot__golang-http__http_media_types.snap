@@ -19,10 +19,10 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-http"
 	"net/http"
 	"net/url"
 	"strings"
-	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-http"
 )
 
 var (
@@ -49,27 +49,27 @@ func NewHttpMediaTypesApiHandler(svc HttpMediaTypesApiService) http.Handler {
 			return
 		}
 
-	req := &HttpMediaTypesApiSubmitProfileRequest{}
-	body := HttpMediaTypesApiSubmitProfileRequestBody{}
-	if err := xidlgohttp.DecodeBody(r, "application/x-www-form-urlencoded", &body); err != nil {
-		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
-		return
-	}
-	req.Name = body.Name
-	req.Age = body.Age
+		req := &HttpMediaTypesApiSubmitProfileRequest{}
+		body := HttpMediaTypesApiSubmitProfileRequestBody{}
+		if err := xidlgohttp.DecodeBody(r, "application/x-www-form-urlencoded", &body); err != nil {
+			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			return
+		}
+		req.Name = body.Name
+		req.Age = body.Age
 		resp, err := svc.SubmitProfile(r.Context(), req)
 		if err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
 
-	respBody := HttpMediaTypesApiSubmitProfileResponseBody{
-		Return: resp.Return,
-		NormalizedName: resp.NormalizedName,
-	}
-	if err := xidlgohttp.EncodeBody(w, "application/json", respBody); err != nil {
-		xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
-	}
+		respBody := HttpMediaTypesApiSubmitProfileResponseBody{
+			Return:         resp.Return,
+			NormalizedName: resp.NormalizedName,
+		}
+		if err := xidlgohttp.EncodeBody(w, "application/json", respBody); err != nil {
+			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+		}
 	})
 	mux.HandleFunc("GET /v1/msgpack/users/{user_id}", func(w http.ResponseWriter, r *http.Request) {
 		if err := xidlgohttp.RequireAccept(r, "application/msgpack"); err != nil {
@@ -77,33 +77,35 @@ func NewHttpMediaTypesApiHandler(svc HttpMediaTypesApiService) http.Handler {
 			return
 		}
 
-	req := &HttpMediaTypesApiGetMsgpackUserRequest{}
+		req := &HttpMediaTypesApiGetMsgpackUserRequest{}
 
- 	if value, err := xidlgohttp.PathString(r, "user_id"); err == nil { req.UserId = value } else {
- 		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
- 		return
- 	}
+		if value, err := xidlgohttp.PathString(r, "user_id"); err == nil {
+			req.UserId = value
+		} else {
+			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			return
+		}
 		resp, err := svc.GetMsgpackUser(r.Context(), req)
 		if err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
 
-	respBody := HttpMediaTypesApiGetMsgpackUserResponseBody{
-		Return: resp.Return,
-		Score: resp.Score,
-	}
-	if err := xidlgohttp.EncodeBody(w, "application/msgpack", respBody); err != nil {
-		xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
-	}
+		respBody := HttpMediaTypesApiGetMsgpackUserResponseBody{
+			Return: resp.Return,
+			Score:  resp.Score,
+		}
+		if err := xidlgohttp.EncodeBody(w, "application/msgpack", respBody); err != nil {
+			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+		}
 	})
 	return mux
 }
 
 type HttpMediaTypesApiClient struct {
-	baseURL string
+	baseURL    string
 	httpClient *http.Client
-	auth xidlgohttp.ClientAuth
+	auth       xidlgohttp.ClientAuth
 }
 
 func NewHttpMediaTypesApiClient(baseURL string, httpClient *http.Client, auth xidlgohttp.ClientAuth) *HttpMediaTypesApiClient {
@@ -117,60 +119,77 @@ func (c *HttpMediaTypesApiClient) SubmitProfile(ctx context.Context, req *HttpMe
 	requestURL := c.baseURL + formatHttpMediaTypesApiSubmitProfilePath(req)
 	body := HttpMediaTypesApiSubmitProfileRequestBody{
 		Name: req.Name,
-		Age: req.Age,
+		Age:  req.Age,
 	}
 	var requestBody bytes.Buffer
-	if err := xidlgohttp.MustCodecForMime("application/x-www-form-urlencoded").Encode(&requestBody, body); err != nil { return nil, err }
+	if err := xidlgohttp.MustCodecForMime("application/x-www-form-urlencoded").Encode(&requestBody, body); err != nil {
+		return nil, err
+	}
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", requestURL, &requestBody)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	httpReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	httpReq.Header.Set("Accept", "application/json")
 	resp, err := c.httpClient.Do(httpReq)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 { return nil, fmt.Errorf("http %d", resp.StatusCode) }
+	if resp.StatusCode >= 400 {
+		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	}
 	decoded, err := decodeHttpMediaTypesApiSubmitProfileResponse(resp)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	return &decoded, nil
 }
 
 func (c *HttpMediaTypesApiClient) GetMsgpackUser(ctx context.Context, req *HttpMediaTypesApiGetMsgpackUserRequest) (*HttpMediaTypesApiGetMsgpackUserResponse, error) {
 	requestURL := c.baseURL + formatHttpMediaTypesApiGetMsgpackUserPath(req)
 	httpReq, err := http.NewRequestWithContext(ctx, "GET", requestURL, nil)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	httpReq.Header.Set("Accept", "application/msgpack")
 	resp, err := c.httpClient.Do(httpReq)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 { return nil, fmt.Errorf("http %d", resp.StatusCode) }
+	if resp.StatusCode >= 400 {
+		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	}
 	decoded, err := decodeHttpMediaTypesApiGetMsgpackUserResponse(resp)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	return &decoded, nil
 }
 
 type HttpMediaTypesApiSubmitProfileRequest struct {
 	Name string `json:"name" form:"name"`
-	Age uint32 `json:"age" form:"age"`
+	Age  uint32 `json:"age" form:"age"`
 }
 
 type HttpMediaTypesApiSubmitProfileRequestBody struct {
 	Name string `json:"name" form:"name"`
-	Age uint32 `json:"age" form:"age"`
+	Age  uint32 `json:"age" form:"age"`
 }
 
 type HttpMediaTypesApiSubmitProfileResponse struct {
-	Return string `json:"return"`
+	Return         string `json:"return"`
 	NormalizedName string `json:"normalized_name"`
 }
 
 type HttpMediaTypesApiSubmitProfileResponseBody struct {
-	Return string `json:"return"`
+	Return         string `json:"return"`
 	NormalizedName string `json:"normalized_name"`
 }
 
 func HttpMediaTypesApiSubmitProfileSecurityRequirements() []xidlgohttp.SecurityRequirement {
-	return []xidlgohttp.SecurityRequirement{
-	}
+	return []xidlgohttp.SecurityRequirement{}
 }
 
 func HttpMediaTypesApiSubmitProfileDeprecated() xidlgohttp.DeprecatedInfo {
@@ -186,28 +205,30 @@ func formatHttpMediaTypesApiSubmitProfilePath(req *HttpMediaTypesApiSubmitProfil
 func decodeHttpMediaTypesApiSubmitProfileResponse(resp *http.Response) (HttpMediaTypesApiSubmitProfileResponse, error) {
 	out := HttpMediaTypesApiSubmitProfileResponse{}
 	body := HttpMediaTypesApiSubmitProfileResponseBody{}
-	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil { return out, err }
+	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil {
+		return out, err
+	}
 	out.Return = body.Return
 	out.NormalizedName = body.NormalizedName
 	return out, nil
 }
+
 type HttpMediaTypesApiGetMsgpackUserRequest struct {
 	UserId string `json:"user_id" form:"user_id"`
 }
 
 type HttpMediaTypesApiGetMsgpackUserResponse struct {
 	Return string `json:"return"`
-	Score uint32 `json:"score"`
+	Score  uint32 `json:"score"`
 }
 
 type HttpMediaTypesApiGetMsgpackUserResponseBody struct {
 	Return string `json:"return"`
-	Score uint32 `json:"score"`
+	Score  uint32 `json:"score"`
 }
 
 func HttpMediaTypesApiGetMsgpackUserSecurityRequirements() []xidlgohttp.SecurityRequirement {
-	return []xidlgohttp.SecurityRequirement{
-	}
+	return []xidlgohttp.SecurityRequirement{}
 }
 
 func HttpMediaTypesApiGetMsgpackUserDeprecated() xidlgohttp.DeprecatedInfo {
@@ -225,7 +246,9 @@ func formatHttpMediaTypesApiGetMsgpackUserPath(req *HttpMediaTypesApiGetMsgpackU
 func decodeHttpMediaTypesApiGetMsgpackUserResponse(resp *http.Response) (HttpMediaTypesApiGetMsgpackUserResponse, error) {
 	out := HttpMediaTypesApiGetMsgpackUserResponse{}
 	body := HttpMediaTypesApiGetMsgpackUserResponseBody{}
-	if err := xidlgohttp.MustCodecForMime("application/msgpack").Decode(resp.Body, &body); err != nil { return out, err }
+	if err := xidlgohttp.MustCodecForMime("application/msgpack").Decode(resp.Body, &body); err != nil {
+		return out, err
+	}
 	out.Return = body.Return
 	out.Score = body.Score
 	return out, nil

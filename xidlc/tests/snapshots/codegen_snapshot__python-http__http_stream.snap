@@ -26,7 +26,6 @@ from xidl.http import (
     query_value,
     read_json_body,
     read_json_field,
-    read_json_value,
     read_scalar,
     require_accept,
     require_content_type,

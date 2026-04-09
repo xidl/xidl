@@ -2,6 +2,7 @@ use crate::error::{IdlcError, IdlcResult};
 use include_dir::{Dir, include_dir};
 use minijinja::{Environment, Error, ErrorKind};
 use serde::Serialize;
+use std::process::{Command, Stdio};
 
 use super::GoHttpRenderOutput;
 
@@ -19,7 +20,8 @@ impl GoHttpRenderer {
     }
 
     pub fn render_spec(&self, output: &GoHttpRenderOutput) -> IdlcResult<String> {
-        self.render_template("spec.go.j2", output)
+        let rendered = self.render_template("spec.go.j2", output)?;
+        format_go_source(&rendered)
     }
 
     pub fn render_template<S: Serialize>(&self, name: &str, ctx: &S) -> IdlcResult<String> {
@@ -44,4 +46,35 @@ fn load_template(name: &str) -> std::result::Result<String, Error> {
             format!("template {name} is not valid utf-8"),
         )
     })
+}
+
+fn format_go_source(source: &str) -> IdlcResult<String> {
+    let Ok(mut child) = Command::new("gofmt")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+    else {
+        return Ok(source.to_string());
+    };
+
+    if let Some(mut stdin) = child.stdin.take() {
+        use std::io::Write;
+        stdin
+            .write_all(source.as_bytes())
+            .map_err(|err| IdlcError::template(format!("write gofmt stdin: {err}")))?;
+    }
+
+    let output = child
+        .wait_with_output()
+        .map_err(|err| IdlcError::template(format!("wait for gofmt: {err}")))?;
+    if output.status.success() {
+        String::from_utf8(output.stdout)
+            .map_err(|err| IdlcError::template(format!("decode gofmt output: {err}")))
+    } else {
+        Err(IdlcError::template(format!(
+            "gofmt failed: {}",
+            String::from_utf8_lossy(&output.stderr).trim()
+        )))
+    }
 }

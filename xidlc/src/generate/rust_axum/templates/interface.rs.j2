@@ -13,7 +13,7 @@ pub trait {{ ident }} {
         {% endif %}
         {% if method.deprecated -%}
         #[deprecated{% if method.deprecated_note %}(note = "{{ method.deprecated_note }}"){% endif %}]
-        {% endif %}
+        {%- endif %}
         async fn {{ method.name }}(
         &self,
         req: xidl_rust_axum::Request<{{ method.request_payload_ty }}>
@@ -139,6 +139,7 @@ pub trait {{ ident }} {
         }
 
         {% for method in methods %}
+            #[allow(clippy::let_and_return, clippy::needless_return)]
             async fn {{ method.name }}(
             ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
             headers: ::xidl_rust_axum::axum::http::HeaderMap{% if method.has_bearer_auth %},
@@ -459,27 +460,27 @@ pub trait {{ ident }} {
                                     {% endif %}
                                 {% endfor %}
                             {% endif %}
-                            let mut resp = {
-                                {% if method.is_server_stream %}
-                                    xidl_rust_axum::stream::sse_response(resp_value)
-                                {% else %}
-                                    {% if method.response_is_empty %}
-                                        let _ = resp_value;
-                                        ::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT)
-                                    {% else %}
-                                        let body = xidl_rust_axum::SerializeFactory::new("{{ method.response_content_type }}")
-                                            .to_vec(&resp_value)?;
-                                        ::xidl_rust_axum::axum::response::Response::builder()
-                                            .status(::xidl_rust_axum::axum::http::StatusCode::OK)
-                                            .header(
-                                                ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                                                "{{ method.response_content_type }}",
-                                            )
-                                            .body(::xidl_rust_axum::axum::body::Body::from(body))
-                                            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?
-                                    {% endif %}
-                                {% endif %}
-                            };
+                            let mut resp = {% if method.is_server_stream %}
+                                xidl_rust_axum::stream::sse_response(resp_value)
+                            {% elif method.response_is_empty %}
+                                {
+                                    resp_value;
+                                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT)
+                                }
+                            {% else %}
+                                {
+                                    let body = xidl_rust_axum::SerializeFactory::new("{{ method.response_content_type }}")
+                                        .to_vec(&resp_value)?;
+                                    ::xidl_rust_axum::axum::response::Response::builder()
+                                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                                        .header(
+                                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                                            "{{ method.response_content_type }}",
+                                        )
+                                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                                        .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?
+                                }
+                            {% endif %};
                             {% if method.response_header_params | length > 0 %}
                                 {% for param in method.response_header_params %}
                                     let header_name = ::xidl_rust_axum::axum::http::HeaderName::from_bytes(
@@ -617,7 +618,7 @@ pub trait {{ ident }} {
                 let mut req = self
                     .client
                     .http()
-                    .request(xidl_rust_axum::reqwest::Method::{{ method.reqwest_method }}, &self.client.url(&path))
+                    .request(xidl_rust_axum::reqwest::Method::{{ method.reqwest_method }}, self.client.url(&path))
                     .build()
                     .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 req.headers_mut().insert(
@@ -865,7 +866,7 @@ pub trait {{ ident }} {
                             Err(xidl_rust_axum::Error::from_http_response(status, body))
                         }
                     });
-                    return Ok(xidl_rust_axum::stream::Writer::new(tx, response_task));
+                    Ok(xidl_rust_axum::stream::Writer::new(tx, response_task))
                 {% elif method.body_params | length > 0 %}
                     {% if method.request_body_flatten %}
                         let body = {{ method.body_params[0].name }};

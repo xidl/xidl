@@ -6,10 +6,10 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-http"
 	"net/http"
 	"net/url"
 	"strings"
-	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-http"
 )
 
 var (
@@ -35,13 +35,13 @@ func NewHelloWorldHandler(svc HelloWorldService) http.Handler {
 			return
 		}
 
-	req := &HelloWorldSayHelloRequest{}
-	body := HelloWorldSayHelloRequestBody{}
-	if err := xidlgohttp.DecodeBody(r, "application/json", &body); err != nil {
-		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
-		return
-	}
-	req.Name = body.Name
+		req := &HelloWorldSayHelloRequest{}
+		body := HelloWorldSayHelloRequestBody{}
+		if err := xidlgohttp.DecodeBody(r, "application/json", &body); err != nil {
+			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			return
+		}
+		req.Name = body.Name
 		if _, err := svc.SayHello(r.Context(), req); err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
@@ -52,9 +52,9 @@ func NewHelloWorldHandler(svc HelloWorldService) http.Handler {
 }
 
 type HelloWorldClient struct {
-	baseURL string
+	baseURL    string
 	httpClient *http.Client
-	auth xidlgohttp.ClientAuth
+	auth       xidlgohttp.ClientAuth
 }
 
 func NewHelloWorldClient(baseURL string, httpClient *http.Client, auth xidlgohttp.ClientAuth) *HelloWorldClient {
@@ -70,17 +70,27 @@ func (c *HelloWorldClient) SayHello(ctx context.Context, req *HelloWorldSayHello
 		Name: req.Name,
 	}
 	var requestBody bytes.Buffer
-	if err := xidlgohttp.MustCodecForMime("application/json").Encode(&requestBody, body); err != nil { return nil, err }
+	if err := xidlgohttp.MustCodecForMime("application/json").Encode(&requestBody, body); err != nil {
+		return nil, err
+	}
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", requestURL, &requestBody)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	httpReq.Header.Set("Content-Type", "application/json")
 	httpReq.Header.Set("Accept", "application/json")
 	resp, err := c.httpClient.Do(httpReq)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 { return nil, fmt.Errorf("http %d", resp.StatusCode) }
+	if resp.StatusCode >= 400 {
+		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	}
 	decoded, err := decodeHelloWorldSayHelloResponse(resp)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	return &decoded, nil
 }
 
@@ -96,8 +106,7 @@ type HelloWorldSayHelloResponse struct {
 }
 
 func HelloWorldSayHelloSecurityRequirements() []xidlgohttp.SecurityRequirement {
-	return []xidlgohttp.SecurityRequirement{
-	}
+	return []xidlgohttp.SecurityRequirement{}
 }
 
 func HelloWorldSayHelloDeprecated() xidlgohttp.DeprecatedInfo {

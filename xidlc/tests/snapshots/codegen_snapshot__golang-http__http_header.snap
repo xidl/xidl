@@ -32,10 +32,10 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-http"
 	"net/http"
 	"net/url"
 	"strings"
-	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-http"
 )
 
 var (
@@ -58,46 +58,54 @@ func NewTestHeaderServiceHandler(svc TestHeaderServiceService) http.Handler {
 			return
 		}
 
-	req := &TestHeaderServiceGetUserRequest{}
+		req := &TestHeaderServiceGetUserRequest{}
 
- 	if raw, err := xidlgohttp.PathString(r, "id"); err == nil {
- 		if value, parseErr := xidlgohttp.ParseUint32(raw); parseErr == nil { req.Id = value } else {
- 			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", parseErr.Error())
- 			return
- 		}
- 	} else {
- 		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
- 		return
- 	}
+		if raw, err := xidlgohttp.PathString(r, "id"); err == nil {
+			if value, parseErr := xidlgohttp.ParseUint32(raw); parseErr == nil {
+				req.Id = value
+			} else {
+				xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", parseErr.Error())
+				return
+			}
+		} else {
+			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			return
+		}
 
- 	if value, err := xidlgohttp.HeaderString(r.Header, "X-Req-Id"); err == nil { req.ReqId = value } else {
- 		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
- 		return
- 	}
+		if value, err := xidlgohttp.HeaderString(r.Header, "X-Req-Id"); err == nil {
+			req.ReqId = value
+		} else {
+			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			return
+		}
 
- 	if raw, err := xidlgohttp.HeaderString(r.Header, "X-Age"); err == nil {
- 		if value, parseErr := xidlgohttp.ParseUint32(raw); parseErr == nil { req.Age = value } else {
- 			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", parseErr.Error())
- 			return
- 		}
- 	} else {
- 		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
- 		return
- 	}
+		if raw, err := xidlgohttp.HeaderString(r.Header, "X-Age"); err == nil {
+			if value, parseErr := xidlgohttp.ParseUint32(raw); parseErr == nil {
+				req.Age = value
+			} else {
+				xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", parseErr.Error())
+				return
+			}
+		} else {
+			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			return
+		}
 
- 	if value, err := xidlgohttp.CookieString(r, "sid"); err == nil { req.SessionId = value } else {
- 		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
- 		return
- 	}
+		if value, err := xidlgohttp.CookieString(r, "sid"); err == nil {
+			req.SessionId = value
+		} else {
+			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			return
+		}
 		resp, err := svc.GetUser(r.Context(), req)
 		if err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
 
-	if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
-		xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
-	}
+		if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
+			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+		}
 	})
 	mux.HandleFunc("POST /v1/headers", func(w http.ResponseWriter, r *http.Request) {
 		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
@@ -109,23 +117,27 @@ func NewTestHeaderServiceHandler(svc TestHeaderServiceService) http.Handler {
 			return
 		}
 
-	req := &TestHeaderServiceCreateUserRequest{}
+		req := &TestHeaderServiceCreateUserRequest{}
 
- 	if value, err := xidlgohttp.HeaderString(r.Header, "X-Token"); err == nil { req.Token = value } else {
- 		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
- 		return
- 	}
+		if value, err := xidlgohttp.HeaderString(r.Header, "X-Token"); err == nil {
+			req.Token = value
+		} else {
+			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			return
+		}
 
- 	if value, err := xidlgohttp.CookieString(r, "sid"); err == nil { req.SessionId = value } else {
- 		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
- 		return
- 	}
-	body := TestHeaderServiceCreateUserRequestBody{}
-	if err := xidlgohttp.DecodeBody(r, "application/json", &body); err != nil {
-		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
-		return
-	}
-	req.Name = body.Name
+		if value, err := xidlgohttp.CookieString(r, "sid"); err == nil {
+			req.SessionId = value
+		} else {
+			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			return
+		}
+		body := TestHeaderServiceCreateUserRequestBody{}
+		if err := xidlgohttp.DecodeBody(r, "application/json", &body); err != nil {
+			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			return
+		}
+		req.Name = body.Name
 		if _, err := svc.CreateUser(r.Context(), req); err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
@@ -136,9 +148,9 @@ func NewTestHeaderServiceHandler(svc TestHeaderServiceService) http.Handler {
 }
 
 type TestHeaderServiceClient struct {
-	baseURL string
+	baseURL    string
 	httpClient *http.Client
-	auth xidlgohttp.ClientAuth
+	auth       xidlgohttp.ClientAuth
 }
 
 func NewTestHeaderServiceClient(baseURL string, httpClient *http.Client, auth xidlgohttp.ClientAuth) *TestHeaderServiceClient {
@@ -151,20 +163,28 @@ func NewTestHeaderServiceClient(baseURL string, httpClient *http.Client, auth xi
 func (c *TestHeaderServiceClient) GetUser(ctx context.Context, req *TestHeaderServiceGetUserRequest) (*TestHeaderServiceGetUserResponse, error) {
 	requestURL := c.baseURL + formatTestHeaderServiceGetUserPath(req)
 	httpReq, err := http.NewRequestWithContext(ctx, "GET", requestURL, nil)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	httpReq.Header.Set("Accept", "application/json")
 
- 	httpReq.Header.Set("X-Req-Id", req.ReqId)
+	httpReq.Header.Set("X-Req-Id", req.ReqId)
 
- 	httpReq.Header.Set("X-Age", xidlgohttp.FormatUint32(req.Age))
+	httpReq.Header.Set("X-Age", xidlgohttp.FormatUint32(req.Age))
 
- 	httpReq.AddCookie(&http.Cookie{Name: "sid", Value: req.SessionId})
+	httpReq.AddCookie(&http.Cookie{Name: "sid", Value: req.SessionId})
 	resp, err := c.httpClient.Do(httpReq)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 { return nil, fmt.Errorf("http %d", resp.StatusCode) }
+	if resp.StatusCode >= 400 {
+		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	}
 	decoded, err := decodeTestHeaderServiceGetUserResponse(resp)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	return &decoded, nil
 }
 
@@ -174,31 +194,41 @@ func (c *TestHeaderServiceClient) CreateUser(ctx context.Context, req *TestHeade
 		Name: req.Name,
 	}
 	var requestBody bytes.Buffer
-	if err := xidlgohttp.MustCodecForMime("application/json").Encode(&requestBody, body); err != nil { return nil, err }
+	if err := xidlgohttp.MustCodecForMime("application/json").Encode(&requestBody, body); err != nil {
+		return nil, err
+	}
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", requestURL, &requestBody)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	httpReq.Header.Set("Content-Type", "application/json")
 	httpReq.Header.Set("Accept", "application/json")
 
- 	httpReq.Header.Set("X-Token", req.Token)
+	httpReq.Header.Set("X-Token", req.Token)
 
- 	httpReq.AddCookie(&http.Cookie{Name: "sid", Value: req.SessionId})
+	httpReq.AddCookie(&http.Cookie{Name: "sid", Value: req.SessionId})
 	resp, err := c.httpClient.Do(httpReq)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 { return nil, fmt.Errorf("http %d", resp.StatusCode) }
+	if resp.StatusCode >= 400 {
+		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	}
 	decoded, err := decodeTestHeaderServiceCreateUserResponse(resp)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	return &decoded, nil
 }
 
 type TestHeaderServiceGetUserRequest struct {
-	Id uint32 `json:"id" form:"id"`
-	ReqId string `json:"req_id" form:"req_id"`
-	Flags []string `json:"flags" form:"flags"`
-	Age uint32 `json:"age" form:"age"`
-	SessionId string `json:"session_id" form:"session_id"`
-	Prefs []string `json:"prefs" form:"prefs"`
+	Id        uint32   `json:"id" form:"id"`
+	ReqId     string   `json:"req_id" form:"req_id"`
+	Flags     []string `json:"flags" form:"flags"`
+	Age       uint32   `json:"age" form:"age"`
+	SessionId string   `json:"session_id" form:"session_id"`
+	Prefs     []string `json:"prefs" form:"prefs"`
 }
 
 type TestHeaderServiceGetUserResponse struct {
@@ -206,8 +236,7 @@ type TestHeaderServiceGetUserResponse struct {
 }
 
 func TestHeaderServiceGetUserSecurityRequirements() []xidlgohttp.SecurityRequirement {
-	return []xidlgohttp.SecurityRequirement{
-	}
+	return []xidlgohttp.SecurityRequirement{}
 }
 
 func TestHeaderServiceGetUserDeprecated() xidlgohttp.DeprecatedInfo {
@@ -225,14 +254,17 @@ func formatTestHeaderServiceGetUserPath(req *TestHeaderServiceGetUserRequest) st
 func decodeTestHeaderServiceGetUserResponse(resp *http.Response) (TestHeaderServiceGetUserResponse, error) {
 	out := TestHeaderServiceGetUserResponse{}
 	var body User
-	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil { return out, err }
+	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil {
+		return out, err
+	}
 	out.Return = body
 	return out, nil
 }
+
 type TestHeaderServiceCreateUserRequest struct {
-	Token string `json:"token" form:"token"`
+	Token     string `json:"token" form:"token"`
 	SessionId string `json:"session_id" form:"session_id"`
-	Name string `json:"name" form:"name"`
+	Name      string `json:"name" form:"name"`
 }
 
 type TestHeaderServiceCreateUserRequestBody struct {
@@ -243,8 +275,7 @@ type TestHeaderServiceCreateUserResponse struct {
 }
 
 func TestHeaderServiceCreateUserSecurityRequirements() []xidlgohttp.SecurityRequirement {
-	return []xidlgohttp.SecurityRequirement{
-	}
+	return []xidlgohttp.SecurityRequirement{}
 }
 
 func TestHeaderServiceCreateUserDeprecated() xidlgohttp.DeprecatedInfo {

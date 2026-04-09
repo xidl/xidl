@@ -70,14 +70,16 @@ impl<'a> Formatter<'a> {
             }
             self.append_gap(
                 &mut output,
-                source,
                 gap,
-                prev_end,
-                token,
-                prev_token,
-                prev_was_comment,
-                indent_level,
-                actions,
+                GapContext {
+                    source,
+                    prev_end,
+                    token,
+                    prev_token,
+                    prev_was_comment,
+                    indent_level,
+                    actions,
+                },
             );
             output.push_str(token_text);
             prev_token = Some(*token);
@@ -95,18 +97,16 @@ impl<'a> Formatter<'a> {
         }
     }
 
-    fn append_gap(
-        &self,
-        output: &mut String,
-        source: &str,
-        gap: &str,
-        prev_end: usize,
-        token: &Token,
-        prev_token: Option<Token>,
-        prev_was_comment: bool,
-        indent_level: i32,
-        actions: &QueryActions,
-    ) {
+    fn append_gap(&self, output: &mut String, gap: &str, ctx: GapContext<'_>) {
+        let GapContext {
+            source,
+            prev_end,
+            token,
+            prev_token,
+            prev_was_comment,
+            indent_level,
+            actions,
+        } = ctx;
         if prev_was_comment && gap.chars().all(|c| c.is_whitespace()) {
             return;
         }
@@ -162,6 +162,16 @@ impl<'a> Formatter<'a> {
             output.push_str(tail);
         }
     }
+}
+
+struct GapContext<'a> {
+    source: &'a str,
+    prev_end: usize,
+    token: &'a Token,
+    prev_token: Option<Token>,
+    prev_was_comment: bool,
+    indent_level: i32,
+    actions: &'a QueryActions,
 }
 
 fn apply_indent(current: i32, delta: Option<&i32>) -> i32 {

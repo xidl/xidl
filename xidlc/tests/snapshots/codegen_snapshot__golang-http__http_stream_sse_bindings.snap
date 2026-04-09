@@ -19,10 +19,10 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-http"
 	"net/http"
 	"net/url"
 	"strings"
-	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-http"
 )
 
 var (
@@ -44,27 +44,33 @@ func NewHttpStreamSseBindingsServiceHandler(svc HttpStreamSseBindingsServiceServ
 			return
 		}
 
-	req := &HttpStreamSseBindingsServiceTailFileRequest{}
+		req := &HttpStreamSseBindingsServiceTailFileRequest{}
 
- 	if value, err := xidlgohttp.PathString(r, "path"); err == nil { req.Path = value } else {
- 		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
- 		return
- 	}
+		if value, err := xidlgohttp.PathString(r, "path"); err == nil {
+			req.Path = value
+		} else {
+			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			return
+		}
 
- 	if value, err := xidlgohttp.QueryString(r.URL.Query(), "lang"); err == nil { req.Lang = value } else {
- 		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
- 		return
- 	}
+		if value, err := xidlgohttp.QueryString(r.URL.Query(), "lang"); err == nil {
+			req.Lang = value
+		} else {
+			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			return
+		}
 
- 	if raw, err := xidlgohttp.QueryString(r.URL.Query(), "follow"); err == nil {
- 		if value, parseErr := xidlgohttp.ParseBool(raw); parseErr == nil { req.Follow = value } else {
- 			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", parseErr.Error())
- 			return
- 		}
- 	} else {
- 		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
- 		return
- 	}
+		if raw, err := xidlgohttp.QueryString(r.URL.Query(), "follow"); err == nil {
+			if value, parseErr := xidlgohttp.ParseBool(raw); parseErr == nil {
+				req.Follow = value
+			} else {
+				xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", parseErr.Error())
+				return
+			}
+		} else {
+			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			return
+		}
 		stream := xidlgohttp.NewSSEServerStreamWriter[[]string](w)
 		if err := svc.TailFile(r.Context(), req, stream); err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
@@ -76,9 +82,9 @@ func NewHttpStreamSseBindingsServiceHandler(svc HttpStreamSseBindingsServiceServ
 }
 
 type HttpStreamSseBindingsServiceClient struct {
-	baseURL string
+	baseURL    string
 	httpClient *http.Client
-	auth xidlgohttp.ClientAuth
+	auth       xidlgohttp.ClientAuth
 }
 
 func NewHttpStreamSseBindingsServiceClient(baseURL string, httpClient *http.Client, auth xidlgohttp.ClientAuth) *HttpStreamSseBindingsServiceClient {
@@ -92,25 +98,32 @@ func (c *HttpStreamSseBindingsServiceClient) TailFile(ctx context.Context, req *
 	requestURL := c.baseURL + formatHttpStreamSseBindingsServiceTailFilePath(req)
 	query := url.Values{}
 
- 	query.Set("lang", req.Lang)
+	query.Set("lang", req.Lang)
 
- 	query.Set("follow", xidlgohttp.FormatBool(req.Follow))
+	query.Set("follow", xidlgohttp.FormatBool(req.Follow))
 	if encoded := query.Encode(); encoded != "" {
 		requestURL += "?" + encoded
 	}
 	httpReq, err := http.NewRequestWithContext(ctx, "GET", requestURL, nil)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	httpReq.Header.Set("Accept", "text/event-stream")
 	resp, err := c.httpClient.Do(httpReq)
-	if err != nil { return nil, err }
-	if resp.StatusCode >= 400 { defer resp.Body.Close(); return nil, fmt.Errorf("http %d", resp.StatusCode) }
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode >= 400 {
+		defer resp.Body.Close()
+		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	}
 	return xidlgohttp.NewSSEStreamReader[[]string](resp.Body), nil
 }
 
 type HttpStreamSseBindingsServiceTailFileRequest struct {
-	Path string `json:"path" form:"path"`
-	Lang string `json:"lang" form:"lang"`
-	Follow bool `json:"follow" form:"follow"`
+	Path   string `json:"path" form:"path"`
+	Lang   string `json:"lang" form:"lang"`
+	Follow bool   `json:"follow" form:"follow"`
 }
 
 type HttpStreamSseBindingsServiceTailFileResponse struct {
@@ -118,8 +131,7 @@ type HttpStreamSseBindingsServiceTailFileResponse struct {
 }
 
 func HttpStreamSseBindingsServiceTailFileSecurityRequirements() []xidlgohttp.SecurityRequirement {
-	return []xidlgohttp.SecurityRequirement{
-	}
+	return []xidlgohttp.SecurityRequirement{}
 }
 
 func HttpStreamSseBindingsServiceTailFileDeprecated() xidlgohttp.DeprecatedInfo {
@@ -137,7 +149,9 @@ func formatHttpStreamSseBindingsServiceTailFilePath(req *HttpStreamSseBindingsSe
 func decodeHttpStreamSseBindingsServiceTailFileResponse(resp *http.Response) (HttpStreamSseBindingsServiceTailFileResponse, error) {
 	out := HttpStreamSseBindingsServiceTailFileResponse{}
 	var body []string
-	if err := xidlgohttp.MustCodecForMime("text/event-stream").Decode(resp.Body, &body); err != nil { return out, err }
+	if err := xidlgohttp.MustCodecForMime("text/event-stream").Decode(resp.Body, &body); err != nil {
+		return out, err
+	}
 	out.Return = body
 	return out, nil
 }

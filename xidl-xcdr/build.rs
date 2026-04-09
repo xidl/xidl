@@ -4,6 +4,9 @@ fn main() {
         use std::env;
         use std::fs;
         use std::path::PathBuf;
+        if env::var_os("CLIPPY_ARGS").is_some() {
+            return;
+        }
         let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").expect("manifest dir"));
         let include_dir = manifest_dir.join("include");
         fs::create_dir_all(&include_dir).expect("create include dir");

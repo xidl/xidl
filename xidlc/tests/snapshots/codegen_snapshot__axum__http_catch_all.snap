@@ -79,6 +79,7 @@ T:HttpCatchAllService+Send+Sync+'static,
         .with_state(svc)
     }
 
+    #[allow(clippy::let_and_return,clippy::needless_return)]
     async fn read_file(
     ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
     headers: ::xidl_rust_axum::axum::http::HeaderMap,
@@ -110,7 +111,8 @@ T:HttpCatchAllService+Send+Sync+'static,
                     )
                     .body(::xidl_rust_axum::axum::body::Body::from(body))
                     .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?
-                };
+                }
+                ;
                 resp
             }
             Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
@@ -119,6 +121,7 @@ T:HttpCatchAllService+Send+Sync+'static,
         Ok(resp)
     }
 
+    #[allow(clippy::let_and_return,clippy::needless_return)]
     async fn read_asset(
     ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
     headers: ::xidl_rust_axum::axum::http::HeaderMap,
@@ -157,7 +160,8 @@ T:HttpCatchAllService+Send+Sync+'static,
                     )
                     .body(::xidl_rust_axum::axum::body::Body::from(body))
                     .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?
-                };
+                }
+                ;
                 resp
             }
             Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
@@ -232,7 +236,7 @@ impl HttpCatchAllServiceClient{
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,&self.client.url(&path))
+        .request(xidl_rust_axum::reqwest::Method::GET,self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(
@@ -267,7 +271,7 @@ impl HttpCatchAllServiceClient{
         let mut req = self
         .client
         .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,&self.client.url(&path))
+        .request(xidl_rust_axum::reqwest::Method::GET,self.client.url(&path))
         .build()
         .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
         req.headers_mut().insert(

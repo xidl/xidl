@@ -13,10 +13,10 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-http"
 	"net/http"
 	"net/url"
 	"strings"
-	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-http"
 )
 
 var (
@@ -45,28 +45,32 @@ func NewReportApiHandler(svc ReportApiService) http.Handler {
 		}
 		r = r.WithContext(ctx)
 
-	req := &ReportApiGetReportRequest{}
+		req := &ReportApiGetReportRequest{}
 
- 	if value, err := xidlgohttp.PathString(r, "id"); err == nil { req.Id = value } else {
- 		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
- 		return
- 	}
+		if value, err := xidlgohttp.PathString(r, "id"); err == nil {
+			req.Id = value
+		} else {
+			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			return
+		}
 
- 	req.Lang = xidlgohttp.QueryOptionalString(xidlgohttp.QueryString(r.URL.Query(), "lang"))
+		req.Lang = xidlgohttp.QueryOptionalString(xidlgohttp.QueryString(r.URL.Query(), "lang"))
 
- 	if value, err := xidlgohttp.HeaderString(r.Header, "X-Trace-Id"); err == nil { req.TraceId = value } else {
- 		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
- 		return
- 	}
+		if value, err := xidlgohttp.HeaderString(r.Header, "X-Trace-Id"); err == nil {
+			req.TraceId = value
+		} else {
+			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			return
+		}
 		resp, err := svc.GetReport(r.Context(), req)
 		if err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
 		}
 
-	if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
-		xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
-	}
+		if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
+			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+		}
 	})
 	mux.HandleFunc("GET /reports/{id}/events", func(w http.ResponseWriter, r *http.Request) {
 		if err := xidlgohttp.RequireAccept(r, "text/event-stream"); err != nil {
@@ -80,12 +84,14 @@ func NewReportApiHandler(svc ReportApiService) http.Handler {
 		}
 		r = r.WithContext(ctx)
 
-	req := &ReportApiWatchReportRequest{}
+		req := &ReportApiWatchReportRequest{}
 
- 	if value, err := xidlgohttp.PathString(r, "id"); err == nil { req.Id = value } else {
- 		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
- 		return
- 	}
+		if value, err := xidlgohttp.PathString(r, "id"); err == nil {
+			req.Id = value
+		} else {
+			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			return
+		}
 		stream := xidlgohttp.NewSSEServerStreamWriter[string](w)
 		if err := svc.WatchReport(r.Context(), req, stream); err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
@@ -97,9 +103,9 @@ func NewReportApiHandler(svc ReportApiService) http.Handler {
 }
 
 type ReportApiClient struct {
-	baseURL string
+	baseURL    string
 	httpClient *http.Client
-	auth xidlgohttp.ClientAuth
+	auth       xidlgohttp.ClientAuth
 }
 
 func NewReportApiClient(baseURL string, httpClient *http.Client, auth xidlgohttp.ClientAuth) *ReportApiClient {
@@ -113,40 +119,55 @@ func (c *ReportApiClient) GetReport(ctx context.Context, req *ReportApiGetReport
 	requestURL := c.baseURL + formatReportApiGetReportPath(req)
 	query := url.Values{}
 
- 	query.Set("lang", req.Lang)
+	query.Set("lang", req.Lang)
 	if encoded := query.Encode(); encoded != "" {
 		requestURL += "?" + encoded
 	}
 	httpReq, err := http.NewRequestWithContext(ctx, "GET", requestURL, nil)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	httpReq.Header.Set("Accept", "application/json")
 
- 	httpReq.Header.Set("X-Trace-Id", req.TraceId)
+	httpReq.Header.Set("X-Trace-Id", req.TraceId)
 	xidlgohttp.ApplyClientAuth(httpReq, c.auth, ReportApiGetReportSecurityRequirements())
 	resp, err := c.httpClient.Do(httpReq)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 { return nil, fmt.Errorf("http %d", resp.StatusCode) }
+	if resp.StatusCode >= 400 {
+		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	}
 	decoded, err := decodeReportApiGetReportResponse(resp)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	return &decoded, nil
 }
 
 func (c *ReportApiClient) WatchReport(ctx context.Context, req *ReportApiWatchReportRequest) (*xidlgohttp.SSEStreamReader[string], error) {
 	requestURL := c.baseURL + formatReportApiWatchReportPath(req)
 	httpReq, err := http.NewRequestWithContext(ctx, "GET", requestURL, nil)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	httpReq.Header.Set("Accept", "text/event-stream")
 	xidlgohttp.ApplyClientAuth(httpReq, c.auth, ReportApiWatchReportSecurityRequirements())
 	resp, err := c.httpClient.Do(httpReq)
-	if err != nil { return nil, err }
-	if resp.StatusCode >= 400 { defer resp.Body.Close(); return nil, fmt.Errorf("http %d", resp.StatusCode) }
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode >= 400 {
+		defer resp.Body.Close()
+		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	}
 	return xidlgohttp.NewSSEStreamReader[string](resp.Body), nil
 }
 
 type ReportApiGetReportRequest struct {
-	Id string `json:"id" form:"id"`
-	Lang string `json:"lang" form:"lang"`
+	Id      string `json:"id" form:"id"`
+	Lang    string `json:"lang" form:"lang"`
 	TraceId string `json:"trace_id" form:"trace_id"`
 }
 
@@ -175,10 +196,13 @@ func formatReportApiGetReportPath(req *ReportApiGetReportRequest) string {
 func decodeReportApiGetReportResponse(resp *http.Response) (ReportApiGetReportResponse, error) {
 	out := ReportApiGetReportResponse{}
 	var body string
-	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil { return out, err }
+	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil {
+		return out, err
+	}
 	out.Return = body
 	return out, nil
 }
+
 type ReportApiWatchReportRequest struct {
 	Id string `json:"id" form:"id"`
 }
@@ -208,7 +232,9 @@ func formatReportApiWatchReportPath(req *ReportApiWatchReportRequest) string {
 func decodeReportApiWatchReportResponse(resp *http.Response) (ReportApiWatchReportResponse, error) {
 	out := ReportApiWatchReportResponse{}
 	var body string
-	if err := xidlgohttp.MustCodecForMime("text/event-stream").Decode(resp.Body, &body); err != nil { return out, err }
+	if err := xidlgohttp.MustCodecForMime("text/event-stream").Decode(resp.Body, &body); err != nil {
+		return out, err
+	}
 	out.Return = body
 	return out, nil
 }

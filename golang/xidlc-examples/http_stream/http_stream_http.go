@@ -6,10 +6,10 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-http"
 	"net/http"
 	"net/url"
 	"strings"
-	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-http"
 )
 
 var (
@@ -38,12 +38,14 @@ func NewHttpStreamApiHandler(svc HttpStreamApiService) http.Handler {
 		}
 		r = r.WithContext(ctx)
 
-	req := &HttpStreamApiAlertsRequest{}
+		req := &HttpStreamApiAlertsRequest{}
 
- 	if value, err := xidlgohttp.PathString(r, "district"); err == nil { req.District = value } else {
- 		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
- 		return
- 	}
+		if value, err := xidlgohttp.PathString(r, "district"); err == nil {
+			req.District = value
+		} else {
+			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+			return
+		}
 		stream := xidlgohttp.NewSSEServerStreamWriter[string](w)
 		if err := svc.Alerts(r.Context(), req, stream); err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
@@ -74,17 +76,17 @@ func NewHttpStreamApiHandler(svc HttpStreamApiService) http.Handler {
 			return
 		}
 
-	if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
-		xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
-	}
+		if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
+			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+		}
 	})
 	return mux
 }
 
 type HttpStreamApiClient struct {
-	baseURL string
+	baseURL    string
 	httpClient *http.Client
-	auth xidlgohttp.ClientAuth
+	auth       xidlgohttp.ClientAuth
 }
 
 func NewHttpStreamApiClient(baseURL string, httpClient *http.Client, auth xidlgohttp.ClientAuth) *HttpStreamApiClient {
@@ -97,23 +99,35 @@ func NewHttpStreamApiClient(baseURL string, httpClient *http.Client, auth xidlgo
 func (c *HttpStreamApiClient) Alerts(ctx context.Context, req *HttpStreamApiAlertsRequest) (*xidlgohttp.SSEStreamReader[string], error) {
 	requestURL := c.baseURL + formatHttpStreamApiAlertsPath(req)
 	httpReq, err := http.NewRequestWithContext(ctx, "GET", requestURL, nil)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	httpReq.Header.Set("Accept", "text/event-stream")
 	xidlgohttp.ApplyClientAuth(httpReq, c.auth, HttpStreamApiAlertsSecurityRequirements())
 	resp, err := c.httpClient.Do(httpReq)
-	if err != nil { return nil, err }
-	if resp.StatusCode >= 400 { defer resp.Body.Close(); return nil, fmt.Errorf("http %d", resp.StatusCode) }
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode >= 400 {
+		defer resp.Body.Close()
+		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	}
 	return xidlgohttp.NewSSEStreamReader[string](resp.Body), nil
 }
 
 func (c *HttpStreamApiClient) UploadAsset(ctx context.Context) (*xidlgohttp.ClientStreamWriter[HttpStreamApiUploadAssetRequest, HttpStreamApiUploadAssetResponse], error) {
 	requestURL := c.baseURL + "/upload"
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", requestURL, nil)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	httpReq.Header.Set("Accept", "application/json")
 	xidlgohttp.ApplyClientAuth(httpReq, c.auth, HttpStreamApiUploadAssetSecurityRequirements())
 	stream := xidlgohttp.NewClientStreamWriter[HttpStreamApiUploadAssetRequest, HttpStreamApiUploadAssetResponse](ctx, c.httpClient, httpReq, func(resp *http.Response) (HttpStreamApiUploadAssetResponse, error) {
-		if resp.StatusCode >= 400 { var zero HttpStreamApiUploadAssetResponse; return zero, fmt.Errorf("http %d", resp.StatusCode) }
+		if resp.StatusCode >= 400 {
+			var zero HttpStreamApiUploadAssetResponse
+			return zero, fmt.Errorf("http %d", resp.StatusCode)
+		}
 		decoded, err := decodeHttpStreamApiUploadAssetResponse(resp)
 		return decoded, err
 	})
@@ -149,13 +163,16 @@ func formatHttpStreamApiAlertsPath(req *HttpStreamApiAlertsRequest) string {
 func decodeHttpStreamApiAlertsResponse(resp *http.Response) (HttpStreamApiAlertsResponse, error) {
 	out := HttpStreamApiAlertsResponse{}
 	var body string
-	if err := xidlgohttp.MustCodecForMime("text/event-stream").Decode(resp.Body, &body); err != nil { return out, err }
+	if err := xidlgohttp.MustCodecForMime("text/event-stream").Decode(resp.Body, &body); err != nil {
+		return out, err
+	}
 	out.Return = body
 	return out, nil
 }
+
 type HttpStreamApiUploadAssetRequest struct {
-	AssetId string `json:"asset_id" form:"asset_id"`
-	Chunk []uint8 `json:"chunk" form:"chunk"`
+	AssetId string  `json:"asset_id" form:"asset_id"`
+	Chunk   []uint8 `json:"chunk" form:"chunk"`
 }
 
 type HttpStreamApiUploadAssetResponse struct {
@@ -181,7 +198,9 @@ func formatHttpStreamApiUploadAssetPath(req *HttpStreamApiUploadAssetRequest) st
 func decodeHttpStreamApiUploadAssetResponse(resp *http.Response) (HttpStreamApiUploadAssetResponse, error) {
 	out := HttpStreamApiUploadAssetResponse{}
 	var body string
-	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil { return out, err }
+	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil {
+		return out, err
+	}
 	out.Return = body
 	return out, nil
 }

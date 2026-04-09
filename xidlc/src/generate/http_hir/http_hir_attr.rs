@@ -120,27 +120,27 @@ fn attribute_get_operation(
     security: Option<HttpSecurityProfile>,
     deprecated: Option<DeprecatedInfo>,
 ) -> HttpOperation {
-    base_attribute_operation(
+    base_attribute_operation(AttributeOperationArgs {
         interface_name,
         module_path,
-        &format!("get_attribute_{raw_name}"),
-        HttpOperationSource::AttributeGet,
-        HttpMethod::Get,
-        vec![HttpRoute {
+        name: &format!("get_attribute_{raw_name}"),
+        source: HttpOperationSource::AttributeGet,
+        method: HttpMethod::Get,
+        routes: vec![HttpRoute {
             path: attribute_path(raw_name),
             path_params: Vec::new(),
             query_params: Vec::new(),
         }],
-        HttpStreamConfig {
+        stream: HttpStreamConfig {
             kind: None,
             codec: HttpStreamCodec::Ndjson,
         },
         security,
         deprecated,
-        Vec::new(),
-        Vec::new(),
-        Some(ty.clone()),
-    )
+        request_params: Vec::new(),
+        request_body_params: Vec::new(),
+        return_type: Some(ty.clone()),
+    })
 }
 
 fn attribute_set_operation(
@@ -160,27 +160,27 @@ fn attribute_set_operation(
         optional: false,
         flatten: false,
     };
-    base_attribute_operation(
+    base_attribute_operation(AttributeOperationArgs {
         interface_name,
         module_path,
-        &format!("set_attribute_{raw_name}"),
-        HttpOperationSource::AttributeSet,
-        HttpMethod::Post,
-        vec![HttpRoute {
+        name: &format!("set_attribute_{raw_name}"),
+        source: HttpOperationSource::AttributeSet,
+        method: HttpMethod::Post,
+        routes: vec![HttpRoute {
             path: attribute_path(raw_name),
             path_params: Vec::new(),
             query_params: Vec::new(),
         }],
-        HttpStreamConfig {
+        stream: HttpStreamConfig {
             kind: None,
             codec: HttpStreamCodec::Ndjson,
         },
         security,
         deprecated,
-        vec![value.clone()],
-        vec![value],
-        None,
-    )
+        request_params: vec![value.clone()],
+        request_body_params: vec![value],
+        return_type: None,
+    })
 }
 
 fn attribute_watch_operation(
@@ -191,13 +191,13 @@ fn attribute_watch_operation(
     security: Option<HttpSecurityProfile>,
     deprecated: Option<DeprecatedInfo>,
 ) -> HttpOperation {
-    base_attribute_operation(
+    base_attribute_operation(AttributeOperationArgs {
         interface_name,
         module_path,
-        &format!("watch_attribute_{raw_name}"),
-        HttpOperationSource::AttributeWatch,
-        HttpMethod::Get,
-        vec![HttpRoute {
+        name: &format!("watch_attribute_{raw_name}"),
+        source: HttpOperationSource::AttributeWatch,
+        method: HttpMethod::Get,
+        routes: vec![HttpRoute {
             path: default_path(
                 module_path,
                 interface_name,
@@ -206,32 +206,33 @@ fn attribute_watch_operation(
             path_params: Vec::new(),
             query_params: Vec::new(),
         }],
-        HttpStreamConfig {
+        stream: HttpStreamConfig {
             kind: Some(HttpStreamKind::Server),
             codec: HttpStreamCodec::Sse,
         },
         security,
         deprecated,
-        Vec::new(),
-        Vec::new(),
-        Some(ty.clone()),
-    )
+        request_params: Vec::new(),
+        request_body_params: Vec::new(),
+        return_type: Some(ty.clone()),
+    })
 }
 
-fn base_attribute_operation(
-    interface_name: &str,
-    module_path: &[String],
-    name: &str,
-    source: HttpOperationSource,
-    method: HttpMethod,
-    routes: Vec<HttpRoute>,
-    stream: HttpStreamConfig,
-    security: Option<HttpSecurityProfile>,
-    deprecated: Option<DeprecatedInfo>,
-    request_params: Vec<HttpParam>,
-    request_body_params: Vec<HttpParam>,
-    return_type: Option<hir::TypeSpec>,
-) -> HttpOperation {
+fn base_attribute_operation(args: AttributeOperationArgs<'_>) -> HttpOperation {
+    let AttributeOperationArgs {
+        interface_name,
+        module_path,
+        name,
+        source,
+        method,
+        routes,
+        stream,
+        security,
+        deprecated,
+        request_params,
+        request_body_params,
+        return_type,
+    } = args;
     HttpOperation {
         name: name.to_string(),
         operation_id: operation_id(module_path, interface_name, name),
@@ -256,4 +257,19 @@ fn base_attribute_operation(
         response_body_params: Vec::new(),
         return_type,
     }
+}
+
+struct AttributeOperationArgs<'a> {
+    interface_name: &'a str,
+    module_path: &'a [String],
+    name: &'a str,
+    source: HttpOperationSource,
+    method: HttpMethod,
+    routes: Vec<HttpRoute>,
+    stream: HttpStreamConfig,
+    security: Option<HttpSecurityProfile>,
+    deprecated: Option<DeprecatedInfo>,
+    request_params: Vec<HttpParam>,
+    request_body_params: Vec<HttpParam>,
+    return_type: Option<hir::TypeSpec>,
 }
