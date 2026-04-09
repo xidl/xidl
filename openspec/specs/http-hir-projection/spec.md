@@ -1,8 +1,12 @@
 # http-hir-projection Specification
 
 ## Purpose
-TBD - created by archiving change introduce-http-hir-layer. Update Purpose after archive.
+
+TBD - created by archiving change introduce-http-hir-layer. Update Purpose after
+archive.
+
 ## Requirements
+
 ### Requirement: HTTP Target Selection Uses HTTP HIR
 
 The system MUST select a dedicated `http-hir` projection stage for supported
@@ -117,4 +121,3 @@ RFC interpretation path.
   `openapi` output from the same HTTP fixtures
 - **THEN** the test suite MUST verify those renderers continue to produce output
   consistent with the shared `http-hir` semantics
-

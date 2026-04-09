@@ -2,7 +2,7 @@
 exclude: ^(tests/snapshots)|(xidl-xcdr/include/xidl_xcdr.h)|(.*.snap)|(xidlc-examples/api/.*.json)|(CHANGELOG.md)$
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.2.0
+    rev: v6.0.0
     hooks:
       - id: check-merge-conflict
       - id: end-of-file-fixer
@@ -15,7 +15,7 @@ repos:
         name: xidlc fmt
         language: system
         files: ^(xidlc-examples/api/|golang/xidlc-examples/api/|xidlc/src/jsonrpc/|xidl-typeobject/idl/).+\.idl$
-        entry: cargo run -p xidlc -- fmt --inplace --lang idl
+        entry: cargo run -p xidlc --features cli,fmt -- fmt --inplace --lang idl
       - id: rustfmt
         name: rustfmt
         language: system
@@ -33,14 +33,15 @@ repos:
         entry: taplo format
 
   - repo: https://github.com/biomejs/pre-commit
-    rev: "v0.4.0"
+    rev: "v2.4.10"
     hooks:
       - id: biome-check
-        additional_dependencies: ["@biomejs/biome@2.2.6"]
+        additional_dependencies: ["@biomejs/biome@2.4.10"]
         exclude: "CHANGELOG.md"
 
   - repo: https://github.com/bneijt/deno-pre-commit
-    rev: 2.2.5
+    rev: 2.7.9
     hooks:
       - id: deno-fmt
+        exclude: ^README\.md$
         exclude_types: ["javascript", "jsx", "ts", "tsx", "json"]

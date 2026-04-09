@@ -23,8 +23,8 @@ iwr -useb https://xidl.github.io/xidl/public/install.ps1 | iex
 The release installers resolve the latest stable GitHub Release and verify the
 asset digest when GitHub exposes one for that artifact. macOS installers use
 native `apple-darwin` archives, Linux installers prefer the static `musl`
-builds, and Windows prefers the newer MSVC zip assets while still tolerating
-the legacy GNU tarball on older releases.
+builds, and Windows prefers the newer MSVC zip assets while still tolerating the
+legacy GNU tarball on older releases.
 
 ### Cargo
 

@@ -4,8 +4,8 @@ This document describes the repository-level invariants of XIDL: the parts of
 the system that are expected to stay stable for a long time, even while
 features, RFCs, generator details, and APIs continue to evolve.
 
-It is not a changelog and it is not a complete implementation guide. It is a
-map of the architectural boundaries that contributors should preserve.
+It is not a changelog and it is not a complete implementation guide. It is a map
+of the architectural boundaries that contributors should preserve.
 
 ## Scope
 
@@ -242,15 +242,15 @@ Why it exists:
 
 - generators should depend on shared semantics, not on syntax accidents
 - one semantic interpretation should feed many targets
-- plugin IPC should carry a stable semantic contract rather than a
-  syntax-shaped tree
+- plugin IPC should carry a stable semantic contract rather than a syntax-shaped
+  tree
 - generator authors should not need to re-implement parsing, include handling,
   pragma interpretation, or normalization
 
 If `hir` did not exist, every generator would need to understand parser-era
-structures such as includes, raw pragma text, and syntax-specific variants.
-That would duplicate logic, increase drift, and make the plugin contract much
-less stable.
+structures such as includes, raw pragma text, and syntax-specific variants. That
+would duplicate logic, increase drift, and make the plugin contract much less
+stable.
 
 ### `http_hir`
 
@@ -300,8 +300,8 @@ The three-layer split lets XIDL isolate three different kinds of change:
 - HTTP protocol-mapping changes belong in `http_hir`
 
 That separation keeps the repository understandable and keeps regressions local.
-It also makes tests more meaningful, because each layer can be validated for
-its own responsibilities instead of only through final generated files.
+It also makes tests more meaningful, because each layer can be validated for its
+own responsibilities instead of only through final generated files.
 
 ## Code Map
 
@@ -414,8 +414,8 @@ Responsibility:
 Use it when:
 
 - generating HTTP-oriented outputs
-- mapping routes, request/response parameters, streams, media types, or
-  security rules
+- mapping routes, request/response parameters, streams, media types, or security
+  rules
 
 ### Final Generators
 
@@ -482,8 +482,8 @@ Templates should not be the place that:
 - performs large amounts of target-specific graph traversal
 - hides business rules that should be unit-tested in Rust
 
-If a template needs complicated logic, that is usually a sign that the Rust
-side should prepare a better context first.
+If a template needs complicated logic, that is usually a sign that the Rust side
+should prepare a better context first.
 
 ## Plugin Architecture
 
@@ -562,8 +562,8 @@ Examples:
 - the TypeScript generator can emit files and also return a `Hir` artifact for
   Rust generation of the non-interface portion
 
-This staged model is the reason the driver recursively processes artifacts
-until only `File` values remain.
+This staged model is the reason the driver recursively processes artifacts until
+only `File` values remain.
 
 ### Property passing between stages
 
@@ -573,8 +573,7 @@ properties forward.
 - each stage contributes default properties through `get_properties()`
 - the driver merges CLI/input metadata into those properties
 - a stage may return extra `props` together with `Hir` or `HttpHir`
-- later stages read those properties, often exposing them to templates as
-  `opt`
+- later stages read those properties, often exposing them to templates as `opt`
 
 This is how cross-stage metadata such as render options, timestamps, target
 settings, and `http_hir` data flow through the pipeline without breaking the
