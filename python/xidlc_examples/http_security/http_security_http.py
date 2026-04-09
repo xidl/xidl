@@ -142,4 +142,3 @@ def http_security_service_routes(service: HttpSecurityServiceService) -> list[Ro
         _http_security_service_search_user_route(service),
         _http_security_service_health_route(service),
     ]
-

@@ -101,4 +101,3 @@ def http_stream_api_routes(service: HttpStreamApiService) -> list[Route]:
         _http_stream_api_alerts_route(service),
         _http_stream_api_upload_asset_route(service),
     ]
-

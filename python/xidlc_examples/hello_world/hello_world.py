@@ -11,4 +11,3 @@ class HelloWorld(abc.ABC):
     @abc.abstractmethod
     def say_hello(self, name: str) -> None:
         raise NotImplementedError
-
