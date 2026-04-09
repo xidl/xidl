@@ -119,11 +119,31 @@ fn interface_conversion_preserves_attr_and_raises_variants() {
         panic!("expected definition");
     };
     let body = def.interface_body.as_ref().expect("body");
-    assert!(body.0.iter().any(|export| matches!(export, xidl_parser::hir::Export::OpDcl(_))));
-    assert!(body.0.iter().any(|export| matches!(export, xidl_parser::hir::Export::AttrDcl(_))));
-    assert!(body.0.iter().any(|export| matches!(export, xidl_parser::hir::Export::TypeDcl(_))));
-    assert!(body.0.iter().any(|export| matches!(export, xidl_parser::hir::Export::ConstDcl(_))));
-    assert!(body.0.iter().any(|export| matches!(export, xidl_parser::hir::Export::ExceptDcl(_))));
+    assert!(
+        body.0
+            .iter()
+            .any(|export| matches!(export, xidl_parser::hir::Export::OpDcl(_)))
+    );
+    assert!(
+        body.0
+            .iter()
+            .any(|export| matches!(export, xidl_parser::hir::Export::AttrDcl(_)))
+    );
+    assert!(
+        body.0
+            .iter()
+            .any(|export| matches!(export, xidl_parser::hir::Export::TypeDcl(_)))
+    );
+    assert!(
+        body.0
+            .iter()
+            .any(|export| matches!(export, xidl_parser::hir::Export::ConstDcl(_)))
+    );
+    assert!(
+        body.0
+            .iter()
+            .any(|export| matches!(export, xidl_parser::hir::Export::ExceptDcl(_)))
+    );
 
     let attr = body
         .0

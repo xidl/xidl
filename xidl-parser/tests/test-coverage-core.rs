@@ -4,9 +4,9 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use serde_json::json;
 use xidl_parser::hir::{
-    annotation_id_value, const_expr_to_i64, extensibility_from_annotations, Annotation,
-    AnnotationParams, Definition, Extensibility, Pragma, SerializeConfig, SerializeKind,
-    SerializeVersion, Specification,
+    Annotation, AnnotationParams, Definition, Extensibility, Pragma, SerializeConfig,
+    SerializeKind, SerializeVersion, Specification, annotation_id_value, const_expr_to_i64,
+    extensibility_from_annotations,
 };
 use xidl_parser::parser::{normalize_source_for_tree_sitter, parser_text};
 use xidl_parser::typed_ast::{
@@ -59,11 +59,7 @@ fn typed_scoped_name(parts: &[&str], is_root: bool) -> ScopedName {
         });
     }
     let mut scoped = current.expect("at least one part");
-    scoped.node_text = format!(
-        "{}{}",
-        if is_root { "::" } else { "" },
-        parts.join("::")
-    );
+    scoped.node_text = format!("{}{}", if is_root { "::" } else { "" }, parts.join("::"));
     scoped
 }
 
@@ -148,8 +144,14 @@ fn hir_parses_pragmas_and_include_errors() {
     write_file(&identifier_include, "#include SOME_HEADER\n");
 
     let hir = parse_hir_with_path(&pragma).expect("pragma parse should succeed");
-    assert!(matches!(hir.0[0], Definition::Pragma(Pragma::XidlcVersion(SerializeVersion::Xcdr2))));
-    assert!(matches!(hir.0[1], Definition::Pragma(Pragma::XidlcSerialize(SerializeKind::PlCdr))));
+    assert!(matches!(
+        hir.0[0],
+        Definition::Pragma(Pragma::XidlcVersion(SerializeVersion::Xcdr2))
+    ));
+    assert!(matches!(
+        hir.0[1],
+        Definition::Pragma(Pragma::XidlcSerialize(SerializeKind::PlCdr))
+    ));
     assert!(matches!(
         hir.0[2],
         Definition::Pragma(Pragma::XidlcPackage(ref value)) if value == "demo.pkg"
@@ -194,39 +196,69 @@ fn serialize_config_and_expr_helpers_cover_resolution_branches() {
     ));
 
     let mut config = SerializeConfig::default();
-    assert!(matches!(config.resolve(Extensibility::None), SerializeKind::Cdr));
+    assert!(matches!(
+        config.resolve(Extensibility::None),
+        SerializeKind::Cdr
+    ));
     config.apply_pragma(Pragma::XidlcVersion(SerializeVersion::Xcdr1));
-    assert!(matches!(config.resolve(Extensibility::Mutable), SerializeKind::PlCdr));
-    assert!(matches!(config.resolve(Extensibility::Appendable), SerializeKind::Cdr));
-    assert!(matches!(config.resolve(Extensibility::None), SerializeKind::PlainCdr));
+    assert!(matches!(
+        config.resolve(Extensibility::Mutable),
+        SerializeKind::PlCdr
+    ));
+    assert!(matches!(
+        config.resolve(Extensibility::Appendable),
+        SerializeKind::Cdr
+    ));
+    assert!(matches!(
+        config.resolve(Extensibility::None),
+        SerializeKind::PlainCdr
+    ));
     config.apply_pragma(Pragma::XidlcSerialize(SerializeKind::DelimitedCdr));
     assert!(matches!(
         config.resolve_for_annotations(&annotations),
         SerializeKind::DelimitedCdr
     ));
 
-    assert_eq!(const_expr_to_i64(&int_expr(IntegerLiteral::BinNumber("0b1_010".to_string())).into()), Some(10));
-    assert_eq!(const_expr_to_i64(&int_expr(IntegerLiteral::OctNumber("0O17".to_string())).into()), Some(15));
-    assert_eq!(const_expr_to_i64(&int_expr(IntegerLiteral::HexNumber("0x1f".to_string())).into()), Some(31));
+    assert_eq!(
+        const_expr_to_i64(&int_expr(IntegerLiteral::BinNumber("0b1_010".to_string())).into()),
+        Some(10)
+    );
+    assert_eq!(
+        const_expr_to_i64(&int_expr(IntegerLiteral::OctNumber("0O17".to_string())).into()),
+        Some(15)
+    );
+    assert_eq!(
+        const_expr_to_i64(&int_expr(IntegerLiteral::HexNumber("0x1f".to_string())).into()),
+        Some(31)
+    );
 
     let negative = ConstExpr(OrExpr::XorExpr(XorExpr::AndExpr(AndExpr::ShiftExpr(
-        ShiftExpr::AddExpr(AddExpr::MultExpr(MultExpr::UnaryExpr(UnaryExpr::UnaryExpr(
-            UnaryOperator::Sub,
-            PrimaryExpr::Literal(Literal::IntegerLiteral(IntegerLiteral::DecNumber("7".to_string()))),
-        )))),
+        ShiftExpr::AddExpr(AddExpr::MultExpr(MultExpr::UnaryExpr(
+            UnaryExpr::UnaryExpr(
+                UnaryOperator::Sub,
+                PrimaryExpr::Literal(Literal::IntegerLiteral(IntegerLiteral::DecNumber(
+                    "7".to_string(),
+                ))),
+            ),
+        ))),
     ))));
     assert_eq!(const_expr_to_i64(&negative.into()), Some(-7));
 
     let unsupported = ConstExpr(OrExpr::OrExpr(
         Box::new(OrExpr::XorExpr(XorExpr::AndExpr(AndExpr::ShiftExpr(
             ShiftExpr::AddExpr(AddExpr::MultExpr(MultExpr::UnaryExpr(
-                UnaryExpr::PrimaryExpr(PrimaryExpr::ScopedName(typed_scoped_name(&["Demo", "VALUE"], true))),
+                UnaryExpr::PrimaryExpr(PrimaryExpr::ScopedName(typed_scoped_name(
+                    &["Demo", "VALUE"],
+                    true,
+                ))),
             ))),
         )))),
         XorExpr::AndExpr(AndExpr::ShiftExpr(ShiftExpr::AddExpr(AddExpr::MultExpr(
             MultExpr::UnaryExpr(UnaryExpr::UnaryExpr(
                 UnaryOperator::Not,
-                PrimaryExpr::ConstExpr(Box::new(int_expr(IntegerLiteral::DecNumber("1".to_string())))),
+                PrimaryExpr::ConstExpr(Box::new(int_expr(IntegerLiteral::DecNumber(
+                    "1".to_string(),
+                )))),
             )),
         )))),
     ));
@@ -246,5 +278,8 @@ fn serialize_config_and_expr_helpers_cover_resolution_branches() {
         fraction: DecNumber("5".to_string()),
     })
     .into();
-    assert!(matches!(float, xidl_parser::hir::Literal::FloatingPtLiteral(_)));
+    assert!(matches!(
+        float,
+        xidl_parser::hir::Literal::FloatingPtLiteral(_)
+    ));
 }
