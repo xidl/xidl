@@ -98,10 +98,6 @@ impl CodegenSession {
             Plugin::Hir => run_server!(crate::generate::hir_gen::HirGen),
             Plugin::HttpHir => run_server!(crate::generate::http_hir::HttpHirCodegen),
             Plugin::TypedAst => run_server!(crate::generate::typed_ast_gen::TypedAstGen),
-            #[cfg(feature = "gen-c")]
-            Plugin::C => run_server!(crate::generate::c::CCodegen),
-            #[cfg(feature = "gen-cpp")]
-            Plugin::Cpp => run_server!(crate::generate::cpp::CppCodegen),
             #[cfg(feature = "gen-go")]
             Plugin::Go => run_server!(crate::generate::go::GoCodegen),
             #[cfg(feature = "gen-go-http")]

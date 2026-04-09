@@ -19,8 +19,6 @@ use self::helpers::{build_gap, collect_tokens, ensure_trailing_newline, normaliz
 const IDL_QUERY: &str = include_str!("queries/idl.scm");
 #[cfg(feature = "fmt-rust")]
 const RUST_QUERY: &str = include_str!("queries/rust.scm");
-#[cfg(feature = "fmt-cpp")]
-const CPP_QUERY: &str = include_str!("queries/cpp.scm");
 #[cfg(feature = "fmt-typescript")]
 const TYPESCRIPT_QUERY: &str = include_str!("queries/typescript.scm");
 
@@ -89,16 +87,6 @@ pub fn format_rust_source(source: &str) -> IdlcResult<String> {
     Ok(source.to_string())
 }
 
-#[cfg(feature = "fmt-cpp")]
-pub fn format_c_source(source: &str) -> IdlcResult<String> {
-    format_tree_sitter_source(source, CPP_QUERY, "c", false, false, true)
-}
-
-#[cfg(not(feature = "fmt-cpp"))]
-pub fn format_c_source(source: &str) -> IdlcResult<String> {
-    Ok(source.to_string())
-}
-
 #[cfg(feature = "fmt-typescript")]
 pub fn format_typescript_source(source: &str) -> IdlcResult<String> {
     format_tree_sitter_source(source, TYPESCRIPT_QUERY, "typescript", false, false, true)
@@ -115,7 +103,7 @@ pub fn format_jinja_source(source: &str) -> IdlcResult<String> {
     )))
 }
 
-#[cfg(any(feature = "fmt-rust", feature = "fmt-cpp", feature = "fmt-typescript"))]
+#[cfg(any(feature = "fmt-rust", feature = "fmt-typescript"))]
 fn format_tree_sitter_source(
     source: &str,
     query_source: &str,
@@ -127,8 +115,6 @@ fn format_tree_sitter_source(
     let language = match label {
         #[cfg(feature = "fmt-rust")]
         "rust" => tree_sitter_rust::LANGUAGE.into(),
-        #[cfg(feature = "fmt-cpp")]
-        "c" => tree_sitter_cpp::LANGUAGE.into(),
         #[cfg(feature = "fmt-typescript")]
         "typescript" => tree_sitter_typescript::LANGUAGE_TYPESCRIPT.into(),
         _ => unreachable!(),

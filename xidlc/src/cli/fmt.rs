@@ -7,9 +7,6 @@ enum FormatLang {
     Idl,
     #[value(aliases = ["rs"])]
     Rust,
-    C,
-    #[value(aliases = ["cpp", "c++"])]
-    Cpp,
     #[value(aliases = ["ts"])]
     Typescript,
     #[value(aliases=["j2", "jinja2"])]
@@ -37,7 +34,6 @@ impl ArgsFormat {
                     file.to_string_lossy().as_ref(),
                 )?,
                 FormatLang::Rust => crate::fmt::format_rust_source(&source)?,
-                FormatLang::C | FormatLang::Cpp => crate::fmt::format_c_source(&source)?,
                 FormatLang::Typescript => crate::fmt::format_typescript_source(&source)?,
                 FormatLang::Jinja => crate::fmt::format_jinja_source(&source)?,
             };

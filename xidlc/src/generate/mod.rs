@@ -1,8 +1,4 @@
-#[cfg(feature = "gen-c")]
-pub mod c;
 mod const_expr;
-#[cfg(feature = "gen-cpp")]
-pub mod cpp;
 #[cfg(feature = "gen-go")]
 pub mod go;
 #[cfg(feature = "gen-go-http")]

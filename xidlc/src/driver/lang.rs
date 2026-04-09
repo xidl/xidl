@@ -8,10 +8,6 @@ pub enum Plugin {
     HttpHir,
     #[serde(alias = "typed_ast", alias = "typed-ast")]
     TypedAst,
-    #[serde(alias = "c", alias = "cc")]
-    C,
-    #[serde(alias = "cpp", alias = "c++", alias = "cxx")]
-    Cpp,
     #[serde(alias = "rs", alias = "rust")]
     Rust,
     #[serde(
@@ -78,9 +74,6 @@ mod tests {
             ("http-hir", Plugin::HttpHir),
             ("typed_ast", Plugin::TypedAst),
             ("typed-ast", Plugin::TypedAst),
-            ("c", Plugin::C),
-            ("cc", Plugin::C),
-            ("cpp", Plugin::Cpp),
             ("rs", Plugin::Rust),
             ("rust_jsonrpc", Plugin::RustJsonRpc),
             ("rust-jsonrpc", Plugin::RustJsonRpc),

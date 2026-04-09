@@ -17,8 +17,6 @@ required-features = ["cli", "fmt"]
 
 [features]
 default = [
-  "gen-c",
-  "gen-cpp",
   "gen-rust",
   "gen-rust-jsonrpc",
   "gen-rust-axum",
@@ -30,8 +28,6 @@ default = [
   "gen-openapi",
   "gen-openrpc",
 ]
-gen-c = []
-gen-cpp = []
 gen-rust = []
 gen-rust-jsonrpc = []
 gen-rust-axum = []
@@ -49,9 +45,8 @@ cli = [
   "dep:owo-colors",
   "miette/fancy",
 ]
-fmt = ["fmt-rust", "fmt-cpp", "fmt-typescript"]
+fmt = ["fmt-rust", "fmt-typescript"]
 fmt-rust = ["tree-sitter-rust"]
-fmt-cpp = ["tree-sitter-cpp"]
 fmt-typescript = ["tree-sitter-typescript"]
 
 [lints]
@@ -83,7 +78,6 @@ tree-sitter-highlight = { version = "=0.25.0", optional = true }
 owo-colors = { version = "4.2", optional = true }
 tree-sitter-idl = { workspace = true }
 tree-sitter-rust = { version = "=0.23.3", optional = true }
-tree-sitter-cpp = { version = "=0.23.4", optional = true }
 tree-sitter-typescript = { version = "=0.23.2", optional = true }
 md5.workspace = true
 indexmap = { version = "2", features = ["serde"] }

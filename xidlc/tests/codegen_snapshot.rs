@@ -4,8 +4,6 @@ use std::path::{Path, PathBuf};
 
 fn lang_and_codegen(folder: &str) -> Option<&'static str> {
     match folder {
-        "c" => Some("c"),
-        "cpp" => Some("cpp"),
         "rust" => Some("rs"),
         "ts" => Some("ts"),
         "golang" => Some("go"),
