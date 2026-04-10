@@ -1,6 +1,6 @@
 ---
 name: code-style
-description: Enforce repository-wide final validation before finishing a change or creating a commit. Use when work is complete, when preparing the final response, or immediately before committing. This skill requires `pre-commit run -a`, `cargo clippy --all-targets --all-features -- -D warnings`, and `cargo publish --workspace --dry-run` to succeed from the repository root.
+description: Enforce repository-wide final validation before finishing a change or creating a commit. Use when work is complete, when preparing the final response, or immediately before committing. This skill requires `pre-commit run -a`, `cargo clippy --all-targets --all-features -- -D warnings`, `cargo tarpaulin --manifest-path xidl-parser/Cargo.toml --packages xidl-parser --include-files "xidl-parser/src/*" --exclude-files "xidl-parser/src/typed_ast/*" --fail-under 95 --out Stdout`, and `cargo publish --workspace --dry-run` to succeed from the repository root.
 ---
 
 # Code Style
@@ -22,6 +22,7 @@ From the repository root, run these commands and require all of them to pass:
 ```bash
 pre-commit run -a
 cargo clippy --all-targets --all-features -- -D warnings
+cargo tarpaulin --manifest-path xidl-parser/Cargo.toml --packages xidl-parser --include-files "xidl-parser/src/*" --exclude-files "xidl-parser/src/typed_ast/*" --fail-under 95 --out Stdout
 cargo publish --workspace --dry-run
 ```
 
@@ -35,10 +36,13 @@ cargo publish --workspace --dry-run
    it succeeds.
 5. Run `cargo clippy --all-targets --all-features -- -D warnings`.
 6. If it fails, fix every warning or error and rerun it until it succeeds.
-7. Run `cargo publish --workspace --dry-run`.
-8. If it fails, fix the packaging or manifest problem and rerun it until it
-   succeeds.
-9. Only finish the task or create a commit after all three commands succeed.
+7. Run
+   `cargo tarpaulin --manifest-path xidl-parser/Cargo.toml --packages xidl-parser --include-files "xidl-parser/src/*" --exclude-files "xidl-parser/src/typed_ast/*" --fail-under 95 --out Stdout`.
+8. If it fails, fix the coverage gaps and rerun it until it succeeds.
+9. Run `cargo publish --workspace --dry-run`.
+10. If it fails, fix the packaging or manifest problem and rerun it until it
+    succeeds.
+11. Only finish the task or create a commit after all four commands succeed.
 
 ## Rules
 

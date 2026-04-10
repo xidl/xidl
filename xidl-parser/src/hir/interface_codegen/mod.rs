@@ -87,3 +87,6 @@ fn collect_consts(
 
     consts
 }
+
+#[cfg(test)]
+mod tests;

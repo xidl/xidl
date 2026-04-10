@@ -132,3 +132,180 @@ fn hir_type_conversions_cover_simple_and_template_variants() {
     let expanded = expand_annotations(vec![nested]);
     assert_eq!(expanded.len(), 2);
 }
+
+#[test]
+fn hir_struct_and_type_dcl_cover_optional_and_inline_typedef_paths() {
+    let typed = parser_text(
+        r#"
+        @mutable
+        struct Item {
+            @optional long builtin_optional;
+        };
+        native NativeThing;
+        "#,
+    )
+    .expect("parse should succeed");
+    let hir = Specification::from(typed);
+
+    let Definition::TypeDcl(struct_dcl) = &hir.0[0] else {
+        panic!("expected struct");
+    };
+    let TypeDclInner::ConstrTypeDcl(ConstrTypeDcl::StructDcl(item)) = &struct_dcl.decl else {
+        panic!("expected struct def");
+    };
+    assert!(item.member[0].is_optional());
+
+    let no_optional = xidl_parser::hir::StructDcl {
+        annotations: vec![xidl_parser::hir::Annotation::Builtin {
+            name: "appendable".to_string(),
+            params: None,
+        }],
+        ident: "Plain".to_string(),
+        parent: Vec::new(),
+        member: Vec::new(),
+    };
+    assert!(matches!(
+        no_optional.serialize_kind(&xidl_parser::hir::SerializeConfig::default()),
+        xidl_parser::hir::SerializeKind::Cdr
+    ));
+
+    let scoped_optional = xidl_parser::hir::Member {
+        annotations: vec![xidl_parser::hir::Annotation::ScopedName {
+            name: xidl_parser::hir::ScopedName {
+                name: vec!["foo".to_string(), "optional".to_string()],
+                is_root: false,
+            },
+            params: None,
+        }],
+        ty: xidl_parser::hir::TypeSpec::SimpleTypeSpec(
+            xidl_parser::hir::SimpleTypeSpec::IntegerType(xidl_parser::hir::IntegerType::I32),
+        ),
+        ident: Vec::new(),
+        default: Some(xidl_parser::hir::Default(xidl_parser::hir::ConstExpr(
+            xidl_parser::hir::OrExpr::XorExpr(xidl_parser::hir::XorExpr::AndExpr(
+                xidl_parser::hir::AndExpr::ShiftExpr(xidl_parser::hir::ShiftExpr::AddExpr(
+                    xidl_parser::hir::AddExpr::MultExpr(xidl_parser::hir::MultExpr::UnaryExpr(
+                        xidl_parser::hir::UnaryExpr::PrimaryExpr(
+                            xidl_parser::hir::PrimaryExpr::Literal(
+                                xidl_parser::hir::Literal::IntegerLiteral(
+                                    xidl_parser::hir::IntegerLiteral::DecNumber("7".to_string()),
+                                ),
+                            ),
+                        ),
+                    )),
+                )),
+            )),
+        ))),
+        field_id: None,
+    };
+    assert!(scoped_optional.is_optional());
+    assert_eq!(
+        xidl_parser::hir::const_expr_to_i64(&scoped_optional.default.unwrap().0),
+        Some(7)
+    );
+
+    let typedef: xidl_parser::hir::TypedefDcl = xidl_parser::typed_ast::TypedefDcl {
+        decl: xidl_parser::typed_ast::TypeDeclarator {
+            ty: xidl_parser::typed_ast::TypeDeclaratorInner::ConstrTypeDcl(
+                xidl_parser::typed_ast::ConstrTypeDcl::StructDcl(
+                    xidl_parser::typed_ast::StructDcl::StructDef(
+                        xidl_parser::typed_ast::StructDef {
+                            ident: xidl_parser::typed_ast::Identifier("Inline".to_string()),
+                            parent: Vec::new(),
+                            member: Vec::new(),
+                        },
+                    ),
+                ),
+            ),
+            decl: xidl_parser::typed_ast::AnyDeclarators(vec![
+                xidl_parser::typed_ast::AnyDeclarator::SimpleDeclarator(
+                    xidl_parser::typed_ast::SimpleDeclarator(xidl_parser::typed_ast::Identifier(
+                        "InlineAlias".to_string(),
+                    )),
+                ),
+            ]),
+        },
+    }
+    .into();
+    assert!(matches!(
+        typedef.ty,
+        xidl_parser::hir::TypedefType::ConstrTypeDcl(ConstrTypeDcl::StructDcl(_))
+    ));
+
+    let constr_inner: xidl_parser::hir::TypeDclInner =
+        xidl_parser::typed_ast::TypeDclInner::ConstrTypeDcl(
+            xidl_parser::typed_ast::ConstrTypeDcl::EnumDcl(xidl_parser::typed_ast::EnumDcl {
+                ident: xidl_parser::typed_ast::Identifier("Mode".to_string()),
+                member: Vec::new(),
+            }),
+        )
+        .into();
+    assert!(matches!(constr_inner, TypeDclInner::ConstrTypeDcl(_)));
+
+    let typedef_inner: xidl_parser::hir::TypeDclInner =
+        xidl_parser::typed_ast::TypeDclInner::TypedefDcl(xidl_parser::typed_ast::TypedefDcl {
+            decl: xidl_parser::typed_ast::TypeDeclarator {
+                ty: xidl_parser::typed_ast::TypeDeclaratorInner::SimpleTypeSpec(
+                    xidl_parser::typed_ast::SimpleTypeSpec::BaseTypeSpec(
+                        xidl_parser::typed_ast::BaseTypeSpec::IntegerType(
+                            xidl_parser::typed_ast::IntegerType::SignedInt(
+                                xidl_parser::typed_ast::SignedInt::SignedLongInt(
+                                    xidl_parser::typed_ast::SignedLongInt,
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+                decl: xidl_parser::typed_ast::AnyDeclarators(vec![
+                    xidl_parser::typed_ast::AnyDeclarator::SimpleDeclarator(
+                        xidl_parser::typed_ast::SimpleDeclarator(
+                            xidl_parser::typed_ast::Identifier("Alias".to_string()),
+                        ),
+                    ),
+                ]),
+            },
+        })
+        .into();
+    assert!(matches!(typedef_inner, TypeDclInner::TypedefDcl(_)));
+
+    let native_inner: xidl_parser::hir::TypeDclInner =
+        xidl_parser::typed_ast::TypeDclInner::NativeDcl(xidl_parser::typed_ast::NativeDcl {
+            decl: xidl_parser::typed_ast::SimpleDeclarator(xidl_parser::typed_ast::Identifier(
+                "NativeAlias".to_string(),
+            )),
+        })
+        .into();
+    assert!(matches!(native_inner, TypeDclInner::NativeDcl(_)));
+
+    let default_value: xidl_parser::hir::Default = xidl_parser::typed_ast::Default(
+        xidl_parser::typed_ast::ConstExpr(xidl_parser::typed_ast::OrExpr::XorExpr(
+            xidl_parser::typed_ast::XorExpr::AndExpr(xidl_parser::typed_ast::AndExpr::ShiftExpr(
+                xidl_parser::typed_ast::ShiftExpr::AddExpr(
+                    xidl_parser::typed_ast::AddExpr::MultExpr(
+                        xidl_parser::typed_ast::MultExpr::UnaryExpr(
+                            xidl_parser::typed_ast::UnaryExpr::PrimaryExpr(
+                                xidl_parser::typed_ast::PrimaryExpr::Literal(
+                                    xidl_parser::typed_ast::Literal::IntegerLiteral(
+                                        xidl_parser::typed_ast::IntegerLiteral::DecNumber(
+                                            "9".to_string(),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            )),
+        )),
+    )
+    .into();
+    assert_eq!(
+        xidl_parser::hir::const_expr_to_i64(&default_value.0),
+        Some(9)
+    );
+
+    let Definition::TypeDcl(native_dcl) = &hir.0[1] else {
+        panic!("expected native");
+    };
+    assert!(matches!(native_dcl.decl, TypeDclInner::NativeDcl(_)));
+}

@@ -371,6 +371,9 @@ impl From<crate::typed_ast::DecNumber> for DecNumber {
     }
 }
 
+#[cfg(test)]
+mod tests;
+
 impl From<crate::typed_ast::PositiveIntConst> for PositiveIntConst {
     fn from(value: crate::typed_ast::PositiveIntConst) -> Self {
         Self(value.0.into())

@@ -1,0 +1,6 @@
+[default]
+manifest-path = "Cargo.toml"
+packages = ["xidl-parser"]
+include-files = ["src/*", "src/hir/*", "src/parser*"]
+exclude-files = ["src/typed_ast/*"]
+fail-under = 95

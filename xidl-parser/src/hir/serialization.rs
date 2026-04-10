@@ -113,3 +113,6 @@ pub fn extensibility_from_annotations(annotations: &[Annotation]) -> Extensibili
         Extensibility::None
     }
 }
+
+#[cfg(test)]
+mod tests;

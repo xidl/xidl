@@ -135,3 +135,6 @@ fn parse_serialize_kind(value: &str) -> Option<SerializeKind> {
         None
     }
 }
+
+#[cfg(test)]
+mod tests;

@@ -47,6 +47,11 @@ jobs:
         with:
           tool: taplo-cli
 
+      - name: Install cargo-tarpaulin
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-tarpaulin
+
       - name: Pre-commit
         run: |
           pre-commit run -a
@@ -62,6 +67,10 @@ jobs:
       - name: Cargo test
         run: |
           make test
+
+      - name: xidl-parser coverage
+        run: |
+          make test-xidl-parser-coverage
 
       - name: Python test
         run: |
