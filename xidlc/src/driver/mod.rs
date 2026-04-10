@@ -33,6 +33,15 @@ pub struct ArgsGenerate {
     pub files: Vec<PathBuf>,
 }
 
+impl ArgsGenerate {
+    pub fn generator_props(&self) -> HashMap<String, serde_json::Value> {
+        HashMap::from([
+            ("enable_client".into(), self.client.into()),
+            ("enable_server".into(), self.server.into()),
+        ])
+    }
+}
+
 pub struct File {
     path: String,
     content: String,
@@ -50,11 +59,19 @@ impl File {
 
 pub struct Driver {
     args: ArgsGenerate,
+    extra_props: HashMap<String, serde_json::Value>,
 }
 
 impl Driver {
     pub async fn run(args: ArgsGenerate) -> IdlcResult<()> {
-        Self { args }.execute().await
+        Self::run_with_props(args, HashMap::new()).await
+    }
+
+    pub async fn run_with_props(
+        args: ArgsGenerate,
+        extra_props: HashMap<String, serde_json::Value>,
+    ) -> IdlcResult<()> {
+        Self { args, extra_props }.execute().await
     }
 
     async fn execute(self) -> IdlcResult<()> {
@@ -64,9 +81,8 @@ impl Driver {
         };
 
         let mut generator = generate::Generator::new(self.args.lang.clone());
-        let mut props = HashMap::new();
-        props.insert("enable_client".into(), self.args.client.into());
-        props.insert("enable_server".into(), self.args.server.into());
+        let mut props = self.args.generator_props();
+        props.extend(self.extra_props);
 
         for input in self.args.files {
             let source = fs::read_to_string(&input)?;

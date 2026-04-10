@@ -61,6 +61,18 @@ fn render_output(files: Vec<xidlc::driver::File>) -> String {
     out
 }
 
+fn render_single_output(path: &str, content: &str) -> String {
+    let mut out = String::new();
+    out.push_str("===============\n");
+    out.push_str(path);
+    out.push_str("\n===============\n");
+    out.push_str(content);
+    if !content.ends_with('\n') {
+        out.push('\n');
+    }
+    out
+}
+
 fn case_props(folder: &str, case_name: &str) -> HashMap<String, serde_json::Value> {
     let mut props: HashMap<String, serde_json::Value> =
         HashMap::from([(String::from("enable_metadata"), false.into())]);
@@ -70,6 +82,29 @@ fn case_props(folder: &str, case_name: &str) -> HashMap<String, serde_json::Valu
         props.insert("enable_render_header".to_string(), false.into());
     }
     props
+}
+
+async fn generate_case_output(
+    folder: &str,
+    case_name: &str,
+    props: HashMap<String, serde_json::Value>,
+) -> String {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests");
+    let case_path = root.join(folder).join(format!("{case_name}.idl"));
+    let lang = lang_and_codegen(folder).expect("supported folder");
+    let source = fs::read_to_string(&case_path).expect("read idl");
+    let mut generator = xidlc::driver::Generator::new(lang.to_string());
+    let files = generator
+        .generate_from_idl(
+            &source,
+            case_path
+                .strip_prefix(env!("CARGO_MANIFEST_DIR"))
+                .unwrap_or(&case_path),
+            props,
+        )
+        .await
+        .expect("generate");
+    render_output(files)
 }
 
 #[tokio::test(flavor = "current_thread")]
@@ -101,4 +136,47 @@ async fn codegen_snapshots_from_idl_folders() {
         let snapshot_name = format!("{folder}__{case_name}");
         insta::assert_snapshot!(snapshot_name, output);
     }
+}
+
+#[cfg(feature = "cli")]
+#[tokio::test(flavor = "current_thread")]
+async fn skip_cdr_codec_matches_disabling_serialize_and_deserialize() {
+    use clap::Parser;
+
+    let args = xidlc::driver::ArgsGenerate {
+        lang: "rust".to_string(),
+        out_dir: ".".to_string(),
+        client: false,
+        server: true,
+        dry_run: false,
+        files: Vec::new(),
+    };
+    let mut expected_props = args.generator_props();
+    expected_props.insert(String::from("enable_serialize"), false.into());
+    expected_props.insert(String::from("enable_deserialize"), false.into());
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests");
+    let case_path = root.join("rust").join("struct_simple.idl");
+    let out_dir = std::env::temp_dir().join(format!(
+        "xidlc-skip-cdr-codec-{}-{}",
+        std::process::id(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("unix epoch")
+            .as_nanos()
+    ));
+    fs::create_dir_all(&out_dir).expect("create output dir");
+    let cli = xidlc::cli::Cli::parse_from([
+        "xidlc",
+        "--lang",
+        "rust",
+        "--out-dir",
+        out_dir.to_str().expect("utf8 path"),
+        "--skip-cdr-codec",
+        case_path.to_str().expect("utf8 path"),
+    ]);
+    cli.run().await.expect("run cli");
+    let actual = fs::read_to_string(out_dir.join("struct_simple.rs")).expect("read generated file");
+    let expected = generate_case_output("rust", "struct_simple", expected_props).await;
+    assert_eq!(render_single_output("struct_simple.rs", &actual), expected);
+    fs::remove_dir_all(out_dir).expect("cleanup output dir");
 }
