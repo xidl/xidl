@@ -225,3 +225,6 @@ pub(super) async fn connect(
 ) -> std::io::Result<Box<dyn Stream + Unpin + Send + 'static>> {
     Endpoint::parse(endpoint).connect().await
 }
+
+#[cfg(test)]
+mod test;

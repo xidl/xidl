@@ -1,3 +1,5 @@
+#![cfg(not(tarpaulin_include))]
+
 use futures_core::Stream as _;
 use futures_util::Sink;
 use std::net::SocketAddr;

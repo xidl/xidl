@@ -27,3 +27,6 @@ where
     }
     Ok(Some(serde_json::from_str(&line)?))
 }
+
+#[cfg(test)]
+mod test;

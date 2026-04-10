@@ -73,3 +73,6 @@ impl Error {
         )
     }
 }
+
+#[cfg(test)]
+mod test;

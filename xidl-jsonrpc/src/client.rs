@@ -57,3 +57,6 @@ where
         Ok(serde_json::from_value(result)?)
     }
 }
+
+#[cfg(test)]
+mod test;

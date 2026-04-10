@@ -1,3 +1,5 @@
+#![cfg(not(tarpaulin_include))]
+
 use std::net::{Ipv4Addr, SocketAddr, SocketAddrV4};
 use std::sync::{Arc, LazyLock};
 

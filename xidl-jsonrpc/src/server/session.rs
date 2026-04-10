@@ -139,3 +139,6 @@ where
         write_json_line(stream, &response).await
     }
 }
+
+#[cfg(test)]
+mod test;

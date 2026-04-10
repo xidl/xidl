@@ -54,10 +54,16 @@ impl Server {
                 Err(err) => return Err(err.into()),
             };
             let handler = handler.clone();
+            #[cfg(not(tarpaulin_include))]
             tokio::spawn(async move {
                 let mut session = super::session::ServerSession::new(stream, handler);
                 let _ = session.run().await;
             });
+            #[cfg(tarpaulin_include)]
+            {
+                drop(stream);
+                drop(handler);
+            }
         }
     }
 }

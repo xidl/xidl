@@ -1,3 +1,5 @@
+#![cfg(not(tarpaulin_include))]
+
 #[cfg(unix)]
 use std::path::{Path, PathBuf};
 

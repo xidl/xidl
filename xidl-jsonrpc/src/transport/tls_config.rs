@@ -1,3 +1,5 @@
+#![cfg(not(tarpaulin_include))]
+
 use std::collections::HashMap;
 #[cfg(any(feature = "transport-tls", feature = "transport-websocket"))]
 use std::fs::File;

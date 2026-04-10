@@ -93,3 +93,6 @@ impl Handler for MultiHandler {
         Err(Error::method_not_found(method))
     }
 }
+
+#[cfg(test)]
+mod test;

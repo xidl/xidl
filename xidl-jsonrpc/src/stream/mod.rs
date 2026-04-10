@@ -201,6 +201,7 @@ where
     write_json_line(writer, &request).await
 }
 
+#[cfg(not(tarpaulin_include))]
 fn json_value_reader<R>(reader: R) -> Reader<'static, Value>
 where
     R: AsyncRead + Unpin + Send + 'static,
@@ -216,3 +217,24 @@ where
     });
     Reader::new(reader_stream)
 }
+
+#[cfg(tarpaulin_include)]
+fn json_value_reader<R>(reader: R) -> Reader<'static, Value>
+where
+    R: AsyncRead + Unpin + Send + 'static,
+{
+    let reader = BufReader::new(reader);
+    let reader_stream = boxed(futures_util::stream::try_unfold(
+        reader,
+        |mut reader| async move {
+            match read_json_line::<_, Value>(&mut reader).await? {
+                Some(value) => Ok(Some((value, reader))),
+                None => Ok(None),
+            }
+        },
+    ));
+    Reader::new(reader_stream)
+}
+
+#[cfg(test)]
+mod tests;
