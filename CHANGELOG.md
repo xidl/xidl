@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.41.0](https://github.com/xidl/xidl/compare/v0.40.0...v0.41.0) (2026-04-10)
+
+
+### Features
+
+* **skills:** add code-style validation skill ([9422b40](https://github.com/xidl/xidl/commit/9422b407d316dfa381ca4314fb7b36105fdde7f6))
+* **xidlc:** add skip cdr codec flag ([8174ae2](https://github.com/xidl/xidl/commit/8174ae2889f23aeb8006d7dd96f8213bbdc8e568))
+
+
+### Bug Fixes
+
+* **xidlc:** correct jinja formatter block indentation ([944ed1f](https://github.com/xidl/xidl/commit/944ed1f6fe1545b415a294da696a3503b0cf4bcc))
+
 ## [0.40.0](https://github.com/xidl/xidl/compare/v0.39.0...v0.40.0) (2026-04-09)
 
 
