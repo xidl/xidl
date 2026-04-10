@@ -55,3 +55,6 @@ tokio-tungstenite = { version = "0.28.0", default-features = false }
 collapsible-if = "allow"
 if_same_then_else = "allow"
 single_element_loop = "allow"
+
+[workspace.lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(tarpaulin_include)'] }

@@ -34,6 +34,7 @@ impl ServerBuilder {
     }
 
     /// Binds a TCP listener on `addr` and serves the composed router.
+    #[cfg(not(tarpaulin_include))]
     pub async fn serve(self, addr: impl tokio::net::ToSocketAddrs) -> Result<()> {
         let listener = tokio::net::TcpListener::bind(addr)
             .await
@@ -44,6 +45,7 @@ impl ServerBuilder {
     }
 
     /// Serves the composed router using an existing Axum listener.
+    #[cfg(not(tarpaulin_include))]
     pub async fn serve_with_listener<L>(self, listener: L) -> Result<()>
     where
         L: axum::serve::Listener,
@@ -55,3 +57,6 @@ impl ServerBuilder {
             .map_err(|err| Error::new(500, err.to_string()))
     }
 }
+
+#[cfg(test)]
+mod tests;

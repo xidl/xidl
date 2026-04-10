@@ -119,3 +119,6 @@ impl Header for BearerHeader {
         }
     }
 }
+
+#[cfg(test)]
+mod tests;

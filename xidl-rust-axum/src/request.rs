@@ -26,3 +26,6 @@ impl<T> Request<T> {
         self.data
     }
 }
+
+#[cfg(test)]
+mod tests;

@@ -85,3 +85,6 @@ pub mod serde_ext {
             .ok_or_else(|| de::Error::custom("null is not allowed"))
     }
 }
+
+#[cfg(test)]
+mod tests;

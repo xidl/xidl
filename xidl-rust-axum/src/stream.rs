@@ -207,6 +207,7 @@ where
 }
 
 /// Opens a server-side bidirectional WebSocket stream from an upgraded socket.
+#[cfg(not(tarpaulin_include))]
 pub fn open_bidi_server<TIn, TOut>(socket: AxumWebSocket) -> BidiServerStream<TIn, TOut>
 where
     TIn: DeserializeOwned + Send + 'static,
@@ -290,6 +291,7 @@ where
 }
 
 /// Opens a client-side bidirectional WebSocket stream.
+#[cfg(not(tarpaulin_include))]
 pub async fn open_bidi_client<TIn, TOut>(ws_url: &str) -> Result<BidiClientStream<TIn, TOut>>
 where
     TIn: Serialize + Send + 'static,
@@ -374,6 +376,7 @@ where
 }
 
 /// Opens a client-side bidirectional WebSocket stream with custom headers.
+#[cfg(not(tarpaulin_include))]
 pub async fn open_bidi_client_with_headers<TIn, TOut>(
     ws_url: &str,
     headers: axum::http::HeaderMap,
@@ -623,3 +626,6 @@ enum StreamAction<T> {
     Item(T),
     Done,
 }
+
+#[cfg(test)]
+mod tests;

@@ -28,3 +28,6 @@ fn sanitize_realm(realm: &str) -> String {
         out
     }
 }
+
+#[cfg(test)]
+mod tests;
