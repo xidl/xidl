@@ -1,0 +1,7 @@
+interface:
+  display_name: "Code Style"
+  short_description: "Run the repo's final validation gates."
+  default_prompt: "Use $code-style to run the required final validation commands before finishing this change."
+
+policy:
+  allow_implicit_invocation: true
