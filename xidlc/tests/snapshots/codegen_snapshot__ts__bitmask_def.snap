@@ -408,25 +408,6 @@ pub struct A{
 impl A{
 }
 
-impl xidl_xcdr::XcdrSerialize for A{
-    fn serialize_with<S:xidl_xcdr::XcdrSerializer+?Sized>(
-    &self,
-    serializer:&mut S,
-    )->xidl_xcdr::error::XcdrResult<()>{
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.value,serializer)
-    }
-}
-
-impl xidl_xcdr::XcdrDeserialize for A{
-    fn deserialize<D:xidl_xcdr::XcdrDeserializer+?Sized>(
-    deserializer:&mut D,
-    )->xidl_xcdr::error::XcdrResult<Self>{
-        let value = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self{
-            value})
-    }
-}
-
 pub struct A{
     pub value:u32,
 }
@@ -437,25 +418,6 @@ impl A{
     pub const C:u32 = 1u32<<2;
 }
 
-impl xidl_xcdr::XcdrSerialize for A{
-    fn serialize_with<S:xidl_xcdr::XcdrSerializer+?Sized>(
-    &self,
-    serializer:&mut S,
-    )->xidl_xcdr::error::XcdrResult<()>{
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.value,serializer)
-    }
-}
-
-impl xidl_xcdr::XcdrDeserialize for A{
-    fn deserialize<D:xidl_xcdr::XcdrDeserializer+?Sized>(
-    deserializer:&mut D,
-    )->xidl_xcdr::error::XcdrResult<Self>{
-        let value = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self{
-            value})
-    }
-}
-
 pub struct A{
     pub value:u32,
 }
@@ -464,25 +426,6 @@ impl A{
     pub const A:u32 = 1u32<<0;
     pub const B:u32 = 1u32<<1;
     pub const C:u32 = 1u32<<2;
-}
-
-impl xidl_xcdr::XcdrSerialize for A{
-    fn serialize_with<S:xidl_xcdr::XcdrSerializer+?Sized>(
-    &self,
-    serializer:&mut S,
-    )->xidl_xcdr::error::XcdrResult<()>{
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.value,serializer)
-    }
-}
-
-impl xidl_xcdr::XcdrDeserialize for A{
-    fn deserialize<D:xidl_xcdr::XcdrDeserializer+?Sized>(
-    deserializer:&mut D,
-    )->xidl_xcdr::error::XcdrResult<Self>{
-        let value = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self{
-            value})
-    }
 }
 ===============
 bitmask_def.zod.ts

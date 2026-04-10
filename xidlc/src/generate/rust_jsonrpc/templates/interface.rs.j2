@@ -64,42 +64,42 @@ T: {{ ident }} + Send + Sync,
         match method {
             {% for method in methods %}
                 {% if method.kind == "rpc" %}
-                "{{ method.rpc_name }}" => {
-                    let params: {{ method.params_struct }} = ::serde_json::from_value(params)
+                    "{{ method.rpc_name }}" => {
+                        let params: {{ method.params_struct }} = ::serde_json::from_value(params)
                         .map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
-                    {% if method.args | length > 0 %}
-                        let result = self.inner.{{ method.name }}({% for arg in method.args %}params.{{ arg }}{% if not loop.last %}, {% endif %}{% endfor %}).await?;
-                    {% else %}
-                        let result = self.inner.{{ method.name }}().await?;
-                    {% endif %}
-                    {% if method.response_kind == "empty" %}
-                        Ok(::serde_json::json!({}))
-                    {% elif method.response_kind == "single_return" or method.response_kind == "single_output" %}
-                        let wire = {{ method.response_struct }} { {{ method.response_single_field }}: result };
-                        Ok(::serde_json::to_value(wire)?)
-                    {% else %}
-                        Ok(::serde_json::to_value(result)?)
-                    {% endif %}
-                }
+                        {% if method.args | length > 0 %}
+                            let result = self.inner.{{ method.name }}({% for arg in method.args %}params.{{ arg }}{% if not loop.last %}, {% endif %}{% endfor %}).await?;
+                        {% else %}
+                            let result = self.inner.{{ method.name }}().await?;
+                        {% endif %}
+                        {% if method.response_kind == "empty" %}
+                            Ok(::serde_json::json!({}))
+                        {% elif method.response_kind == "single_return" or method.response_kind == "single_output" %}
+                            let wire = {{ method.response_struct }} { {{ method.response_single_field }}: result };
+                            Ok(::serde_json::to_value(wire)?)
+                        {% else %}
+                            Ok(::serde_json::to_value(result)?)
+                        {% endif %}
+                    }
                 {% elif method.kind == "stream_op" and method.stream_mode == "client" %}
-                "{{ method.rpc_name }}" => {
-                    let items: Vec<::serde_json::Value> = ::serde_json::from_value(params)
+                    "{{ method.rpc_name }}" => {
+                        let items: Vec<::serde_json::Value> = ::serde_json::from_value(params)
                         .map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
-                    let stream = xidl_jsonrpc::stream::boxed(async_stream::try_stream! {
-                        for item in items {
-                            yield item;
-                        }
-                    });
-                    let result = self.inner.{{ method.name }}(stream).await?;
-                    {% if method.response_kind == "empty" %}
-                        Ok(::serde_json::json!({}))
-                    {% elif method.response_kind == "single_return" or method.response_kind == "single_output" %}
-                        let wire = {{ method.response_struct }} { {{ method.response_single_field }}: result };
-                        Ok(::serde_json::to_value(wire)?)
-                    {% else %}
-                        Ok(::serde_json::to_value(result)?)
-                    {% endif %}
-                }
+                        let stream = xidl_jsonrpc::stream::boxed(async_stream::try_stream! {
+                            for item in items {
+                                yield item;
+                            }
+                        });
+                        let result = self.inner.{{ method.name }}(stream).await?;
+                        {% if method.response_kind == "empty" %}
+                            Ok(::serde_json::json!({}))
+                        {% elif method.response_kind == "single_return" or method.response_kind == "single_output" %}
+                            let wire = {{ method.response_struct }} { {{ method.response_single_field }}: result };
+                            Ok(::serde_json::to_value(wire)?)
+                        {% else %}
+                            Ok(::serde_json::to_value(result)?)
+                        {% endif %}
+                    }
                 {% endif %}
             {% endfor %}
             _ => Err(xidl_jsonrpc::Error::method_not_found(method)),
@@ -108,69 +108,69 @@ T: {{ ident }} + Send + Sync,
 
     fn accepts_bidi(&self, method: &str) -> bool {
         {% if bidi_method_names and bidi_method_names | length > 0 %}
-        matches!(
+            matches!(
             method,
             {% for rpc_name in bidi_method_names %}
-            "{{ rpc_name }}"{% if not loop.last %} |{% endif %}
+                "{{ rpc_name }}"{% if not loop.last %} |{% endif %}
             {% endfor %}
-        )
+            )
         {% else %}
-        false
+            false
         {% endif %}
     }
 
     #[allow(clippy::match_single_binding)]
     async fn handle_bidi(
-        &self,
-        method: &str,
-        params: ::serde_json::Value,
-        mut stream: xidl_jsonrpc::stream::ReaderWriter<::serde_json::Value, ::serde_json::Value>,
+    &self,
+    method: &str,
+    params: ::serde_json::Value,
+    mut stream: xidl_jsonrpc::stream::ReaderWriter<::serde_json::Value, ::serde_json::Value>,
     ) -> Result<(), xidl_jsonrpc::Error> {
         match method {
             {% for method in methods %}
                 {% if method.kind == "stream_op" and method.stream_mode == "server" %}
-                "{{ method.rpc_name }}" => {
-                    let params: {{ method.params_struct }} = ::serde_json::from_value(params)
+                    "{{ method.rpc_name }}" => {
+                        let params: {{ method.params_struct }} = ::serde_json::from_value(params)
                         .map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
-                    let mut out = self.inner.{{ method.name }}({% for arg in method.args %}params.{{ arg }}{% if not loop.last %}, {% endif %}{% endfor %}).await?;
-                    while let Some(item) = xidl_jsonrpc::futures_util::StreamExt::next(&mut out).await {
-                        stream.write(item?).await?;
-                    }
-                    stream.close().await?;
-                    Ok(())
-                }
-                {% elif method.kind == "stream_op" and method.stream_mode == "client" %}
-                "{{ method.rpc_name }}" => {
-                    let (mut outbound, mut inbound_reader) = stream.into_parts();
-                    let inbound = xidl_jsonrpc::stream::boxed(async_stream::try_stream! {
-                        while let Some(item) = inbound_reader.read().await {
-                            yield item?;
+                        let mut out = self.inner.{{ method.name }}({% for arg in method.args %}params.{{ arg }}{% if not loop.last %}, {% endif %}{% endfor %}).await?;
+                        while let Some(item) = xidl_jsonrpc::futures_util::StreamExt::next(&mut out).await {
+                            stream.write(item?).await?;
                         }
-                    });
-                    let result = self.inner.{{ method.name }}(inbound).await?;
-                    {% if method.response_kind == "empty" %}
-                        let wire = ::serde_json::Value::Null;
-                    {% elif method.response_kind == "single_return" or method.response_kind == "single_output" %}
-                        let wire = ::serde_json::to_value({{ method.response_struct }} { {{ method.response_single_field }}: result })?;
-                    {% else %}
-                        let wire = ::serde_json::to_value(result)?;
-                    {% endif %}
-                    outbound.write(wire).await?;
-                    outbound.close().await?;
-                    Ok(())
-                }
-                {% elif method.kind == "stream_source" %}
-                "{{ method.rpc_name }}" => {
-                    let mut out = self.inner.{{ method.name }}().await?;
-                    while let Some(item) = xidl_jsonrpc::futures_util::StreamExt::next(&mut out).await {
-                        let value = ::serde_json::to_value(item?)?;
-                        stream.write(value).await?;
+                        stream.close().await?;
+                        Ok(())
                     }
-                    stream.close().await?;
-                    Ok(())
-                }
+                {% elif method.kind == "stream_op" and method.stream_mode == "client" %}
+                    "{{ method.rpc_name }}" => {
+                        let (mut outbound, mut inbound_reader) = stream.into_parts();
+                        let inbound = xidl_jsonrpc::stream::boxed(async_stream::try_stream! {
+                            while let Some(item) = inbound_reader.read().await {
+                                yield item?;
+                            }
+                        });
+                        let result = self.inner.{{ method.name }}(inbound).await?;
+                        {% if method.response_kind == "empty" %}
+                            let wire = ::serde_json::Value::Null;
+                        {% elif method.response_kind == "single_return" or method.response_kind == "single_output" %}
+                            let wire = ::serde_json::to_value({{ method.response_struct }} { {{ method.response_single_field }}: result })?;
+                        {% else %}
+                            let wire = ::serde_json::to_value(result)?;
+                        {% endif %}
+                        outbound.write(wire).await?;
+                        outbound.close().await?;
+                        Ok(())
+                    }
+                {% elif method.kind == "stream_source" %}
+                    "{{ method.rpc_name }}" => {
+                        let mut out = self.inner.{{ method.name }}().await?;
+                        while let Some(item) = xidl_jsonrpc::futures_util::StreamExt::next(&mut out).await {
+                            let value = ::serde_json::to_value(item?)?;
+                            stream.write(value).await?;
+                        }
+                        stream.close().await?;
+                        Ok(())
+                    }
                 {% elif method.kind == "stream_op" and method.stream_mode == "bidi" %}
-                "{{ method.rpc_name }}" => self.inner.{{ method.name }}(stream).await,
+                    "{{ method.rpc_name }}" => self.inner.{{ method.name }}(stream).await,
                 {% endif %}
             {% endfor %}
             _ => Err(xidl_jsonrpc::Error::method_not_found(method)),
@@ -209,11 +209,11 @@ impl {{ ident }}ClientBuilder {
 
     pub async fn build(self) -> Result<{{ ident }}Client<{{ ident }}ReadHalf, {{ ident }}WriteHalf>, xidl_jsonrpc::Error> {
         let endpoint = self
-            .endpoint
-            .ok_or(xidl_jsonrpc::Error::Protocol("missing endpoint"))?;
+        .endpoint
+        .ok_or(xidl_jsonrpc::Error::Protocol("missing endpoint"))?;
         let io = xidl_jsonrpc::transport::connect(&endpoint)
-            .await
-            .map_err(xidl_jsonrpc::Error::Io)?;
+        .await
+        .map_err(xidl_jsonrpc::Error::Io)?;
         let (reader, writer) = tokio::io::split(io);
         Ok({{ ident }}Client::from_io(reader, writer, Some(endpoint)))
     }
@@ -242,7 +242,7 @@ W: tokio::io::AsyncWrite + Unpin + Send + 'static,
 impl<R, W> {{ ident }} for {{ ident }}Client<R, W>
 where
 R: tokio::io::AsyncRead + Unpin + Send + 'static,
-    W: tokio::io::AsyncWrite + Unpin + Send + 'static,
+W: tokio::io::AsyncWrite + Unpin + Send + 'static,
 {
     {% for method in methods %}
         {% if method.kind == "rpc" %}
@@ -267,56 +267,162 @@ R: tokio::io::AsyncRead + Unpin + Send + 'static,
         {% elif method.kind == "stream_op" and method.stream_mode == "server" %}
             async fn {{ method.name }}<'a>(&'a self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.ret }}, xidl_jsonrpc::Error> {
                 let endpoint = self
-                    .endpoint
-                    .clone()
-                    .ok_or(xidl_jsonrpc::Error::Protocol("missing endpoint for stream method"))?;
+                .endpoint
+                .clone()
+                .ok_or(xidl_jsonrpc::Error::Protocol("missing endpoint for stream method"))?;
                 let params = {{ method.params_struct }} {
                     {% for field in method.params_fields %}
                         {{ field.name }},
                     {% endfor %}
                 };
                 let stream = xidl_jsonrpc::transport::connect(&endpoint)
-                    .await
-                    .map_err(xidl_jsonrpc::Error::Io)?;
+                .await
+                .map_err(xidl_jsonrpc::Error::Io)?;
                 let reader = xidl_jsonrpc::stream::open_server_stream_client(
-                    stream,
-                    "{{ method.rpc_name }}",
-                    ::serde_json::to_value(params)?,
+                stream,
+                "{{ method.rpc_name }}",
+                ::serde_json::to_value(params)?,
                 )
                 .await?;
                 Ok(reader.into_inner())
             }
         {% elif method.kind == "stream_op" and method.stream_mode == "client" %}
             async fn {{ method.name }}<'a>(&'a self, mut stream: xidl_jsonrpc::stream::BoxStream<'a, serde_json::Value>) -> Result<{{ method.ret }}, xidl_jsonrpc::Error> {
-                let endpoint = self
-                    .endpoint
-                    .clone()
-                    .ok_or(xidl_jsonrpc::Error::Protocol("missing endpoint for stream method"))?;
-                let mut io = xidl_jsonrpc::transport::connect(&endpoint)
-                    .await
-                    .map_err(xidl_jsonrpc::Error::Io)?;
-                let request = ::serde_json::json!({
-                    "jsonrpc": "2.0",
-                    "id": 1u64,
-                    "method": "{{ method.rpc_name }}",
-                    "params": ::serde_json::Value::Null,
-                });
-                let payload = ::serde_json::to_string(&request)?;
-                tokio::io::AsyncWriteExt::write_all(&mut io, payload.as_bytes()).await?;
-                tokio::io::AsyncWriteExt::write_all(&mut io, b"\n").await?;
-                tokio::io::AsyncWriteExt::flush(&mut io).await?;
+            let endpoint = self
+            .endpoint
+            .clone()
+            .ok_or(xidl_jsonrpc::Error::Protocol("missing endpoint for stream method"))?;
+            let mut io = xidl_jsonrpc::transport::connect(&endpoint)
+            .await
+            .map_err(xidl_jsonrpc::Error::Io)?;
+            let request = ::serde_json::json!({
+                "jsonrpc": "2.0",
+                "id": 1u64,
+                "method": "{{ method.rpc_name }}",
+                "params": ::serde_json::Value::Null,
+            });
+            let payload = ::serde_json::to_string(&request)?;
+            tokio::io::AsyncWriteExt::write_all(&mut io, payload.as_bytes()).await?;
+            tokio::io::AsyncWriteExt::write_all(&mut io, b"\n").await?;
+            tokio::io::AsyncWriteExt::flush(&mut io).await?;
 
-                let (read_half, write_half) = tokio::io::split(io);
+            let (read_half, write_half) = tokio::io::split(io);
+            let mut writer = tokio::io::BufWriter::new(write_half);
+            while let Some(item) = xidl_jsonrpc::futures_util::StreamExt::next(&mut stream).await {
+                let value = item?;
+                let line = ::serde_json::to_string(&value)?;
+                tokio::io::AsyncWriteExt::write_all(&mut writer, line.as_bytes()).await?;
+                tokio::io::AsyncWriteExt::write_all(&mut writer, b"\n").await?;
+                tokio::io::AsyncWriteExt::flush(&mut writer).await?;
+            }
+            tokio::io::AsyncWriteExt::shutdown(&mut writer).await?;
+
+            let mut reader = tokio::io::BufReader::new(read_half);
+            let mut line = String::new();
+            let bytes = tokio::io::AsyncBufReadExt::read_line(&mut reader, &mut line).await?;
+            if bytes == 0 {
+                return Err(xidl_jsonrpc::Error::Protocol("missing stream response"));
+            }
+            let value: ::serde_json::Value = ::serde_json::from_str(&line)?;
+            {% if method.response_kind == "empty" %}
+                let _ = value;
+                Ok(())
+            {% elif method.response_kind == "single_return" or method.response_kind == "single_output" %}
+                let result: {{ method.response_struct }} = ::serde_json::from_value(value)?;
+                Ok(result.{{ method.response_single_field }})
+            {% else %}
+                ::serde_json::from_value(value).map_err(xidl_jsonrpc::Error::from)
+            {% endif %}
+        }
+    {% elif method.kind == "stream_source" %}
+        async fn {{ method.name }}(& self) -> Result<xidl_jsonrpc::stream::BoxStream<'_, {{ method.stream_item_ty }}>, xidl_jsonrpc::Error> {
+        Err(xidl_jsonrpc::Error::Protocol("stream source method is server-side only"))
+        }
+    {% elif method.kind == "stream_op" %}
+        async fn {{ method.name }}<'a>(&'a self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.ret }}, xidl_jsonrpc::Error> {
+            Err(xidl_jsonrpc::Error::Protocol("stream operation is not implemented in client runtime"))
+        }
+    {% endif %}
+{% endfor %}
+}
+
+impl<R, W> {{ ident }}Client<R, W>
+where
+R: tokio::io::AsyncRead + Unpin + Send + 'static,
+W: tokio::io::AsyncWrite + Unpin + Send + 'static,
+{
+    {% for method in watch_methods %}
+        pub async fn {{ method.getter_name }}(&self) -> Result<xidl_jsonrpc::stream::Reader<'static, {{ method.item_ty }}>, xidl_jsonrpc::Error> {
+        let endpoint = self
+        .endpoint
+        .clone()
+        .ok_or(xidl_jsonrpc::Error::Protocol("missing endpoint for stream method"))?;
+        let io = xidl_jsonrpc::transport::connect(&endpoint)
+        .await
+        .map_err(xidl_jsonrpc::Error::Io)?;
+        let mut source = xidl_jsonrpc::stream::open_server_stream_client(
+        io,
+        "{{ method.stream_rpc_name }}",
+        ::serde_json::Value::Null,
+        )
+        .await?;
+        let stream = async_stream::try_stream! {
+            while let Some(item) = source.read().await {
+                let value: {{ method.item_ty }} = ::serde_json::from_value(item?)?;
+                yield value;
+            }
+        };
+        Ok(xidl_jsonrpc::stream::Reader::new(xidl_jsonrpc::stream::boxed(stream)))
+    }
+{% endfor %}
+{% for method in methods %}
+    {% if method.kind == "stream_op" and method.stream_mode == "client" %}
+        pub async fn {{ method.name }}(&self) -> Result<xidl_jsonrpc::stream::Writer<serde_json::Value, {{ method.ret }}>, xidl_jsonrpc::Error> {
+            let endpoint = self
+            .endpoint
+            .clone()
+            .ok_or(xidl_jsonrpc::Error::Protocol("missing endpoint for stream method"))?;
+            let mut io = xidl_jsonrpc::transport::connect(&endpoint)
+            .await
+            .map_err(xidl_jsonrpc::Error::Io)?;
+            let request = ::serde_json::json!({
+                "jsonrpc": "2.0",
+                "id": 1u64,
+                "method": "{{ method.rpc_name }}",
+                "params": ::serde_json::Value::Null,
+            });
+            let payload = ::serde_json::to_string(&request)?;
+            tokio::io::AsyncWriteExt::write_all(&mut io, payload.as_bytes()).await?;
+            tokio::io::AsyncWriteExt::write_all(&mut io, b"\n").await?;
+            tokio::io::AsyncWriteExt::flush(&mut io).await?;
+            let (read_half, write_half) = tokio::io::split(io);
+
+            let (tx, mut rx) = tokio::sync::mpsc::channel(32);
+            tokio::spawn(async move {
                 let mut writer = tokio::io::BufWriter::new(write_half);
-                while let Some(item) = xidl_jsonrpc::futures_util::StreamExt::next(&mut stream).await {
-                    let value = item?;
-                    let line = ::serde_json::to_string(&value)?;
-                    tokio::io::AsyncWriteExt::write_all(&mut writer, line.as_bytes()).await?;
-                    tokio::io::AsyncWriteExt::write_all(&mut writer, b"\n").await?;
-                    tokio::io::AsyncWriteExt::flush(&mut writer).await?;
+                while let Some(item) = rx.recv().await {
+                    let value = match item {
+                        Ok(v) => v,
+                        Err(_) => break,
+                    };
+                    let line = match ::serde_json::to_string(&value) {
+                        Ok(v) => v,
+                        Err(_) => break,
+                    };
+                    if tokio::io::AsyncWriteExt::write_all(&mut writer, line.as_bytes()).await.is_err() {
+                        break;
+                    }
+                    if tokio::io::AsyncWriteExt::write_all(&mut writer, b"\n").await.is_err() {
+                        break;
+                    }
+                    if tokio::io::AsyncWriteExt::flush(&mut writer).await.is_err() {
+                        break;
+                    }
                 }
-                tokio::io::AsyncWriteExt::shutdown(&mut writer).await?;
+                let _ = tokio::io::AsyncWriteExt::shutdown(&mut writer).await;
+            });
 
+            let response = tokio::spawn(async move {
                 let mut reader = tokio::io::BufReader::new(read_half);
                 let mut line = String::new();
                 let bytes = tokio::io::AsyncBufReadExt::read_line(&mut reader, &mut line).await?;
@@ -333,126 +439,20 @@ R: tokio::io::AsyncRead + Unpin + Send + 'static,
                 {% else %}
                     ::serde_json::from_value(value).map_err(xidl_jsonrpc::Error::from)
                 {% endif %}
-            }
-        {% elif method.kind == "stream_source" %}
-            async fn {{ method.name }}(& self) -> Result<xidl_jsonrpc::stream::BoxStream<'_, {{ method.stream_item_ty }}>, xidl_jsonrpc::Error> {
-                Err(xidl_jsonrpc::Error::Protocol("stream source method is server-side only"))
-            }
-        {% elif method.kind == "stream_op" %}
-            async fn {{ method.name }}<'a>(&'a self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.ret }}, xidl_jsonrpc::Error> {
-                Err(xidl_jsonrpc::Error::Protocol("stream operation is not implemented in client runtime"))
-            }
-        {% endif %}
-    {% endfor %}
-}
-
-impl<R, W> {{ ident }}Client<R, W>
-where
-R: tokio::io::AsyncRead + Unpin + Send + 'static,
-W: tokio::io::AsyncWrite + Unpin + Send + 'static,
-{
-    {% for method in watch_methods %}
-        pub async fn {{ method.getter_name }}(&self) -> Result<xidl_jsonrpc::stream::Reader<'static, {{ method.item_ty }}>, xidl_jsonrpc::Error> {
-            let endpoint = self
-                .endpoint
-                .clone()
-                .ok_or(xidl_jsonrpc::Error::Protocol("missing endpoint for stream method"))?;
-            let io = xidl_jsonrpc::transport::connect(&endpoint)
-                .await
-                .map_err(xidl_jsonrpc::Error::Io)?;
-            let mut source = xidl_jsonrpc::stream::open_server_stream_client(
-                io,
-                "{{ method.stream_rpc_name }}",
-                ::serde_json::Value::Null,
-            )
-            .await?;
-            let stream = async_stream::try_stream! {
-                while let Some(item) = source.read().await {
-                    let value: {{ method.item_ty }} = ::serde_json::from_value(item?)?;
-                    yield value;
-                }
-            };
-            Ok(xidl_jsonrpc::stream::Reader::new(xidl_jsonrpc::stream::boxed(stream)))
+            });
+            Ok(xidl_jsonrpc::stream::Writer::new(tx, response))
         }
-    {% endfor %}
-    {% for method in methods %}
-        {% if method.kind == "stream_op" and method.stream_mode == "client" %}
-            pub async fn {{ method.name }}(&self) -> Result<xidl_jsonrpc::stream::Writer<serde_json::Value, {{ method.ret }}>, xidl_jsonrpc::Error> {
-                let endpoint = self
-                    .endpoint
-                    .clone()
-                    .ok_or(xidl_jsonrpc::Error::Protocol("missing endpoint for stream method"))?;
-                let mut io = xidl_jsonrpc::transport::connect(&endpoint)
-                    .await
-                    .map_err(xidl_jsonrpc::Error::Io)?;
-                let request = ::serde_json::json!({
-                    "jsonrpc": "2.0",
-                    "id": 1u64,
-                    "method": "{{ method.rpc_name }}",
-                    "params": ::serde_json::Value::Null,
-                });
-                let payload = ::serde_json::to_string(&request)?;
-                tokio::io::AsyncWriteExt::write_all(&mut io, payload.as_bytes()).await?;
-                tokio::io::AsyncWriteExt::write_all(&mut io, b"\n").await?;
-                tokio::io::AsyncWriteExt::flush(&mut io).await?;
-                let (read_half, write_half) = tokio::io::split(io);
-
-                let (tx, mut rx) = tokio::sync::mpsc::channel(32);
-                tokio::spawn(async move {
-                    let mut writer = tokio::io::BufWriter::new(write_half);
-                    while let Some(item) = rx.recv().await {
-                        let value = match item {
-                            Ok(v) => v,
-                            Err(_) => break,
-                        };
-                        let line = match ::serde_json::to_string(&value) {
-                            Ok(v) => v,
-                            Err(_) => break,
-                        };
-                        if tokio::io::AsyncWriteExt::write_all(&mut writer, line.as_bytes()).await.is_err() {
-                            break;
-                        }
-                        if tokio::io::AsyncWriteExt::write_all(&mut writer, b"\n").await.is_err() {
-                            break;
-                        }
-                        if tokio::io::AsyncWriteExt::flush(&mut writer).await.is_err() {
-                            break;
-                        }
-                    }
-                    let _ = tokio::io::AsyncWriteExt::shutdown(&mut writer).await;
-                });
-
-                let response = tokio::spawn(async move {
-                    let mut reader = tokio::io::BufReader::new(read_half);
-                    let mut line = String::new();
-                    let bytes = tokio::io::AsyncBufReadExt::read_line(&mut reader, &mut line).await?;
-                    if bytes == 0 {
-                        return Err(xidl_jsonrpc::Error::Protocol("missing stream response"));
-                    }
-                    let value: ::serde_json::Value = ::serde_json::from_str(&line)?;
-                    {% if method.response_kind == "empty" %}
-                        let _ = value;
-                        Ok(())
-                    {% elif method.response_kind == "single_return" or method.response_kind == "single_output" %}
-                        let result: {{ method.response_struct }} = ::serde_json::from_value(value)?;
-                        Ok(result.{{ method.response_single_field }})
-                    {% else %}
-                        ::serde_json::from_value(value).map_err(xidl_jsonrpc::Error::from)
-                    {% endif %}
-                });
-                Ok(xidl_jsonrpc::stream::Writer::new(tx, response))
-            }
-        {% elif method.kind == "stream_op" and method.stream_mode == "bidi" %}
-            pub async fn {{ method.name }}(&self) -> Result<xidl_jsonrpc::stream::ReaderWriter<serde_json::Value, serde_json::Value>, xidl_jsonrpc::Error> {
-                let endpoint = self
-                    .endpoint
-                    .clone()
-                    .ok_or(xidl_jsonrpc::Error::Protocol("missing endpoint for bidi stream"))?;
-                let stream = xidl_jsonrpc::transport::connect(&endpoint)
-                    .await
-                    .map_err(xidl_jsonrpc::Error::Io)?;
-                xidl_jsonrpc::stream::open_bidi_client(stream, "{{ method.rpc_name }}").await
-            }
-        {% endif %}
-    {% endfor %}
+    {% elif method.kind == "stream_op" and method.stream_mode == "bidi" %}
+        pub async fn {{ method.name }}(&self) -> Result<xidl_jsonrpc::stream::ReaderWriter<serde_json::Value, serde_json::Value>, xidl_jsonrpc::Error> {
+            let endpoint = self
+            .endpoint
+            .clone()
+            .ok_or(xidl_jsonrpc::Error::Protocol("missing endpoint for bidi stream"))?;
+            let stream = xidl_jsonrpc::transport::connect(&endpoint)
+            .await
+            .map_err(xidl_jsonrpc::Error::Io)?;
+            xidl_jsonrpc::stream::open_bidi_client(stream, "{{ method.rpc_name }}").await
+        }
+    {% endif %}
+{% endfor %}
 }

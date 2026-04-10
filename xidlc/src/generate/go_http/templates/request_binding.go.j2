@@ -1,32 +1,32 @@
 {%- if not method.is_client_stream %}
-	req := &{{ method.request_struct }}{}
-{%- if method.path_bindings %}
-{{ method.path_bindings | indent(1, true) }}
-{%- endif %}
-{%- if method.query_bindings %}
-{{ method.query_bindings | indent(1, true) }}
-{%- endif %}
-{%- if method.header_bindings %}
-{{ method.header_bindings | indent(1, true) }}
-{%- endif %}
-{%- if method.cookie_bindings %}
-{{ method.cookie_bindings | indent(1, true) }}
-{%- endif %}
-{%- if method.request_body_struct %}
-	body := {{ method.request_body_struct }}{}
-	if err := xidlgohttp.DecodeBody(r, "{{ method.request_content_type }}", &body); err != nil {
-		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
-		return
-	}
-{%- for param in method.body_params %}
-	req.{{ param.field_name }} = body.{{ param.field_name }}
-{%- endfor %}
-{%- elif method.request_body_direct_field %}
-	var body {{ method.request_body_direct_ty }}
-	if err := xidlgohttp.DecodeBody(r, "{{ method.request_content_type }}", &body); err != nil {
-		xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
-		return
-	}
-	req.{{ method.request_body_direct_field }} = body
-{%- endif %}
+    req := &{{ method.request_struct }}{}
+    {%- if method.path_bindings %}
+        {{ method.path_bindings | indent(1, true) }}
+    {%- endif %}
+    {%- if method.query_bindings %}
+        {{ method.query_bindings | indent(1, true) }}
+    {%- endif %}
+    {%- if method.header_bindings %}
+        {{ method.header_bindings | indent(1, true) }}
+    {%- endif %}
+    {%- if method.cookie_bindings %}
+        {{ method.cookie_bindings | indent(1, true) }}
+    {%- endif %}
+    {%- if method.request_body_struct %}
+        body := {{ method.request_body_struct }}{}
+        if err := xidlgohttp.DecodeBody(r, "{{ method.request_content_type }}", &body); err != nil {
+            xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+            return
+        }
+        {%- for param in method.body_params %}
+            req.{{ param.field_name }} = body.{{ param.field_name }}
+        {%- endfor %}
+    {%- elif method.request_body_direct_field %}
+        var body {{ method.request_body_direct_ty }}
+        if err := xidlgohttp.DecodeBody(r, "{{ method.request_content_type }}", &body); err != nil {
+            xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
+            return
+        }
+        req.{{ method.request_body_direct_field }} = body
+    {%- endif %}
 {%- endif %}

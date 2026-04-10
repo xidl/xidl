@@ -28,6 +28,16 @@ fn jinja_else_branch_keeps_same_control_depth() {
 }
 
 #[test]
+fn jinja_set_assignment_does_not_open_block() {
+    let source = "{% if cond %}\n{% set ns = namespace(field_id=1) %}\n{% for field in fields %}\nvalue\n{% endfor %}\n{% endif %}";
+    let formatted = format_jinja_source(source).expect("format jinja");
+    assert_eq!(
+        formatted,
+        "{% if cond %}\n    {% set ns = namespace(field_id=1) %}\n    {% for field in fields %}\n        value\n    {% endfor %}\n{% endif %}\n"
+    );
+}
+
+#[test]
 fn idl_formatter_appends_trailing_newline() {
     let source = "struct Point {\n    int32 x;\n};";
     let formatted = format_idl_source(source).expect("format idl");

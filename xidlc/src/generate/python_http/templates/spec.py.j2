@@ -5,27 +5,27 @@ from dataclasses import dataclass
 from typing import Optional
 
 from xidl.http import (
-    Request,
-    Route,
-    RouteMetadata,
-    SecurityRequirement,
-    ServerStreamResponse,
-    StreamMetadata,
-    cookie_value,
-    encode_json_response,
-    encode_stream_response,
-    header_value,
-    path_value,
-    query_value,
-    read_json_body,
-    read_json_field,
+Request,
+Route,
+RouteMetadata,
+SecurityRequirement,
+ServerStreamResponse,
+StreamMetadata,
+cookie_value,
+encode_json_response,
+encode_stream_response,
+header_value,
+path_value,
+query_value,
+read_json_body,
+read_json_field,
 {%- if "read_json_value(" in body %}
     read_json_value,
 {%- endif %}
-    read_scalar,
-    require_accept,
-    require_content_type,
-    require_security,
+read_scalar,
+require_accept,
+require_content_type,
+require_security,
 )
 
 # generated http module: {{ module_name }}

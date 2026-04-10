@@ -47,6 +47,13 @@ repos:
         entry: bash -lc 'cd golang/xidlc-examples && go vet ./...'
         files: ^golang/xidlc-examples/.+\.go$
         pass_filenames: false
+      - id: jinjafmt
+        name: jinjafmt
+        language: system
+        types: [file]
+        entry: make fmt-jinja
+        files: \.rs$
+        pass_filenames: false
 
   - repo: local
     hooks:

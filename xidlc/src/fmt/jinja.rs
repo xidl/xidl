@@ -11,9 +11,9 @@ pub(super) fn normalize_jinja_indentation(input: &str) -> String {
             continue;
         }
         let is_control = trimmed.starts_with("{%") && trimmed.ends_with("%}");
-        let control_stmt = extract_jinja_control_statement(trimmed);
-        if let Some(statement) = control_stmt {
-            if is_jinja_control_end(statement) || is_jinja_control_mid(statement) {
+        let control_tag = parse_jinja_control_tag(trimmed);
+        if let Some(tag) = control_tag {
+            if is_jinja_control_end(tag.statement) || is_jinja_control_mid(tag.statement) {
                 control_depth = (control_depth - 1).max(0);
             }
         }
@@ -29,8 +29,8 @@ pub(super) fn normalize_jinja_indentation(input: &str) -> String {
         out.push_str(trimmed);
         out.push('\n');
         if is_control {
-            if let Some(statement) = control_stmt {
-                if is_jinja_control_start(statement) || is_jinja_control_mid(statement) {
+            if let Some(tag) = control_tag {
+                if is_jinja_control_start(tag) || is_jinja_control_mid(tag.statement) {
                     control_depth += 1;
                 }
             }
@@ -44,7 +44,13 @@ pub(super) fn normalize_jinja_indentation(input: &str) -> String {
     out
 }
 
-fn extract_jinja_control_statement(line: &str) -> Option<&str> {
+#[derive(Clone, Copy)]
+struct JinjaControlTag<'a> {
+    statement: &'a str,
+    body: &'a str,
+}
+
+fn parse_jinja_control_tag(line: &str) -> Option<JinjaControlTag<'_>> {
     if !(line.starts_with("{%") && line.ends_with("%}")) {
         return None;
     }
@@ -62,23 +68,15 @@ fn extract_jinja_control_statement(line: &str) -> Option<&str> {
     if let Some(rest) = body.strip_prefix('#') {
         body = rest.trim();
     }
-    body.split_whitespace().next()
+    let statement = body.split_whitespace().next()?;
+    Some(JinjaControlTag { statement, body })
 }
 
-fn is_jinja_control_start(statement: &str) -> bool {
+fn is_jinja_control_start(tag: JinjaControlTag<'_>) -> bool {
     matches!(
-        statement,
-        "for"
-            | "if"
-            | "with"
-            | "call"
-            | "macro"
-            | "filter"
-            | "block"
-            | "trans"
-            | "autoescape"
-            | "set"
-    )
+        tag.statement,
+        "for" | "if" | "with" | "call" | "macro" | "filter" | "block" | "trans" | "autoescape"
+    ) || (tag.statement == "set" && !tag.body.contains('='))
 }
 
 fn is_jinja_control_mid(statement: &str) -> bool {

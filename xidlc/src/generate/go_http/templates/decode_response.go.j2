@@ -1,24 +1,24 @@
 func decode{{ method.struct_prefix }}Response(resp *http.Response) ({{ method.response_struct }}, error) {
-	out := {{ method.response_struct }}{}
-{%- if method.response_header_decode %}
-{{ method.response_header_decode | indent(1, true) }}
-{%- endif %}
-{%- if method.response_cookie_decode %}
-{{ method.response_cookie_decode | indent(1, true) }}
-{%- endif %}
-{%- if method.response_body_struct %}
-	body := {{ method.response_body_struct }}{}
-	if err := xidlgohttp.MustCodecForMime("{{ method.response_content_type }}").Decode(resp.Body, &body); err != nil { return out, err }
-{%- if method.return_ty %}
-	out.Return = body.Return
-{%- endif %}
-{%- for param in method.response_body_params %}
-	out.{{ param.field_name }} = body.{{ param.field_name }}
-{%- endfor %}
-{%- elif method.response_body_direct_field %}
-	var body {{ method.response_body_direct_ty }}
-	if err := xidlgohttp.MustCodecForMime("{{ method.response_content_type }}").Decode(resp.Body, &body); err != nil { return out, err }
-	out.{{ method.response_body_direct_field }} = body
-{%- endif %}
-	return out, nil
+    out := {{ method.response_struct }}{}
+    {%- if method.response_header_decode %}
+        {{ method.response_header_decode | indent(1, true) }}
+    {%- endif %}
+    {%- if method.response_cookie_decode %}
+        {{ method.response_cookie_decode | indent(1, true) }}
+    {%- endif %}
+    {%- if method.response_body_struct %}
+        body := {{ method.response_body_struct }}{}
+        if err := xidlgohttp.MustCodecForMime("{{ method.response_content_type }}").Decode(resp.Body, &body); err != nil { return out, err }
+        {%- if method.return_ty %}
+            out.Return = body.Return
+        {%- endif %}
+        {%- for param in method.response_body_params %}
+            out.{{ param.field_name }} = body.{{ param.field_name }}
+        {%- endfor %}
+    {%- elif method.response_body_direct_field %}
+        var body {{ method.response_body_direct_ty }}
+        if err := xidlgohttp.MustCodecForMime("{{ method.response_content_type }}").Decode(resp.Body, &body); err != nil { return out, err }
+        out.{{ method.response_body_direct_field }} = body
+    {%- endif %}
+    return out, nil
 }

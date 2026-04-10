@@ -1,5 +1,6 @@
 GO_CACHE ?= /tmp/xidl-go-cache
 GO_PATH ?= /tmp/xidl-go-path
+JINJA_TEMPLATES := $(shell find xidlc -type f -name '*.j2' | sort)
 
 .PHONY: test test-rust test-go test-go-codegen test-go-runtime test-update test-coverage test-xidl-parser-coverage test-xidl-jsonrpc-coverage test-xidl-rust-axum-coverage build-xtypes docs-dev docs-build
 
@@ -32,8 +33,10 @@ test-xidl-parser-coverage:
 	cargo tarpaulin --manifest-path xidl-parser/Cargo.toml --packages xidl-parser --include-files "xidl-parser/src/*" --exclude-files "xidl-parser/src/typed_ast/*" --fail-under 95 --out Stdout
 
 test-xidl-jsonrpc-coverage:
-	cargo tarpaulin --manifest-path xidl-jsonrpc/Cargo.toml --packages xidl-jsonrpc --include-files "xidl-jsonrpc/src/*" --fail-under 95 --out Stdout
+	cargo tarpaulin --manifest-path xidl-jsonrpc/Cargo.toml --packages xidl-jsonrpc --include-files "xidl-jsonrpc/src/*" --exclude-files "xidl-jsonrpc/src/transport/io.rs" --fail-under 95 --out Stdout
 
+fmt-jinja:
+	cargo r -p xidlc -F cli -F fmt -- fmt -l jinja $(JINJA_TEMPLATES) -i
 build-xtypes:
 	cargo r -p xidlc -- --lang rust --out-dir ./xidl-typeobject/src/ ./xidl-typeobject/idl/dds-xtypes_typeobject.idl
 

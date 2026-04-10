@@ -40,9 +40,9 @@ function encodePathSegment(value: unknown): string {
 
 function encodePathCatchAll(value: unknown): string {
     return String(value)
-        .split("/")
-        .map((segment) => encodeURIComponent(segment))
-        .join("/");
+    .split("/")
+    .map((segment) => encodeURIComponent(segment))
+    .join("/");
 }
 
 function encodeQueryValue(value: unknown): string {
@@ -89,9 +89,9 @@ async function parseXidlError(resp: Response): Promise<XidlClientError> {
 }
 
 async function* sseJsonStream<T>(
-    fetchImpl: FetchLike,
-    url: string,
-    options: RequestInit,
+fetchImpl: FetchLike,
+url: string,
+options: RequestInit,
 ): AsyncIterable<T> {
     const headers = new Headers(options.headers ?? {});
     if (!headers.has("Accept")) {

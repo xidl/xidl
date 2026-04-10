@@ -4,6 +4,8 @@ use crate::{Error, Handler};
 use serde_json::Value;
 use std::net::SocketAddr;
 use std::sync::Arc;
+#[cfg(all(feature = "transport-ipc", unix))]
+use std::time::{SystemTime, UNIX_EPOCH};
 
 struct StubHandler;
 
@@ -37,6 +39,15 @@ impl Listener for BrokenPipeListener {
 
 struct SingleAcceptListener {
     accepted: tokio::sync::Mutex<bool>,
+}
+
+#[cfg(all(feature = "transport-ipc", unix))]
+fn unique_ipc_endpoint(label: &str) -> String {
+    let nanos = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("clock drift")
+        .as_nanos();
+    format!("ipc:///tmp/xjr-{label}-{}-{nanos}.sock", std::process::id())
 }
 
 #[async_trait::async_trait]
@@ -101,6 +112,22 @@ async fn builder_rejects_invalid_binding_configurations() {
         Err(err) => err,
     };
     assert!(matches!(err, Error::Protocol("listener already set")));
+
+    #[cfg(not(all(feature = "transport-ipc", unix)))]
+    {
+        let err = match Server::builder()
+            .with_service(StubHandler)
+            .serve_on("ipc://unsupported")
+            .await
+        {
+            Ok(_) => panic!("expected unsupported transport"),
+            Err(err) => err,
+        };
+        assert_eq!(
+            err.to_string(),
+            "io error: ipc transport requires `transport-ipc` feature"
+        );
+    }
 }
 
 #[tokio::test]
@@ -134,18 +161,32 @@ async fn builder_supports_io_builders_and_endpoint_shortcuts() {
         .unwrap();
     assert_eq!(server.endpoint(), Some("inproc://runtime-shortcut"));
 
-    let err = match Server::builder()
-        .with_service(StubHandler)
-        .serve_on("ipc://unsupported")
-        .await
+    #[cfg(all(feature = "transport-ipc", unix))]
     {
-        Ok(_) => panic!("expected unsupported transport"),
-        Err(err) => err,
-    };
-    assert_eq!(
-        err.to_string(),
-        "io error: ipc transport requires `transport-ipc` feature"
-    );
+        let endpoint = unique_ipc_endpoint("runtime-shortcut");
+        let server = Server::builder()
+            .with_service(StubHandler)
+            .build_on(&endpoint)
+            .await
+            .unwrap();
+        assert_eq!(server.endpoint(), Some(endpoint.as_str()));
+    }
+
+    #[cfg(not(all(feature = "transport-ipc", unix)))]
+    {
+        let err = match Server::builder()
+            .with_service(StubHandler)
+            .build_on("ipc://unsupported")
+            .await
+        {
+            Ok(_) => panic!("expected unsupported transport"),
+            Err(err) => err,
+        };
+        assert_eq!(
+            err.to_string(),
+            "io error: ipc transport requires `transport-ipc` feature"
+        );
+    }
 
     let result = Server::builder()
         .with_service(Arc::new(StubHandler))

@@ -140,8 +140,49 @@ async fn multi_handler_dispatches_and_bidi_routes() {
 async fn default_accepts_bidi_is_false() {
     let handler = UnaryOnlyHandler;
     assert!(!handler.accepts_bidi("anything"));
+    let err = handler.handle("anything", Value::Null).await.unwrap_err();
+    assert!(err.is_method_not_found());
     let (_client, server) = tokio::io::duplex(64);
     let err = handler
+        .handle_bidi(
+            "missing",
+            Value::Null,
+            crate::stream::open_bidi_server(server),
+        )
+        .await
+        .unwrap_err();
+    assert!(err.is_method_not_found());
+}
+
+#[tokio::test]
+async fn arc_handler_and_default_bidi_methods_delegate_correctly() {
+    let handler = Arc::new(EchoHandler);
+    assert_eq!(
+        handler.handle("echo", json!({"ok": true})).await.unwrap(),
+        json!({"ok": true})
+    );
+
+    let (mut client, server) = tokio::io::duplex(128);
+    handler
+        .handle_bidi(
+            "bidi",
+            json!({"via": "arc"}),
+            crate::stream::open_bidi_server(server),
+        )
+        .await
+        .unwrap();
+
+    use tokio::io::AsyncBufReadExt;
+    let mut line = String::new();
+    tokio::io::BufReader::new(&mut client)
+        .read_line(&mut line)
+        .await
+        .unwrap();
+    assert_eq!(line, "{\"params\":{\"via\":\"arc\"}}\n");
+
+    let default_bidi: &dyn Handler = &UnaryOnlyHandler;
+    let (_client, server) = tokio::io::duplex(64);
+    let err = default_bidi
         .handle_bidi(
             "missing",
             Value::Null,

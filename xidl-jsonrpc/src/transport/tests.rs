@@ -2,9 +2,20 @@ use crate::Io;
 use crate::transport::{
     BoundListener, InprocListener, IoListener, Listener, bind, connect, connect_inproc,
 };
+#[cfg(all(feature = "transport-ipc", unix))]
+use std::time::{SystemTime, UNIX_EPOCH};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 struct EndpointlessListener;
+
+#[cfg(all(feature = "transport-ipc", unix))]
+fn unique_ipc_endpoint(label: &str) -> String {
+    let nanos = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("clock drift")
+        .as_nanos();
+    format!("ipc:///tmp/xjr-{label}-{}-{nanos}.sock", std::process::id())
+}
 
 #[async_trait::async_trait]
 impl Listener for EndpointlessListener {
@@ -86,6 +97,15 @@ async fn io_listener_accepts_once_and_then_breaks() {
     writer_task.await.unwrap();
 }
 
+#[cfg(tarpaulin_include)]
+#[tokio::test]
+async fn io_listener_tarpaulin_stub_reports_broken_pipe() {
+    let (reader, writer) = tokio::io::duplex(16);
+    let listener = IoListener::from_io(Io::new(reader, writer));
+    let err = listener.accept().await.unwrap_err();
+    assert_eq!(err.kind(), std::io::ErrorKind::BrokenPipe);
+}
+
 #[tokio::test]
 async fn inproc_listener_supports_pending_and_duplicate_bind_detection() {
     let endpoint = "transport-tests-pending";
@@ -126,13 +146,87 @@ async fn endpoint_bind_and_connect_cover_supported_and_unsupported_schemes() {
     server.read_to_string(&mut buf).await.unwrap();
     assert_eq!(buf, "hi");
 
-    for endpoint in [
-        "ipc://unsupported",
-        "quic://127.0.0.1:9999",
-        "tls://127.0.0.1:9999",
-        "ws://127.0.0.1:9999",
-        "127.0.0.1:9999",
-    ] {
+    #[cfg(all(feature = "transport-ipc", unix))]
+    {
+        let endpoint = unique_ipc_endpoint("endpoint-connect");
+        let bound = bind(&endpoint).await.unwrap();
+        let (listener, bound_endpoint) = bound.into_parts();
+        assert_eq!(bound_endpoint, endpoint);
+
+        let client_task = tokio::spawn({
+            let endpoint = endpoint.clone();
+            async move {
+                let mut client = connect(&endpoint).await.unwrap();
+                client.write_all(b"ipc").await.unwrap();
+                client.shutdown().await.unwrap();
+            }
+        });
+
+        let (mut server, _peer) = listener.accept().await.unwrap();
+        let mut buf = String::new();
+        server.read_to_string(&mut buf).await.unwrap();
+        assert_eq!(buf, "ipc");
+        client_task.await.unwrap();
+    }
+
+    #[cfg(not(all(feature = "transport-ipc", unix)))]
+    for endpoint in ["ipc://unsupported"] {
+        let err = match bind(endpoint).await {
+            Ok(_) => panic!("expected unsupported bind"),
+            Err(err) => err,
+        };
+        assert_eq!(err.kind(), std::io::ErrorKind::Unsupported);
+        let err = match connect(endpoint).await {
+            Ok(_) => panic!("expected unsupported connect"),
+            Err(err) => err,
+        };
+        assert_eq!(err.kind(), std::io::ErrorKind::Unsupported);
+    }
+
+    #[cfg(not(feature = "transport-quic"))]
+    for endpoint in ["quic://127.0.0.1:9999"] {
+        let err = match bind(endpoint).await {
+            Ok(_) => panic!("expected unsupported bind"),
+            Err(err) => err,
+        };
+        assert_eq!(err.kind(), std::io::ErrorKind::Unsupported);
+        let err = match connect(endpoint).await {
+            Ok(_) => panic!("expected unsupported connect"),
+            Err(err) => err,
+        };
+        assert_eq!(err.kind(), std::io::ErrorKind::Unsupported);
+    }
+
+    #[cfg(not(feature = "transport-tls"))]
+    for endpoint in ["tls://127.0.0.1:9999"] {
+        let err = match bind(endpoint).await {
+            Ok(_) => panic!("expected unsupported bind"),
+            Err(err) => err,
+        };
+        assert_eq!(err.kind(), std::io::ErrorKind::Unsupported);
+        let err = match connect(endpoint).await {
+            Ok(_) => panic!("expected unsupported connect"),
+            Err(err) => err,
+        };
+        assert_eq!(err.kind(), std::io::ErrorKind::Unsupported);
+    }
+
+    #[cfg(not(feature = "transport-websocket"))]
+    for endpoint in ["ws://127.0.0.1:9999"] {
+        let err = match bind(endpoint).await {
+            Ok(_) => panic!("expected unsupported bind"),
+            Err(err) => err,
+        };
+        assert_eq!(err.kind(), std::io::ErrorKind::Unsupported);
+        let err = match connect(endpoint).await {
+            Ok(_) => panic!("expected unsupported connect"),
+            Err(err) => err,
+        };
+        assert_eq!(err.kind(), std::io::ErrorKind::Unsupported);
+    }
+
+    #[cfg(not(feature = "transport-tcp"))]
+    for endpoint in ["127.0.0.1:9999"] {
         let err = match bind(endpoint).await {
             Ok(_) => panic!("expected unsupported bind"),
             Err(err) => err,

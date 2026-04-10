@@ -1,25 +1,25 @@
 {%- if method.response_header_encode %}
-{{ method.response_header_encode | indent(1, true) }}
+    {{ method.response_header_encode | indent(1, true) }}
 {%- endif %}
 {%- if method.response_cookie_encode %}
-{{ method.response_cookie_encode | indent(1, true) }}
+    {{ method.response_cookie_encode | indent(1, true) }}
 {%- endif %}
 {%- if method.response_body_struct %}
-	respBody := {{ method.response_body_struct }}{
-{%- if method.return_ty %}
-		Return: {{ value }}.Return,
-{%- endif %}
-{%- for param in method.response_body_params %}
-		{{ param.field_name }}: {{ value }}.{{ param.field_name }},
-{%- endfor %}
-	}
-	if err := xidlgohttp.EncodeBody(w, "{{ method.response_content_type }}", respBody); err != nil {
-		xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
-	}
+    respBody := {{ method.response_body_struct }}{
+        {%- if method.return_ty %}
+            Return: {{ value }}.Return,
+        {%- endif %}
+        {%- for param in method.response_body_params %}
+            {{ param.field_name }}: {{ value }}.{{ param.field_name }},
+        {%- endfor %}
+    }
+    if err := xidlgohttp.EncodeBody(w, "{{ method.response_content_type }}", respBody); err != nil {
+        xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+    }
 {%- elif method.response_body_direct_field %}
-	if err := xidlgohttp.EncodeBody(w, "{{ method.response_content_type }}", {{ value }}.{{ method.response_body_direct_field }}); err != nil {
-		xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
-	}
+    if err := xidlgohttp.EncodeBody(w, "{{ method.response_content_type }}", {{ value }}.{{ method.response_body_direct_field }}); err != nil {
+        xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
+    }
 {%- else %}
-	w.WriteHeader(http.StatusNoContent)
+    w.WriteHeader(http.StatusNoContent)
 {%- endif %}
