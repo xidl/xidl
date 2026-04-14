@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod test;
+
 use serde_json::Value;
 use thiserror::Error;
 
@@ -73,6 +76,3 @@ impl Error {
         )
     }
 }
-
-#[cfg(test)]
-mod test;

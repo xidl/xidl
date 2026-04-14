@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod test;
+
 use crate::line_io::{read_json_line, write_json_line};
 use crate::{Error, ErrorCode, JSONRPC_VERSION, RpcRequest, RpcResponse};
 use serde::Serialize;
@@ -57,6 +60,3 @@ where
         Ok(serde_json::from_value(result)?)
     }
 }
-
-#[cfg(test)]
-mod test;

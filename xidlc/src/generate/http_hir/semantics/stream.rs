@@ -1,9 +1,7 @@
 use serde::{Deserialize, Serialize};
 use xidl_parser::hir;
 
-use super::semantics_annotations::{
-    annotation_name, annotation_params, normalize_annotation_params,
-};
+use super::annotations::{annotation_name, annotation_params, normalize_annotation_params};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum HttpStreamKind {

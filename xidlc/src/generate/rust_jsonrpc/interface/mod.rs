@@ -1,20 +1,11 @@
-#[path = "interface_annotations.rs"]
 mod interface_annotations;
-#[path = "interface_attr.rs"]
 mod interface_attr;
-#[path = "interface_attr_support.rs"]
 mod interface_attr_support;
-#[path = "interface_model.rs"]
 mod interface_model;
-#[path = "interface_names.rs"]
 mod interface_names;
-#[path = "interface_ops.rs"]
 mod interface_ops;
-#[path = "interface_ops_support.rs"]
 mod interface_ops_support;
-#[path = "interface_render.rs"]
 mod interface_render;
-#[path = "interface_types.rs"]
 mod interface_types;
 
 use crate::error::IdlcResult;

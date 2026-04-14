@@ -1,18 +1,10 @@
-#[path = "interface_binding.rs"]
 mod interface_binding;
-#[path = "interface_client.rs"]
 mod interface_client;
-#[path = "interface_meta.rs"]
 mod interface_meta;
-#[path = "interface_meta_support.rs"]
 mod interface_meta_support;
-#[path = "interface_server.rs"]
 mod interface_server;
-#[path = "interface_server_support.rs"]
 mod interface_server_support;
-#[path = "interface_templates.rs"]
 mod interface_templates;
-#[path = "interface_types.rs"]
 mod interface_types;
 
 use crate::error::IdlcResult;

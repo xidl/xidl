@@ -9,6 +9,33 @@ keywords.workspace = true
 categories.workspace = true
 repository.workspace = true
 
+[features]
+default = ["tokio", "transport-all"]
+tokio = ["dep:tokio"]
+transport-all = [
+  "transport-ipc",
+  "transport-tcp",
+  "transport-quic",
+  "transport-tls",
+  "transport-websocket",
+]
+transport-ipc = ["transport-tcp"]
+transport-tcp = ["tokio", "tokio/net"]
+transport-quic = ["transport-tcp", "dep:s2n-quic", "dep:url"]
+transport-tls = [
+  "transport-tcp",
+  "dep:tokio-rustls",
+  "dep:rustls",
+  "dep:rustls-pemfile",
+  "dep:url",
+]
+transport-websocket = [
+  "transport-tcp",
+  "transport-tls",
+  "dep:tokio-tungstenite",
+  "dep:url",
+]
+
 [lints]
 workspace = true
 
@@ -42,32 +69,6 @@ tokio-rustls = { version = "0.26", optional = true }
 rustls = { version = "0.23", optional = true }
 rustls-pemfile = { version = "2", optional = true }
 
-[features]
-default = ["tokio"]
-tokio = ["dep:tokio"]
-transport-all = [
-  "transport-ipc",
-  "transport-tcp",
-  "transport-quic",
-  "transport-tls",
-  "transport-websocket",
-]
-transport-ipc = ["transport-tcp"]
-transport-tcp = ["tokio", "tokio/net"]
-transport-quic = ["transport-tcp", "dep:s2n-quic", "dep:url"]
-transport-tls = [
-  "transport-tcp",
-  "dep:tokio-rustls",
-  "dep:rustls",
-  "dep:rustls-pemfile",
-  "dep:url",
-]
-transport-websocket = [
-  "transport-tcp",
-  "transport-tls",
-  "dep:tokio-tungstenite",
-  "dep:url",
-]
 
 [[test]]
 name = "serve_on"

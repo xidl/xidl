@@ -1,12 +1,7 @@
-#[path = "spec_binding.rs"]
 mod spec_binding;
-#[path = "spec_context.rs"]
 mod spec_context;
-#[path = "spec_meta.rs"]
 mod spec_meta;
-#[path = "spec_render.rs"]
 mod spec_render;
-#[path = "spec_types.rs"]
 mod spec_types;
 
 use crate::error::{IdlcError, IdlcResult};

@@ -1,12 +1,7 @@
-#[path = "actions.rs"]
 mod actions;
-#[path = "formatter.rs"]
 mod formatter;
-#[path = "helpers.rs"]
 mod helpers;
-#[path = "indent.rs"]
 mod indent;
-#[path = "jinja.rs"]
 mod jinja;
 #[cfg(test)]
 mod tests;

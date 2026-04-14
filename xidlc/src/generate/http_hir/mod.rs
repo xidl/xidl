@@ -1,16 +1,9 @@
-#[path = "http_hir_attr.rs"]
 mod http_hir_attr;
-#[path = "http_hir_codegen.rs"]
 mod http_hir_codegen;
-#[path = "http_hir_model.rs"]
 mod http_hir_model;
-#[path = "http_hir_project.rs"]
 mod http_hir_project;
-#[path = "http_hir_project_params.rs"]
 mod http_hir_project_params;
-#[path = "http_hir_route.rs"]
 mod http_hir_route;
-#[path = "http_hir_validate.rs"]
 mod http_hir_validate;
 
 pub mod semantics;

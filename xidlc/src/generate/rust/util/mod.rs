@@ -1,12 +1,7 @@
-#[path = "util_annotation_parse.rs"]
 mod util_annotation_parse;
-#[path = "util_annotations.rs"]
 mod util_annotations;
-#[path = "util_declarators.rs"]
 mod util_declarators;
-#[path = "util_derives.rs"]
 mod util_derives;
-#[path = "util_types.rs"]
 mod util_types;
 
 #[allow(unused_imports)]

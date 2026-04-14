@@ -9,7 +9,7 @@ struct ArtifactHir {
 struct ArtifactHttpHir {
     string lang;
     ::xidl_parser::hir::Specification hir;
-    ::xidlc::generate::http_hir::HttpHirDocument http_hir;
+    crate::generate::http_hir::HttpHirDocument http_hir;
     ::xidl_parser::hir::ParserProperties props;
 };
 

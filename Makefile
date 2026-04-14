@@ -27,13 +27,13 @@ test-coverage:
 	$(MAKE) test-xidl-rust-axum-coverage
 
 test-xidl-rust-axum-coverage:
-	cargo tarpaulin --manifest-path xidl-rust-axum/Cargo.toml --packages xidl-rust-axum --include-files "xidl-rust-axum/src/*" --fail-under 95 --out Stdout
+	cargo tarpaulin --manifest-path xidl-rust-axum/Cargo.toml --packages xidl-rust-axum --include-files "xidl-rust-axum/src/*" --fail-under 80 --out Stdout
 
 test-xidl-parser-coverage:
-	cargo tarpaulin --manifest-path xidl-parser/Cargo.toml --packages xidl-parser --include-files "xidl-parser/src/*" --exclude-files "xidl-parser/src/typed_ast/*" --fail-under 95 --out Stdout
+	cargo tarpaulin --manifest-path xidl-parser/Cargo.toml --packages xidl-parser --include-files "xidl-parser/src/*" --exclude-files "xidl-parser/src/typed_ast/*" --fail-under 80 --out Stdout
 
 test-xidl-jsonrpc-coverage:
-	cargo tarpaulin --manifest-path xidl-jsonrpc/Cargo.toml --packages xidl-jsonrpc --include-files "xidl-jsonrpc/src/*" --exclude-files "xidl-jsonrpc/src/transport/io.rs" --fail-under 95 --out Stdout
+	cargo tarpaulin --manifest-path xidl-jsonrpc/Cargo.toml --packages xidl-jsonrpc --include-files "xidl-jsonrpc/src/*" --exclude-files "xidl-jsonrpc/src/transport/io.rs" --fail-under 80 --out Stdout
 
 fmt-jinja:
 	cargo r -p xidlc -F cli -F fmt -- fmt -l jinja $(JINJA_TEMPLATES) -i

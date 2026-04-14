@@ -1,8 +1,5 @@
-#[path = "spec_render_interface.rs"]
 mod spec_render_interface;
-#[path = "spec_render_types.rs"]
 mod spec_render_types;
-#[path = "spec_types.rs"]
 mod spec_types;
 
 use crate::error::IdlcResult;

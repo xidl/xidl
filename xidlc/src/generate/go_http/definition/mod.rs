@@ -1,8 +1,5 @@
-#[path = "definition_emit.rs"]
 mod definition_emit;
-#[path = "definition_format.rs"]
 mod definition_format;
-#[path = "definition_templates.rs"]
 mod definition_templates;
 
 use convert_case::Casing;

@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 use xidl_parser::hir;
 
-use super::semantics_annotations::{
+use super::annotations::{
     annotation_name, annotation_params, normalize_annotation_params, parse_string_array,
 };
 

@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod test;
+
 use crate::Error;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
@@ -27,6 +30,3 @@ where
     }
     Ok(Some(serde_json::from_str(&line)?))
 }
-
-#[cfg(test)]
-mod test;

@@ -1,14 +1,8 @@
-#[path = "definition_attr.rs"]
 mod definition_attr;
-#[path = "definition_names.rs"]
 mod definition_names;
-#[path = "definition_render.rs"]
 mod definition_render;
-#[path = "definition_support.rs"]
 mod definition_support;
-#[path = "definition_type_render.rs"]
 mod definition_type_render;
-#[path = "definition_types.rs"]
 mod definition_types;
 
 use crate::error::IdlcResult;

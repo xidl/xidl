@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod tests;
+
 use crate::Error;
 use crate::line_io::{read_json_line, write_json_line};
 use futures_core::Stream;
@@ -235,6 +238,3 @@ where
     ));
     Reader::new(reader_stream)
 }
-
-#[cfg(test)]
-mod tests;

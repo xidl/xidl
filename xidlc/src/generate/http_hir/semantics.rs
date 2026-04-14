@@ -1,25 +1,21 @@
-#[path = "semantics_annotation_parse.rs"]
-mod semantics_annotation_parse;
-#[path = "semantics_annotations.rs"]
-mod semantics_annotations;
-#[path = "semantics_security.rs"]
-mod semantics_security;
-#[path = "semantics_stream.rs"]
-mod semantics_stream;
+mod annotation_parse;
+mod annotations;
+mod security;
+mod stream;
 
 use jiff::{Timestamp, civil, tz::TimeZone};
 use serde::{Deserialize, Serialize};
 use xidl_parser::hir;
 
-pub use self::semantics_annotations::{
+pub use self::annotations::{
     annotation_name, annotation_params, effective_media_type, has_annotation,
     has_optional_annotation, normalize_annotation_params,
 };
-pub use self::semantics_security::{
+pub use self::security::{
     HttpApiKeyLocation, HttpSecurityOrigin, HttpSecurityProfile, HttpSecurityRequirement,
     effective_security, effective_security_with_origin,
 };
-pub use self::semantics_stream::{
+pub use self::stream::{
     HttpStreamCodec, HttpStreamConfig, HttpStreamKind, HttpStreamTargetSupport, http_stream_config,
     validate_http_stream_method, validate_http_stream_target,
 };
@@ -69,8 +65,7 @@ pub fn validate_http_annotations(
     annotations: &[hir::Annotation],
 ) -> Result<(), String> {
     let _ = deprecated_info(annotations).map_err(|err| format!("{target}: {err}"))?;
-    let _ = semantics_security::collect_security(annotations)
-        .map_err(|err| format!("{target}: {err}"))?;
+    let _ = security::collect_security(annotations).map_err(|err| format!("{target}: {err}"))?;
     validate_http_media_types(target, annotations)?;
     Ok(())
 }
@@ -83,8 +78,7 @@ fn validate_http_media_types(target: &str, annotations: &[hir::Annotation]) -> R
         if !name.eq_ignore_ascii_case("Consumes") && !name.eq_ignore_ascii_case("Produces") {
             continue;
         }
-        let Some(value) =
-            semantics_annotations::annotation_value(std::slice::from_ref(annotation), name)
+        let Some(value) = annotations::annotation_value(std::slice::from_ref(annotation), name)
         else {
             continue;
         };
