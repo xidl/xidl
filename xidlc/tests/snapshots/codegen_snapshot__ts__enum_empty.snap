@@ -399,15 +399,8 @@ import{z}from"zod";
 ===============
 enum_empty.rs
 ===============
-#[derive(
-Debug,
-Clone,
-Copy,
-PartialEq,
-Eq
-)]
-pub enum A{
-}
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum A {}
 ===============
 enum_empty.zod.ts
 ===============

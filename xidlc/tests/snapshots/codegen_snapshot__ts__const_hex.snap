@@ -398,7 +398,7 @@ import{z}from"zod";
 ===============
 const_hex.rs
 ===============
-pub const a:i32 = 0xff;
+pub const a: i32 = 0xff;
 ===============
 const_hex.zod.ts
 ===============

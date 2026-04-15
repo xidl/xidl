@@ -398,7 +398,7 @@ import{z}from"zod";
 ===============
 const_dec.rs
 ===============
-pub const a:i32 = 10;
+pub const a: i32 = 10;
 ===============
 const_dec.zod.ts
 ===============

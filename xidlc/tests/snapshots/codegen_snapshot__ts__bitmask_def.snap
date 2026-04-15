@@ -401,31 +401,25 @@ import{z}from"zod";
 ===============
 bitmask_def.rs
 ===============
-pub struct A{
-    pub value:u32,
+pub struct A {
+    pub value: u32,
 }
-
-impl A{
+impl A {}
+pub struct A {
+    pub value: u32,
 }
-
-pub struct A{
-    pub value:u32,
+impl A {
+    pub const A: u32 = 1u32 << 0;
+    pub const B: u32 = 1u32 << 1;
+    pub const C: u32 = 1u32 << 2;
 }
-
-impl A{
-    pub const A:u32 = 1u32<<0;
-    pub const B:u32 = 1u32<<1;
-    pub const C:u32 = 1u32<<2;
+pub struct A {
+    pub value: u32,
 }
-
-pub struct A{
-    pub value:u32,
-}
-
-impl A{
-    pub const A:u32 = 1u32<<0;
-    pub const B:u32 = 1u32<<1;
-    pub const C:u32 = 1u32<<2;
+impl A {
+    pub const A: u32 = 1u32 << 0;
+    pub const B: u32 = 1u32 << 1;
+    pub const C: u32 = 1u32 << 2;
 }
 ===============
 bitmask_def.zod.ts

@@ -5,9 +5,7 @@ expression: output
 ===============
 option.rs
 ===============
-pub struct A{
-    pub a:Option<String>,
+pub struct A {
+    pub a: Option<String>,
 }
-
-impl A{
-}
+impl A {}

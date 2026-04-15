@@ -947,14 +947,12 @@ typeof HttpDefaultsServiceGetUserAliasRequestSchema
 ===============
 http_defaults.rs
 ===============
-#[derive(Debug,::serde::Serialize,::serde::Deserialize)]
-pub struct CreateUserRequest{
-    pub name:String,
-    pub age:u32,
+#[derive(Debug, ::serde::Serialize, ::serde::Deserialize)]
+pub struct CreateUserRequest {
+    pub name: String,
+    pub age: u32,
 }
-
-impl CreateUserRequest{
-}
+impl CreateUserRequest {}
 ===============
 http_defaults.zod.ts
 ===============

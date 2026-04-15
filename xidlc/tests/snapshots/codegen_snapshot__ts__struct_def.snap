@@ -436,61 +436,36 @@ import{z}from"zod";
 ===============
 struct_def.rs
 ===============
-pub struct A{
+pub struct A {}
+impl A {}
+pub struct A {
+    pub a: i32,
 }
-
-impl A{
-}
-
-pub struct A{
-    pub a:i32,
-}
-
-impl A{
-}
-
-pub struct A{
+impl A {}
+pub struct A {
     pub a: ::A::b,
 }
-
-impl A{
+impl A {}
+pub struct A {
+    pub base: B,
 }
-
-pub struct A{
-    pub base:B,
+impl A {}
+pub struct _A {}
+impl _A {}
+pub struct _Custom {
+    pub var_inner: Inner,
 }
-
-impl A{
-}
-
-pub struct _A{
-}
-
-impl _A{
-}
-
-pub struct _Custom{
-    pub var_inner:Inner,
-}
-
-impl _Custom{
-}
-
-pub struct HelloWorld{
-    pub a:u8,
-    pub b:[u16;
-    10],
-    pub c:[[String;
-    20];
-    10],
-    pub c:Vec<u8>,
-    pub d:String,
-    pub d:String,
+impl _Custom {}
+pub struct HelloWorld {
+    pub a: u8,
+    pub b: [u16; 10],
+    pub c: [[String; 20]; 10],
+    pub c: Vec<u8>,
+    pub d: String,
+    pub d: String,
     pub d: ::serde_json::Value,
 }
-
-impl HelloWorld{
-}
+impl HelloWorld {}
 ===============
 struct_def.zod.ts
 ===============

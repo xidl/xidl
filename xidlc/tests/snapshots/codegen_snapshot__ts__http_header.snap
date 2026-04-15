@@ -644,27 +644,18 @@ export namespace test{
 ===============
 http_header.rs
 ===============
-pub mod test{
-    #[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq
-    )]
-    pub enum Status{
+pub mod test {
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum Status {
         OK,
-        FAILED
+        FAILED,
     }
-
-    pub struct User{
-        pub id:u32,
-        pub name:String,
-        pub status:Status,
+    pub struct User {
+        pub id: u32,
+        pub name: String,
+        pub status: Status,
     }
-
-    impl User{
-    }
+    impl User {}
 }
 ===============
 http_header.zod.ts

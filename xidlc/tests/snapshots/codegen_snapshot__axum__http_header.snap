@@ -5,173 +5,168 @@ expression: output
 ===============
 http_header.rs
 ===============
-pub mod test{
+pub mod test {
     #[async_trait::async_trait]
-    pub trait HeaderService{
+    pub trait HeaderService {
         async fn get_user(
-        &self,
-        req:xidl_rust_axum::Request<HeaderServiceGetUserRequest>
-        )->Result<User,xidl_rust_axum::Error>;
+            &self,
+            req: xidl_rust_axum::Request<HeaderServiceGetUserRequest>,
+        ) -> Result<User, xidl_rust_axum::Error>;
         async fn create_user(
-        &self,
-        req:xidl_rust_axum::Request<HeaderServiceCreateUserRequest>
-        )->Result<(),xidl_rust_axum::Error>;
+            &self,
+            req: xidl_rust_axum::Request<HeaderServiceCreateUserRequest>,
+        ) -> Result<(), xidl_rust_axum::Error>;
     }
-
-    #[derive(::serde::Serialize,::serde::Deserialize)]
-    struct HeaderServiceGetUserPath{
-        id:u32,
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    struct HeaderServiceGetUserPath {
+        id: u32,
     }
-
-    #[derive(::serde::Serialize,::serde::Deserialize)]
-    pub struct HeaderServiceGetUserRequest{
-        pub id:u32,
-        pub req_id:String,
-        pub flags:Vec<String>,
-        pub age:u32,
-        pub session_id:String,
-        pub prefs:Vec<String>,
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    pub struct HeaderServiceGetUserRequest {
+        pub id: u32,
+        pub req_id: String,
+        pub flags: Vec<String>,
+        pub age: u32,
+        pub session_id: String,
+        pub prefs: Vec<String>,
     }
-
-    #[derive(::serde::Serialize,::serde::Deserialize)]
-    struct HeaderServiceCreateUserBody{
-        #[serde(default,deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null")]
-
-        name:String,
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    struct HeaderServiceCreateUserBody {
+        #[serde(
+            default,
+            deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null"
+        )]
+        name: String,
     }
-
-    #[derive(::serde::Serialize,::serde::Deserialize)]
-    pub struct HeaderServiceCreateUserRequest{
-        pub token:String,
-        pub session_id:String,
-        pub name:String,
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    pub struct HeaderServiceCreateUserRequest {
+        pub token: String,
+        pub session_id: String,
+        pub name: String,
     }
-
-    pub struct HeaderServiceServer<T>{
+    pub struct HeaderServiceServer<T> {
         inner: ::std::sync::Arc<T>,
     }
-
-    impl<T>HeaderServiceServer<T>
+    impl<T> HeaderServiceServer<T>
     where
-    T:HeaderService+Send+Sync+'static,
+        T: HeaderService + Send + Sync + 'static,
     {
-        pub fn new(inner:T)->Self{
-            Self{
+        pub fn new(inner: T) -> Self {
+            Self {
                 inner: ::std::sync::Arc::new(inner),
             }
         }
-
-        pub fn from_arc(inner: ::std::sync::Arc<T>)->Self{
-            Self{
-                inner}
+        pub fn from_arc(inner: ::std::sync::Arc<T>) -> Self {
+            Self { inner }
         }
-
-        pub fn router(self)->xidl_rust_axum::axum::Router{
+        pub fn router(self) -> xidl_rust_axum::axum::Router {
             let svc = self.inner;
             xidl_rust_axum::axum::Router::new()
-
-            .route("/v1/headers/{id}",xidl_rust_axum::axum::routing::get(Self::get_user))
-
-            .route("/v1/headers",xidl_rust_axum::axum::routing::post(Self::create_user))
-
-            .with_state(svc)
+                .route(
+                    "/v1/headers/{id}",
+                    xidl_rust_axum::axum::routing::get(Self::get_user),
+                )
+                .route(
+                    "/v1/headers",
+                    xidl_rust_axum::axum::routing::post(Self::create_user),
+                )
+                .with_state(svc)
         }
-
-        #[allow(clippy::let_and_return,clippy::needless_return)]
+        #[allow(clippy::let_and_return, clippy::needless_return)]
         async fn get_user(
-        ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
-        headers: ::xidl_rust_axum::axum::http::HeaderMap,
-        ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<HeaderServiceGetUserPath>
-        )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
-            if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            ::xidl_rust_axum::axum::extract::State(
+                svc,
+            ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+            headers: ::xidl_rust_axum::axum::http::HeaderMap,
+            ::xidl_rust_axum::axum::extract::Path(
+                path,
+            ): ::xidl_rust_axum::axum::extract::Path<HeaderServiceGetUserPath>,
+        ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+            if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
                 return Err(xidl_rust_axum::Error::not_acceptable());
             }
-
-            let HeaderServiceGetUserPath{
-
-            id,
-
-            } = path;
-            let req_id:String = match headers.get("X-Req-Id"){
+            let HeaderServiceGetUserPath { id } = path;
+            let req_id: String = match headers.get("X-Req-Id") {
                 Some(header_value) => {
                     let header_str = header_value
-                    .to_str()
-                    .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
+                        .to_str()
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            400,
+                            format!("{err:?}"),
+                        ))?;
                     header_str.to_string()
                 }
                 None => ::core::default::Default::default(),
-
             };
-            let mut flags:Vec<String> = Vec::new();
-            for header_value in headers.get_all("X-Flags").iter(){
+            let mut flags: Vec<String> = Vec::new();
+            for header_value in headers.get_all("X-Flags").iter() {
                 let header_str = header_value
-                .to_str()
-                .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
-                let parsed:String = header_str.to_string();
+                    .to_str()
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                let parsed: String = header_str.to_string();
                 flags.push(parsed);
             }
-
-            if flags.is_empty(){
-                let flags:Vec<String> = ::core::default::Default::default();
-
-            }else{
-                let flags:Vec<String> = flags;
+            if flags.is_empty() {
+                let flags: Vec<String> = ::core::default::Default::default();
+            } else {
+                let flags: Vec<String> = flags;
             }
-
-            let age:u32 = match headers.get("X-Age"){
+            let age: u32 = match headers.get("X-Age") {
                 Some(header_value) => {
                     let header_str = header_value
-                    .to_str()
-                    .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
-                    header_str.parse()
-                    .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?
+                        .to_str()
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            400,
+                            format!("{err:?}"),
+                        ))?;
+                    header_str
+                        .parse()
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            400,
+                            format!("{err:?}"),
+                        ))?
                 }
                 None => ::core::default::Default::default(),
-
             };
-            let mut cookie_map: ::std::collections::HashMap<String,Vec<String>> = ::std::collections::HashMap::new();
-            for header_value in headers.get_all("cookie").iter(){
+            let mut cookie_map: ::std::collections::HashMap<String, Vec<String>> = ::std::collections::HashMap::new();
+            for header_value in headers.get_all("cookie").iter() {
                 let cookie_str = header_value
-                .to_str()
-                .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
-                for part in cookie_str.split(';'){
+                    .to_str()
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                for part in cookie_str.split(';') {
                     let part = part.trim();
-                    if part.is_empty(){
+                    if part.is_empty() {
                         continue;
                     }
-                    let mut iter = part.splitn(2,'=');
+                    let mut iter = part.splitn(2, '=');
                     let name = iter.next().unwrap_or("").trim();
-                    if name.is_empty(){
+                    if name.is_empty() {
                         continue;
                     }
                     let value = iter.next().unwrap_or("").trim().to_string();
                     cookie_map.entry(name.to_string()).or_default().push(value);
                 }
             }
-
-            let session_id:String = match cookie_map
-            .get("sid")
-            .and_then(|values|values.first()){
+            let session_id: String = match cookie_map
+                .get("sid")
+                .and_then(|values| values.first())
+            {
                 Some(value) => value.to_string(),
                 None => ::core::default::Default::default(),
-
             };
-            let mut prefs:Vec<String> = Vec::new();
-            if let Some(values) = cookie_map.get("pref"){
-                for value in values{
-                    let parsed:String = value.to_string();
+            let mut prefs: Vec<String> = Vec::new();
+            if let Some(values) = cookie_map.get("pref") {
+                for value in values {
+                    let parsed: String = value.to_string();
                     prefs.push(parsed);
                 }
             }
-
-            if prefs.is_empty(){
-                let prefs:Vec<String> = ::core::default::Default::default();
-
-            }else{
-                let prefs:Vec<String> = prefs;
+            if prefs.is_empty() {
+                let prefs: Vec<String> = ::core::default::Default::default();
+            } else {
+                let prefs: Vec<String> = prefs;
             }
-
-            let data = HeaderServiceGetUserRequest{
+            let data = HeaderServiceGetUserRequest {
                 id,
                 req_id,
                 flags,
@@ -179,342 +174,380 @@ pub mod test{
                 session_id,
                 prefs,
             };
-            let req = ::xidl_rust_axum::Request::new(headers,data);
-            let mut resp = match svc.get_user(req).await{
+            let req = ::xidl_rust_axum::Request::new(headers, data);
+            let mut resp = match svc.get_user(req).await {
                 Ok(resp_value) => {
                     let mut resp = {
-                        let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                        .to_vec(&resp_value)?;
+                        let body = xidl_rust_axum::SerializeFactory::new(
+                                "application/json",
+                            )
+                            .to_vec(&resp_value)?;
                         ::xidl_rust_axum::axum::response::Response::builder()
-                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
-                        .header(
-                        ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                        "application/json",
-                        )
-                        .body(::xidl_rust_axum::axum::body::Body::from(body))
-                        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?
-                    }
-                    ;
+                            .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                            .header(
+                                ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                                "application/json",
+                            )
+                            .body(::xidl_rust_axum::axum::body::Body::from(body))
+                            .map_err(|err| xidl_rust_axum::Error::new(
+                                500,
+                                format!("{err:?}"),
+                            ))?
+                    };
                     resp
                 }
-                Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
-
+                Err(err) => {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+                }
             };
             Ok(resp)
         }
-
-        #[allow(clippy::let_and_return,clippy::needless_return)]
+        #[allow(clippy::let_and_return, clippy::needless_return)]
         async fn create_user(
-        ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
-        headers: ::xidl_rust_axum::axum::http::HeaderMap,
-        body: ::xidl_rust_axum::axum::body::Body
-        )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
-            if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+            ::xidl_rust_axum::axum::extract::State(
+                svc,
+            ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+            headers: ::xidl_rust_axum::axum::http::HeaderMap,
+            body: ::xidl_rust_axum::axum::body::Body,
+        ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+            if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
                 return Err(xidl_rust_axum::Error::not_acceptable());
             }
-
-            if!xidl_rust_axum::http::content_type_matches(&headers,"application/json"){
+            if !xidl_rust_axum::http::content_type_matches(
+                &headers,
+                "application/json",
+            ) {
                 return Err(xidl_rust_axum::Error::unsupported_media_type());
             }
-
-            let token:String = match headers.get("X-Token"){
+            let token: String = match headers.get("X-Token") {
                 Some(header_value) => {
                     let header_str = header_value
-                    .to_str()
-                    .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
+                        .to_str()
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            400,
+                            format!("{err:?}"),
+                        ))?;
                     header_str.to_string()
                 }
                 None => ::core::default::Default::default(),
-
             };
-            let mut cookie_map: ::std::collections::HashMap<String,Vec<String>> = ::std::collections::HashMap::new();
-            for header_value in headers.get_all("cookie").iter(){
+            let mut cookie_map: ::std::collections::HashMap<String, Vec<String>> = ::std::collections::HashMap::new();
+            for header_value in headers.get_all("cookie").iter() {
                 let cookie_str = header_value
-                .to_str()
-                .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
-                for part in cookie_str.split(';'){
+                    .to_str()
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                for part in cookie_str.split(';') {
                     let part = part.trim();
-                    if part.is_empty(){
+                    if part.is_empty() {
                         continue;
                     }
-                    let mut iter = part.splitn(2,'=');
+                    let mut iter = part.splitn(2, '=');
                     let name = iter.next().unwrap_or("").trim();
-                    if name.is_empty(){
+                    if name.is_empty() {
                         continue;
                     }
                     let value = iter.next().unwrap_or("").trim().to_string();
                     cookie_map.entry(name.to_string()).or_default().push(value);
                 }
             }
-
-            let session_id:String = match cookie_map
-            .get("sid")
-            .and_then(|values|values.first()){
+            let session_id: String = match cookie_map
+                .get("sid")
+                .and_then(|values| values.first())
+            {
                 Some(value) => value.to_string(),
                 None => ::core::default::Default::default(),
-
             };
-            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body,usize::MAX)
-            .await
-            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
-            let body:HeaderServiceCreateUserBody = xidl_rust_axum::DeserializeFactory::new("application/json")
-            .from_slice(&body_bytes)?;
-            let HeaderServiceCreateUserBody{
-
-            name,
-
-            } = body;
-            let data = HeaderServiceCreateUserRequest{
+            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+            let body: HeaderServiceCreateUserBody = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body_bytes)?;
+            let HeaderServiceCreateUserBody { name } = body;
+            let data = HeaderServiceCreateUserRequest {
                 token,
                 session_id,
                 name,
             };
-            let req = ::xidl_rust_axum::Request::new(headers,data);
-            let mut resp = match svc.create_user(req).await{
+            let req = ::xidl_rust_axum::Request::new(headers, data);
+            let mut resp = match svc.create_user(req).await {
                 Ok(resp_value) => {
                     let mut resp = {
                         resp_value;
-                        ::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT)
-                    }
-                    ;
+                        ::xidl_rust_axum::axum::response::IntoResponse::into_response(
+                            ::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT,
+                        )
+                    };
                     resp
                 }
-                Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
-
+                Err(err) => {
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+                }
             };
             Ok(resp)
         }
     }
-
-    impl<T>xidl_rust_axum::Service for HeaderServiceServer<T>
+    impl<T> xidl_rust_axum::Service for HeaderServiceServer<T>
     where
-    T:HeaderService+Send+Sync+'static,
+        T: HeaderService + Send + Sync + 'static,
     {
-        fn into_router(self)->xidl_rust_axum::axum::Router{
+        fn into_router(self) -> xidl_rust_axum::axum::Router {
             self.router()
         }
     }
-
-    pub struct HeaderServiceClient{
-        client:xidl_rust_axum::Client,
+    pub struct HeaderServiceClient {
+        client: xidl_rust_axum::Client,
     }
-
-    impl HeaderServiceClient{
-        pub fn new(base_url:impl Into<String>)->Self{
-            Self{
-                client:xidl_rust_axum::Client::new(base_url),
+    impl HeaderServiceClient {
+        pub fn new(base_url: impl Into<String>) -> Self {
+            Self {
+                client: xidl_rust_axum::Client::new(base_url),
             }
         }
-
         pub fn with_auth(
-        base_url:impl Into<String>,
-        auth:xidl_rust_axum::ClientAuth,
-        )->Self{
-            Self{
-                client:xidl_rust_axum::Client::with_auth(base_url,auth),
+            base_url: impl Into<String>,
+            auth: xidl_rust_axum::ClientAuth,
+        ) -> Self {
+            Self {
+                client: xidl_rust_axum::Client::with_auth(base_url, auth),
             }
         }
-
         pub fn with_http(
-        base_url:impl Into<String>,
-        http:xidl_rust_axum::reqwest::Client,
-        )->Self{
-            Self{
-                client:xidl_rust_axum::Client::with_http(base_url,http),
+            base_url: impl Into<String>,
+            http: xidl_rust_axum::reqwest::Client,
+        ) -> Self {
+            Self {
+                client: xidl_rust_axum::Client::with_http(base_url, http),
             }
         }
-
         pub fn with_http_and_auth(
-        base_url:impl Into<String>,
-        http:xidl_rust_axum::reqwest::Client,
-        auth:xidl_rust_axum::ClientAuth,
-        )->Self{
-            Self{
-                client:xidl_rust_axum::Client::with_http_and_auth(base_url,http,auth),
+            base_url: impl Into<String>,
+            http: xidl_rust_axum::reqwest::Client,
+            auth: xidl_rust_axum::ClientAuth,
+        ) -> Self {
+            Self {
+                client: xidl_rust_axum::Client::with_http_and_auth(base_url, http, auth),
             }
         }
-
         pub fn with_auth_override(
-        &self,
-        auth:Option<xidl_rust_axum::ClientAuth>,
-        )->Self{
-            Self{
-                client:self.client.with_auth_override(auth),
+            &self,
+            auth: Option<xidl_rust_axum::ClientAuth>,
+        ) -> Self {
+            Self {
+                client: self.client.with_auth_override(auth),
             }
         }
     }
-
-    impl HeaderServiceClient{
-        pub async fn get_user(&self,id:u32,req_id:String,flags:Vec<String>,age:u32,session_id:String,prefs:Vec<String>)->Result<User,xidl_rust_axum::Error>{
+    impl HeaderServiceClient {
+        pub async fn get_user(
+            &self,
+            id: u32,
+            req_id: String,
+            flags: Vec<String>,
+            age: u32,
+            session_id: String,
+            prefs: Vec<String>,
+        ) -> Result<User, xidl_rust_axum::Error> {
             let path = "/v1/headers/{id}".to_string();
-            let path = path.replace("{id}",&id.to_string());
+            let path = path.replace("{id}", &id.to_string());
             let mut req = self
-            .client
-            .http()
-            .request(xidl_rust_axum::reqwest::Method::GET,self.client.url(&path))
-            .build()
-            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-            req.headers_mut().insert(
-            xidl_rust_axum::reqwest::header::ACCEPT,
-            xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
-            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
-            );
+                .client
+                .http()
+                .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+                .build()
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            req.headers_mut()
+                .insert(
+                    xidl_rust_axum::reqwest::header::ACCEPT,
+                    xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                            "application/json",
+                        )
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            400,
+                            format!("{err:?}"),
+                        ))?,
+                );
             let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
-            "X-Req-Id".as_bytes(),
-            )
-            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
+                    "X-Req-Id".as_bytes(),
+                )
+                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
             let header_value_str = req_id;
             let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-            &header_value_str,
-            )
-            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
-            req.headers_mut().insert(header_name,header_value);
+                    &header_value_str,
+                )
+                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+            req.headers_mut().insert(header_name, header_value);
             let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
-            "X-Flags".as_bytes(),
-            )
-            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
-            for value in flags{
+                    "X-Flags".as_bytes(),
+                )
+                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+            for value in flags {
                 let header_value_str = value;
                 let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                &header_value_str,
-                )
-                .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
-                req.headers_mut().append(header_name.clone(),header_value);
+                        &header_value_str,
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                req.headers_mut().append(header_name.clone(), header_value);
             }
-
             let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
-            "X-Age".as_bytes(),
-            )
-            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
+                    "X-Age".as_bytes(),
+                )
+                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
             let header_value_str = age.to_string();
             let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-            &header_value_str,
-            )
-            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
-            req.headers_mut().insert(header_name,header_value);
-            let mut cookie_pairs:Vec<String> = Vec::new();
+                    &header_value_str,
+                )
+                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+            req.headers_mut().insert(header_name, header_value);
+            let mut cookie_pairs: Vec<String> = Vec::new();
             let value_str = session_id;
-            cookie_pairs.push(format!("{}={}","sid",value_str));
-            for value in prefs{
+            cookie_pairs.push(format!("{}={}", "sid", value_str));
+            for value in prefs {
                 let value_str = value;
-                cookie_pairs.push(format!("{}={}","pref",value_str));
+                cookie_pairs.push(format!("{}={}", "pref", value_str));
             }
-
-            if!cookie_pairs.is_empty(){
+            if !cookie_pairs.is_empty() {
                 let cookie_value = cookie_pairs.join("; ");
-                let cookie_name = xidl_rust_axum::reqwest::header::HeaderName::from_static("cookie");
-                let merged = match req.headers().get(&cookie_name){
+                let cookie_name = xidl_rust_axum::reqwest::header::HeaderName::from_static(
+                    "cookie",
+                );
+                let merged = match req.headers().get(&cookie_name) {
                     Some(existing) => {
                         let existing = existing
-                        .to_str()
-                        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
-                        if existing.is_empty(){
+                            .to_str()
+                            .map_err(|err| xidl_rust_axum::Error::new(
+                                400,
+                                format!("{err:?}"),
+                            ))?;
+                        if existing.is_empty() {
                             cookie_value
-                        }else{
+                        } else {
                             format!("{existing}; {cookie_value}")
                         }
                     }
                     None => cookie_value,
-
                 };
-                let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(&merged)
-                .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
-                req.headers_mut().insert(cookie_name,header_value);
+                let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        &merged,
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                req.headers_mut().insert(cookie_name, header_value);
             }
-
             let auth_target = &self.client;
             let resp = self
-            .client
-            .http()
-            .execute(req)
-            .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-            if resp.status().is_success(){
-                let body = resp
-                .bytes()
+                .client
+                .http()
+                .execute(req)
                 .await
-                .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            if resp.status().is_success() {
+                let body = resp
+                    .bytes()
+                    .await
+                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 xidl_rust_axum::DeserializeFactory::new("application/json")
-                .from_slice(&body)
-            }else{
+                    .from_slice(&body)
+            } else {
                 let status = resp.status();
                 let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
-                Err(xidl_rust_axum::Error::from_http_response(status,body))
+                Err(xidl_rust_axum::Error::from_http_response(status, body))
             }
         }
-
-        pub async fn create_user(&self,token:String,session_id:String,name:String)->Result<(),xidl_rust_axum::Error>{
+        pub async fn create_user(
+            &self,
+            token: String,
+            session_id: String,
+            name: String,
+        ) -> Result<(), xidl_rust_axum::Error> {
             let path = "/v1/headers".to_string();
             let mut req = self
-            .client
-            .http()
-            .request(xidl_rust_axum::reqwest::Method::POST,self.client.url(&path))
-            .build()
-            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-            req.headers_mut().insert(
-            xidl_rust_axum::reqwest::header::ACCEPT,
-            xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
-            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
-            );
+                .client
+                .http()
+                .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+                .build()
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            req.headers_mut()
+                .insert(
+                    xidl_rust_axum::reqwest::header::ACCEPT,
+                    xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                            "application/json",
+                        )
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            400,
+                            format!("{err:?}"),
+                        ))?,
+                );
             let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
-            "X-Token".as_bytes(),
-            )
-            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
+                    "X-Token".as_bytes(),
+                )
+                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
             let header_value_str = token;
             let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-            &header_value_str,
-            )
-            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
-            req.headers_mut().insert(header_name,header_value);
-            let mut cookie_pairs:Vec<String> = Vec::new();
+                    &header_value_str,
+                )
+                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+            req.headers_mut().insert(header_name, header_value);
+            let mut cookie_pairs: Vec<String> = Vec::new();
             let value_str = session_id;
-            cookie_pairs.push(format!("{}={}","sid",value_str));
-            if!cookie_pairs.is_empty(){
+            cookie_pairs.push(format!("{}={}", "sid", value_str));
+            if !cookie_pairs.is_empty() {
                 let cookie_value = cookie_pairs.join("; ");
-                let cookie_name = xidl_rust_axum::reqwest::header::HeaderName::from_static("cookie");
-                let merged = match req.headers().get(&cookie_name){
+                let cookie_name = xidl_rust_axum::reqwest::header::HeaderName::from_static(
+                    "cookie",
+                );
+                let merged = match req.headers().get(&cookie_name) {
                     Some(existing) => {
                         let existing = existing
-                        .to_str()
-                        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
-                        if existing.is_empty(){
+                            .to_str()
+                            .map_err(|err| xidl_rust_axum::Error::new(
+                                400,
+                                format!("{err:?}"),
+                            ))?;
+                        if existing.is_empty() {
                             cookie_value
-                        }else{
+                        } else {
                             format!("{existing}; {cookie_value}")
                         }
                     }
                     None => cookie_value,
-
                 };
-                let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(&merged)
-                .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
-                req.headers_mut().insert(cookie_name,header_value);
+                let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        &merged,
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                req.headers_mut().insert(cookie_name, header_value);
             }
-
             let auth_target = &self.client;
-            let body = HeaderServiceCreateUserBody{
+            let body = HeaderServiceCreateUserBody {
                 name,
             };
             let body = xidl_rust_axum::SerializeFactory::new("application/json")
-            .to_vec(&body)?;
-            req.headers_mut().insert(
-            xidl_rust_axum::reqwest::header::CONTENT_TYPE,
-            xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
-            .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
-            );
+                .to_vec(&body)?;
+            req.headers_mut()
+                .insert(
+                    xidl_rust_axum::reqwest::header::CONTENT_TYPE,
+                    xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                            "application/json",
+                        )
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            400,
+                            format!("{err:?}"),
+                        ))?,
+                );
             *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
             let resp = self
-            .client
-            .http()
-            .execute(req)
-            .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-            if resp.status().is_success(){
+                .client
+                .http()
+                .execute(req)
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            if resp.status().is_success() {
                 Ok(())
-            }else{
+            } else {
                 let status = resp.status();
                 let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
-                Err(xidl_rust_axum::Error::from_http_response(status,body))
+                Err(xidl_rust_axum::Error::from_http_response(status, body))
             }
         }
     }
@@ -522,25 +555,16 @@ pub mod test{
 ===============
 http_header.rs
 ===============
-pub mod test{
-    #[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq
-    )]
-    pub enum Status{
+pub mod test {
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum Status {
         OK,
-        FAILED
+        FAILED,
     }
-
-    pub struct User{
-        pub id:u32,
-        pub name:String,
-        pub status:Status,
+    pub struct User {
+        pub id: u32,
+        pub name: String,
+        pub status: Status,
     }
-
-    impl User{
-    }
+    impl User {}
 }

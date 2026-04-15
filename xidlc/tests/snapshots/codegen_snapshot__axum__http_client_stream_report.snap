@@ -6,209 +6,216 @@ expression: output
 http_client_stream_report.rs
 ===============
 #[async_trait::async_trait]
-pub trait HttpClientStreamReportService{
+pub trait HttpClientStreamReportService {
     async fn upload_parts(
-    &self,
-    req:xidl_rust_axum::Request<xidl_rust_axum::stream::NdjsonStream<HttpClientStreamReportServiceUploadPartsRequest>>
-    )->Result<UploadSummary,xidl_rust_axum::Error>;
+        &self,
+        req: xidl_rust_axum::Request<
+            xidl_rust_axum::stream::NdjsonStream<
+                HttpClientStreamReportServiceUploadPartsRequest,
+            >,
+        >,
+    ) -> Result<UploadSummary, xidl_rust_axum::Error>;
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize)]
-struct HttpClientStreamReportServiceUploadPartsBody{
-    #[serde(default,deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null")]
-
-    chunk:UploadChunk,
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+struct HttpClientStreamReportServiceUploadPartsBody {
+    #[serde(
+        default,
+        deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null"
+    )]
+    chunk: UploadChunk,
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize)]
-pub struct HttpClientStreamReportServiceUploadPartsRequest{
-    pub chunk:UploadChunk,
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+pub struct HttpClientStreamReportServiceUploadPartsRequest {
+    pub chunk: UploadChunk,
 }
-
-pub struct HttpClientStreamReportServiceServer<T>{
+pub struct HttpClientStreamReportServiceServer<T> {
     inner: ::std::sync::Arc<T>,
 }
-
-impl<T>HttpClientStreamReportServiceServer<T>
+impl<T> HttpClientStreamReportServiceServer<T>
 where
-T:HttpClientStreamReportService+Send+Sync+'static,
+    T: HttpClientStreamReportService + Send + Sync + 'static,
 {
-    pub fn new(inner:T)->Self{
-        Self{
+    pub fn new(inner: T) -> Self {
+        Self {
             inner: ::std::sync::Arc::new(inner),
         }
     }
-
-    pub fn from_arc(inner: ::std::sync::Arc<T>)->Self{
-        Self{
-            inner}
+    pub fn from_arc(inner: ::std::sync::Arc<T>) -> Self {
+        Self { inner }
     }
-
-    pub fn router(self)->xidl_rust_axum::axum::Router{
+    pub fn router(self) -> xidl_rust_axum::axum::Router {
         let svc = self.inner;
         xidl_rust_axum::axum::Router::new()
-
-        .route("/uploads/parts",xidl_rust_axum::axum::routing::post(Self::upload_parts))
-
-        .with_state(svc)
+            .route(
+                "/uploads/parts",
+                xidl_rust_axum::axum::routing::post(Self::upload_parts),
+            )
+            .with_state(svc)
     }
-
-    #[allow(clippy::let_and_return,clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return)]
     async fn upload_parts(
-    ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
-    headers: ::xidl_rust_axum::axum::http::HeaderMap,
-    body: ::xidl_rust_axum::axum::body::Body
-    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
-        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        body: ::xidl_rust_axum::axum::body::Body,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-
-        let stream = xidl_rust_axum::stream::decode_ndjson_body::<HttpClientStreamReportServiceUploadPartsRequest>(body);
+        let stream = xidl_rust_axum::stream::decode_ndjson_body::<
+            HttpClientStreamReportServiceUploadPartsRequest,
+        >(body);
         let data = stream;
-        let req = ::xidl_rust_axum::Request::new(headers,data);
-        let mut resp = match svc.upload_parts(req).await{
+        let req = ::xidl_rust_axum::Request::new(headers, data);
+        let mut resp = match svc.upload_parts(req).await {
             Ok(resp_value) => {
                 let mut resp = {
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                    .to_vec(&resp_value)?;
+                        .to_vec(&resp_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
-                    .status(::xidl_rust_axum::axum::http::StatusCode::OK)
-                    .header(
-                    ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                    "application/json",
-                    )
-                    .body(::xidl_rust_axum::axum::body::Body::from(body))
-                    .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?
-                }
-                ;
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
                 resp
             }
-            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
-
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
         };
         Ok(resp)
     }
 }
-
-impl<T>xidl_rust_axum::Service for HttpClientStreamReportServiceServer<T>
+impl<T> xidl_rust_axum::Service for HttpClientStreamReportServiceServer<T>
 where
-T:HttpClientStreamReportService+Send+Sync+'static,
+    T: HttpClientStreamReportService + Send + Sync + 'static,
 {
-    fn into_router(self)->xidl_rust_axum::axum::Router{
+    fn into_router(self) -> xidl_rust_axum::axum::Router {
         self.router()
     }
 }
-
-pub struct HttpClientStreamReportServiceClient{
-    client:xidl_rust_axum::Client,
+pub struct HttpClientStreamReportServiceClient {
+    client: xidl_rust_axum::Client,
 }
-
-impl HttpClientStreamReportServiceClient{
-    pub fn new(base_url:impl Into<String>)->Self{
-        Self{
-            client:xidl_rust_axum::Client::new(base_url),
+impl HttpClientStreamReportServiceClient {
+    pub fn new(base_url: impl Into<String>) -> Self {
+        Self {
+            client: xidl_rust_axum::Client::new(base_url),
         }
     }
-
     pub fn with_auth(
-    base_url:impl Into<String>,
-    auth:xidl_rust_axum::ClientAuth,
-    )->Self{
-        Self{
-            client:xidl_rust_axum::Client::with_auth(base_url,auth),
+        base_url: impl Into<String>,
+        auth: xidl_rust_axum::ClientAuth,
+    ) -> Self {
+        Self {
+            client: xidl_rust_axum::Client::with_auth(base_url, auth),
         }
     }
-
     pub fn with_http(
-    base_url:impl Into<String>,
-    http:xidl_rust_axum::reqwest::Client,
-    )->Self{
-        Self{
-            client:xidl_rust_axum::Client::with_http(base_url,http),
+        base_url: impl Into<String>,
+        http: xidl_rust_axum::reqwest::Client,
+    ) -> Self {
+        Self {
+            client: xidl_rust_axum::Client::with_http(base_url, http),
         }
     }
-
     pub fn with_http_and_auth(
-    base_url:impl Into<String>,
-    http:xidl_rust_axum::reqwest::Client,
-    auth:xidl_rust_axum::ClientAuth,
-    )->Self{
-        Self{
-            client:xidl_rust_axum::Client::with_http_and_auth(base_url,http,auth),
+        base_url: impl Into<String>,
+        http: xidl_rust_axum::reqwest::Client,
+        auth: xidl_rust_axum::ClientAuth,
+    ) -> Self {
+        Self {
+            client: xidl_rust_axum::Client::with_http_and_auth(base_url, http, auth),
         }
     }
-
-    pub fn with_auth_override(
-    &self,
-    auth:Option<xidl_rust_axum::ClientAuth>,
-    )->Self{
-        Self{
-            client:self.client.with_auth_override(auth),
+    pub fn with_auth_override(&self, auth: Option<xidl_rust_axum::ClientAuth>) -> Self {
+        Self {
+            client: self.client.with_auth_override(auth),
         }
     }
 }
-
-impl HttpClientStreamReportServiceClient{
-    pub async fn upload_parts(&self,chunk:UploadChunk)->Result<xidl_rust_axum::stream::Writer<HttpClientStreamReportServiceUploadPartsRequest,UploadSummary>,xidl_rust_axum::Error>{
+impl HttpClientStreamReportServiceClient {
+    pub async fn upload_parts(
+        &self,
+        chunk: UploadChunk,
+    ) -> Result<
+        xidl_rust_axum::stream::Writer<
+            HttpClientStreamReportServiceUploadPartsRequest,
+            UploadSummary,
+        >,
+        xidl_rust_axum::Error,
+    > {
         let path = "/uploads/parts".to_string();
         let mut req = self
-        .client
-        .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,self.client.url(&path))
-        .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        req.headers_mut().insert(
-        xidl_rust_axum::reqwest::header::ACCEPT,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
-        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
-        );
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
         let auth_target = &self.client;
-        req.headers_mut().insert(
-        xidl_rust_axum::reqwest::header::CONTENT_TYPE,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_static("application/x-ndjson"),
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::CONTENT_TYPE,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_static(
+                    "application/x-ndjson",
+                ),
+            );
+        let (tx, rx) = xidl_rust_axum::tokio::sync::mpsc::channel(32);
+        let outbound = xidl_rust_axum::futures_util::stream::unfold(
+            rx,
+            |mut rx| async move { rx.recv().await.map(|item| (item, rx)) },
         );
-        let(tx,rx) = xidl_rust_axum::tokio::sync::mpsc::channel(32);
-        let outbound = xidl_rust_axum::futures_util::stream::unfold(rx,|mut rx|async move{
-            rx.recv().await.map(|item|(item,rx))
-        });
-        *req.body_mut() = Some(xidl_rust_axum::stream::encode_ndjson_body(Box::pin(outbound)));
+        *req.body_mut() = Some(
+            xidl_rust_axum::stream::encode_ndjson_body(Box::pin(outbound)),
+        );
         let http = self.client.http().clone();
-        let response_task = xidl_rust_axum::tokio::spawn(async move{
+        let response_task = xidl_rust_axum::tokio::spawn(async move {
             let resp = http
-            .execute(req)
-            .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-            if resp.status().is_success(){
-                let body = resp
-                .bytes()
+                .execute(req)
                 .await
-                .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            if resp.status().is_success() {
+                let body = resp
+                    .bytes()
+                    .await
+                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
                 xidl_rust_axum::DeserializeFactory::new("application/json")
-                .from_slice(&body)
-            }else{
+                    .from_slice(&body)
+            } else {
                 let status = resp.status();
                 let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
-                Err(xidl_rust_axum::Error::from_http_response(status,body))
+                Err(xidl_rust_axum::Error::from_http_response(status, body))
             }
         });
-        Ok(xidl_rust_axum::stream::Writer::new(tx,response_task))
+        Ok(xidl_rust_axum::stream::Writer::new(tx, response_task))
     }
 }
 ===============
 http_client_stream_report.rs
 ===============
-pub struct UploadChunk{
-    pub part_id:String,
-    pub bytes:Vec<u8>,
+pub struct UploadChunk {
+    pub part_id: String,
+    pub bytes: Vec<u8>,
 }
-
-impl UploadChunk{
+impl UploadChunk {}
+pub struct UploadSummary {
+    pub upload_id: String,
+    pub accepted: u32,
 }
-
-pub struct UploadSummary{
-    pub upload_id:String,
-    pub accepted:u32,
-}
-
-impl UploadSummary{
-}
+impl UploadSummary {}

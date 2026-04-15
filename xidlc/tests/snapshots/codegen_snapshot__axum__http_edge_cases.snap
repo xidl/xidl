@@ -6,519 +6,495 @@ expression: output
 http_edge_cases.rs
 ===============
 #[async_trait::async_trait]
-pub trait HttpEdgeCasesService{
+pub trait HttpEdgeCasesService {
     async fn health(
-    &self,
-    req:xidl_rust_axum::Request<HttpEdgeCasesServiceHealthRequest>
-    )->Result<(),xidl_rust_axum::Error>;
+        &self,
+        req: xidl_rust_axum::Request<HttpEdgeCasesServiceHealthRequest>,
+    ) -> Result<(), xidl_rust_axum::Error>;
     async fn get_user(
-    &self,
-    req:xidl_rust_axum::Request<HttpEdgeCasesServiceGetUserRequest>
-    )->Result<String,xidl_rust_axum::Error>;
+        &self,
+        req: xidl_rust_axum::Request<HttpEdgeCasesServiceGetUserRequest>,
+    ) -> Result<String, xidl_rust_axum::Error>;
     async fn get_item(
-    &self,
-    req:xidl_rust_axum::Request<HttpEdgeCasesServiceGetItemRequest>
-    )->Result<String,xidl_rust_axum::Error>;
+        &self,
+        req: xidl_rust_axum::Request<HttpEdgeCasesServiceGetItemRequest>,
+    ) -> Result<String, xidl_rust_axum::Error>;
     async fn lookup(
-    &self,
-    req:xidl_rust_axum::Request<HttpEdgeCasesServiceLookupRequest>
-    )->Result<String,xidl_rust_axum::Error>;
+        &self,
+        req: xidl_rust_axum::Request<HttpEdgeCasesServiceLookupRequest>,
+    ) -> Result<String, xidl_rust_axum::Error>;
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize,::core::default::Default)]
-struct HttpEdgeCasesServiceHealthQuery{
+#[derive(::serde::Serialize, ::serde::Deserialize, ::core::default::Default)]
+struct HttpEdgeCasesServiceHealthQuery {
     #[serde(rename = "trace_id")]
-
     #[serde(default)]
-
-    trace:String,
+    trace: String,
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize)]
-pub struct HttpEdgeCasesServiceHealthRequest{
-    pub trace:String,
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+pub struct HttpEdgeCasesServiceHealthRequest {
+    pub trace: String,
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize)]
-struct HttpEdgeCasesServiceGetUserPath{
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+struct HttpEdgeCasesServiceGetUserPath {
     #[serde(rename = "id")]
-
-    uid:u32,
+    uid: u32,
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize,::core::default::Default)]
-struct HttpEdgeCasesServiceGetUserQuery{
+#[derive(::serde::Serialize, ::serde::Deserialize, ::core::default::Default)]
+struct HttpEdgeCasesServiceGetUserQuery {
     #[serde(rename = "lang")]
-
     #[serde(default)]
-
-    locale:String,
+    locale: String,
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize)]
-pub struct HttpEdgeCasesServiceGetUserRequest{
-    pub uid:u32,
-    pub locale:String,
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+pub struct HttpEdgeCasesServiceGetUserRequest {
+    pub uid: u32,
+    pub locale: String,
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize)]
-struct HttpEdgeCasesServiceGetItemPath{
-    order_id:u32,
-    item_id:u32,
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+struct HttpEdgeCasesServiceGetItemPath {
+    order_id: u32,
+    item_id: u32,
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize)]
-pub struct HttpEdgeCasesServiceGetItemRequest{
-    pub order_id:u32,
-    pub item_id:u32,
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+pub struct HttpEdgeCasesServiceGetItemRequest {
+    pub order_id: u32,
+    pub item_id: u32,
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize,::core::default::Default)]
-struct HttpEdgeCasesServiceLookupQuery{
+#[derive(::serde::Serialize, ::serde::Deserialize, ::core::default::Default)]
+struct HttpEdgeCasesServiceLookupQuery {
     #[serde(default)]
-
-    keyword:String,
+    keyword: String,
     #[serde(rename = "limit")]
-
     #[serde(default)]
-
-    page_size:u32,
+    page_size: u32,
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize)]
-pub struct HttpEdgeCasesServiceLookupRequest{
-    pub keyword:String,
-    pub page_size:u32,
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+pub struct HttpEdgeCasesServiceLookupRequest {
+    pub keyword: String,
+    pub page_size: u32,
 }
-
-pub struct HttpEdgeCasesServiceServer<T>{
+pub struct HttpEdgeCasesServiceServer<T> {
     inner: ::std::sync::Arc<T>,
 }
-
-impl<T>HttpEdgeCasesServiceServer<T>
+impl<T> HttpEdgeCasesServiceServer<T>
 where
-T:HttpEdgeCasesService+Send+Sync+'static,
+    T: HttpEdgeCasesService + Send + Sync + 'static,
 {
-    pub fn new(inner:T)->Self{
-        Self{
+    pub fn new(inner: T) -> Self {
+        Self {
             inner: ::std::sync::Arc::new(inner),
         }
     }
-
-    pub fn from_arc(inner: ::std::sync::Arc<T>)->Self{
-        Self{
-            inner}
+    pub fn from_arc(inner: ::std::sync::Arc<T>) -> Self {
+        Self { inner }
     }
-
-    pub fn router(self)->xidl_rust_axum::axum::Router{
+    pub fn router(self) -> xidl_rust_axum::axum::Router {
         let svc = self.inner;
         xidl_rust_axum::axum::Router::new()
-
-        .route("/v1/health",xidl_rust_axum::axum::routing::head(Self::health))
-
-        .route("/v1/users/{id}",xidl_rust_axum::axum::routing::get(Self::get_user))
-
-        .route("/v2/users/{id}",xidl_rust_axum::axum::routing::get(Self::get_user))
-
-        .route("/orders/{order_id}/items/{item_id}",xidl_rust_axum::axum::routing::get(Self::get_item))
-
-        .route("/lookup",xidl_rust_axum::axum::routing::post(Self::lookup))
-
-        .with_state(svc)
+            .route("/v1/health", xidl_rust_axum::axum::routing::head(Self::health))
+            .route("/v1/users/{id}", xidl_rust_axum::axum::routing::get(Self::get_user))
+            .route("/v2/users/{id}", xidl_rust_axum::axum::routing::get(Self::get_user))
+            .route(
+                "/orders/{order_id}/items/{item_id}",
+                xidl_rust_axum::axum::routing::get(Self::get_item),
+            )
+            .route("/lookup", xidl_rust_axum::axum::routing::post(Self::lookup))
+            .with_state(svc)
     }
-
-    #[allow(clippy::let_and_return,clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return)]
     async fn health(
-    ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
-    headers: ::xidl_rust_axum::axum::http::HeaderMap,
-    xidl_rust_axum::axum::extract::Query(query):xidl_rust_axum::axum::extract::Query<HttpEdgeCasesServiceHealthQuery>
-    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
-        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        xidl_rust_axum::axum::extract::Query(
+            query,
+        ): xidl_rust_axum::axum::extract::Query<HttpEdgeCasesServiceHealthQuery>,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-
-        let HttpEdgeCasesServiceHealthQuery{
-
-        trace,
-
-        } = query;
-        let data = HttpEdgeCasesServiceHealthRequest{
+        let HttpEdgeCasesServiceHealthQuery { trace } = query;
+        let data = HttpEdgeCasesServiceHealthRequest {
             trace,
         };
-        let req = ::xidl_rust_axum::Request::new(headers,data);
-        let mut resp = match svc.health(req).await{
+        let req = ::xidl_rust_axum::Request::new(headers, data);
+        let mut resp = match svc.health(req).await {
             Ok(resp_value) => {
                 let mut resp = {
                     resp_value;
-                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT)
-                }
-                ;
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(
+                        ::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT,
+                    )
+                };
                 resp
             }
-            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
-
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
         };
         Ok(resp)
     }
-
-    #[allow(clippy::let_and_return,clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return)]
     async fn get_user(
-    ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
-    headers: ::xidl_rust_axum::axum::http::HeaderMap,
-    ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<HttpEdgeCasesServiceGetUserPath>,
-    xidl_rust_axum::axum::extract::Query(query):xidl_rust_axum::axum::extract::Query<HttpEdgeCasesServiceGetUserQuery>
-    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
-        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        ::xidl_rust_axum::axum::extract::Path(
+            path,
+        ): ::xidl_rust_axum::axum::extract::Path<HttpEdgeCasesServiceGetUserPath>,
+        xidl_rust_axum::axum::extract::Query(
+            query,
+        ): xidl_rust_axum::axum::extract::Query<HttpEdgeCasesServiceGetUserQuery>,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-
-        let HttpEdgeCasesServiceGetUserPath{
-
-        uid,
-
-        } = path;
-        let HttpEdgeCasesServiceGetUserQuery{
-
-        locale,
-
-        } = query;
-        let data = HttpEdgeCasesServiceGetUserRequest{
+        let HttpEdgeCasesServiceGetUserPath { uid } = path;
+        let HttpEdgeCasesServiceGetUserQuery { locale } = query;
+        let data = HttpEdgeCasesServiceGetUserRequest {
             uid,
             locale,
         };
-        let req = ::xidl_rust_axum::Request::new(headers,data);
-        let mut resp = match svc.get_user(req).await{
+        let req = ::xidl_rust_axum::Request::new(headers, data);
+        let mut resp = match svc.get_user(req).await {
             Ok(resp_value) => {
                 let mut resp = {
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                    .to_vec(&resp_value)?;
+                        .to_vec(&resp_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
-                    .status(::xidl_rust_axum::axum::http::StatusCode::OK)
-                    .header(
-                    ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                    "application/json",
-                    )
-                    .body(::xidl_rust_axum::axum::body::Body::from(body))
-                    .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?
-                }
-                ;
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
                 resp
             }
-            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
-
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
         };
         Ok(resp)
     }
-
-    #[allow(clippy::let_and_return,clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return)]
     async fn get_item(
-    ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
-    headers: ::xidl_rust_axum::axum::http::HeaderMap,
-    ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<HttpEdgeCasesServiceGetItemPath>
-    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
-        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        ::xidl_rust_axum::axum::extract::Path(
+            path,
+        ): ::xidl_rust_axum::axum::extract::Path<HttpEdgeCasesServiceGetItemPath>,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-
-        let HttpEdgeCasesServiceGetItemPath{
-
-        order_id,
-
-        item_id,
-
-        } = path;
-        let data = HttpEdgeCasesServiceGetItemRequest{
+        let HttpEdgeCasesServiceGetItemPath { order_id, item_id } = path;
+        let data = HttpEdgeCasesServiceGetItemRequest {
             order_id,
             item_id,
         };
-        let req = ::xidl_rust_axum::Request::new(headers,data);
-        let mut resp = match svc.get_item(req).await{
+        let req = ::xidl_rust_axum::Request::new(headers, data);
+        let mut resp = match svc.get_item(req).await {
             Ok(resp_value) => {
                 let mut resp = {
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                    .to_vec(&resp_value)?;
+                        .to_vec(&resp_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
-                    .status(::xidl_rust_axum::axum::http::StatusCode::OK)
-                    .header(
-                    ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                    "application/json",
-                    )
-                    .body(::xidl_rust_axum::axum::body::Body::from(body))
-                    .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?
-                }
-                ;
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
                 resp
             }
-            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
-
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
         };
         Ok(resp)
     }
-
-    #[allow(clippy::let_and_return,clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return)]
     async fn lookup(
-    ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
-    headers: ::xidl_rust_axum::axum::http::HeaderMap,
-    xidl_rust_axum::axum::extract::Query(query):xidl_rust_axum::axum::extract::Query<HttpEdgeCasesServiceLookupQuery>
-    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
-        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        xidl_rust_axum::axum::extract::Query(
+            query,
+        ): xidl_rust_axum::axum::extract::Query<HttpEdgeCasesServiceLookupQuery>,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-
-        let HttpEdgeCasesServiceLookupQuery{
-
-        keyword,
-
-        page_size,
-
-        } = query;
-        let data = HttpEdgeCasesServiceLookupRequest{
+        let HttpEdgeCasesServiceLookupQuery { keyword, page_size } = query;
+        let data = HttpEdgeCasesServiceLookupRequest {
             keyword,
             page_size,
         };
-        let req = ::xidl_rust_axum::Request::new(headers,data);
-        let mut resp = match svc.lookup(req).await{
+        let req = ::xidl_rust_axum::Request::new(headers, data);
+        let mut resp = match svc.lookup(req).await {
             Ok(resp_value) => {
                 let mut resp = {
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                    .to_vec(&resp_value)?;
+                        .to_vec(&resp_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
-                    .status(::xidl_rust_axum::axum::http::StatusCode::OK)
-                    .header(
-                    ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                    "application/json",
-                    )
-                    .body(::xidl_rust_axum::axum::body::Body::from(body))
-                    .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?
-                }
-                ;
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
                 resp
             }
-            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
-
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
         };
         Ok(resp)
     }
 }
-
-impl<T>xidl_rust_axum::Service for HttpEdgeCasesServiceServer<T>
+impl<T> xidl_rust_axum::Service for HttpEdgeCasesServiceServer<T>
 where
-T:HttpEdgeCasesService+Send+Sync+'static,
+    T: HttpEdgeCasesService + Send + Sync + 'static,
 {
-    fn into_router(self)->xidl_rust_axum::axum::Router{
+    fn into_router(self) -> xidl_rust_axum::axum::Router {
         self.router()
     }
 }
-
-pub struct HttpEdgeCasesServiceClient{
-    client:xidl_rust_axum::Client,
+pub struct HttpEdgeCasesServiceClient {
+    client: xidl_rust_axum::Client,
 }
-
-impl HttpEdgeCasesServiceClient{
-    pub fn new(base_url:impl Into<String>)->Self{
-        Self{
-            client:xidl_rust_axum::Client::new(base_url),
+impl HttpEdgeCasesServiceClient {
+    pub fn new(base_url: impl Into<String>) -> Self {
+        Self {
+            client: xidl_rust_axum::Client::new(base_url),
         }
     }
-
     pub fn with_auth(
-    base_url:impl Into<String>,
-    auth:xidl_rust_axum::ClientAuth,
-    )->Self{
-        Self{
-            client:xidl_rust_axum::Client::with_auth(base_url,auth),
+        base_url: impl Into<String>,
+        auth: xidl_rust_axum::ClientAuth,
+    ) -> Self {
+        Self {
+            client: xidl_rust_axum::Client::with_auth(base_url, auth),
         }
     }
-
     pub fn with_http(
-    base_url:impl Into<String>,
-    http:xidl_rust_axum::reqwest::Client,
-    )->Self{
-        Self{
-            client:xidl_rust_axum::Client::with_http(base_url,http),
+        base_url: impl Into<String>,
+        http: xidl_rust_axum::reqwest::Client,
+    ) -> Self {
+        Self {
+            client: xidl_rust_axum::Client::with_http(base_url, http),
         }
     }
-
     pub fn with_http_and_auth(
-    base_url:impl Into<String>,
-    http:xidl_rust_axum::reqwest::Client,
-    auth:xidl_rust_axum::ClientAuth,
-    )->Self{
-        Self{
-            client:xidl_rust_axum::Client::with_http_and_auth(base_url,http,auth),
+        base_url: impl Into<String>,
+        http: xidl_rust_axum::reqwest::Client,
+        auth: xidl_rust_axum::ClientAuth,
+    ) -> Self {
+        Self {
+            client: xidl_rust_axum::Client::with_http_and_auth(base_url, http, auth),
         }
     }
-
-    pub fn with_auth_override(
-    &self,
-    auth:Option<xidl_rust_axum::ClientAuth>,
-    )->Self{
-        Self{
-            client:self.client.with_auth_override(auth),
+    pub fn with_auth_override(&self, auth: Option<xidl_rust_axum::ClientAuth>) -> Self {
+        Self {
+            client: self.client.with_auth_override(auth),
         }
     }
 }
-
-impl HttpEdgeCasesServiceClient{
-    pub async fn health(&self,trace:String)->Result<(),xidl_rust_axum::Error>{
+impl HttpEdgeCasesServiceClient {
+    pub async fn health(&self, trace: String) -> Result<(), xidl_rust_axum::Error> {
         let path = "/v1/health".to_string();
         let mut req = self
-        .client
-        .http()
-        .request(xidl_rust_axum::reqwest::Method::HEAD,self.client.url(&path))
-        .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        req.headers_mut().insert(
-        xidl_rust_axum::reqwest::header::ACCEPT,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
-        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
-        );
-        let query = HttpEdgeCasesServiceHealthQuery{
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::HEAD, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let query = HttpEdgeCasesServiceHealthQuery {
             trace,
         };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        if!query.is_empty(){
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if !query.is_empty() {
             req.url_mut().set_query(Some(&query));
         }
-
         let auth_target = &self.client;
         let resp = self
-        .client
-        .http()
-        .execute(req)
-        .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        if resp.status().is_success(){
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
             Ok(())
-        }else{
+        } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
-            Err(xidl_rust_axum::Error::from_http_response(status,body))
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-
-    pub async fn get_user(&self,uid:u32,locale:String)->Result<String,xidl_rust_axum::Error>{
+    pub async fn get_user(
+        &self,
+        uid: u32,
+        locale: String,
+    ) -> Result<String, xidl_rust_axum::Error> {
         let path = "/v1/users/{id}".to_string();
-        let path = path.replace("{id}",&uid.to_string());
+        let path = path.replace("{id}", &uid.to_string());
         let mut req = self
-        .client
-        .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,self.client.url(&path))
-        .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        req.headers_mut().insert(
-        xidl_rust_axum::reqwest::header::ACCEPT,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
-        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
-        );
-        let query = HttpEdgeCasesServiceGetUserQuery{
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let query = HttpEdgeCasesServiceGetUserQuery {
             locale,
         };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        if!query.is_empty(){
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if !query.is_empty() {
             req.url_mut().set_query(Some(&query));
         }
-
         let auth_target = &self.client;
         let resp = self
-        .client
-        .http()
-        .execute(req)
-        .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        if resp.status().is_success(){
-            let body = resp
-            .bytes()
+            .client
+            .http()
+            .execute(req)
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json")
-            .from_slice(&body)
-        }else{
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+        } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
-            Err(xidl_rust_axum::Error::from_http_response(status,body))
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-
-    pub async fn get_item(&self,order_id:u32,item_id:u32)->Result<String,xidl_rust_axum::Error>{
+    pub async fn get_item(
+        &self,
+        order_id: u32,
+        item_id: u32,
+    ) -> Result<String, xidl_rust_axum::Error> {
         let path = "/orders/{order_id}/items/{item_id}".to_string();
-        let path = path.replace("{order_id}",&order_id.to_string());
-        let path = path.replace("{item_id}",&item_id.to_string());
+        let path = path.replace("{order_id}", &order_id.to_string());
+        let path = path.replace("{item_id}", &item_id.to_string());
         let mut req = self
-        .client
-        .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,self.client.url(&path))
-        .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        req.headers_mut().insert(
-        xidl_rust_axum::reqwest::header::ACCEPT,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
-        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
-        );
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
         let auth_target = &self.client;
         let resp = self
-        .client
-        .http()
-        .execute(req)
-        .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        if resp.status().is_success(){
-            let body = resp
-            .bytes()
+            .client
+            .http()
+            .execute(req)
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json")
-            .from_slice(&body)
-        }else{
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+        } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
-            Err(xidl_rust_axum::Error::from_http_response(status,body))
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-
-    pub async fn lookup(&self,keyword:String,page_size:u32)->Result<String,xidl_rust_axum::Error>{
+    pub async fn lookup(
+        &self,
+        keyword: String,
+        page_size: u32,
+    ) -> Result<String, xidl_rust_axum::Error> {
         let path = "/lookup".to_string();
         let mut req = self
-        .client
-        .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,self.client.url(&path))
-        .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        req.headers_mut().insert(
-        xidl_rust_axum::reqwest::header::ACCEPT,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
-        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
-        );
-        let query = HttpEdgeCasesServiceLookupQuery{
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let query = HttpEdgeCasesServiceLookupQuery {
             keyword,
             page_size,
         };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        if!query.is_empty(){
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if !query.is_empty() {
             req.url_mut().set_query(Some(&query));
         }
-
         let auth_target = &self.client;
         let resp = self
-        .client
-        .http()
-        .execute(req)
-        .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        if resp.status().is_success(){
-            let body = resp
-            .bytes()
+            .client
+            .http()
+            .execute(req)
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json")
-            .from_slice(&body)
-        }else{
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+        } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
-            Err(xidl_rust_axum::Error::from_http_response(status,body))
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
 }

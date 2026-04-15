@@ -5,16 +5,8 @@ expression: output
 ===============
 enum_serialize.rs
 ===============
-#[derive(
-Debug,
-Clone,
-Copy,
-PartialEq,
-Eq,
-::serde::Serialize,
-::serde::Deserialize
-)]
-pub enum Tag{
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ::serde::Serialize, ::serde::Deserialize)]
+pub enum Tag {
     A,
-    B
+    B,
 }

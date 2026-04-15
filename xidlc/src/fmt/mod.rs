@@ -12,8 +12,6 @@ use std::collections::HashMap;
 use self::helpers::{build_gap, collect_tokens, ensure_trailing_newline, normalize_blank_lines};
 
 const IDL_QUERY: &str = include_str!("queries/idl.scm");
-#[cfg(feature = "fmt-rust")]
-const RUST_QUERY: &str = include_str!("queries/rust.scm");
 #[cfg(feature = "fmt-typescript")]
 const TYPESCRIPT_QUERY: &str = include_str!("queries/typescript.scm");
 
@@ -74,7 +72,8 @@ pub fn format_idl_source_with_name(source: &str, filename: &str) -> IdlcResult<S
 
 #[cfg(feature = "fmt-rust")]
 pub fn format_rust_source(source: &str) -> IdlcResult<String> {
-    format_tree_sitter_source(source, RUST_QUERY, "rust", false, false, false)
+    let syntax_tree = syn::parse_file(source).expect("internal error: invalid rust source!!");
+    Ok(prettyplease::unparse(&syntax_tree))
 }
 
 #[cfg(not(feature = "fmt-rust"))]
@@ -98,7 +97,7 @@ pub fn format_jinja_source(source: &str) -> IdlcResult<String> {
     )))
 }
 
-#[cfg(any(feature = "fmt-rust", feature = "fmt-typescript"))]
+#[cfg(feature = "fmt-typescript")]
 fn format_tree_sitter_source(
     source: &str,
     query_source: &str,
@@ -108,8 +107,6 @@ fn format_tree_sitter_source(
     normalize_indent: bool,
 ) -> IdlcResult<String> {
     let language = match label {
-        #[cfg(feature = "fmt-rust")]
-        "rust" => tree_sitter_rust::LANGUAGE.into(),
         #[cfg(feature = "fmt-typescript")]
         "typescript" => tree_sitter_typescript::LANGUAGE_TYPESCRIPT.into(),
         _ => unreachable!(),

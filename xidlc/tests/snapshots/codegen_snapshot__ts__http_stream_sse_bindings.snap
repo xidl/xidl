@@ -493,13 +493,11 @@ typeof HttpStreamSseBindingsServiceWatchProjectRequestSchema
 ===============
 http_stream_sse_bindings.rs
 ===============
-pub struct ProjectEvent{
-    pub id:String,
-    pub payload:String,
+pub struct ProjectEvent {
+    pub id: String,
+    pub payload: String,
 }
-
-impl ProjectEvent{
-}
+impl ProjectEvent {}
 ===============
 http_stream_sse_bindings.zod.ts
 ===============

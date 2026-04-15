@@ -398,8 +398,8 @@ import{z}from"zod";
 ===============
 module_dcl.rs
 ===============
-pub mod B{
-    pub const a:u8 = 10;
+pub mod B {
+    pub const a: u8 = 10;
 }
 ===============
 module_dcl.zod.ts

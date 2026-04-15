@@ -6,1025 +6,1035 @@ expression: output
 http_defaults.rs
 ===============
 #[async_trait::async_trait]
-pub trait HttpDefaultsService{
+pub trait HttpDefaultsService {
     async fn get_name(
-    &self,
-    req:xidl_rust_axum::Request<HttpDefaultsServiceGetNameRequest>
-    )->Result<String,xidl_rust_axum::Error>;
+        &self,
+        req: xidl_rust_axum::Request<HttpDefaultsServiceGetNameRequest>,
+    ) -> Result<String, xidl_rust_axum::Error>;
     async fn list_orders(
-    &self,
-    req:xidl_rust_axum::Request<HttpDefaultsServiceListOrdersRequest>
-    )->Result<String,xidl_rust_axum::Error>;
+        &self,
+        req: xidl_rust_axum::Request<HttpDefaultsServiceListOrdersRequest>,
+    ) -> Result<String, xidl_rust_axum::Error>;
     async fn create_user(
-    &self,
-    req:xidl_rust_axum::Request<HttpDefaultsServiceCreateUserRequest>
-    )->Result<String,xidl_rust_axum::Error>;
+        &self,
+        req: xidl_rust_axum::Request<HttpDefaultsServiceCreateUserRequest>,
+    ) -> Result<String, xidl_rust_axum::Error>;
     async fn create_user_flat(
-    &self,
-    req:xidl_rust_axum::Request<HttpDefaultsServiceCreateUserFlatRequest>
-    )->Result<String,xidl_rust_axum::Error>;
+        &self,
+        req: xidl_rust_axum::Request<HttpDefaultsServiceCreateUserFlatRequest>,
+    ) -> Result<String, xidl_rust_axum::Error>;
     async fn search_user(
-    &self,
-    req:xidl_rust_axum::Request<HttpDefaultsServiceSearchUserRequest>
-    )->Result<String,xidl_rust_axum::Error>;
+        &self,
+        req: xidl_rust_axum::Request<HttpDefaultsServiceSearchUserRequest>,
+    ) -> Result<String, xidl_rust_axum::Error>;
     async fn preview_user(
-    &self,
-    req:xidl_rust_axum::Request<HttpDefaultsServicePreviewUserRequest>
-    )->Result<String,xidl_rust_axum::Error>;
+        &self,
+        req: xidl_rust_axum::Request<HttpDefaultsServicePreviewUserRequest>,
+    ) -> Result<String, xidl_rust_axum::Error>;
     async fn get_user(
-    &self,
-    req:xidl_rust_axum::Request<HttpDefaultsServiceGetUserRequest>
-    )->Result<String,xidl_rust_axum::Error>;
+        &self,
+        req: xidl_rust_axum::Request<HttpDefaultsServiceGetUserRequest>,
+    ) -> Result<String, xidl_rust_axum::Error>;
     async fn get_user_alias(
-    &self,
-    req:xidl_rust_axum::Request<HttpDefaultsServiceGetUserAliasRequest>
-    )->Result<String,xidl_rust_axum::Error>;
+        &self,
+        req: xidl_rust_axum::Request<HttpDefaultsServiceGetUserAliasRequest>,
+    ) -> Result<String, xidl_rust_axum::Error>;
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize,::core::default::Default)]
-struct HttpDefaultsServiceGetNameQuery{
+#[derive(::serde::Serialize, ::serde::Deserialize, ::core::default::Default)]
+struct HttpDefaultsServiceGetNameQuery {
     #[serde(default)]
-
-    name:String,
+    name: String,
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize)]
-pub struct HttpDefaultsServiceGetNameRequest{
-    pub name:String,
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+pub struct HttpDefaultsServiceGetNameRequest {
+    pub name: String,
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize)]
-struct HttpDefaultsServiceListOrdersPath{
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+struct HttpDefaultsServiceListOrdersPath {
     #[serde(rename = "uid")]
-
-    user_id:u32,
+    user_id: u32,
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize,::core::default::Default)]
-struct HttpDefaultsServiceListOrdersQuery{
+#[derive(::serde::Serialize, ::serde::Deserialize, ::core::default::Default)]
+struct HttpDefaultsServiceListOrdersQuery {
     #[serde(default)]
-
-    page:u32,
+    page: u32,
     #[serde(default)]
-
-    size:u32,
+    size: u32,
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize)]
-pub struct HttpDefaultsServiceListOrdersRequest{
-    pub user_id:u32,
-    pub page:u32,
-    pub size:u32,
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+pub struct HttpDefaultsServiceListOrdersRequest {
+    pub user_id: u32,
+    pub page: u32,
+    pub size: u32,
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize)]
-struct HttpDefaultsServiceCreateUserBody{
-    #[serde(default,deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null")]
-
-    req:CreateUserRequest,
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+struct HttpDefaultsServiceCreateUserBody {
+    #[serde(
+        default,
+        deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null"
+    )]
+    req: CreateUserRequest,
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize)]
-pub struct HttpDefaultsServiceCreateUserRequest{
-    pub req:CreateUserRequest,
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+pub struct HttpDefaultsServiceCreateUserRequest {
+    pub req: CreateUserRequest,
 }
-
 type HttpDefaultsServiceCreateUserFlatBody = CreateUserRequest;
-#[derive(::serde::Serialize,::serde::Deserialize)]
-pub struct HttpDefaultsServiceCreateUserFlatRequest{
-    pub req:CreateUserRequest,
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+pub struct HttpDefaultsServiceCreateUserFlatRequest {
+    pub req: CreateUserRequest,
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize)]
-struct HttpDefaultsServiceSearchUserBody{
-    #[serde(default,deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null")]
-
-    name:String,
-    #[serde(default,deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null")]
-
-    age:u32,
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+struct HttpDefaultsServiceSearchUserBody {
+    #[serde(
+        default,
+        deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null"
+    )]
+    name: String,
+    #[serde(
+        default,
+        deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null"
+    )]
+    age: u32,
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize)]
-pub struct HttpDefaultsServiceSearchUserRequest{
-    pub name:String,
-    pub age:u32,
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+pub struct HttpDefaultsServiceSearchUserRequest {
+    pub name: String,
+    pub age: u32,
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize)]
-struct HttpDefaultsServicePreviewUserBody{
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+struct HttpDefaultsServicePreviewUserBody {
     #[serde(rename = "user")]
-
-    #[serde(default,deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null")]
-
-    req:CreateUserRequest,
+    #[serde(
+        default,
+        deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null"
+    )]
+    req: CreateUserRequest,
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize)]
-pub struct HttpDefaultsServicePreviewUserRequest{
-    pub req:CreateUserRequest,
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+pub struct HttpDefaultsServicePreviewUserRequest {
+    pub req: CreateUserRequest,
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize)]
-struct HttpDefaultsServiceGetUserPath{
-    id:u32,
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+struct HttpDefaultsServiceGetUserPath {
+    id: u32,
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize,::core::default::Default)]
-struct HttpDefaultsServiceGetUserQuery{
+#[derive(::serde::Serialize, ::serde::Deserialize, ::core::default::Default)]
+struct HttpDefaultsServiceGetUserQuery {
     #[serde(default)]
-
-    lang:String,
+    lang: String,
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize)]
-pub struct HttpDefaultsServiceGetUserRequest{
-    pub id:u32,
-    pub lang:String,
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+pub struct HttpDefaultsServiceGetUserRequest {
+    pub id: u32,
+    pub lang: String,
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize)]
-struct HttpDefaultsServiceGetUserAliasPath{
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+struct HttpDefaultsServiceGetUserAliasPath {
     #[serde(rename = "id")]
-
-    user_id:u32,
+    user_id: u32,
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize,::core::default::Default)]
-struct HttpDefaultsServiceGetUserAliasQuery{
+#[derive(::serde::Serialize, ::serde::Deserialize, ::core::default::Default)]
+struct HttpDefaultsServiceGetUserAliasQuery {
     #[serde(rename = "lang")]
-
     #[serde(default)]
-
-    locale:String,
+    locale: String,
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize)]
-pub struct HttpDefaultsServiceGetUserAliasRequest{
-    pub user_id:u32,
-    pub locale:String,
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+pub struct HttpDefaultsServiceGetUserAliasRequest {
+    pub user_id: u32,
+    pub locale: String,
 }
-
-pub struct HttpDefaultsServiceServer<T>{
+pub struct HttpDefaultsServiceServer<T> {
     inner: ::std::sync::Arc<T>,
 }
-
-impl<T>HttpDefaultsServiceServer<T>
+impl<T> HttpDefaultsServiceServer<T>
 where
-T:HttpDefaultsService+Send+Sync+'static,
+    T: HttpDefaultsService + Send + Sync + 'static,
 {
-    pub fn new(inner:T)->Self{
-        Self{
+    pub fn new(inner: T) -> Self {
+        Self {
             inner: ::std::sync::Arc::new(inner),
         }
     }
-
-    pub fn from_arc(inner: ::std::sync::Arc<T>)->Self{
-        Self{
-            inner}
+    pub fn from_arc(inner: ::std::sync::Arc<T>) -> Self {
+        Self { inner }
     }
-
-    pub fn router(self)->xidl_rust_axum::axum::Router{
+    pub fn router(self) -> xidl_rust_axum::axum::Router {
         let svc = self.inner;
         xidl_rust_axum::axum::Router::new()
-
-        .route("/get_name",xidl_rust_axum::axum::routing::post(Self::get_name))
-
-        .route("/list_orders/{uid}",xidl_rust_axum::axum::routing::get(Self::list_orders))
-
-        .route("/users",xidl_rust_axum::axum::routing::post(Self::create_user))
-
-        .route("/users/flat",xidl_rust_axum::axum::routing::post(Self::create_user_flat))
-
-        .route("/users/search",xidl_rust_axum::axum::routing::post(Self::search_user))
-
-        .route("/users/preview",xidl_rust_axum::axum::routing::get(Self::preview_user))
-
-        .route("/v1/users/{id}",xidl_rust_axum::axum::routing::get(Self::get_user))
-
-        .route("/get_user_alias/{id}",xidl_rust_axum::axum::routing::post(Self::get_user_alias))
-
-        .with_state(svc)
+            .route("/get_name", xidl_rust_axum::axum::routing::post(Self::get_name))
+            .route(
+                "/list_orders/{uid}",
+                xidl_rust_axum::axum::routing::get(Self::list_orders),
+            )
+            .route("/users", xidl_rust_axum::axum::routing::post(Self::create_user))
+            .route(
+                "/users/flat",
+                xidl_rust_axum::axum::routing::post(Self::create_user_flat),
+            )
+            .route(
+                "/users/search",
+                xidl_rust_axum::axum::routing::post(Self::search_user),
+            )
+            .route(
+                "/users/preview",
+                xidl_rust_axum::axum::routing::get(Self::preview_user),
+            )
+            .route("/v1/users/{id}", xidl_rust_axum::axum::routing::get(Self::get_user))
+            .route(
+                "/get_user_alias/{id}",
+                xidl_rust_axum::axum::routing::post(Self::get_user_alias),
+            )
+            .with_state(svc)
     }
-
-    #[allow(clippy::let_and_return,clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return)]
     async fn get_name(
-    ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
-    headers: ::xidl_rust_axum::axum::http::HeaderMap,
-    xidl_rust_axum::axum::extract::Query(query):xidl_rust_axum::axum::extract::Query<HttpDefaultsServiceGetNameQuery>
-    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
-        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        xidl_rust_axum::axum::extract::Query(
+            query,
+        ): xidl_rust_axum::axum::extract::Query<HttpDefaultsServiceGetNameQuery>,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-
-        let HttpDefaultsServiceGetNameQuery{
-
-        name,
-
-        } = query;
-        let data = HttpDefaultsServiceGetNameRequest{
+        let HttpDefaultsServiceGetNameQuery { name } = query;
+        let data = HttpDefaultsServiceGetNameRequest {
             name,
         };
-        let req = ::xidl_rust_axum::Request::new(headers,data);
-        let mut resp = match svc.get_name(req).await{
+        let req = ::xidl_rust_axum::Request::new(headers, data);
+        let mut resp = match svc.get_name(req).await {
             Ok(resp_value) => {
                 let mut resp = {
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                    .to_vec(&resp_value)?;
+                        .to_vec(&resp_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
-                    .status(::xidl_rust_axum::axum::http::StatusCode::OK)
-                    .header(
-                    ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                    "application/json",
-                    )
-                    .body(::xidl_rust_axum::axum::body::Body::from(body))
-                    .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?
-                }
-                ;
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
                 resp
             }
-            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
-
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
         };
         Ok(resp)
     }
-
-    #[allow(clippy::let_and_return,clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return)]
     async fn list_orders(
-    ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
-    headers: ::xidl_rust_axum::axum::http::HeaderMap,
-    ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<HttpDefaultsServiceListOrdersPath>,
-    xidl_rust_axum::axum::extract::Query(query):xidl_rust_axum::axum::extract::Query<HttpDefaultsServiceListOrdersQuery>
-    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
-        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        ::xidl_rust_axum::axum::extract::Path(
+            path,
+        ): ::xidl_rust_axum::axum::extract::Path<HttpDefaultsServiceListOrdersPath>,
+        xidl_rust_axum::axum::extract::Query(
+            query,
+        ): xidl_rust_axum::axum::extract::Query<HttpDefaultsServiceListOrdersQuery>,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-
-        let HttpDefaultsServiceListOrdersPath{
-
-        user_id,
-
-        } = path;
-        let HttpDefaultsServiceListOrdersQuery{
-
-        page,
-
-        size,
-
-        } = query;
-        let data = HttpDefaultsServiceListOrdersRequest{
+        let HttpDefaultsServiceListOrdersPath { user_id } = path;
+        let HttpDefaultsServiceListOrdersQuery { page, size } = query;
+        let data = HttpDefaultsServiceListOrdersRequest {
             user_id,
             page,
             size,
         };
-        let req = ::xidl_rust_axum::Request::new(headers,data);
-        let mut resp = match svc.list_orders(req).await{
+        let req = ::xidl_rust_axum::Request::new(headers, data);
+        let mut resp = match svc.list_orders(req).await {
             Ok(resp_value) => {
                 let mut resp = {
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                    .to_vec(&resp_value)?;
+                        .to_vec(&resp_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
-                    .status(::xidl_rust_axum::axum::http::StatusCode::OK)
-                    .header(
-                    ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                    "application/json",
-                    )
-                    .body(::xidl_rust_axum::axum::body::Body::from(body))
-                    .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?
-                }
-                ;
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
                 resp
             }
-            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
-
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
         };
         Ok(resp)
     }
-
-    #[allow(clippy::let_and_return,clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return)]
     async fn create_user(
-    ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
-    headers: ::xidl_rust_axum::axum::http::HeaderMap,
-    body: ::xidl_rust_axum::axum::body::Body
-    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
-        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        body: ::xidl_rust_axum::axum::body::Body,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-
-        if!xidl_rust_axum::http::content_type_matches(&headers,"application/json"){
+        if !xidl_rust_axum::http::content_type_matches(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::unsupported_media_type());
         }
-
-        let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body,usize::MAX)
-        .await
-        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
-        let body:HttpDefaultsServiceCreateUserBody = xidl_rust_axum::DeserializeFactory::new("application/json")
-        .from_slice(&body_bytes)?;
-        let HttpDefaultsServiceCreateUserBody{
-
-        req,
-
-        } = body;
-        let data = HttpDefaultsServiceCreateUserRequest{
+        let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+        let body: HttpDefaultsServiceCreateUserBody = xidl_rust_axum::DeserializeFactory::new(
+                "application/json",
+            )
+            .from_slice(&body_bytes)?;
+        let HttpDefaultsServiceCreateUserBody { req } = body;
+        let data = HttpDefaultsServiceCreateUserRequest {
             req,
         };
-        let req = ::xidl_rust_axum::Request::new(headers,data);
-        let mut resp = match svc.create_user(req).await{
+        let req = ::xidl_rust_axum::Request::new(headers, data);
+        let mut resp = match svc.create_user(req).await {
             Ok(resp_value) => {
                 let mut resp = {
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                    .to_vec(&resp_value)?;
+                        .to_vec(&resp_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
-                    .status(::xidl_rust_axum::axum::http::StatusCode::OK)
-                    .header(
-                    ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                    "application/json",
-                    )
-                    .body(::xidl_rust_axum::axum::body::Body::from(body))
-                    .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?
-                }
-                ;
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
                 resp
             }
-            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
-
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
         };
         Ok(resp)
     }
-
-    #[allow(clippy::let_and_return,clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return)]
     async fn create_user_flat(
-    ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
-    headers: ::xidl_rust_axum::axum::http::HeaderMap,
-    body: ::xidl_rust_axum::axum::body::Body
-    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
-        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        body: ::xidl_rust_axum::axum::body::Body,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-
-        if!xidl_rust_axum::http::content_type_matches(&headers,"application/json"){
+        if !xidl_rust_axum::http::content_type_matches(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::unsupported_media_type());
         }
-
-        let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body,usize::MAX)
-        .await
-        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
-        let body:HttpDefaultsServiceCreateUserFlatBody = xidl_rust_axum::DeserializeFactory::new("application/json")
-        .from_slice(&body_bytes)?;
+        let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+        let body: HttpDefaultsServiceCreateUserFlatBody = xidl_rust_axum::DeserializeFactory::new(
+                "application/json",
+            )
+            .from_slice(&body_bytes)?;
         let req = body;
-        let data = HttpDefaultsServiceCreateUserFlatRequest{
+        let data = HttpDefaultsServiceCreateUserFlatRequest {
             req,
         };
-        let req = ::xidl_rust_axum::Request::new(headers,data);
-        let mut resp = match svc.create_user_flat(req).await{
+        let req = ::xidl_rust_axum::Request::new(headers, data);
+        let mut resp = match svc.create_user_flat(req).await {
             Ok(resp_value) => {
                 let mut resp = {
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                    .to_vec(&resp_value)?;
+                        .to_vec(&resp_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
-                    .status(::xidl_rust_axum::axum::http::StatusCode::OK)
-                    .header(
-                    ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                    "application/json",
-                    )
-                    .body(::xidl_rust_axum::axum::body::Body::from(body))
-                    .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?
-                }
-                ;
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
                 resp
             }
-            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
-
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
         };
         Ok(resp)
     }
-
-    #[allow(clippy::let_and_return,clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return)]
     async fn search_user(
-    ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
-    headers: ::xidl_rust_axum::axum::http::HeaderMap,
-    body: ::xidl_rust_axum::axum::body::Body
-    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
-        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        body: ::xidl_rust_axum::axum::body::Body,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-
-        if!xidl_rust_axum::http::content_type_matches(&headers,"application/json"){
+        if !xidl_rust_axum::http::content_type_matches(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::unsupported_media_type());
         }
-
-        let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body,usize::MAX)
-        .await
-        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
-        let body:HttpDefaultsServiceSearchUserBody = xidl_rust_axum::DeserializeFactory::new("application/json")
-        .from_slice(&body_bytes)?;
-        let HttpDefaultsServiceSearchUserBody{
-
-        name,
-
-        age,
-
-        } = body;
-        let data = HttpDefaultsServiceSearchUserRequest{
+        let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+        let body: HttpDefaultsServiceSearchUserBody = xidl_rust_axum::DeserializeFactory::new(
+                "application/json",
+            )
+            .from_slice(&body_bytes)?;
+        let HttpDefaultsServiceSearchUserBody { name, age } = body;
+        let data = HttpDefaultsServiceSearchUserRequest {
             name,
             age,
         };
-        let req = ::xidl_rust_axum::Request::new(headers,data);
-        let mut resp = match svc.search_user(req).await{
+        let req = ::xidl_rust_axum::Request::new(headers, data);
+        let mut resp = match svc.search_user(req).await {
             Ok(resp_value) => {
                 let mut resp = {
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                    .to_vec(&resp_value)?;
+                        .to_vec(&resp_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
-                    .status(::xidl_rust_axum::axum::http::StatusCode::OK)
-                    .header(
-                    ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                    "application/json",
-                    )
-                    .body(::xidl_rust_axum::axum::body::Body::from(body))
-                    .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?
-                }
-                ;
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
                 resp
             }
-            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
-
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
         };
         Ok(resp)
     }
-
-    #[allow(clippy::let_and_return,clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return)]
     async fn preview_user(
-    ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
-    headers: ::xidl_rust_axum::axum::http::HeaderMap,
-    body: ::xidl_rust_axum::axum::body::Body
-    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
-        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        body: ::xidl_rust_axum::axum::body::Body,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-
-        if!xidl_rust_axum::http::content_type_matches(&headers,"application/json"){
+        if !xidl_rust_axum::http::content_type_matches(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::unsupported_media_type());
         }
-
-        let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body,usize::MAX)
-        .await
-        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?;
-        let body:HttpDefaultsServicePreviewUserBody = xidl_rust_axum::DeserializeFactory::new("application/json")
-        .from_slice(&body_bytes)?;
-        let HttpDefaultsServicePreviewUserBody{
-
-        req,
-
-        } = body;
-        let data = HttpDefaultsServicePreviewUserRequest{
+        let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+        let body: HttpDefaultsServicePreviewUserBody = xidl_rust_axum::DeserializeFactory::new(
+                "application/json",
+            )
+            .from_slice(&body_bytes)?;
+        let HttpDefaultsServicePreviewUserBody { req } = body;
+        let data = HttpDefaultsServicePreviewUserRequest {
             req,
         };
-        let req = ::xidl_rust_axum::Request::new(headers,data);
-        let mut resp = match svc.preview_user(req).await{
+        let req = ::xidl_rust_axum::Request::new(headers, data);
+        let mut resp = match svc.preview_user(req).await {
             Ok(resp_value) => {
                 let mut resp = {
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                    .to_vec(&resp_value)?;
+                        .to_vec(&resp_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
-                    .status(::xidl_rust_axum::axum::http::StatusCode::OK)
-                    .header(
-                    ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                    "application/json",
-                    )
-                    .body(::xidl_rust_axum::axum::body::Body::from(body))
-                    .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?
-                }
-                ;
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
                 resp
             }
-            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
-
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
         };
         Ok(resp)
     }
-
-    #[allow(clippy::let_and_return,clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return)]
     async fn get_user(
-    ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
-    headers: ::xidl_rust_axum::axum::http::HeaderMap,
-    ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<HttpDefaultsServiceGetUserPath>,
-    xidl_rust_axum::axum::extract::Query(query):xidl_rust_axum::axum::extract::Query<HttpDefaultsServiceGetUserQuery>
-    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
-        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        ::xidl_rust_axum::axum::extract::Path(
+            path,
+        ): ::xidl_rust_axum::axum::extract::Path<HttpDefaultsServiceGetUserPath>,
+        xidl_rust_axum::axum::extract::Query(
+            query,
+        ): xidl_rust_axum::axum::extract::Query<HttpDefaultsServiceGetUserQuery>,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-
-        let HttpDefaultsServiceGetUserPath{
-
-        id,
-
-        } = path;
-        let HttpDefaultsServiceGetUserQuery{
-
-        lang,
-
-        } = query;
-        let data = HttpDefaultsServiceGetUserRequest{
+        let HttpDefaultsServiceGetUserPath { id } = path;
+        let HttpDefaultsServiceGetUserQuery { lang } = query;
+        let data = HttpDefaultsServiceGetUserRequest {
             id,
             lang,
         };
-        let req = ::xidl_rust_axum::Request::new(headers,data);
-        let mut resp = match svc.get_user(req).await{
+        let req = ::xidl_rust_axum::Request::new(headers, data);
+        let mut resp = match svc.get_user(req).await {
             Ok(resp_value) => {
                 let mut resp = {
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                    .to_vec(&resp_value)?;
+                        .to_vec(&resp_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
-                    .status(::xidl_rust_axum::axum::http::StatusCode::OK)
-                    .header(
-                    ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                    "application/json",
-                    )
-                    .body(::xidl_rust_axum::axum::body::Body::from(body))
-                    .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?
-                }
-                ;
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
                 resp
             }
-            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
-
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
         };
         Ok(resp)
     }
-
-    #[allow(clippy::let_and_return,clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return)]
     async fn get_user_alias(
-    ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
-    headers: ::xidl_rust_axum::axum::http::HeaderMap,
-    ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<HttpDefaultsServiceGetUserAliasPath>,
-    xidl_rust_axum::axum::extract::Query(query):xidl_rust_axum::axum::extract::Query<HttpDefaultsServiceGetUserAliasQuery>
-    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
-        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        ::xidl_rust_axum::axum::extract::Path(
+            path,
+        ): ::xidl_rust_axum::axum::extract::Path<HttpDefaultsServiceGetUserAliasPath>,
+        xidl_rust_axum::axum::extract::Query(
+            query,
+        ): xidl_rust_axum::axum::extract::Query<HttpDefaultsServiceGetUserAliasQuery>,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-
-        let HttpDefaultsServiceGetUserAliasPath{
-
-        user_id,
-
-        } = path;
-        let HttpDefaultsServiceGetUserAliasQuery{
-
-        locale,
-
-        } = query;
-        let data = HttpDefaultsServiceGetUserAliasRequest{
+        let HttpDefaultsServiceGetUserAliasPath { user_id } = path;
+        let HttpDefaultsServiceGetUserAliasQuery { locale } = query;
+        let data = HttpDefaultsServiceGetUserAliasRequest {
             user_id,
             locale,
         };
-        let req = ::xidl_rust_axum::Request::new(headers,data);
-        let mut resp = match svc.get_user_alias(req).await{
+        let req = ::xidl_rust_axum::Request::new(headers, data);
+        let mut resp = match svc.get_user_alias(req).await {
             Ok(resp_value) => {
                 let mut resp = {
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                    .to_vec(&resp_value)?;
+                        .to_vec(&resp_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
-                    .status(::xidl_rust_axum::axum::http::StatusCode::OK)
-                    .header(
-                    ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
-                    "application/json",
-                    )
-                    .body(::xidl_rust_axum::axum::body::Body::from(body))
-                    .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?
-                }
-                ;
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
                 resp
             }
-            Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
-
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
         };
         Ok(resp)
     }
 }
-
-impl<T>xidl_rust_axum::Service for HttpDefaultsServiceServer<T>
+impl<T> xidl_rust_axum::Service for HttpDefaultsServiceServer<T>
 where
-T:HttpDefaultsService+Send+Sync+'static,
+    T: HttpDefaultsService + Send + Sync + 'static,
 {
-    fn into_router(self)->xidl_rust_axum::axum::Router{
+    fn into_router(self) -> xidl_rust_axum::axum::Router {
         self.router()
     }
 }
-
-pub struct HttpDefaultsServiceClient{
-    client:xidl_rust_axum::Client,
+pub struct HttpDefaultsServiceClient {
+    client: xidl_rust_axum::Client,
 }
-
-impl HttpDefaultsServiceClient{
-    pub fn new(base_url:impl Into<String>)->Self{
-        Self{
-            client:xidl_rust_axum::Client::new(base_url),
+impl HttpDefaultsServiceClient {
+    pub fn new(base_url: impl Into<String>) -> Self {
+        Self {
+            client: xidl_rust_axum::Client::new(base_url),
         }
     }
-
     pub fn with_auth(
-    base_url:impl Into<String>,
-    auth:xidl_rust_axum::ClientAuth,
-    )->Self{
-        Self{
-            client:xidl_rust_axum::Client::with_auth(base_url,auth),
+        base_url: impl Into<String>,
+        auth: xidl_rust_axum::ClientAuth,
+    ) -> Self {
+        Self {
+            client: xidl_rust_axum::Client::with_auth(base_url, auth),
         }
     }
-
     pub fn with_http(
-    base_url:impl Into<String>,
-    http:xidl_rust_axum::reqwest::Client,
-    )->Self{
-        Self{
-            client:xidl_rust_axum::Client::with_http(base_url,http),
+        base_url: impl Into<String>,
+        http: xidl_rust_axum::reqwest::Client,
+    ) -> Self {
+        Self {
+            client: xidl_rust_axum::Client::with_http(base_url, http),
         }
     }
-
     pub fn with_http_and_auth(
-    base_url:impl Into<String>,
-    http:xidl_rust_axum::reqwest::Client,
-    auth:xidl_rust_axum::ClientAuth,
-    )->Self{
-        Self{
-            client:xidl_rust_axum::Client::with_http_and_auth(base_url,http,auth),
+        base_url: impl Into<String>,
+        http: xidl_rust_axum::reqwest::Client,
+        auth: xidl_rust_axum::ClientAuth,
+    ) -> Self {
+        Self {
+            client: xidl_rust_axum::Client::with_http_and_auth(base_url, http, auth),
         }
     }
-
-    pub fn with_auth_override(
-    &self,
-    auth:Option<xidl_rust_axum::ClientAuth>,
-    )->Self{
-        Self{
-            client:self.client.with_auth_override(auth),
+    pub fn with_auth_override(&self, auth: Option<xidl_rust_axum::ClientAuth>) -> Self {
+        Self {
+            client: self.client.with_auth_override(auth),
         }
     }
 }
-
-impl HttpDefaultsServiceClient{
-    pub async fn get_name(&self,name:String)->Result<String,xidl_rust_axum::Error>{
+impl HttpDefaultsServiceClient {
+    pub async fn get_name(&self, name: String) -> Result<String, xidl_rust_axum::Error> {
         let path = "/get_name".to_string();
         let mut req = self
-        .client
-        .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,self.client.url(&path))
-        .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        req.headers_mut().insert(
-        xidl_rust_axum::reqwest::header::ACCEPT,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
-        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
-        );
-        let query = HttpDefaultsServiceGetNameQuery{
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let query = HttpDefaultsServiceGetNameQuery {
             name,
         };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        if!query.is_empty(){
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if !query.is_empty() {
             req.url_mut().set_query(Some(&query));
         }
-
         let auth_target = &self.client;
         let resp = self
-        .client
-        .http()
-        .execute(req)
-        .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        if resp.status().is_success(){
-            let body = resp
-            .bytes()
+            .client
+            .http()
+            .execute(req)
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json")
-            .from_slice(&body)
-        }else{
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+        } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
-            Err(xidl_rust_axum::Error::from_http_response(status,body))
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-
-    pub async fn list_orders(&self,user_id:u32,page:u32,size:u32)->Result<String,xidl_rust_axum::Error>{
+    pub async fn list_orders(
+        &self,
+        user_id: u32,
+        page: u32,
+        size: u32,
+    ) -> Result<String, xidl_rust_axum::Error> {
         let path = "/list_orders/{uid}".to_string();
-        let path = path.replace("{uid}",&user_id.to_string());
+        let path = path.replace("{uid}", &user_id.to_string());
         let mut req = self
-        .client
-        .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,self.client.url(&path))
-        .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        req.headers_mut().insert(
-        xidl_rust_axum::reqwest::header::ACCEPT,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
-        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
-        );
-        let query = HttpDefaultsServiceListOrdersQuery{
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let query = HttpDefaultsServiceListOrdersQuery {
             page,
             size,
         };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        if!query.is_empty(){
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if !query.is_empty() {
             req.url_mut().set_query(Some(&query));
         }
-
         let auth_target = &self.client;
         let resp = self
-        .client
-        .http()
-        .execute(req)
-        .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        if resp.status().is_success(){
-            let body = resp
-            .bytes()
+            .client
+            .http()
+            .execute(req)
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json")
-            .from_slice(&body)
-        }else{
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+        } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
-            Err(xidl_rust_axum::Error::from_http_response(status,body))
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-
-    pub async fn create_user(&self,req:CreateUserRequest)->Result<String,xidl_rust_axum::Error>{
+    pub async fn create_user(
+        &self,
+        req: CreateUserRequest,
+    ) -> Result<String, xidl_rust_axum::Error> {
         let path = "/users".to_string();
         let mut req = self
-        .client
-        .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,self.client.url(&path))
-        .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        req.headers_mut().insert(
-        xidl_rust_axum::reqwest::header::ACCEPT,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
-        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
-        );
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
         let auth_target = &self.client;
-        let body = HttpDefaultsServiceCreateUserBody{
+        let body = HttpDefaultsServiceCreateUserBody {
             req,
         };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
-        .to_vec(&body)?;
-        req.headers_mut().insert(
-        xidl_rust_axum::reqwest::header::CONTENT_TYPE,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
-        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
-        );
+            .to_vec(&body)?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::CONTENT_TYPE,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
         *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
         let resp = self
-        .client
-        .http()
-        .execute(req)
-        .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        if resp.status().is_success(){
-            let body = resp
-            .bytes()
+            .client
+            .http()
+            .execute(req)
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json")
-            .from_slice(&body)
-        }else{
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+        } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
-            Err(xidl_rust_axum::Error::from_http_response(status,body))
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-
-    pub async fn create_user_flat(&self,req:CreateUserRequest)->Result<String,xidl_rust_axum::Error>{
+    pub async fn create_user_flat(
+        &self,
+        req: CreateUserRequest,
+    ) -> Result<String, xidl_rust_axum::Error> {
         let path = "/users/flat".to_string();
         let mut req = self
-        .client
-        .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,self.client.url(&path))
-        .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        req.headers_mut().insert(
-        xidl_rust_axum::reqwest::header::ACCEPT,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
-        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
-        );
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
         let auth_target = &self.client;
         let body = req;
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
-        .to_vec(&body)?;
-        req.headers_mut().insert(
-        xidl_rust_axum::reqwest::header::CONTENT_TYPE,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
-        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
-        );
+            .to_vec(&body)?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::CONTENT_TYPE,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
         *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
         let resp = self
-        .client
-        .http()
-        .execute(req)
-        .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        if resp.status().is_success(){
-            let body = resp
-            .bytes()
+            .client
+            .http()
+            .execute(req)
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json")
-            .from_slice(&body)
-        }else{
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+        } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
-            Err(xidl_rust_axum::Error::from_http_response(status,body))
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-
-    pub async fn search_user(&self,name:String,age:u32)->Result<String,xidl_rust_axum::Error>{
+    pub async fn search_user(
+        &self,
+        name: String,
+        age: u32,
+    ) -> Result<String, xidl_rust_axum::Error> {
         let path = "/users/search".to_string();
         let mut req = self
-        .client
-        .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,self.client.url(&path))
-        .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        req.headers_mut().insert(
-        xidl_rust_axum::reqwest::header::ACCEPT,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
-        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
-        );
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
         let auth_target = &self.client;
-        let body = HttpDefaultsServiceSearchUserBody{
+        let body = HttpDefaultsServiceSearchUserBody {
             name,
             age,
         };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
-        .to_vec(&body)?;
-        req.headers_mut().insert(
-        xidl_rust_axum::reqwest::header::CONTENT_TYPE,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
-        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
-        );
+            .to_vec(&body)?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::CONTENT_TYPE,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
         *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
         let resp = self
-        .client
-        .http()
-        .execute(req)
-        .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        if resp.status().is_success(){
-            let body = resp
-            .bytes()
+            .client
+            .http()
+            .execute(req)
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json")
-            .from_slice(&body)
-        }else{
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+        } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
-            Err(xidl_rust_axum::Error::from_http_response(status,body))
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-
-    pub async fn preview_user(&self,req:CreateUserRequest)->Result<String,xidl_rust_axum::Error>{
+    pub async fn preview_user(
+        &self,
+        req: CreateUserRequest,
+    ) -> Result<String, xidl_rust_axum::Error> {
         let path = "/users/preview".to_string();
         let mut req = self
-        .client
-        .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,self.client.url(&path))
-        .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        req.headers_mut().insert(
-        xidl_rust_axum::reqwest::header::ACCEPT,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
-        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
-        );
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
         let auth_target = &self.client;
-        let body = HttpDefaultsServicePreviewUserBody{
+        let body = HttpDefaultsServicePreviewUserBody {
             req,
         };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
-        .to_vec(&body)?;
-        req.headers_mut().insert(
-        xidl_rust_axum::reqwest::header::CONTENT_TYPE,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
-        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
-        );
+            .to_vec(&body)?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::CONTENT_TYPE,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
         *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
         let resp = self
-        .client
-        .http()
-        .execute(req)
-        .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        if resp.status().is_success(){
-            let body = resp
-            .bytes()
+            .client
+            .http()
+            .execute(req)
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json")
-            .from_slice(&body)
-        }else{
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+        } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
-            Err(xidl_rust_axum::Error::from_http_response(status,body))
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-
-    pub async fn get_user(&self,id:u32,lang:String)->Result<String,xidl_rust_axum::Error>{
+    pub async fn get_user(
+        &self,
+        id: u32,
+        lang: String,
+    ) -> Result<String, xidl_rust_axum::Error> {
         let path = "/v1/users/{id}".to_string();
-        let path = path.replace("{id}",&id.to_string());
+        let path = path.replace("{id}", &id.to_string());
         let mut req = self
-        .client
-        .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,self.client.url(&path))
-        .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        req.headers_mut().insert(
-        xidl_rust_axum::reqwest::header::ACCEPT,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
-        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
-        );
-        let query = HttpDefaultsServiceGetUserQuery{
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let query = HttpDefaultsServiceGetUserQuery {
             lang,
         };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        if!query.is_empty(){
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if !query.is_empty() {
             req.url_mut().set_query(Some(&query));
         }
-
         let auth_target = &self.client;
         let resp = self
-        .client
-        .http()
-        .execute(req)
-        .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        if resp.status().is_success(){
-            let body = resp
-            .bytes()
+            .client
+            .http()
+            .execute(req)
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json")
-            .from_slice(&body)
-        }else{
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+        } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
-            Err(xidl_rust_axum::Error::from_http_response(status,body))
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-
-    pub async fn get_user_alias(&self,user_id:u32,locale:String)->Result<String,xidl_rust_axum::Error>{
+    pub async fn get_user_alias(
+        &self,
+        user_id: u32,
+        locale: String,
+    ) -> Result<String, xidl_rust_axum::Error> {
         let path = "/get_user_alias/{id}".to_string();
-        let path = path.replace("{id}",&user_id.to_string());
+        let path = path.replace("{id}", &user_id.to_string());
         let mut req = self
-        .client
-        .http()
-        .request(xidl_rust_axum::reqwest::Method::POST,self.client.url(&path))
-        .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        req.headers_mut().insert(
-        xidl_rust_axum::reqwest::header::ACCEPT,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
-        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
-        );
-        let query = HttpDefaultsServiceGetUserAliasQuery{
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let query = HttpDefaultsServiceGetUserAliasQuery {
             locale,
         };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        if!query.is_empty(){
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if !query.is_empty() {
             req.url_mut().set_query(Some(&query));
         }
-
         let auth_target = &self.client;
         let resp = self
-        .client
-        .http()
-        .execute(req)
-        .await
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        if resp.status().is_success(){
-            let body = resp
-            .bytes()
+            .client
+            .http()
+            .execute(req)
             .await
-            .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json")
-            .from_slice(&body)
-        }else{
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+        } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
-            Err(xidl_rust_axum::Error::from_http_response(status,body))
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
 }
 ===============
 http_defaults.rs
 ===============
-#[derive(Debug,::serde::Serialize,::serde::Deserialize)]
-pub struct CreateUserRequest{
-    pub name:String,
-    pub age:u32,
+#[derive(Debug, ::serde::Serialize, ::serde::Deserialize)]
+pub struct CreateUserRequest {
+    pub name: String,
+    pub age: u32,
 }
-
-impl CreateUserRequest{
-}
+impl CreateUserRequest {}

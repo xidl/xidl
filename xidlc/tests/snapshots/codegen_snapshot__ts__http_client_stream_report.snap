@@ -486,21 +486,16 @@ typeof HttpClientStreamReportServiceUploadPartsRequestSchema
 ===============
 http_client_stream_report.rs
 ===============
-pub struct UploadChunk{
-    pub part_id:String,
-    pub bytes:Vec<u8>,
+pub struct UploadChunk {
+    pub part_id: String,
+    pub bytes: Vec<u8>,
 }
-
-impl UploadChunk{
+impl UploadChunk {}
+pub struct UploadSummary {
+    pub upload_id: String,
+    pub accepted: u32,
 }
-
-pub struct UploadSummary{
-    pub upload_id:String,
-    pub accepted:u32,
-}
-
-impl UploadSummary{
-}
+impl UploadSummary {}
 ===============
 http_client_stream_report.zod.ts
 ===============

@@ -415,18 +415,15 @@ import{z}from"zod";
 ===============
 except_dcl.rs
 ===============
-#[derive(Debug,Clone)]
-pub struct HelloWorld{
-    pub a:u8,
-    pub b:[u16;
-    10],
-    pub c:[[String;
-    20];
-    10],
-    pub c:Vec<u8>,
-    pub d:String,
-    pub d:String,
-    pub d:f64,
+#[derive(Debug, Clone)]
+pub struct HelloWorld {
+    pub a: u8,
+    pub b: [u16; 10],
+    pub c: [[String; 20]; 10],
+    pub c: Vec<u8>,
+    pub d: String,
+    pub d: String,
+    pub d: f64,
 }
 ===============
 except_dcl.zod.ts

@@ -2874,16 +2874,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "009994f150cc0cd50ff54917d5bc8bffe8cad10ca10d81c34da2ec421ae61782"
 
 [[package]]
-name = "tree-sitter-rust"
-version = "0.23.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ca8ccb3e3a3495c8a943f6c3fd24c3804c471fd7f4f16087623c7fa4c0068e8a"
-dependencies = [
- "cc",
- "tree-sitter-language",
-]
-
-[[package]]
 name = "tree-sitter-typescript"
 version = "0.23.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3712,10 +3702,12 @@ dependencies = [
  "miette",
  "minijinja",
  "owo-colors",
+ "prettyplease",
  "scopeguard",
  "semver",
  "serde",
  "serde_json",
+ "syn",
  "thiserror 2.0.18",
  "tokio",
  "tracing",
@@ -3723,7 +3715,6 @@ dependencies = [
  "tree-sitter",
  "tree-sitter-highlight",
  "tree-sitter-idl",
- "tree-sitter-rust",
  "tree-sitter-typescript",
  "xidl-jsonrpc",
  "xidl-parser",

@@ -46,7 +46,7 @@ cli = [
   "miette/fancy",
 ]
 fmt = ["fmt-rust", "fmt-typescript"]
-fmt-rust = ["tree-sitter-rust"]
+fmt-rust = ["dep:syn", "dep:prettyplease"]
 fmt-typescript = ["tree-sitter-typescript"]
 
 [lints]
@@ -77,7 +77,8 @@ tree-sitter.workspace = true
 tree-sitter-highlight = { version = "=0.25.0", optional = true }
 owo-colors = { version = "4.2", optional = true }
 tree-sitter-idl = { workspace = true }
-tree-sitter-rust = { version = "=0.23.3", optional = true }
+prettyplease = { version = "0.2.37", optional = true }
+syn = { version = "2.0.117", optional = true }
 tree-sitter-typescript = { version = "=0.23.2", optional = true }
 md5.workspace = true
 indexmap = { version = "2", features = ["serde"] }

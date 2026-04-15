@@ -6,168 +6,172 @@ expression: output
 http_bidi_stream.rs
 ===============
 #[async_trait::async_trait]
-pub trait HttpBidiStreamService{
+pub trait HttpBidiStreamService {
     async fn chat(
-    &self,
-    req:xidl_rust_axum::Request<xidl_rust_axum::stream::BidiServerStream<HttpBidiStreamServiceChatRequest,HttpBidiStreamServiceChatResponse>>
-    )->Result<(),xidl_rust_axum::Error>;
+        &self,
+        req: xidl_rust_axum::Request<
+            xidl_rust_axum::stream::BidiServerStream<
+                HttpBidiStreamServiceChatRequest,
+                HttpBidiStreamServiceChatResponse,
+            >,
+        >,
+    ) -> Result<(), xidl_rust_axum::Error>;
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize)]
-struct HttpBidiStreamServiceChatBody{
-    #[serde(default,deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null")]
-
-    room:String,
-    #[serde(default,deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null")]
-
-    text:String,
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+struct HttpBidiStreamServiceChatBody {
+    #[serde(
+        default,
+        deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null"
+    )]
+    room: String,
+    #[serde(
+        default,
+        deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null"
+    )]
+    text: String,
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize)]
-pub struct HttpBidiStreamServiceChatRequest{
-    pub room:String,
-    pub text:String,
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+pub struct HttpBidiStreamServiceChatRequest {
+    pub room: String,
+    pub text: String,
 }
-
-#[derive(::serde::Serialize,::serde::Deserialize)]
-pub struct HttpBidiStreamServiceChatResponse{
-    pub from:String,
-    pub reply:String,
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+pub struct HttpBidiStreamServiceChatResponse {
+    pub from: String,
+    pub reply: String,
 }
-
-pub struct HttpBidiStreamServiceServer<T>{
+pub struct HttpBidiStreamServiceServer<T> {
     inner: ::std::sync::Arc<T>,
 }
-
-impl<T>HttpBidiStreamServiceServer<T>
+impl<T> HttpBidiStreamServiceServer<T>
 where
-T:HttpBidiStreamService+Send+Sync+'static,
+    T: HttpBidiStreamService + Send + Sync + 'static,
 {
-    pub fn new(inner:T)->Self{
-        Self{
+    pub fn new(inner: T) -> Self {
+        Self {
             inner: ::std::sync::Arc::new(inner),
         }
     }
-
-    pub fn from_arc(inner: ::std::sync::Arc<T>)->Self{
-        Self{
-            inner}
+    pub fn from_arc(inner: ::std::sync::Arc<T>) -> Self {
+        Self { inner }
     }
-
-    pub fn router(self)->xidl_rust_axum::axum::Router{
+    pub fn router(self) -> xidl_rust_axum::axum::Router {
         let svc = self.inner;
         xidl_rust_axum::axum::Router::new()
-
-        .route("/chat",xidl_rust_axum::axum::routing::get(Self::chat))
-
-        .with_state(svc)
+            .route("/chat", xidl_rust_axum::axum::routing::get(Self::chat))
+            .with_state(svc)
     }
-
-    #[allow(clippy::let_and_return,clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return)]
     async fn chat(
-    ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
-    headers: ::xidl_rust_axum::axum::http::HeaderMap,
-    ws: ::xidl_rust_axum::axum::extract::ws::WebSocketUpgrade
-    )->::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response>{
-        if!xidl_rust_axum::http::accepts_media_type(&headers,"application/json"){
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        ws: ::xidl_rust_axum::axum::extract::ws::WebSocketUpgrade,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-
         let req_headers = headers.clone();
         let svc = svc.clone();
-        let mut resp = ws.on_upgrade(move|socket|async move{
-            let bidi = xidl_rust_axum::stream::open_bidi_server::<HttpBidiStreamServiceChatRequest,HttpBidiStreamServiceChatResponse>(socket);
-            let error_sender = bidi.error_sender();
-            let req = ::xidl_rust_axum::Request::new(
-            req_headers,
-
-            bidi
-
-            );
-            if let Err(err) = svc.chat(req).await{
-                if let Some(tx) = error_sender{
-                    let _ = tx.send(Err(err)).await;
+        let mut resp = ws
+            .on_upgrade(move |socket| async move {
+                let bidi = xidl_rust_axum::stream::open_bidi_server::<
+                    HttpBidiStreamServiceChatRequest,
+                    HttpBidiStreamServiceChatResponse,
+                >(socket);
+                let error_sender = bidi.error_sender();
+                let req = ::xidl_rust_axum::Request::new(req_headers, bidi);
+                if let Err(err) = svc.chat(req).await {
+                    if let Some(tx) = error_sender {
+                        let _ = tx.send(Err(err)).await;
+                    }
                 }
-            }
-        });
+            });
         return Ok(resp);
     }
 }
-
-impl<T>xidl_rust_axum::Service for HttpBidiStreamServiceServer<T>
+impl<T> xidl_rust_axum::Service for HttpBidiStreamServiceServer<T>
 where
-T:HttpBidiStreamService+Send+Sync+'static,
+    T: HttpBidiStreamService + Send + Sync + 'static,
 {
-    fn into_router(self)->xidl_rust_axum::axum::Router{
+    fn into_router(self) -> xidl_rust_axum::axum::Router {
         self.router()
     }
 }
-
-pub struct HttpBidiStreamServiceClient{
-    client:xidl_rust_axum::Client,
+pub struct HttpBidiStreamServiceClient {
+    client: xidl_rust_axum::Client,
 }
-
-impl HttpBidiStreamServiceClient{
-    pub fn new(base_url:impl Into<String>)->Self{
-        Self{
-            client:xidl_rust_axum::Client::new(base_url),
+impl HttpBidiStreamServiceClient {
+    pub fn new(base_url: impl Into<String>) -> Self {
+        Self {
+            client: xidl_rust_axum::Client::new(base_url),
         }
     }
-
     pub fn with_auth(
-    base_url:impl Into<String>,
-    auth:xidl_rust_axum::ClientAuth,
-    )->Self{
-        Self{
-            client:xidl_rust_axum::Client::with_auth(base_url,auth),
+        base_url: impl Into<String>,
+        auth: xidl_rust_axum::ClientAuth,
+    ) -> Self {
+        Self {
+            client: xidl_rust_axum::Client::with_auth(base_url, auth),
         }
     }
-
     pub fn with_http(
-    base_url:impl Into<String>,
-    http:xidl_rust_axum::reqwest::Client,
-    )->Self{
-        Self{
-            client:xidl_rust_axum::Client::with_http(base_url,http),
+        base_url: impl Into<String>,
+        http: xidl_rust_axum::reqwest::Client,
+    ) -> Self {
+        Self {
+            client: xidl_rust_axum::Client::with_http(base_url, http),
         }
     }
-
     pub fn with_http_and_auth(
-    base_url:impl Into<String>,
-    http:xidl_rust_axum::reqwest::Client,
-    auth:xidl_rust_axum::ClientAuth,
-    )->Self{
-        Self{
-            client:xidl_rust_axum::Client::with_http_and_auth(base_url,http,auth),
+        base_url: impl Into<String>,
+        http: xidl_rust_axum::reqwest::Client,
+        auth: xidl_rust_axum::ClientAuth,
+    ) -> Self {
+        Self {
+            client: xidl_rust_axum::Client::with_http_and_auth(base_url, http, auth),
         }
     }
-
-    pub fn with_auth_override(
-    &self,
-    auth:Option<xidl_rust_axum::ClientAuth>,
-    )->Self{
-        Self{
-            client:self.client.with_auth_override(auth),
+    pub fn with_auth_override(&self, auth: Option<xidl_rust_axum::ClientAuth>) -> Self {
+        Self {
+            client: self.client.with_auth_override(auth),
         }
     }
 }
-
-impl HttpBidiStreamServiceClient{
-    pub async fn chat(&self,room:String,text:String)->Result<xidl_rust_axum::stream::ReaderWriter<HttpBidiStreamServiceChatRequest,HttpBidiStreamServiceChatResponse>,xidl_rust_axum::Error>{
+impl HttpBidiStreamServiceClient {
+    pub async fn chat(
+        &self,
+        room: String,
+        text: String,
+    ) -> Result<
+        xidl_rust_axum::stream::ReaderWriter<
+            HttpBidiStreamServiceChatRequest,
+            HttpBidiStreamServiceChatResponse,
+        >,
+        xidl_rust_axum::Error,
+    > {
         let path = "/chat".to_string();
         let mut req = self
-        .client
-        .http()
-        .request(xidl_rust_axum::reqwest::Method::GET,self.client.url(&path))
-        .build()
-        .map_err(|err|xidl_rust_axum::Error::new(500,format!("{err:?}")))?;
-        req.headers_mut().insert(
-        xidl_rust_axum::reqwest::header::ACCEPT,
-        xidl_rust_axum::reqwest::header::HeaderValue::from_str("application/json")
-        .map_err(|err|xidl_rust_axum::Error::new(400,format!("{err:?}")))?,
-        );
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
         let auth_target = &self.client;
         let mut ws_url = self.client.ws_url(&path)?;
-        return xidl_rust_axum::stream::open_bidi_client::<HttpBidiStreamServiceChatRequest,HttpBidiStreamServiceChatResponse>(&ws_url).await;
+        return xidl_rust_axum::stream::open_bidi_client::<
+            HttpBidiStreamServiceChatRequest,
+            HttpBidiStreamServiceChatResponse,
+        >(&ws_url)
+            .await;
     }
 }
