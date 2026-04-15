@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.42.0](https://github.com/xidl/xidl/compare/v0.41.0...v0.42.0) (2026-04-15)
+
+
+### Features
+
+* **xidlc:** replace rust formatter with prettyplease ([87e1b26](https://github.com/xidl/xidl/commit/87e1b269db59f60a1df38e30a3bd7900dee27273))
+
 ## [0.41.0](https://github.com/xidl/xidl/compare/v0.40.0...v0.41.0) (2026-04-10)
 
 
