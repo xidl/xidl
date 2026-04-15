@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.43.0](https://github.com/xidl/xidl/compare/v0.42.0...v0.43.0) (2026-04-15)
+
+
+### Features
+
+* **xidlc:** impl default for rust enum ([f9868ac](https://github.com/xidl/xidl/commit/f9868ac41fdd0644d051a02d597bdea0d7fc017f))
+
 ## [0.42.0](https://github.com/xidl/xidl/compare/v0.41.0...v0.42.0) (2026-04-15)
 
 
