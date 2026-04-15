@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.44.0](https://github.com/xidl/xidl/compare/v0.43.0...v0.44.0) (2026-04-15)
+
+
+### Features
+
+* **xidlc:** impl default for rust struct ([24d996f](https://github.com/xidl/xidl/commit/24d996f872d26203069a8a11be56b22d1f5c90f5))
+
 ## [0.43.0](https://github.com/xidl/xidl/compare/v0.42.0...v0.43.0) (2026-04-15)
 
 
