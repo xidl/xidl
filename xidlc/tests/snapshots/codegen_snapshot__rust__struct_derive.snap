@@ -11,6 +11,7 @@ struct_derive.rs
 #![allow(unused_variables)]
 #![allow(unreachable_patterns)]
 #[derive(Debug)]
+#[derive(Default)]
 pub struct A {}
 impl A {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
@@ -36,6 +37,7 @@ impl xidl_xcdr::XcdrDeserialize for A {
     }
 }
 #[derive(Debug, ::serde::Serialize)]
+#[derive(Default)]
 pub struct A {}
 impl A {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;

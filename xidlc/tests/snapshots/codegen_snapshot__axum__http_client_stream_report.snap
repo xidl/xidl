@@ -209,11 +209,13 @@ impl HttpClientStreamReportServiceClient {
 ===============
 http_client_stream_report.rs
 ===============
+#[derive(Default)]
 pub struct UploadChunk {
     pub part_id: String,
     pub bytes: Vec<u8>,
 }
 impl UploadChunk {}
+#[derive(Default)]
 pub struct UploadSummary {
     pub upload_id: String,
     pub accepted: u32,

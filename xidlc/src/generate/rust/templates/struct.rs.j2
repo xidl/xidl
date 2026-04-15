@@ -11,6 +11,7 @@
 {%- if derive and derive | length > 0 %}
     #[derive({{ derive | join(", ") }})]
 {%- endif %}
+#[derive(Default)]
 pub struct {{ ident }} {
     {% if parent %}
         pub base: {{ parent }},

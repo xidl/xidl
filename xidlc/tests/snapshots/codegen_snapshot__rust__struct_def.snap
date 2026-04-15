@@ -10,6 +10,7 @@ struct_def.rs
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
 #![allow(unreachable_patterns)]
+#[derive(Default)]
 pub struct A {}
 impl A {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
@@ -34,6 +35,7 @@ impl xidl_xcdr::XcdrDeserialize for A {
         Ok(Self {})
     }
 }
+#[derive(Default)]
 pub struct A {
     pub a: i32,
 }
@@ -64,6 +66,7 @@ impl xidl_xcdr::XcdrDeserialize for A {
         Ok(Self { a })
     }
 }
+#[derive(Default)]
 pub struct A {
     pub a: ::A::b,
 }
@@ -94,6 +97,7 @@ impl xidl_xcdr::XcdrDeserialize for A {
         Ok(Self { a })
     }
 }
+#[derive(Default)]
 pub struct A {
     pub base: B,
 }
@@ -122,6 +126,7 @@ impl xidl_xcdr::XcdrDeserialize for A {
         Ok(Self { base })
     }
 }
+#[derive(Default)]
 pub struct _A {}
 impl _A {
     pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
@@ -146,6 +151,7 @@ impl xidl_xcdr::XcdrDeserialize for _A {
         Ok(Self {})
     }
 }
+#[derive(Default)]
 pub struct _Custom {
     pub var_inner: Inner,
 }
@@ -176,6 +182,7 @@ impl xidl_xcdr::XcdrDeserialize for _Custom {
         Ok(Self { var_inner })
     }
 }
+#[derive(Default)]
 pub struct HelloWorld {
     pub a: u8,
     pub b: [u16; 10],

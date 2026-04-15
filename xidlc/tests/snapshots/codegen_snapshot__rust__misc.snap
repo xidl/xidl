@@ -52,6 +52,7 @@ pub const another: Color = M::medium;
 pub type FooSeq = Vec<Foo>;
 pub type FooSeq = Vec<Foo>;
 pub type FooSeq = Vec<Foo>;
+#[derive(Default)]
 pub struct Foo {
     pub value: i32,
     pub chain: FooSeq,
@@ -232,6 +233,7 @@ pub trait C {}
 pub trait D {}
 pub trait E {}
 pub const A_make_it_so_Hash: i32 = 4027367364;
+#[derive(Default)]
 pub struct A_make_it_so_In {
     pub dummy: dds::rpc::UnusedMember,
 }
@@ -262,6 +264,7 @@ impl xidl_xcdr::XcdrDeserialize for A_make_it_so_In {
         Ok(Self { dummy })
     }
 }
+#[derive(Default)]
 pub struct A_make_it_so_Out {
     pub dummy: dds::rpc::UnusedMember,
 }
@@ -521,6 +524,7 @@ impl xidl_xcdr::XcdrDeserialize for A_Call {
         Ok(Self { tag, data })
     }
 }
+#[derive(Default)]
 pub struct A_Request {
     pub header: dds::rpc::RequestHeader,
     pub data: A_Call,
@@ -692,6 +696,7 @@ impl xidl_xcdr::XcdrDeserialize for A_Return {
         Ok(Self { tag, data })
     }
 }
+#[derive(Default)]
 pub struct A_Reply {
     pub header: dds::rpc::ReplyHeader,
     pub data: A_Return,
@@ -731,6 +736,7 @@ pub trait A {
     fn make_it_so(&self) -> ();
 }
 pub const B_make_it_so_Hash: i32 = 4027367364;
+#[derive(Default)]
 pub struct B_make_it_so_In {
     pub times: i32,
 }
@@ -761,6 +767,7 @@ impl xidl_xcdr::XcdrDeserialize for B_make_it_so_In {
         Ok(Self { times })
     }
 }
+#[derive(Default)]
 pub struct B_make_it_so_Out {
     pub return_: i16,
 }
@@ -1020,6 +1027,7 @@ impl xidl_xcdr::XcdrDeserialize for B_Call {
         Ok(Self { tag, data })
     }
 }
+#[derive(Default)]
 pub struct B_Request {
     pub header: dds::rpc::RequestHeader,
     pub data: B_Call,
@@ -1191,6 +1199,7 @@ impl xidl_xcdr::XcdrDeserialize for B_Return {
         Ok(Self { tag, data })
     }
 }
+#[derive(Default)]
 pub struct B_Reply {
     pub header: dds::rpc::ReplyHeader,
     pub data: B_Return,
@@ -1230,6 +1239,7 @@ pub trait B {
     fn make_it_so(&self, times: i32) -> i16;
 }
 pub const A_opA_Hash: i32 = 3927698569;
+#[derive(Default)]
 pub struct A_opA_In {
     pub l_1: L1,
 }
@@ -1260,6 +1270,7 @@ impl xidl_xcdr::XcdrDeserialize for A_opA_In {
         Ok(Self { l_1 })
     }
 }
+#[derive(Default)]
 pub struct A_opA_Out {
     pub return_: i16,
 }
@@ -1519,6 +1530,7 @@ impl xidl_xcdr::XcdrDeserialize for A_Call {
         Ok(Self { tag, data })
     }
 }
+#[derive(Default)]
 pub struct A_Request {
     pub header: dds::rpc::RequestHeader,
     pub data: A_Call,
@@ -1690,6 +1702,7 @@ impl xidl_xcdr::XcdrDeserialize for A_Return {
         Ok(Self { tag, data })
     }
 }
+#[derive(Default)]
 pub struct A_Reply {
     pub header: dds::rpc::ReplyHeader,
     pub data: A_Return,
@@ -1730,6 +1743,7 @@ pub trait A {
     fn opA(&self, l_1: &L1) -> i16;
 }
 pub const B_opB_Hash: i32 = 772252025;
+#[derive(Default)]
 pub struct B_opB_In {
     pub l: i32,
 }
@@ -1760,6 +1774,7 @@ impl xidl_xcdr::XcdrDeserialize for B_opB_In {
         Ok(Self { l })
     }
 }
+#[derive(Default)]
 pub struct B_opB_Out {
     pub return_: L1,
 }
@@ -2019,6 +2034,7 @@ impl xidl_xcdr::XcdrDeserialize for B_Call {
         Ok(Self { tag, data })
     }
 }
+#[derive(Default)]
 pub struct B_Request {
     pub header: dds::rpc::RequestHeader,
     pub data: B_Call,
@@ -2190,6 +2206,7 @@ impl xidl_xcdr::XcdrDeserialize for B_Return {
         Ok(Self { tag, data })
     }
 }
+#[derive(Default)]
 pub struct B_Reply {
     pub header: dds::rpc::ReplyHeader,
     pub data: B_Return,
@@ -2230,6 +2247,7 @@ pub trait B {
     fn opB(&self, l: i32) -> L1;
 }
 pub const C_opC_Hash: i32 = 1200187224;
+#[derive(Default)]
 pub struct C_opC_In {
     pub l_3: L3,
 }
@@ -2260,6 +2278,7 @@ impl xidl_xcdr::XcdrDeserialize for C_opC_In {
         Ok(Self { l_3 })
     }
 }
+#[derive(Default)]
 pub struct C_opC_Out {
     pub return_: B::L1,
 }
@@ -2519,6 +2538,7 @@ impl xidl_xcdr::XcdrDeserialize for C_Call {
         Ok(Self { tag, data })
     }
 }
+#[derive(Default)]
 pub struct C_Request {
     pub header: dds::rpc::RequestHeader,
     pub data: C_Call,
@@ -2690,6 +2710,7 @@ impl xidl_xcdr::XcdrDeserialize for C_Return {
         Ok(Self { tag, data })
     }
 }
+#[derive(Default)]
 pub struct C_Reply {
     pub header: dds::rpc::ReplyHeader,
     pub data: C_Return,
@@ -2732,6 +2753,7 @@ pub trait C {
 }
 pub const L: i32 = 3;
 pub const A_f_Hash: i32 = 3712786831;
+#[derive(Default)]
 pub struct A_f_In {
     pub s: coord,
 }
@@ -2762,6 +2784,7 @@ impl xidl_xcdr::XcdrDeserialize for A_f_In {
         Ok(Self { s })
     }
 }
+#[derive(Default)]
 pub struct A_f_Out {
     pub dummy: dds::rpc::UnusedMember,
 }
@@ -3021,6 +3044,7 @@ impl xidl_xcdr::XcdrDeserialize for A_Call {
         Ok(Self { tag, data })
     }
 }
+#[derive(Default)]
 pub struct A_Request {
     pub header: dds::rpc::RequestHeader,
     pub data: A_Call,
@@ -3192,6 +3216,7 @@ impl xidl_xcdr::XcdrDeserialize for A_Return {
         Ok(Self { tag, data })
     }
 }
+#[derive(Default)]
 pub struct A_Reply {
     pub header: dds::rpc::ReplyHeader,
     pub data: A_Return,
@@ -3244,6 +3269,7 @@ pub const C_get_attribute_Name_Hash: i32 = 1786101153;
 pub const C_set_attribute_Name_Hash: i32 = 2852545551;
 pub const C_get_attribute_City_Hash: i32 = 3564363613;
 pub const C_set_attribute_City_Hash: i32 = 1017480313;
+#[derive(Default)]
 pub struct C_get_attribute_Title_In {
     pub dummy: dds::rpc::UnusedMember,
 }
@@ -3274,6 +3300,7 @@ impl xidl_xcdr::XcdrDeserialize for C_get_attribute_Title_In {
         Ok(Self { dummy })
     }
 }
+#[derive(Default)]
 pub struct C_get_attribute_Title_Out {
     pub return_: string_t,
 }
@@ -3397,6 +3424,7 @@ impl xidl_xcdr::XcdrDeserialize for C_get_attribute_Title_Result {
         Ok(Self { tag, data })
     }
 }
+#[derive(Default)]
 pub struct C_set_attribute_Title_In {
     pub Title: string_t,
 }
@@ -3427,6 +3455,7 @@ impl xidl_xcdr::XcdrDeserialize for C_set_attribute_Title_In {
         Ok(Self { Title })
     }
 }
+#[derive(Default)]
 pub struct C_set_attribute_Title_Out {
     pub dummy: dds::rpc::UnusedMember,
 }
@@ -3550,6 +3579,7 @@ impl xidl_xcdr::XcdrDeserialize for C_set_attribute_Title_Result {
         Ok(Self { tag, data })
     }
 }
+#[derive(Default)]
 pub struct C_get_attribute_Name_In {
     pub dummy: dds::rpc::UnusedMember,
 }
@@ -3580,6 +3610,7 @@ impl xidl_xcdr::XcdrDeserialize for C_get_attribute_Name_In {
         Ok(Self { dummy })
     }
 }
+#[derive(Default)]
 pub struct C_get_attribute_Name_Out {
     pub return_: A::string_t,
 }
@@ -3703,6 +3734,7 @@ impl xidl_xcdr::XcdrDeserialize for C_get_attribute_Name_Result {
         Ok(Self { tag, data })
     }
 }
+#[derive(Default)]
 pub struct C_set_attribute_Name_In {
     pub Name: A::string_t,
 }
@@ -3733,6 +3765,7 @@ impl xidl_xcdr::XcdrDeserialize for C_set_attribute_Name_In {
         Ok(Self { Name })
     }
 }
+#[derive(Default)]
 pub struct C_set_attribute_Name_Out {
     pub dummy: dds::rpc::UnusedMember,
 }
@@ -3856,6 +3889,7 @@ impl xidl_xcdr::XcdrDeserialize for C_set_attribute_Name_Result {
         Ok(Self { tag, data })
     }
 }
+#[derive(Default)]
 pub struct C_get_attribute_City_In {
     pub dummy: dds::rpc::UnusedMember,
 }
@@ -3886,6 +3920,7 @@ impl xidl_xcdr::XcdrDeserialize for C_get_attribute_City_In {
         Ok(Self { dummy })
     }
 }
+#[derive(Default)]
 pub struct C_get_attribute_City_Out {
     pub return_: B::string_t,
 }
@@ -4009,6 +4044,7 @@ impl xidl_xcdr::XcdrDeserialize for C_get_attribute_City_Result {
         Ok(Self { tag, data })
     }
 }
+#[derive(Default)]
 pub struct C_set_attribute_City_In {
     pub City: B::string_t,
 }
@@ -4039,6 +4075,7 @@ impl xidl_xcdr::XcdrDeserialize for C_set_attribute_City_In {
         Ok(Self { City })
     }
 }
+#[derive(Default)]
 pub struct C_set_attribute_City_Out {
     pub dummy: dds::rpc::UnusedMember,
 }
@@ -4523,6 +4560,7 @@ impl xidl_xcdr::XcdrDeserialize for C_Call {
         Ok(Self { tag, data })
     }
 }
+#[derive(Default)]
 pub struct C_Request {
     pub header: dds::rpc::RequestHeader,
     pub data: C_Call,
@@ -4919,6 +4957,7 @@ impl xidl_xcdr::XcdrDeserialize for C_Return {
         Ok(Self { tag, data })
     }
 }
+#[derive(Default)]
 pub struct C_Reply {
     pub header: dds::rpc::ReplyHeader,
     pub data: C_Return,

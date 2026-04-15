@@ -948,6 +948,7 @@ typeof HttpDefaultsServiceGetUserAliasRequestSchema
 http_defaults.rs
 ===============
 #[derive(Debug, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Default)]
 pub struct CreateUserRequest {
     pub name: String,
     pub age: u32,

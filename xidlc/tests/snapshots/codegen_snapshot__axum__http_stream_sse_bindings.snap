@@ -196,6 +196,7 @@ impl HttpStreamSseBindingsServiceClient {
 ===============
 http_stream_sse_bindings.rs
 ===============
+#[derive(Default)]
 pub struct ProjectEvent {
     pub id: String,
     pub payload: String,

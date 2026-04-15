@@ -768,6 +768,7 @@ impl HttpServiceClient {
 simple.rs
 ===============
 #[derive(Debug, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Default)]
 pub struct HealthResponse {
     pub healthy: bool,
     pub rtt_ms: u64,
@@ -775,30 +776,35 @@ pub struct HealthResponse {
 }
 impl HealthResponse {}
 #[derive(Debug, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Default)]
 pub struct VersionResponse {
     pub short: String,
     pub long: String,
 }
 impl VersionResponse {}
 #[derive(Debug, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Default)]
 pub struct MemoryResponse {
     pub allocated: u64,
     pub active: u64,
 }
 impl MemoryResponse {}
 #[derive(Debug, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Default)]
 pub struct UdpStatsResponse {
     pub tx: u64,
     pub rx: u64,
 }
 impl UdpStatsResponse {}
 #[derive(Debug, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Default)]
 pub struct CreateTcpReverseRequest {
     pub local_addr: String,
     pub remote_port: u16,
 }
 impl CreateTcpReverseRequest {}
 #[derive(Debug, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Default)]
 pub struct CreateSimpleResponse {
     pub id: u32,
 }

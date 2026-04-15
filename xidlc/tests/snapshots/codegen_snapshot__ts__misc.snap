@@ -1327,6 +1327,7 @@ pub const another: Color = M::medium;
 pub type FooSeq = Vec<Foo>;
 pub type FooSeq = Vec<Foo>;
 pub type FooSeq = Vec<Foo>;
+#[derive(Default)]
 pub struct Foo {
     pub value: i32,
     pub chain: FooSeq,

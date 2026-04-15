@@ -10,6 +10,7 @@ annotation_basic.rs
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
 #![allow(unreachable_patterns)]
+#[derive(Default)]
 pub struct S {
     pub a: i32,
     pub b: Option<i16>,
@@ -242,6 +243,7 @@ impl xidl_xcdr::XcdrDeserialize for U {
 pub const I_ping_Hash: i32 = 18846175;
 pub const I_get_attribute_value_Hash: i32 = 3881857402;
 pub const I_set_attribute_value_Hash: i32 = 1976821110;
+#[derive(Default)]
 pub struct I_ping_In {
     pub dummy: dds::rpc::UnusedMember,
 }
@@ -272,6 +274,7 @@ impl xidl_xcdr::XcdrDeserialize for I_ping_In {
         Ok(Self { dummy })
     }
 }
+#[derive(Default)]
 pub struct I_ping_Out {
     pub dummy: dds::rpc::UnusedMember,
 }
@@ -395,6 +398,7 @@ impl xidl_xcdr::XcdrDeserialize for I_ping_Result {
         Ok(Self { tag, data })
     }
 }
+#[derive(Default)]
 pub struct I_get_attribute_value_In {
     pub dummy: dds::rpc::UnusedMember,
 }
@@ -425,6 +429,7 @@ impl xidl_xcdr::XcdrDeserialize for I_get_attribute_value_In {
         Ok(Self { dummy })
     }
 }
+#[derive(Default)]
 pub struct I_get_attribute_value_Out {
     pub return_: i32,
 }
@@ -548,6 +553,7 @@ impl xidl_xcdr::XcdrDeserialize for I_get_attribute_value_Result {
         Ok(Self { tag, data })
     }
 }
+#[derive(Default)]
 pub struct I_set_attribute_value_In {
     pub value: i32,
 }
@@ -578,6 +584,7 @@ impl xidl_xcdr::XcdrDeserialize for I_set_attribute_value_In {
         Ok(Self { value })
     }
 }
+#[derive(Default)]
 pub struct I_set_attribute_value_Out {
     pub dummy: dds::rpc::UnusedMember,
 }
@@ -927,6 +934,7 @@ impl xidl_xcdr::XcdrDeserialize for I_Call {
         Ok(Self { tag, data })
     }
 }
+#[derive(Default)]
 pub struct I_Request {
     pub header: dds::rpc::RequestHeader,
     pub data: I_Call,
@@ -1188,6 +1196,7 @@ impl xidl_xcdr::XcdrDeserialize for I_Return {
         Ok(Self { tag, data })
     }
 }
+#[derive(Default)]
 pub struct I_Reply {
     pub header: dds::rpc::ReplyHeader,
     pub data: I_Return,

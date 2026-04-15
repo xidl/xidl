@@ -15,3 +15,14 @@ enum EnumSecondDefault {
     @default_literal
     Second
 };
+
+struct SimpleStruct {
+    uint8 a;
+};
+
+struct ComplexStruct {
+    uint8 a;
+    SimpleStruct b;
+    EnumFirstDefault c;
+    EnumSecondDefault d;
+};

@@ -37,6 +37,31 @@
   },
   "components": {
     "schemas": {
+      "ComplexStruct": {
+        "type": "object",
+        "required": [
+          "a",
+          "b",
+          "c",
+          "d"
+        ],
+        "properties": {
+          "a": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "b": {
+            "$ref": "#/components/schemas/SimpleStruct"
+          },
+          "c": {
+            "$ref": "#/components/schemas/EnumFirstDefault"
+          },
+          "d": {
+            "$ref": "#/components/schemas/EnumSecondDefault"
+          }
+        }
+      },
       "EnumFirstDefault": {
         "type": "string",
         "enum": [
@@ -186,6 +211,19 @@
             }
           }
         ]
+      },
+      "SimpleStruct": {
+        "type": "object",
+        "required": [
+          "a"
+        ],
+        "properties": {
+          "a": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          }
+        }
       }
     }
   }

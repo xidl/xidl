@@ -111,7 +111,7 @@ interface HttpServer {
 
 };
 
-@derive(Debug, Default, Clone, Serialize, Deserialize)
+@derive(Debug, Clone, Serialize, Deserialize)
 struct UserInfo {
     string name;
     string email;

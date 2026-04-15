@@ -534,6 +534,7 @@ typeof ISetValueRequestSchema
 ===============
 annotation_basic.rs
 ===============
+#[derive(Default)]
 pub struct S {
     pub a: i32,
     pub b: Option<i16>,

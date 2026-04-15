@@ -12,6 +12,7 @@ rust_annotation_passthrough.rs
 #![allow(unreachable_patterns)]
 #[serde(rename_all = "camelCase")]
 #[inline]
+#[derive(Default)]
 pub struct User {
     #[serde(rename = "userId")]
     pub user_id: String,
@@ -80,6 +81,7 @@ impl xidl_xcdr::XcdrDeserialize for Color {
     }
 }
 pub const Api_ping_Hash: i32 = 18846175;
+#[derive(Default)]
 pub struct Api_ping_In {
     pub dummy: dds::rpc::UnusedMember,
 }
@@ -110,6 +112,7 @@ impl xidl_xcdr::XcdrDeserialize for Api_ping_In {
         Ok(Self { dummy })
     }
 }
+#[derive(Default)]
 pub struct Api_ping_Out {
     pub dummy: dds::rpc::UnusedMember,
 }
@@ -369,6 +372,7 @@ impl xidl_xcdr::XcdrDeserialize for Api_Call {
         Ok(Self { tag, data })
     }
 }
+#[derive(Default)]
 pub struct Api_Request {
     pub header: dds::rpc::RequestHeader,
     pub data: Api_Call,
@@ -540,6 +544,7 @@ impl xidl_xcdr::XcdrDeserialize for Api_Return {
         Ok(Self { tag, data })
     }
 }
+#[derive(Default)]
 pub struct Api_Reply {
     pub header: dds::rpc::ReplyHeader,
     pub data: Api_Return,

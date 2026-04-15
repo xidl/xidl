@@ -5,6 +5,7 @@ expression: output
 ===============
 option.rs
 ===============
+#[derive(Default)]
 pub struct A {
     pub a: Option<String>,
 }

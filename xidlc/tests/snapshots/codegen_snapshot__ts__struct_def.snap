@@ -436,26 +436,33 @@ import{z}from"zod";
 ===============
 struct_def.rs
 ===============
+#[derive(Default)]
 pub struct A {}
 impl A {}
+#[derive(Default)]
 pub struct A {
     pub a: i32,
 }
 impl A {}
+#[derive(Default)]
 pub struct A {
     pub a: ::A::b,
 }
 impl A {}
+#[derive(Default)]
 pub struct A {
     pub base: B,
 }
 impl A {}
+#[derive(Default)]
 pub struct _A {}
 impl _A {}
+#[derive(Default)]
 pub struct _Custom {
     pub var_inner: Inner,
 }
 impl _Custom {}
+#[derive(Default)]
 pub struct HelloWorld {
     pub a: u8,
     pub b: [u16; 10],

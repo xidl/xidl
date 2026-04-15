@@ -404,9 +404,11 @@ import{z}from"zod";
 struct_derive.rs
 ===============
 #[derive(Debug)]
+#[derive(Default)]
 pub struct A {}
 impl A {}
 #[derive(Debug, ::serde::Serialize)]
+#[derive(Default)]
 pub struct A {}
 impl A {}
 ===============
