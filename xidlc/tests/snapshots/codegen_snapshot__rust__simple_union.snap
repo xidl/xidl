@@ -5,8 +5,9 @@ expression: output
 ===============
 simple_union.rs
 ===============
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Tag {
+    #[default]
     A,
     B,
 }

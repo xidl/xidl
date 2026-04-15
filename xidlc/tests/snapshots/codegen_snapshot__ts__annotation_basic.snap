@@ -539,8 +539,9 @@ pub struct S {
     pub b: Option<i16>,
 }
 impl S {}
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum E {
+    #[default]
     A,
     B,
 }

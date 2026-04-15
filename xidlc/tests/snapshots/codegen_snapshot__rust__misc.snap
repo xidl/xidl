@@ -10,8 +10,9 @@ misc.rs
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
 #![allow(unreachable_patterns)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Color {
+    #[default]
     red,
     green,
     blue,
@@ -4962,8 +4963,9 @@ pub trait C {
     fn set_City(&self, value: &B::string_t) -> ();
 }
 pub mod M {
-    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
     pub enum Size {
+        #[default]
         small,
         medium,
         large,

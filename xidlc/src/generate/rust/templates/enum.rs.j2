@@ -13,9 +13,16 @@ Debug,
 Clone,
 Copy,
 PartialEq,
-Eq{% if has_serde_serialize %},
-::serde::Serialize{% endif %}{% if has_serde_deserialize %},
-::serde::Deserialize{% endif %}
+Eq
+{% if has_serde_serialize %}
+    ,::serde::Serialize
+{% endif %}
+{% if has_serde_deserialize %}
+    ,::serde::Deserialize
+{% endif %}
+{% if members | length != 0 %}
+    ,Default
+{% endif %}
 )]
 pub enum {{ ident }} {
     {% for member in members %}
@@ -31,6 +38,9 @@ pub enum {{ ident }} {
         {% endif %}
         {% if (has_serde_serialize or has_serde_deserialize) and member.serde_rename is defined and member.serde_rename %}
             #[serde(rename = "{{ member.serde_rename }}")]
+        {% endif %}
+        {% if member.is_default %}
+            #[default]
         {% endif %}
         {{ member.name }}{% if not loop.last %},{% endif %}
     {%- endfor %}

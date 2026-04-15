@@ -13,6 +13,7 @@ struct ArtifactFile {
 
 @derive(Debug, Serialize, Deserialize)
 enum ArtifactKind {
+    @default_literal
     Hir,
     File
 };

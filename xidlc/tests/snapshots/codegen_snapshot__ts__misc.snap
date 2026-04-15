@@ -1313,8 +1313,9 @@ export namespace Example{
 ===============
 misc.rs
 ===============
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Color {
+    #[default]
     red,
     green,
     blue,
@@ -1415,8 +1416,9 @@ impl Bar {
 }
 pub const L: i32 = 3;
 pub mod M {
-    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
     pub enum Size {
+        #[default]
         small,
         medium,
         large,

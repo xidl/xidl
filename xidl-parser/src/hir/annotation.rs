@@ -15,6 +15,7 @@ pub enum Annotation {
         name: ScopedName,
         params: Option<AnnotationParams>,
     },
+    DefaultLiteral,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -78,6 +79,8 @@ impl From<crate::typed_ast::AnnotationAppl> for Annotation {
                     if params.is_none() {
                         return Self::Key;
                     }
+                } else if name.eq_ignore_ascii_case("default_literal") {
+                    return Self::DefaultLiteral;
                 }
                 Self::Builtin { name, params }
             }

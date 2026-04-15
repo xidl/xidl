@@ -399,8 +399,9 @@ import{z}from"zod";
 ===============
 enum_simple.rs
 ===============
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum A {
+    #[default]
     B,
     C,
 }

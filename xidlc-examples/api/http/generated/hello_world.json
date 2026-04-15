@@ -37,6 +37,19 @@
   },
   "components": {
     "schemas": {
+      "EnumFirstDefault": {
+        "type": "string",
+        "enum": [
+          "First"
+        ]
+      },
+      "EnumSecondDefault": {
+        "type": "string",
+        "enum": [
+          "First",
+          "Second"
+        ]
+      },
       "Error": {
         "type": "object",
         "required": [

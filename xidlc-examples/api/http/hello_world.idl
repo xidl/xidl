@@ -5,3 +5,13 @@ interface HelloWorld {
     );
 
 };
+
+enum EnumFirstDefault {
+    First
+};
+
+enum EnumSecondDefault {
+    First,
+    @default_literal
+    Second
+};

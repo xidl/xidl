@@ -45,9 +45,10 @@ impl xidl_xcdr::XcdrDeserialize for User {
 }
 #[repr(u8)]
 #[non_exhaustive]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Color {
     #[deprecated(note = "primary red")]
+    #[default]
     Red,
     Green,
 }

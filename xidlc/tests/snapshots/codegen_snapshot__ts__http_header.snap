@@ -645,8 +645,9 @@ export namespace test{
 http_header.rs
 ===============
 pub mod test {
-    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
     pub enum Status {
+        #[default]
         OK,
         FAILED,
     }
