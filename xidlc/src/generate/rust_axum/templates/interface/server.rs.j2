@@ -1,0 +1,447 @@
+pub struct {{ ident }}Server<T> {
+    inner: ::std::sync::Arc<T>,
+}
+
+impl<T> {{ ident }}Server<T>
+where
+T: {{ ident }} + Send + Sync + 'static,
+{
+    pub fn new(inner: T) -> Self {
+        Self {
+            inner: ::std::sync::Arc::new(inner),
+        }
+    }
+
+    pub fn from_arc(inner: ::std::sync::Arc<T>) -> Self {
+        Self { inner }
+    }
+
+    pub fn router(self) -> xidl_rust_axum::axum::Router {
+        let svc = self.inner;
+        xidl_rust_axum::axum::Router::new()
+        {% for method in methods %}
+            {% for path in method.paths %}
+                .route("{{ path }}", xidl_rust_axum::axum::routing::{{ method.http_method_fn }}(Self::{{ method.name }}))
+            {% endfor %}
+        {% endfor %}
+        .with_state(svc)
+    }
+
+    {% for method in methods %}
+        #[allow(clippy::let_and_return, clippy::needless_return)]
+        async fn {{ method.name }}(
+        ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap{% if method.has_bearer_auth %},
+        auth_header: Option<::xidl_rust_axum::axum_extra::extract::TypedHeader<::xidl_rust_axum::auth::bearer::BearerHeader>>{% endif %}{% if method.path_params | length > 0 %},
+        ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<{{ method.struct_prefix }}Path>{% endif %}{% if method.query_params | length > 0 %},
+        xidl_rust_axum::axum::extract::Query(query): xidl_rust_axum::axum::extract::Query<{{ method.struct_prefix }}Query>{% endif %}{% if method.is_bidi_stream %},
+        ws: ::xidl_rust_axum::axum::extract::ws::WebSocketUpgrade{% elif method.is_client_stream %},
+        body: ::xidl_rust_axum::axum::body::Body{% elif method.body_params | length > 0 %},
+        body: ::xidl_rust_axum::axum::body::Body{% endif %}
+        ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+            if !xidl_rust_axum::http::accepts_media_type(&headers, "{{ method.response_content_type }}") {
+                return Err(xidl_rust_axum::Error::not_acceptable());
+            }
+            {% if method.body_params | length > 0 and not method.is_client_stream and not method.is_bidi_stream %}
+                if !xidl_rust_axum::http::content_type_matches(&headers, "{{ method.request_content_type }}") {
+                    return Err(xidl_rust_axum::Error::unsupported_media_type());
+                }
+            {% endif %}
+            {% if method.has_basic_auth %}
+                let xidl_auth = match xidl_rust_axum::auth::basic::extract_basic_auth(&headers) {
+                    Ok(auth) => auth,
+                    Err(_) => {
+                        let resp = xidl_rust_axum::auth::basic::unauthorized_response("{{ method.basic_auth_realm }}");
+                        return Ok(resp);
+                    }
+                };
+            {% endif %}
+            {% if method.has_bearer_auth %}
+                let xidl_auth = match auth_header {
+                    Some(::xidl_rust_axum::axum_extra::extract::TypedHeader(auth_header)) => {
+                        xidl_rust_axum::auth::bearer::BearerAuth::from_header(auth_header)
+                    }
+                    None => return Err(xidl_rust_axum::Error::unauthorized()),
+                };
+            {% endif %}
+            {% if method.path_params | length > 0 %}
+                let {{ method.struct_prefix }}Path {
+                    {% for param in method.path_params %}
+                        {{ param.name }},
+                    {% endfor %}
+                } = path;
+            {% endif %}
+            {% if method.query_params | length > 0 %}
+                let {{ method.struct_prefix }}Query {
+                    {% for param in method.query_params %}
+                        {{ param.name }},
+                    {% endfor %}
+                } = query;
+            {% endif %}
+            {% if method.header_params | length > 0 %}
+                {% for param in method.header_params %}
+                    {% if param.header_is_multi %}
+                        let mut {{ param.name }}: Vec<{{ param.header_item_ty }}> = Vec::new();
+                        for header_value in headers.get_all("{{ param.wire_name }}").iter() {
+                            let header_str = header_value
+                            .to_str()
+                            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                            let parsed: {{ param.header_item_ty }} = {% if param.header_item_is_string %}header_str.to_string(){% elif param.header_item_is_primitive %}header_str.parse()
+                            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% else %}xidl_rust_axum::serde_json::from_str(header_str)
+                            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %};
+                            {{ param.name }}.push(parsed);
+                        }
+                        {% if param.optional %}
+                            let {{ param.name }} = if {{ param.name }}.is_empty() { None } else { Some({{ param.name }}) };
+                        {% else %}
+                            if {{ param.name }}.is_empty() {
+                                let {{ param.name }}: {{ param.ty }} = ::core::default::Default::default();
+                            } else {
+                                let {{ param.name }}: {{ param.ty }} = {{ param.name }};
+                            }
+                        {% endif %}
+                    {% else %}
+                        {% if param.optional %}
+                            let {{ param.name }}: {{ param.ty }} = match headers.get("{{ param.wire_name }}") {
+                                Some(header_value) => {
+                                    let header_str = header_value
+                                    .to_str()
+                                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                                    Some({% if param.header_item_is_string %}header_str.to_string(){% elif param.header_item_is_primitive %}header_str.parse()
+                                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% else %}xidl_rust_axum::serde_json::from_str(header_str)
+                                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %})
+                                }
+                                None => None,
+                            };
+                        {% else %}
+                            let {{ param.name }}: {{ param.ty }} = match headers.get("{{ param.wire_name }}") {
+                                Some(header_value) => {
+                                    let header_str = header_value
+                                    .to_str()
+                                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                                    {% if param.header_item_is_string %}header_str.to_string(){% elif param.header_item_is_primitive %}header_str.parse()
+                                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% else %}xidl_rust_axum::serde_json::from_str(header_str)
+                                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
+                                }
+                                None => ::core::default::Default::default(),
+                            };
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            {% if method.cookie_params | length > 0 %}
+                let mut cookie_map: ::std::collections::HashMap<String, Vec<String>> = ::std::collections::HashMap::new();
+                for header_value in headers.get_all("cookie").iter() {
+                    let cookie_str = header_value
+                    .to_str()
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                    for part in cookie_str.split(';') {
+                        let part = part.trim();
+                        if part.is_empty() {
+                            continue;
+                        }
+                        let mut iter = part.splitn(2, '=');
+                        let name = iter.next().unwrap_or("").trim();
+                        if name.is_empty() {
+                            continue;
+                        }
+                        let value = iter.next().unwrap_or("").trim().to_string();
+                        cookie_map.entry(name.to_string()).or_default().push(value);
+                    }
+                }
+                {% for param in method.cookie_params %}
+                    {% if param.cookie_is_multi %}
+                        let mut {{ param.name }}: Vec<{{ param.cookie_item_ty }}> = Vec::new();
+                        if let Some(values) = cookie_map.get("{{ param.wire_name }}") {
+                            for value in values {
+                                let parsed: {{ param.cookie_item_ty }} = {% if param.cookie_item_is_string %}value.to_string(){% elif param.cookie_item_is_primitive %}value.parse()
+                                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% else %}xidl_rust_axum::serde_json::from_str(value)
+                                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %};
+                                {{ param.name }}.push(parsed);
+                            }
+                        }
+                        {% if param.optional %}
+                            let {{ param.name }} = if {{ param.name }}.is_empty() { None } else { Some({{ param.name }}) };
+                        {% else %}
+                            if {{ param.name }}.is_empty() {
+                                let {{ param.name }}: {{ param.ty }} = ::core::default::Default::default();
+                            } else {
+                                let {{ param.name }}: {{ param.ty }} = {{ param.name }};
+                            }
+                        {% endif %}
+                    {% else %}
+                        {% if param.optional %}
+                            let {{ param.name }}: {{ param.ty }} = match cookie_map
+                            .get("{{ param.wire_name }}")
+                            .and_then(|values| values.first()) {
+                                Some(value) => Some({% if param.cookie_item_is_string %}value.to_string(){% elif param.cookie_item_is_primitive %}value.parse()
+                                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% else %}xidl_rust_axum::serde_json::from_str(value)
+                                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}),
+                                None => None,
+                            };
+                        {% else %}
+                            let {{ param.name }}: {{ param.ty }} = match cookie_map
+                            .get("{{ param.wire_name }}")
+                            .and_then(|values| values.first()) {
+                                Some(value) => {% if param.cookie_item_is_string %}value.to_string(){% elif param.cookie_item_is_primitive %}value.parse()
+                                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% else %}xidl_rust_axum::serde_json::from_str(value)
+                                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %},
+                                None => ::core::default::Default::default(),
+                            };
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            {% if method.body_params | length > 0 and not method.is_client_stream and not method.is_bidi_stream %}
+                let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                let body: {{ method.struct_prefix }}Body = xidl_rust_axum::DeserializeFactory::new("{{ method.request_content_type }}")
+                .from_slice(&body_bytes)?;
+                {% if method.request_body_flatten %}
+                    let {{ method.body_params[0].name }} = body;
+                {% else %}
+                    let {{ method.struct_prefix }}Body {
+                        {% for param in method.body_params %}
+                            {{ param.name }},
+                        {% endfor %}
+                    } = body;
+                {% endif %}
+            {% endif %}
+            {% if method.is_bidi_stream %}
+                let req_headers = headers.clone();
+                let svc = svc.clone();
+                {% if method.has_basic_auth or method.has_bearer_auth %}
+                    let xidl_auth = xidl_auth.clone();
+                {% endif %}
+                let mut resp = ws.on_upgrade(move |socket| async move {
+                    let bidi = xidl_rust_axum::stream::open_bidi_server::<{{ method.request_item_ty }}, {{ method.response_ty }}>(socket);
+                    let error_sender = bidi.error_sender();
+                    let req = ::xidl_rust_axum::Request::new(
+                    req_headers,
+                    {% if method.auth_wrapper_struct %}
+                        {{ method.auth_wrapper_struct }} { xidl_auth, data: bidi }
+                    {% else %}
+                        bidi
+                    {% endif %}
+                    );
+                    if let Err(err) = svc.{{ method.name }}(req).await {
+                        if let Some(tx) = error_sender {
+                            let _ = tx.send(Err(err)).await;
+                        }
+                    }
+                });
+                {% if method.deprecated %}
+                    resp.headers_mut().insert(
+                    ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated"),
+                    ::xidl_rust_axum::axum::http::HeaderValue::from_static("true"),
+                    );
+                    {% if method.deprecated_since %}
+                        let value = ::xidl_rust_axum::axum::http::HeaderValue::from_str("{{ method.deprecated_since }}")
+                        .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                        resp.headers_mut().insert(
+                        ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated-since"),
+                        value,
+                        );
+                    {% endif %}
+                    {% if method.deprecated_after %}
+                        let value = ::xidl_rust_axum::axum::http::HeaderValue::from_str("{{ method.deprecated_after }}")
+                        .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                        resp.headers_mut().insert(
+                        ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated-from"),
+                        value,
+                        );
+                    {% endif %}
+                {% endif %}
+                return Ok(resp);
+            {% elif method.is_client_stream %}
+                let stream = xidl_rust_axum::stream::decode_ndjson_body::<{{ method.request_item_ty }}>(body);
+                {% if method.auth_wrapper_struct %}
+                    let data = {{ method.auth_wrapper_struct }} { xidl_auth, data: stream };
+                {% else %}
+                    let data = stream;
+                {% endif %}
+            {% elif method.request_struct is defined and method.request_struct %}
+                let data = {{ method.request_struct }} {
+                    {% for param in method.request_params %}
+                        {{ param.name }},
+                    {% endfor %}
+                    {% if method.auth_in_request_struct %}
+                        xidl_auth,
+                    {% endif %}
+                };
+            {% else %}
+                let data = ();
+            {% endif %}
+            {% if not method.is_bidi_stream %}
+                let req = ::xidl_rust_axum::Request::new(headers, data);
+                let mut resp = match svc.{{ method.name }}(req).await {
+                    Ok(resp_value) => {
+                        {% if method.response_header_params | length > 0 or method.response_cookie_params | length > 0 %}
+                            {% for param in method.response_header_params %}
+                                {% if method.response_struct %}
+                                    {% if param.header_is_multi %}
+                                        let {{ param.name }}_header_values: Vec<String> = {
+                                            let values = &resp_value.{{ param.name }};
+                                            values.iter().map(|value| {
+                                                {% if param.header_item_is_string %}value.clone(){% elif param.header_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
+                                                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
+                                            }).collect()
+                                        };
+                                    {% else %}
+                                        let {{ param.name }}_header_value: String = {
+                                            let value = &resp_value.{{ param.name }};
+                                            {% if param.header_item_is_string %}value.clone(){% elif param.header_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
+                                            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
+                                        };
+                                    {% endif %}
+                                {% elif method.response_params | length == 1 and not method.response_include_return %}
+                                    {% if param.header_is_multi %}
+                                        let {{ param.name }}_header_values: Vec<String> = {
+                                            let values = &resp_value;
+                                            values.iter().map(|value| {
+                                                {% if param.header_item_is_string %}value.clone(){% elif param.header_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
+                                                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
+                                            }).collect()
+                                        };
+                                    {% else %}
+                                        let {{ param.name }}_header_value: String = {
+                                            let value = &resp_value;
+                                            {% if param.header_item_is_string %}value.clone(){% elif param.header_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
+                                            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
+                                        };
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                            {% for param in method.response_cookie_params %}
+                                {% if method.response_struct %}
+                                    {% if param.cookie_is_multi %}
+                                        let {{ param.name }}_cookie_values: Vec<String> = {
+                                            let values = &resp_value.{{ param.name }};
+                                            values.iter().map(|value| {
+                                                {% if param.cookie_item_is_string %}value.clone(){% elif param.cookie_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
+                                                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
+                                            }).collect()
+                                        };
+                                    {% else %}
+                                        let {{ param.name }}_cookie_value: String = {
+                                            let value = &resp_value.{{ param.name }};
+                                            {% if param.cookie_item_is_string %}value.clone(){% elif param.cookie_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
+                                            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
+                                        };
+                                    {% endif %}
+                                {% elif method.response_params | length == 1 and not method.response_include_return %}
+                                    {% if param.cookie_is_multi %}
+                                        let {{ param.name }}_cookie_values: Vec<String> = {
+                                            let values = &resp_value;
+                                            values.iter().map(|value| {
+                                                {% if param.cookie_item_is_string %}value.clone(){% elif param.cookie_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
+                                                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
+                                            }).collect()
+                                        };
+                                    {% else %}
+                                        let {{ param.name }}_cookie_value: String = {
+                                            let value = &resp_value;
+                                            {% if param.cookie_item_is_string %}value.clone(){% elif param.cookie_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(value)
+                                            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
+                                        };
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                        let mut resp = {% if method.is_server_stream %}
+                        xidl_rust_axum::stream::sse_response(resp_value)
+                    {% elif method.response_is_empty %}
+                        {
+                            resp_value;
+                            ::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT)
+                        }
+                    {% else %}
+                        {
+                            let body = xidl_rust_axum::SerializeFactory::new("{{ method.response_content_type }}")
+                            .to_vec(&resp_value)?;
+                            ::xidl_rust_axum::axum::response::Response::builder()
+                            .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                            .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "{{ method.response_content_type }}",
+                            )
+                            .body(::xidl_rust_axum::axum::body::Body::from(body))
+                            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?
+                        }
+                        {% endif %};
+                        {% if method.response_header_params | length > 0 %}
+                            {% for param in method.response_header_params %}
+                                let header_name = ::xidl_rust_axum::axum::http::HeaderName::from_bytes(
+                                "{{ param.wire_name }}".as_bytes(),
+                                ).map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                                {% if param.header_is_multi %}
+                                    for value_str in {{ param.name }}_header_values {
+                                        let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(&value_str)
+                                        .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                                        resp.headers_mut().append(header_name.clone(), header_value);
+                                    }
+                                {% else %}
+                                    let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(&{{ param.name }}_header_value)
+                                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                                    resp.headers_mut().insert(header_name, header_value);
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                        {% if method.response_cookie_params | length > 0 %}
+                            {% for param in method.response_cookie_params %}
+                                {% if param.cookie_is_multi %}
+                                    for value_str in {{ param.name }}_cookie_values {
+                                        let cookie_str = format!("{}={}", "{{ param.wire_name }}", value_str);
+                                        let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(&cookie_str)
+                                        .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                                        resp.headers_mut().append(::xidl_rust_axum::axum::http::header::SET_COOKIE, header_value);
+                                    }
+                                {% else %}
+                                    let cookie_str = format!("{}={}", "{{ param.wire_name }}", {{ param.name }}_cookie_value);
+                                    let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(&cookie_str)
+                                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                                    resp.headers_mut().append(::xidl_rust_axum::axum::http::header::SET_COOKIE, header_value);
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                        resp
+                    }
+                    Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+                };
+                {% if method.deprecated %}
+                    resp.headers_mut().insert(
+                    ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated"),
+                    ::xidl_rust_axum::axum::http::HeaderValue::from_static("true"),
+                    );
+                    {% if method.deprecated_since %}
+                        let value = ::xidl_rust_axum::axum::http::HeaderValue::from_str("{{ method.deprecated_since }}")
+                        .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                        resp.headers_mut().insert(
+                        ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated-since"),
+                        value,
+                        );
+                    {% endif %}
+                    {% if method.deprecated_after %}
+                        let value = ::xidl_rust_axum::axum::http::HeaderValue::from_str("{{ method.deprecated_after }}")
+                        .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                        resp.headers_mut().insert(
+                        ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated-from"),
+                        value,
+                        );
+                    {% endif %}
+                {% endif %}
+                Ok(resp)
+            {% endif %}
+        }
+    {% endfor %}
+}
+
+impl<T> xidl_rust_axum::Service for {{ ident }}Server<T>
+where
+T: {{ ident }} + Send + Sync + 'static,
+{
+    fn into_router(self) -> xidl_rust_axum::axum::Router {
+        self.router()
+    }
+}
