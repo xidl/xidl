@@ -15,9 +15,10 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@1.92.0
+        uses: dtolnay/rust-toolchain@master
         with:
-          components: rustfmt, clippy
+          toolchain: 1.92.0
+          components: rustfmt
 
       - name: Setup Go
         uses: actions/setup-go@v6
@@ -47,18 +48,9 @@ jobs:
         with:
           tool: taplo-cli
 
-      - name: Install cargo-tarpaulin
-        uses: taiki-e/install-action@v2
-        with:
-          tool: cargo-tarpaulin
-
       - name: Pre-commit
         run: |
           pre-commit run -a
-
-      - name: Cargo clippy
-        run: |
-          cargo clippy --all-targets --all-features -- -D warnings
 
       - name: Python compile
         run: |
@@ -68,13 +60,56 @@ jobs:
         run: |
           make test
 
-      - name: xidl-parser coverage
-        run: |
-          make test-xidl-parser-coverage
-
       - name: Python test
         run: |
           make -C python test
+
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.92.0
+          components: clippy
+
+      - name: Cargo clippy
+        run: |
+          cargo clippy --all-targets --all-features -- -D warnings
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.92.0
+
+      - name: Install cargo-tarpaulin
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-tarpaulin
+
+      - name: xidl-parser coverage
+        run: |
+          make test-coverage
+
+  try-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.92.0
 
       - name: Check release
         run: |

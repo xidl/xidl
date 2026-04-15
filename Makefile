@@ -4,7 +4,7 @@ JINJA_TEMPLATES := $(shell find xidlc -type f -name '*.j2' | sort)
 
 .PHONY: test test-rust test-go test-go-codegen test-go-runtime test-update test-coverage test-xidl-parser-coverage test-xidl-jsonrpc-coverage test-xidl-rust-axum-coverage build-xtypes docs-dev docs-build
 
-test: test-rust test-go test-coverage
+test: test-rust test-go
 
 test-rust:
 	cargo test --all -F transport-all -F fmt
