@@ -20,8 +20,8 @@ Specification(
                                             PrimaryExpr(
                                                 Literal(
                                                     IntegerLiteral(
-                                                        OctNumber(
-                                                            "0o10",
+                                                        IntegerLiteral(
+                                                            "8",
                                                         ),
                                                     ),
                                                 ),

@@ -20,7 +20,7 @@ Specification(
                                             PrimaryExpr(
                                                 Literal(
                                                     IntegerLiteral(
-                                                        DecNumber(
+                                                        IntegerLiteral(
                                                             "3850959154",
                                                         ),
                                                     ),
@@ -51,7 +51,7 @@ Specification(
                                             PrimaryExpr(
                                                 Literal(
                                                     IntegerLiteral(
-                                                        DecNumber(
+                                                        IntegerLiteral(
                                                             "3347793635",
                                                         ),
                                                     ),
@@ -82,7 +82,7 @@ Specification(
                                             PrimaryExpr(
                                                 Literal(
                                                     IntegerLiteral(
-                                                        DecNumber(
+                                                        IntegerLiteral(
                                                             "1317556379",
                                                         ),
                                                     ),
@@ -113,7 +113,7 @@ Specification(
                                             PrimaryExpr(
                                                 Literal(
                                                     IntegerLiteral(
-                                                        DecNumber(
+                                                        IntegerLiteral(
                                                             "888691541",
                                                         ),
                                                     ),

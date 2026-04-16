@@ -53,12 +53,7 @@ pub(crate) fn go_scoped_name(value: &hir::ScopedName) -> String {
 
 pub(crate) fn go_literal(value: &hir::Literal) -> String {
     match value {
-        hir::Literal::IntegerLiteral(lit) => match lit {
-            hir::IntegerLiteral::BinNumber(value)
-            | hir::IntegerLiteral::OctNumber(value)
-            | hir::IntegerLiteral::DecNumber(value)
-            | hir::IntegerLiteral::HexNumber(value) => value.clone(),
-        },
+        hir::Literal::IntegerLiteral(lit) => lit.0.clone(),
         hir::Literal::FloatingPtLiteral(lit) => {
             let sign = lit
                 .sign

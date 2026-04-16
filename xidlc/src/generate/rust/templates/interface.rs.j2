@@ -13,8 +13,8 @@ pub trait {{ ident }} {
             #[{{ attr }}]
         {% endfor %}
         fn {{ method.name }}(
-            &self,
-            {{ method.params | join(", ") }}
+        &self,
+        {{ method.params | join(", ") }}
         ) -> {{ method.ret }};
     {% endfor %}
 }

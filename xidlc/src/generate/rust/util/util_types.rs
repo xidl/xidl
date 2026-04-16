@@ -114,12 +114,7 @@ pub fn rust_switch_type(value: &hir::SwitchTypeSpec) -> String {
 
 pub fn rust_literal(value: &hir::Literal) -> String {
     match value {
-        hir::Literal::IntegerLiteral(lit) => match lit {
-            hir::IntegerLiteral::BinNumber(value)
-            | hir::IntegerLiteral::OctNumber(value)
-            | hir::IntegerLiteral::DecNumber(value)
-            | hir::IntegerLiteral::HexNumber(value) => value.clone(),
-        },
+        hir::Literal::IntegerLiteral(lit) => lit.0.clone(),
         hir::Literal::FloatingPtLiteral(lit) => {
             let sign = lit
                 .sign

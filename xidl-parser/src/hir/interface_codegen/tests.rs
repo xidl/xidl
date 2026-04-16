@@ -13,9 +13,7 @@ fn scoped(parts: &[&str], is_root: bool) -> ScopedName {
 }
 
 fn int(value: &str) -> PrimaryExpr {
-    PrimaryExpr::Literal(Literal::IntegerLiteral(IntegerLiteral::DecNumber(
-        value.to_string(),
-    )))
+    PrimaryExpr::Literal(Literal::IntegerLiteral(IntegerLiteral(value.to_string())))
 }
 
 fn wrap_primary(value: PrimaryExpr) -> ConstExpr {

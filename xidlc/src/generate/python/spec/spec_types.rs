@@ -72,12 +72,7 @@ pub(super) fn py_const_type(value: &hir::ConstType) -> String {
 
 pub(super) fn py_const_expr(expr: &hir::ConstExpr) -> String {
     crate::generate::render_const_expr(expr, &py_scoped_name, &|literal| match literal {
-        hir::Literal::IntegerLiteral(value) => match value {
-            hir::IntegerLiteral::BinNumber(value)
-            | hir::IntegerLiteral::OctNumber(value)
-            | hir::IntegerLiteral::DecNumber(value)
-            | hir::IntegerLiteral::HexNumber(value) => value.clone(),
-        },
+        hir::Literal::IntegerLiteral(value) => value.0.clone(),
         hir::Literal::FloatingPtLiteral(value) => {
             let sign = value
                 .sign

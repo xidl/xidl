@@ -20,8 +20,8 @@ Specification(
                                             PrimaryExpr(
                                                 Literal(
                                                     IntegerLiteral(
-                                                        HexNumber(
-                                                            "0xff",
+                                                        IntegerLiteral(
+                                                            "255",
                                                         ),
                                                     ),
                                                 ),

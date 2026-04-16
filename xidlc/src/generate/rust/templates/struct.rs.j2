@@ -39,8 +39,8 @@ impl {{ ident }} {
         }
 
         fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-            &self,
-            serializer: &mut S,
+        &self,
+        serializer: &mut S,
         ) -> xidl_xcdr::error::XcdrResult<()> {
             serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
             {% if parent %}

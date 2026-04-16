@@ -1,5 +1,6 @@
 ---
 source: xidl-parser/tests/test-annotation.rs
+assertion_line: 74
 expression: hir
 ---
 Specification(

@@ -20,8 +20,8 @@ Specification(
                                             PrimaryExpr(
                                                 Literal(
                                                     IntegerLiteral(
-                                                        BinNumber(
-                                                            "0b10",
+                                                        IntegerLiteral(
+                                                            "2",
                                                         ),
                                                     ),
                                                 ),

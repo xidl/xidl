@@ -10,8 +10,8 @@ impl {{ ident }}Client {
     }
 
     pub fn with_auth(
-        base_url: impl Into<String>,
-        auth: xidl_rust_axum::ClientAuth,
+    base_url: impl Into<String>,
+    auth: xidl_rust_axum::ClientAuth,
     ) -> Self {
         Self {
             client: xidl_rust_axum::Client::with_auth(base_url, auth),
@@ -19,8 +19,8 @@ impl {{ ident }}Client {
     }
 
     pub fn with_http(
-        base_url: impl Into<String>,
-        http: xidl_rust_axum::reqwest::Client,
+    base_url: impl Into<String>,
+    http: xidl_rust_axum::reqwest::Client,
     ) -> Self {
         Self {
             client: xidl_rust_axum::Client::with_http(base_url, http),
@@ -28,9 +28,9 @@ impl {{ ident }}Client {
     }
 
     pub fn with_http_and_auth(
-        base_url: impl Into<String>,
-        http: xidl_rust_axum::reqwest::Client,
-        auth: xidl_rust_axum::ClientAuth,
+    base_url: impl Into<String>,
+    http: xidl_rust_axum::reqwest::Client,
+    auth: xidl_rust_axum::ClientAuth,
     ) -> Self {
         Self {
             client: xidl_rust_axum::Client::with_http_and_auth(base_url, http, auth),
@@ -38,8 +38,8 @@ impl {{ ident }}Client {
     }
 
     pub fn with_auth_override(
-        &self,
-        auth: Option<xidl_rust_axum::ClientAuth>,
+    &self,
+    auth: Option<xidl_rust_axum::ClientAuth>,
     ) -> Self {
         Self {
             client: self.client.with_auth_override(auth),

@@ -188,7 +188,7 @@ fn hir_struct_and_type_dcl_cover_optional_and_inline_typedef_paths() {
                         xidl_parser::hir::UnaryExpr::PrimaryExpr(
                             xidl_parser::hir::PrimaryExpr::Literal(
                                 xidl_parser::hir::Literal::IntegerLiteral(
-                                    xidl_parser::hir::IntegerLiteral::DecNumber("7".to_string()),
+                                    xidl_parser::hir::IntegerLiteral("7".to_string()),
                                 ),
                             ),
                         ),

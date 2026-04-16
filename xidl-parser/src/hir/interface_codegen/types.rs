@@ -182,12 +182,7 @@ pub fn render_const_expr(expr: &ConstExpr) -> String {
 
     fn render_literal(value: &Literal) -> String {
         match value {
-            Literal::IntegerLiteral(lit) => match lit {
-                IntegerLiteral::BinNumber(value) => value.clone(),
-                IntegerLiteral::OctNumber(value) => value.clone(),
-                IntegerLiteral::DecNumber(value) => value.clone(),
-                IntegerLiteral::HexNumber(value) => value.clone(),
-            },
+            Literal::IntegerLiteral(lit) => lit.0.clone(),
             Literal::FloatingPtLiteral(lit) => {
                 let sign = lit
                     .sign

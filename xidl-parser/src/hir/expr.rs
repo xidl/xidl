@@ -77,12 +77,7 @@ pub enum Literal {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum IntegerLiteral {
-    BinNumber(String),
-    OctNumber(String),
-    DecNumber(String),
-    HexNumber(String),
-}
+pub struct IntegerLiteral(pub String);
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FloatingPtLiteral {
@@ -176,12 +171,7 @@ fn literal_to_i64(value: &Literal) -> Option<i64> {
 }
 
 fn parse_int_literal(value: &IntegerLiteral) -> Option<i64> {
-    match value {
-        IntegerLiteral::BinNumber(value) => parse_radix(value, 2),
-        IntegerLiteral::OctNumber(value) => parse_radix(value, 8),
-        IntegerLiteral::DecNumber(value) => parse_radix(value, 10),
-        IntegerLiteral::HexNumber(value) => parse_radix(value, 16),
-    }
+    parse_radix(&value.0, 10)
 }
 
 fn parse_radix(value: &str, radix: u32) -> Option<i64> {
@@ -340,12 +330,15 @@ impl From<crate::typed_ast::Literal> for Literal {
 
 impl From<crate::typed_ast::IntegerLiteral> for IntegerLiteral {
     fn from(value: crate::typed_ast::IntegerLiteral) -> Self {
-        match value {
-            crate::typed_ast::IntegerLiteral::BinNumber(value) => Self::BinNumber(value),
-            crate::typed_ast::IntegerLiteral::OctNumber(value) => Self::OctNumber(value),
-            crate::typed_ast::IntegerLiteral::DecNumber(value) => Self::DecNumber(value),
-            crate::typed_ast::IntegerLiteral::HexNumber(value) => Self::HexNumber(value),
+        let parsed = match value {
+            crate::typed_ast::IntegerLiteral::BinNumber(value) => parse_radix(&value, 2),
+            crate::typed_ast::IntegerLiteral::OctNumber(value) => parse_radix(&value, 8),
+            crate::typed_ast::IntegerLiteral::DecNumber(value) => parse_radix(&value, 10),
+            crate::typed_ast::IntegerLiteral::HexNumber(value) => parse_radix(&value, 16),
         }
+        .expect("typed_ast integer literal should parse");
+
+        Self(parsed.to_string())
     }
 }
 

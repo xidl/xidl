@@ -58,7 +58,7 @@ Specification(
                                                                         PrimaryExpr(
                                                                             Literal(
                                                                                 IntegerLiteral(
-                                                                                    DecNumber(
+                                                                                    IntegerLiteral(
                                                                                         "10",
                                                                                     ),
                                                                                 ),
@@ -104,7 +104,7 @@ Specification(
                                                                         PrimaryExpr(
                                                                             Literal(
                                                                                 IntegerLiteral(
-                                                                                    DecNumber(
+                                                                                    IntegerLiteral(
                                                                                         "10",
                                                                                     ),
                                                                                 ),
@@ -129,7 +129,7 @@ Specification(
                                                                         PrimaryExpr(
                                                                             Literal(
                                                                                 IntegerLiteral(
-                                                                                    DecNumber(
+                                                                                    IntegerLiteral(
                                                                                         "20",
                                                                                     ),
                                                                                 ),
@@ -196,7 +196,7 @@ Specification(
                                                                         PrimaryExpr(
                                                                             Literal(
                                                                                 IntegerLiteral(
-                                                                                    DecNumber(
+                                                                                    IntegerLiteral(
                                                                                         "20",
                                                                                     ),
                                                                                 ),
@@ -241,7 +241,7 @@ Specification(
                                                                         PrimaryExpr(
                                                                             Literal(
                                                                                 IntegerLiteral(
-                                                                                    DecNumber(
+                                                                                    IntegerLiteral(
                                                                                         "20",
                                                                                     ),
                                                                                 ),
@@ -285,7 +285,7 @@ Specification(
                                                                     PrimaryExpr(
                                                                         Literal(
                                                                             IntegerLiteral(
-                                                                                DecNumber(
+                                                                                IntegerLiteral(
                                                                                     "1",
                                                                                 ),
                                                                             ),
@@ -310,7 +310,7 @@ Specification(
                                                                     PrimaryExpr(
                                                                         Literal(
                                                                             IntegerLiteral(
-                                                                                DecNumber(
+                                                                                IntegerLiteral(
                                                                                     "2",
                                                                                 ),
                                                                             ),
