@@ -138,6 +138,7 @@ fn hir_parses_pragmas_and_include_errors() {
         #pragma xidlc package "demo.pkg"
         #pragma xidlc openapi version "1.2.3"
         #pragma xidlc service "https://example.test" "Demo service"
+        #pragma vendor keep-me
         "#,
     );
     write_file(&system_include, "#include <dds/core.idl>\n");
@@ -164,6 +165,11 @@ fn hir_parses_pragmas_and_include_errors() {
         hir.0[4],
         Definition::Pragma(Pragma::XidlcOpenApiService { ref base_url, ref description })
             if base_url == "https://example.test" && description.as_deref() == Some("Demo service")
+    ));
+    assert!(matches!(
+        hir.0[5],
+        Definition::Pragma(Pragma::Custom(ref value))
+            if value.directive == "#pragma" && value.argument.as_deref() == Some("vendor keep-me")
     ));
 
     let err = parse_hir_with_path(&system_include).expect_err("system include must fail");

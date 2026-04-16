@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum Pragma {
+    Custom(CustomPragma),
     XidlcSerialize(SerializeKind),
     XidlcVersion(SerializeVersion),
     XidlcPackage(String),
@@ -13,20 +14,32 @@ pub enum Pragma {
     },
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+pub struct CustomPragma {
+    pub directive: String,
+    pub argument: Option<String>,
+}
+
 pub(crate) fn parse_xidlc_pragma(call: &crate::typed_ast::PreprocCall) -> Option<Pragma> {
     let directive = call.directive.0.as_str();
     if !directive.eq_ignore_ascii_case("#pragma") {
         return None;
     }
 
-    let arg = call.argument.as_ref()?.0.as_str();
+    let Some(arg) = call.argument.as_ref().map(|arg| arg.0.as_str()) else {
+        return Some(Pragma::Custom(CustomPragma::from(call)));
+    };
     let mut parts = arg.split_whitespace();
-    let namespace = parts.next()?;
+    let Some(namespace) = parts.next() else {
+        return Some(Pragma::Custom(CustomPragma::from(call)));
+    };
     if !namespace.eq_ignore_ascii_case("xidlc") {
-        return None;
+        return Some(Pragma::Custom(CustomPragma::from(call)));
     }
 
-    let token = parts.next()?;
+    let Some(token) = parts.next() else {
+        return Some(Pragma::Custom(CustomPragma::from(call)));
+    };
     let rest = parts.collect::<Vec<_>>().join(" ");
     if token.eq_ignore_ascii_case("XCDR1") {
         return Some(Pragma::XidlcVersion(SerializeVersion::Xcdr1));
@@ -35,27 +48,41 @@ pub(crate) fn parse_xidlc_pragma(call: &crate::typed_ast::PreprocCall) -> Option
         return Some(Pragma::XidlcVersion(SerializeVersion::Xcdr2));
     }
     if token.eq_ignore_ascii_case("package") {
-        return (!rest.is_empty()).then(|| Pragma::XidlcPackage(trim_pragma_value(&rest)));
-    }
-    if token.eq_ignore_ascii_case("version") {
-        return (!rest.is_empty()).then(|| Pragma::XidlcOpenApiVersion(trim_pragma_value(&rest)));
-    }
-    if token.eq_ignore_ascii_case("service") {
-        return parse_pragma_service(&rest).map(|(base_url, description)| {
-            Pragma::XidlcOpenApiService {
-                base_url,
-                description,
-            }
+        return Some(if rest.is_empty() {
+            Pragma::Custom(CustomPragma::from(call))
+        } else {
+            Pragma::XidlcPackage(trim_pragma_value(&rest))
         });
     }
+    if token.eq_ignore_ascii_case("version") {
+        return Some(if rest.is_empty() {
+            Pragma::Custom(CustomPragma::from(call))
+        } else {
+            Pragma::XidlcOpenApiVersion(trim_pragma_value(&rest))
+        });
+    }
+    if token.eq_ignore_ascii_case("service") {
+        return Some(
+            parse_pragma_service(&rest)
+                .map(|(base_url, description)| Pragma::XidlcOpenApiService {
+                    base_url,
+                    description,
+                })
+                .unwrap_or_else(|| Pragma::Custom(CustomPragma::from(call))),
+        );
+    }
     if token.eq_ignore_ascii_case("openapi") {
-        return parse_nested_openapi_pragma(&rest);
+        return Some(
+            parse_nested_openapi_pragma(&rest)
+                .unwrap_or_else(|| Pragma::Custom(CustomPragma::from(call))),
+        );
     }
 
     token
         .strip_prefix("serialize(")
         .and_then(|value| value.strip_suffix(')'))
         .and_then(parse_serialize_pragma)
+        .or_else(|| Some(Pragma::Custom(CustomPragma::from(call))))
 }
 
 pub(crate) fn trim_pragma_value(value: &str) -> String {
@@ -133,6 +160,15 @@ fn parse_serialize_kind(value: &str) -> Option<SerializeKind> {
         Some(SerializeKind::PlCdr2)
     } else {
         None
+    }
+}
+
+impl From<&crate::typed_ast::PreprocCall> for CustomPragma {
+    fn from(value: &crate::typed_ast::PreprocCall) -> Self {
+        Self {
+            directive: value.directive.0.clone(),
+            argument: value.argument.as_ref().map(|arg| arg.0.clone()),
+        }
     }
 }
 

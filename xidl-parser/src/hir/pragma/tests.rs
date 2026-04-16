@@ -60,12 +60,44 @@ fn rejects_non_xidlc_or_incomplete_pragmas() {
         })
         .is_none()
     );
-    assert!(parse_xidlc_pragma(&pragma("other XCDR1")).is_none());
-    assert!(parse_xidlc_pragma(&pragma("xidlc")).is_none());
-    assert!(parse_xidlc_pragma(&pragma("xidlc package")).is_none());
-    assert!(parse_xidlc_pragma(&pragma("xidlc openapi")).is_none());
-    assert!(parse_xidlc_pragma(&pragma("xidlc service")).is_none());
-    assert!(parse_xidlc_pragma(&pragma("xidlc serialize(unknown)")).is_none());
+    assert!(matches!(
+        parse_xidlc_pragma(&pragma("other XCDR1")),
+        Some(Pragma::Custom(CustomPragma { directive, argument }))
+            if directive == "#pragma" && argument.as_deref() == Some("other XCDR1")
+    ));
+    assert!(matches!(
+        parse_xidlc_pragma(&pragma("xidlc")),
+        Some(Pragma::Custom(CustomPragma { directive, argument }))
+            if directive == "#pragma" && argument.as_deref() == Some("xidlc")
+    ));
+    assert!(matches!(
+        parse_xidlc_pragma(&pragma("xidlc package")),
+        Some(Pragma::Custom(CustomPragma { directive, argument }))
+            if directive == "#pragma" && argument.as_deref() == Some("xidlc package")
+    ));
+    assert!(matches!(
+        parse_xidlc_pragma(&pragma("xidlc openapi")),
+        Some(Pragma::Custom(CustomPragma { directive, argument }))
+            if directive == "#pragma" && argument.as_deref() == Some("xidlc openapi")
+    ));
+    assert!(matches!(
+        parse_xidlc_pragma(&pragma("xidlc service")),
+        Some(Pragma::Custom(CustomPragma { directive, argument }))
+            if directive == "#pragma" && argument.as_deref() == Some("xidlc service")
+    ));
+    assert!(matches!(
+        parse_xidlc_pragma(&pragma("xidlc serialize(unknown)")),
+        Some(Pragma::Custom(CustomPragma { directive, argument }))
+            if directive == "#pragma" && argument.as_deref() == Some("xidlc serialize(unknown)")
+    ));
+    assert!(matches!(
+        parse_xidlc_pragma(&PreprocCall {
+            directive: PreprocDirective("#pragma".to_string()),
+            argument: None,
+        }),
+        Some(Pragma::Custom(CustomPragma { directive, argument }))
+            if directive == "#pragma" && argument.is_none()
+    ));
 }
 
 #[test]
@@ -99,5 +131,9 @@ fn parses_all_serialize_kinds_and_invalid_openapi_tokens() {
         Some(Pragma::XidlcVersion(SerializeVersion::Xcdr2))
     ));
 
-    assert!(parse_xidlc_pragma(&pragma("xidlc openapi unknown value")).is_none());
+    assert!(matches!(
+        parse_xidlc_pragma(&pragma("xidlc openapi unknown value")),
+        Some(Pragma::Custom(CustomPragma { directive, argument }))
+            if directive == "#pragma" && argument.as_deref() == Some("xidlc openapi unknown value")
+    ));
 }

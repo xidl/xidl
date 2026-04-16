@@ -34,6 +34,7 @@ pub enum Extensibility {
 impl SerializeConfig {
     pub fn apply_pragma(&mut self, pragma: super::Pragma) {
         match pragma {
+            super::Pragma::Custom(_) => {}
             super::Pragma::XidlcSerialize(kind) => self.explicit_kind = Some(kind),
             super::Pragma::XidlcVersion(version) => {
                 self.version = Some(version);

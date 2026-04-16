@@ -1,5 +1,5 @@
 use super::*;
-use crate::hir::Pragma;
+use crate::hir::{CustomPragma, Pragma};
 
 fn builtin(name: &str) -> Annotation {
     Annotation::Builtin {
@@ -28,6 +28,10 @@ fn apply_pragma_updates_config_and_ignores_non_serialization_pragmas() {
         base_url: "https://demo.test".to_string(),
         description: None,
     });
+    config.apply_pragma(Pragma::Custom(CustomPragma {
+        directive: "#pragma".to_string(),
+        argument: Some("vendor keep-me".to_string()),
+    }));
     assert!(matches!(config.explicit_kind, Some(SerializeKind::PlCdr)));
 
     config.apply_pragma(Pragma::XidlcVersion(SerializeVersion::Xcdr2));
