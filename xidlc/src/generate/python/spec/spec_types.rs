@@ -77,7 +77,7 @@ pub(super) fn py_const_expr(expr: &hir::ConstExpr) -> String {
             let sign = value
                 .sign
                 .as_ref()
-                .map(|value| value.0.as_str())
+                .map(hir::IntegerSign::as_str)
                 .unwrap_or("");
             format!("{sign}{}.{}", value.integer.0, value.fraction.0)
         }
@@ -86,7 +86,7 @@ pub(super) fn py_const_expr(expr: &hir::ConstExpr) -> String {
         | hir::Literal::StringLiteral(value)
         | hir::Literal::WideStringLiteral(value) => format!("{value:?}"),
         hir::Literal::BooleanLiteral(value) => {
-            if value.eq_ignore_ascii_case("true") {
+            if *value {
                 "True".to_string()
             } else {
                 "False".to_string()

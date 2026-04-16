@@ -106,7 +106,36 @@ pub enum Literal {
     WideCharacterLiteral(String),
     StringLiteral(String),
     WideStringLiteral(String),
-    BooleanLiteral(String),
+    BooleanLiteral(BooleanLiteral),
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum BooleanLiteral {
+    True,
+    False,
+}
+
+impl BooleanLiteral {
+    pub fn as_bool(&self) -> bool {
+        matches!(self, Self::True)
+    }
+}
+
+impl<'a> crate::parser::FromTreeSitter<'a> for BooleanLiteral {
+    fn from_node(
+        node: tree_sitter::Node<'a>,
+        ctx: &mut crate::parser::ParseContext<'a>,
+    ) -> crate::error::ParserResult<Self> {
+        match ctx.node_text(&node)?.to_ascii_lowercase().as_str() {
+            "true" => Ok(Self::True),
+            "false" => Ok(Self::False),
+            value => Err(crate::error::ParseError::UnexpectedNode(format!(
+                "parent: {}, got: {}",
+                node.kind(),
+                value
+            ))),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Parser, Serialize, Deserialize)]
@@ -161,9 +190,38 @@ impl<'a> crate::parser::FromTreeSitter<'a> for FloatingPtLiteral {
     }
 }
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
-#[ts(transparent)]
-pub struct IntegerSign(pub String);
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum IntegerSign {
+    Plus,
+    Minus,
+}
+
+impl IntegerSign {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Plus => "+",
+            Self::Minus => "-",
+        }
+    }
+}
+
+impl<'a> crate::parser::FromTreeSitter<'a> for IntegerSign {
+    fn from_node(
+        node: tree_sitter::Node<'a>,
+        ctx: &mut crate::parser::ParseContext<'a>,
+    ) -> crate::error::ParserResult<Self> {
+        let text = ctx.node_text(&node)?;
+        match text {
+            "+" => Ok(Self::Plus),
+            "-" => Ok(Self::Minus),
+            _ => Err(crate::error::ParseError::UnexpectedNode(format!(
+                "parent: {}, got: {}",
+                node.kind(),
+                text
+            ))),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Parser, Serialize, Deserialize)]
 #[ts(transparent)]

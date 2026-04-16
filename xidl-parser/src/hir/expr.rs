@@ -39,7 +39,7 @@ pub enum Literal {
     WideCharacterLiteral(String),
     StringLiteral(String),
     WideStringLiteral(String),
-    BooleanLiteral(String),
+    BooleanLiteral(bool),
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -53,7 +53,19 @@ pub struct FloatingPtLiteral {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct IntegerSign(pub String);
+pub enum IntegerSign {
+    Plus,
+    Minus,
+}
+
+impl IntegerSign {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Plus => "+",
+            Self::Minus => "-",
+        }
+    }
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DecNumber(pub String);
@@ -227,7 +239,9 @@ impl From<crate::typed_ast::Literal> for Literal {
             }
             crate::typed_ast::Literal::StringLiteral(value) => Self::StringLiteral(value),
             crate::typed_ast::Literal::WideStringLiteral(value) => Self::WideStringLiteral(value),
-            crate::typed_ast::Literal::BooleanLiteral(value) => Self::BooleanLiteral(value),
+            crate::typed_ast::Literal::BooleanLiteral(value) => {
+                Self::BooleanLiteral(value.as_bool())
+            }
         }
     }
 }
@@ -257,7 +271,10 @@ impl From<crate::typed_ast::FloatingPtLiteral> for FloatingPtLiteral {
 
 impl From<crate::typed_ast::IntegerSign> for IntegerSign {
     fn from(value: crate::typed_ast::IntegerSign) -> Self {
-        Self(value.0)
+        match value {
+            crate::typed_ast::IntegerSign::Plus => Self::Plus,
+            crate::typed_ast::IntegerSign::Minus => Self::Minus,
+        }
     }
 }
 

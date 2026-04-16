@@ -141,9 +141,7 @@ fn conversion_covers_recursive_expr_and_literal_variants() {
                                                             crate::typed_ast::PrimaryExpr::Literal(
                                                                 crate::typed_ast::Literal::FloatingPtLiteral(
                                                                     crate::typed_ast::FloatingPtLiteral {
-                                                                        sign: Some(crate::typed_ast::IntegerSign(
-                                                                            "-".to_string(),
-                                                                        )),
+                                                                        sign: Some(crate::typed_ast::IntegerSign::Minus),
                                                                         integer: crate::typed_ast::DecNumber(
                                                                             "1".to_string(),
                                                                         ),
@@ -196,7 +194,9 @@ fn conversion_covers_recursive_expr_and_literal_variants() {
                             crate::typed_ast::AddExpr::MultExpr(crate::typed_ast::MultExpr::UnaryExpr(
                                 crate::typed_ast::UnaryExpr::PrimaryExpr(
                                     crate::typed_ast::PrimaryExpr::Literal(
-                                        crate::typed_ast::Literal::BooleanLiteral("TRUE".to_string()),
+                                        crate::typed_ast::Literal::BooleanLiteral(
+                                            crate::typed_ast::BooleanLiteral::True,
+                                        ),
                                     ),
                                 ),
                             )),

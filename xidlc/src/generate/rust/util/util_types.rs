@@ -119,7 +119,7 @@ pub fn rust_literal(value: &hir::Literal) -> String {
             let sign = lit
                 .sign
                 .as_ref()
-                .map(|value| value.0.as_str())
+                .map(hir::IntegerSign::as_str)
                 .unwrap_or("");
             format!("{}{}.{}", sign, lit.integer.0, lit.fraction.0)
         }
@@ -129,7 +129,7 @@ pub fn rust_literal(value: &hir::Literal) -> String {
         }
         hir::Literal::StringLiteral(value) => value.clone(),
         hir::Literal::WideStringLiteral(value) => value.strip_prefix('L').unwrap_or(value).into(),
-        hir::Literal::BooleanLiteral(value) => value.to_ascii_lowercase(),
+        hir::Literal::BooleanLiteral(value) => value.to_string(),
     }
 }
 

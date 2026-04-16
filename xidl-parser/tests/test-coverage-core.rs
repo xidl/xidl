@@ -273,7 +273,7 @@ fn serialize_config_and_expr_helpers_cover_resolution_branches() {
     assert_eq!(custom.0.len(), 1);
 
     let float: xidl_parser::hir::Literal = Literal::FloatingPtLiteral(FloatingPtLiteral {
-        sign: Some(IntegerSign("-".to_string())),
+        sign: Some(IntegerSign::Minus),
         integer: DecNumber("12".to_string()),
         fraction: DecNumber("5".to_string()),
     })

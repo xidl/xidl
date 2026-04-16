@@ -126,18 +126,14 @@ pub fn render_const_expr(expr: &ConstExpr) -> String {
         match value {
             Literal::IntegerLiteral(lit) => lit.0.clone(),
             Literal::FloatingPtLiteral(lit) => {
-                let sign = lit
-                    .sign
-                    .as_ref()
-                    .map(|value| value.0.as_str())
-                    .unwrap_or("");
+                let sign = lit.sign.as_ref().map(IntegerSign::as_str).unwrap_or("");
                 format!("{}{}.{}", sign, lit.integer.0, lit.fraction.0)
             }
             Literal::CharLiteral(value) => value.clone(),
             Literal::WideCharacterLiteral(value) => value.clone(),
             Literal::StringLiteral(value) => value.clone(),
             Literal::WideStringLiteral(value) => value.clone(),
-            Literal::BooleanLiteral(value) => value.to_ascii_lowercase(),
+            Literal::BooleanLiteral(value) => value.to_string(),
         }
     }
 

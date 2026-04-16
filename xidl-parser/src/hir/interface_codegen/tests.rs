@@ -67,7 +67,7 @@ fn renders_idl_types_and_expressions() {
         render_const_expr(&scoped_expr(&["demo", "VALUE"], true)),
         render_const_expr(&nested(int("8"))),
         render_const_expr(&literal(Literal::FloatingPtLiteral(FloatingPtLiteral {
-            sign: Some(IntegerSign("-".to_string())),
+            sign: Some(IntegerSign::Minus),
             integer: DecNumber("1".to_string()),
             fraction: DecNumber("5".to_string()),
         }))),
@@ -75,7 +75,7 @@ fn renders_idl_types_and_expressions() {
         render_const_expr(&literal(Literal::WideCharacterLiteral("L'a'".to_string()))),
         render_const_expr(&literal(Literal::StringLiteral("\"hi\"".to_string()))),
         render_const_expr(&literal(Literal::WideStringLiteral("L\"hi\"".to_string()))),
-        render_const_expr(&literal(Literal::BooleanLiteral("TRUE".to_string()))),
+        render_const_expr(&literal(Literal::BooleanLiteral(true))),
     ];
 
     for token in ["|", "^", "&", "<<", ">>", "+", "-", "*", "/", "%", "~"] {
