@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.45.0](https://github.com/xidl/xidl/compare/v0.44.0...v0.45.0) (2026-04-16)
+
+
+### Features
+
+* **bitmask:** support bitbound ([270ca60](https://github.com/xidl/xidl/commit/270ca602fe426a595f83cd7adcb5b8da88c0a2a1))
+* **hir:** flatten constexpr ([79934b4](https://github.com/xidl/xidl/commit/79934b4d3d2be3d7d92df3f0c7512c7638211e1b))
+* **xidl-parser:** parse hir IntegerSign and IntegerBoolean ([1029226](https://github.com/xidl/xidl/commit/10292266c6593cea3fbc2f562f11de02226f91e0))
+* **xidl-parser:** parse IntegerLiteral ([e744d1a](https://github.com/xidl/xidl/commit/e744d1aedaa69cb6b9cc8ec97551132071025ea3))
+
+
+### Bug Fixes
+
+* **parser:** preserve unknown pragmas in hir ([fffff6e](https://github.com/xidl/xidl/commit/fffff6ed4e2711f21f3d81ba9249cd9482ae185a))
+
 ## [0.44.0](https://github.com/xidl/xidl/compare/v0.43.0...v0.44.0) (2026-04-15)
 
 
