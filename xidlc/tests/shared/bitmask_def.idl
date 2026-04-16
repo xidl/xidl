@@ -1,15 +1,14 @@
-bitmask A {
+bitmask EmptyBitmask {
 };
 
-bitmask A {
+bitmask SimpleBitmask {
     A,
     B,
     C
 };
 
-bitmask A {
-    A,
-    B,
-    C,
-
+bitmask PositionedBitmask {
+    @position (0) A,
+    @position (2) B,
+    @position (4) C,
 };

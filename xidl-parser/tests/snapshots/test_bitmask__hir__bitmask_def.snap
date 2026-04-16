@@ -26,14 +26,17 @@ Specification(
                             ident: "A",
                             value: [
                                 BitValue {
+                                    position: 0,
                                     annotations: [],
                                     ident: "A",
                                 },
                                 BitValue {
+                                    position: 1,
                                     annotations: [],
                                     ident: "B",
                                 },
                                 BitValue {
+                                    position: 2,
                                     annotations: [],
                                     ident: "C",
                                 },
@@ -52,14 +55,17 @@ Specification(
                             ident: "A",
                             value: [
                                 BitValue {
+                                    position: 0,
                                     annotations: [],
                                     ident: "A",
                                 },
                                 BitValue {
+                                    position: 1,
                                     annotations: [],
                                     ident: "B",
                                 },
                                 BitValue {
+                                    position: 2,
                                     annotations: [],
                                     ident: "C",
                                 },

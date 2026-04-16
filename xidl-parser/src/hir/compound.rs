@@ -94,6 +94,7 @@ pub struct BitmaskDcl {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct BitValue {
+    pub position: usize,
     pub annotations: Vec<Annotation>,
     pub ident: String,
 }
@@ -288,10 +289,33 @@ impl From<crate::typed_ast::DestinationType> for BitFieldType {
 
 impl From<crate::typed_ast::BitmaskDcl> for BitmaskDcl {
     fn from(value: crate::typed_ast::BitmaskDcl) -> Self {
+        let mut bits = vec![];
+        for (idx, bitvalue) in value.value.into_iter().enumerate() {
+            let mut position = idx;
+            for annotation in &bitvalue.annotations {
+                let crate::typed_ast::AnnotationName::Builtin(name) = &annotation.name else {
+                    continue;
+                };
+                if !name.eq_ignore_ascii_case("position") {
+                    continue;
+                }
+
+                let Some(crate::typed_ast::AnnotationParams::Raw(v)) = &annotation.params else {
+                    continue;
+                };
+
+                if let Ok(v) = v.parse::<usize>() {
+                    position = v;
+                }
+            }
+            let mut bit: BitValue = bitvalue.into();
+            bit.position = position;
+            bits.push(bit);
+        }
         Self {
             annotations: vec![],
             ident: value.ident.0,
-            value: value.value.into_iter().map(Into::into).collect(),
+            value: bits,
         }
     }
 }
@@ -299,6 +323,7 @@ impl From<crate::typed_ast::BitmaskDcl> for BitmaskDcl {
 impl From<crate::typed_ast::BitValue> for BitValue {
     fn from(value: crate::typed_ast::BitValue) -> Self {
         Self {
+            position: 0,
             annotations: expand_annotations(value.annotations),
             ident: value.ident.0,
         }

@@ -198,6 +198,7 @@ Specification(
                             ident: "BM",
                             value: [
                                 BitValue {
+                                    position: 0,
                                     annotations: [
                                         Builtin {
                                             name: "id",
@@ -211,6 +212,7 @@ Specification(
                                     ident: "A",
                                 },
                                 BitValue {
+                                    position: 1,
                                     annotations: [
                                         Builtin {
                                             name: "id",

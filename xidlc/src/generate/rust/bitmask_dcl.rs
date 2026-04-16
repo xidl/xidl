@@ -12,11 +12,10 @@ impl RustRender for hir::BitmaskDcl {
         let values = self
             .value
             .iter()
-            .enumerate()
-            .map(|(idx, value)| {
+            .map(|value| {
                 json!({
                     "name": crate::generate::rust::util::rust_ident(&value.ident),
-                    "index": idx,
+                    "position": value.position,
                     "doc": doc_lines_from_annotations(&value.annotations),
                     "rust_attrs": rust_passthrough_attrs_from_annotations(&value.annotations),
                 })

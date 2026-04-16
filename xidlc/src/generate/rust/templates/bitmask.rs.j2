@@ -19,7 +19,7 @@ impl {{ ident }} {
         {% for attr in value.rust_attrs %}
             #[{{ attr }}]
         {% endfor %}
-        pub const {{ value.name }}: u32 = 1u32 << {{ value.index }};
+        pub const {{ value.name }}: u32 = 1u32 << {{ value.position }};
     {% endfor %}
 }
 
