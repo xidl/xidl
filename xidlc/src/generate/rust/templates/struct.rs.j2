@@ -1,13 +1,9 @@
-{%- if doc and doc | length > 0 -%}
-    {%- for line in doc %}
-        /// {{ line }}
-    {%- endfor %}
-{%- endif -%}
-{% if rust_attrs and rust_attrs | length > 0 %}
-    {% for attr in rust_attrs %}
-        #[{{ attr }}]
-    {% endfor %}
-{%- endif %}
+{%- for line in doc %}
+    /// {{ line }}
+{%- endfor %}
+{% for attr in rust_attrs %}
+    #[{{ attr }}]
+{% endfor %}
 {%- if derive and derive | length > 0 %}
     #[derive({{ derive | join(", ") }})]
 {%- endif %}
@@ -17,16 +13,12 @@ pub struct {{ ident }} {
         pub base: {{ parent }},
     {% endif %}
     {%- for member in members %}
-        {%- if member.doc and member.doc | length > 0 -%}
-            {%- for line in member.doc %}
-                /// {{ line }}
-            {%- endfor %}
-        {%- endif -%}
-        {% if member.rust_attrs and member.rust_attrs | length > 0 %}
-            {% for attr in member.rust_attrs %}
-                #[{{ attr }}]
-            {% endfor %}
-        {% endif %}
+        {%- for line in member.doc %}
+            /// {{ line }}
+        {%- endfor %}
+        {% for attr in member.rust_attrs %}
+            #[{{ attr }}]
+        {% endfor %}
         {% if opt.enable_serialize and opt.enable_deserialize and enable_serde_attrs and member.serde_rename is defined and member.serde_rename %}
             #[serde(rename = "{{ member.serde_rename }}")]
         {% endif %}
@@ -36,8 +28,7 @@ pub struct {{ ident }} {
 
 impl {{ ident }} {
     {% if opt.enable_serialize and opt.enable_deserialize %}
-        pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind =
-        xidl_xcdr::SerializeKind::{{ serialize_kind }};
+        pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::{{ serialize_kind }};
     {% endif %}
 }
 
@@ -48,8 +39,8 @@ impl {{ ident }} {
         }
 
         fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
+            &self,
+            serializer: &mut S,
         ) -> xidl_xcdr::error::XcdrResult<()> {
             serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
             {% if parent %}

@@ -1,11 +1,7 @@
-{%- if doc and doc | length > 0 -%}
-    {%- for line in doc %}
-        /// {{ line }}
-    {%- endfor %}
-{%- endif -%}
-{% if rust_attrs and rust_attrs | length > 0 %}
-    {% for attr in rust_attrs %}
-        #[{{ attr }}]
-    {% endfor %}
-{%- endif %}
+{%- for line in doc %}
+    /// {{ line }}
+{%- endfor %}
+{% for attr in rust_attrs %}
+    #[{{ attr }}]
+{% endfor %}
 pub type {{ name }} = {{ ty }};

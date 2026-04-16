@@ -1,48 +1,40 @@
-{%- if doc and doc | length > 0 -%}
-    {%- for line in doc %}
-        /// {{ line }}
-    {%- endfor %}
-{%- endif -%}
-{% if rust_attrs and rust_attrs | length > 0 %}
-    {% for attr in rust_attrs %}
-        #[{{ attr }}]
-    {% endfor %}
-{%- endif %}
+{%- for line in doc %}
+    /// {{ line }}
+{%- endfor %}
+{% for attr in rust_attrs %}
+    #[{{ attr }}]
+{% endfor %}
 #[derive(
-Debug,
-Clone,
-Copy,
-PartialEq,
-Eq
-{% if has_serde_serialize %}
-    ,::serde::Serialize
-{% endif %}
-{% if has_serde_deserialize %}
-    ,::serde::Deserialize
-{% endif %}
-{% if members | length != 0 %}
-    ,Default
-{% endif %}
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    {% if has_serde_serialize %}
+        ::serde::Serialize,
+    {% endif %}
+    {% if has_serde_deserialize %}
+        ::serde::Deserialize,
+    {% endif %}
+    {% if members | length != 0 %}
+        Default,
+    {% endif %}
 )]
 pub enum {{ ident }} {
     {% for member in members %}
-        {%- if member.doc and member.doc | length > 0 -%}
-            {%- for line in member.doc %}
-                /// {{ line }}
-            {%- endfor %}
-        {%- endif -%}
-        {% if member.rust_attrs and member.rust_attrs | length > 0 %}
-            {% for attr in member.rust_attrs %}
-                #[{{ attr }}]
-            {% endfor %}
-        {% endif %}
+        {%- for line in member.doc %}
+            /// {{ line }}
+        {%- endfor %}
+        {% for attr in member.rust_attrs %}
+            #[{{ attr }}]
+        {% endfor %}
         {% if (has_serde_serialize or has_serde_deserialize) and member.serde_rename is defined and member.serde_rename %}
             #[serde(rename = "{{ member.serde_rename }}")]
         {% endif %}
         {% if member.is_default %}
             #[default]
         {% endif %}
-        {{ member.name }}{% if not loop.last %},{% endif %}
+        {{ member.name }},
     {%- endfor %}
 }
 
@@ -61,7 +53,7 @@ pub enum {{ ident }} {
 {% if opt.enable_deserialize %}
     impl xidl_xcdr::XcdrDeserialize for {{ ident }} {
         fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
+            deserializer: &mut D,
         ) -> xidl_xcdr::error::XcdrResult<Self> {
             let value: u32 = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
             match value {
@@ -69,8 +61,8 @@ pub enum {{ ident }} {
                     {{ loop.index0 }} => Ok(Self::{{ member.name }}),
                 {% endfor %}
                 _ => Err(xidl_xcdr::error::XcdrError::Message(format!(
-                "invalid {{ ident }} discriminant: {}",
-                value
+                    "invalid {{ ident }} discriminant: {}",
+                    value
                 ))),
             }
         }

@@ -5,7 +5,6 @@ use crate::generate::utils::doc_lines_from_annotations;
 use serde_json::json;
 use xidl_parser::hir;
 
-#[path = "interface_dcl_support.rs"]
 mod interface_dcl_support;
 use interface_dcl_support::InterfaceMethodRenderer;
 

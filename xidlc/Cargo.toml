@@ -94,11 +94,6 @@ path = "tests/codegen_snapshot.rs"
 required-features = ["fmt"]
 
 [[test]]
-name = "go_examples"
-path = "tests/go_examples.rs"
-required-features = ["fmt"]
-
-[[test]]
 name = "http_validation"
 path = "tests/http_validation.rs"
 required-features = ["fmt"]

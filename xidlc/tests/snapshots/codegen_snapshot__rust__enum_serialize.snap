@@ -13,7 +13,7 @@ enum_serialize.rs
     Eq,
     ::serde::Serialize,
     ::serde::Deserialize,
-    Default
+    Default,
 )]
 pub enum Tag {
     #[default]
