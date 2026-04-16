@@ -27,26 +27,10 @@ Specification(
                                 },
                             ),
                             ident: "a",
-                            value: ConstExpr(
-                                XorExpr(
-                                    AndExpr(
-                                        ShiftExpr(
-                                            AddExpr(
-                                                MultExpr(
-                                                    UnaryExpr(
-                                                        PrimaryExpr(
-                                                            Literal(
-                                                                IntegerLiteral(
-                                                                    IntegerLiteral(
-                                                                        "10",
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
+                            value: Literal(
+                                IntegerLiteral(
+                                    IntegerLiteral(
+                                        "10",
                                     ),
                                 ),
                             ),

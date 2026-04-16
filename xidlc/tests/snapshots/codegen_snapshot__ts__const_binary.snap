@@ -398,7 +398,7 @@ import{z}from"zod";
 ===============
 const_binary.rs
 ===============
-pub const a: i32 = 0b10;
+pub const a: i32 = 2;
 ===============
 const_binary.zod.ts
 ===============

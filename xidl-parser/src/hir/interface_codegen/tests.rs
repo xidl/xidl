@@ -12,126 +12,28 @@ fn scoped(parts: &[&str], is_root: bool) -> ScopedName {
     }
 }
 
-fn int(value: &str) -> PrimaryExpr {
-    PrimaryExpr::Literal(Literal::IntegerLiteral(IntegerLiteral(value.to_string())))
+fn int(value: &str) -> ConstExpr {
+    ConstExpr::Literal(Literal::IntegerLiteral(IntegerLiteral(value.to_string())))
 }
 
-fn wrap_primary(value: PrimaryExpr) -> ConstExpr {
-    ConstExpr(OrExpr::XorExpr(XorExpr::AndExpr(AndExpr::ShiftExpr(
-        ShiftExpr::AddExpr(AddExpr::MultExpr(MultExpr::UnaryExpr(
-            UnaryExpr::PrimaryExpr(value),
-        ))),
-    ))))
+fn scoped_expr(parts: &[&str], is_root: bool) -> ConstExpr {
+    ConstExpr::ScopedName(scoped(parts, is_root))
 }
 
-fn wrap_unary(op: UnaryOperator, value: PrimaryExpr) -> ConstExpr {
-    ConstExpr(OrExpr::XorExpr(XorExpr::AndExpr(AndExpr::ShiftExpr(
-        ShiftExpr::AddExpr(AddExpr::MultExpr(MultExpr::UnaryExpr(
-            UnaryExpr::UnaryExpr(op, value),
-        ))),
-    ))))
+fn wrap_unary(op: UnaryOperator, value: ConstExpr) -> ConstExpr {
+    ConstExpr::UnaryExpr(op, Box::new(value))
 }
 
-fn or_expr(left: ConstExpr, right: PrimaryExpr) -> ConstExpr {
-    ConstExpr(OrExpr::OrExpr(
-        Box::new(left.0),
-        XorExpr::AndExpr(AndExpr::ShiftExpr(ShiftExpr::AddExpr(AddExpr::MultExpr(
-            MultExpr::UnaryExpr(UnaryExpr::PrimaryExpr(right)),
-        )))),
-    ))
+fn literal(value: Literal) -> ConstExpr {
+    ConstExpr::Literal(value)
 }
 
-fn xor_expr(left: PrimaryExpr, right: PrimaryExpr) -> ConstExpr {
-    ConstExpr(OrExpr::XorExpr(XorExpr::XorExpr(
-        Box::new(XorExpr::AndExpr(AndExpr::ShiftExpr(ShiftExpr::AddExpr(
-            AddExpr::MultExpr(MultExpr::UnaryExpr(UnaryExpr::PrimaryExpr(left))),
-        )))),
-        AndExpr::ShiftExpr(ShiftExpr::AddExpr(AddExpr::MultExpr(MultExpr::UnaryExpr(
-            UnaryExpr::PrimaryExpr(right),
-        )))),
-    )))
+fn nested(value: ConstExpr) -> ConstExpr {
+    ConstExpr::UnaryExpr(UnaryOperator::Add, Box::new(value))
 }
 
-fn and_expr(left: PrimaryExpr, right: PrimaryExpr) -> ConstExpr {
-    ConstExpr(OrExpr::XorExpr(XorExpr::AndExpr(AndExpr::AndExpr(
-        Box::new(AndExpr::ShiftExpr(ShiftExpr::AddExpr(AddExpr::MultExpr(
-            MultExpr::UnaryExpr(UnaryExpr::PrimaryExpr(left)),
-        )))),
-        ShiftExpr::AddExpr(AddExpr::MultExpr(MultExpr::UnaryExpr(
-            UnaryExpr::PrimaryExpr(right),
-        ))),
-    ))))
-}
-
-fn lshift_expr(left: PrimaryExpr, right: PrimaryExpr) -> ConstExpr {
-    ConstExpr(OrExpr::XorExpr(XorExpr::AndExpr(AndExpr::ShiftExpr(
-        ShiftExpr::LeftShiftExpr(
-            Box::new(ShiftExpr::AddExpr(AddExpr::MultExpr(MultExpr::UnaryExpr(
-                UnaryExpr::PrimaryExpr(left),
-            )))),
-            AddExpr::MultExpr(MultExpr::UnaryExpr(UnaryExpr::PrimaryExpr(right))),
-        ),
-    ))))
-}
-
-fn rshift_expr(left: PrimaryExpr, right: PrimaryExpr) -> ConstExpr {
-    ConstExpr(OrExpr::XorExpr(XorExpr::AndExpr(AndExpr::ShiftExpr(
-        ShiftExpr::RightShiftExpr(
-            Box::new(ShiftExpr::AddExpr(AddExpr::MultExpr(MultExpr::UnaryExpr(
-                UnaryExpr::PrimaryExpr(left),
-            )))),
-            AddExpr::MultExpr(MultExpr::UnaryExpr(UnaryExpr::PrimaryExpr(right))),
-        ),
-    ))))
-}
-
-fn add_expr(left: PrimaryExpr, right: PrimaryExpr) -> ConstExpr {
-    ConstExpr(OrExpr::XorExpr(XorExpr::AndExpr(AndExpr::ShiftExpr(
-        ShiftExpr::AddExpr(AddExpr::AddExpr(
-            Box::new(AddExpr::MultExpr(MultExpr::UnaryExpr(
-                UnaryExpr::PrimaryExpr(left),
-            ))),
-            MultExpr::UnaryExpr(UnaryExpr::PrimaryExpr(right)),
-        )),
-    ))))
-}
-
-fn sub_expr(left: PrimaryExpr, right: PrimaryExpr) -> ConstExpr {
-    ConstExpr(OrExpr::XorExpr(XorExpr::AndExpr(AndExpr::ShiftExpr(
-        ShiftExpr::AddExpr(AddExpr::SubExpr(
-            Box::new(AddExpr::MultExpr(MultExpr::UnaryExpr(
-                UnaryExpr::PrimaryExpr(left),
-            ))),
-            MultExpr::UnaryExpr(UnaryExpr::PrimaryExpr(right)),
-        )),
-    ))))
-}
-
-fn mult_expr(left: PrimaryExpr, right: PrimaryExpr) -> ConstExpr {
-    ConstExpr(OrExpr::XorExpr(XorExpr::AndExpr(AndExpr::ShiftExpr(
-        ShiftExpr::AddExpr(AddExpr::MultExpr(MultExpr::MultExpr(
-            Box::new(MultExpr::UnaryExpr(UnaryExpr::PrimaryExpr(left))),
-            UnaryExpr::PrimaryExpr(right),
-        ))),
-    ))))
-}
-
-fn div_expr(left: PrimaryExpr, right: PrimaryExpr) -> ConstExpr {
-    ConstExpr(OrExpr::XorExpr(XorExpr::AndExpr(AndExpr::ShiftExpr(
-        ShiftExpr::AddExpr(AddExpr::MultExpr(MultExpr::DivExpr(
-            Box::new(MultExpr::UnaryExpr(UnaryExpr::PrimaryExpr(left))),
-            UnaryExpr::PrimaryExpr(right),
-        ))),
-    ))))
-}
-
-fn mod_expr(left: PrimaryExpr, right: PrimaryExpr) -> ConstExpr {
-    ConstExpr(OrExpr::XorExpr(XorExpr::AndExpr(AndExpr::ShiftExpr(
-        ShiftExpr::AddExpr(AddExpr::MultExpr(MultExpr::ModExpr(
-            Box::new(MultExpr::UnaryExpr(UnaryExpr::PrimaryExpr(left))),
-            UnaryExpr::PrimaryExpr(right),
-        ))),
-    ))))
+fn binary(op: BinaryOperator, left: ConstExpr, right: ConstExpr) -> ConstExpr {
+    ConstExpr::BinaryExpr(op, Box::new(left), Box::new(right))
 }
 
 fn parse_interface(source: &str) -> InterfaceDcl {
@@ -151,46 +53,29 @@ fn parse_interface(source: &str) -> InterfaceDcl {
 #[test]
 fn renders_idl_types_and_expressions() {
     let rendered = [
-        render_const_expr(&or_expr(wrap_primary(int("1")), int("2"))),
-        render_const_expr(&xor_expr(int("1"), int("2"))),
-        render_const_expr(&and_expr(int("1"), int("2"))),
-        render_const_expr(&lshift_expr(int("1"), int("2"))),
-        render_const_expr(&rshift_expr(int("4"), int("1"))),
-        render_const_expr(&add_expr(int("1"), int("2"))),
-        render_const_expr(&sub_expr(int("3"), int("1"))),
-        render_const_expr(&mult_expr(int("2"), int("3"))),
-        render_const_expr(&div_expr(int("6"), int("2"))),
-        render_const_expr(&mod_expr(int("7"), int("3"))),
+        render_const_expr(&binary(BinaryOperator::Or, int("1"), int("2"))),
+        render_const_expr(&binary(BinaryOperator::Xor, int("1"), int("2"))),
+        render_const_expr(&binary(BinaryOperator::And, int("1"), int("2"))),
+        render_const_expr(&binary(BinaryOperator::LeftShift, int("1"), int("2"))),
+        render_const_expr(&binary(BinaryOperator::RightShift, int("4"), int("1"))),
+        render_const_expr(&binary(BinaryOperator::Add, int("1"), int("2"))),
+        render_const_expr(&binary(BinaryOperator::Sub, int("3"), int("1"))),
+        render_const_expr(&binary(BinaryOperator::Mult, int("2"), int("3"))),
+        render_const_expr(&binary(BinaryOperator::Div, int("6"), int("2"))),
+        render_const_expr(&binary(BinaryOperator::Mod, int("7"), int("3"))),
         render_const_expr(&wrap_unary(UnaryOperator::Not, int("1"))),
-        render_const_expr(&wrap_primary(PrimaryExpr::ScopedName(scoped(
-            &["demo", "VALUE"],
-            true,
-        )))),
-        render_const_expr(&wrap_primary(PrimaryExpr::ConstExpr(Box::new(
-            wrap_primary(int("8")),
-        )))),
-        render_const_expr(&wrap_primary(PrimaryExpr::Literal(
-            Literal::FloatingPtLiteral(FloatingPtLiteral {
-                sign: Some(IntegerSign("-".to_string())),
-                integer: DecNumber("1".to_string()),
-                fraction: DecNumber("5".to_string()),
-            }),
-        ))),
-        render_const_expr(&wrap_primary(PrimaryExpr::Literal(Literal::CharLiteral(
-            "'a'".to_string(),
-        )))),
-        render_const_expr(&wrap_primary(PrimaryExpr::Literal(
-            Literal::WideCharacterLiteral("L'a'".to_string()),
-        ))),
-        render_const_expr(&wrap_primary(PrimaryExpr::Literal(Literal::StringLiteral(
-            "\"hi\"".to_string(),
-        )))),
-        render_const_expr(&wrap_primary(PrimaryExpr::Literal(
-            Literal::WideStringLiteral("L\"hi\"".to_string()),
-        ))),
-        render_const_expr(&wrap_primary(PrimaryExpr::Literal(
-            Literal::BooleanLiteral("TRUE".to_string()),
-        ))),
+        render_const_expr(&scoped_expr(&["demo", "VALUE"], true)),
+        render_const_expr(&nested(int("8"))),
+        render_const_expr(&literal(Literal::FloatingPtLiteral(FloatingPtLiteral {
+            sign: Some(IntegerSign("-".to_string())),
+            integer: DecNumber("1".to_string()),
+            fraction: DecNumber("5".to_string()),
+        }))),
+        render_const_expr(&literal(Literal::CharLiteral("'a'".to_string()))),
+        render_const_expr(&literal(Literal::WideCharacterLiteral("L'a'".to_string()))),
+        render_const_expr(&literal(Literal::StringLiteral("\"hi\"".to_string()))),
+        render_const_expr(&literal(Literal::WideStringLiteral("L\"hi\"".to_string()))),
+        render_const_expr(&literal(Literal::BooleanLiteral("TRUE".to_string()))),
     ];
 
     for token in ["|", "^", "&", "<<", ">>", "+", "-", "*", "/", "%", "~"] {

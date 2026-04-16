@@ -64,64 +64,11 @@ fn parse_raw_doc(raw: &str) -> Option<String> {
 }
 
 fn const_expr_string(expr: &hir::ConstExpr) -> Option<String> {
-    primary_string(&expr.0)
-}
-
-fn primary_string(expr: &hir::OrExpr) -> Option<String> {
     match expr {
-        hir::OrExpr::XorExpr(value) => xor_string(value),
-        hir::OrExpr::OrExpr(_, _) => None,
-    }
-}
-
-fn xor_string(expr: &hir::XorExpr) -> Option<String> {
-    match expr {
-        hir::XorExpr::AndExpr(value) => and_string(value),
-        hir::XorExpr::XorExpr(_, _) => None,
-    }
-}
-
-fn and_string(expr: &hir::AndExpr) -> Option<String> {
-    match expr {
-        hir::AndExpr::ShiftExpr(value) => shift_string(value),
-        hir::AndExpr::AndExpr(_, _) => None,
-    }
-}
-
-fn shift_string(expr: &hir::ShiftExpr) -> Option<String> {
-    match expr {
-        hir::ShiftExpr::AddExpr(value) => add_string(value),
-        hir::ShiftExpr::LeftShiftExpr(_, _) | hir::ShiftExpr::RightShiftExpr(_, _) => None,
-    }
-}
-
-fn add_string(expr: &hir::AddExpr) -> Option<String> {
-    match expr {
-        hir::AddExpr::MultExpr(value) => mult_string(value),
-        hir::AddExpr::AddExpr(_, _) | hir::AddExpr::SubExpr(_, _) => None,
-    }
-}
-
-fn mult_string(expr: &hir::MultExpr) -> Option<String> {
-    match expr {
-        hir::MultExpr::UnaryExpr(value) => unary_string(value),
-        hir::MultExpr::MultExpr(_, _)
-        | hir::MultExpr::DivExpr(_, _)
-        | hir::MultExpr::ModExpr(_, _) => None,
-    }
-}
-
-fn unary_string(expr: &hir::UnaryExpr) -> Option<String> {
-    match expr {
-        hir::UnaryExpr::PrimaryExpr(value) => primary_expr_string(value),
-        hir::UnaryExpr::UnaryExpr(_, _) => None,
-    }
-}
-
-fn primary_expr_string(expr: &hir::PrimaryExpr) -> Option<String> {
-    match expr {
-        hir::PrimaryExpr::Literal(value) => literal_string(value),
-        hir::PrimaryExpr::ScopedName(_) | hir::PrimaryExpr::ConstExpr(_) => None,
+        hir::ConstExpr::Literal(value) => literal_string(value),
+        hir::ConstExpr::ScopedName(_)
+        | hir::ConstExpr::UnaryExpr(_, _)
+        | hir::ConstExpr::BinaryExpr(_, _, _) => None,
     }
 }
 

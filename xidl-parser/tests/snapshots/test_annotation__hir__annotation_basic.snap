@@ -116,26 +116,10 @@ Specification(
                                                 AnnotationParam {
                                                     ident: "abc",
                                                     value: Some(
-                                                        ConstExpr(
-                                                            XorExpr(
-                                                                AndExpr(
-                                                                    ShiftExpr(
-                                                                        AddExpr(
-                                                                            MultExpr(
-                                                                                UnaryExpr(
-                                                                                    PrimaryExpr(
-                                                                                        Literal(
-                                                                                            IntegerLiteral(
-                                                                                                IntegerLiteral(
-                                                                                                    "1",
-                                                                                                ),
-                                                                                            ),
-                                                                                        ),
-                                                                                    ),
-                                                                                ),
-                                                                            ),
-                                                                        ),
-                                                                    ),
+                                                        Literal(
+                                                            IntegerLiteral(
+                                                                IntegerLiteral(
+                                                                    "1",
                                                                 ),
                                                             ),
                                                         ),
@@ -254,26 +238,10 @@ Specification(
                                 Case {
                                     label: [
                                         Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            Literal(
-                                                                                IntegerLiteral(
-                                                                                    IntegerLiteral(
-                                                                                        "0",
-                                                                                    ),
-                                                                                ),
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
+                                            Literal(
+                                                IntegerLiteral(
+                                                    IntegerLiteral(
+                                                        "0",
                                                     ),
                                                 ),
                                             ),
@@ -342,26 +310,10 @@ Specification(
                     I32,
                 ),
                 ident: "I_ping_Hash",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    IntegerLiteral(
-                                                        IntegerLiteral(
-                                                            "18846175",
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
+                value: Literal(
+                    IntegerLiteral(
+                        IntegerLiteral(
+                            "18846175",
                         ),
                     ),
                 ),
@@ -373,26 +325,10 @@ Specification(
                     I32,
                 ),
                 ident: "I_get_attribute_value_Hash",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    IntegerLiteral(
-                                                        IntegerLiteral(
-                                                            "3881857402",
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
+                value: Literal(
+                    IntegerLiteral(
+                        IntegerLiteral(
+                            "3881857402",
                         ),
                     ),
                 ),
@@ -404,26 +340,10 @@ Specification(
                     I32,
                 ),
                 ident: "I_set_attribute_value_Hash",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    IntegerLiteral(
-                                                        IntegerLiteral(
-                                                            "1976821110",
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
+                value: Literal(
+                    IntegerLiteral(
+                        IntegerLiteral(
+                            "1976821110",
                         ),
                     ),
                 ),
@@ -525,30 +445,14 @@ Specification(
                                 Case {
                                     label: [
                                         Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "dds",
-                                                                                        "RETCODE_OK",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "dds",
+                                                        "RETCODE_OK",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
                                     ],
@@ -671,30 +575,14 @@ Specification(
                                 Case {
                                     label: [
                                         Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "dds",
-                                                                                        "RETCODE_OK",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "dds",
+                                                        "RETCODE_OK",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
                                     ],
@@ -817,30 +705,14 @@ Specification(
                                 Case {
                                     label: [
                                         Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "dds",
-                                                                                        "RETCODE_OK",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "dds",
+                                                        "RETCODE_OK",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
                                     ],
@@ -918,29 +790,13 @@ Specification(
                                 Case {
                                     label: [
                                         Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "I_ping_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "I_ping_Hash",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
                                     ],
@@ -971,29 +827,13 @@ Specification(
                                 Case {
                                     label: [
                                         Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "I_get_attribute_value_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "I_get_attribute_value_Hash",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
                                     ],
@@ -1024,29 +864,13 @@ Specification(
                                 Case {
                                     label: [
                                         Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "I_set_attribute_value_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "I_set_attribute_value_Hash",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
                                     ],
@@ -1189,29 +1013,13 @@ Specification(
                                 Case {
                                     label: [
                                         Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "I_ping_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "I_ping_Hash",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
                                     ],
@@ -1242,29 +1050,13 @@ Specification(
                                 Case {
                                     label: [
                                         Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "I_get_attribute_value_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "I_get_attribute_value_Hash",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
                                     ],
@@ -1295,29 +1087,13 @@ Specification(
                                 Case {
                                     label: [
                                         Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "I_set_attribute_value_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "I_set_attribute_value_Hash",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
                                     ],

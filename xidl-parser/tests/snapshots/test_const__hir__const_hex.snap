@@ -10,26 +10,10 @@ Specification(
                     I32,
                 ),
                 ident: "a",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    IntegerLiteral(
-                                                        IntegerLiteral(
-                                                            "255",
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
+                value: Literal(
+                    IntegerLiteral(
+                        IntegerLiteral(
+                            "255",
                         ),
                     ),
                 ),

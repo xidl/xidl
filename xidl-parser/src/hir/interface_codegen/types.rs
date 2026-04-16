@@ -92,91 +92,33 @@ pub fn qualified_exception_name(name: &ScopedName, modules: &[String]) -> String
 }
 
 pub fn render_const_expr(expr: &ConstExpr) -> String {
-    fn render_or(expr: &OrExpr) -> String {
+    fn render_expr(expr: &ConstExpr) -> String {
         match expr {
-            OrExpr::XorExpr(value) => render_xor(value),
-            OrExpr::OrExpr(left, right) => {
-                format!("({} | {})", render_or(left), render_xor(right))
-            }
-        }
-    }
-
-    fn render_xor(expr: &XorExpr) -> String {
-        match expr {
-            XorExpr::AndExpr(value) => render_and(value),
-            XorExpr::XorExpr(left, right) => {
-                format!("({} ^ {})", render_xor(left), render_and(right))
-            }
-        }
-    }
-
-    fn render_and(expr: &AndExpr) -> String {
-        match expr {
-            AndExpr::ShiftExpr(value) => render_shift(value),
-            AndExpr::AndExpr(left, right) => {
-                format!("({} & {})", render_and(left), render_shift(right))
-            }
-        }
-    }
-
-    fn render_shift(expr: &ShiftExpr) -> String {
-        match expr {
-            ShiftExpr::AddExpr(value) => render_add(value),
-            ShiftExpr::LeftShiftExpr(left, right) => {
-                format!("({} << {})", render_shift(left), render_add(right))
-            }
-            ShiftExpr::RightShiftExpr(left, right) => {
-                format!("({} >> {})", render_shift(left), render_add(right))
-            }
-        }
-    }
-
-    fn render_add(expr: &AddExpr) -> String {
-        match expr {
-            AddExpr::MultExpr(value) => render_mult(value),
-            AddExpr::AddExpr(left, right) => {
-                format!("({} + {})", render_add(left), render_mult(right))
-            }
-            AddExpr::SubExpr(left, right) => {
-                format!("({} - {})", render_add(left), render_mult(right))
-            }
-        }
-    }
-
-    fn render_mult(expr: &MultExpr) -> String {
-        match expr {
-            MultExpr::UnaryExpr(value) => render_unary(value),
-            MultExpr::MultExpr(left, right) => {
-                format!("({} * {})", render_mult(left), render_unary(right))
-            }
-            MultExpr::DivExpr(left, right) => {
-                format!("({} / {})", render_mult(left), render_unary(right))
-            }
-            MultExpr::ModExpr(left, right) => {
-                format!("({} % {})", render_mult(left), render_unary(right))
-            }
-        }
-    }
-
-    fn render_unary(expr: &UnaryExpr) -> String {
-        match expr {
-            UnaryExpr::UnaryExpr(op, expr) => {
+            ConstExpr::ScopedName(value) => scoped_name_to_idl(value),
+            ConstExpr::Literal(value) => render_literal(value),
+            ConstExpr::UnaryExpr(op, value) => {
                 let op = match op {
                     UnaryOperator::Add => "+",
                     UnaryOperator::Sub => "-",
                     UnaryOperator::Not => "~",
                 };
-                format!("({}{})", op, render_primary(expr))
+                format!("({op}{})", render_expr(value))
             }
-            UnaryExpr::PrimaryExpr(value) => render_primary(value),
-        }
-    }
-
-    fn render_primary(expr: &PrimaryExpr) -> String {
-        match expr {
-            PrimaryExpr::ScopedName(value) => scoped_name_to_idl(value),
-            PrimaryExpr::Literal(value) => render_literal(value),
-            PrimaryExpr::ConstExpr(value) => render_const_expr(value),
+            ConstExpr::BinaryExpr(op, left, right) => {
+                let op = match op {
+                    BinaryOperator::Or => "|",
+                    BinaryOperator::Xor => "^",
+                    BinaryOperator::And => "&",
+                    BinaryOperator::LeftShift => "<<",
+                    BinaryOperator::RightShift => ">>",
+                    BinaryOperator::Add => "+",
+                    BinaryOperator::Sub => "-",
+                    BinaryOperator::Mult => "*",
+                    BinaryOperator::Div => "/",
+                    BinaryOperator::Mod => "%",
+                };
+                format!("({} {op} {})", render_expr(left), render_expr(right))
+            }
         }
     }
 
@@ -199,5 +141,5 @@ pub fn render_const_expr(expr: &ConstExpr) -> String {
         }
     }
 
-    render_or(&expr.0)
+    render_expr(expr)
 }

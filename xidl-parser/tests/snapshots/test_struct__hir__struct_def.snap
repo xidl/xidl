@@ -217,26 +217,10 @@ Specification(
                                                 ident: "b",
                                                 len: [
                                                     PositiveIntConst(
-                                                        ConstExpr(
-                                                            XorExpr(
-                                                                AndExpr(
-                                                                    ShiftExpr(
-                                                                        AddExpr(
-                                                                            MultExpr(
-                                                                                UnaryExpr(
-                                                                                    PrimaryExpr(
-                                                                                        Literal(
-                                                                                            IntegerLiteral(
-                                                                                                IntegerLiteral(
-                                                                                                    "10",
-                                                                                                ),
-                                                                                            ),
-                                                                                        ),
-                                                                                    ),
-                                                                                ),
-                                                                            ),
-                                                                        ),
-                                                                    ),
+                                                        Literal(
+                                                            IntegerLiteral(
+                                                                IntegerLiteral(
+                                                                    "10",
                                                                 ),
                                                             ),
                                                         ),
@@ -265,51 +249,19 @@ Specification(
                                                 ident: "c",
                                                 len: [
                                                     PositiveIntConst(
-                                                        ConstExpr(
-                                                            XorExpr(
-                                                                AndExpr(
-                                                                    ShiftExpr(
-                                                                        AddExpr(
-                                                                            MultExpr(
-                                                                                UnaryExpr(
-                                                                                    PrimaryExpr(
-                                                                                        Literal(
-                                                                                            IntegerLiteral(
-                                                                                                IntegerLiteral(
-                                                                                                    "10",
-                                                                                                ),
-                                                                                            ),
-                                                                                        ),
-                                                                                    ),
-                                                                                ),
-                                                                            ),
-                                                                        ),
-                                                                    ),
+                                                        Literal(
+                                                            IntegerLiteral(
+                                                                IntegerLiteral(
+                                                                    "10",
                                                                 ),
                                                             ),
                                                         ),
                                                     ),
                                                     PositiveIntConst(
-                                                        ConstExpr(
-                                                            XorExpr(
-                                                                AndExpr(
-                                                                    ShiftExpr(
-                                                                        AddExpr(
-                                                                            MultExpr(
-                                                                                UnaryExpr(
-                                                                                    PrimaryExpr(
-                                                                                        Literal(
-                                                                                            IntegerLiteral(
-                                                                                                IntegerLiteral(
-                                                                                                    "20",
-                                                                                                ),
-                                                                                            ),
-                                                                                        ),
-                                                                                    ),
-                                                                                ),
-                                                                            ),
-                                                                        ),
-                                                                    ),
+                                                        Literal(
+                                                            IntegerLiteral(
+                                                                IntegerLiteral(
+                                                                    "20",
                                                                 ),
                                                             ),
                                                         ),
@@ -361,26 +313,10 @@ Specification(
                                             StringType {
                                                 bound: Some(
                                                     PositiveIntConst(
-                                                        ConstExpr(
-                                                            XorExpr(
-                                                                AndExpr(
-                                                                    ShiftExpr(
-                                                                        AddExpr(
-                                                                            MultExpr(
-                                                                                UnaryExpr(
-                                                                                    PrimaryExpr(
-                                                                                        Literal(
-                                                                                            IntegerLiteral(
-                                                                                                IntegerLiteral(
-                                                                                                    "20",
-                                                                                                ),
-                                                                                            ),
-                                                                                        ),
-                                                                                    ),
-                                                                                ),
-                                                                            ),
-                                                                        ),
-                                                                    ),
+                                                        Literal(
+                                                            IntegerLiteral(
+                                                                IntegerLiteral(
+                                                                    "20",
                                                                 ),
                                                             ),
                                                         ),
@@ -408,26 +344,10 @@ Specification(
                                             WideStringType {
                                                 bound: Some(
                                                     PositiveIntConst(
-                                                        ConstExpr(
-                                                            XorExpr(
-                                                                AndExpr(
-                                                                    ShiftExpr(
-                                                                        AddExpr(
-                                                                            MultExpr(
-                                                                                UnaryExpr(
-                                                                                    PrimaryExpr(
-                                                                                        Literal(
-                                                                                            IntegerLiteral(
-                                                                                                IntegerLiteral(
-                                                                                                    "20",
-                                                                                                ),
-                                                                                            ),
-                                                                                        ),
-                                                                                    ),
-                                                                                ),
-                                                                            ),
-                                                                        ),
-                                                                    ),
+                                                        Literal(
+                                                            IntegerLiteral(
+                                                                IntegerLiteral(
+                                                                    "20",
                                                                 ),
                                                             ),
                                                         ),

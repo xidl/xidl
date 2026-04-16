@@ -15,26 +15,10 @@ Specification(
                     },
                 ),
                 ident: "a",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    IntegerLiteral(
-                                                        IntegerLiteral(
-                                                            "0",
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
+                value: Literal(
+                    IntegerLiteral(
+                        IntegerLiteral(
+                            "0",
                         ),
                     ),
                 ),
@@ -46,26 +30,10 @@ Specification(
                     U8,
                 ),
                 ident: "a",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    IntegerLiteral(
-                                                        IntegerLiteral(
-                                                            "0",
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
+                value: Literal(
+                    IntegerLiteral(
+                        IntegerLiteral(
+                            "0",
                         ),
                     ),
                 ),
@@ -77,26 +45,10 @@ Specification(
                     U16,
                 ),
                 ident: "a",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    IntegerLiteral(
-                                                        IntegerLiteral(
-                                                            "0",
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
+                value: Literal(
+                    IntegerLiteral(
+                        IntegerLiteral(
+                            "0",
                         ),
                     ),
                 ),
@@ -108,26 +60,10 @@ Specification(
                     U32,
                 ),
                 ident: "a",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    IntegerLiteral(
-                                                        IntegerLiteral(
-                                                            "0",
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
+                value: Literal(
+                    IntegerLiteral(
+                        IntegerLiteral(
+                            "0",
                         ),
                     ),
                 ),
@@ -139,26 +75,10 @@ Specification(
                     U64,
                 ),
                 ident: "a",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    IntegerLiteral(
-                                                        IntegerLiteral(
-                                                            "0",
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
+                value: Literal(
+                    IntegerLiteral(
+                        IntegerLiteral(
+                            "0",
                         ),
                     ),
                 ),
@@ -170,26 +90,10 @@ Specification(
                     I8,
                 ),
                 ident: "a",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    IntegerLiteral(
-                                                        IntegerLiteral(
-                                                            "0",
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
+                value: Literal(
+                    IntegerLiteral(
+                        IntegerLiteral(
+                            "0",
                         ),
                     ),
                 ),
@@ -201,26 +105,10 @@ Specification(
                     I16,
                 ),
                 ident: "a",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    IntegerLiteral(
-                                                        IntegerLiteral(
-                                                            "0",
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
+                value: Literal(
+                    IntegerLiteral(
+                        IntegerLiteral(
+                            "0",
                         ),
                     ),
                 ),
@@ -232,26 +120,10 @@ Specification(
                     I32,
                 ),
                 ident: "a",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    IntegerLiteral(
-                                                        IntegerLiteral(
-                                                            "0",
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
+                value: Literal(
+                    IntegerLiteral(
+                        IntegerLiteral(
+                            "0",
                         ),
                     ),
                 ),
@@ -263,26 +135,10 @@ Specification(
                     I64,
                 ),
                 ident: "a",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    IntegerLiteral(
-                                                        IntegerLiteral(
-                                                            "0",
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
+                value: Literal(
+                    IntegerLiteral(
+                        IntegerLiteral(
+                            "0",
                         ),
                     ),
                 ),
@@ -299,26 +155,10 @@ Specification(
                     },
                 ),
                 ident: "a",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    IntegerLiteral(
-                                                        IntegerLiteral(
-                                                            "0",
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
+                value: Literal(
+                    IntegerLiteral(
+                        IntegerLiteral(
+                            "0",
                         ),
                     ),
                 ),
@@ -335,26 +175,10 @@ Specification(
                     },
                 ),
                 ident: "a",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    IntegerLiteral(
-                                                        IntegerLiteral(
-                                                            "0",
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
+                value: Literal(
+                    IntegerLiteral(
+                        IntegerLiteral(
+                            "0",
                         ),
                     ),
                 ),
@@ -364,25 +188,9 @@ Specification(
             ConstDcl {
                 ty: CharType,
                 ident: "C1",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    CharLiteral(
-                                                        "'X'",
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
+                value: Literal(
+                    CharLiteral(
+                        "'X'",
                     ),
                 ),
             },
@@ -391,25 +199,9 @@ Specification(
             ConstDcl {
                 ty: WideCharType,
                 ident: "C2",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    WideCharacterLiteral(
-                                                        "L'X'",
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
+                value: Literal(
+                    WideCharacterLiteral(
+                        "L'X'",
                     ),
                 ),
             },
@@ -422,25 +214,9 @@ Specification(
                     },
                 ),
                 ident: "C3",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    StringLiteral(
-                                                        "\"aaa\"",
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
+                value: Literal(
+                    StringLiteral(
+                        "\"aaa\"",
                     ),
                 ),
             },
@@ -453,25 +229,9 @@ Specification(
                     },
                 ),
                 ident: "C3",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    WideStringLiteral(
-                                                        "L\"aaa\"",
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
+                value: Literal(
+                    WideStringLiteral(
+                        "L\"aaa\"",
                     ),
                 ),
             },
@@ -487,29 +247,13 @@ Specification(
                     },
                 ),
                 ident: "C3",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "false",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    ),
+                value: ScopedName(
+                    ScopedName {
+                        name: [
+                            "false",
+                        ],
+                        is_root: false,
+                    },
                 ),
             },
         ),
@@ -524,26 +268,10 @@ Specification(
                     },
                 ),
                 ident: "a",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    IntegerLiteral(
-                                                        IntegerLiteral(
-                                                            "0",
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
+                value: Literal(
+                    IntegerLiteral(
+                        IntegerLiteral(
+                            "0",
                         ),
                     ),
                 ),
@@ -561,26 +289,10 @@ Specification(
                     },
                 ),
                 ident: "a",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    IntegerLiteral(
-                                                        IntegerLiteral(
-                                                            "0",
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
+                value: Literal(
+                    IntegerLiteral(
+                        IntegerLiteral(
+                            "0",
                         ),
                     ),
                 ),
@@ -599,26 +311,10 @@ Specification(
                     },
                 ),
                 ident: "a",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    IntegerLiteral(
-                                                        IntegerLiteral(
-                                                            "0",
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
+                value: Literal(
+                    IntegerLiteral(
+                        IntegerLiteral(
+                            "0",
                         ),
                     ),
                 ),
@@ -640,26 +336,10 @@ Specification(
                     },
                 ),
                 ident: "a",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    IntegerLiteral(
-                                                        IntegerLiteral(
-                                                            "0",
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
+                value: Literal(
+                    IntegerLiteral(
+                        IntegerLiteral(
+                            "0",
                         ),
                     ),
                 ),
@@ -677,30 +357,14 @@ Specification(
                     },
                 ),
                 ident: "MYSIZE",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "M",
-                                                            "medium",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    ),
+                value: ScopedName(
+                    ScopedName {
+                        name: [
+                            "M",
+                            "medium",
+                        ],
+                        is_root: false,
+                    },
                 ),
             },
         ),
@@ -708,33 +372,17 @@ Specification(
             ConstDcl {
                 ty: FloatingPtType,
                 ident: "const_float",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    FloatingPtLiteral(
-                                                        FloatingPtLiteral {
-                                                            sign: None,
-                                                            integer: DecNumber(
-                                                                "13",
-                                                            ),
-                                                            fraction: DecNumber(
-                                                                "1",
-                                                            ),
-                                                        },
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
+                value: Literal(
+                    FloatingPtLiteral(
+                        FloatingPtLiteral {
+                            sign: None,
+                            integer: DecNumber(
+                                "13",
                             ),
-                        ),
+                            fraction: DecNumber(
+                                "1",
+                            ),
+                        },
                     ),
                 ),
             },
@@ -743,33 +391,17 @@ Specification(
             ConstDcl {
                 ty: FloatingPtType,
                 ident: "const_double",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    FloatingPtLiteral(
-                                                        FloatingPtLiteral {
-                                                            sign: None,
-                                                            integer: DecNumber(
-                                                                "84",
-                                                            ),
-                                                            fraction: DecNumber(
-                                                                "1",
-                                                            ),
-                                                        },
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
+                value: Literal(
+                    FloatingPtLiteral(
+                        FloatingPtLiteral {
+                            sign: None,
+                            integer: DecNumber(
+                                "84",
                             ),
-                        ),
+                            fraction: DecNumber(
+                                "1",
+                            ),
+                        },
                     ),
                 ),
             },
@@ -778,33 +410,17 @@ Specification(
             ConstDcl {
                 ty: FloatingPtType,
                 ident: "const_longdouble",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    FloatingPtLiteral(
-                                                        FloatingPtLiteral {
-                                                            sign: None,
-                                                            integer: DecNumber(
-                                                                "46",
-                                                            ),
-                                                            fraction: DecNumber(
-                                                                "1",
-                                                            ),
-                                                        },
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
+                value: Literal(
+                    FloatingPtLiteral(
+                        FloatingPtLiteral {
+                            sign: None,
+                            integer: DecNumber(
+                                "46",
                             ),
-                        ),
+                            fraction: DecNumber(
+                                "1",
+                            ),
+                        },
                     ),
                 ),
             },

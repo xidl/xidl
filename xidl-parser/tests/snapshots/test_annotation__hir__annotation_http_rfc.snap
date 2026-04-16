@@ -10,26 +10,10 @@ Specification(
                     I32,
                 ),
                 ident: "HttpApi_old_ping_Hash",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    IntegerLiteral(
-                                                        IntegerLiteral(
-                                                            "3850959154",
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
+                value: Literal(
+                    IntegerLiteral(
+                        IntegerLiteral(
+                            "3850959154",
                         ),
                     ),
                 ),
@@ -41,26 +25,10 @@ Specification(
                     I32,
                 ),
                 ident: "HttpApi_get_user_Hash",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    IntegerLiteral(
-                                                        IntegerLiteral(
-                                                            "3347793635",
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
+                value: Literal(
+                    IntegerLiteral(
+                        IntegerLiteral(
+                            "3347793635",
                         ),
                     ),
                 ),
@@ -72,26 +40,10 @@ Specification(
                     I32,
                 ),
                 ident: "HttpApi_update_user_Hash",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    IntegerLiteral(
-                                                        IntegerLiteral(
-                                                            "1317556379",
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
+                value: Literal(
+                    IntegerLiteral(
+                        IntegerLiteral(
+                            "1317556379",
                         ),
                     ),
                 ),
@@ -103,26 +55,10 @@ Specification(
                     I32,
                 ),
                 ident: "HttpApi_health_Hash",
-                value: ConstExpr(
-                    XorExpr(
-                        AndExpr(
-                            ShiftExpr(
-                                AddExpr(
-                                    MultExpr(
-                                        UnaryExpr(
-                                            PrimaryExpr(
-                                                Literal(
-                                                    IntegerLiteral(
-                                                        IntegerLiteral(
-                                                            "888691541",
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
+                value: Literal(
+                    IntegerLiteral(
+                        IntegerLiteral(
+                            "888691541",
                         ),
                     ),
                 ),
@@ -224,30 +160,14 @@ Specification(
                                 Case {
                                     label: [
                                         Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "dds",
-                                                                                        "RETCODE_OK",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "dds",
+                                                        "RETCODE_OK",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
                                     ],
@@ -367,30 +287,14 @@ Specification(
                                 Case {
                                     label: [
                                         Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "dds",
-                                                                                        "RETCODE_OK",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "dds",
+                                                        "RETCODE_OK",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
                                     ],
@@ -531,30 +435,14 @@ Specification(
                                 Case {
                                     label: [
                                         Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "dds",
-                                                                                        "RETCODE_OK",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "dds",
+                                                        "RETCODE_OK",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
                                     ],
@@ -679,30 +567,14 @@ Specification(
                                 Case {
                                     label: [
                                         Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "dds",
-                                                                                        "RETCODE_OK",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "dds",
+                                                        "RETCODE_OK",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
                                     ],
@@ -780,29 +652,13 @@ Specification(
                                 Case {
                                     label: [
                                         Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "HttpApi_old_ping_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "HttpApi_old_ping_Hash",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
                                     ],
@@ -833,29 +689,13 @@ Specification(
                                 Case {
                                     label: [
                                         Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "HttpApi_get_user_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "HttpApi_get_user_Hash",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
                                     ],
@@ -886,29 +726,13 @@ Specification(
                                 Case {
                                     label: [
                                         Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "HttpApi_update_user_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "HttpApi_update_user_Hash",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
                                     ],
@@ -939,29 +763,13 @@ Specification(
                                 Case {
                                     label: [
                                         Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "HttpApi_health_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "HttpApi_health_Hash",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
                                     ],
@@ -1104,29 +912,13 @@ Specification(
                                 Case {
                                     label: [
                                         Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "HttpApi_old_ping_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "HttpApi_old_ping_Hash",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
                                     ],
@@ -1157,29 +949,13 @@ Specification(
                                 Case {
                                     label: [
                                         Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "HttpApi_get_user_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "HttpApi_get_user_Hash",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
                                     ],
@@ -1210,29 +986,13 @@ Specification(
                                 Case {
                                     label: [
                                         Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "HttpApi_update_user_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "HttpApi_update_user_Hash",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
                                     ],
@@ -1263,29 +1023,13 @@ Specification(
                                 Case {
                                     label: [
                                         Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            ScopedName(
-                                                                                ScopedName {
-                                                                                    name: [
-                                                                                        "HttpApi_health_Hash",
-                                                                                    ],
-                                                                                    is_root: false,
-                                                                                },
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ),
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "HttpApi_health_Hash",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
                                     ],
@@ -1409,25 +1153,9 @@ Specification(
                                     AnnotationParam {
                                         ident: "in",
                                         value: Some(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            Literal(
-                                                                                StringLiteral(
-                                                                                    "\"header\"",
-                                                                                ),
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
+                                            Literal(
+                                                StringLiteral(
+                                                    "\"header\"",
                                                 ),
                                             ),
                                         ),
@@ -1435,25 +1163,9 @@ Specification(
                                     AnnotationParam {
                                         ident: "name",
                                         value: Some(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            Literal(
-                                                                                StringLiteral(
-                                                                                    "\"X-API-Key\"",
-                                                                                ),
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
+                                            Literal(
+                                                StringLiteral(
+                                                    "\"X-API-Key\"",
                                                 ),
                                             ),
                                         ),
@@ -1503,25 +1215,9 @@ Specification(
                                                     },
                                                     params: Some(
                                                         ConstExpr(
-                                                            ConstExpr(
-                                                                XorExpr(
-                                                                    AndExpr(
-                                                                        ShiftExpr(
-                                                                            AddExpr(
-                                                                                MultExpr(
-                                                                                    UnaryExpr(
-                                                                                        PrimaryExpr(
-                                                                                            Literal(
-                                                                                                StringLiteral(
-                                                                                                    "\"2026-03-13\"",
-                                                                                                ),
-                                                                                            ),
-                                                                                        ),
-                                                                                    ),
-                                                                                ),
-                                                                            ),
-                                                                        ),
-                                                                    ),
+                                                            Literal(
+                                                                StringLiteral(
+                                                                    "\"2026-03-13\"",
                                                                 ),
                                                             ),
                                                         ),
@@ -1596,25 +1292,9 @@ Specification(
                                                                 AnnotationParam {
                                                                     ident: "since",
                                                                     value: Some(
-                                                                        ConstExpr(
-                                                                            XorExpr(
-                                                                                AndExpr(
-                                                                                    ShiftExpr(
-                                                                                        AddExpr(
-                                                                                            MultExpr(
-                                                                                                UnaryExpr(
-                                                                                                    PrimaryExpr(
-                                                                                                        Literal(
-                                                                                                            StringLiteral(
-                                                                                                                "\"2026-03-13\"",
-                                                                                                            ),
-                                                                                                        ),
-                                                                                                    ),
-                                                                                                ),
-                                                                                            ),
-                                                                                        ),
-                                                                                    ),
-                                                                                ),
+                                                                        Literal(
+                                                                            StringLiteral(
+                                                                                "\"2026-03-13\"",
                                                                             ),
                                                                         ),
                                                                     ),
@@ -1622,25 +1302,9 @@ Specification(
                                                                 AnnotationParam {
                                                                     ident: "after",
                                                                     value: Some(
-                                                                        ConstExpr(
-                                                                            XorExpr(
-                                                                                AndExpr(
-                                                                                    ShiftExpr(
-                                                                                        AddExpr(
-                                                                                            MultExpr(
-                                                                                                UnaryExpr(
-                                                                                                    PrimaryExpr(
-                                                                                                        Literal(
-                                                                                                            StringLiteral(
-                                                                                                                "\"2026-03-14T12:00:00+08:00\"",
-                                                                                                            ),
-                                                                                                        ),
-                                                                                                    ),
-                                                                                                ),
-                                                                                            ),
-                                                                                        ),
-                                                                                    ),
-                                                                                ),
+                                                                        Literal(
+                                                                            StringLiteral(
+                                                                                "\"2026-03-14T12:00:00+08:00\"",
                                                                             ),
                                                                         ),
                                                                     ),
@@ -1682,25 +1346,9 @@ Specification(
                                                                     },
                                                                     params: Some(
                                                                         ConstExpr(
-                                                                            ConstExpr(
-                                                                                XorExpr(
-                                                                                    AndExpr(
-                                                                                        ShiftExpr(
-                                                                                            AddExpr(
-                                                                                                MultExpr(
-                                                                                                    UnaryExpr(
-                                                                                                        PrimaryExpr(
-                                                                                                            Literal(
-                                                                                                                StringLiteral(
-                                                                                                                    "\"X-Req-Id\"",
-                                                                                                                ),
-                                                                                                            ),
-                                                                                                        ),
-                                                                                                    ),
-                                                                                                ),
-                                                                                            ),
-                                                                                        ),
-                                                                                    ),
+                                                                            Literal(
+                                                                                StringLiteral(
+                                                                                    "\"X-Req-Id\"",
                                                                                 ),
                                                                             ),
                                                                         ),

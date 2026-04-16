@@ -3,59 +3,25 @@ use serde::{Deserialize, Serialize};
 use super::ScopedName;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ConstExpr(pub OrExpr);
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum OrExpr {
-    XorExpr(XorExpr),
-    OrExpr(Box<OrExpr>, XorExpr),
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum XorExpr {
-    AndExpr(AndExpr),
-    XorExpr(Box<XorExpr>, AndExpr),
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum AndExpr {
-    ShiftExpr(ShiftExpr),
-    AndExpr(Box<AndExpr>, ShiftExpr),
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum ShiftExpr {
-    AddExpr(AddExpr),
-    LeftShiftExpr(Box<ShiftExpr>, AddExpr),
-    RightShiftExpr(Box<ShiftExpr>, AddExpr),
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum AddExpr {
-    MultExpr(MultExpr),
-    AddExpr(Box<AddExpr>, MultExpr),
-    SubExpr(Box<AddExpr>, MultExpr),
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum MultExpr {
-    UnaryExpr(UnaryExpr),
-    MultExpr(Box<MultExpr>, UnaryExpr),
-    DivExpr(Box<MultExpr>, UnaryExpr),
-    ModExpr(Box<MultExpr>, UnaryExpr),
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum UnaryExpr {
-    UnaryExpr(UnaryOperator, PrimaryExpr),
-    PrimaryExpr(PrimaryExpr),
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum PrimaryExpr {
+pub enum ConstExpr {
     ScopedName(ScopedName),
     Literal(Literal),
-    ConstExpr(Box<ConstExpr>),
+    UnaryExpr(UnaryOperator, Box<ConstExpr>),
+    BinaryExpr(BinaryOperator, Box<ConstExpr>, Box<ConstExpr>),
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub enum BinaryOperator {
+    Or,
+    Xor,
+    And,
+    LeftShift,
+    RightShift,
+    Add,
+    Sub,
+    Mult,
+    Div,
+    Mod,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -96,77 +62,14 @@ pub struct DecNumber(pub String);
 pub struct PositiveIntConst(pub ConstExpr);
 
 pub fn const_expr_to_i64(expr: &ConstExpr) -> Option<i64> {
-    or_expr_to_i64(&expr.0)
-}
-
-fn or_expr_to_i64(expr: &OrExpr) -> Option<i64> {
     match expr {
-        OrExpr::XorExpr(value) => xor_expr_to_i64(value),
-        OrExpr::OrExpr(_, _) => None,
-    }
-}
-
-fn xor_expr_to_i64(expr: &XorExpr) -> Option<i64> {
-    match expr {
-        XorExpr::AndExpr(value) => and_expr_to_i64(value),
-        XorExpr::XorExpr(_, _) => None,
-    }
-}
-
-fn and_expr_to_i64(expr: &AndExpr) -> Option<i64> {
-    match expr {
-        AndExpr::ShiftExpr(value) => shift_expr_to_i64(value),
-        AndExpr::AndExpr(_, _) => None,
-    }
-}
-
-fn shift_expr_to_i64(expr: &ShiftExpr) -> Option<i64> {
-    match expr {
-        ShiftExpr::AddExpr(value) => add_expr_to_i64(value),
-        ShiftExpr::LeftShiftExpr(_, _) => None,
-        ShiftExpr::RightShiftExpr(_, _) => None,
-    }
-}
-
-fn add_expr_to_i64(expr: &AddExpr) -> Option<i64> {
-    match expr {
-        AddExpr::MultExpr(value) => mult_expr_to_i64(value),
-        AddExpr::AddExpr(_, _) => None,
-        AddExpr::SubExpr(_, _) => None,
-    }
-}
-
-fn mult_expr_to_i64(expr: &MultExpr) -> Option<i64> {
-    match expr {
-        MultExpr::UnaryExpr(value) => unary_expr_to_i64(value),
-        MultExpr::MultExpr(_, _) => None,
-        MultExpr::DivExpr(_, _) => None,
-        MultExpr::ModExpr(_, _) => None,
-    }
-}
-
-fn unary_expr_to_i64(expr: &UnaryExpr) -> Option<i64> {
-    match expr {
-        UnaryExpr::PrimaryExpr(value) => primary_expr_to_i64(value),
-        UnaryExpr::UnaryExpr(op, value) => match op {
-            UnaryOperator::Add => primary_expr_to_i64(value),
-            UnaryOperator::Sub => primary_expr_to_i64(value).map(|value| -value),
-            UnaryOperator::Not => None,
-        },
-    }
-}
-
-fn primary_expr_to_i64(expr: &PrimaryExpr) -> Option<i64> {
-    match expr {
-        PrimaryExpr::Literal(value) => literal_to_i64(value),
-        PrimaryExpr::ScopedName(_) | PrimaryExpr::ConstExpr(_) => None,
-    }
-}
-
-fn literal_to_i64(value: &Literal) -> Option<i64> {
-    match value {
-        Literal::IntegerLiteral(lit) => parse_int_literal(lit),
-        _ => None,
+        ConstExpr::Literal(Literal::IntegerLiteral(lit)) => parse_int_literal(lit),
+        ConstExpr::UnaryExpr(UnaryOperator::Add, expr) => const_expr_to_i64(expr),
+        ConstExpr::UnaryExpr(UnaryOperator::Sub, expr) => const_expr_to_i64(expr).map(|v| -v),
+        ConstExpr::ScopedName(_)
+        | ConstExpr::Literal(_)
+        | ConstExpr::UnaryExpr(UnaryOperator::Not, _)
+        | ConstExpr::BinaryExpr(_, _, _) => None,
     }
 }
 
@@ -189,114 +92,115 @@ fn parse_radix(value: &str, radix: u32) -> Option<i64> {
             .or_else(|| trimmed.strip_prefix("0X")),
         _ => None,
     };
-    let digits = stripped.unwrap_or(trimmed);
-    i64::from_str_radix(digits, radix).ok()
+    i64::from_str_radix(stripped.unwrap_or(trimmed), radix).ok()
 }
 
 impl From<crate::typed_ast::ConstExpr> for ConstExpr {
     fn from(value: crate::typed_ast::ConstExpr) -> Self {
-        Self(value.0.into())
+        from_or_expr(value.0)
     }
 }
 
-impl From<crate::typed_ast::OrExpr> for OrExpr {
-    fn from(value: crate::typed_ast::OrExpr) -> Self {
-        match value {
-            crate::typed_ast::OrExpr::XorExpr(value) => Self::XorExpr(value.into()),
-            crate::typed_ast::OrExpr::OrExpr(left, right) => {
-                Self::OrExpr(Box::new((*left).into()), right.into())
-            }
+fn from_or_expr(value: crate::typed_ast::OrExpr) -> ConstExpr {
+    match value {
+        crate::typed_ast::OrExpr::XorExpr(value) => from_xor_expr(value),
+        crate::typed_ast::OrExpr::OrExpr(left, right) => ConstExpr::BinaryExpr(
+            BinaryOperator::Or,
+            Box::new(from_or_expr(*left)),
+            Box::new(from_xor_expr(right)),
+        ),
+    }
+}
+
+fn from_xor_expr(value: crate::typed_ast::XorExpr) -> ConstExpr {
+    match value {
+        crate::typed_ast::XorExpr::AndExpr(value) => from_and_expr(value),
+        crate::typed_ast::XorExpr::XorExpr(left, right) => ConstExpr::BinaryExpr(
+            BinaryOperator::Xor,
+            Box::new(from_xor_expr(*left)),
+            Box::new(from_and_expr(right)),
+        ),
+    }
+}
+
+fn from_and_expr(value: crate::typed_ast::AndExpr) -> ConstExpr {
+    match value {
+        crate::typed_ast::AndExpr::ShiftExpr(value) => from_shift_expr(value),
+        crate::typed_ast::AndExpr::AndExpr(left, right) => ConstExpr::BinaryExpr(
+            BinaryOperator::And,
+            Box::new(from_and_expr(*left)),
+            Box::new(from_shift_expr(right)),
+        ),
+    }
+}
+
+fn from_shift_expr(value: crate::typed_ast::ShiftExpr) -> ConstExpr {
+    match value {
+        crate::typed_ast::ShiftExpr::AddExpr(value) => from_add_expr(value),
+        crate::typed_ast::ShiftExpr::LeftShiftExpr(left, right) => ConstExpr::BinaryExpr(
+            BinaryOperator::LeftShift,
+            Box::new(from_shift_expr(*left)),
+            Box::new(from_add_expr(right)),
+        ),
+        crate::typed_ast::ShiftExpr::RightShiftExpr(left, right) => ConstExpr::BinaryExpr(
+            BinaryOperator::RightShift,
+            Box::new(from_shift_expr(*left)),
+            Box::new(from_add_expr(right)),
+        ),
+    }
+}
+
+fn from_add_expr(value: crate::typed_ast::AddExpr) -> ConstExpr {
+    match value {
+        crate::typed_ast::AddExpr::MultExpr(value) => from_mult_expr(value),
+        crate::typed_ast::AddExpr::AddExpr(left, right) => ConstExpr::BinaryExpr(
+            BinaryOperator::Add,
+            Box::new(from_add_expr(*left)),
+            Box::new(from_mult_expr(right)),
+        ),
+        crate::typed_ast::AddExpr::SubExpr(left, right) => ConstExpr::BinaryExpr(
+            BinaryOperator::Sub,
+            Box::new(from_add_expr(*left)),
+            Box::new(from_mult_expr(right)),
+        ),
+    }
+}
+
+fn from_mult_expr(value: crate::typed_ast::MultExpr) -> ConstExpr {
+    match value {
+        crate::typed_ast::MultExpr::UnaryExpr(value) => from_unary_expr(value),
+        crate::typed_ast::MultExpr::MultExpr(left, right) => ConstExpr::BinaryExpr(
+            BinaryOperator::Mult,
+            Box::new(from_mult_expr(*left)),
+            Box::new(from_unary_expr(right)),
+        ),
+        crate::typed_ast::MultExpr::DivExpr(left, right) => ConstExpr::BinaryExpr(
+            BinaryOperator::Div,
+            Box::new(from_mult_expr(*left)),
+            Box::new(from_unary_expr(right)),
+        ),
+        crate::typed_ast::MultExpr::ModExpr(left, right) => ConstExpr::BinaryExpr(
+            BinaryOperator::Mod,
+            Box::new(from_mult_expr(*left)),
+            Box::new(from_unary_expr(right)),
+        ),
+    }
+}
+
+fn from_unary_expr(value: crate::typed_ast::UnaryExpr) -> ConstExpr {
+    match value {
+        crate::typed_ast::UnaryExpr::PrimaryExpr(value) => from_primary_expr(value),
+        crate::typed_ast::UnaryExpr::UnaryExpr(op, value) => {
+            ConstExpr::UnaryExpr(op.into(), Box::new(from_primary_expr(value)))
         }
     }
 }
 
-impl From<crate::typed_ast::XorExpr> for XorExpr {
-    fn from(value: crate::typed_ast::XorExpr) -> Self {
-        match value {
-            crate::typed_ast::XorExpr::AndExpr(value) => Self::AndExpr(value.into()),
-            crate::typed_ast::XorExpr::XorExpr(left, right) => {
-                Self::XorExpr(Box::new((*left).into()), right.into())
-            }
-        }
-    }
-}
-
-impl From<crate::typed_ast::AndExpr> for AndExpr {
-    fn from(value: crate::typed_ast::AndExpr) -> Self {
-        match value {
-            crate::typed_ast::AndExpr::ShiftExpr(value) => Self::ShiftExpr(value.into()),
-            crate::typed_ast::AndExpr::AndExpr(left, right) => {
-                Self::AndExpr(Box::new((*left).into()), right.into())
-            }
-        }
-    }
-}
-
-impl From<crate::typed_ast::ShiftExpr> for ShiftExpr {
-    fn from(value: crate::typed_ast::ShiftExpr) -> Self {
-        match value {
-            crate::typed_ast::ShiftExpr::AddExpr(value) => Self::AddExpr(value.into()),
-            crate::typed_ast::ShiftExpr::LeftShiftExpr(left, right) => {
-                Self::LeftShiftExpr(Box::new((*left).into()), right.into())
-            }
-            crate::typed_ast::ShiftExpr::RightShiftExpr(left, right) => {
-                Self::RightShiftExpr(Box::new((*left).into()), right.into())
-            }
-        }
-    }
-}
-
-impl From<crate::typed_ast::AddExpr> for AddExpr {
-    fn from(value: crate::typed_ast::AddExpr) -> Self {
-        match value {
-            crate::typed_ast::AddExpr::MultExpr(value) => Self::MultExpr(value.into()),
-            crate::typed_ast::AddExpr::AddExpr(left, right) => {
-                Self::AddExpr(Box::new((*left).into()), right.into())
-            }
-            crate::typed_ast::AddExpr::SubExpr(left, right) => {
-                Self::SubExpr(Box::new((*left).into()), right.into())
-            }
-        }
-    }
-}
-
-impl From<crate::typed_ast::MultExpr> for MultExpr {
-    fn from(value: crate::typed_ast::MultExpr) -> Self {
-        match value {
-            crate::typed_ast::MultExpr::UnaryExpr(value) => Self::UnaryExpr(value.into()),
-            crate::typed_ast::MultExpr::MultExpr(left, right) => {
-                Self::MultExpr(Box::new((*left).into()), right.into())
-            }
-            crate::typed_ast::MultExpr::DivExpr(left, right) => {
-                Self::DivExpr(Box::new((*left).into()), right.into())
-            }
-            crate::typed_ast::MultExpr::ModExpr(left, right) => {
-                Self::ModExpr(Box::new((*left).into()), right.into())
-            }
-        }
-    }
-}
-
-impl From<crate::typed_ast::UnaryExpr> for UnaryExpr {
-    fn from(value: crate::typed_ast::UnaryExpr) -> Self {
-        match value {
-            crate::typed_ast::UnaryExpr::PrimaryExpr(value) => Self::PrimaryExpr(value.into()),
-            crate::typed_ast::UnaryExpr::UnaryExpr(op, value) => {
-                Self::UnaryExpr(op.into(), value.into())
-            }
-        }
-    }
-}
-
-impl From<crate::typed_ast::PrimaryExpr> for PrimaryExpr {
-    fn from(value: crate::typed_ast::PrimaryExpr) -> Self {
-        match value {
-            crate::typed_ast::PrimaryExpr::ScopedName(value) => Self::ScopedName(value.into()),
-            crate::typed_ast::PrimaryExpr::Literal(value) => Self::Literal(value.into()),
-            crate::typed_ast::PrimaryExpr::ConstExpr(value) => {
-                Self::ConstExpr(Box::new((*value).into()))
-            }
-        }
+fn from_primary_expr(value: crate::typed_ast::PrimaryExpr) -> ConstExpr {
+    match value {
+        crate::typed_ast::PrimaryExpr::ScopedName(value) => ConstExpr::ScopedName(value.into()),
+        crate::typed_ast::PrimaryExpr::Literal(value) => ConstExpr::Literal(value.into()),
+        crate::typed_ast::PrimaryExpr::ConstExpr(value) => (*value).into(),
     }
 }
 
@@ -337,7 +241,6 @@ impl From<crate::typed_ast::IntegerLiteral> for IntegerLiteral {
             crate::typed_ast::IntegerLiteral::HexNumber(value) => parse_radix(&value, 16),
         }
         .expect("typed_ast integer literal should parse");
-
         Self(parsed.to_string())
     }
 }
@@ -364,9 +267,6 @@ impl From<crate::typed_ast::DecNumber> for DecNumber {
     }
 }
 
-#[cfg(test)]
-mod tests;
-
 impl From<crate::typed_ast::PositiveIntConst> for PositiveIntConst {
     fn from(value: crate::typed_ast::PositiveIntConst) -> Self {
         Self(value.0.into())
@@ -378,3 +278,6 @@ impl From<crate::typed_ast::FixedArraySize> for PositiveIntConst {
         value.0.into()
     }
 }
+
+#[cfg(test)]
+mod tests;

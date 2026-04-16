@@ -46,26 +46,10 @@ Specification(
                                 Case {
                                     label: [
                                         Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            Literal(
-                                                                                IntegerLiteral(
-                                                                                    IntegerLiteral(
-                                                                                        "0",
-                                                                                    ),
-                                                                                ),
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
+                                            Literal(
+                                                IntegerLiteral(
+                                                    IntegerLiteral(
+                                                        "0",
                                                     ),
                                                 ),
                                             ),
@@ -93,26 +77,10 @@ Specification(
                                 Case {
                                     label: [
                                         Value(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            Literal(
-                                                                                IntegerLiteral(
-                                                                                    IntegerLiteral(
-                                                                                        "1",
-                                                                                    ),
-                                                                                ),
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
+                                            Literal(
+                                                IntegerLiteral(
+                                                    IntegerLiteral(
+                                                        "1",
                                                     ),
                                                 ),
                                             ),

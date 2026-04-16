@@ -181,21 +181,11 @@ fn hir_struct_and_type_dcl_cover_optional_and_inline_typedef_paths() {
             xidl_parser::hir::SimpleTypeSpec::IntegerType(xidl_parser::hir::IntegerType::I32),
         ),
         ident: Vec::new(),
-        default: Some(xidl_parser::hir::Default(xidl_parser::hir::ConstExpr(
-            xidl_parser::hir::OrExpr::XorExpr(xidl_parser::hir::XorExpr::AndExpr(
-                xidl_parser::hir::AndExpr::ShiftExpr(xidl_parser::hir::ShiftExpr::AddExpr(
-                    xidl_parser::hir::AddExpr::MultExpr(xidl_parser::hir::MultExpr::UnaryExpr(
-                        xidl_parser::hir::UnaryExpr::PrimaryExpr(
-                            xidl_parser::hir::PrimaryExpr::Literal(
-                                xidl_parser::hir::Literal::IntegerLiteral(
-                                    xidl_parser::hir::IntegerLiteral("7".to_string()),
-                                ),
-                            ),
-                        ),
-                    )),
-                )),
+        default: Some(xidl_parser::hir::Default(
+            xidl_parser::hir::ConstExpr::Literal(xidl_parser::hir::Literal::IntegerLiteral(
+                xidl_parser::hir::IntegerLiteral("7".to_string()),
             )),
-        ))),
+        )),
         field_id: None,
     };
     assert!(scoped_optional.is_optional());
