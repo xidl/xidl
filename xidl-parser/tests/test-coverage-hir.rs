@@ -1,5 +1,5 @@
 use xidl_parser::hir::{
-    BitFieldType, ConstrTypeDcl, Definition, SimpleTypeSpec, Specification, TypeDclInner, TypeSpec,
+    BitFieldType, ConstrTypeDcl, Definition, SimpleTypeSpec, Specification, TypeDcl, TypeSpec,
     expand_annotations,
 };
 use xidl_parser::parser::parser_text;
@@ -53,7 +53,7 @@ fn hir_conversion_handles_union_field_ids_bitfields_and_typedef_shapes() {
     let Definition::TypeDcl(type_dcl) = &hir.0[0] else {
         panic!("expected bitset");
     };
-    let TypeDclInner::ConstrTypeDcl(ConstrTypeDcl::BitsetDcl(bitset)) = &type_dcl.decl else {
+    let TypeDcl::ConstrTypeDcl(ConstrTypeDcl::BitsetDcl(bitset)) = type_dcl else {
         panic!("expected bitset");
     };
     assert_eq!(bitset.field.len(), 5);
@@ -69,7 +69,7 @@ fn hir_conversion_handles_union_field_ids_bitfields_and_typedef_shapes() {
     let Definition::TypeDcl(type_dcl) = &hir.0[2] else {
         panic!("expected union");
     };
-    let TypeDclInner::ConstrTypeDcl(ConstrTypeDcl::UnionDef(union)) = &type_dcl.decl else {
+    let TypeDcl::ConstrTypeDcl(ConstrTypeDcl::UnionDef(union)) = type_dcl else {
         panic!("expected union");
     };
     assert_eq!(
@@ -86,7 +86,7 @@ fn hir_conversion_handles_union_field_ids_bitfields_and_typedef_shapes() {
     let Definition::TypeDcl(type_dcl) = &hir.0[3] else {
         panic!("expected typedef");
     };
-    let TypeDclInner::TypedefDcl(typedef) = &type_dcl.decl else {
+    let TypeDcl::TypedefDcl(typedef) = type_dcl else {
         panic!("expected typedef");
     };
     assert_eq!(typedef.decl.len(), 2);
@@ -94,7 +94,7 @@ fn hir_conversion_handles_union_field_ids_bitfields_and_typedef_shapes() {
     let Definition::TypeDcl(type_dcl) = &hir.0[4] else {
         panic!("expected native");
     };
-    assert!(matches!(type_dcl.decl, TypeDclInner::NativeDcl(_)));
+    assert!(matches!(type_dcl, TypeDcl::NativeDcl(_)));
 }
 
 #[test]
@@ -150,7 +150,7 @@ fn hir_struct_and_type_dcl_cover_optional_and_inline_typedef_paths() {
     let Definition::TypeDcl(struct_dcl) = &hir.0[0] else {
         panic!("expected struct");
     };
-    let TypeDclInner::ConstrTypeDcl(ConstrTypeDcl::StructDcl(item)) = &struct_dcl.decl else {
+    let TypeDcl::ConstrTypeDcl(ConstrTypeDcl::StructDcl(item)) = struct_dcl else {
         panic!("expected struct def");
     };
     assert!(item.member[0].is_optional());
@@ -222,7 +222,7 @@ fn hir_struct_and_type_dcl_cover_optional_and_inline_typedef_paths() {
         xidl_parser::hir::TypedefType::ConstrTypeDcl(ConstrTypeDcl::StructDcl(_))
     ));
 
-    let constr_inner: xidl_parser::hir::TypeDclInner =
+    let constr_inner: xidl_parser::hir::TypeDcl =
         xidl_parser::typed_ast::TypeDclInner::ConstrTypeDcl(
             xidl_parser::typed_ast::ConstrTypeDcl::EnumDcl(xidl_parser::typed_ast::EnumDcl {
                 ident: xidl_parser::typed_ast::Identifier("Mode".to_string()),
@@ -230,9 +230,9 @@ fn hir_struct_and_type_dcl_cover_optional_and_inline_typedef_paths() {
             }),
         )
         .into();
-    assert!(matches!(constr_inner, TypeDclInner::ConstrTypeDcl(_)));
+    assert!(matches!(constr_inner, TypeDcl::ConstrTypeDcl(_)));
 
-    let typedef_inner: xidl_parser::hir::TypeDclInner =
+    let typedef_inner: xidl_parser::hir::TypeDcl =
         xidl_parser::typed_ast::TypeDclInner::TypedefDcl(xidl_parser::typed_ast::TypedefDcl {
             decl: xidl_parser::typed_ast::TypeDeclarator {
                 ty: xidl_parser::typed_ast::TypeDeclaratorInner::SimpleTypeSpec(
@@ -256,16 +256,16 @@ fn hir_struct_and_type_dcl_cover_optional_and_inline_typedef_paths() {
             },
         })
         .into();
-    assert!(matches!(typedef_inner, TypeDclInner::TypedefDcl(_)));
+    assert!(matches!(typedef_inner, TypeDcl::TypedefDcl(_)));
 
-    let native_inner: xidl_parser::hir::TypeDclInner =
+    let native_inner: xidl_parser::hir::TypeDcl =
         xidl_parser::typed_ast::TypeDclInner::NativeDcl(xidl_parser::typed_ast::NativeDcl {
             decl: xidl_parser::typed_ast::SimpleDeclarator(xidl_parser::typed_ast::Identifier(
                 "NativeAlias".to_string(),
             )),
         })
         .into();
-    assert!(matches!(native_inner, TypeDclInner::NativeDcl(_)));
+    assert!(matches!(native_inner, TypeDcl::NativeDcl(_)));
 
     let default_value: xidl_parser::hir::Default = xidl_parser::typed_ast::Default(
         xidl_parser::typed_ast::ConstExpr(xidl_parser::typed_ast::OrExpr::XorExpr(
@@ -297,5 +297,5 @@ fn hir_struct_and_type_dcl_cover_optional_and_inline_typedef_paths() {
     let Definition::TypeDcl(native_dcl) = &hir.0[1] else {
         panic!("expected native");
     };
-    assert!(matches!(native_dcl.decl, TypeDclInner::NativeDcl(_)));
+    assert!(matches!(native_dcl, TypeDcl::NativeDcl(_)));
 }

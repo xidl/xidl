@@ -5,391 +5,377 @@ expression: hir
 Specification(
     [
         TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "A",
-                            parent: [],
-                            member: [],
-                        },
-                    ),
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "A",
+                        parent: [],
+                        member: [],
+                    },
                 ),
-            },
+            ),
         ),
         TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "A",
-                            parent: [],
-                            member: [
-                                Member {
-                                    annotations: [],
-                                    ty: SimpleTypeSpec(
-                                        IntegerType(
-                                            I32,
-                                        ),
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "A",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: SimpleTypeSpec(
+                                    IntegerType(
+                                        I32,
                                     ),
-                                    ident: [
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
                                         SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "a",
-                                            ),
+                                            "a",
                                         ),
-                                    ],
-                                    default: None,
-                                    field_id: Some(
-                                        1,
                                     ),
-                                },
-                            ],
-                        },
-                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                            },
+                        ],
+                    },
                 ),
-            },
+            ),
         ),
         TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "A",
-                            parent: [],
-                            member: [
-                                Member {
-                                    annotations: [],
-                                    ty: SimpleTypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A",
-                                                    "b",
-                                                ],
-                                                is_root: true,
-                                            },
-                                        ),
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "A",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: SimpleTypeSpec(
+                                    ScopedName(
+                                        ScopedName {
+                                            name: [
+                                                "A",
+                                                "b",
+                                            ],
+                                            is_root: true,
+                                        },
                                     ),
-                                    ident: [
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
                                         SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "a",
-                                            ),
-                                        ),
-                                    ],
-                                    default: None,
-                                    field_id: Some(
-                                        1,
-                                    ),
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "A",
-                            parent: [
-                                ScopedName {
-                                    name: [
-                                        "B",
-                                    ],
-                                    is_root: false,
-                                },
-                            ],
-                            member: [],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "_A",
-                            parent: [],
-                            member: [],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "_Custom",
-                            parent: [],
-                            member: [
-                                Member {
-                                    annotations: [],
-                                    ty: SimpleTypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "Inner",
-                                                ],
-                                                is_root: false,
-                                            },
+                                            "a",
                                         ),
                                     ),
-                                    ident: [
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "A",
+                        parent: [
+                            ScopedName {
+                                name: [
+                                    "B",
+                                ],
+                                is_root: false,
+                            },
+                        ],
+                        member: [],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "_A",
+                        parent: [],
+                        member: [],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "_Custom",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: SimpleTypeSpec(
+                                    ScopedName(
+                                        ScopedName {
+                                            name: [
+                                                "Inner",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
                                         SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "var_inner",
-                                            ),
+                                            "var_inner",
                                         ),
-                                    ],
-                                    default: None,
-                                    field_id: Some(
-                                        1,
                                     ),
-                                },
-                            ],
-                        },
-                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                            },
+                        ],
+                    },
                 ),
-            },
+            ),
         ),
         TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "HelloWorld",
-                            parent: [],
-                            member: [
-                                Member {
-                                    annotations: [],
-                                    ty: SimpleTypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "u8",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "HelloWorld",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: SimpleTypeSpec(
+                                    ScopedName(
+                                        ScopedName {
+                                            name: [
+                                                "u8",
+                                            ],
+                                            is_root: false,
+                                        },
                                     ),
-                                    ident: [
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
                                         SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "a",
-                                            ),
-                                        ),
-                                    ],
-                                    default: None,
-                                    field_id: Some(
-                                        1,
-                                    ),
-                                },
-                                Member {
-                                    annotations: [],
-                                    ty: SimpleTypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "u16",
-                                                ],
-                                                is_root: false,
-                                            },
+                                            "a",
                                         ),
                                     ),
-                                    ident: [
-                                        ArrayDeclarator(
-                                            ArrayDeclarator {
-                                                ident: "b",
-                                                len: [
-                                                    PositiveIntConst(
-                                                        Literal(
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                            },
+                            Member {
+                                annotations: [],
+                                ty: SimpleTypeSpec(
+                                    ScopedName(
+                                        ScopedName {
+                                            name: [
+                                                "u16",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                ),
+                                ident: [
+                                    ArrayDeclarator(
+                                        ArrayDeclarator {
+                                            ident: "b",
+                                            len: [
+                                                PositiveIntConst(
+                                                    Literal(
+                                                        IntegerLiteral(
                                                             IntegerLiteral(
-                                                                IntegerLiteral(
-                                                                    "10",
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ],
-                                            },
-                                        ),
-                                    ],
-                                    default: None,
-                                    field_id: Some(
-                                        2,
-                                    ),
-                                },
-                                Member {
-                                    annotations: [],
-                                    ty: TemplateTypeSpec(
-                                        StringType(
-                                            StringType {
-                                                bound: None,
-                                            },
-                                        ),
-                                    ),
-                                    ident: [
-                                        ArrayDeclarator(
-                                            ArrayDeclarator {
-                                                ident: "c",
-                                                len: [
-                                                    PositiveIntConst(
-                                                        Literal(
-                                                            IntegerLiteral(
-                                                                IntegerLiteral(
-                                                                    "10",
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                    PositiveIntConst(
-                                                        Literal(
-                                                            IntegerLiteral(
-                                                                IntegerLiteral(
-                                                                    "20",
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    ),
-                                                ],
-                                            },
-                                        ),
-                                    ],
-                                    default: None,
-                                    field_id: Some(
-                                        3,
-                                    ),
-                                },
-                                Member {
-                                    annotations: [],
-                                    ty: TemplateTypeSpec(
-                                        SequenceType(
-                                            SequenceType {
-                                                ty: SimpleTypeSpec(
-                                                    ScopedName(
-                                                        ScopedName {
-                                                            name: [
-                                                                "u8",
-                                                            ],
-                                                            is_root: false,
-                                                        },
-                                                    ),
-                                                ),
-                                                len: None,
-                                            },
-                                        ),
-                                    ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "c",
-                                            ),
-                                        ),
-                                    ],
-                                    default: None,
-                                    field_id: Some(
-                                        4,
-                                    ),
-                                },
-                                Member {
-                                    annotations: [],
-                                    ty: TemplateTypeSpec(
-                                        StringType(
-                                            StringType {
-                                                bound: Some(
-                                                    PositiveIntConst(
-                                                        Literal(
-                                                            IntegerLiteral(
-                                                                IntegerLiteral(
-                                                                    "20",
-                                                                ),
+                                                                "10",
                                                             ),
                                                         ),
                                                     ),
                                                 ),
-                                            },
-                                        ),
+                                            ],
+                                        },
                                     ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "d",
-                                            ),
-                                        ),
-                                    ],
-                                    default: None,
-                                    field_id: Some(
-                                        5,
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    2,
+                                ),
+                            },
+                            Member {
+                                annotations: [],
+                                ty: TemplateTypeSpec(
+                                    StringType(
+                                        StringType {
+                                            bound: None,
+                                        },
                                     ),
-                                },
-                                Member {
-                                    annotations: [],
-                                    ty: TemplateTypeSpec(
-                                        WideStringType(
-                                            WideStringType {
-                                                bound: Some(
-                                                    PositiveIntConst(
-                                                        Literal(
+                                ),
+                                ident: [
+                                    ArrayDeclarator(
+                                        ArrayDeclarator {
+                                            ident: "c",
+                                            len: [
+                                                PositiveIntConst(
+                                                    Literal(
+                                                        IntegerLiteral(
                                                             IntegerLiteral(
-                                                                IntegerLiteral(
-                                                                    "20",
-                                                                ),
+                                                                "10",
                                                             ),
                                                         ),
                                                     ),
                                                 ),
-                                            },
-                                        ),
+                                                PositiveIntConst(
+                                                    Literal(
+                                                        IntegerLiteral(
+                                                            IntegerLiteral(
+                                                                "20",
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ],
+                                        },
                                     ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "d",
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    3,
+                                ),
+                            },
+                            Member {
+                                annotations: [],
+                                ty: TemplateTypeSpec(
+                                    SequenceType(
+                                        SequenceType {
+                                            ty: SimpleTypeSpec(
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "u8",
+                                                        ],
+                                                        is_root: false,
+                                                    },
+                                                ),
                                             ),
-                                        ),
-                                    ],
-                                    default: None,
-                                    field_id: Some(
-                                        6,
+                                            len: None,
+                                        },
                                     ),
-                                },
-                                Member {
-                                    annotations: [],
-                                    ty: SimpleTypeSpec(
-                                        AnyType,
-                                    ),
-                                    ident: [
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
                                         SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "d",
-                                            ),
+                                            "c",
                                         ),
-                                    ],
-                                    default: None,
-                                    field_id: Some(
-                                        7,
                                     ),
-                                },
-                            ],
-                        },
-                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    4,
+                                ),
+                            },
+                            Member {
+                                annotations: [],
+                                ty: TemplateTypeSpec(
+                                    StringType(
+                                        StringType {
+                                            bound: Some(
+                                                PositiveIntConst(
+                                                    Literal(
+                                                        IntegerLiteral(
+                                                            IntegerLiteral(
+                                                                "20",
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        },
+                                    ),
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "d",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    5,
+                                ),
+                            },
+                            Member {
+                                annotations: [],
+                                ty: TemplateTypeSpec(
+                                    WideStringType(
+                                        WideStringType {
+                                            bound: Some(
+                                                PositiveIntConst(
+                                                    Literal(
+                                                        IntegerLiteral(
+                                                            IntegerLiteral(
+                                                                "20",
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        },
+                                    ),
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "d",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    6,
+                                ),
+                            },
+                            Member {
+                                annotations: [],
+                                ty: SimpleTypeSpec(
+                                    AnyType,
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "d",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    7,
+                                ),
+                            },
+                        ],
+                    },
                 ),
-            },
+            ),
         ),
     ],
 )

@@ -5,16 +5,14 @@ expression: hir
 Specification(
     [
         TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    StructForwardDcl(
-                        StructForwardDcl {
-                            annotations: [],
-                            ident: "A",
-                        },
-                    ),
+            ConstrTypeDcl(
+                StructForwardDcl(
+                    StructForwardDcl {
+                        annotations: [],
+                        ident: "A",
+                    },
                 ),
-            },
+            ),
         ),
     ],
 )

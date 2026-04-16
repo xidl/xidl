@@ -13,12 +13,10 @@ use xidl_parser::hir;
 
 impl RustRender for hir::TypeDcl {
     fn render(&self, renderer: &RustRenderer) -> IdlcResult<RustRenderOutput> {
-        match &self.decl {
-            hir::TypeDclInner::ConstrTypeDcl(constr) => constr.render(renderer),
-            hir::TypeDclInner::TypedefDcl(typedef) => {
-                render_typedef_with_config(typedef, renderer, &[])
-            }
-            hir::TypeDclInner::NativeDcl(native) => {
+        match self {
+            hir::TypeDcl::ConstrTypeDcl(constr) => constr.render(renderer),
+            hir::TypeDcl::TypedefDcl(typedef) => render_typedef_with_config(typedef, renderer, &[]),
+            hir::TypeDcl::NativeDcl(native) => {
                 let ctx = renderer.enrich_ctx(
                     json!({
                     "name": crate::generate::rust::util::rust_ident(&native.decl.0),

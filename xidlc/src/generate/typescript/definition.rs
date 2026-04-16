@@ -240,11 +240,11 @@ fn render_type_dcl(
     renderer: &TypescriptRenderer,
 ) -> IdlcResult<TsRenderOutput> {
     let mut out = TsRenderOutput::default();
-    match &ty.decl {
-        hir::TypeDclInner::ConstrTypeDcl(constr) => {
+    match ty {
+        hir::TypeDcl::ConstrTypeDcl(constr) => {
             out.extend(render_constr_type(constr, module_path, renderer)?);
         }
-        hir::TypeDclInner::TypedefDcl(typedef) => {
+        hir::TypeDcl::TypedefDcl(typedef) => {
             for decl in &typedef.decl {
                 let name = ts_ident(declarator_name(decl));
                 let type_expr = match &typedef.ty {
@@ -288,7 +288,7 @@ fn render_type_dcl(
                 out.zod.push(zod);
             }
         }
-        hir::TypeDclInner::NativeDcl(native) => {
+        hir::TypeDcl::NativeDcl(native) => {
             let name = ts_ident(&native.decl.0);
             let types = renderer.render_template(
                 "typedef.d.ts.j2",

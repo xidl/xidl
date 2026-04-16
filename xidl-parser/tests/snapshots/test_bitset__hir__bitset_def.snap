@@ -5,113 +5,107 @@ expression: hir
 Specification(
     [
         TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    BitsetDcl(
-                        BitsetDcl {
-                            annotations: [],
-                            ident: "A",
-                            parent: None,
-                            field: [],
-                        },
-                    ),
+            ConstrTypeDcl(
+                BitsetDcl(
+                    BitsetDcl {
+                        annotations: [],
+                        ident: "A",
+                        parent: None,
+                        field: [],
+                    },
                 ),
-            },
+            ),
         ),
         TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    BitsetDcl(
-                        BitsetDcl {
-                            annotations: [],
-                            ident: "A",
-                            parent: Some(
-                                ScopedName {
-                                    name: [
-                                        "B",
-                                    ],
-                                    is_root: false,
-                                },
-                            ),
-                            field: [],
-                        },
-                    ),
+            ConstrTypeDcl(
+                BitsetDcl(
+                    BitsetDcl {
+                        annotations: [],
+                        ident: "A",
+                        parent: Some(
+                            ScopedName {
+                                name: [
+                                    "B",
+                                ],
+                                is_root: false,
+                            },
+                        ),
+                        field: [],
+                    },
                 ),
-            },
+            ),
         ),
         TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    BitsetDcl(
-                        BitsetDcl {
-                            annotations: [],
-                            ident: "A",
-                            parent: Some(
-                                ScopedName {
-                                    name: [
-                                        "B",
-                                    ],
-                                    is_root: false,
-                                },
-                            ),
-                            field: [
-                                BitField {
-                                    ident: "a",
-                                    pos: PositiveIntConst(
-                                        Literal(
+            ConstrTypeDcl(
+                BitsetDcl(
+                    BitsetDcl {
+                        annotations: [],
+                        ident: "A",
+                        parent: Some(
+                            ScopedName {
+                                name: [
+                                    "B",
+                                ],
+                                is_root: false,
+                            },
+                        ),
+                        field: [
+                            BitField {
+                                ident: "a",
+                                pos: PositiveIntConst(
+                                    Literal(
+                                        IntegerLiteral(
                                             IntegerLiteral(
-                                                IntegerLiteral(
-                                                    "1",
-                                                ),
+                                                "1",
                                             ),
                                         ),
                                     ),
-                                    ty: None,
-                                },
-                                BitField {
-                                    ident: "a",
-                                    pos: PositiveIntConst(
-                                        Literal(
+                                ),
+                                ty: None,
+                            },
+                            BitField {
+                                ident: "a",
+                                pos: PositiveIntConst(
+                                    Literal(
+                                        IntegerLiteral(
                                             IntegerLiteral(
-                                                IntegerLiteral(
-                                                    "1",
-                                                ),
+                                                "1",
                                             ),
                                         ),
                                     ),
-                                    ty: None,
-                                },
-                                BitField {
-                                    ident: "b",
-                                    pos: PositiveIntConst(
-                                        Literal(
+                                ),
+                                ty: None,
+                            },
+                            BitField {
+                                ident: "b",
+                                pos: PositiveIntConst(
+                                    Literal(
+                                        IntegerLiteral(
                                             IntegerLiteral(
-                                                IntegerLiteral(
-                                                    "1",
-                                                ),
+                                                "1",
                                             ),
                                         ),
                                     ),
-                                    ty: None,
-                                },
-                                BitField {
-                                    ident: "c",
-                                    pos: PositiveIntConst(
-                                        Literal(
+                                ),
+                                ty: None,
+                            },
+                            BitField {
+                                ident: "c",
+                                pos: PositiveIntConst(
+                                    Literal(
+                                        IntegerLiteral(
                                             IntegerLiteral(
-                                                IntegerLiteral(
-                                                    "1",
-                                                ),
+                                                "1",
                                             ),
                                         ),
                                     ),
-                                    ty: None,
-                                },
-                            ],
-                        },
-                    ),
+                                ),
+                                ty: None,
+                            },
+                        ],
+                    },
                 ),
-            },
+            ),
         ),
     ],
 )

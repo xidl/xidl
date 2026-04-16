@@ -1,4 +1,4 @@
-use xidl_parser::hir::{Definition, Specification, TypeDclInner};
+use xidl_parser::hir::{Definition, Specification, TypeDcl};
 use xidl_parser::parser::parser_text;
 
 fn parse_hir(source: &str, expand_interface: bool) -> Specification {
@@ -166,5 +166,5 @@ fn interface_conversion_preserves_attr_and_raises_variants() {
             _ => None,
         })
         .expect("typedef");
-    assert!(matches!(typedef.decl, TypeDclInner::TypedefDcl(_)));
+    assert!(matches!(typedef, TypeDcl::TypedefDcl(_)));
 }

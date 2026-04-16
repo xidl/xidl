@@ -199,8 +199,8 @@ impl OpenApiContext {
     }
 
     fn collect_type_dcl(&mut self, type_dcl: &hir::TypeDcl, module_path: &[String]) {
-        match &type_dcl.decl {
-            hir::TypeDclInner::TypedefDcl(typedef) => {
+        match type_dcl {
+            hir::TypeDcl::TypedefDcl(typedef) => {
                 for decl in &typedef.decl {
                     let name = scoped_name(module_path, &declarator_name(decl));
                     let schema = match &typedef.ty {
@@ -213,10 +213,10 @@ impl OpenApiContext {
                     self.schemas.insert(name, schema);
                 }
             }
-            hir::TypeDclInner::ConstrTypeDcl(constr) => {
+            hir::TypeDcl::ConstrTypeDcl(constr) => {
                 self.collect_constr_type(constr, module_path);
             }
-            hir::TypeDclInner::NativeDcl(_) => {}
+            hir::TypeDcl::NativeDcl(_) => {}
         }
     }
 

@@ -5,17 +5,15 @@ expression: hir
 Specification(
     [
         TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    EnumDcl(
-                        EnumDcl {
-                            annotations: [],
-                            ident: "A",
-                            member: [],
-                        },
-                    ),
+            ConstrTypeDcl(
+                EnumDcl(
+                    EnumDcl {
+                        annotations: [],
+                        ident: "A",
+                        member: [],
+                    },
                 ),
-            },
+            ),
         ),
     ],
 )

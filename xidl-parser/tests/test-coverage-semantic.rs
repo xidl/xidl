@@ -1,4 +1,4 @@
-use xidl_parser::hir::{Definition, Specification, TypeDclInner};
+use xidl_parser::hir::{Definition, Specification, TypeDcl};
 use xidl_parser::parser::parser_text;
 
 #[test]
@@ -68,5 +68,5 @@ fn converts_semantic_matrix_without_interface_expansion() {
             _ => None,
         })
         .expect("typedef");
-    assert!(matches!(typedef.decl, TypeDclInner::ConstrTypeDcl(_)));
+    assert!(matches!(typedef, TypeDcl::ConstrTypeDcl(_)));
 }

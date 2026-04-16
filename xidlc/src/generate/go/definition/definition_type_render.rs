@@ -13,10 +13,10 @@ pub(super) fn render_type_dcl(
     def: &hir::TypeDcl,
     prefix: &[String],
 ) -> IdlcResult<()> {
-    match &def.decl {
-        hir::TypeDclInner::ConstrTypeDcl(constr) => render_constr_type(ctx, constr, prefix),
-        hir::TypeDclInner::TypedefDcl(typedef) => render_typedef(ctx, typedef, prefix),
-        hir::TypeDclInner::NativeDcl(native) => {
+    match def {
+        hir::TypeDcl::ConstrTypeDcl(constr) => render_constr_type(ctx, constr, prefix),
+        hir::TypeDcl::TypedefDcl(typedef) => render_typedef(ctx, typedef, prefix),
+        hir::TypeDcl::NativeDcl(native) => {
             let name = go_export_name(prefix, &native.decl.0);
             writeln!(&mut ctx.body, "type {name} any").unwrap();
             writeln!(&mut ctx.body).unwrap();

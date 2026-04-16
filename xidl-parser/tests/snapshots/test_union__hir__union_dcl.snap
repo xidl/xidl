@@ -5,113 +5,107 @@ expression: hir
 Specification(
     [
         TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    UnionForwardDcl(
-                        UnionForwardDcl {
-                            annotations: [],
-                            ident: "A",
-                        },
-                    ),
+            ConstrTypeDcl(
+                UnionForwardDcl(
+                    UnionForwardDcl {
+                        annotations: [],
+                        ident: "A",
+                    },
                 ),
-            },
+            ),
         ),
         TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    UnionDef(
-                        UnionDef {
-                            annotations: [],
-                            ident: "B",
-                            switch_type_spec: IntegerType(
-                                I32,
-                            ),
-                            case: [],
-                        },
-                    ),
+            ConstrTypeDcl(
+                UnionDef(
+                    UnionDef {
+                        annotations: [],
+                        ident: "B",
+                        switch_type_spec: IntegerType(
+                            I32,
+                        ),
+                        case: [],
+                    },
                 ),
-            },
+            ),
         ),
         TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    UnionDef(
-                        UnionDef {
-                            annotations: [],
-                            ident: "C",
-                            switch_type_spec: IntegerType(
-                                I32,
-                            ),
-                            case: [
-                                Case {
-                                    label: [
-                                        Value(
-                                            Literal(
+            ConstrTypeDcl(
+                UnionDef(
+                    UnionDef {
+                        annotations: [],
+                        ident: "C",
+                        switch_type_spec: IntegerType(
+                            I32,
+                        ),
+                        case: [
+                            Case {
+                                label: [
+                                    Value(
+                                        Literal(
+                                            IntegerLiteral(
                                                 IntegerLiteral(
-                                                    IntegerLiteral(
-                                                        "0",
-                                                    ),
+                                                    "0",
                                                 ),
                                             ),
                                         ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                IntegerType(
-                                                    I32,
-                                                ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        SimpleTypeSpec(
+                                            IntegerType(
+                                                I32,
                                             ),
                                         ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "a",
-                                            ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "a",
                                         ),
-                                        field_id: Some(
-                                            1,
-                                        ),
-                                    },
+                                    ),
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
-                                Case {
-                                    label: [
-                                        Value(
-                                            Literal(
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        Literal(
+                                            IntegerLiteral(
                                                 IntegerLiteral(
-                                                    IntegerLiteral(
-                                                        "1",
-                                                    ),
+                                                    "1",
                                                 ),
                                             ),
                                         ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            TemplateTypeSpec(
-                                                StringType(
-                                                    StringType {
-                                                        bound: None,
-                                                    },
-                                                ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        TemplateTypeSpec(
+                                            StringType(
+                                                StringType {
+                                                    bound: None,
+                                                },
                                             ),
                                         ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "b",
-                                            ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "b",
                                         ),
-                                        field_id: Some(
-                                            2,
-                                        ),
-                                    },
+                                    ),
+                                    field_id: Some(
+                                        2,
+                                    ),
                                 },
-                            ],
-                        },
-                    ),
+                            },
+                        ],
+                    },
                 ),
-            },
+            ),
         ),
     ],
 )

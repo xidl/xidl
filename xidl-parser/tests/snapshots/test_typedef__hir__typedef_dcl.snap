@@ -5,117 +5,109 @@ expression: hir
 Specification(
     [
         TypeDcl(
-            TypeDcl {
-                decl: TypedefDcl(
-                    TypedefDcl {
-                        annotations: [],
-                        ty: TypeSpec(
-                            TemplateTypeSpec(
-                                SequenceType(
-                                    SequenceType {
-                                        ty: SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "Foo",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+            TypedefDcl(
+                TypedefDcl {
+                    annotations: [],
+                    ty: TypeSpec(
+                        TemplateTypeSpec(
+                            SequenceType(
+                                SequenceType {
+                                    ty: SimpleTypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "Foo",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
-                                        len: None,
-                                    },
-                                ),
+                                    ),
+                                    len: None,
+                                },
                             ),
                         ),
-                        decl: [
+                    ),
+                    decl: [
+                        SimpleDeclarator(
                             SimpleDeclarator(
-                                SimpleDeclarator(
-                                    "FooSeq",
-                                ),
+                                "FooSeq",
                             ),
-                        ],
-                    },
-                ),
-            },
+                        ),
+                    ],
+                },
+            ),
         ),
         TypeDcl(
-            TypeDcl {
-                decl: TypedefDcl(
-                    TypedefDcl {
-                        annotations: [],
-                        ty: TypeSpec(
-                            SimpleTypeSpec(
-                                ScopedName(
-                                    ScopedName {
-                                        name: [
-                                            "u8",
-                                        ],
-                                        is_root: false,
-                                    },
-                                ),
+            TypedefDcl(
+                TypedefDcl {
+                    annotations: [],
+                    ty: TypeSpec(
+                        SimpleTypeSpec(
+                            ScopedName(
+                                ScopedName {
+                                    name: [
+                                        "u8",
+                                    ],
+                                    is_root: false,
+                                },
                             ),
                         ),
-                        decl: [
+                    ),
+                    decl: [
+                        SimpleDeclarator(
                             SimpleDeclarator(
-                                SimpleDeclarator(
-                                    "uint8_t",
-                                ),
+                                "uint8_t",
                             ),
-                        ],
-                    },
-                ),
-            },
+                        ),
+                    ],
+                },
+            ),
         ),
         TypeDcl(
-            TypeDcl {
-                decl: TypedefDcl(
-                    TypedefDcl {
-                        annotations: [],
-                        ty: TypeSpec(
-                            TemplateTypeSpec(
-                                StringType(
-                                    StringType {
-                                        bound: None,
-                                    },
-                                ),
+            TypedefDcl(
+                TypedefDcl {
+                    annotations: [],
+                    ty: TypeSpec(
+                        TemplateTypeSpec(
+                            StringType(
+                                StringType {
+                                    bound: None,
+                                },
                             ),
                         ),
-                        decl: [
+                    ),
+                    decl: [
+                        SimpleDeclarator(
                             SimpleDeclarator(
-                                SimpleDeclarator(
-                                    "u8string",
-                                ),
+                                "u8string",
                             ),
-                        ],
-                    },
-                ),
-            },
+                        ),
+                    ],
+                },
+            ),
         ),
         TypeDcl(
-            TypeDcl {
-                decl: TypedefDcl(
-                    TypedefDcl {
-                        annotations: [],
-                        ty: TypeSpec(
-                            TemplateTypeSpec(
-                                WideStringType(
-                                    WideStringType {
-                                        bound: None,
-                                    },
-                                ),
+            TypedefDcl(
+                TypedefDcl {
+                    annotations: [],
+                    ty: TypeSpec(
+                        TemplateTypeSpec(
+                            WideStringType(
+                                WideStringType {
+                                    bound: None,
+                                },
                             ),
                         ),
-                        decl: [
+                    ),
+                    decl: [
+                        SimpleDeclarator(
                             SimpleDeclarator(
-                                SimpleDeclarator(
-                                    "u16string",
-                                ),
+                                "u16string",
                             ),
-                        ],
-                    },
-                ),
-            },
+                        ),
+                    ],
+                },
+            ),
         ),
     ],
 )

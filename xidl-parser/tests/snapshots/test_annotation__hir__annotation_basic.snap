@@ -5,304 +5,296 @@ expression: hir
 Specification(
     [
         TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [
-                                Builtin {
-                                    name: "id",
-                                    params: Some(
-                                        Raw(
-                                            "1",
-                                        ),
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [
+                            Builtin {
+                                name: "id",
+                                params: Some(
+                                    Raw(
+                                        "1",
                                     ),
-                                },
-                            ],
-                            ident: "S",
-                            parent: [],
-                            member: [
-                                Member {
-                                    annotations: [
-                                        Builtin {
-                                            name: "id",
-                                            params: Some(
-                                                Raw(
-                                                    "10",
-                                                ),
+                                ),
+                            },
+                        ],
+                        ident: "S",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [
+                                    Builtin {
+                                        name: "id",
+                                        params: Some(
+                                            Raw(
+                                                "10",
                                             ),
-                                        },
-                                    ],
-                                    ty: SimpleTypeSpec(
-                                        IntegerType(
-                                            I32,
                                         ),
+                                    },
+                                ],
+                                ty: SimpleTypeSpec(
+                                    IntegerType(
+                                        I32,
                                     ),
-                                    ident: [
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
                                         SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "a",
-                                            ),
-                                        ),
-                                    ],
-                                    default: None,
-                                    field_id: Some(
-                                        1,
-                                    ),
-                                },
-                                Member {
-                                    annotations: [
-                                        Builtin {
-                                            name: "id",
-                                            params: Some(
-                                                Raw(
-                                                    "11",
-                                                ),
-                                            ),
-                                        },
-                                        Builtin {
-                                            name: "id",
-                                            params: Some(
-                                                Raw(
-                                                    "11",
-                                                ),
-                                            ),
-                                        },
-                                        Builtin {
-                                            name: "optional",
-                                            params: None,
-                                        },
-                                    ],
-                                    ty: SimpleTypeSpec(
-                                        IntegerType(
-                                            I16,
+                                            "a",
                                         ),
                                     ),
-                                    ident: [
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                            },
+                            Member {
+                                annotations: [
+                                    Builtin {
+                                        name: "id",
+                                        params: Some(
+                                            Raw(
+                                                "11",
+                                            ),
+                                        ),
+                                    },
+                                    Builtin {
+                                        name: "id",
+                                        params: Some(
+                                            Raw(
+                                                "11",
+                                            ),
+                                        ),
+                                    },
+                                    Builtin {
+                                        name: "optional",
+                                        params: None,
+                                    },
+                                ],
+                                ty: SimpleTypeSpec(
+                                    IntegerType(
+                                        I16,
+                                    ),
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
                                         SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "b",
-                                            ),
+                                            "b",
                                         ),
-                                    ],
-                                    default: None,
-                                    field_id: Some(
-                                        2,
                                     ),
-                                },
-                            ],
-                        },
-                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    2,
+                                ),
+                            },
+                        ],
+                    },
                 ),
-            },
+            ),
         ),
         TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    EnumDcl(
-                        EnumDcl {
-                            annotations: [
-                                ScopedName {
-                                    name: ScopedName {
-                                        name: [
-                                            "my",
-                                            "anno",
-                                        ],
-                                        is_root: false,
-                                    },
-                                    params: Some(
-                                        Params(
-                                            [
-                                                AnnotationParam {
-                                                    ident: "abc",
-                                                    value: Some(
-                                                        Literal(
+            ConstrTypeDcl(
+                EnumDcl(
+                    EnumDcl {
+                        annotations: [
+                            ScopedName {
+                                name: ScopedName {
+                                    name: [
+                                        "my",
+                                        "anno",
+                                    ],
+                                    is_root: false,
+                                },
+                                params: Some(
+                                    Params(
+                                        [
+                                            AnnotationParam {
+                                                ident: "abc",
+                                                value: Some(
+                                                    Literal(
+                                                        IntegerLiteral(
                                                             IntegerLiteral(
-                                                                IntegerLiteral(
-                                                                    "1",
-                                                                ),
+                                                                "1",
                                                             ),
                                                         ),
-                                                    ),
-                                                },
-                                            ],
-                                        ),
-                                    ),
-                                },
-                            ],
-                            ident: "E",
-                            member: [
-                                Enumerator {
-                                    annotations: [
-                                        Builtin {
-                                            name: "id",
-                                            params: Some(
-                                                Raw(
-                                                    "0",
-                                                ),
-                                            ),
-                                        },
-                                    ],
-                                    ident: "A",
-                                },
-                                Enumerator {
-                                    annotations: [
-                                        Builtin {
-                                            name: "id",
-                                            params: Some(
-                                                Raw(
-                                                    "1",
-                                                ),
-                                            ),
-                                        },
-                                    ],
-                                    ident: "B",
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    BitmaskDcl(
-                        BitmaskDcl {
-                            annotations: [
-                                Builtin {
-                                    name: "id",
-                                    params: Some(
-                                        Raw(
-                                            "2",
-                                        ),
-                                    ),
-                                },
-                            ],
-                            ident: "BM",
-                            value: [
-                                BitValue {
-                                    position: 0,
-                                    annotations: [
-                                        Builtin {
-                                            name: "id",
-                                            params: Some(
-                                                Raw(
-                                                    "0",
-                                                ),
-                                            ),
-                                        },
-                                    ],
-                                    ident: "A",
-                                },
-                                BitValue {
-                                    position: 1,
-                                    annotations: [
-                                        Builtin {
-                                            name: "id",
-                                            params: Some(
-                                                Raw(
-                                                    "1",
-                                                ),
-                                            ),
-                                        },
-                                    ],
-                                    ident: "B",
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    UnionDef(
-                        UnionDef {
-                            annotations: [
-                                Builtin {
-                                    name: "id",
-                                    params: Some(
-                                        Raw(
-                                            "3",
-                                        ),
-                                    ),
-                                },
-                            ],
-                            ident: "U",
-                            switch_type_spec: IntegerType(
-                                I32,
-                            ),
-                            case: [
-                                Case {
-                                    label: [
-                                        Value(
-                                            Literal(
-                                                IntegerLiteral(
-                                                    IntegerLiteral(
-                                                        "0",
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [
-                                            Builtin {
-                                                name: "id",
-                                                params: Some(
-                                                    Raw(
-                                                        "100",
                                                     ),
                                                 ),
                                             },
                                         ],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                IntegerType(
-                                                    I32,
-                                                ),
+                                    ),
+                                ),
+                            },
+                        ],
+                        ident: "E",
+                        member: [
+                            Enumerator {
+                                annotations: [
+                                    Builtin {
+                                        name: "id",
+                                        params: Some(
+                                            Raw(
+                                                "0",
                                             ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "a",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            1,
                                         ),
                                     },
-                                },
-                                Case {
-                                    label: [
-                                        Default,
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                IntegerType(
-                                                    I32,
-                                                ),
+                                ],
+                                ident: "A",
+                            },
+                            Enumerator {
+                                annotations: [
+                                    Builtin {
+                                        name: "id",
+                                        params: Some(
+                                            Raw(
+                                                "1",
                                             ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "b",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            2,
                                         ),
                                     },
-                                },
-                            ],
-                        },
-                    ),
+                                ],
+                                ident: "B",
+                            },
+                        ],
+                    },
                 ),
-            },
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                BitmaskDcl(
+                    BitmaskDcl {
+                        annotations: [
+                            Builtin {
+                                name: "id",
+                                params: Some(
+                                    Raw(
+                                        "2",
+                                    ),
+                                ),
+                            },
+                        ],
+                        ident: "BM",
+                        value: [
+                            BitValue {
+                                position: 0,
+                                annotations: [
+                                    Builtin {
+                                        name: "id",
+                                        params: Some(
+                                            Raw(
+                                                "0",
+                                            ),
+                                        ),
+                                    },
+                                ],
+                                ident: "A",
+                            },
+                            BitValue {
+                                position: 1,
+                                annotations: [
+                                    Builtin {
+                                        name: "id",
+                                        params: Some(
+                                            Raw(
+                                                "1",
+                                            ),
+                                        ),
+                                    },
+                                ],
+                                ident: "B",
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                UnionDef(
+                    UnionDef {
+                        annotations: [
+                            Builtin {
+                                name: "id",
+                                params: Some(
+                                    Raw(
+                                        "3",
+                                    ),
+                                ),
+                            },
+                        ],
+                        ident: "U",
+                        switch_type_spec: IntegerType(
+                            I32,
+                        ),
+                        case: [
+                            Case {
+                                label: [
+                                    Value(
+                                        Literal(
+                                            IntegerLiteral(
+                                                IntegerLiteral(
+                                                    "0",
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [
+                                        Builtin {
+                                            name: "id",
+                                            params: Some(
+                                                Raw(
+                                                    "100",
+                                                ),
+                                            ),
+                                        },
+                                    ],
+                                    ty: TypeSpec(
+                                        SimpleTypeSpec(
+                                            IntegerType(
+                                                I32,
+                                            ),
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "a",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Default,
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        SimpleTypeSpec(
+                                            IntegerType(
+                                                I32,
+                                            ),
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "b",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        2,
+                                    ),
+                                },
+                            },
+                        ],
+                    },
+                ),
+            ),
         ),
         ConstDcl(
             ConstDcl {
@@ -350,847 +342,821 @@ Specification(
             },
         ),
         TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "I_ping_In",
-                            parent: [],
-                            member: [
-                                Member {
-                                    annotations: [],
-                                    ty: SimpleTypeSpec(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "I_ping_In",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: SimpleTypeSpec(
+                                    ScopedName(
+                                        ScopedName {
+                                            name: [
+                                                "dds",
+                                                "rpc",
+                                                "UnusedMember",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "dummy",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "I_ping_Out",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: SimpleTypeSpec(
+                                    ScopedName(
+                                        ScopedName {
+                                            name: [
+                                                "dds",
+                                                "rpc",
+                                                "UnusedMember",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "dummy",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                UnionDef(
+                    UnionDef {
+                        annotations: [],
+                        ident: "I_ping_Result",
+                        switch_type_spec: IntegerType(
+                            I32,
+                        ),
+                        case: [
+                            Case {
+                                label: [
+                                    Value(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
                                                     "dds",
-                                                    "rpc",
-                                                    "UnusedMember",
+                                                    "RETCODE_OK",
                                                 ],
                                                 is_root: false,
                                             },
                                         ),
                                     ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "dummy",
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        SimpleTypeSpec(
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "I_ping_Out",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
-                                    ],
-                                    default: None,
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "result",
+                                        ),
+                                    ),
                                     field_id: Some(
                                         1,
                                     ),
                                 },
-                            ],
-                        },
-                    ),
+                            },
+                        ],
+                    },
                 ),
-            },
+            ),
         ),
         TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "I_ping_Out",
-                            parent: [],
-                            member: [
-                                Member {
-                                    annotations: [],
-                                    ty: SimpleTypeSpec(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "I_get_attribute_value_In",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: SimpleTypeSpec(
+                                    ScopedName(
+                                        ScopedName {
+                                            name: [
+                                                "dds",
+                                                "rpc",
+                                                "UnusedMember",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "dummy",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "I_get_attribute_value_Out",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: SimpleTypeSpec(
+                                    IntegerType(
+                                        I32,
+                                    ),
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "return_",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                UnionDef(
+                    UnionDef {
+                        annotations: [],
+                        ident: "I_get_attribute_value_Result",
+                        switch_type_spec: IntegerType(
+                            I32,
+                        ),
+                        case: [
+                            Case {
+                                label: [
+                                    Value(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
                                                     "dds",
-                                                    "rpc",
-                                                    "UnusedMember",
+                                                    "RETCODE_OK",
                                                 ],
                                                 is_root: false,
                                             },
                                         ),
                                     ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "dummy",
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        SimpleTypeSpec(
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "I_get_attribute_value_Out",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
-                                    ],
-                                    default: None,
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "result",
+                                        ),
+                                    ),
                                     field_id: Some(
                                         1,
                                     ),
                                 },
-                            ],
-                        },
-                    ),
+                            },
+                        ],
+                    },
                 ),
-            },
+            ),
         ),
         TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    UnionDef(
-                        UnionDef {
-                            annotations: [],
-                            ident: "I_ping_Result",
-                            switch_type_spec: IntegerType(
-                                I32,
-                            ),
-                            case: [
-                                Case {
-                                    label: [
-                                        Value(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "I_set_attribute_value_In",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: SimpleTypeSpec(
+                                    IntegerType(
+                                        I32,
+                                    ),
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "value",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "I_set_attribute_value_Out",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: SimpleTypeSpec(
+                                    ScopedName(
+                                        ScopedName {
+                                            name: [
+                                                "dds",
+                                                "rpc",
+                                                "UnusedMember",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "dummy",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                UnionDef(
+                    UnionDef {
+                        annotations: [],
+                        ident: "I_set_attribute_value_Result",
+                        switch_type_spec: IntegerType(
+                            I32,
+                        ),
+                        case: [
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "RETCODE_OK",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        SimpleTypeSpec(
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "I_set_attribute_value_Out",
+                                                    ],
+                                                    is_root: false,
+                                                },
+                                            ),
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "result",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                UnionDef(
+                    UnionDef {
+                        annotations: [],
+                        ident: "I_Call",
+                        switch_type_spec: IntegerType(
+                            I32,
+                        ),
+                        case: [
+                            Case {
+                                label: [
+                                    Default,
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        SimpleTypeSpec(
                                             ScopedName(
                                                 ScopedName {
                                                     name: [
                                                         "dds",
-                                                        "RETCODE_OK",
+                                                        "rpc",
+                                                        "UnknownOperation",
                                                     ],
                                                     is_root: false,
                                                 },
                                             ),
                                         ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "I_ping_Out",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "unknownOp",
                                         ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "result",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            1,
-                                        ),
-                                    },
+                                    ),
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "I_get_attribute_value_In",
-                            parent: [],
-                            member: [
-                                Member {
-                                    annotations: [],
-                                    ty: SimpleTypeSpec(
+                            },
+                            Case {
+                                label: [
+                                    Value(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "dds",
-                                                    "rpc",
-                                                    "UnusedMember",
+                                                    "I_ping_Hash",
                                                 ],
                                                 is_root: false,
                                             },
                                         ),
                                     ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "dummy",
-                                            ),
-                                        ),
-                                    ],
-                                    default: None,
-                                    field_id: Some(
-                                        1,
-                                    ),
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "I_get_attribute_value_Out",
-                            parent: [],
-                            member: [
-                                Member {
+                                ],
+                                element: ElementSpec {
                                     annotations: [],
-                                    ty: SimpleTypeSpec(
-                                        IntegerType(
-                                            I32,
-                                        ),
-                                    ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "return_",
-                                            ),
-                                        ),
-                                    ],
-                                    default: None,
-                                    field_id: Some(
-                                        1,
-                                    ),
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    UnionDef(
-                        UnionDef {
-                            annotations: [],
-                            ident: "I_get_attribute_value_Result",
-                            switch_type_spec: IntegerType(
-                                I32,
-                            ),
-                            case: [
-                                Case {
-                                    label: [
-                                        Value(
+                                    ty: TypeSpec(
+                                        SimpleTypeSpec(
                                             ScopedName(
                                                 ScopedName {
                                                     name: [
-                                                        "dds",
-                                                        "RETCODE_OK",
+                                                        "I_ping_In",
                                                     ],
                                                     is_root: false,
                                                 },
                                             ),
                                         ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "I_get_attribute_value_Out",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "result",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            1,
-                                        ),
-                                    },
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "I_set_attribute_value_In",
-                            parent: [],
-                            member: [
-                                Member {
-                                    annotations: [],
-                                    ty: SimpleTypeSpec(
-                                        IntegerType(
-                                            I32,
-                                        ),
                                     ),
-                                    ident: [
+                                    value: SimpleDeclarator(
                                         SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "value",
-                                            ),
-                                        ),
-                                    ],
-                                    default: None,
-                                    field_id: Some(
-                                        1,
-                                    ),
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "I_set_attribute_value_Out",
-                            parent: [],
-                            member: [
-                                Member {
-                                    annotations: [],
-                                    ty: SimpleTypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "dds",
-                                                    "rpc",
-                                                    "UnusedMember",
-                                                ],
-                                                is_root: false,
-                                            },
+                                            "ping",
                                         ),
                                     ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "dummy",
-                                            ),
-                                        ),
-                                    ],
-                                    default: None,
-                                    field_id: Some(
-                                        1,
-                                    ),
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    UnionDef(
-                        UnionDef {
-                            annotations: [],
-                            ident: "I_set_attribute_value_Result",
-                            switch_type_spec: IntegerType(
-                                I32,
-                            ),
-                            case: [
-                                Case {
-                                    label: [
-                                        Value(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "dds",
-                                                        "RETCODE_OK",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "I_set_attribute_value_Out",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "result",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            1,
-                                        ),
-                                    },
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    UnionDef(
-                        UnionDef {
-                            annotations: [],
-                            ident: "I_Call",
-                            switch_type_spec: IntegerType(
-                                I32,
-                            ),
-                            case: [
-                                Case {
-                                    label: [
-                                        Default,
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "dds",
-                                                            "rpc",
-                                                            "UnknownOperation",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "unknownOp",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            1,
-                                        ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "I_ping_Hash",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "I_ping_In",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "ping",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            2,
-                                        ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "I_get_attribute_value_Hash",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "I_get_attribute_value_In",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "get_attribute_value",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            3,
-                                        ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "I_set_attribute_value_Hash",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "I_set_attribute_value_In",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "set_attribute_value",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            4,
-                                        ),
-                                    },
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "I_Request",
-                            parent: [],
-                            member: [
-                                Member {
-                                    annotations: [],
-                                    ty: SimpleTypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "dds",
-                                                    "rpc",
-                                                    "RequestHeader",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "header",
-                                            ),
-                                        ),
-                                    ],
-                                    default: None,
-                                    field_id: Some(
-                                        1,
-                                    ),
-                                },
-                                Member {
-                                    annotations: [],
-                                    ty: SimpleTypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "I_Call",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "data",
-                                            ),
-                                        ),
-                                    ],
-                                    default: None,
                                     field_id: Some(
                                         2,
                                     ),
                                 },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    UnionDef(
-                        UnionDef {
-                            annotations: [],
-                            ident: "I_Return",
-                            switch_type_spec: IntegerType(
-                                I32,
-                            ),
-                            case: [
-                                Case {
-                                    label: [
-                                        Default,
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "dds",
-                                                            "rpc",
-                                                            "UnknownOperation",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "unknownOp",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            1,
-                                        ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "I_ping_Hash",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "I_ping_Result",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "ping",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            2,
-                                        ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "I_get_attribute_value_Hash",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "I_get_attribute_value_Result",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "get_attribute_value",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            3,
-                                        ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "I_set_attribute_value_Hash",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "I_set_attribute_value_Result",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "set_attribute_value",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            4,
-                                        ),
-                                    },
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "I_Reply",
-                            parent: [],
-                            member: [
-                                Member {
-                                    annotations: [],
-                                    ty: SimpleTypeSpec(
+                            },
+                            Case {
+                                label: [
+                                    Value(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "dds",
-                                                    "rpc",
-                                                    "ReplyHeader",
+                                                    "I_get_attribute_value_Hash",
                                                 ],
                                                 is_root: false,
                                             },
                                         ),
                                     ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "header",
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        SimpleTypeSpec(
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "I_get_attribute_value_In",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
-                                    ],
-                                    default: None,
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "get_attribute_value",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        3,
+                                    ),
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "I_set_attribute_value_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        SimpleTypeSpec(
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "I_set_attribute_value_In",
+                                                    ],
+                                                    is_root: false,
+                                                },
+                                            ),
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "set_attribute_value",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        4,
+                                    ),
+                                },
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "I_Request",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: SimpleTypeSpec(
+                                    ScopedName(
+                                        ScopedName {
+                                            name: [
+                                                "dds",
+                                                "rpc",
+                                                "RequestHeader",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "header",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                            },
+                            Member {
+                                annotations: [],
+                                ty: SimpleTypeSpec(
+                                    ScopedName(
+                                        ScopedName {
+                                            name: [
+                                                "I_Call",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "data",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    2,
+                                ),
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                UnionDef(
+                    UnionDef {
+                        annotations: [],
+                        ident: "I_Return",
+                        switch_type_spec: IntegerType(
+                            I32,
+                        ),
+                        case: [
+                            Case {
+                                label: [
+                                    Default,
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        SimpleTypeSpec(
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "dds",
+                                                        "rpc",
+                                                        "UnknownOperation",
+                                                    ],
+                                                    is_root: false,
+                                                },
+                                            ),
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "unknownOp",
+                                        ),
+                                    ),
                                     field_id: Some(
                                         1,
                                     ),
                                 },
-                                Member {
-                                    annotations: [],
-                                    ty: SimpleTypeSpec(
+                            },
+                            Case {
+                                label: [
+                                    Value(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "I_Return",
+                                                    "I_ping_Hash",
                                                 ],
                                                 is_root: false,
                                             },
                                         ),
                                     ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "data",
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        SimpleTypeSpec(
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "I_ping_Result",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
-                                    ],
-                                    default: None,
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "ping",
+                                        ),
+                                    ),
                                     field_id: Some(
                                         2,
                                     ),
                                 },
-                            ],
-                        },
-                    ),
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "I_get_attribute_value_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        SimpleTypeSpec(
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "I_get_attribute_value_Result",
+                                                    ],
+                                                    is_root: false,
+                                                },
+                                            ),
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "get_attribute_value",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        3,
+                                    ),
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "I_set_attribute_value_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        SimpleTypeSpec(
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "I_set_attribute_value_Result",
+                                                    ],
+                                                    is_root: false,
+                                                },
+                                            ),
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "set_attribute_value",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        4,
+                                    ),
+                                },
+                            },
+                        ],
+                    },
                 ),
-            },
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "I_Reply",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: SimpleTypeSpec(
+                                    ScopedName(
+                                        ScopedName {
+                                            name: [
+                                                "dds",
+                                                "rpc",
+                                                "ReplyHeader",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "header",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                            },
+                            Member {
+                                annotations: [],
+                                ty: SimpleTypeSpec(
+                                    ScopedName(
+                                        ScopedName {
+                                            name: [
+                                                "I_Return",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "data",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    2,
+                                ),
+                            },
+                        ],
+                    },
+                ),
+            ),
         ),
         InterfaceDcl(
             InterfaceDcl {

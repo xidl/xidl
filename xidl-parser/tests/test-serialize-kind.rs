@@ -3,8 +3,7 @@ use xidl_parser::hir;
 fn first_struct(spec: &hir::Specification) -> &hir::StructDcl {
     for def in &spec.0 {
         if let hir::Definition::TypeDcl(type_dcl) = def
-            && let hir::TypeDclInner::ConstrTypeDcl(hir::ConstrTypeDcl::StructDcl(def)) =
-                &type_dcl.decl
+            && let hir::TypeDcl::ConstrTypeDcl(hir::ConstrTypeDcl::StructDcl(def)) = type_dcl
         {
             return def;
         }

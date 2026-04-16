@@ -65,1068 +65,1036 @@ Specification(
             },
         ),
         TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "HttpApi_old_ping_In",
-                            parent: [],
-                            member: [
-                                Member {
-                                    annotations: [],
-                                    ty: SimpleTypeSpec(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "HttpApi_old_ping_In",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: SimpleTypeSpec(
+                                    ScopedName(
+                                        ScopedName {
+                                            name: [
+                                                "dds",
+                                                "rpc",
+                                                "UnusedMember",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "dummy",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "HttpApi_old_ping_Out",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: SimpleTypeSpec(
+                                    ScopedName(
+                                        ScopedName {
+                                            name: [
+                                                "dds",
+                                                "rpc",
+                                                "UnusedMember",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "dummy",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                UnionDef(
+                    UnionDef {
+                        annotations: [],
+                        ident: "HttpApi_old_ping_Result",
+                        switch_type_spec: IntegerType(
+                            I32,
+                        ),
+                        case: [
+                            Case {
+                                label: [
+                                    Value(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
                                                     "dds",
-                                                    "rpc",
-                                                    "UnusedMember",
+                                                    "RETCODE_OK",
                                                 ],
                                                 is_root: false,
                                             },
                                         ),
                                     ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "dummy",
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        SimpleTypeSpec(
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "HttpApi_old_ping_Out",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
-                                    ],
-                                    default: None,
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "result",
+                                        ),
+                                    ),
                                     field_id: Some(
                                         1,
                                     ),
                                 },
-                            ],
-                        },
-                    ),
+                            },
+                        ],
+                    },
                 ),
-            },
+            ),
         ),
         TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "HttpApi_old_ping_Out",
-                            parent: [],
-                            member: [
-                                Member {
-                                    annotations: [],
-                                    ty: SimpleTypeSpec(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "HttpApi_get_user_In",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: TemplateTypeSpec(
+                                    StringType(
+                                        StringType {
+                                            bound: None,
+                                        },
+                                    ),
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "id",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "HttpApi_get_user_Out",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: TemplateTypeSpec(
+                                    StringType(
+                                        StringType {
+                                            bound: None,
+                                        },
+                                    ),
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "return_",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                UnionDef(
+                    UnionDef {
+                        annotations: [],
+                        ident: "HttpApi_get_user_Result",
+                        switch_type_spec: IntegerType(
+                            I32,
+                        ),
+                        case: [
+                            Case {
+                                label: [
+                                    Value(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
                                                     "dds",
-                                                    "rpc",
-                                                    "UnusedMember",
+                                                    "RETCODE_OK",
                                                 ],
                                                 is_root: false,
                                             },
                                         ),
                                     ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "dummy",
-                                            ),
-                                        ),
-                                    ],
-                                    default: None,
-                                    field_id: Some(
-                                        1,
-                                    ),
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    UnionDef(
-                        UnionDef {
-                            annotations: [],
-                            ident: "HttpApi_old_ping_Result",
-                            switch_type_spec: IntegerType(
-                                I32,
-                            ),
-                            case: [
-                                Case {
-                                    label: [
-                                        Value(
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        SimpleTypeSpec(
                                             ScopedName(
                                                 ScopedName {
                                                     name: [
-                                                        "dds",
-                                                        "RETCODE_OK",
+                                                        "HttpApi_get_user_Out",
                                                     ],
                                                     is_root: false,
                                                 },
                                             ),
                                         ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "HttpApi_old_ping_Out",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "result",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            1,
-                                        ),
-                                    },
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "HttpApi_get_user_In",
-                            parent: [],
-                            member: [
-                                Member {
-                                    annotations: [],
-                                    ty: TemplateTypeSpec(
-                                        StringType(
-                                            StringType {
-                                                bound: None,
-                                            },
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "result",
                                         ),
                                     ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "id",
-                                            ),
-                                        ),
-                                    ],
-                                    default: None,
                                     field_id: Some(
                                         1,
                                     ),
                                 },
-                            ],
-                        },
-                    ),
+                            },
+                        ],
+                    },
                 ),
-            },
+            ),
         ),
         TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "HttpApi_get_user_Out",
-                            parent: [],
-                            member: [
-                                Member {
-                                    annotations: [],
-                                    ty: TemplateTypeSpec(
-                                        StringType(
-                                            StringType {
-                                                bound: None,
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "HttpApi_update_user_In",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: TemplateTypeSpec(
+                                    StringType(
+                                        StringType {
+                                            bound: None,
+                                        },
+                                    ),
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "request_id",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                            },
+                            Member {
+                                annotations: [],
+                                ty: TemplateTypeSpec(
+                                    StringType(
+                                        StringType {
+                                            bound: None,
+                                        },
+                                    ),
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "name",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    2,
+                                ),
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "HttpApi_update_user_Out",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: TemplateTypeSpec(
+                                    StringType(
+                                        StringType {
+                                            bound: None,
+                                        },
+                                    ),
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "return_",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                UnionDef(
+                    UnionDef {
+                        annotations: [],
+                        ident: "HttpApi_update_user_Result",
+                        switch_type_spec: IntegerType(
+                            I32,
+                        ),
+                        case: [
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "RETCODE_OK",
+                                                ],
+                                                is_root: false,
                                             },
                                         ),
                                     ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "return_",
-                                            ),
-                                        ),
-                                    ],
-                                    default: None,
-                                    field_id: Some(
-                                        1,
-                                    ),
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    UnionDef(
-                        UnionDef {
-                            annotations: [],
-                            ident: "HttpApi_get_user_Result",
-                            switch_type_spec: IntegerType(
-                                I32,
-                            ),
-                            case: [
-                                Case {
-                                    label: [
-                                        Value(
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        SimpleTypeSpec(
                                             ScopedName(
                                                 ScopedName {
                                                     name: [
-                                                        "dds",
-                                                        "RETCODE_OK",
+                                                        "HttpApi_update_user_Out",
                                                     ],
                                                     is_root: false,
                                                 },
                                             ),
                                         ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "HttpApi_get_user_Out",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "result",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            1,
-                                        ),
-                                    },
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "HttpApi_update_user_In",
-                            parent: [],
-                            member: [
-                                Member {
-                                    annotations: [],
-                                    ty: TemplateTypeSpec(
-                                        StringType(
-                                            StringType {
-                                                bound: None,
-                                            },
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "result",
                                         ),
                                     ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "request_id",
-                                            ),
-                                        ),
-                                    ],
-                                    default: None,
                                     field_id: Some(
                                         1,
                                     ),
                                 },
-                                Member {
-                                    annotations: [],
-                                    ty: TemplateTypeSpec(
-                                        StringType(
-                                            StringType {
-                                                bound: None,
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "HttpApi_health_In",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: SimpleTypeSpec(
+                                    ScopedName(
+                                        ScopedName {
+                                            name: [
+                                                "dds",
+                                                "rpc",
+                                                "UnusedMember",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "dummy",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "HttpApi_health_Out",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: TemplateTypeSpec(
+                                    StringType(
+                                        StringType {
+                                            bound: None,
+                                        },
+                                    ),
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "return_",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                UnionDef(
+                    UnionDef {
+                        annotations: [],
+                        ident: "HttpApi_health_Result",
+                        switch_type_spec: IntegerType(
+                            I32,
+                        ),
+                        case: [
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "RETCODE_OK",
+                                                ],
+                                                is_root: false,
                                             },
                                         ),
                                     ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "name",
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        SimpleTypeSpec(
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "HttpApi_health_Out",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
-                                    ],
-                                    default: None,
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "result",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                UnionDef(
+                    UnionDef {
+                        annotations: [],
+                        ident: "HttpApi_Call",
+                        switch_type_spec: IntegerType(
+                            I32,
+                        ),
+                        case: [
+                            Case {
+                                label: [
+                                    Default,
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        SimpleTypeSpec(
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "dds",
+                                                        "rpc",
+                                                        "UnknownOperation",
+                                                    ],
+                                                    is_root: false,
+                                                },
+                                            ),
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "unknownOp",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "HttpApi_old_ping_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        SimpleTypeSpec(
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "HttpApi_old_ping_In",
+                                                    ],
+                                                    is_root: false,
+                                                },
+                                            ),
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "old_ping",
+                                        ),
+                                    ),
                                     field_id: Some(
                                         2,
                                     ),
                                 },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "HttpApi_update_user_Out",
-                            parent: [],
-                            member: [
-                                Member {
-                                    annotations: [],
-                                    ty: TemplateTypeSpec(
-                                        StringType(
-                                            StringType {
-                                                bound: None,
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "HttpApi_get_user_Hash",
+                                                ],
+                                                is_root: false,
                                             },
                                         ),
                                     ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "return_",
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        SimpleTypeSpec(
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "HttpApi_get_user_In",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
-                                    ],
-                                    default: None,
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "get_user",
+                                        ),
+                                    ),
                                     field_id: Some(
-                                        1,
+                                        3,
                                     ),
                                 },
-                            ],
-                        },
-                    ),
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "HttpApi_update_user_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        SimpleTypeSpec(
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "HttpApi_update_user_In",
+                                                    ],
+                                                    is_root: false,
+                                                },
+                                            ),
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "update_user",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        4,
+                                    ),
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "HttpApi_health_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        SimpleTypeSpec(
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "HttpApi_health_In",
+                                                    ],
+                                                    is_root: false,
+                                                },
+                                            ),
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "health",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        5,
+                                    ),
+                                },
+                            },
+                        ],
+                    },
                 ),
-            },
+            ),
         ),
         TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    UnionDef(
-                        UnionDef {
-                            annotations: [],
-                            ident: "HttpApi_update_user_Result",
-                            switch_type_spec: IntegerType(
-                                I32,
-                            ),
-                            case: [
-                                Case {
-                                    label: [
-                                        Value(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "HttpApi_Request",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: SimpleTypeSpec(
+                                    ScopedName(
+                                        ScopedName {
+                                            name: [
+                                                "dds",
+                                                "rpc",
+                                                "RequestHeader",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "header",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                            },
+                            Member {
+                                annotations: [],
+                                ty: SimpleTypeSpec(
+                                    ScopedName(
+                                        ScopedName {
+                                            name: [
+                                                "HttpApi_Call",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "data",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    2,
+                                ),
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                UnionDef(
+                    UnionDef {
+                        annotations: [],
+                        ident: "HttpApi_Return",
+                        switch_type_spec: IntegerType(
+                            I32,
+                        ),
+                        case: [
+                            Case {
+                                label: [
+                                    Default,
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        SimpleTypeSpec(
                                             ScopedName(
                                                 ScopedName {
                                                     name: [
                                                         "dds",
-                                                        "RETCODE_OK",
+                                                        "rpc",
+                                                        "UnknownOperation",
                                                     ],
                                                     is_root: false,
                                                 },
                                             ),
                                         ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "HttpApi_update_user_Out",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "unknownOp",
                                         ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "result",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            1,
-                                        ),
-                                    },
+                                    ),
+                                    field_id: Some(
+                                        1,
+                                    ),
                                 },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "HttpApi_health_In",
-                            parent: [],
-                            member: [
-                                Member {
-                                    annotations: [],
-                                    ty: SimpleTypeSpec(
+                            },
+                            Case {
+                                label: [
+                                    Value(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "dds",
-                                                    "rpc",
-                                                    "UnusedMember",
+                                                    "HttpApi_old_ping_Hash",
                                                 ],
                                                 is_root: false,
                                             },
                                         ),
                                     ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "dummy",
-                                            ),
-                                        ),
-                                    ],
-                                    default: None,
-                                    field_id: Some(
-                                        1,
-                                    ),
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "HttpApi_health_Out",
-                            parent: [],
-                            member: [
-                                Member {
+                                ],
+                                element: ElementSpec {
                                     annotations: [],
-                                    ty: TemplateTypeSpec(
-                                        StringType(
-                                            StringType {
-                                                bound: None,
-                                            },
+                                    ty: TypeSpec(
+                                        SimpleTypeSpec(
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "HttpApi_old_ping_Result",
+                                                    ],
+                                                    is_root: false,
+                                                },
+                                            ),
                                         ),
                                     ),
-                                    ident: [
+                                    value: SimpleDeclarator(
                                         SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "return_",
-                                            ),
-                                        ),
-                                    ],
-                                    default: None,
-                                    field_id: Some(
-                                        1,
-                                    ),
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    UnionDef(
-                        UnionDef {
-                            annotations: [],
-                            ident: "HttpApi_health_Result",
-                            switch_type_spec: IntegerType(
-                                I32,
-                            ),
-                            case: [
-                                Case {
-                                    label: [
-                                        Value(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "dds",
-                                                        "RETCODE_OK",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "HttpApi_health_Out",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "result",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            1,
-                                        ),
-                                    },
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    UnionDef(
-                        UnionDef {
-                            annotations: [],
-                            ident: "HttpApi_Call",
-                            switch_type_spec: IntegerType(
-                                I32,
-                            ),
-                            case: [
-                                Case {
-                                    label: [
-                                        Default,
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "dds",
-                                                            "rpc",
-                                                            "UnknownOperation",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "unknownOp",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            1,
-                                        ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "HttpApi_old_ping_Hash",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "HttpApi_old_ping_In",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "old_ping",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            2,
-                                        ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "HttpApi_get_user_Hash",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "HttpApi_get_user_In",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "get_user",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            3,
-                                        ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "HttpApi_update_user_Hash",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "HttpApi_update_user_In",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "update_user",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            4,
-                                        ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "HttpApi_health_Hash",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "HttpApi_health_In",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "health",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            5,
-                                        ),
-                                    },
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "HttpApi_Request",
-                            parent: [],
-                            member: [
-                                Member {
-                                    annotations: [],
-                                    ty: SimpleTypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "dds",
-                                                    "rpc",
-                                                    "RequestHeader",
-                                                ],
-                                                is_root: false,
-                                            },
+                                            "old_ping",
                                         ),
                                     ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "header",
-                                            ),
-                                        ),
-                                    ],
-                                    default: None,
-                                    field_id: Some(
-                                        1,
-                                    ),
-                                },
-                                Member {
-                                    annotations: [],
-                                    ty: SimpleTypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "HttpApi_Call",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "data",
-                                            ),
-                                        ),
-                                    ],
-                                    default: None,
                                     field_id: Some(
                                         2,
                                     ),
                                 },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    UnionDef(
-                        UnionDef {
-                            annotations: [],
-                            ident: "HttpApi_Return",
-                            switch_type_spec: IntegerType(
-                                I32,
-                            ),
-                            case: [
-                                Case {
-                                    label: [
-                                        Default,
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "dds",
-                                                            "rpc",
-                                                            "UnknownOperation",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "unknownOp",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            1,
-                                        ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "HttpApi_old_ping_Hash",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "HttpApi_old_ping_Result",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "old_ping",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            2,
-                                        ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "HttpApi_get_user_Hash",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "HttpApi_get_user_Result",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "get_user",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            3,
-                                        ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "HttpApi_update_user_Hash",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "HttpApi_update_user_Result",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "update_user",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            4,
-                                        ),
-                                    },
-                                },
-                                Case {
-                                    label: [
-                                        Value(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "HttpApi_health_Hash",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
-                                        ),
-                                    ],
-                                    element: ElementSpec {
-                                        annotations: [],
-                                        ty: TypeSpec(
-                                            SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "HttpApi_health_Result",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                        ),
-                                        value: SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "health",
-                                            ),
-                                        ),
-                                        field_id: Some(
-                                            5,
-                                        ),
-                                    },
-                                },
-                            ],
-                        },
-                    ),
-                ),
-            },
-        ),
-        TypeDcl(
-            TypeDcl {
-                decl: ConstrTypeDcl(
-                    StructDcl(
-                        StructDcl {
-                            annotations: [],
-                            ident: "HttpApi_Reply",
-                            parent: [],
-                            member: [
-                                Member {
-                                    annotations: [],
-                                    ty: SimpleTypeSpec(
+                            },
+                            Case {
+                                label: [
+                                    Value(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "dds",
-                                                    "rpc",
-                                                    "ReplyHeader",
+                                                    "HttpApi_get_user_Hash",
                                                 ],
                                                 is_root: false,
                                             },
                                         ),
                                     ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "header",
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        SimpleTypeSpec(
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "HttpApi_get_user_Result",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
-                                    ],
-                                    default: None,
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "get_user",
+                                        ),
+                                    ),
                                     field_id: Some(
-                                        1,
+                                        3,
                                     ),
                                 },
-                                Member {
-                                    annotations: [],
-                                    ty: SimpleTypeSpec(
+                            },
+                            Case {
+                                label: [
+                                    Value(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "HttpApi_Return",
+                                                    "HttpApi_update_user_Hash",
                                                 ],
                                                 is_root: false,
                                             },
                                         ),
                                     ),
-                                    ident: [
-                                        SimpleDeclarator(
-                                            SimpleDeclarator(
-                                                "data",
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        SimpleTypeSpec(
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "HttpApi_update_user_Result",
+                                                    ],
+                                                    is_root: false,
+                                                },
                                             ),
                                         ),
-                                    ],
-                                    default: None,
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "update_user",
+                                        ),
+                                    ),
                                     field_id: Some(
-                                        2,
+                                        4,
                                     ),
                                 },
-                            ],
-                        },
-                    ),
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "HttpApi_health_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        SimpleTypeSpec(
+                                            ScopedName(
+                                                ScopedName {
+                                                    name: [
+                                                        "HttpApi_health_Result",
+                                                    ],
+                                                    is_root: false,
+                                                },
+                                            ),
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "health",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        5,
+                                    ),
+                                },
+                            },
+                        ],
+                    },
                 ),
-            },
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "HttpApi_Reply",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: SimpleTypeSpec(
+                                    ScopedName(
+                                        ScopedName {
+                                            name: [
+                                                "dds",
+                                                "rpc",
+                                                "ReplyHeader",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "header",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                            },
+                            Member {
+                                annotations: [],
+                                ty: SimpleTypeSpec(
+                                    ScopedName(
+                                        ScopedName {
+                                            name: [
+                                                "HttpApi_Return",
+                                            ],
+                                            is_root: false,
+                                        },
+                                    ),
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "data",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    2,
+                                ),
+                            },
+                        ],
+                    },
+                ),
+            ),
         ),
         InterfaceDcl(
             InterfaceDcl {

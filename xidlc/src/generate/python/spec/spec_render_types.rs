@@ -56,9 +56,9 @@ pub(super) fn render_constr_type(out: &mut String, constr: &hir::ConstrTypeDcl) 
 }
 
 pub(super) fn render_type_decl(out: &mut String, type_dcl: &hir::TypeDcl) {
-    match &type_dcl.decl {
-        hir::TypeDclInner::ConstrTypeDcl(value) => render_constr_type(out, value),
-        hir::TypeDclInner::TypedefDcl(value) => {
+    match type_dcl {
+        hir::TypeDcl::ConstrTypeDcl(value) => render_constr_type(out, value),
+        hir::TypeDcl::TypedefDcl(value) => {
             let ty = match &value.ty {
                 hir::TypedefType::TypeSpec(value) => py_type(value),
                 hir::TypedefType::ConstrTypeDcl(value) => {
@@ -86,7 +86,7 @@ pub(super) fn render_type_decl(out: &mut String, type_dcl: &hir::TypeDcl) {
             }
             writeln!(out).unwrap();
         }
-        hir::TypeDclInner::NativeDcl(value) => {
+        hir::TypeDcl::NativeDcl(value) => {
             writeln!(out, "{} = Any", py_type_name(&value.decl.0)).unwrap();
             writeln!(out).unwrap();
         }

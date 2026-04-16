@@ -37,16 +37,14 @@ Specification(
                         },
                     ),
                     TypeDcl(
-                        TypeDcl {
-                            decl: ConstrTypeDcl(
-                                StructForwardDcl(
-                                    StructForwardDcl {
-                                        annotations: [],
-                                        ident: "B",
-                                    },
-                                ),
+                        ConstrTypeDcl(
+                            StructForwardDcl(
+                                StructForwardDcl {
+                                    annotations: [],
+                                    ident: "B",
+                                },
                             ),
-                        },
+                        ),
                     ),
                 ],
             },

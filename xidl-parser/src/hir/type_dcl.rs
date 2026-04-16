@@ -2,13 +2,8 @@ use super::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct TypeDcl {
-    pub decl: TypeDclInner,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
 #[allow(clippy::large_enum_variant)]
-pub enum TypeDclInner {
+pub enum TypeDcl {
     ConstrTypeDcl(ConstrTypeDcl),
     TypedefDcl(TypedefDcl),
     NativeDcl(NativeDcl),
@@ -36,7 +31,7 @@ pub struct NativeDcl {
 impl From<crate::typed_ast::TypeDcl> for TypeDcl {
     fn from(value: crate::typed_ast::TypeDcl) -> Self {
         let annotations = expand_annotations(value.annotations);
-        let decl = match value.decl {
+        match value.decl {
             crate::typed_ast::TypeDclInner::ConstrTypeDcl(constr) => {
                 let mut decl: ConstrTypeDcl = constr.into();
                 match &mut decl {
@@ -48,24 +43,23 @@ impl From<crate::typed_ast::TypeDcl> for TypeDcl {
                     ConstrTypeDcl::BitsetDcl(value) => value.annotations.extend(annotations),
                     ConstrTypeDcl::BitmaskDcl(value) => value.annotations.extend(annotations),
                 }
-                TypeDclInner::ConstrTypeDcl(decl)
+                TypeDcl::ConstrTypeDcl(decl)
             }
             crate::typed_ast::TypeDclInner::TypedefDcl(typedef) => {
                 let mut decl: TypedefDcl = typedef.into();
                 decl.annotations.extend(annotations);
-                TypeDclInner::TypedefDcl(decl)
+                TypeDcl::TypedefDcl(decl)
             }
             crate::typed_ast::TypeDclInner::NativeDcl(native) => {
                 let mut decl: NativeDcl = native.into();
                 decl.annotations.extend(annotations);
-                TypeDclInner::NativeDcl(decl)
+                TypeDcl::NativeDcl(decl)
             }
-        };
-        Self { decl }
+        }
     }
 }
 
-impl From<crate::typed_ast::TypeDclInner> for TypeDclInner {
+impl From<crate::typed_ast::TypeDclInner> for TypeDcl {
     fn from(value: crate::typed_ast::TypeDclInner) -> Self {
         match value {
             crate::typed_ast::TypeDclInner::ConstrTypeDcl(constr) => {

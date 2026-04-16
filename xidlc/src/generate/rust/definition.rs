@@ -126,12 +126,12 @@ impl<'a> DefinitionRenderContext<'a> {
     }
 
     fn render_type_dcl(&self, def: &hir::TypeDcl) -> IdlcResult<RustRenderOutput> {
-        match &def.decl {
-            hir::TypeDclInner::ConstrTypeDcl(constr) => self.render_constr(constr),
-            hir::TypeDclInner::TypedefDcl(typedef) => {
+        match def {
+            hir::TypeDcl::ConstrTypeDcl(constr) => self.render_constr(constr),
+            hir::TypeDcl::TypedefDcl(typedef) => {
                 render_typedef_with_config(typedef, self.renderer, &self.module_path)
             }
-            _ => def.render(self.renderer),
+            hir::TypeDcl::NativeDcl(_) => def.render(self.renderer),
         }
     }
 }
