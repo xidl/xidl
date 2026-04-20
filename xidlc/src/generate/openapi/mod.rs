@@ -21,8 +21,7 @@ use xidl_parser::hir;
 use xidl_parser::hir::{ParserProperties, Specification};
 
 use crate::generate::http_hir::{
-    HttpHirDocument, HttpMethod as HttpHirMethod, HttpOperation,
-    HttpParamSource as HttpHirParamSource,
+    HttpHirDocument, HttpMethod as HttpHirMethod, HttpOperation, HttpParamKind as HttpHirParamKind,
     semantics::{
         DeprecatedInfo, HttpApiKeyLocation, HttpSecurityRequirement, HttpStreamCodec,
         HttpStreamKind, annotation_name, annotation_params, normalize_annotation_params,
@@ -446,8 +445,8 @@ fn render_http_operation(
     for param in &op.request_params {
         let raw_name = param.name.clone();
         let schema = schema_for_type(&param.ty);
-        match param.source {
-            HttpHirParamSource::Path => {
+        match param.kind {
+            HttpHirParamKind::Path => {
                 parameters.push(parameter_schema(
                     ParameterIn::Path,
                     &param.wire_name,
@@ -456,7 +455,7 @@ fn render_http_operation(
                     None,
                 ));
             }
-            HttpHirParamSource::Query => {
+            HttpHirParamKind::Query => {
                 parameters.push(parameter_schema(
                     ParameterIn::Query,
                     &param.wire_name,
@@ -465,21 +464,21 @@ fn render_http_operation(
                     None,
                 ));
             }
-            HttpHirParamSource::Header => parameters.push(parameter_schema(
+            HttpHirParamKind::Header => parameters.push(parameter_schema(
                 ParameterIn::Header,
                 &param.wire_name,
                 schema,
                 false,
                 None,
             )),
-            HttpHirParamSource::Cookie => parameters.push(parameter_schema(
+            HttpHirParamKind::Cookie => parameters.push(parameter_schema(
                 ParameterIn::Cookie,
                 &param.wire_name,
                 schema,
                 false,
                 None,
             )),
-            HttpHirParamSource::Body => body_props.push((raw_name, schema)),
+            HttpHirParamKind::Body => body_props.push((raw_name, schema)),
         }
     }
 

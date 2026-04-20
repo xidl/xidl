@@ -3,11 +3,12 @@ use std::collections::{BTreeSet, HashSet};
 use xidl_parser::hir;
 
 use super::semantics::{annotation_name, annotation_params, normalize_annotation_params};
-use super::{HttpMethod, HttpParamDirection, HttpParamSource, HttpRoute};
+use super::validate::HttpParamDirection;
+use super::{HttpMethod, HttpParamKind, HttpRoute};
 
 #[derive(Clone)]
 pub(super) struct SourceBinding {
-    pub(super) source: HttpParamSource,
+    pub(super) source: HttpParamKind,
     pub(super) bound_name: String,
 }
 
@@ -18,11 +19,11 @@ pub(super) fn explicit_param_binding(param: &hir::ParamDcl) -> IdlcResult<Option
             continue;
         };
         let current = match name.to_ascii_lowercase().as_str() {
-            "path" => Some(HttpParamSource::Path),
-            "query" => Some(HttpParamSource::Query),
-            "body" => Some(HttpParamSource::Body),
-            "header" => Some(HttpParamSource::Header),
-            "cookie" => Some(HttpParamSource::Cookie),
+            "path" => Some(HttpParamKind::Path),
+            "query" => Some(HttpParamKind::Query),
+            "body" => Some(HttpParamKind::Body),
+            "header" => Some(HttpParamKind::Header),
+            "cookie" => Some(HttpParamKind::Cookie),
             _ => None,
         };
         let Some(current) = current else { continue };
@@ -118,7 +119,7 @@ pub(super) fn auto_default_method_path(op: &hir::OpDcl, method: HttpMethod) -> I
             .as_ref()
             .map(|value| value.bound_name.clone())
             .unwrap_or_else(|| param.declarator.0.clone());
-        if matches!(source, HttpParamSource::Path) {
+        if matches!(source, HttpParamKind::Path) {
             path.push('/');
             path.push('{');
             path.push_str(&bound_name);

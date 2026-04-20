@@ -6,14 +6,21 @@ use super::semantics::{
     DeprecatedInfo, HttpStreamCodec, HttpStreamKind, annotation_name, annotation_params,
     deprecated_info, normalize_annotation_params,
 };
-use super::{HttpMethod, HttpParam, HttpParamDirection, HttpParamSource, HttpRoute};
+use super::{HttpMethod, HttpParam, HttpParamKind, HttpRoute};
 
-pub(super) fn default_param_source(method: HttpMethod) -> HttpParamSource {
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(super) enum HttpParamDirection {
+    In,
+    Out,
+    InOut,
+}
+
+pub(super) fn default_param_source(method: HttpMethod) -> HttpParamKind {
     match method {
         HttpMethod::Get | HttpMethod::Delete | HttpMethod::Head | HttpMethod::Options => {
-            HttpParamSource::Query
+            HttpParamKind::Query
         }
-        HttpMethod::Post | HttpMethod::Put | HttpMethod::Patch => HttpParamSource::Body,
+        HttpMethod::Post | HttpMethod::Put | HttpMethod::Patch => HttpParamKind::Body,
     }
 }
 
@@ -145,7 +152,7 @@ pub(super) fn validate_projected_param(
             param.name, op_name
         )));
     }
-    if matches!(param.source, HttpParamSource::Path) {
+    if matches!(param.kind, HttpParamKind::Path) {
         if route_path_names
             .iter()
             .any(|set| set.contains(&param.wire_name))
@@ -230,19 +237,19 @@ fn validate_route_group(
 pub(super) fn validate_request_shape(
     op_name: &str,
     stream_kind: Option<HttpStreamKind>,
-    request_path_params: &[HttpParam],
-    request_query_params: &[HttpParam],
-    request_header_params: &[HttpParam],
-    request_cookie_params: &[HttpParam],
-    request_body_params: &[HttpParam],
+    request_params: &[HttpParam],
 ) -> IdlcResult<()> {
+    let request_body_params = request_params
+        .iter()
+        .filter(|param| matches!(param.kind, HttpParamKind::Body))
+        .collect::<Vec<_>>();
+    let has_non_body_request_params = request_params
+        .iter()
+        .any(|param| !matches!(param.kind, HttpParamKind::Body));
     if matches!(
         stream_kind,
         Some(HttpStreamKind::Client | HttpStreamKind::Bidi)
-    ) && (!request_path_params.is_empty()
-        || !request_query_params.is_empty()
-        || !request_header_params.is_empty()
-        || !request_cookie_params.is_empty())
+    ) && has_non_body_request_params
     {
         let label = if matches!(stream_kind, Some(HttpStreamKind::Bidi)) {
             "@bidi_stream"

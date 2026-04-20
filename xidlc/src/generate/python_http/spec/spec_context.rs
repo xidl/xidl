@@ -88,7 +88,10 @@ pub(super) fn build_method(
         response_type: response_type(interface_name, operation.name.as_str(), stream_kind),
         request_content_type: request_content_type(operation),
         response_content_type: response_content_type(operation),
-        requires_request_content_type: !operation.request_body_params.is_empty()
+        requires_request_content_type: operation
+            .request_params
+            .iter()
+            .any(|param| matches!(param.kind, crate::generate::http_hir::HttpParamKind::Body))
             || matches!(stream_kind, Some(HttpStreamKind::Client)),
         security_expr: security_expr(operation.security.as_ref()),
         stream_expr: stream_expr(operation.stream),
@@ -120,7 +123,7 @@ fn param_context(param: &HttpParam) -> ParamContext {
         wire_name: param.wire_name.clone(),
         ty: py_type(&param.ty),
         optional: param.optional,
-        source: param_source(param.source),
+        source: param_source(param.kind),
         flatten: param.flatten,
     }
 }

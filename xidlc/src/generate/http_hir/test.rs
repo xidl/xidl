@@ -30,10 +30,28 @@ fn projects_normalized_http_operations() {
     assert_eq!(op.routes[0].path, "/cities/{id}");
     assert_eq!(op.routes[0].path_params, vec!["id".to_string()]);
     assert_eq!(op.routes[0].query_params, vec!["region".to_string()]);
-    assert_eq!(op.request_path_params[0].wire_name, "id");
-    assert_eq!(op.request_query_params[0].wire_name, "region");
-    assert_eq!(op.request_header_params[0].wire_name, "X-Trace-Id");
-    assert_eq!(op.response_body_params[0].name, "etag");
+    assert_eq!(
+        op.request_params
+            .iter()
+            .find(|param| matches!(param.kind, HttpParamKind::Path))
+            .map(|param| param.wire_name.as_str()),
+        Some("id")
+    );
+    assert_eq!(
+        op.request_params
+            .iter()
+            .find(|param| matches!(param.kind, HttpParamKind::Query))
+            .map(|param| param.wire_name.as_str()),
+        Some("region")
+    );
+    assert_eq!(
+        op.request_params
+            .iter()
+            .find(|param| matches!(param.kind, HttpParamKind::Header))
+            .map(|param| param.wire_name.as_str()),
+        Some("X-Trace-Id")
+    );
+    assert_eq!(op.response_params[0].name, "etag");
 }
 
 #[test]

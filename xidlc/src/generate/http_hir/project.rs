@@ -7,13 +7,13 @@ use super::project_params::project_params;
 use super::route::{
     auto_default_method_path, operation_id, parse_route_template, route_from_annotations,
 };
-use super::validate::{
-    effective_basic_auth_realm, effective_deprecated, validate_head_constraints,
-    validate_request_shape, validate_route_bindings, validate_stream_method, validate_stream_shape,
-};
 use super::semantics::{
     HttpStreamKind, effective_media_type, effective_security_with_origin, has_annotation,
     http_stream_config, validate_http_annotations,
+};
+use super::validate::{
+    effective_basic_auth_realm, effective_deprecated, validate_head_constraints,
+    validate_request_shape, validate_route_bindings, validate_stream_method, validate_stream_shape,
 };
 use super::{
     HttpDocumentMetadata, HttpDocumentServer, HttpHirDocument, HttpInterface, HttpOperation,
@@ -201,26 +201,14 @@ fn project_operation(
         .map(|route| route.query_params.iter().cloned().collect::<HashSet<_>>())
         .collect::<Vec<_>>();
 
-    let (
-        request_params,
-        request_path_params,
-        request_query_params,
-        request_header_params,
-        request_cookie_params,
-        request_body_params,
-        response_params,
-        response_header_params,
-        response_cookie_params,
-        response_body_params,
-        path_binding_count,
-        query_binding_count,
-    ) = project_params(
-        op,
-        method,
-        stream.kind,
-        &route_path_names,
-        &route_query_names,
-    )?;
+    let (request_params, response_params, path_binding_count, query_binding_count) =
+        project_params(
+            op,
+            method,
+            stream.kind,
+            &route_path_names,
+            &route_query_names,
+        )?;
 
     validate_route_bindings(
         &op.ident,
@@ -228,15 +216,7 @@ fn project_operation(
         &path_binding_count,
         &query_binding_count,
     )?;
-    validate_request_shape(
-        &op.ident,
-        stream.kind,
-        &request_path_params,
-        &request_query_params,
-        &request_header_params,
-        &request_cookie_params,
-        &request_body_params,
-    )?;
+    validate_request_shape(&op.ident, stream.kind, &request_params)?;
     validate_head_constraints(
         &op.ident,
         method,
@@ -270,15 +250,7 @@ fn project_operation(
         deprecated: effective_deprecated(interface_annotations, &op.annotations)
             .map_err(IdlcError::rpc)?,
         request_params,
-        request_path_params,
-        request_query_params,
-        request_header_params,
-        request_cookie_params,
-        request_body_params,
         response_params,
-        response_header_params,
-        response_cookie_params,
-        response_body_params,
         return_type: match &op.ty {
             hir::OpTypeSpec::Void => None,
             hir::OpTypeSpec::TypeSpec(ty) => Some(ty.clone()),

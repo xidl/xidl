@@ -14,14 +14,7 @@ pub enum HttpMethod {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum HttpParamDirection {
-    In,
-    Out,
-    InOut,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum HttpParamSource {
+pub enum HttpParamKind {
     Path,
     Query,
     Header,
@@ -49,8 +42,7 @@ pub struct HttpParam {
     pub name: String,
     pub wire_name: String,
     pub ty: hir::TypeSpec,
-    pub direction: HttpParamDirection,
-    pub source: HttpParamSource,
+    pub kind: HttpParamKind,
     pub optional: bool,
     pub flatten: bool,
 }
@@ -82,15 +74,7 @@ pub struct HttpOperation {
     pub basic_auth_realm: Option<String>,
     pub deprecated: Option<super::semantics::DeprecatedInfo>,
     pub request_params: Vec<HttpParam>,
-    pub request_path_params: Vec<HttpParam>,
-    pub request_query_params: Vec<HttpParam>,
-    pub request_header_params: Vec<HttpParam>,
-    pub request_cookie_params: Vec<HttpParam>,
-    pub request_body_params: Vec<HttpParam>,
     pub response_params: Vec<HttpParam>,
-    pub response_header_params: Vec<HttpParam>,
-    pub response_cookie_params: Vec<HttpParam>,
-    pub response_body_params: Vec<HttpParam>,
     pub return_type: Option<hir::TypeSpec>,
 }
 

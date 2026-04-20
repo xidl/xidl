@@ -1,6 +1,6 @@
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::http_hir::{
-    HttpMethod, HttpOperation, HttpParamSource,
+    HttpMethod, HttpOperation, HttpParamKind,
     semantics::{
         HttpApiKeyLocation, HttpSecurityProfile, HttpSecurityRequirement, HttpStreamCodec,
         HttpStreamConfig, HttpStreamKind,
@@ -105,13 +105,13 @@ pub(super) fn http_method_name(method: HttpMethod) -> &'static str {
     }
 }
 
-pub(super) fn param_source(source: HttpParamSource) -> ParamSource {
+pub(super) fn param_source(source: HttpParamKind) -> ParamSource {
     match source {
-        HttpParamSource::Path => ParamSource::Path,
-        HttpParamSource::Query => ParamSource::Query,
-        HttpParamSource::Header => ParamSource::Header,
-        HttpParamSource::Cookie => ParamSource::Cookie,
-        HttpParamSource::Body => ParamSource::Body,
+        HttpParamKind::Path => ParamSource::Path,
+        HttpParamKind::Query => ParamSource::Query,
+        HttpParamKind::Header => ParamSource::Header,
+        HttpParamKind::Cookie => ParamSource::Cookie,
+        HttpParamKind::Body => ParamSource::Body,
     }
 }
 

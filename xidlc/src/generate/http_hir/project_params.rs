@@ -3,12 +3,12 @@ use std::collections::{HashMap, HashSet};
 use xidl_parser::hir;
 
 use super::route::{SourceBinding, explicit_param_binding};
-use super::validate::{
-    default_param_source, param_direction, validate_cookie_name, validate_header_name,
-    validate_projected_param,
-};
 use super::semantics::{HttpStreamKind, has_annotation, has_optional_annotation};
-use super::{HttpParam, HttpParamDirection, HttpParamSource};
+use super::validate::{
+    HttpParamDirection, default_param_source, param_direction, validate_cookie_name,
+    validate_header_name, validate_projected_param,
+};
+use super::{HttpParam, HttpParamKind};
 
 #[allow(clippy::type_complexity)]
 pub(super) fn project_params(
@@ -20,14 +20,6 @@ pub(super) fn project_params(
 ) -> IdlcResult<(
     Vec<HttpParam>,
     Vec<HttpParam>,
-    Vec<HttpParam>,
-    Vec<HttpParam>,
-    Vec<HttpParam>,
-    Vec<HttpParam>,
-    Vec<HttpParam>,
-    Vec<HttpParam>,
-    Vec<HttpParam>,
-    Vec<HttpParam>,
     HashMap<String, usize>,
     HashMap<String, usize>,
 )> {
@@ -37,15 +29,7 @@ pub(super) fn project_params(
         .map(|value| value.0.as_slice())
         .unwrap_or(&[]);
     let mut request_params = Vec::new();
-    let mut request_path_params = Vec::new();
-    let mut request_query_params = Vec::new();
-    let mut request_header_params = Vec::new();
-    let mut request_cookie_params = Vec::new();
-    let mut request_body_params = Vec::new();
     let mut response_params = Vec::new();
-    let mut response_header_params = Vec::new();
-    let mut response_cookie_params = Vec::new();
-    let mut response_body_params = Vec::new();
     let mut path_binding_count = HashMap::<String, usize>::new();
     let mut query_binding_count = HashMap::<String, usize>::new();
 
@@ -53,11 +37,11 @@ pub(super) fn project_params(
         let direction = param_direction(param.attr.as_ref());
         let binding = explicit_param_binding(param)?;
         let default_source = if matches!(stream_kind, Some(HttpStreamKind::Bidi)) {
-            HttpParamSource::Body
+            HttpParamKind::Body
         } else {
             default_param_source(method)
         };
-        let inferred_source = infer_param_source(
+        let inferred_kind = infer_param_kind(
             param,
             direction,
             binding.as_ref(),
@@ -72,15 +56,14 @@ pub(super) fn project_params(
                 .map(|value| value.bound_name.clone())
                 .unwrap_or_else(|| param.declarator.0.clone()),
             ty: param.ty.clone(),
-            direction,
-            source: inferred_source,
+            kind: inferred_kind,
             optional: has_optional_annotation(&param.annotations),
             flatten: has_annotation(&param.annotations, "flatten"),
         };
-        if matches!(projected.source, HttpParamSource::Header) {
+        if matches!(projected.kind, HttpParamKind::Header) {
             validate_header_name(&projected.wire_name, &projected.name)?;
         }
-        if matches!(projected.source, HttpParamSource::Cookie) {
+        if matches!(projected.kind, HttpParamKind::Cookie) {
             validate_cookie_name(&projected.wire_name, &projected.name)?;
         }
         validate_projected_param(&op.ident, &projected, direction, route_path_names)?;
@@ -88,15 +71,7 @@ pub(super) fn project_params(
             projected,
             direction,
             &mut request_params,
-            &mut request_path_params,
-            &mut request_query_params,
-            &mut request_header_params,
-            &mut request_cookie_params,
-            &mut request_body_params,
             &mut response_params,
-            &mut response_header_params,
-            &mut response_cookie_params,
-            &mut response_body_params,
             &mut path_binding_count,
             &mut query_binding_count,
         );
@@ -104,43 +79,35 @@ pub(super) fn project_params(
 
     Ok((
         request_params,
-        request_path_params,
-        request_query_params,
-        request_header_params,
-        request_cookie_params,
-        request_body_params,
         response_params,
-        response_header_params,
-        response_cookie_params,
-        response_body_params,
         path_binding_count,
         query_binding_count,
     ))
 }
 
-fn infer_param_source(
+fn infer_param_kind(
     param: &hir::ParamDcl,
     direction: HttpParamDirection,
     binding: Option<&SourceBinding>,
-    default_source: HttpParamSource,
+    default_source: HttpParamKind,
     route_path_names: &[HashSet<String>],
     route_query_names: &[HashSet<String>],
-) -> HttpParamSource {
+) -> HttpParamKind {
     match direction {
         HttpParamDirection::Out | HttpParamDirection::InOut => binding
             .map(|value| value.source)
-            .unwrap_or(HttpParamSource::Body),
+            .unwrap_or(HttpParamKind::Body),
         HttpParamDirection::In => binding.map(|value| value.source).unwrap_or_else(|| {
             if route_path_names
                 .iter()
                 .all(|set| set.contains(&param.declarator.0))
             {
-                HttpParamSource::Path
+                HttpParamKind::Path
             } else if route_query_names
                 .iter()
                 .any(|set| set.contains(&param.declarator.0))
             {
-                HttpParamSource::Query
+                HttpParamKind::Query
             } else {
                 default_source
             }
@@ -153,51 +120,33 @@ fn distribute_param(
     projected: HttpParam,
     direction: HttpParamDirection,
     request_params: &mut Vec<HttpParam>,
-    request_path_params: &mut Vec<HttpParam>,
-    request_query_params: &mut Vec<HttpParam>,
-    request_header_params: &mut Vec<HttpParam>,
-    request_cookie_params: &mut Vec<HttpParam>,
-    request_body_params: &mut Vec<HttpParam>,
     response_params: &mut Vec<HttpParam>,
-    response_header_params: &mut Vec<HttpParam>,
-    response_cookie_params: &mut Vec<HttpParam>,
-    response_body_params: &mut Vec<HttpParam>,
     path_binding_count: &mut HashMap<String, usize>,
     query_binding_count: &mut HashMap<String, usize>,
 ) {
-    let projected_source = projected.source;
     if matches!(
         direction,
         HttpParamDirection::In | HttpParamDirection::InOut
     ) {
-        request_params.push(projected.clone());
-        match projected_source {
-            HttpParamSource::Path => {
+        match projected.kind {
+            HttpParamKind::Path => {
                 *path_binding_count
                     .entry(projected.wire_name.clone())
                     .or_insert(0) += 1;
-                request_path_params.push(projected.clone());
             }
-            HttpParamSource::Query => {
+            HttpParamKind::Query => {
                 *query_binding_count
                     .entry(projected.wire_name.clone())
                     .or_insert(0) += 1;
-                request_query_params.push(projected.clone());
             }
-            HttpParamSource::Header => request_header_params.push(projected.clone()),
-            HttpParamSource::Cookie => request_cookie_params.push(projected.clone()),
-            HttpParamSource::Body => request_body_params.push(projected.clone()),
+            HttpParamKind::Header | HttpParamKind::Cookie | HttpParamKind::Body => {}
         }
+        request_params.push(projected.clone());
     }
     if matches!(
         direction,
         HttpParamDirection::Out | HttpParamDirection::InOut
     ) {
         response_params.push(projected.clone());
-        match projected_source {
-            HttpParamSource::Header => response_header_params.push(projected),
-            HttpParamSource::Cookie => response_cookie_params.push(projected),
-            _ => response_body_params.push(projected),
-        }
     }
 }

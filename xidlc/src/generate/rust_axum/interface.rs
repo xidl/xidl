@@ -1,7 +1,7 @@
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::http_hir::{
     HttpMethod as HttpHirMethod, HttpOperation, HttpOperationSource, HttpParam as HttpHirParam,
-    HttpParamSource as HttpHirParamSource,
+    HttpParamKind as HttpHirParamKind,
     semantics::{
         DeprecatedInfo, HttpApiKeyLocation, HttpSecurityOrigin, HttpSecurityProfile,
         HttpSecurityRequirement, HttpStreamCodec, HttpStreamKind, HttpStreamTargetSupport,
@@ -363,7 +363,7 @@ fn render_op_from_http(
                 wire_name: shared.wire_name.clone(),
                 path_template_name: String::new(),
                 ty: inner_ty.clone(),
-                source: param_source_code(http_param_source(shared.source)),
+                source: param_source_code(http_param_kind(shared.kind)),
                 serde_rename: field_rename(&param.annotations, &name)
                     .or_else(|| serde_rename(&param.declarator.0, &name)),
                 header_is_multi: header_is_multi(&param.ty),
@@ -378,7 +378,7 @@ fn render_op_from_http(
                 inner_ty: inner_ty.clone(),
                 flatten: false,
             };
-            match http_param_source(shared.source) {
+            match http_param_kind(shared.kind) {
                 ParamSource::Header => response_header_params.push(response_ctx.clone()),
                 ParamSource::Cookie => response_cookie_params.push(response_ctx.clone()),
                 _ => response_body_params.push(response_ctx.clone()),
@@ -391,7 +391,7 @@ fn render_op_from_http(
         let Some(shared) = find_http_param(&http_op.request_params, &param.declarator.0) else {
             continue;
         };
-        let source = http_param_source(shared.source);
+        let source = http_param_kind(shared.kind);
         let wire_name = shared.wire_name.clone();
         param_list.push(format!("{name}: {ty}"));
         param_names.push(name.clone());
@@ -697,7 +697,11 @@ fn render_attr_operation_from_http(
     let mut param_names = Vec::new();
     let mut request_params = Vec::new();
     let mut body_params = Vec::new();
-    if let Some(param) = http_op.request_body_params.first() {
+    if let Some(param) = http_op
+        .request_params
+        .iter()
+        .find(|param| matches!(param.kind, HttpHirParamKind::Body))
+    {
         let param_name = rust_ident(&param.name);
         let ty = axum_type(&param.ty);
         params.push(format!("{param_name}: {ty}"));
@@ -807,13 +811,13 @@ fn find_http_param<'a>(params: &'a [HttpHirParam], name: &str) -> Option<&'a Htt
     params.iter().find(|param| param.name == name)
 }
 
-fn http_param_source(source: HttpHirParamSource) -> ParamSource {
+fn http_param_kind(source: HttpHirParamKind) -> ParamSource {
     match source {
-        HttpHirParamSource::Path => ParamSource::Path,
-        HttpHirParamSource::Query => ParamSource::Query,
-        HttpHirParamSource::Header => ParamSource::Header,
-        HttpHirParamSource::Cookie => ParamSource::Cookie,
-        HttpHirParamSource::Body => ParamSource::Body,
+        HttpHirParamKind::Path => ParamSource::Path,
+        HttpHirParamKind::Query => ParamSource::Query,
+        HttpHirParamKind::Header => ParamSource::Header,
+        HttpHirParamKind::Cookie => ParamSource::Cookie,
+        HttpHirParamKind::Body => ParamSource::Body,
     }
 }
 

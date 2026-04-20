@@ -1,7 +1,7 @@
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::go_http::{HttpMethod, ParamMeta, ParamSource, definition};
 use crate::generate::http_hir::{
-    HttpMethod as HttpHirMethod, HttpOperation, HttpParamSource as HttpHirParamSource,
+    HttpMethod as HttpHirMethod, HttpOperation, HttpParamKind as HttpHirParamKind,
     semantics::{HttpStreamCodec, HttpStreamKind},
 };
 use convert_case::{Case, Casing};
@@ -124,12 +124,12 @@ pub(super) fn param_meta(param: &crate::generate::http_hir::HttpParam) -> ParamM
         wire_name: param.wire_name.clone(),
         ty: definition::go_type(&param.ty),
         optional: param.optional,
-        source: match param.source {
-            HttpHirParamSource::Path => ParamSource::Path,
-            HttpHirParamSource::Query => ParamSource::Query,
-            HttpHirParamSource::Header => ParamSource::Header,
-            HttpHirParamSource::Cookie => ParamSource::Cookie,
-            HttpHirParamSource::Body => ParamSource::Body,
+        source: match param.kind {
+            HttpHirParamKind::Path => ParamSource::Path,
+            HttpHirParamKind::Query => ParamSource::Query,
+            HttpHirParamKind::Header => ParamSource::Header,
+            HttpHirParamKind::Cookie => ParamSource::Cookie,
+            HttpHirParamKind::Body => ParamSource::Body,
         },
         flatten: param.flatten,
     }

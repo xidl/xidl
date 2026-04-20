@@ -5,10 +5,7 @@ use super::route::{attribute_path, default_path, operation_id, readonly_attr_nam
 use super::semantics::{
     DeprecatedInfo, HttpSecurityProfile, HttpStreamCodec, HttpStreamConfig, HttpStreamKind,
 };
-use super::{
-    HttpMethod, HttpOperation, HttpOperationSource, HttpParam, HttpParamDirection, HttpParamSource,
-    HttpRoute,
-};
+use super::{HttpMethod, HttpOperation, HttpOperationSource, HttpParam, HttpParamKind, HttpRoute};
 
 pub(super) fn project_attribute(
     interface_name: &str,
@@ -138,7 +135,7 @@ fn attribute_get_operation(
         security,
         deprecated,
         request_params: Vec::new(),
-        request_body_params: Vec::new(),
+        response_params: Vec::new(),
         return_type: Some(ty.clone()),
     })
 }
@@ -155,8 +152,7 @@ fn attribute_set_operation(
         name: raw_name.to_case(Case::Snake),
         wire_name: raw_name.to_string(),
         ty: ty.clone(),
-        direction: HttpParamDirection::In,
-        source: HttpParamSource::Body,
+        kind: HttpParamKind::Body,
         optional: false,
         flatten: false,
     };
@@ -177,8 +173,8 @@ fn attribute_set_operation(
         },
         security,
         deprecated,
-        request_params: vec![value.clone()],
-        request_body_params: vec![value],
+        request_params: vec![value],
+        response_params: Vec::new(),
         return_type: None,
     })
 }
@@ -213,7 +209,7 @@ fn attribute_watch_operation(
         security,
         deprecated,
         request_params: Vec::new(),
-        request_body_params: Vec::new(),
+        response_params: Vec::new(),
         return_type: Some(ty.clone()),
     })
 }
@@ -230,7 +226,7 @@ fn base_attribute_operation(args: AttributeOperationArgs<'_>) -> HttpOperation {
         security,
         deprecated,
         request_params,
-        request_body_params,
+        response_params,
         return_type,
     } = args;
     HttpOperation {
@@ -246,15 +242,7 @@ fn base_attribute_operation(args: AttributeOperationArgs<'_>) -> HttpOperation {
         basic_auth_realm: None,
         deprecated,
         request_params,
-        request_path_params: Vec::new(),
-        request_query_params: Vec::new(),
-        request_header_params: Vec::new(),
-        request_cookie_params: Vec::new(),
-        request_body_params,
-        response_params: Vec::new(),
-        response_header_params: Vec::new(),
-        response_cookie_params: Vec::new(),
-        response_body_params: Vec::new(),
+        response_params,
         return_type,
     }
 }
@@ -270,6 +258,6 @@ struct AttributeOperationArgs<'a> {
     security: Option<HttpSecurityProfile>,
     deprecated: Option<DeprecatedInfo>,
     request_params: Vec<HttpParam>,
-    request_body_params: Vec<HttpParam>,
+    response_params: Vec<HttpParam>,
     return_type: Option<hir::TypeSpec>,
 }
