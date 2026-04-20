@@ -6,6 +6,7 @@ use xidl_parser_derive::Parser;
 pub struct AnnotationAppl {
     pub name: AnnotationName,
     pub params: Option<AnnotationParams>,
+    pub builtin: Option<BuiltinAnnotation>,
     pub is_extend: bool,
     pub extra: Vec<AnnotationAppl>,
 }
@@ -86,11 +87,15 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AnnotationAppl {
             return Ok(Self {
                 name: AnnotationName::ScopedName(scoped_name),
                 params,
+                builtin: None,
                 is_extend,
                 extra,
             });
         }
 
+        let builtin = builtin_body
+            .map(|node| parse_builtin_annotation(node, ctx))
+            .transpose()?;
         let source = builtin_body
             .map(|node| ctx.node_text(&node))
             .transpose()?
@@ -108,6 +113,7 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AnnotationAppl {
         Ok(Self {
             name: AnnotationName::Builtin(name.to_string()),
             params: args.map(|value| AnnotationParams::Raw(value.to_string())),
+            builtin,
             is_extend,
             extra,
         })
@@ -143,6 +149,7 @@ fn parse_annotation_from_raw(
     Ok(AnnotationAppl {
         name: AnnotationName::Builtin(name.to_string()),
         params: args.map(|value| AnnotationParams::Raw(value.to_string())),
+        builtin: None,
         is_extend,
         extra,
     })
@@ -154,6 +161,7 @@ impl AnnotationAppl {
         Self {
             name: AnnotationName::Builtin("doc".to_string()),
             params: Some(AnnotationParams::Raw(format!("\"{}\"", escaped))),
+            builtin: None,
             is_extend: false,
             extra: Vec::new(),
         }

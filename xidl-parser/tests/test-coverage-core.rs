@@ -182,16 +182,13 @@ fn hir_parses_pragmas_and_include_errors() {
 #[test]
 fn serialize_config_and_expr_helpers_cover_resolution_branches() {
     let annotations = vec![
-        Annotation::Builtin {
-            name: "appendable".to_string(),
-            params: None,
-        },
+        Annotation::Appendable,
         Annotation::Builtin {
             name: "extensibility".to_string(),
             params: Some(AnnotationParams::Raw("\"mutable\"".to_string())),
         },
         Annotation::Id {
-            value: int_expr(IntegerLiteral::DecNumber("42".to_string())).into(),
+            value: "42".to_string(),
         },
     ];
 

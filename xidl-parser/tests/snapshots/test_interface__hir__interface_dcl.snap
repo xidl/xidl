@@ -5317,7 +5317,9 @@ Specification(
                                                     [
                                                         ParamDcl {
                                                             annotations: [
-                                                                Key,
+                                                                Key {
+                                                                    value: None,
+                                                                },
                                                             ],
                                                             attr: Some(
                                                                 ParamAttribute(

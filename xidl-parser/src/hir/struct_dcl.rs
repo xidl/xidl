@@ -40,7 +40,7 @@ impl StructDcl {
 impl Member {
     pub fn is_optional(&self) -> bool {
         self.annotations.iter().any(|annotation| match annotation {
-            Annotation::Builtin { name, .. } => name.eq_ignore_ascii_case("optional"),
+            Annotation::Optional { .. } => true,
             Annotation::ScopedName { name, .. } => name
                 .name
                 .last()

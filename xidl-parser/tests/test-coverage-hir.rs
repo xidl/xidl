@@ -123,6 +123,7 @@ fn hir_type_conversions_cover_simple_and_template_variants() {
     let nested = AnnotationAppl {
         name: AnnotationName::Builtin("outer".to_string()),
         params: None,
+        builtin: None,
         is_extend: false,
         extra: vec![AnnotationAppl::doc("inner".to_string())],
     };
@@ -153,10 +154,7 @@ fn hir_struct_and_type_dcl_cover_optional_and_inline_typedef_paths() {
     assert!(item.member[0].is_optional());
 
     let no_optional = xidl_parser::hir::StructDcl {
-        annotations: vec![xidl_parser::hir::Annotation::Builtin {
-            name: "appendable".to_string(),
-            params: None,
-        }],
+        annotations: vec![xidl_parser::hir::Annotation::Appendable],
         ident: "Plain".to_string(),
         parent: Vec::new(),
         member: Vec::new(),

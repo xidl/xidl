@@ -16,6 +16,13 @@ Specification(
                                 "1",
                             ),
                         ),
+                        builtin: Some(
+                            Id {
+                                value: DecNumber(
+                                    "1",
+                                ),
+                            },
+                        ),
                         is_extend: false,
                         extra: [],
                     },
@@ -39,6 +46,13 @@ Specification(
                                                     Raw(
                                                         "10",
                                                     ),
+                                                ),
+                                                builtin: Some(
+                                                    Id {
+                                                        value: DecNumber(
+                                                            "10",
+                                                        ),
+                                                    },
                                                 ),
                                                 is_extend: false,
                                                 extra: [],
@@ -79,6 +93,7 @@ Specification(
                                                         "11",
                                                     ),
                                                 ),
+                                                builtin: None,
                                                 is_extend: false,
                                                 extra: [
                                                     AnnotationAppl {
@@ -90,6 +105,13 @@ Specification(
                                                                 "11",
                                                             ),
                                                         ),
+                                                        builtin: Some(
+                                                            Id {
+                                                                value: DecNumber(
+                                                                    "11",
+                                                                ),
+                                                            },
+                                                        ),
                                                         is_extend: true,
                                                         extra: [],
                                                     },
@@ -100,6 +122,11 @@ Specification(
                                                     "optional",
                                                 ),
                                                 params: None,
+                                                builtin: Some(
+                                                    Optional {
+                                                        value: None,
+                                                    },
+                                                ),
                                                 is_extend: false,
                                                 extra: [],
                                             },
@@ -192,6 +219,7 @@ Specification(
                                 ],
                             ),
                         ),
+                        builtin: None,
                         is_extend: false,
                         extra: [],
                     },
@@ -214,6 +242,13 @@ Specification(
                                                     "0",
                                                 ),
                                             ),
+                                            builtin: Some(
+                                                Id {
+                                                    value: DecNumber(
+                                                        "0",
+                                                    ),
+                                                },
+                                            ),
                                             is_extend: false,
                                             extra: [],
                                         },
@@ -232,6 +267,13 @@ Specification(
                                                 Raw(
                                                     "1",
                                                 ),
+                                            ),
+                                            builtin: Some(
+                                                Id {
+                                                    value: DecNumber(
+                                                        "1",
+                                                    ),
+                                                },
                                             ),
                                             is_extend: false,
                                             extra: [],
@@ -259,6 +301,13 @@ Specification(
                                 "2",
                             ),
                         ),
+                        builtin: Some(
+                            Id {
+                                value: DecNumber(
+                                    "2",
+                                ),
+                            },
+                        ),
                         is_extend: false,
                         extra: [],
                     },
@@ -281,6 +330,13 @@ Specification(
                                                     "0",
                                                 ),
                                             ),
+                                            builtin: Some(
+                                                Id {
+                                                    value: DecNumber(
+                                                        "0",
+                                                    ),
+                                                },
+                                            ),
                                             is_extend: false,
                                             extra: [],
                                         },
@@ -299,6 +355,13 @@ Specification(
                                                 Raw(
                                                     "1",
                                                 ),
+                                            ),
+                                            builtin: Some(
+                                                Id {
+                                                    value: DecNumber(
+                                                        "1",
+                                                    ),
+                                                },
                                             ),
                                             is_extend: false,
                                             extra: [],
@@ -325,6 +388,13 @@ Specification(
                             Raw(
                                 "3",
                             ),
+                        ),
+                        builtin: Some(
+                            Id {
+                                value: DecNumber(
+                                    "3",
+                                ),
+                            },
                         ),
                         is_extend: false,
                         extra: [],
@@ -383,6 +453,13 @@ Specification(
                                                         Raw(
                                                             "100",
                                                         ),
+                                                    ),
+                                                    builtin: Some(
+                                                        Id {
+                                                            value: DecNumber(
+                                                                "100",
+                                                            ),
+                                                        },
                                                     ),
                                                     is_extend: false,
                                                     extra: [],
@@ -457,6 +534,13 @@ Specification(
                                 "4",
                             ),
                         ),
+                        builtin: Some(
+                            Id {
+                                value: DecNumber(
+                                    "4",
+                                ),
+                            },
+                        ),
                         is_extend: false,
                         extra: [],
                     },
@@ -481,6 +565,11 @@ Specification(
                                                         "oneway",
                                                     ),
                                                     params: None,
+                                                    builtin: Some(
+                                                        Oneway {
+                                                            value: None,
+                                                        },
+                                                    ),
                                                     is_extend: false,
                                                     extra: [],
                                                 },
@@ -501,6 +590,11 @@ Specification(
                                                         "key",
                                                     ),
                                                     params: None,
+                                                    builtin: Some(
+                                                        Key {
+                                                            value: None,
+                                                        },
+                                                    ),
                                                     is_extend: false,
                                                     extra: [],
                                                 },

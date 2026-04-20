@@ -78,29 +78,33 @@ pub fn extensibility_from_annotations(annotations: &[Annotation]) -> Extensibili
     let mut mutable = false;
 
     for annotation in annotations {
-        if let Annotation::Builtin { name, .. } = annotation {
-            if name.eq_ignore_ascii_case("final") {
-                final_flag = true;
-            } else if name.eq_ignore_ascii_case("appendable") {
-                appendable = true;
-            } else if name.eq_ignore_ascii_case("mutable") {
-                mutable = true;
-            }
-        }
-
-        if let Annotation::Builtin { name, params } = annotation {
-            if name.eq_ignore_ascii_case("extensibility") {
-                if let Some(AnnotationParams::Raw(raw)) = params {
-                    let value = raw.trim().trim_matches('"');
-                    if value.eq_ignore_ascii_case("final") {
-                        final_flag = true;
-                    } else if value.eq_ignore_ascii_case("appendable") {
-                        appendable = true;
-                    } else if value.eq_ignore_ascii_case("mutable") {
-                        mutable = true;
-                    }
+        match annotation {
+            Annotation::Final => final_flag = true,
+            Annotation::Appendable => appendable = true,
+            Annotation::Mutable => mutable = true,
+            Annotation::Extensibility { kind } => {
+                if kind.eq_ignore_ascii_case("final") {
+                    final_flag = true;
+                } else if kind.eq_ignore_ascii_case("appendable") {
+                    appendable = true;
+                } else if kind.eq_ignore_ascii_case("mutable") {
+                    mutable = true;
                 }
             }
+            Annotation::Builtin {
+                name,
+                params: Some(AnnotationParams::Raw(raw)),
+            } if name.eq_ignore_ascii_case("extensibility") => {
+                let value = raw.trim().trim_matches('"');
+                if value.eq_ignore_ascii_case("final") {
+                    final_flag = true;
+                } else if value.eq_ignore_ascii_case("appendable") {
+                    appendable = true;
+                } else if value.eq_ignore_ascii_case("mutable") {
+                    mutable = true;
+                }
+            }
+            _ => {}
         }
     }
 

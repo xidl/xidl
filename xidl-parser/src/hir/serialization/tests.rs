@@ -2,9 +2,14 @@ use super::*;
 use crate::hir::{CustomPragma, Pragma};
 
 fn builtin(name: &str) -> Annotation {
-    Annotation::Builtin {
-        name: name.to_string(),
-        params: None,
+    match name {
+        "final" => Annotation::Final,
+        "appendable" => Annotation::Appendable,
+        "mutable" => Annotation::Mutable,
+        other => Annotation::Builtin {
+            name: other.to_string(),
+            params: None,
+        },
     }
 }
 

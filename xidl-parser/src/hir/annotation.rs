@@ -1,12 +1,104 @@
 use super::*;
 use serde::{Deserialize, Serialize};
-
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum Annotation {
     Id {
-        value: ConstExpr,
+        value: String,
     },
-    Key,
+    Key {
+        value: Option<String>,
+    },
+    AutoId {
+        value: Option<String>,
+    },
+    Optional {
+        value: Option<String>,
+    },
+    Position {
+        value: String,
+    },
+    Value {
+        value: String,
+    },
+    Extensibility {
+        kind: String,
+    },
+    Final,
+    Appendable,
+    Mutable,
+    MustUnderstand {
+        value: Option<String>,
+    },
+    Default {
+        value: String,
+    },
+    Range {
+        min: String,
+        max: String,
+    },
+    Min {
+        value: String,
+    },
+    Max {
+        value: String,
+    },
+    Unit {
+        value: String,
+    },
+    BitBound {
+        value: String,
+    },
+    External {
+        value: Option<String>,
+    },
+    Nested {
+        value: Option<String>,
+    },
+    Verbatim {
+        language: Option<String>,
+        placement: Option<String>,
+        text: String,
+    },
+    Service {
+        platform: Option<String>,
+    },
+    Oneway {
+        value: Option<String>,
+    },
+    Ami {
+        value: Option<String>,
+    },
+    HashId {
+        value: Option<String>,
+    },
+    DefaultNested {
+        value: Option<String>,
+    },
+    IgnoreLiteralNames {
+        value: Option<String>,
+    },
+    TryConstruct {
+        value: Option<String>,
+    },
+    NonSerialized {
+        value: Option<String>,
+    },
+    DataRepresentation {
+        kinds: Vec<String>,
+    },
+    Topic {
+        name: Option<String>,
+        platform: Option<String>,
+    },
+    Choice,
+    Empty,
+    DdsService,
+    DdsRequestTopic {
+        name: String,
+    },
+    DdsReplyTopic {
+        name: String,
+    },
     Builtin {
         name: String,
         params: Option<AnnotationParams>,
@@ -34,10 +126,8 @@ pub struct AnnotationParam {
 pub fn annotation_id_value(annotations: &[Annotation]) -> Option<u32> {
     for annotation in annotations {
         if let Annotation::Id { value } = annotation {
-            if let Some(value) = super::expr::const_expr_to_i64(value) {
-                if value >= 0 && value <= u32::MAX as i64 {
-                    return Some(value as u32);
-                }
+            if let Ok(value) = value.parse::<u32>() {
+                return Some(value);
             }
         }
     }
@@ -68,22 +158,11 @@ impl From<crate::typed_ast::AnnotationAppl> for Annotation {
                 name: name.into(),
                 params,
             },
-            crate::typed_ast::AnnotationName::Builtin(name) => {
-                if name.eq_ignore_ascii_case("id") {
-                    if let Some(AnnotationParams::ConstExpr(expr)) = &params {
-                        return Self::Id {
-                            value: expr.clone(),
-                        };
-                    }
-                } else if name.eq_ignore_ascii_case("key") {
-                    if params.is_none() {
-                        return Self::Key;
-                    }
-                } else if name.eq_ignore_ascii_case("default_literal") {
-                    return Self::DefaultLiteral;
-                }
-                Self::Builtin { name, params }
-            }
+            crate::typed_ast::AnnotationName::Builtin(name) => match value.builtin {
+                Some(builtin) => super::annotation_builtin::from_builtin_annotation(builtin)
+                    .unwrap_or(Self::Builtin { name, params }),
+                None => Self::Builtin { name, params },
+            },
         }
     }
 }

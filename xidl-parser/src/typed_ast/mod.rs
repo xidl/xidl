@@ -9,6 +9,9 @@ use xidl_parser_derive::Parser;
 mod annotation;
 pub use annotation::*;
 
+mod annotation_builtin;
+pub use annotation_builtin::*;
+
 mod preproc;
 pub use preproc::*;
 

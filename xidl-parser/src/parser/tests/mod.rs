@@ -1,7 +1,7 @@
 use crate::parser::parser_text;
 use crate::typed_ast::{
-    AnnotationAppl, AnnotationName, AnnotationParams, Definition, TemplateTypeSpec, TypeDclInner,
-    TypeDeclaratorInner, TypeSpec,
+    AnnotationAppl, AnnotationName, AnnotationParams, BuiltinAnnotation, DataRepresentationKind,
+    Definition, TemplateTypeSpec, TopicPlatform, TypeDclInner, TypeDeclaratorInner, TypeSpec,
 };
 
 #[test]
@@ -77,6 +77,59 @@ fn parse_doc_comments_as_doc_annotation() {
     };
     let member = &struct_def.member[0];
     assert_has_doc(&member.annotations, "\"field doc\"");
+}
+
+#[test]
+fn parse_builtin_annotations_with_structured_args() {
+    let typed = parser_text(
+        r#"
+        @range(min=1, max=8)
+        @topic("orders", DDS)
+        @data_representation(allowed_kinds = XCDR1 | XCDR2)
+        struct S {};
+        "#,
+    )
+    .expect("parse should succeed");
+
+    let Definition::TypeDcl(type_dcl) = &typed.0[0] else {
+        panic!("expected type declaration");
+    };
+    let [range, topic, data_representation] = &type_dcl.annotations[..] else {
+        panic!("expected three annotations");
+    };
+
+    let range = range
+        .builtin
+        .as_ref()
+        .expect("range should keep builtin parse");
+    assert!(matches!(
+        range,
+        BuiltinAnnotation::Range { min, max }
+            if matches!(&min.0, crate::typed_ast::ConstExpr(_))
+            && matches!(&max.0, crate::typed_ast::ConstExpr(_))
+    ));
+
+    let topic = topic
+        .builtin
+        .as_ref()
+        .expect("topic should keep builtin parse");
+    assert!(matches!(
+        topic,
+        BuiltinAnnotation::Topic {
+            name: Some(_),
+            platform: Some(TopicPlatform::Dds)
+        }
+    ));
+
+    let data_representation = data_representation
+        .builtin
+        .as_ref()
+        .expect("data_representation should keep builtin parse");
+    assert!(matches!(
+        data_representation,
+        BuiltinAnnotation::DataRepresentation { kinds }
+            if kinds == &[DataRepresentationKind::Xcdr1, DataRepresentationKind::Xcdr2]
+    ));
 }
 
 fn assert_has_doc(annotations: &[AnnotationAppl], expected: &str) {

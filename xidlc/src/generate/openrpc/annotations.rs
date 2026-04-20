@@ -28,7 +28,12 @@ fn annotation_name(annotation: &hir::Annotation) -> Option<&str> {
 }
 
 pub(super) fn has_optional_annotation(annotations: &[hir::Annotation]) -> bool {
-    has_annotation(annotations, "optional")
+    annotations.iter().any(|annotation| {
+        matches!(annotation, hir::Annotation::Optional { .. })
+            || annotation_name(annotation)
+                .map(|name| name.eq_ignore_ascii_case("optional"))
+                .unwrap_or(false)
+    })
 }
 
 pub(super) fn has_annotation(annotations: &[hir::Annotation], target: &str) -> bool {

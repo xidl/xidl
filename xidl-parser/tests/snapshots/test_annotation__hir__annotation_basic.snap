@@ -9,13 +9,8 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [
-                            Builtin {
-                                name: "id",
-                                params: Some(
-                                    Raw(
-                                        "1",
-                                    ),
-                                ),
+                            Id {
+                                value: "1",
                             },
                         ],
                         ident: "S",
@@ -23,13 +18,8 @@ Specification(
                         member: [
                             Member {
                                 annotations: [
-                                    Builtin {
-                                        name: "id",
-                                        params: Some(
-                                            Raw(
-                                                "10",
-                                            ),
-                                        ),
+                                    Id {
+                                        value: "10",
                                     },
                                 ],
                                 ty: IntegerType(
@@ -44,7 +34,7 @@ Specification(
                                 ],
                                 default: None,
                                 field_id: Some(
-                                    1,
+                                    10,
                                 ),
                             },
                             Member {
@@ -57,17 +47,11 @@ Specification(
                                             ),
                                         ),
                                     },
-                                    Builtin {
-                                        name: "id",
-                                        params: Some(
-                                            Raw(
-                                                "11",
-                                            ),
-                                        ),
+                                    Id {
+                                        value: "11",
                                     },
-                                    Builtin {
-                                        name: "optional",
-                                        params: None,
+                                    Optional {
+                                        value: None,
                                     },
                                 ],
                                 ty: IntegerType(
@@ -82,7 +66,7 @@ Specification(
                                 ],
                                 default: None,
                                 field_id: Some(
-                                    2,
+                                    11,
                                 ),
                             },
                         ],
@@ -127,26 +111,16 @@ Specification(
                         member: [
                             Enumerator {
                                 annotations: [
-                                    Builtin {
-                                        name: "id",
-                                        params: Some(
-                                            Raw(
-                                                "0",
-                                            ),
-                                        ),
+                                    Id {
+                                        value: "0",
                                     },
                                 ],
                                 ident: "A",
                             },
                             Enumerator {
                                 annotations: [
-                                    Builtin {
-                                        name: "id",
-                                        params: Some(
-                                            Raw(
-                                                "1",
-                                            ),
-                                        ),
+                                    Id {
+                                        value: "1",
                                     },
                                 ],
                                 ident: "B",
@@ -161,13 +135,8 @@ Specification(
                 BitmaskDcl(
                     BitmaskDcl {
                         annotations: [
-                            Builtin {
-                                name: "id",
-                                params: Some(
-                                    Raw(
-                                        "2",
-                                    ),
-                                ),
+                            Id {
+                                value: "2",
                             },
                         ],
                         ident: "BM",
@@ -175,13 +144,8 @@ Specification(
                             BitValue {
                                 position: 0,
                                 annotations: [
-                                    Builtin {
-                                        name: "id",
-                                        params: Some(
-                                            Raw(
-                                                "0",
-                                            ),
-                                        ),
+                                    Id {
+                                        value: "0",
                                     },
                                 ],
                                 ident: "A",
@@ -189,13 +153,8 @@ Specification(
                             BitValue {
                                 position: 1,
                                 annotations: [
-                                    Builtin {
-                                        name: "id",
-                                        params: Some(
-                                            Raw(
-                                                "1",
-                                            ),
-                                        ),
+                                    Id {
+                                        value: "1",
                                     },
                                 ],
                                 ident: "B",
@@ -210,13 +169,8 @@ Specification(
                 UnionDef(
                     UnionDef {
                         annotations: [
-                            Builtin {
-                                name: "id",
-                                params: Some(
-                                    Raw(
-                                        "3",
-                                    ),
-                                ),
+                            Id {
+                                value: "3",
                             },
                         ],
                         ident: "U",
@@ -238,13 +192,8 @@ Specification(
                                 ],
                                 element: ElementSpec {
                                     annotations: [
-                                        Builtin {
-                                            name: "id",
-                                            params: Some(
-                                                Raw(
-                                                    "100",
-                                                ),
-                                            ),
+                                        Id {
+                                            value: "100",
                                         },
                                     ],
                                     ty: TypeSpec(
@@ -258,7 +207,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        1,
+                                        100,
                                     ),
                                 },
                             },
@@ -279,7 +228,7 @@ Specification(
                                         ),
                                     ),
                                     field_id: Some(
-                                        2,
+                                        1,
                                     ),
                                 },
                             },
@@ -1111,13 +1060,8 @@ Specification(
         InterfaceDcl(
             InterfaceDcl {
                 annotations: [
-                    Builtin {
-                        name: "id",
-                        params: Some(
-                            Raw(
-                                "4",
-                            ),
-                        ),
+                    Id {
+                        value: "4",
                     },
                 ],
                 decl: InterfaceDef(
@@ -1132,9 +1076,8 @@ Specification(
                                     OpDcl(
                                         OpDcl {
                                             annotations: [
-                                                Builtin {
-                                                    name: "oneway",
-                                                    params: None,
+                                                Oneway {
+                                                    value: None,
                                                 },
                                             ],
                                             ty: Void,
@@ -1146,7 +1089,9 @@ Specification(
                                     AttrDcl(
                                         AttrDcl {
                                             annotations: [
-                                                Key,
+                                                Key {
+                                                    value: None,
+                                                },
                                             ],
                                             decl: AttrSpec(
                                                 AttrSpec {

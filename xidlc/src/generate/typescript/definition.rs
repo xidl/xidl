@@ -2086,9 +2086,10 @@ fn has_annotation(annotations: &[hir::Annotation], target: &str) -> bool {
 
 fn has_optional_annotation(annotations: &[hir::Annotation]) -> bool {
     annotations.iter().any(|annotation| {
-        annotation_name(annotation)
-            .map(|name| name.eq_ignore_ascii_case("optional"))
-            .unwrap_or(false)
+        matches!(annotation, hir::Annotation::Optional { .. })
+            || annotation_name(annotation)
+                .map(|name| name.eq_ignore_ascii_case("optional"))
+                .unwrap_or(false)
     })
 }
 
