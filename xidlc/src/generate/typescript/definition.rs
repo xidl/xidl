@@ -1719,79 +1719,58 @@ fn ts_type_for_type_spec(
     target: TypeRefTarget,
 ) -> String {
     match ty {
-        hir::TypeSpec::SimpleTypeSpec(simple) => match simple {
-            hir::SimpleTypeSpec::IntegerType(_) | hir::SimpleTypeSpec::FloatingPtType => {
-                "number".to_string()
-            }
-            hir::SimpleTypeSpec::CharType | hir::SimpleTypeSpec::WideCharType => {
-                "string".to_string()
-            }
-            hir::SimpleTypeSpec::Boolean => "boolean".to_string(),
-            hir::SimpleTypeSpec::AnyType
-            | hir::SimpleTypeSpec::ObjectType
-            | hir::SimpleTypeSpec::ValueBaseType => "unknown".to_string(),
-            hir::SimpleTypeSpec::ScopedName(value) => ts_scoped_name(value, module_path, target),
-        },
-        hir::TypeSpec::TemplateTypeSpec(template) => match template {
-            hir::TemplateTypeSpec::SequenceType(seq) => {
-                let inner = ts_type_for_type_spec(&seq.ty, module_path, target);
-                format!("Array<{inner}>")
-            }
-            hir::TemplateTypeSpec::StringType(_) | hir::TemplateTypeSpec::WideStringType(_) => {
-                "string".to_string()
-            }
-            hir::TemplateTypeSpec::FixedPtType(_) => "number".to_string(),
-            hir::TemplateTypeSpec::MapType(map) => {
-                let value = ts_type_for_type_spec(&map.value, module_path, target);
-                format!("Record<string, {value}>")
-            }
-            hir::TemplateTypeSpec::TemplateType(value) => {
-                ts_template_type(value, module_path, target)
-            }
-        },
+        hir::TypeSpec::IntegerType(_) | hir::TypeSpec::FloatingPtType => "number".to_string(),
+        hir::TypeSpec::CharType | hir::TypeSpec::WideCharType => "string".to_string(),
+        hir::TypeSpec::Boolean => "boolean".to_string(),
+        hir::TypeSpec::AnyType | hir::TypeSpec::ObjectType | hir::TypeSpec::ValueBaseType => {
+            "unknown".to_string()
+        }
+        hir::TypeSpec::ScopedName(value) => ts_scoped_name(value, module_path, target),
+        hir::TypeSpec::SequenceType(seq) => {
+            let inner = ts_type_for_type_spec(&seq.ty, module_path, target);
+            format!("Array<{inner}>")
+        }
+        hir::TypeSpec::StringType(_) | hir::TypeSpec::WideStringType(_) => "string".to_string(),
+        hir::TypeSpec::FixedPtType(_) => "number".to_string(),
+        hir::TypeSpec::MapType(map) => {
+            let value = ts_type_for_type_spec(&map.value, module_path, target);
+            format!("Record<string, {value}>")
+        }
+        hir::TypeSpec::TemplateType(value) => ts_template_type(value, module_path, target),
     }
 }
 
 fn zod_schema_for_type_spec(ty: &hir::TypeSpec, module_path: &[String]) -> String {
     match ty {
-        hir::TypeSpec::SimpleTypeSpec(simple) => match simple {
-            hir::SimpleTypeSpec::IntegerType(value) => integer_schema(value),
-            hir::SimpleTypeSpec::FloatingPtType => "z.number()".to_string(),
-            hir::SimpleTypeSpec::CharType | hir::SimpleTypeSpec::WideCharType => {
-                "z.string()".to_string()
+        hir::TypeSpec::IntegerType(value) => integer_schema(value),
+        hir::TypeSpec::FloatingPtType => "z.number()".to_string(),
+        hir::TypeSpec::CharType | hir::TypeSpec::WideCharType => "z.string()".to_string(),
+        hir::TypeSpec::Boolean => "z.boolean()".to_string(),
+        hir::TypeSpec::AnyType | hir::TypeSpec::ObjectType | hir::TypeSpec::ValueBaseType => {
+            "z.unknown()".to_string()
+        }
+        hir::TypeSpec::ScopedName(value) => zod_schema_ref(value, module_path),
+        hir::TypeSpec::SequenceType(seq) => {
+            let inner = zod_schema_for_type_spec(&seq.ty, module_path);
+            let mut schema = format!("z.array({inner})");
+            if let Some(len) = &seq.len
+                && let Some(size) = xidl_parser::hir::const_expr_to_i64(&len.0)
+                && size >= 0
+            {
+                schema = format!("{schema}.length({size})");
             }
-            hir::SimpleTypeSpec::Boolean => "z.boolean()".to_string(),
-            hir::SimpleTypeSpec::AnyType
-            | hir::SimpleTypeSpec::ObjectType
-            | hir::SimpleTypeSpec::ValueBaseType => "z.unknown()".to_string(),
-            hir::SimpleTypeSpec::ScopedName(value) => zod_schema_ref(value, module_path),
-        },
-        hir::TypeSpec::TemplateTypeSpec(template) => match template {
-            hir::TemplateTypeSpec::SequenceType(seq) => {
-                let inner = zod_schema_for_type_spec(&seq.ty, module_path);
-                let mut schema = format!("z.array({inner})");
-                if let Some(len) = &seq.len {
-                    if let Some(size) = xidl_parser::hir::const_expr_to_i64(&len.0) {
-                        if size >= 0 {
-                            schema = format!("{schema}.length({size})");
-                        }
-                    }
-                }
-                schema
-            }
-            hir::TemplateTypeSpec::StringType(_) | hir::TemplateTypeSpec::WideStringType(_) => {
-                "z.string()".to_string()
-            }
-            hir::TemplateTypeSpec::FixedPtType(_) => "z.number()".to_string(),
-            hir::TemplateTypeSpec::MapType(map) => {
-                let value = zod_schema_for_type_spec(&map.value, module_path);
-                format!("z.record({value})")
-            }
-            hir::TemplateTypeSpec::TemplateType(value) => {
-                let ty = ts_template_type(value, module_path, TypeRefTarget::Types);
-                format!("z.custom<{ty}>()")
-            }
-        },
+            schema
+        }
+        hir::TypeSpec::StringType(_) | hir::TypeSpec::WideStringType(_) => "z.string()".to_string(),
+        hir::TypeSpec::FixedPtType(_) => "z.number()".to_string(),
+        hir::TypeSpec::MapType(map) => {
+            let value = zod_schema_for_type_spec(&map.value, module_path);
+            format!("z.record({value})")
+        }
+        hir::TypeSpec::TemplateType(value) => {
+            let ty = ts_template_type(value, module_path, TypeRefTarget::Types);
+            format!("z.custom<{ty}>()")
+        }
     }
 }
 
@@ -2482,10 +2461,7 @@ fn path_param_is_catch_all(path: &str, name: &str) -> bool {
 }
 
 fn is_sequence_type(ty: &hir::TypeSpec) -> bool {
-    matches!(
-        ty,
-        hir::TypeSpec::TemplateTypeSpec(hir::TemplateTypeSpec::SequenceType(_))
-    )
+    matches!(ty, hir::TypeSpec::SequenceType(_))
 }
 
 fn validate_route_template(path: &str) -> IdlcResult<()> {

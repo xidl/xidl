@@ -154,13 +154,11 @@ impl RustTypePolicy {
     fn is_value_type(&self, ty: &hir::TypeSpec) -> bool {
         matches!(
             ty,
-            hir::TypeSpec::SimpleTypeSpec(
-                hir::SimpleTypeSpec::IntegerType(_)
-                    | hir::SimpleTypeSpec::FloatingPtType
-                    | hir::SimpleTypeSpec::CharType
-                    | hir::SimpleTypeSpec::WideCharType
-                    | hir::SimpleTypeSpec::Boolean
-            )
+            hir::TypeSpec::IntegerType(_)
+                | hir::TypeSpec::FloatingPtType
+                | hir::TypeSpec::CharType
+                | hir::TypeSpec::WideCharType
+                | hir::TypeSpec::Boolean
         )
     }
 }

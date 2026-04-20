@@ -13,40 +13,34 @@ pub(super) fn render_param_type(ty: &hir::TypeSpec, attr: Option<&hir::ParamAttr
 
 pub(super) fn jsonrpc_type(ty: &hir::TypeSpec) -> String {
     match ty {
-        hir::TypeSpec::SimpleTypeSpec(simple) => match simple {
-            hir::SimpleTypeSpec::IntegerType(value) => rust_integer_type(value),
-            hir::SimpleTypeSpec::FloatingPtType => "f64".to_string(),
-            hir::SimpleTypeSpec::CharType | hir::SimpleTypeSpec::WideCharType => "char".to_string(),
-            hir::SimpleTypeSpec::Boolean => "bool".to_string(),
-            hir::SimpleTypeSpec::AnyType
-            | hir::SimpleTypeSpec::ObjectType
-            | hir::SimpleTypeSpec::ValueBaseType => "serde_json::Value".to_string(),
-            hir::SimpleTypeSpec::ScopedName(value) => render_scoped_name(value),
-        },
-        hir::TypeSpec::TemplateTypeSpec(template) => match template {
-            hir::TemplateTypeSpec::SequenceType(seq) => format!("Vec<{}>", jsonrpc_type(&seq.ty)),
-            hir::TemplateTypeSpec::StringType(_) | hir::TemplateTypeSpec::WideStringType(_) => {
-                "String".to_string()
-            }
-            hir::TemplateTypeSpec::FixedPtType(_) => "f64".to_string(),
-            hir::TemplateTypeSpec::MapType(map) => {
-                format!(
-                    "BTreeMap<{}, {}>",
-                    jsonrpc_type(&map.key),
-                    jsonrpc_type(&map.value)
-                )
-            }
-            hir::TemplateTypeSpec::TemplateType(value) => format!(
-                "{}<{}>",
-                rust_ident(&value.ident),
-                value
-                    .args
-                    .iter()
-                    .map(jsonrpc_type)
-                    .collect::<Vec<_>>()
-                    .join(", ")
-            ),
-        },
+        hir::TypeSpec::IntegerType(value) => rust_integer_type(value),
+        hir::TypeSpec::FloatingPtType => "f64".to_string(),
+        hir::TypeSpec::CharType | hir::TypeSpec::WideCharType => "char".to_string(),
+        hir::TypeSpec::Boolean => "bool".to_string(),
+        hir::TypeSpec::AnyType | hir::TypeSpec::ObjectType | hir::TypeSpec::ValueBaseType => {
+            "serde_json::Value".to_string()
+        }
+        hir::TypeSpec::ScopedName(value) => render_scoped_name(value),
+        hir::TypeSpec::SequenceType(seq) => format!("Vec<{}>", jsonrpc_type(&seq.ty)),
+        hir::TypeSpec::StringType(_) | hir::TypeSpec::WideStringType(_) => "String".to_string(),
+        hir::TypeSpec::FixedPtType(_) => "f64".to_string(),
+        hir::TypeSpec::MapType(map) => {
+            format!(
+                "BTreeMap<{}, {}>",
+                jsonrpc_type(&map.key),
+                jsonrpc_type(&map.value)
+            )
+        }
+        hir::TypeSpec::TemplateType(value) => format!(
+            "{}<{}>",
+            rust_ident(&value.ident),
+            value
+                .args
+                .iter()
+                .map(jsonrpc_type)
+                .collect::<Vec<_>>()
+                .join(", ")
+        ),
     }
 }
 

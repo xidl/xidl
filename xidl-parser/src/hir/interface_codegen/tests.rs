@@ -97,31 +97,26 @@ fn renders_idl_types_and_expressions() {
     }
 
     let rendered_types = [
-        TypeSpec::SimpleTypeSpec(SimpleTypeSpec::IntegerType(IntegerType::Char)),
-        TypeSpec::SimpleTypeSpec(SimpleTypeSpec::IntegerType(IntegerType::UChar)),
-        TypeSpec::SimpleTypeSpec(SimpleTypeSpec::FloatingPtType),
-        TypeSpec::SimpleTypeSpec(SimpleTypeSpec::CharType),
-        TypeSpec::SimpleTypeSpec(SimpleTypeSpec::WideCharType),
-        TypeSpec::SimpleTypeSpec(SimpleTypeSpec::Boolean),
-        TypeSpec::SimpleTypeSpec(SimpleTypeSpec::AnyType),
-        TypeSpec::SimpleTypeSpec(SimpleTypeSpec::ObjectType),
-        TypeSpec::SimpleTypeSpec(SimpleTypeSpec::ValueBaseType),
-        TypeSpec::SimpleTypeSpec(SimpleTypeSpec::ScopedName(scoped(&["demo", "Thing"], true))),
-        TypeSpec::TemplateTypeSpec(TemplateTypeSpec::WideStringType(WideStringType {
-            bound: None,
-        })),
-        TypeSpec::TemplateTypeSpec(TemplateTypeSpec::MapType(MapType {
-            key: Box::new(TypeSpec::SimpleTypeSpec(SimpleTypeSpec::CharType)),
-            value: Box::new(TypeSpec::SimpleTypeSpec(SimpleTypeSpec::Boolean)),
+        TypeSpec::IntegerType(IntegerType::Char),
+        TypeSpec::IntegerType(IntegerType::UChar),
+        TypeSpec::FloatingPtType,
+        TypeSpec::CharType,
+        TypeSpec::WideCharType,
+        TypeSpec::Boolean,
+        TypeSpec::AnyType,
+        TypeSpec::ObjectType,
+        TypeSpec::ValueBaseType,
+        TypeSpec::ScopedName(scoped(&["demo", "Thing"], true)),
+        TypeSpec::WideStringType(WideStringType { bound: None }),
+        TypeSpec::MapType(MapType {
+            key: Box::new(TypeSpec::CharType),
+            value: Box::new(TypeSpec::Boolean),
             len: None,
-        })),
-        TypeSpec::TemplateTypeSpec(TemplateTypeSpec::TemplateType(TemplateType {
+        }),
+        TypeSpec::TemplateType(TemplateType {
             ident: "Box".to_string(),
-            args: vec![
-                TypeSpec::SimpleTypeSpec(SimpleTypeSpec::IntegerType(IntegerType::I32)),
-                TypeSpec::SimpleTypeSpec(SimpleTypeSpec::CharType),
-            ],
-        })),
+            args: vec![TypeSpec::IntegerType(IntegerType::I32), TypeSpec::CharType],
+        }),
     ]
     .iter()
     .map(idl_type_spec)

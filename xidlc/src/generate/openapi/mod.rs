@@ -935,9 +935,7 @@ mod tests {
     fn schema_for_struct_applies_doc_to_fields() {
         let member = hir::Member {
             annotations: vec![doc_annotation("field doc")],
-            ty: hir::TypeSpec::SimpleTypeSpec(hir::SimpleTypeSpec::IntegerType(
-                hir::IntegerType::I32,
-            )),
+            ty: hir::TypeSpec::IntegerType(hir::IntegerType::I32),
             ident: vec![hir::Declarator::SimpleDeclarator(hir::SimpleDeclarator(
                 "value".to_string(),
             ))],
@@ -1252,54 +1250,49 @@ mod tests {
 
 fn schema_for_type(ty: &hir::TypeSpec) -> RefOr<Schema> {
     match ty {
-        hir::TypeSpec::SimpleTypeSpec(simple) => match simple {
-            hir::SimpleTypeSpec::IntegerType(value) => integer_schema(value),
-            hir::SimpleTypeSpec::FloatingPtType => RefOr::T(Schema::from(
-                ObjectBuilder::new()
-                    .schema_type(Type::Number)
-                    .format(Some(SchemaFormat::KnownFormat(KnownFormat::Double))),
-            )),
-            hir::SimpleTypeSpec::CharType | hir::SimpleTypeSpec::WideCharType => {
-                RefOr::T(Schema::from(ObjectBuilder::new().schema_type(Type::String)))
+        hir::TypeSpec::IntegerType(value) => integer_schema(value),
+        hir::TypeSpec::FloatingPtType => RefOr::T(Schema::from(
+            ObjectBuilder::new()
+                .schema_type(Type::Number)
+                .format(Some(SchemaFormat::KnownFormat(KnownFormat::Double))),
+        )),
+        hir::TypeSpec::CharType | hir::TypeSpec::WideCharType => {
+            RefOr::T(Schema::from(ObjectBuilder::new().schema_type(Type::String)))
+        }
+        hir::TypeSpec::Boolean => RefOr::T(Schema::from(
+            ObjectBuilder::new().schema_type(Type::Boolean),
+        )),
+        hir::TypeSpec::AnyType | hir::TypeSpec::ObjectType | hir::TypeSpec::ValueBaseType => {
+            RefOr::T(Schema::from(ObjectBuilder::new()))
+        }
+        hir::TypeSpec::ScopedName(value) => schema_ref(&scoped_name_ref(value)),
+        hir::TypeSpec::SequenceType(seq) => {
+            let mut schema = ArrayBuilder::new().items(schema_for_type(&seq.ty));
+            if let Some(len) = &seq.len
+                && let Some(size) = xidl_parser::hir::const_expr_to_i64(&len.0)
+                && size >= 0
+            {
+                let size = size as usize;
+                schema = schema.min_items(Some(size)).max_items(Some(size));
             }
-            hir::SimpleTypeSpec::Boolean => RefOr::T(Schema::from(
-                ObjectBuilder::new().schema_type(Type::Boolean),
-            )),
-            hir::SimpleTypeSpec::AnyType
-            | hir::SimpleTypeSpec::ObjectType
-            | hir::SimpleTypeSpec::ValueBaseType => RefOr::T(Schema::from(ObjectBuilder::new())),
-            hir::SimpleTypeSpec::ScopedName(value) => schema_ref(&scoped_name_ref(value)),
-        },
-        hir::TypeSpec::TemplateTypeSpec(template) => match template {
-            hir::TemplateTypeSpec::SequenceType(seq) => {
-                let mut schema = ArrayBuilder::new().items(schema_for_type(&seq.ty));
-                if let Some(len) = &seq.len {
-                    if let Some(size) = xidl_parser::hir::const_expr_to_i64(&len.0) {
-                        if size >= 0 {
-                            let size = size as usize;
-                            schema = schema.min_items(Some(size)).max_items(Some(size));
-                        }
-                    }
-                }
-                RefOr::T(Schema::from(schema))
-            }
-            hir::TemplateTypeSpec::StringType(_) | hir::TemplateTypeSpec::WideStringType(_) => {
-                RefOr::T(Schema::from(ObjectBuilder::new().schema_type(Type::String)))
-            }
-            hir::TemplateTypeSpec::FixedPtType(_) => RefOr::T(Schema::from(
-                ObjectBuilder::new()
-                    .schema_type(Type::Number)
-                    .format(Some(SchemaFormat::KnownFormat(KnownFormat::Double))),
-            )),
-            hir::TemplateTypeSpec::MapType(map) => RefOr::T(Schema::from(
-                ObjectBuilder::new()
-                    .schema_type(Type::Object)
-                    .additional_properties(Some(schema_for_type(&map.value))),
-            )),
-            hir::TemplateTypeSpec::TemplateType(_) => {
-                RefOr::T(Schema::from(ObjectBuilder::new().schema_type(Type::Object)))
-            }
-        },
+            RefOr::T(Schema::from(schema))
+        }
+        hir::TypeSpec::StringType(_) | hir::TypeSpec::WideStringType(_) => {
+            RefOr::T(Schema::from(ObjectBuilder::new().schema_type(Type::String)))
+        }
+        hir::TypeSpec::FixedPtType(_) => RefOr::T(Schema::from(
+            ObjectBuilder::new()
+                .schema_type(Type::Number)
+                .format(Some(SchemaFormat::KnownFormat(KnownFormat::Double))),
+        )),
+        hir::TypeSpec::MapType(map) => RefOr::T(Schema::from(
+            ObjectBuilder::new()
+                .schema_type(Type::Object)
+                .additional_properties(Some(schema_for_type(&map.value))),
+        )),
+        hir::TypeSpec::TemplateType(_) => {
+            RefOr::T(Schema::from(ObjectBuilder::new().schema_type(Type::Object)))
+        }
     }
 }
 

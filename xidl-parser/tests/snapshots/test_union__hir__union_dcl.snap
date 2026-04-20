@@ -53,10 +53,8 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            IntegerType(
-                                                I32,
-                                            ),
+                                        IntegerType(
+                                            I32,
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -84,12 +82,10 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        TemplateTypeSpec(
-                                            StringType(
-                                                StringType {
-                                                    bound: None,
-                                                },
-                                            ),
+                                        StringType(
+                                            StringType {
+                                                bound: None,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(

@@ -1,6 +1,5 @@
 use xidl_parser::hir::{
-    BitFieldType, ConstrTypeDcl, Definition, SimpleTypeSpec, Specification, TypeDcl, TypeSpec,
-    expand_annotations,
+    BitFieldType, ConstrTypeDcl, Definition, Specification, TypeDcl, TypeSpec, expand_annotations,
 };
 use xidl_parser::parser::parser_text;
 use xidl_parser::typed_ast::{
@@ -115,12 +114,10 @@ fn hir_type_conversions_cover_simple_and_template_variants() {
     let template_hir: TypeSpec = template.into();
     let simple_hir: TypeSpec = simple.into();
 
-    assert!(matches!(template_hir, TypeSpec::TemplateTypeSpec(_)));
+    assert!(matches!(template_hir, TypeSpec::TemplateType(_)));
     assert!(matches!(
         simple_hir,
-        TypeSpec::SimpleTypeSpec(SimpleTypeSpec::IntegerType(
-            xidl_parser::hir::IntegerType::I64
-        ))
+        TypeSpec::IntegerType(xidl_parser::hir::IntegerType::I64)
     ));
 
     let nested = AnnotationAppl {
@@ -177,9 +174,7 @@ fn hir_struct_and_type_dcl_cover_optional_and_inline_typedef_paths() {
             },
             params: None,
         }],
-        ty: xidl_parser::hir::TypeSpec::SimpleTypeSpec(
-            xidl_parser::hir::SimpleTypeSpec::IntegerType(xidl_parser::hir::IntegerType::I32),
-        ),
+        ty: xidl_parser::hir::TypeSpec::IntegerType(xidl_parser::hir::IntegerType::I32),
         ident: Vec::new(),
         default: Some(xidl_parser::hir::Default(
             xidl_parser::hir::ConstExpr::Literal(xidl_parser::hir::Literal::IntegerLiteral(

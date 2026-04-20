@@ -9,22 +9,18 @@ Specification(
                 TypedefDcl {
                     annotations: [],
                     ty: TypeSpec(
-                        TemplateTypeSpec(
-                            SequenceType(
-                                SequenceType {
-                                    ty: SimpleTypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "Foo",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    len: None,
-                                },
-                            ),
+                        SequenceType(
+                            SequenceType {
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "Foo",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                                len: None,
+                            },
                         ),
                     ),
                     decl: [
@@ -42,15 +38,13 @@ Specification(
                 TypedefDcl {
                     annotations: [],
                     ty: TypeSpec(
-                        SimpleTypeSpec(
-                            ScopedName(
-                                ScopedName {
-                                    name: [
-                                        "u8",
-                                    ],
-                                    is_root: false,
-                                },
-                            ),
+                        ScopedName(
+                            ScopedName {
+                                name: [
+                                    "u8",
+                                ],
+                                is_root: false,
+                            },
                         ),
                     ),
                     decl: [
@@ -68,12 +62,10 @@ Specification(
                 TypedefDcl {
                     annotations: [],
                     ty: TypeSpec(
-                        TemplateTypeSpec(
-                            StringType(
-                                StringType {
-                                    bound: None,
-                                },
-                            ),
+                        StringType(
+                            StringType {
+                                bound: None,
+                            },
                         ),
                     ),
                     decl: [
@@ -91,12 +83,10 @@ Specification(
                 TypedefDcl {
                     annotations: [],
                     ty: TypeSpec(
-                        TemplateTypeSpec(
-                            WideStringType(
-                                WideStringType {
-                                    bound: None,
-                                },
-                            ),
+                        WideStringType(
+                            WideStringType {
+                                bound: None,
+                            },
                         ),
                     ),
                     decl: [

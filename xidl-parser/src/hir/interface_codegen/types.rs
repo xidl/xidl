@@ -2,56 +2,52 @@ use super::*;
 
 pub fn idl_type_spec(ty: &TypeSpec) -> String {
     match ty {
-        TypeSpec::SimpleTypeSpec(simple) => match simple {
-            SimpleTypeSpec::IntegerType(value) => idl_integer_type(value),
-            SimpleTypeSpec::FloatingPtType => "double".to_string(),
-            SimpleTypeSpec::CharType => "char".to_string(),
-            SimpleTypeSpec::WideCharType => "wchar".to_string(),
-            SimpleTypeSpec::Boolean => "boolean".to_string(),
-            SimpleTypeSpec::AnyType => "any".to_string(),
-            SimpleTypeSpec::ObjectType => "Object".to_string(),
-            SimpleTypeSpec::ValueBaseType => "ValueBase".to_string(),
-            SimpleTypeSpec::ScopedName(value) => scoped_name_to_idl(value),
+        TypeSpec::IntegerType(value) => idl_integer_type(value),
+        TypeSpec::FloatingPtType => "double".to_string(),
+        TypeSpec::CharType => "char".to_string(),
+        TypeSpec::WideCharType => "wchar".to_string(),
+        TypeSpec::Boolean => "boolean".to_string(),
+        TypeSpec::AnyType => "any".to_string(),
+        TypeSpec::ObjectType => "Object".to_string(),
+        TypeSpec::ValueBaseType => "ValueBase".to_string(),
+        TypeSpec::ScopedName(value) => scoped_name_to_idl(value),
+        TypeSpec::SequenceType(seq) => {
+            let elem = idl_type_spec(&seq.ty);
+            match &seq.len {
+                Some(len) => format!("sequence<{}, {}>", elem, render_const_expr(&len.0)),
+                None => format!("sequence<{}>", elem),
+            }
+        }
+        TypeSpec::StringType(string) => match &string.bound {
+            Some(bound) => format!("string<{}>", render_const_expr(&bound.0)),
+            None => "string".to_string(),
         },
-        TypeSpec::TemplateTypeSpec(template) => match template {
-            TemplateTypeSpec::SequenceType(seq) => {
-                let elem = idl_type_spec(&seq.ty);
-                match &seq.len {
-                    Some(len) => format!("sequence<{}, {}>", elem, render_const_expr(&len.0)),
-                    None => format!("sequence<{}>", elem),
-                }
-            }
-            TemplateTypeSpec::StringType(string) => match &string.bound {
-                Some(bound) => format!("string<{}>", render_const_expr(&bound.0)),
-                None => "string".to_string(),
-            },
-            TemplateTypeSpec::WideStringType(string) => match &string.bound {
-                Some(bound) => format!("wstring<{}>", render_const_expr(&bound.0)),
-                None => "wstring".to_string(),
-            },
-            TemplateTypeSpec::FixedPtType(fixed) => format!(
-                "fixed<{}, {}>",
-                render_const_expr(&fixed.integer.0),
-                render_const_expr(&fixed.fraction.0)
-            ),
-            TemplateTypeSpec::MapType(map) => {
-                let key = idl_type_spec(&map.key);
-                let value = idl_type_spec(&map.value);
-                match &map.len {
-                    Some(len) => format!("map<{}, {}, {}>", key, value, render_const_expr(&len.0)),
-                    None => format!("map<{}, {}>", key, value),
-                }
-            }
-            TemplateTypeSpec::TemplateType(template) => {
-                let args = template
-                    .args
-                    .iter()
-                    .map(idl_type_spec)
-                    .collect::<Vec<_>>()
-                    .join(", ");
-                format!("{}<{}>", template.ident, args)
-            }
+        TypeSpec::WideStringType(string) => match &string.bound {
+            Some(bound) => format!("wstring<{}>", render_const_expr(&bound.0)),
+            None => "wstring".to_string(),
         },
+        TypeSpec::FixedPtType(fixed) => format!(
+            "fixed<{}, {}>",
+            render_const_expr(&fixed.integer.0),
+            render_const_expr(&fixed.fraction.0)
+        ),
+        TypeSpec::MapType(map) => {
+            let key = idl_type_spec(&map.key);
+            let value = idl_type_spec(&map.value);
+            match &map.len {
+                Some(len) => format!("map<{}, {}, {}>", key, value, render_const_expr(&len.0)),
+                None => format!("map<{}, {}>", key, value),
+            }
+        }
+        TypeSpec::TemplateType(template) => {
+            let args = template
+                .args
+                .iter()
+                .map(idl_type_spec)
+                .collect::<Vec<_>>()
+                .join(", ");
+            format!("{}<{}>", template.ident, args)
+        }
     }
 }
 

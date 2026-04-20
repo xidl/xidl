@@ -74,17 +74,15 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "dds",
-                                                "rpc",
-                                                "UnusedMember",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "UnusedMember",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -113,17 +111,15 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "dds",
-                                                "rpc",
-                                                "UnusedMember",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "UnusedMember",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -169,15 +165,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "HttpApi_old_ping_Out",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "HttpApi_old_ping_Out",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -205,12 +199,10 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: TemplateTypeSpec(
-                                    StringType(
-                                        StringType {
-                                            bound: None,
-                                        },
-                                    ),
+                                ty: StringType(
+                                    StringType {
+                                        bound: None,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -239,12 +231,10 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: TemplateTypeSpec(
-                                    StringType(
-                                        StringType {
-                                            bound: None,
-                                        },
-                                    ),
+                                ty: StringType(
+                                    StringType {
+                                        bound: None,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -290,15 +280,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "HttpApi_get_user_Out",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "HttpApi_get_user_Out",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -326,12 +314,10 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: TemplateTypeSpec(
-                                    StringType(
-                                        StringType {
-                                            bound: None,
-                                        },
-                                    ),
+                                ty: StringType(
+                                    StringType {
+                                        bound: None,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -347,12 +333,10 @@ Specification(
                             },
                             Member {
                                 annotations: [],
-                                ty: TemplateTypeSpec(
-                                    StringType(
-                                        StringType {
-                                            bound: None,
-                                        },
-                                    ),
+                                ty: StringType(
+                                    StringType {
+                                        bound: None,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -381,12 +365,10 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: TemplateTypeSpec(
-                                    StringType(
-                                        StringType {
-                                            bound: None,
-                                        },
-                                    ),
+                                ty: StringType(
+                                    StringType {
+                                        bound: None,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -432,15 +414,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "HttpApi_update_user_Out",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "HttpApi_update_user_Out",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -468,17 +448,15 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "dds",
-                                                "rpc",
-                                                "UnusedMember",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "UnusedMember",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -507,12 +485,10 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: TemplateTypeSpec(
-                                    StringType(
-                                        StringType {
-                                            bound: None,
-                                        },
-                                    ),
+                                ty: StringType(
+                                    StringType {
+                                        bound: None,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -558,15 +534,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "HttpApi_health_Out",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "HttpApi_health_Out",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -601,17 +575,15 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "dds",
-                                                        "rpc",
-                                                        "UnknownOperation",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "rpc",
+                                                    "UnknownOperation",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -640,15 +612,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "HttpApi_old_ping_In",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "HttpApi_old_ping_In",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -677,15 +647,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "HttpApi_get_user_In",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "HttpApi_get_user_In",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -714,15 +682,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "HttpApi_update_user_In",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "HttpApi_update_user_In",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -751,15 +717,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "HttpApi_health_In",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "HttpApi_health_In",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -787,17 +751,15 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "dds",
-                                                "rpc",
-                                                "RequestHeader",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "RequestHeader",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -813,15 +775,13 @@ Specification(
                             },
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "HttpApi_Call",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "HttpApi_Call",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -857,17 +817,15 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "dds",
-                                                        "rpc",
-                                                        "UnknownOperation",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "rpc",
+                                                    "UnknownOperation",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -896,15 +854,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "HttpApi_old_ping_Result",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "HttpApi_old_ping_Result",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -933,15 +889,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "HttpApi_get_user_Result",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "HttpApi_get_user_Result",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -970,15 +924,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "HttpApi_update_user_Result",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "HttpApi_update_user_Result",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -1007,15 +959,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "HttpApi_health_Result",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "HttpApi_health_Result",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -1043,17 +993,15 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "dds",
-                                                "rpc",
-                                                "ReplyHeader",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "ReplyHeader",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -1069,15 +1017,13 @@ Specification(
                             },
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "HttpApi_Return",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "HttpApi_Return",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -1202,12 +1148,10 @@ Specification(
                                                 },
                                             ],
                                             ty: TypeSpec(
-                                                TemplateTypeSpec(
-                                                    StringType(
-                                                        StringType {
-                                                            bound: None,
-                                                        },
-                                                    ),
+                                                StringType(
+                                                    StringType {
+                                                        bound: None,
+                                                    },
                                                 ),
                                             ),
                                             ident: "get_user",
@@ -1227,12 +1171,10 @@ Specification(
                                                                 },
                                                             ],
                                                             attr: None,
-                                                            ty: TemplateTypeSpec(
-                                                                StringType(
-                                                                    StringType {
-                                                                        bound: None,
-                                                                    },
-                                                                ),
+                                                            ty: StringType(
+                                                                StringType {
+                                                                    bound: None,
+                                                                },
                                                             ),
                                                             declarator: SimpleDeclarator(
                                                                 "id",
@@ -1291,12 +1233,10 @@ Specification(
                                                 },
                                             ],
                                             ty: TypeSpec(
-                                                TemplateTypeSpec(
-                                                    StringType(
-                                                        StringType {
-                                                            bound: None,
-                                                        },
-                                                    ),
+                                                StringType(
+                                                    StringType {
+                                                        bound: None,
+                                                    },
                                                 ),
                                             ),
                                             ident: "update_user",
@@ -1324,12 +1264,10 @@ Specification(
                                                                 },
                                                             ],
                                                             attr: None,
-                                                            ty: TemplateTypeSpec(
-                                                                StringType(
-                                                                    StringType {
-                                                                        bound: None,
-                                                                    },
-                                                                ),
+                                                            ty: StringType(
+                                                                StringType {
+                                                                    bound: None,
+                                                                },
                                                             ),
                                                             declarator: SimpleDeclarator(
                                                                 "request_id",
@@ -1338,12 +1276,10 @@ Specification(
                                                         ParamDcl {
                                                             annotations: [],
                                                             attr: None,
-                                                            ty: TemplateTypeSpec(
-                                                                StringType(
-                                                                    StringType {
-                                                                        bound: None,
-                                                                    },
-                                                                ),
+                                                            ty: StringType(
+                                                                StringType {
+                                                                    bound: None,
+                                                                },
                                                             ),
                                                             declarator: SimpleDeclarator(
                                                                 "name",
@@ -1369,12 +1305,10 @@ Specification(
                                                 },
                                             ],
                                             ty: TypeSpec(
-                                                TemplateTypeSpec(
-                                                    StringType(
-                                                        StringType {
-                                                            bound: None,
-                                                        },
-                                                    ),
+                                                StringType(
+                                                    StringType {
+                                                        bound: None,
+                                                    },
                                                 ),
                                             ),
                                             ident: "health",

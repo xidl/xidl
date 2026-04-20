@@ -26,10 +26,8 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    IntegerType(
-                                        I32,
-                                    ),
+                                ty: IntegerType(
+                                    I32,
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -58,16 +56,14 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "A",
-                                                "b",
-                                            ],
-                                            is_root: true,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "A",
+                                            "b",
+                                        ],
+                                        is_root: true,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -127,15 +123,13 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "Inner",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "Inner",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -164,15 +158,13 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "u8",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "u8",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -188,15 +180,13 @@ Specification(
                             },
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "u16",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "u16",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     ArrayDeclarator(
@@ -223,12 +213,10 @@ Specification(
                             },
                             Member {
                                 annotations: [],
-                                ty: TemplateTypeSpec(
-                                    StringType(
-                                        StringType {
-                                            bound: None,
-                                        },
-                                    ),
+                                ty: StringType(
+                                    StringType {
+                                        bound: None,
+                                    },
                                 ),
                                 ident: [
                                     ArrayDeclarator(
@@ -264,22 +252,18 @@ Specification(
                             },
                             Member {
                                 annotations: [],
-                                ty: TemplateTypeSpec(
-                                    SequenceType(
-                                        SequenceType {
-                                            ty: SimpleTypeSpec(
-                                                ScopedName(
-                                                    ScopedName {
-                                                        name: [
-                                                            "u8",
-                                                        ],
-                                                        is_root: false,
-                                                    },
-                                                ),
-                                            ),
-                                            len: None,
-                                        },
-                                    ),
+                                ty: SequenceType(
+                                    SequenceType {
+                                        ty: ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "u8",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                        len: None,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -295,22 +279,20 @@ Specification(
                             },
                             Member {
                                 annotations: [],
-                                ty: TemplateTypeSpec(
-                                    StringType(
-                                        StringType {
-                                            bound: Some(
-                                                PositiveIntConst(
-                                                    Literal(
+                                ty: StringType(
+                                    StringType {
+                                        bound: Some(
+                                            PositiveIntConst(
+                                                Literal(
+                                                    IntegerLiteral(
                                                         IntegerLiteral(
-                                                            IntegerLiteral(
-                                                                "20",
-                                                            ),
+                                                            "20",
                                                         ),
                                                     ),
                                                 ),
                                             ),
-                                        },
-                                    ),
+                                        ),
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -326,22 +308,20 @@ Specification(
                             },
                             Member {
                                 annotations: [],
-                                ty: TemplateTypeSpec(
-                                    WideStringType(
-                                        WideStringType {
-                                            bound: Some(
-                                                PositiveIntConst(
-                                                    Literal(
+                                ty: WideStringType(
+                                    WideStringType {
+                                        bound: Some(
+                                            PositiveIntConst(
+                                                Literal(
+                                                    IntegerLiteral(
                                                         IntegerLiteral(
-                                                            IntegerLiteral(
-                                                                "20",
-                                                            ),
+                                                            "20",
                                                         ),
                                                     ),
                                                 ),
                                             ),
-                                        },
-                                    ),
+                                        ),
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -357,9 +337,7 @@ Specification(
                             },
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    AnyType,
-                                ),
+                                ty: AnyType,
                                 ident: [
                                     SimpleDeclarator(
                                         SimpleDeclarator(

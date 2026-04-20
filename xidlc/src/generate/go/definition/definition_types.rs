@@ -87,36 +87,30 @@ pub(crate) fn go_const_type(ty: &hir::ConstType) -> String {
 
 pub(crate) fn go_type(ty: &hir::TypeSpec) -> String {
     match ty {
-        hir::TypeSpec::SimpleTypeSpec(simple) => match simple {
-            hir::SimpleTypeSpec::IntegerType(value) => go_integer_type(value),
-            hir::SimpleTypeSpec::FloatingPtType => "float64".to_string(),
-            hir::SimpleTypeSpec::CharType | hir::SimpleTypeSpec::WideCharType => "rune".to_string(),
-            hir::SimpleTypeSpec::Boolean => "bool".to_string(),
-            hir::SimpleTypeSpec::AnyType
-            | hir::SimpleTypeSpec::ObjectType
-            | hir::SimpleTypeSpec::ValueBaseType => "any".to_string(),
-            hir::SimpleTypeSpec::ScopedName(value) => go_scoped_name(value),
-        },
-        hir::TypeSpec::TemplateTypeSpec(template) => match template {
-            hir::TemplateTypeSpec::SequenceType(seq) => format!("[]{}", go_type(&seq.ty)),
-            hir::TemplateTypeSpec::StringType(_) | hir::TemplateTypeSpec::WideStringType(_) => {
-                "string".to_string()
-            }
-            hir::TemplateTypeSpec::FixedPtType(_) => "float64".to_string(),
-            hir::TemplateTypeSpec::MapType(map) => {
-                format!("map[{}]{}", go_type(&map.key), go_type(&map.value))
-            }
-            hir::TemplateTypeSpec::TemplateType(value) => format!(
-                "{}[{}]",
-                value.ident.to_case(Case::Pascal),
-                value
-                    .args
-                    .iter()
-                    .map(go_type)
-                    .collect::<Vec<_>>()
-                    .join(", "),
-            ),
-        },
+        hir::TypeSpec::IntegerType(value) => go_integer_type(value),
+        hir::TypeSpec::FloatingPtType => "float64".to_string(),
+        hir::TypeSpec::CharType | hir::TypeSpec::WideCharType => "rune".to_string(),
+        hir::TypeSpec::Boolean => "bool".to_string(),
+        hir::TypeSpec::AnyType | hir::TypeSpec::ObjectType | hir::TypeSpec::ValueBaseType => {
+            "any".to_string()
+        }
+        hir::TypeSpec::ScopedName(value) => go_scoped_name(value),
+        hir::TypeSpec::SequenceType(seq) => format!("[]{}", go_type(&seq.ty)),
+        hir::TypeSpec::StringType(_) | hir::TypeSpec::WideStringType(_) => "string".to_string(),
+        hir::TypeSpec::FixedPtType(_) => "float64".to_string(),
+        hir::TypeSpec::MapType(map) => {
+            format!("map[{}]{}", go_type(&map.key), go_type(&map.value))
+        }
+        hir::TypeSpec::TemplateType(value) => format!(
+            "{}[{}]",
+            value.ident.to_case(Case::Pascal),
+            value
+                .args
+                .iter()
+                .map(go_type)
+                .collect::<Vec<_>>()
+                .join(", "),
+        ),
     }
 }
 

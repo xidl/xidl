@@ -14,10 +14,8 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    IntegerType(
-                                        I32,
-                                    ),
+                                ty: IntegerType(
+                                    I32,
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -46,10 +44,8 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    IntegerType(
-                                        I32,
-                                    ),
+                                ty: IntegerType(
+                                    I32,
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -78,10 +74,8 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    IntegerType(
-                                        I32,
-                                    ),
+                                ty: IntegerType(
+                                    I32,
                                 ),
                                 ident: [
                                     SimpleDeclarator(

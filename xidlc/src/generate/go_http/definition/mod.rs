@@ -16,44 +16,36 @@ pub(crate) use self::definition_format::{render_format_path_fn, strip_interfaces
 
 pub(crate) fn go_type(ty: &hir::TypeSpec) -> String {
     match ty {
-        hir::TypeSpec::SimpleTypeSpec(simple) => match simple {
-            hir::SimpleTypeSpec::IntegerType(value) => match value {
-                hir::IntegerType::Char => "int8".to_string(),
-                hir::IntegerType::UChar | hir::IntegerType::U8 => "uint8".to_string(),
-                hir::IntegerType::U16 => "uint16".to_string(),
-                hir::IntegerType::U32 => "uint32".to_string(),
-                hir::IntegerType::U64 => "uint64".to_string(),
-                hir::IntegerType::I8 => "int8".to_string(),
-                hir::IntegerType::I16 => "int16".to_string(),
-                hir::IntegerType::I32 => "int32".to_string(),
-                hir::IntegerType::I64 => "int64".to_string(),
-            },
-            hir::SimpleTypeSpec::FloatingPtType => "float64".to_string(),
-            hir::SimpleTypeSpec::CharType | hir::SimpleTypeSpec::WideCharType => "rune".to_string(),
-            hir::SimpleTypeSpec::Boolean => "bool".to_string(),
-            hir::SimpleTypeSpec::AnyType
-            | hir::SimpleTypeSpec::ObjectType
-            | hir::SimpleTypeSpec::ValueBaseType => "any".to_string(),
-            hir::SimpleTypeSpec::ScopedName(value) => value
-                .name
-                .iter()
-                .map(|part| part.to_case(convert_case::Case::Pascal))
-                .collect::<Vec<_>>()
-                .join(""),
+        hir::TypeSpec::IntegerType(value) => match value {
+            hir::IntegerType::Char => "int8".to_string(),
+            hir::IntegerType::UChar | hir::IntegerType::U8 => "uint8".to_string(),
+            hir::IntegerType::U16 => "uint16".to_string(),
+            hir::IntegerType::U32 => "uint32".to_string(),
+            hir::IntegerType::U64 => "uint64".to_string(),
+            hir::IntegerType::I8 => "int8".to_string(),
+            hir::IntegerType::I16 => "int16".to_string(),
+            hir::IntegerType::I32 => "int32".to_string(),
+            hir::IntegerType::I64 => "int64".to_string(),
         },
-        hir::TypeSpec::TemplateTypeSpec(template) => match template {
-            hir::TemplateTypeSpec::SequenceType(seq) => format!("[]{}", go_type(&seq.ty)),
-            hir::TemplateTypeSpec::StringType(_) | hir::TemplateTypeSpec::WideStringType(_) => {
-                "string".to_string()
-            }
-            hir::TemplateTypeSpec::FixedPtType(_) => "float64".to_string(),
-            hir::TemplateTypeSpec::MapType(map) => {
-                format!("map[{}]{}", go_type(&map.key), go_type(&map.value))
-            }
-            hir::TemplateTypeSpec::TemplateType(value) => {
-                value.ident.to_case(convert_case::Case::Pascal)
-            }
-        },
+        hir::TypeSpec::FloatingPtType => "float64".to_string(),
+        hir::TypeSpec::CharType | hir::TypeSpec::WideCharType => "rune".to_string(),
+        hir::TypeSpec::Boolean => "bool".to_string(),
+        hir::TypeSpec::AnyType | hir::TypeSpec::ObjectType | hir::TypeSpec::ValueBaseType => {
+            "any".to_string()
+        }
+        hir::TypeSpec::ScopedName(value) => value
+            .name
+            .iter()
+            .map(|part| part.to_case(convert_case::Case::Pascal))
+            .collect::<Vec<_>>()
+            .join(""),
+        hir::TypeSpec::SequenceType(seq) => format!("[]{}", go_type(&seq.ty)),
+        hir::TypeSpec::StringType(_) | hir::TypeSpec::WideStringType(_) => "string".to_string(),
+        hir::TypeSpec::FixedPtType(_) => "float64".to_string(),
+        hir::TypeSpec::MapType(map) => {
+            format!("map[{}]{}", go_type(&map.key), go_type(&map.value))
+        }
+        hir::TypeSpec::TemplateType(value) => value.ident.to_case(convert_case::Case::Pascal),
     }
 }
 

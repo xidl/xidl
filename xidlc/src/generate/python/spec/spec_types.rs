@@ -4,55 +4,43 @@ use xidl_parser::hir::TypeSpec;
 
 pub(super) fn py_type(value: &TypeSpec) -> String {
     match value {
-        TypeSpec::SimpleTypeSpec(value) => match value {
-            hir::SimpleTypeSpec::IntegerType(hir::IntegerType::U8)
-            | hir::SimpleTypeSpec::IntegerType(hir::IntegerType::U16)
-            | hir::SimpleTypeSpec::IntegerType(hir::IntegerType::U32)
-            | hir::SimpleTypeSpec::IntegerType(hir::IntegerType::U64)
-            | hir::SimpleTypeSpec::IntegerType(hir::IntegerType::I8)
-            | hir::SimpleTypeSpec::IntegerType(hir::IntegerType::I16)
-            | hir::SimpleTypeSpec::IntegerType(hir::IntegerType::I32)
-            | hir::SimpleTypeSpec::IntegerType(hir::IntegerType::I64)
-            | hir::SimpleTypeSpec::IntegerType(hir::IntegerType::Char)
-            | hir::SimpleTypeSpec::IntegerType(hir::IntegerType::UChar) => "int".to_string(),
-            hir::SimpleTypeSpec::FloatingPtType => "float".to_string(),
-            hir::SimpleTypeSpec::CharType
-            | hir::SimpleTypeSpec::WideCharType
-            | hir::SimpleTypeSpec::ScopedName(hir::ScopedName { .. }) => match value {
-                hir::SimpleTypeSpec::ScopedName(name) => py_scoped_name(name),
-                _ => "str".to_string(),
-            },
-            hir::SimpleTypeSpec::Boolean => "bool".to_string(),
-            hir::SimpleTypeSpec::AnyType
-            | hir::SimpleTypeSpec::ObjectType
-            | hir::SimpleTypeSpec::ValueBaseType => "Any".to_string(),
-        },
-        TypeSpec::TemplateTypeSpec(value) => match value {
-            hir::TemplateTypeSpec::SequenceType(value) => format!("list[{}]", py_type(&value.ty)),
-            hir::TemplateTypeSpec::StringType(_) | hir::TemplateTypeSpec::WideStringType(_) => {
-                "str".to_string()
+        TypeSpec::IntegerType(hir::IntegerType::U8)
+        | TypeSpec::IntegerType(hir::IntegerType::U16)
+        | TypeSpec::IntegerType(hir::IntegerType::U32)
+        | TypeSpec::IntegerType(hir::IntegerType::U64)
+        | TypeSpec::IntegerType(hir::IntegerType::I8)
+        | TypeSpec::IntegerType(hir::IntegerType::I16)
+        | TypeSpec::IntegerType(hir::IntegerType::I32)
+        | TypeSpec::IntegerType(hir::IntegerType::I64)
+        | TypeSpec::IntegerType(hir::IntegerType::Char)
+        | TypeSpec::IntegerType(hir::IntegerType::UChar) => "int".to_string(),
+        TypeSpec::FloatingPtType => "float".to_string(),
+        TypeSpec::CharType | TypeSpec::WideCharType => "str".to_string(),
+        TypeSpec::ScopedName(name) => py_scoped_name(name),
+        TypeSpec::Boolean => "bool".to_string(),
+        TypeSpec::AnyType | TypeSpec::ObjectType | TypeSpec::ValueBaseType => "Any".to_string(),
+        TypeSpec::SequenceType(value) => format!("list[{}]", py_type(&value.ty)),
+        TypeSpec::StringType(_) | TypeSpec::WideStringType(_) => "str".to_string(),
+        TypeSpec::FixedPtType(_) => "float".to_string(),
+        TypeSpec::MapType(value) => {
+            format!("dict[{}, {}]", py_type(&value.key), py_type(&value.value))
+        }
+        TypeSpec::TemplateType(value) => {
+            if value.args.is_empty() {
+                py_type_name(&value.ident)
+            } else {
+                format!(
+                    "{}[{}]",
+                    py_type_name(&value.ident),
+                    value
+                        .args
+                        .iter()
+                        .map(py_type)
+                        .collect::<Vec<_>>()
+                        .join(", ")
+                )
             }
-            hir::TemplateTypeSpec::FixedPtType(_) => "float".to_string(),
-            hir::TemplateTypeSpec::MapType(value) => {
-                format!("dict[{}, {}]", py_type(&value.key), py_type(&value.value))
-            }
-            hir::TemplateTypeSpec::TemplateType(value) => {
-                if value.args.is_empty() {
-                    py_type_name(&value.ident)
-                } else {
-                    format!(
-                        "{}[{}]",
-                        py_type_name(&value.ident),
-                        value
-                            .args
-                            .iter()
-                            .map(py_type)
-                            .collect::<Vec<_>>()
-                            .join(", ")
-                    )
-                }
-            }
-        },
+        }
     }
 }
 

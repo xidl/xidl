@@ -2285,42 +2285,34 @@ fn method_struct_prefix(interface_name: &str, method_name: &str) -> String {
 
 fn axum_type(ty: &hir::TypeSpec) -> String {
     match ty {
-        hir::TypeSpec::SimpleTypeSpec(simple) => match simple {
-            hir::SimpleTypeSpec::IntegerType(value) => rust_integer_type(value),
-            hir::SimpleTypeSpec::FloatingPtType => "f64".to_string(),
-            hir::SimpleTypeSpec::CharType => "char".to_string(),
-            hir::SimpleTypeSpec::WideCharType => "char".to_string(),
-            hir::SimpleTypeSpec::Boolean => "bool".to_string(),
-            hir::SimpleTypeSpec::AnyType => "xidl_rust_axum::serde_json::Value".to_string(),
-            hir::SimpleTypeSpec::ObjectType => "xidl_rust_axum::serde_json::Value".to_string(),
-            hir::SimpleTypeSpec::ValueBaseType => "xidl_rust_axum::serde_json::Value".to_string(),
-            hir::SimpleTypeSpec::ScopedName(value) => render_scoped_name(value),
-        },
-        hir::TypeSpec::TemplateTypeSpec(template) => match template {
-            hir::TemplateTypeSpec::SequenceType(seq) => {
-                format!("Vec<{}>", axum_type(&seq.ty))
-            }
-            hir::TemplateTypeSpec::StringType(_) => "String".to_string(),
-            hir::TemplateTypeSpec::WideStringType(_) => "String".to_string(),
-            hir::TemplateTypeSpec::FixedPtType(_) => "f64".to_string(),
-            hir::TemplateTypeSpec::MapType(map) => {
-                format!(
-                    "::std::collections::BTreeMap<{}, {}>",
-                    axum_type(&map.key),
-                    axum_type(&map.value)
-                )
-            }
-            hir::TemplateTypeSpec::TemplateType(value) => format!(
-                "{}<{}>",
-                rust_ident(&value.ident),
-                value
-                    .args
-                    .iter()
-                    .map(axum_type)
-                    .collect::<Vec<_>>()
-                    .join(", ")
-            ),
-        },
+        hir::TypeSpec::IntegerType(value) => rust_integer_type(value),
+        hir::TypeSpec::FloatingPtType => "f64".to_string(),
+        hir::TypeSpec::CharType | hir::TypeSpec::WideCharType => "char".to_string(),
+        hir::TypeSpec::Boolean => "bool".to_string(),
+        hir::TypeSpec::AnyType | hir::TypeSpec::ObjectType | hir::TypeSpec::ValueBaseType => {
+            "xidl_rust_axum::serde_json::Value".to_string()
+        }
+        hir::TypeSpec::ScopedName(value) => render_scoped_name(value),
+        hir::TypeSpec::SequenceType(seq) => format!("Vec<{}>", axum_type(&seq.ty)),
+        hir::TypeSpec::StringType(_) | hir::TypeSpec::WideStringType(_) => "String".to_string(),
+        hir::TypeSpec::FixedPtType(_) => "f64".to_string(),
+        hir::TypeSpec::MapType(map) => {
+            format!(
+                "::std::collections::BTreeMap<{}, {}>",
+                axum_type(&map.key),
+                axum_type(&map.value)
+            )
+        }
+        hir::TypeSpec::TemplateType(value) => format!(
+            "{}<{}>",
+            rust_ident(&value.ident),
+            value
+                .args
+                .iter()
+                .map(axum_type)
+                .collect::<Vec<_>>()
+                .join(", ")
+        ),
     }
 }
 
@@ -2916,40 +2908,30 @@ fn param_source_code(source: ParamSource) -> String {
 }
 
 fn header_is_multi(ty: &hir::TypeSpec) -> bool {
-    matches!(
-        ty,
-        hir::TypeSpec::TemplateTypeSpec(hir::TemplateTypeSpec::SequenceType(_))
-    )
+    matches!(ty, hir::TypeSpec::SequenceType(_))
 }
 
 fn header_item_ty(ty: &hir::TypeSpec) -> String {
     match ty {
-        hir::TypeSpec::TemplateTypeSpec(hir::TemplateTypeSpec::SequenceType(seq)) => {
-            axum_type(&seq.ty)
-        }
+        hir::TypeSpec::SequenceType(seq) => axum_type(&seq.ty),
         _ => axum_type(ty),
     }
 }
 
 fn header_item_is_string(ty: &hir::TypeSpec) -> bool {
     match ty {
-        hir::TypeSpec::TemplateTypeSpec(hir::TemplateTypeSpec::SequenceType(seq)) => {
-            header_item_is_string(&seq.ty)
-        }
-        hir::TypeSpec::TemplateTypeSpec(hir::TemplateTypeSpec::StringType(_))
-        | hir::TypeSpec::TemplateTypeSpec(hir::TemplateTypeSpec::WideStringType(_)) => true,
+        hir::TypeSpec::SequenceType(seq) => header_item_is_string(&seq.ty),
+        hir::TypeSpec::StringType(_) | hir::TypeSpec::WideStringType(_) => true,
         _ => false,
     }
 }
 
 fn header_item_is_primitive(ty: &hir::TypeSpec) -> bool {
     match ty {
-        hir::TypeSpec::TemplateTypeSpec(hir::TemplateTypeSpec::SequenceType(seq)) => {
-            header_item_is_primitive(&seq.ty)
+        hir::TypeSpec::SequenceType(seq) => header_item_is_primitive(&seq.ty),
+        hir::TypeSpec::IntegerType(_) | hir::TypeSpec::FloatingPtType | hir::TypeSpec::Boolean => {
+            true
         }
-        hir::TypeSpec::SimpleTypeSpec(hir::SimpleTypeSpec::IntegerType(_))
-        | hir::TypeSpec::SimpleTypeSpec(hir::SimpleTypeSpec::FloatingPtType)
-        | hir::TypeSpec::SimpleTypeSpec(hir::SimpleTypeSpec::Boolean) => true,
         _ => false,
     }
 }

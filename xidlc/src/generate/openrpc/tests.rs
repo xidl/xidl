@@ -13,7 +13,7 @@ fn doc_annotation(text: &str) -> hir::Annotation {
 fn schema_for_struct_applies_doc_to_fields() {
     let member = hir::Member {
         annotations: vec![doc_annotation("field doc")],
-        ty: hir::TypeSpec::SimpleTypeSpec(hir::SimpleTypeSpec::IntegerType(hir::IntegerType::I32)),
+        ty: hir::TypeSpec::IntegerType(hir::IntegerType::I32),
         ident: vec![hir::Declarator::SimpleDeclarator(hir::SimpleDeclarator(
             "value".to_string(),
         ))],

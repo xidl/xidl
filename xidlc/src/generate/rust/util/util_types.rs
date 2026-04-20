@@ -67,38 +67,32 @@ pub fn rust_const_type(ty: &hir::ConstType) -> String {
 
 pub fn rust_type(ty: &hir::TypeSpec) -> String {
     match ty {
-        hir::TypeSpec::SimpleTypeSpec(simple) => match simple {
-            hir::SimpleTypeSpec::IntegerType(value) => rust_integer_type(value),
-            hir::SimpleTypeSpec::FloatingPtType => "f64".to_string(),
-            hir::SimpleTypeSpec::CharType | hir::SimpleTypeSpec::WideCharType => "char".to_string(),
-            hir::SimpleTypeSpec::Boolean => "bool".to_string(),
-            hir::SimpleTypeSpec::AnyType
-            | hir::SimpleTypeSpec::ObjectType
-            | hir::SimpleTypeSpec::ValueBaseType => "::serde_json::Value".to_string(),
-            hir::SimpleTypeSpec::ScopedName(value) => rust_scoped_name(value),
-        },
-        hir::TypeSpec::TemplateTypeSpec(template) => match template {
-            hir::TemplateTypeSpec::SequenceType(seq) => format!("Vec<{}>", rust_type(&seq.ty)),
-            hir::TemplateTypeSpec::StringType(_) | hir::TemplateTypeSpec::WideStringType(_) => {
-                "String".to_string()
-            }
-            hir::TemplateTypeSpec::FixedPtType(_) => "f64".to_string(),
-            hir::TemplateTypeSpec::MapType(map) => format!(
-                "::std::collections::BTreeMap<{}, {}>",
-                rust_type(&map.key),
-                rust_type(&map.value)
-            ),
-            hir::TemplateTypeSpec::TemplateType(value) => format!(
-                "{}<{}>",
-                rust_ident(&value.ident),
-                value
-                    .args
-                    .iter()
-                    .map(rust_type)
-                    .collect::<Vec<_>>()
-                    .join(", ")
-            ),
-        },
+        hir::TypeSpec::IntegerType(value) => rust_integer_type(value),
+        hir::TypeSpec::FloatingPtType => "f64".to_string(),
+        hir::TypeSpec::CharType | hir::TypeSpec::WideCharType => "char".to_string(),
+        hir::TypeSpec::Boolean => "bool".to_string(),
+        hir::TypeSpec::AnyType | hir::TypeSpec::ObjectType | hir::TypeSpec::ValueBaseType => {
+            "::serde_json::Value".to_string()
+        }
+        hir::TypeSpec::ScopedName(value) => rust_scoped_name(value),
+        hir::TypeSpec::SequenceType(seq) => format!("Vec<{}>", rust_type(&seq.ty)),
+        hir::TypeSpec::StringType(_) | hir::TypeSpec::WideStringType(_) => "String".to_string(),
+        hir::TypeSpec::FixedPtType(_) => "f64".to_string(),
+        hir::TypeSpec::MapType(map) => format!(
+            "::std::collections::BTreeMap<{}, {}>",
+            rust_type(&map.key),
+            rust_type(&map.value)
+        ),
+        hir::TypeSpec::TemplateType(value) => format!(
+            "{}<{}>",
+            rust_ident(&value.ident),
+            value
+                .args
+                .iter()
+                .map(rust_type)
+                .collect::<Vec<_>>()
+                .join(", ")
+        ),
     }
 }
 

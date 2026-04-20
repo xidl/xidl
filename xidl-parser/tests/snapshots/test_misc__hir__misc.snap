@@ -162,22 +162,18 @@ Specification(
                 TypedefDcl {
                     annotations: [],
                     ty: TypeSpec(
-                        TemplateTypeSpec(
-                            SequenceType(
-                                SequenceType {
-                                    ty: SimpleTypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "Foo",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    len: None,
-                                },
-                            ),
+                        SequenceType(
+                            SequenceType {
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "Foo",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                                len: None,
+                            },
                         ),
                     ),
                     decl: [
@@ -195,32 +191,28 @@ Specification(
                 TypedefDcl {
                     annotations: [],
                     ty: TypeSpec(
-                        TemplateTypeSpec(
-                            SequenceType(
-                                SequenceType {
-                                    ty: SimpleTypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "Foo",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    len: Some(
-                                        PositiveIntConst(
-                                            Literal(
+                        SequenceType(
+                            SequenceType {
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "Foo",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                                len: Some(
+                                    PositiveIntConst(
+                                        Literal(
+                                            IntegerLiteral(
                                                 IntegerLiteral(
-                                                    IntegerLiteral(
-                                                        "12",
-                                                    ),
+                                                    "12",
                                                 ),
                                             ),
                                         ),
                                     ),
-                                },
-                            ),
+                                ),
+                            },
                         ),
                     ),
                     decl: [
@@ -238,33 +230,29 @@ Specification(
                 TypedefDcl {
                     annotations: [],
                     ty: TypeSpec(
-                        TemplateTypeSpec(
-                            SequenceType(
-                                SequenceType {
-                                    ty: SimpleTypeSpec(
+                        SequenceType(
+                            SequenceType {
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "Foo",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                                len: Some(
+                                    PositiveIntConst(
                                         ScopedName(
                                             ScopedName {
                                                 name: [
-                                                    "Foo",
+                                                    "red",
                                                 ],
                                                 is_root: false,
                                             },
                                         ),
                                     ),
-                                    len: Some(
-                                        PositiveIntConst(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "red",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
-                                        ),
-                                    ),
-                                },
-                            ),
+                                ),
+                            },
                         ),
                     ),
                     decl: [
@@ -287,10 +275,8 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    IntegerType(
-                                        I32,
-                                    ),
+                                ty: IntegerType(
+                                    I32,
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -306,15 +292,13 @@ Specification(
                             },
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "FooSeq",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "FooSeq",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -348,22 +332,18 @@ Specification(
                 TypedefDcl {
                     annotations: [],
                     ty: TypeSpec(
-                        TemplateTypeSpec(
-                            SequenceType(
-                                SequenceType {
-                                    ty: SimpleTypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "Bar",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    len: None,
-                                },
-                            ),
+                        SequenceType(
+                            SequenceType {
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "Bar",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                                len: None,
+                            },
                         ),
                     ),
                     decl: [
@@ -401,10 +381,8 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            IntegerType(
-                                                I32,
-                                            ),
+                                        IntegerType(
+                                            I32,
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -440,9 +418,7 @@ Specification(
                                                 member: [
                                                     Member {
                                                         annotations: [],
-                                                        ty: SimpleTypeSpec(
-                                                            FloatingPtType,
-                                                        ),
+                                                        ty: FloatingPtType,
                                                         ident: [
                                                             SimpleDeclarator(
                                                                 SimpleDeclarator(
@@ -457,15 +433,13 @@ Specification(
                                                     },
                                                     Member {
                                                         annotations: [],
-                                                        ty: SimpleTypeSpec(
-                                                            ScopedName(
-                                                                ScopedName {
-                                                                    name: [
-                                                                        "BarSeq",
-                                                                    ],
-                                                                    is_root: false,
-                                                                },
-                                                            ),
+                                                        ty: ScopedName(
+                                                            ScopedName {
+                                                                name: [
+                                                                    "BarSeq",
+                                                                ],
+                                                                is_root: false,
+                                                            },
                                                         ),
                                                         ident: [
                                                             SimpleDeclarator(
@@ -661,17 +635,15 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "dds",
-                                                "rpc",
-                                                "UnusedMember",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "UnusedMember",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -700,17 +672,15 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "dds",
-                                                "rpc",
-                                                "UnusedMember",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "UnusedMember",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -756,15 +726,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "A_make_it_so_Out",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_make_it_so_Out",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -799,17 +767,15 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "dds",
-                                                        "rpc",
-                                                        "UnknownOperation",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "rpc",
+                                                    "UnknownOperation",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -838,15 +804,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "A_make_it_so_In",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_make_it_so_In",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -874,17 +838,15 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "dds",
-                                                "rpc",
-                                                "RequestHeader",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "RequestHeader",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -900,15 +862,13 @@ Specification(
                             },
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "A_Call",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "A_Call",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -944,17 +904,15 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "dds",
-                                                        "rpc",
-                                                        "UnknownOperation",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "rpc",
+                                                    "UnknownOperation",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -983,15 +941,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "A_make_it_so_Result",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_make_it_so_Result",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -1019,17 +975,15 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "dds",
-                                                "rpc",
-                                                "ReplyHeader",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "ReplyHeader",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -1045,15 +999,13 @@ Specification(
                             },
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "A_Return",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "A_Return",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -1125,10 +1077,8 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    IntegerType(
-                                        I32,
-                                    ),
+                                ty: IntegerType(
+                                    I32,
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -1157,10 +1107,8 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    IntegerType(
-                                        I16,
-                                    ),
+                                ty: IntegerType(
+                                    I16,
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -1206,15 +1154,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "B_make_it_so_Out",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "B_make_it_so_Out",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -1249,17 +1195,15 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "dds",
-                                                        "rpc",
-                                                        "UnknownOperation",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "rpc",
+                                                    "UnknownOperation",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -1288,15 +1232,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "B_make_it_so_In",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "B_make_it_so_In",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -1324,17 +1266,15 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "dds",
-                                                "rpc",
-                                                "RequestHeader",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "RequestHeader",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -1350,15 +1290,13 @@ Specification(
                             },
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "B_Call",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "B_Call",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -1394,17 +1332,15 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "dds",
-                                                        "rpc",
-                                                        "UnknownOperation",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "rpc",
+                                                    "UnknownOperation",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -1433,15 +1369,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "B_make_it_so_Result",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "B_make_it_so_Result",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -1469,17 +1403,15 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "dds",
-                                                "rpc",
-                                                "ReplyHeader",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "ReplyHeader",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -1495,15 +1427,13 @@ Specification(
                             },
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "B_Return",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "B_Return",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -1551,10 +1481,8 @@ Specification(
                                         OpDcl {
                                             annotations: [],
                                             ty: TypeSpec(
-                                                SimpleTypeSpec(
-                                                    IntegerType(
-                                                        I16,
-                                                    ),
+                                                IntegerType(
+                                                    I16,
                                                 ),
                                             ),
                                             ident: "make_it_so",
@@ -1568,10 +1496,8 @@ Specification(
                                                                     "in",
                                                                 ),
                                                             ),
-                                                            ty: SimpleTypeSpec(
-                                                                IntegerType(
-                                                                    I32,
-                                                                ),
+                                                            ty: IntegerType(
+                                                                I32,
                                                             ),
                                                             declarator: SimpleDeclarator(
                                                                 "times",
@@ -1701,15 +1627,13 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "L1",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "L1",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -1738,10 +1662,8 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    IntegerType(
-                                        I16,
-                                    ),
+                                ty: IntegerType(
+                                    I16,
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -1787,15 +1709,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "A_opA_Out",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_opA_Out",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -1830,17 +1750,15 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "dds",
-                                                        "rpc",
-                                                        "UnknownOperation",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "rpc",
+                                                    "UnknownOperation",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -1869,15 +1787,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "A_opA_In",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_opA_In",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -1905,17 +1821,15 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "dds",
-                                                "rpc",
-                                                "RequestHeader",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "RequestHeader",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -1931,15 +1845,13 @@ Specification(
                             },
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "A_Call",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "A_Call",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -1975,17 +1887,15 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "dds",
-                                                        "rpc",
-                                                        "UnknownOperation",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "rpc",
+                                                    "UnknownOperation",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -2014,15 +1924,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "A_opA_Result",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_opA_Result",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -2050,17 +1958,15 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "dds",
-                                                "rpc",
-                                                "ReplyHeader",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "ReplyHeader",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -2076,15 +1982,13 @@ Specification(
                             },
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "A_Return",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "A_Return",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -2120,10 +2024,8 @@ Specification(
                                             TypedefDcl {
                                                 annotations: [],
                                                 ty: TypeSpec(
-                                                    SimpleTypeSpec(
-                                                        IntegerType(
-                                                            I32,
-                                                        ),
+                                                    IntegerType(
+                                                        I32,
                                                     ),
                                                 ),
                                                 decl: [
@@ -2140,10 +2042,8 @@ Specification(
                                         OpDcl {
                                             annotations: [],
                                             ty: TypeSpec(
-                                                SimpleTypeSpec(
-                                                    IntegerType(
-                                                        I16,
-                                                    ),
+                                                IntegerType(
+                                                    I16,
                                                 ),
                                             ),
                                             ident: "opA",
@@ -2157,15 +2057,13 @@ Specification(
                                                                     "in",
                                                                 ),
                                                             ),
-                                                            ty: SimpleTypeSpec(
-                                                                ScopedName(
-                                                                    ScopedName {
-                                                                        name: [
-                                                                            "L1",
-                                                                        ],
-                                                                        is_root: false,
-                                                                    },
-                                                                ),
+                                                            ty: ScopedName(
+                                                                ScopedName {
+                                                                    name: [
+                                                                        "L1",
+                                                                    ],
+                                                                    is_root: false,
+                                                                },
                                                             ),
                                                             declarator: SimpleDeclarator(
                                                                 "l_1",
@@ -2209,10 +2107,8 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    IntegerType(
-                                        I32,
-                                    ),
+                                ty: IntegerType(
+                                    I32,
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -2241,15 +2137,13 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "L1",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "L1",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -2295,15 +2189,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "B_opB_Out",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "B_opB_Out",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -2338,17 +2230,15 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "dds",
-                                                        "rpc",
-                                                        "UnknownOperation",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "rpc",
+                                                    "UnknownOperation",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -2377,15 +2267,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "B_opB_In",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "B_opB_In",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -2413,17 +2301,15 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "dds",
-                                                "rpc",
-                                                "RequestHeader",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "RequestHeader",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -2439,15 +2325,13 @@ Specification(
                             },
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "B_Call",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "B_Call",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -2483,17 +2367,15 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "dds",
-                                                        "rpc",
-                                                        "UnknownOperation",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "rpc",
+                                                    "UnknownOperation",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -2522,15 +2404,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "B_opB_Result",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "B_opB_Result",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -2558,17 +2438,15 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "dds",
-                                                "rpc",
-                                                "ReplyHeader",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "ReplyHeader",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -2584,15 +2462,13 @@ Specification(
                             },
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "B_Return",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "B_Return",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -2628,10 +2504,8 @@ Specification(
                                             TypedefDcl {
                                                 annotations: [],
                                                 ty: TypeSpec(
-                                                    SimpleTypeSpec(
-                                                        IntegerType(
-                                                            I16,
-                                                        ),
+                                                    IntegerType(
+                                                        I16,
                                                     ),
                                                 ),
                                                 decl: [
@@ -2648,15 +2522,13 @@ Specification(
                                         OpDcl {
                                             annotations: [],
                                             ty: TypeSpec(
-                                                SimpleTypeSpec(
-                                                    ScopedName(
-                                                        ScopedName {
-                                                            name: [
-                                                                "L1",
-                                                            ],
-                                                            is_root: false,
-                                                        },
-                                                    ),
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "L1",
+                                                        ],
+                                                        is_root: false,
+                                                    },
                                                 ),
                                             ),
                                             ident: "opB",
@@ -2670,10 +2542,8 @@ Specification(
                                                                     "in",
                                                                 ),
                                                             ),
-                                                            ty: SimpleTypeSpec(
-                                                                IntegerType(
-                                                                    I32,
-                                                                ),
+                                                            ty: IntegerType(
+                                                                I32,
                                                             ),
                                                             declarator: SimpleDeclarator(
                                                                 "l",
@@ -2717,15 +2587,13 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "L3",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "L3",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -2754,16 +2622,14 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "B",
-                                                "L1",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "B",
+                                            "L1",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -2809,15 +2675,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "C_opC_Out",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "C_opC_Out",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -2852,17 +2716,15 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "dds",
-                                                        "rpc",
-                                                        "UnknownOperation",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "rpc",
+                                                    "UnknownOperation",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -2891,15 +2753,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "C_opC_In",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "C_opC_In",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -2927,17 +2787,15 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "dds",
-                                                "rpc",
-                                                "RequestHeader",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "RequestHeader",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -2953,15 +2811,13 @@ Specification(
                             },
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "C_Call",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "C_Call",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -2997,17 +2853,15 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "dds",
-                                                        "rpc",
-                                                        "UnknownOperation",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "rpc",
+                                                    "UnknownOperation",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -3036,15 +2890,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "C_opC_Result",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "C_opC_Result",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -3072,17 +2924,15 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "dds",
-                                                "rpc",
-                                                "ReplyHeader",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "ReplyHeader",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -3098,15 +2948,13 @@ Specification(
                             },
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "C_Return",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "C_Return",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -3163,15 +3011,13 @@ Specification(
                                             TypedefDcl {
                                                 annotations: [],
                                                 ty: TypeSpec(
-                                                    SimpleTypeSpec(
-                                                        ScopedName(
-                                                            ScopedName {
-                                                                name: [
-                                                                    "L1",
-                                                                ],
-                                                                is_root: false,
-                                                            },
-                                                        ),
+                                                    ScopedName(
+                                                        ScopedName {
+                                                            name: [
+                                                                "L1",
+                                                            ],
+                                                            is_root: false,
+                                                        },
                                                     ),
                                                 ),
                                                 decl: [
@@ -3189,16 +3035,14 @@ Specification(
                                             TypedefDcl {
                                                 annotations: [],
                                                 ty: TypeSpec(
-                                                    SimpleTypeSpec(
-                                                        ScopedName(
-                                                            ScopedName {
-                                                                name: [
-                                                                    "A",
-                                                                    "L1",
-                                                                ],
-                                                                is_root: false,
-                                                            },
-                                                        ),
+                                                    ScopedName(
+                                                        ScopedName {
+                                                            name: [
+                                                                "A",
+                                                                "L1",
+                                                            ],
+                                                            is_root: false,
+                                                        },
                                                     ),
                                                 ),
                                                 decl: [
@@ -3215,16 +3059,14 @@ Specification(
                                         OpDcl {
                                             annotations: [],
                                             ty: TypeSpec(
-                                                SimpleTypeSpec(
-                                                    ScopedName(
-                                                        ScopedName {
-                                                            name: [
-                                                                "B",
-                                                                "L1",
-                                                            ],
-                                                            is_root: false,
-                                                        },
-                                                    ),
+                                                ScopedName(
+                                                    ScopedName {
+                                                        name: [
+                                                            "B",
+                                                            "L1",
+                                                        ],
+                                                        is_root: false,
+                                                    },
                                                 ),
                                             ),
                                             ident: "opC",
@@ -3238,15 +3080,13 @@ Specification(
                                                                     "in",
                                                                 ),
                                                             ),
-                                                            ty: SimpleTypeSpec(
-                                                                ScopedName(
-                                                                    ScopedName {
-                                                                        name: [
-                                                                            "L3",
-                                                                        ],
-                                                                        is_root: false,
-                                                                    },
-                                                                ),
+                                                            ty: ScopedName(
+                                                                ScopedName {
+                                                                    name: [
+                                                                        "L3",
+                                                                    ],
+                                                                    is_root: false,
+                                                                },
                                                             ),
                                                             declarator: SimpleDeclarator(
                                                                 "l_3",
@@ -3305,15 +3145,13 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "coord",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "coord",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -3342,17 +3180,15 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "dds",
-                                                "rpc",
-                                                "UnusedMember",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "UnusedMember",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -3398,15 +3234,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "A_f_Out",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_f_Out",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -3441,17 +3275,15 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "dds",
-                                                        "rpc",
-                                                        "UnknownOperation",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "rpc",
+                                                    "UnknownOperation",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -3480,15 +3312,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "A_f_In",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_f_In",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -3516,17 +3346,15 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "dds",
-                                                "rpc",
-                                                "RequestHeader",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "RequestHeader",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -3542,15 +3370,13 @@ Specification(
                             },
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "A_Call",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "A_Call",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -3586,17 +3412,15 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "dds",
-                                                        "rpc",
-                                                        "UnknownOperation",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "rpc",
+                                                    "UnknownOperation",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -3625,15 +3449,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "A_f_Result",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_f_Result",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -3661,17 +3483,15 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "dds",
-                                                "rpc",
-                                                "ReplyHeader",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "ReplyHeader",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -3687,15 +3507,13 @@ Specification(
                             },
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "A_Return",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "A_Return",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -3731,9 +3549,7 @@ Specification(
                                             TypedefDcl {
                                                 annotations: [],
                                                 ty: TypeSpec(
-                                                    SimpleTypeSpec(
-                                                        FloatingPtType,
-                                                    ),
+                                                    FloatingPtType,
                                                 ),
                                                 decl: [
                                                     ArrayDeclarator(
@@ -3771,15 +3587,13 @@ Specification(
                                                                     "in",
                                                                 ),
                                                             ),
-                                                            ty: SimpleTypeSpec(
-                                                                ScopedName(
-                                                                    ScopedName {
-                                                                        name: [
-                                                                            "coord",
-                                                                        ],
-                                                                        is_root: false,
-                                                                    },
-                                                                ),
+                                                            ty: ScopedName(
+                                                                ScopedName {
+                                                                    name: [
+                                                                        "coord",
+                                                                    ],
+                                                                    is_root: false,
+                                                                },
                                                             ),
                                                             declarator: SimpleDeclarator(
                                                                 "s",
@@ -3884,22 +3698,20 @@ Specification(
                                             TypedefDcl {
                                                 annotations: [],
                                                 ty: TypeSpec(
-                                                    TemplateTypeSpec(
-                                                        StringType(
-                                                            StringType {
-                                                                bound: Some(
-                                                                    PositiveIntConst(
-                                                                        Literal(
+                                                    StringType(
+                                                        StringType {
+                                                            bound: Some(
+                                                                PositiveIntConst(
+                                                                    Literal(
+                                                                        IntegerLiteral(
                                                                             IntegerLiteral(
-                                                                                IntegerLiteral(
-                                                                                    "128",
-                                                                                ),
+                                                                                "128",
                                                                             ),
                                                                         ),
                                                                     ),
                                                                 ),
-                                                            },
-                                                        ),
+                                                            ),
+                                                        },
                                                     ),
                                                 ),
                                                 decl: [
@@ -3936,22 +3748,20 @@ Specification(
                                             TypedefDcl {
                                                 annotations: [],
                                                 ty: TypeSpec(
-                                                    TemplateTypeSpec(
-                                                        StringType(
-                                                            StringType {
-                                                                bound: Some(
-                                                                    PositiveIntConst(
-                                                                        Literal(
+                                                    StringType(
+                                                        StringType {
+                                                            bound: Some(
+                                                                PositiveIntConst(
+                                                                    Literal(
+                                                                        IntegerLiteral(
                                                                             IntegerLiteral(
-                                                                                IntegerLiteral(
-                                                                                    "256",
-                                                                                ),
+                                                                                "256",
                                                                             ),
                                                                         ),
                                                                     ),
                                                                 ),
-                                                            },
-                                                        ),
+                                                            ),
+                                                        },
                                                     ),
                                                 ),
                                                 decl: [
@@ -4071,17 +3881,15 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "dds",
-                                                "rpc",
-                                                "UnusedMember",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "UnusedMember",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -4110,15 +3918,13 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "string_t",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "string_t",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -4164,15 +3970,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "C_get_attribute_Title_Out",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "C_get_attribute_Title_Out",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -4200,15 +4004,13 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "string_t",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "string_t",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -4237,17 +4039,15 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "dds",
-                                                "rpc",
-                                                "UnusedMember",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "UnusedMember",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -4293,15 +4093,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "C_set_attribute_Title_Out",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "C_set_attribute_Title_Out",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -4329,17 +4127,15 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "dds",
-                                                "rpc",
-                                                "UnusedMember",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "UnusedMember",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -4368,16 +4164,14 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "A",
-                                                "string_t",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "A",
+                                            "string_t",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -4423,15 +4217,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "C_get_attribute_Name_Out",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "C_get_attribute_Name_Out",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -4459,16 +4251,14 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "A",
-                                                "string_t",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "A",
+                                            "string_t",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -4497,17 +4287,15 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "dds",
-                                                "rpc",
-                                                "UnusedMember",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "UnusedMember",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -4553,15 +4341,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "C_set_attribute_Name_Out",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "C_set_attribute_Name_Out",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -4589,17 +4375,15 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "dds",
-                                                "rpc",
-                                                "UnusedMember",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "UnusedMember",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -4628,16 +4412,14 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "B",
-                                                "string_t",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "B",
+                                            "string_t",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -4683,15 +4465,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "C_get_attribute_City_Out",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "C_get_attribute_City_Out",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -4719,16 +4499,14 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "B",
-                                                "string_t",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "B",
+                                            "string_t",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -4757,17 +4535,15 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "dds",
-                                                "rpc",
-                                                "UnusedMember",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "UnusedMember",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -4813,15 +4589,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "C_set_attribute_City_Out",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "C_set_attribute_City_Out",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -4856,17 +4630,15 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "dds",
-                                                        "rpc",
-                                                        "UnknownOperation",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "rpc",
+                                                    "UnknownOperation",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -4895,15 +4667,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "C_get_attribute_Title_In",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "C_get_attribute_Title_In",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -4932,15 +4702,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "C_set_attribute_Title_In",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "C_set_attribute_Title_In",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -4969,15 +4737,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "C_get_attribute_Name_In",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "C_get_attribute_Name_In",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -5006,15 +4772,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "C_set_attribute_Name_In",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "C_set_attribute_Name_In",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -5043,15 +4807,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "C_get_attribute_City_In",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "C_get_attribute_City_In",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -5080,15 +4842,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "C_set_attribute_City_In",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "C_set_attribute_City_In",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -5116,17 +4876,15 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "dds",
-                                                "rpc",
-                                                "RequestHeader",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "RequestHeader",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -5142,15 +4900,13 @@ Specification(
                             },
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "C_Call",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "C_Call",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -5186,17 +4942,15 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "dds",
-                                                        "rpc",
-                                                        "UnknownOperation",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "rpc",
+                                                    "UnknownOperation",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -5225,15 +4979,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "C_get_attribute_Title_Result",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "C_get_attribute_Title_Result",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -5262,15 +5014,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "C_set_attribute_Title_Result",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "C_set_attribute_Title_Result",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -5299,15 +5049,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "C_get_attribute_Name_Result",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "C_get_attribute_Name_Result",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -5336,15 +5084,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "C_set_attribute_Name_Result",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "C_set_attribute_Name_Result",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -5373,15 +5119,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "C_get_attribute_City_Result",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "C_get_attribute_City_Result",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -5410,15 +5154,13 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        SimpleTypeSpec(
-                                            ScopedName(
-                                                ScopedName {
-                                                    name: [
-                                                        "C_set_attribute_City_Result",
-                                                    ],
-                                                    is_root: false,
-                                                },
-                                            ),
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "C_set_attribute_City_Result",
+                                                ],
+                                                is_root: false,
+                                            },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
@@ -5446,17 +5188,15 @@ Specification(
                         member: [
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "dds",
-                                                "rpc",
-                                                "ReplyHeader",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "dds",
+                                            "rpc",
+                                            "ReplyHeader",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -5472,15 +5212,13 @@ Specification(
                             },
                             Member {
                                 annotations: [],
-                                ty: SimpleTypeSpec(
-                                    ScopedName(
-                                        ScopedName {
-                                            name: [
-                                                "C_Return",
-                                            ],
-                                            is_root: false,
-                                        },
-                                    ),
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "C_Return",
+                                        ],
+                                        is_root: false,
+                                    },
                                 ),
                                 ident: [
                                     SimpleDeclarator(
@@ -5537,15 +5275,13 @@ Specification(
                                             annotations: [],
                                             decl: AttrSpec(
                                                 AttrSpec {
-                                                    ty: SimpleTypeSpec(
-                                                        ScopedName(
-                                                            ScopedName {
-                                                                name: [
-                                                                    "string_t",
-                                                                ],
-                                                                is_root: false,
-                                                            },
-                                                        ),
+                                                    ty: ScopedName(
+                                                        ScopedName {
+                                                            name: [
+                                                                "string_t",
+                                                            ],
+                                                            is_root: false,
+                                                        },
                                                     ),
                                                     declarator: SimpleDeclarator(
                                                         [
@@ -5563,16 +5299,14 @@ Specification(
                                             annotations: [],
                                             decl: AttrSpec(
                                                 AttrSpec {
-                                                    ty: SimpleTypeSpec(
-                                                        ScopedName(
-                                                            ScopedName {
-                                                                name: [
-                                                                    "A",
-                                                                    "string_t",
-                                                                ],
-                                                                is_root: false,
-                                                            },
-                                                        ),
+                                                    ty: ScopedName(
+                                                        ScopedName {
+                                                            name: [
+                                                                "A",
+                                                                "string_t",
+                                                            ],
+                                                            is_root: false,
+                                                        },
                                                     ),
                                                     declarator: SimpleDeclarator(
                                                         [
@@ -5590,16 +5324,14 @@ Specification(
                                             annotations: [],
                                             decl: AttrSpec(
                                                 AttrSpec {
-                                                    ty: SimpleTypeSpec(
-                                                        ScopedName(
-                                                            ScopedName {
-                                                                name: [
-                                                                    "B",
-                                                                    "string_t",
-                                                                ],
-                                                                is_root: false,
-                                                            },
-                                                        ),
+                                                    ty: ScopedName(
+                                                        ScopedName {
+                                                            name: [
+                                                                "B",
+                                                                "string_t",
+                                                            ],
+                                                            is_root: false,
+                                                        },
                                                     ),
                                                     declarator: SimpleDeclarator(
                                                         [

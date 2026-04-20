@@ -10,15 +10,13 @@ Specification(
                 member: [
                     Member {
                         annotations: [],
-                        ty: SimpleTypeSpec(
-                            ScopedName(
-                                ScopedName {
-                                    name: [
-                                        "u8",
-                                    ],
-                                    is_root: false,
-                                },
-                            ),
+                        ty: ScopedName(
+                            ScopedName {
+                                name: [
+                                    "u8",
+                                ],
+                                is_root: false,
+                            },
                         ),
                         ident: [
                             SimpleDeclarator(
@@ -32,15 +30,13 @@ Specification(
                     },
                     Member {
                         annotations: [],
-                        ty: SimpleTypeSpec(
-                            ScopedName(
-                                ScopedName {
-                                    name: [
-                                        "u16",
-                                    ],
-                                    is_root: false,
-                                },
-                            ),
+                        ty: ScopedName(
+                            ScopedName {
+                                name: [
+                                    "u16",
+                                ],
+                                is_root: false,
+                            },
                         ),
                         ident: [
                             ArrayDeclarator(
@@ -65,12 +61,10 @@ Specification(
                     },
                     Member {
                         annotations: [],
-                        ty: TemplateTypeSpec(
-                            StringType(
-                                StringType {
-                                    bound: None,
-                                },
-                            ),
+                        ty: StringType(
+                            StringType {
+                                bound: None,
+                            },
                         ),
                         ident: [
                             ArrayDeclarator(
@@ -104,22 +98,18 @@ Specification(
                     },
                     Member {
                         annotations: [],
-                        ty: TemplateTypeSpec(
-                            SequenceType(
-                                SequenceType {
-                                    ty: SimpleTypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "u8",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    len: None,
-                                },
-                            ),
+                        ty: SequenceType(
+                            SequenceType {
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "u8",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                                len: None,
+                            },
                         ),
                         ident: [
                             SimpleDeclarator(
@@ -133,22 +123,20 @@ Specification(
                     },
                     Member {
                         annotations: [],
-                        ty: TemplateTypeSpec(
-                            StringType(
-                                StringType {
-                                    bound: Some(
-                                        PositiveIntConst(
-                                            Literal(
+                        ty: StringType(
+                            StringType {
+                                bound: Some(
+                                    PositiveIntConst(
+                                        Literal(
+                                            IntegerLiteral(
                                                 IntegerLiteral(
-                                                    IntegerLiteral(
-                                                        "20",
-                                                    ),
+                                                    "20",
                                                 ),
                                             ),
                                         ),
                                     ),
-                                },
-                            ),
+                                ),
+                            },
                         ),
                         ident: [
                             SimpleDeclarator(
@@ -162,22 +150,20 @@ Specification(
                     },
                     Member {
                         annotations: [],
-                        ty: TemplateTypeSpec(
-                            WideStringType(
-                                WideStringType {
-                                    bound: Some(
-                                        PositiveIntConst(
-                                            Literal(
+                        ty: WideStringType(
+                            WideStringType {
+                                bound: Some(
+                                    PositiveIntConst(
+                                        Literal(
+                                            IntegerLiteral(
                                                 IntegerLiteral(
-                                                    IntegerLiteral(
-                                                        "20",
-                                                    ),
+                                                    "20",
                                                 ),
                                             ),
                                         ),
                                     ),
-                                },
-                            ),
+                                ),
+                            },
                         ),
                         ident: [
                             SimpleDeclarator(
@@ -191,29 +177,27 @@ Specification(
                     },
                     Member {
                         annotations: [],
-                        ty: TemplateTypeSpec(
-                            FixedPtType(
-                                FixedPtType {
-                                    integer: PositiveIntConst(
-                                        Literal(
+                        ty: FixedPtType(
+                            FixedPtType {
+                                integer: PositiveIntConst(
+                                    Literal(
+                                        IntegerLiteral(
                                             IntegerLiteral(
-                                                IntegerLiteral(
-                                                    "1",
-                                                ),
+                                                "1",
                                             ),
                                         ),
                                     ),
-                                    fraction: PositiveIntConst(
-                                        Literal(
+                                ),
+                                fraction: PositiveIntConst(
+                                    Literal(
+                                        IntegerLiteral(
                                             IntegerLiteral(
-                                                IntegerLiteral(
-                                                    "2",
-                                                ),
+                                                "2",
                                             ),
                                         ),
                                     ),
-                                },
-                            ),
+                                ),
+                            },
                         ),
                         ident: [
                             SimpleDeclarator(

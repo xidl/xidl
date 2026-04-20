@@ -5,12 +5,6 @@ use super::*;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[allow(clippy::large_enum_variant)]
 pub enum TypeSpec {
-    SimpleTypeSpec(SimpleTypeSpec),
-    TemplateTypeSpec(TemplateTypeSpec),
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub enum SimpleTypeSpec {
     IntegerType(IntegerType),
     FloatingPtType,
     CharType,
@@ -20,10 +14,6 @@ pub enum SimpleTypeSpec {
     ObjectType,
     ValueBaseType,
     ScopedName(ScopedName),
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub enum TemplateTypeSpec {
     SequenceType(SequenceType),
     StringType(StringType),
     WideStringType(WideStringType),
@@ -84,38 +74,36 @@ pub enum IntegerType {
 impl From<crate::typed_ast::TypeSpec> for TypeSpec {
     fn from(value: crate::typed_ast::TypeSpec) -> Self {
         match value {
-            crate::typed_ast::TypeSpec::SimpleTypeSpec(simple_type_spec) => {
-                Self::SimpleTypeSpec(simple_type_spec.into())
-            }
+            crate::typed_ast::TypeSpec::SimpleTypeSpec(simple_type_spec) => simple_type_spec.into(),
             crate::typed_ast::TypeSpec::TemplateTypeSpec(template_type_spec) => {
-                Self::TemplateTypeSpec(template_type_spec.into())
+                template_type_spec.into()
             }
         }
     }
 }
 
-impl From<crate::typed_ast::SimpleTypeSpec> for SimpleTypeSpec {
+impl From<crate::typed_ast::SimpleTypeSpec> for TypeSpec {
     fn from(ty: crate::typed_ast::SimpleTypeSpec) -> Self {
         match ty {
             crate::typed_ast::SimpleTypeSpec::BaseTypeSpec(base_type_spec) => {
                 match base_type_spec {
                     crate::typed_ast::BaseTypeSpec::IntegerType(integer_type) => {
-                        Self::IntegerType(integer_type.into())
+                        TypeSpec::IntegerType(integer_type.into())
                     }
-                    crate::typed_ast::BaseTypeSpec::FloatingPtType(_) => Self::FloatingPtType,
-                    crate::typed_ast::BaseTypeSpec::CharType(_) => Self::CharType,
-                    crate::typed_ast::BaseTypeSpec::WideCharType(_) => Self::WideCharType,
-                    crate::typed_ast::BaseTypeSpec::BooleanType(_) => Self::Boolean,
+                    crate::typed_ast::BaseTypeSpec::FloatingPtType(_) => TypeSpec::FloatingPtType,
+                    crate::typed_ast::BaseTypeSpec::CharType(_) => TypeSpec::CharType,
+                    crate::typed_ast::BaseTypeSpec::WideCharType(_) => TypeSpec::WideCharType,
+                    crate::typed_ast::BaseTypeSpec::BooleanType(_) => TypeSpec::Boolean,
                     crate::typed_ast::BaseTypeSpec::OctetType(_) => {
-                        Self::IntegerType(IntegerType::U8)
+                        TypeSpec::IntegerType(IntegerType::U8)
                     }
-                    crate::typed_ast::BaseTypeSpec::AnyType(_) => Self::AnyType,
-                    crate::typed_ast::BaseTypeSpec::ObjectType(_) => Self::ObjectType,
-                    crate::typed_ast::BaseTypeSpec::ValueBaseType(_) => Self::ValueBaseType,
+                    crate::typed_ast::BaseTypeSpec::AnyType(_) => TypeSpec::AnyType,
+                    crate::typed_ast::BaseTypeSpec::ObjectType(_) => TypeSpec::ObjectType,
+                    crate::typed_ast::BaseTypeSpec::ValueBaseType(_) => TypeSpec::ValueBaseType,
                 }
             }
             crate::typed_ast::SimpleTypeSpec::ScopedName(scoped_name) => {
-                Self::ScopedName(scoped_name.into())
+                TypeSpec::ScopedName(scoped_name.into())
             }
         }
     }
@@ -140,24 +128,26 @@ impl From<crate::typed_ast::IntegerType> for IntegerType {
     }
 }
 
-impl From<crate::typed_ast::TemplateTypeSpec> for TemplateTypeSpec {
+impl From<crate::typed_ast::TemplateTypeSpec> for TypeSpec {
     fn from(value: crate::typed_ast::TemplateTypeSpec) -> Self {
         match value {
             crate::typed_ast::TemplateTypeSpec::SequenceType(sequence_type) => {
-                Self::SequenceType(sequence_type.into())
+                TypeSpec::SequenceType(sequence_type.into())
             }
             crate::typed_ast::TemplateTypeSpec::StringType(string_type) => {
-                Self::StringType(string_type.into())
+                TypeSpec::StringType(string_type.into())
             }
             crate::typed_ast::TemplateTypeSpec::WideStringType(wide_string_type) => {
-                Self::WideStringType(wide_string_type.into())
+                TypeSpec::WideStringType(wide_string_type.into())
             }
             crate::typed_ast::TemplateTypeSpec::FixedPtType(fixed_pt_type) => {
-                Self::FixedPtType(fixed_pt_type.into())
+                TypeSpec::FixedPtType(fixed_pt_type.into())
             }
-            crate::typed_ast::TemplateTypeSpec::MapType(map_type) => Self::MapType(map_type.into()),
+            crate::typed_ast::TemplateTypeSpec::MapType(map_type) => {
+                TypeSpec::MapType(map_type.into())
+            }
             crate::typed_ast::TemplateTypeSpec::TemplateType(template_type) => {
-                Self::TemplateType(template_type.into())
+                TypeSpec::TemplateType(template_type.into())
             }
         }
     }
