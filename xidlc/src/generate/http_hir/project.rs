@@ -2,12 +2,12 @@ use crate::error::{IdlcError, IdlcResult};
 use std::collections::HashSet;
 use xidl_parser::hir;
 
-use super::http_hir_attr::project_attribute;
-use super::http_hir_project_params::project_params;
-use super::http_hir_route::{
+use super::attr::project_attribute;
+use super::project_params::project_params;
+use super::route::{
     auto_default_method_path, operation_id, parse_route_template, route_from_annotations,
 };
-use super::http_hir_validate::{
+use super::validate::{
     effective_basic_auth_realm, effective_deprecated, validate_head_constraints,
     validate_request_shape, validate_route_bindings, validate_stream_method, validate_stream_shape,
 };

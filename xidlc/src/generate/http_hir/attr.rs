@@ -1,7 +1,7 @@
 use convert_case::{Case, Casing};
 use xidl_parser::hir;
 
-use super::http_hir_route::{attribute_path, default_path, operation_id, readonly_attr_names};
+use super::route::{attribute_path, default_path, operation_id, readonly_attr_names};
 use super::semantics::{
     DeprecatedInfo, HttpSecurityProfile, HttpStreamCodec, HttpStreamConfig, HttpStreamKind,
 };

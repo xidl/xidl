@@ -2,8 +2,8 @@ use crate::error::IdlcResult;
 use std::collections::{HashMap, HashSet};
 use xidl_parser::hir;
 
-use super::http_hir_route::{SourceBinding, explicit_param_binding};
-use super::http_hir_validate::{
+use super::route::{SourceBinding, explicit_param_binding};
+use super::validate::{
     default_param_source, param_direction, validate_cookie_name, validate_header_name,
     validate_projected_param,
 };

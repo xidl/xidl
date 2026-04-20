@@ -104,7 +104,7 @@ pub(super) fn auto_default_method_path(op: &hir::OpDcl, method: HttpMethod) -> I
         .unwrap_or(&[]);
     for param in params {
         if matches!(
-            super::http_hir_validate::param_direction(param.attr.as_ref()),
+            super::validate::param_direction(param.attr.as_ref()),
             HttpParamDirection::Out
         ) {
             continue;
@@ -113,7 +113,7 @@ pub(super) fn auto_default_method_path(op: &hir::OpDcl, method: HttpMethod) -> I
         let source = binding
             .as_ref()
             .map(|value| value.source)
-            .unwrap_or(super::http_hir_validate::default_param_source(method));
+            .unwrap_or(super::validate::default_param_source(method));
         let bound_name = binding
             .as_ref()
             .map(|value| value.bound_name.clone())
