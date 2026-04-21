@@ -38,6 +38,36 @@ fn jinja_set_assignment_does_not_open_block() {
 }
 
 #[test]
+fn jinja_skip_comment_in_hash_line_skips_formatting() {
+    let source = "## jinja-fmt: skip\n{% if cond %}\nline1\n{% endif %}";
+    let formatted = format_jinja_source(source).expect("format jinja");
+    assert_eq!(
+        formatted,
+        "## jinja-fmt: skip\n{% if cond %}\nline1\n{% endif %}"
+    );
+}
+
+#[test]
+fn jinja_skip_comment_in_block_comment_skips_formatting() {
+    let source = "{# jinja-fmt: skip #}\n{% if cond %}\nline1\n{% endif %}";
+    let formatted = format_jinja_source(source).expect("format jinja");
+    assert_eq!(
+        formatted,
+        "{# jinja-fmt: skip #}\n{% if cond %}\nline1\n{% endif %}"
+    );
+}
+
+#[test]
+fn jinja_skip_only_works_in_header_comments() {
+    let source = "{% if cond %}\n## jinja-fmt: skip\nline1\n{% endif %}";
+    let formatted = format_jinja_source(source).expect("format jinja");
+    assert_eq!(
+        formatted,
+        "{% if cond %}\n    ## jinja-fmt: skip\n    line1\n{% endif %}\n"
+    );
+}
+
+#[test]
 fn idl_formatter_appends_trailing_newline() {
     let source = "struct Point {\n    int32 x;\n};";
     let formatted = format_idl_source(source).expect("format idl");

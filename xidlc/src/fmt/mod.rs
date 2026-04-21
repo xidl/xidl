@@ -92,6 +92,10 @@ pub fn format_typescript_source(source: &str) -> IdlcResult<String> {
 }
 
 pub fn format_jinja_source(source: &str) -> IdlcResult<String> {
+    if jinja::should_skip_jinja_format(source) {
+        return Ok(source.to_string());
+    }
+
     Ok(normalize_blank_lines(&jinja::normalize_jinja_indentation(
         source,
     )))

@@ -5,37 +5,44 @@ pub(super) fn normalize_jinja_indentation(input: &str) -> String {
     let mut control_depth: i32 = 0;
     let mut content_brace_depth: i32 = 0;
     for line in input.lines() {
+        let line = line.trim_end_matches('\r');
         let trimmed = line.trim();
         if trimmed.is_empty() {
             out.push('\n');
             continue;
         }
-        let is_control = trimmed.starts_with("{%") && trimmed.ends_with("%}");
-        let control_tag = parse_jinja_control_tag(trimmed);
+
+        let content = strip_leading_indent(line);
+        let control_tag = parse_jinja_control_tag(content.trim());
         if let Some(tag) = control_tag {
             if is_jinja_control_end(tag.statement) || is_jinja_control_mid(tag.statement) {
                 control_depth = (control_depth - 1).max(0);
             }
         }
-        let line_content_depth = if is_control {
+
+        let line_content_depth = if control_tag.is_some() {
             content_brace_depth
         } else {
-            let leading_closing = trimmed.chars().take_while(|&ch| ch == '}').count() as i32;
+            let leading_closing = content
+                .trim_start()
+                .chars()
+                .take_while(|&ch| ch == '}')
+                .count() as i32;
             (content_brace_depth - leading_closing).max(0)
         };
+
         for _ in 0..(control_depth + line_content_depth).max(0) {
             out.push_str(INDENT);
         }
-        out.push_str(trimmed);
+        out.push_str(content);
         out.push('\n');
-        if is_control {
-            if let Some(tag) = control_tag {
-                if is_jinja_control_start(tag) || is_jinja_control_mid(tag.statement) {
-                    control_depth += 1;
-                }
+
+        if let Some(tag) = control_tag {
+            if is_jinja_control_start(tag) || is_jinja_control_mid(tag.statement) {
+                control_depth += 1;
             }
         } else {
-            content_brace_depth = next_content_brace_depth(trimmed, content_brace_depth);
+            content_brace_depth = next_content_brace_depth(content, content_brace_depth);
         }
     }
     if out.ends_with('\n') {
@@ -48,6 +55,50 @@ pub(super) fn normalize_jinja_indentation(input: &str) -> String {
 struct JinjaControlTag<'a> {
     statement: &'a str,
     body: &'a str,
+}
+
+pub(super) fn should_skip_jinja_format(input: &str) -> bool {
+    let mut in_block_comment = false;
+    for line in input.lines() {
+        let trimmed = line.trim();
+        if trimmed.is_empty() {
+            if in_block_comment {
+                continue;
+            }
+            continue;
+        }
+
+        if in_block_comment {
+            if trimmed.contains("jinja-fmt: skip") {
+                return true;
+            }
+            if trimmed.contains("#}") {
+                in_block_comment = false;
+            }
+            continue;
+        }
+
+        if trimmed.starts_with("##") {
+            if trimmed.contains("jinja-fmt: skip") {
+                return true;
+            }
+            continue;
+        }
+
+        if trimmed.starts_with("{#") {
+            if trimmed.contains("jinja-fmt: skip") {
+                return true;
+            }
+            if !trimmed.contains("#}") {
+                in_block_comment = true;
+            }
+            continue;
+        }
+
+        return false;
+    }
+
+    false
 }
 
 fn parse_jinja_control_tag(line: &str) -> Option<JinjaControlTag<'_>> {
@@ -97,6 +148,10 @@ fn is_jinja_control_end(statement: &str) -> bool {
             | "endtrans"
             | "endautoescape"
     )
+}
+
+fn strip_leading_indent(line: &str) -> &str {
+    line.trim_start_matches([' ', '\t'])
 }
 
 fn next_content_brace_depth(line: &str, current: i32) -> i32 {
