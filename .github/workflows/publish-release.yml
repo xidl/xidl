@@ -40,7 +40,7 @@ jobs:
             -e "s|RELEASE_TAG|${{ github.ref_type == 'tag' && github.ref_name || 'nightly' }}|g" \
             ./.github/release_template.md > release/body.md
 
-      - name: Create or update managed prerelease
+      - name: Create or update managed release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_NAME: ${{ github.ref_type == 'tag' && github.ref_name || 'nightly' }}
@@ -48,19 +48,24 @@ jobs:
         run: |
           set -euo pipefail
 
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            release_flags=(--latest)
+          else
+            release_flags=(--prerelease --latest=false)
+          fi
+
           if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release edit "$RELEASE_TAG" \
               --repo "$GITHUB_REPOSITORY" \
               --title "$RELEASE_NAME" \
               --notes-file release/body.md \
-              --prerelease
+              "${release_flags[@]}"
           else
             gh release create "$RELEASE_TAG" \
               --repo "$GITHUB_REPOSITORY" \
               --title "$RELEASE_NAME" \
               --notes-file release/body.md \
-              --prerelease \
-              --latest=false
+              "${release_flags[@]}"
           fi
 
   upload-assets:
