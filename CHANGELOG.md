@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.46.0](https://github.com/xidl/xidl/compare/v0.45.0...v0.46.0) (2026-04-21)
+
+
+### Features
+
+* **xidlc:** update jinja formatter ([41bf57a](https://github.com/xidl/xidl/commit/41bf57af999f5d398528d7a0d0aa9252b6ea8ea5))
+
 ## [0.45.0](https://github.com/xidl/xidl/compare/v0.44.0...v0.45.0) (2026-04-16)
 
 
