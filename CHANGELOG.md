@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.47.0](https://github.com/xidl/xidl/compare/v0.46.0...v0.47.0) (2026-04-22)
+
+
+### Features
+
+* **xidlc:** render constructor by service ([a476311](https://github.com/xidl/xidl/commit/a47631193f39fb52c3b5eb556d3e3a3af0f90bda))
+
 ## [0.46.0](https://github.com/xidl/xidl/compare/v0.45.0...v0.46.0) (2026-04-21)
 
 
