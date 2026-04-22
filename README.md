@@ -1,5 +1,7 @@
 # XIDL
 
+![demo](./assets/demo.svg)
+
 Define interfaces once. Generate APIs, SDKs, specs, and tooling from one
 source of truth.
 

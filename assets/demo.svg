@@ -1,0 +1,58 @@
+<svg width="800" height="150" viewBox="0 0 800 150" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #24292f;
+      --highlight-color: #0969da;
+      --terminal-green: #1a7f37;
+    }
+
+    text {
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+      font-size: 32px;
+      fill: var(--text-color);
+    }
+
+    .prompt { fill: var(--terminal-green); }
+    .oc-value { fill: var(--highlight-color); opacity: 0; }
+
+    /* 8 languages, 2s each = 16s total cycle */
+    .cycle {
+      animation: cycle-text 16s infinite;
+    }
+
+    @keyframes cycle-text {
+      0%, 12.4% { opacity: 0; transform: translateY(0); }
+      12.5%, 24.9% { opacity: 1; transform: translateY(0); } /* Shown for 2s */
+      13% { transform: translateY(-10px); } /* Jump start */
+      14% { transform: translateY(0); }    /* Jump end */
+      25% { opacity: 0; }
+    }
+
+    /* Staggered delays for each language */
+    #lang-0 { animation-delay: 0s; }
+    #lang-1 { animation-delay: 2s; }
+    #lang-2 { animation-delay: 4s; }
+    #lang-3 { animation-delay: 6s; }
+    #lang-4 { animation-delay: 8s; }
+    #lang-5 { animation-delay: 10s; }
+    #lang-6 { animation-delay: 12s; }
+    #lang-7 { animation-delay: 14s; }
+  </style>
+
+  <rect width="100%" height="100%" fill="#ffffff" rx="10" stroke="#d0d7de" stroke-width="1"/>
+
+  <g transform="translate(50, 85)">
+    <text x="0" y="0" class="prompt">$</text>
+    <text x="35" y="0">xidlc api.idl -l</text>
+
+    <!-- Stacked language values -->
+    <text id="lang-0" x="375" y="0" class="oc-value cycle">rust</text>
+    <text id="lang-1" x="375" y="0" class="oc-value cycle">go</text>
+    <text id="lang-2" x="375" y="0" class="oc-value cycle">python</text>
+    <text id="lang-3" x="375" y="0" class="oc-value cycle">rust-axum</text>
+    <text id="lang-4" x="375" y="0" class="oc-value cycle">go-http</text>
+    <text id="lang-5" x="375" y="0" class="oc-value cycle">openapi</text>
+    <text id="lang-6" x="375" y="0" class="oc-value cycle">openrpc</text>
+    <text id="lang-7" x="375" y="0" class="oc-value cycle">python-http</text>  </g>
+</svg>
