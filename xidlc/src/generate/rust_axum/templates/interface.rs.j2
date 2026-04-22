@@ -16,8 +16,8 @@ pub trait {{ ident }} {
         {%- endif %}
         async fn {{ method.name }}(
         &self,
-        req: xidl_rust_axum::Request<{{ method.request_payload_ty }}>
-        ) -> Result<{% if method.is_server_stream %}xidl_rust_axum::stream::SseStream<{{ method.response_ty }}>{% elif method.is_bidi_stream %}(){% else %}{{ method.response_ty }}{% endif %}, xidl_rust_axum::Error>;
+        req: ::xidl_rust_axum::Request<{{ method.request_payload_ty }}>
+        ) -> ::xidl_rust_axum::Result<{% if method.is_server_stream %}xidl_rust_axum::stream::SseStream<{{ method.response_ty }}>{% elif method.is_bidi_stream %}(){% else %}{{ method.response_ty }}{% endif %}>;
     {% endfor %}
 }
 

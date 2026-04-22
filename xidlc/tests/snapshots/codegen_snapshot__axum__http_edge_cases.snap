@@ -9,20 +9,20 @@ http_edge_cases.rs
 pub trait HttpEdgeCasesService {
     async fn health(
         &self,
-        req: xidl_rust_axum::Request<HttpEdgeCasesServiceHealthRequest>,
-    ) -> Result<(), xidl_rust_axum::Error>;
+        req: ::xidl_rust_axum::Request<HttpEdgeCasesServiceHealthRequest>,
+    ) -> ::xidl_rust_axum::Result<()>;
     async fn get_user(
         &self,
-        req: xidl_rust_axum::Request<HttpEdgeCasesServiceGetUserRequest>,
-    ) -> Result<String, xidl_rust_axum::Error>;
+        req: ::xidl_rust_axum::Request<HttpEdgeCasesServiceGetUserRequest>,
+    ) -> ::xidl_rust_axum::Result<String>;
     async fn get_item(
         &self,
-        req: xidl_rust_axum::Request<HttpEdgeCasesServiceGetItemRequest>,
-    ) -> Result<String, xidl_rust_axum::Error>;
+        req: ::xidl_rust_axum::Request<HttpEdgeCasesServiceGetItemRequest>,
+    ) -> ::xidl_rust_axum::Result<String>;
     async fn lookup(
         &self,
-        req: xidl_rust_axum::Request<HttpEdgeCasesServiceLookupRequest>,
-    ) -> Result<String, xidl_rust_axum::Error>;
+        req: ::xidl_rust_axum::Request<HttpEdgeCasesServiceLookupRequest>,
+    ) -> ::xidl_rust_axum::Result<String>;
 }
 #[derive(::serde::Serialize, ::serde::Deserialize, ::core::default::Default)]
 struct HttpEdgeCasesServiceHealthQuery {
@@ -281,40 +281,43 @@ where
     }
 }
 pub struct HttpEdgeCasesServiceClient {
-    client: xidl_rust_axum::Client,
+    client: ::xidl_rust_axum::Client,
 }
 impl HttpEdgeCasesServiceClient {
     pub fn new(base_url: impl Into<String>) -> Self {
         Self {
-            client: xidl_rust_axum::Client::new(base_url),
+            client: ::xidl_rust_axum::Client::new(base_url),
         }
     }
     pub fn with_auth(
         base_url: impl Into<String>,
-        auth: xidl_rust_axum::ClientAuth,
+        auth: ::xidl_rust_axum::ClientAuth,
     ) -> Self {
         Self {
-            client: xidl_rust_axum::Client::with_auth(base_url, auth),
+            client: ::xidl_rust_axum::Client::with_auth(base_url, auth),
         }
     }
     pub fn with_http(
         base_url: impl Into<String>,
-        http: xidl_rust_axum::reqwest::Client,
+        http: ::xidl_rust_axum::reqwest::Client,
     ) -> Self {
         Self {
-            client: xidl_rust_axum::Client::with_http(base_url, http),
+            client: ::xidl_rust_axum::Client::with_http(base_url, http),
         }
     }
     pub fn with_http_and_auth(
         base_url: impl Into<String>,
-        http: xidl_rust_axum::reqwest::Client,
-        auth: xidl_rust_axum::ClientAuth,
+        http: ::xidl_rust_axum::reqwest::Client,
+        auth: ::xidl_rust_axum::ClientAuth,
     ) -> Self {
         Self {
-            client: xidl_rust_axum::Client::with_http_and_auth(base_url, http, auth),
+            client: ::xidl_rust_axum::Client::with_http_and_auth(base_url, http, auth),
         }
     }
-    pub fn with_auth_override(&self, auth: Option<xidl_rust_axum::ClientAuth>) -> Self {
+    pub fn with_auth_override(
+        &self,
+        auth: Option<::xidl_rust_axum::ClientAuth>,
+    ) -> Self {
         Self {
             client: self.client.with_auth_override(auth),
         }

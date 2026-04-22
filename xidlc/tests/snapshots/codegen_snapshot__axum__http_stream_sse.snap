@@ -9,20 +9,20 @@ http_stream_sse.rs
 pub trait HttpStreamSseService {
     async fn watch_topic(
         &self,
-        req: xidl_rust_axum::Request<HttpStreamSseServiceWatchTopicRequest>,
-    ) -> Result<xidl_rust_axum::stream::SseStream<String>, xidl_rust_axum::Error>;
+        req: ::xidl_rust_axum::Request<HttpStreamSseServiceWatchTopicRequest>,
+    ) -> ::xidl_rust_axum::Result<xidl_rust_axum::stream::SseStream<String>>;
     async fn get_attribute_online(
         &self,
-        req: xidl_rust_axum::Request<()>,
-    ) -> Result<bool, xidl_rust_axum::Error>;
+        req: ::xidl_rust_axum::Request<()>,
+    ) -> ::xidl_rust_axum::Result<bool>;
     async fn set_attribute_online(
         &self,
-        req: xidl_rust_axum::Request<HttpStreamSseServiceSetAttributeOnlineRequest>,
-    ) -> Result<(), xidl_rust_axum::Error>;
+        req: ::xidl_rust_axum::Request<HttpStreamSseServiceSetAttributeOnlineRequest>,
+    ) -> ::xidl_rust_axum::Result<()>;
     async fn watch_attribute_online(
         &self,
-        req: xidl_rust_axum::Request<()>,
-    ) -> Result<xidl_rust_axum::stream::SseStream<bool>, xidl_rust_axum::Error>;
+        req: ::xidl_rust_axum::Request<()>,
+    ) -> ::xidl_rust_axum::Result<xidl_rust_axum::stream::SseStream<bool>>;
 }
 #[derive(::serde::Serialize, ::serde::Deserialize)]
 struct HttpStreamSseServiceWatchTopicPath {
@@ -232,40 +232,43 @@ where
     }
 }
 pub struct HttpStreamSseServiceClient {
-    client: xidl_rust_axum::Client,
+    client: ::xidl_rust_axum::Client,
 }
 impl HttpStreamSseServiceClient {
     pub fn new(base_url: impl Into<String>) -> Self {
         Self {
-            client: xidl_rust_axum::Client::new(base_url),
+            client: ::xidl_rust_axum::Client::new(base_url),
         }
     }
     pub fn with_auth(
         base_url: impl Into<String>,
-        auth: xidl_rust_axum::ClientAuth,
+        auth: ::xidl_rust_axum::ClientAuth,
     ) -> Self {
         Self {
-            client: xidl_rust_axum::Client::with_auth(base_url, auth),
+            client: ::xidl_rust_axum::Client::with_auth(base_url, auth),
         }
     }
     pub fn with_http(
         base_url: impl Into<String>,
-        http: xidl_rust_axum::reqwest::Client,
+        http: ::xidl_rust_axum::reqwest::Client,
     ) -> Self {
         Self {
-            client: xidl_rust_axum::Client::with_http(base_url, http),
+            client: ::xidl_rust_axum::Client::with_http(base_url, http),
         }
     }
     pub fn with_http_and_auth(
         base_url: impl Into<String>,
-        http: xidl_rust_axum::reqwest::Client,
-        auth: xidl_rust_axum::ClientAuth,
+        http: ::xidl_rust_axum::reqwest::Client,
+        auth: ::xidl_rust_axum::ClientAuth,
     ) -> Self {
         Self {
-            client: xidl_rust_axum::Client::with_http_and_auth(base_url, http, auth),
+            client: ::xidl_rust_axum::Client::with_http_and_auth(base_url, http, auth),
         }
     }
-    pub fn with_auth_override(&self, auth: Option<xidl_rust_axum::ClientAuth>) -> Self {
+    pub fn with_auth_override(
+        &self,
+        auth: Option<::xidl_rust_axum::ClientAuth>,
+    ) -> Self {
         Self {
             client: self.client.with_auth_override(auth),
         }

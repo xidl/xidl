@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::http_hir::HttpHirDocument;
 use crate::generate::utils::{format_timestamp_filter, rust_format_filter};
+use convert_case::Casing;
 use include_dir::{Dir, include_dir};
 use minijinja::{Environment, Error, ErrorKind};
 use serde::Serialize;
@@ -29,6 +30,7 @@ impl RustAxumRenderer {
         env.set_loader(|name| load_template(name).map(Some));
         env.add_filter("rustfmt", rust_format_filter);
         env.add_filter("fmt_timestamp", format_timestamp_filter);
+        env.add_filter("to_case", to_case);
         Ok(Self {
             env,
             props: HashMap::new(),
@@ -67,4 +69,12 @@ fn load_template(name: &str) -> std::result::Result<String, Error> {
             format!("template {name} is not valid utf-8"),
         )
     })
+}
+
+fn to_case(name: &str, case: &str) -> String {
+    match case {
+        "camel" => name.to_case(convert_case::Case::Camel),
+        "snake_case" => name.to_case(convert_case::Case::Snake),
+        _ => name.to_string(),
+    }
 }

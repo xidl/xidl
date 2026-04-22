@@ -10,19 +10,19 @@ pub trait HttpSecurityService {
     #[deprecated(note = "Deprecated. Since 2026-03-13T00:00:00Z.")]
     async fn get_user(
         &self,
-        req: xidl_rust_axum::Request<HttpSecurityServiceGetUserRequest>,
-    ) -> Result<String, xidl_rust_axum::Error>;
+        req: ::xidl_rust_axum::Request<HttpSecurityServiceGetUserRequest>,
+    ) -> ::xidl_rust_axum::Result<String>;
     async fn search_user(
         &self,
-        req: xidl_rust_axum::Request<HttpSecurityServiceSearchUserRequest>,
-    ) -> Result<String, xidl_rust_axum::Error>;
+        req: ::xidl_rust_axum::Request<HttpSecurityServiceSearchUserRequest>,
+    ) -> ::xidl_rust_axum::Result<String>;
     #[deprecated(
         note = "Deprecated. Since 2026-03-13T00:00:00Z. After 2026-03-14T23:59:59Z."
     )]
     async fn health(
         &self,
-        req: xidl_rust_axum::Request<()>,
-    ) -> Result<String, xidl_rust_axum::Error>;
+        req: ::xidl_rust_axum::Request<()>,
+    ) -> ::xidl_rust_axum::Result<String>;
 }
 #[derive(::serde::Serialize, ::serde::Deserialize)]
 struct HttpSecurityServiceGetUserPath {
@@ -295,40 +295,43 @@ where
     }
 }
 pub struct HttpSecurityServiceClient {
-    client: xidl_rust_axum::Client,
+    client: ::xidl_rust_axum::Client,
 }
 impl HttpSecurityServiceClient {
     pub fn new(base_url: impl Into<String>) -> Self {
         Self {
-            client: xidl_rust_axum::Client::new(base_url),
+            client: ::xidl_rust_axum::Client::new(base_url),
         }
     }
     pub fn with_auth(
         base_url: impl Into<String>,
-        auth: xidl_rust_axum::ClientAuth,
+        auth: ::xidl_rust_axum::ClientAuth,
     ) -> Self {
         Self {
-            client: xidl_rust_axum::Client::with_auth(base_url, auth),
+            client: ::xidl_rust_axum::Client::with_auth(base_url, auth),
         }
     }
     pub fn with_http(
         base_url: impl Into<String>,
-        http: xidl_rust_axum::reqwest::Client,
+        http: ::xidl_rust_axum::reqwest::Client,
     ) -> Self {
         Self {
-            client: xidl_rust_axum::Client::with_http(base_url, http),
+            client: ::xidl_rust_axum::Client::with_http(base_url, http),
         }
     }
     pub fn with_http_and_auth(
         base_url: impl Into<String>,
-        http: xidl_rust_axum::reqwest::Client,
-        auth: xidl_rust_axum::ClientAuth,
+        http: ::xidl_rust_axum::reqwest::Client,
+        auth: ::xidl_rust_axum::ClientAuth,
     ) -> Self {
         Self {
-            client: xidl_rust_axum::Client::with_http_and_auth(base_url, http, auth),
+            client: ::xidl_rust_axum::Client::with_http_and_auth(base_url, http, auth),
         }
     }
-    pub fn with_auth_override(&self, auth: Option<xidl_rust_axum::ClientAuth>) -> Self {
+    pub fn with_auth_override(
+        &self,
+        auth: Option<::xidl_rust_axum::ClientAuth>,
+    ) -> Self {
         Self {
             client: self.client.with_auth_override(auth),
         }

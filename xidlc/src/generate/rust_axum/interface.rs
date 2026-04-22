@@ -223,6 +223,7 @@ fn render_interface_def(
     }
 
     let ctx = serde_json::json!({
+        "metadata": http_hir.document,
         "ident": rust_ident(&def.header.ident),
         "methods": methods,
         "rust_attrs": rust_passthrough_attrs_from_annotations(interface_annotations),

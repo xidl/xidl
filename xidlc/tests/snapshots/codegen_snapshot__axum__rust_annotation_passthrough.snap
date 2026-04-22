@@ -11,18 +11,18 @@ pub trait RustHttp {
     #[cfg(feature = "server")]
     async fn get_user(
         &self,
-        req: xidl_rust_axum::Request<RustHttpGetUserRequest>,
-    ) -> Result<String, xidl_rust_axum::Error>;
+        req: ::xidl_rust_axum::Request<RustHttpGetUserRequest>,
+    ) -> ::xidl_rust_axum::Result<String>;
     #[cfg(feature = "server")]
     async fn get_attribute_display_name(
         &self,
-        req: xidl_rust_axum::Request<()>,
-    ) -> Result<String, xidl_rust_axum::Error>;
+        req: ::xidl_rust_axum::Request<()>,
+    ) -> ::xidl_rust_axum::Result<String>;
     #[cfg(feature = "server")]
     async fn set_attribute_display_name(
         &self,
-        req: xidl_rust_axum::Request<RustHttpSetAttributeDisplayNameRequest>,
-    ) -> Result<(), xidl_rust_axum::Error>;
+        req: ::xidl_rust_axum::Request<RustHttpSetAttributeDisplayNameRequest>,
+    ) -> ::xidl_rust_axum::Result<()>;
 }
 #[derive(::serde::Serialize, ::serde::Deserialize)]
 struct RustHttpGetUserPath {
@@ -206,40 +206,43 @@ where
     }
 }
 pub struct RustHttpClient {
-    client: xidl_rust_axum::Client,
+    client: ::xidl_rust_axum::Client,
 }
 impl RustHttpClient {
     pub fn new(base_url: impl Into<String>) -> Self {
         Self {
-            client: xidl_rust_axum::Client::new(base_url),
+            client: ::xidl_rust_axum::Client::new(base_url),
         }
     }
     pub fn with_auth(
         base_url: impl Into<String>,
-        auth: xidl_rust_axum::ClientAuth,
+        auth: ::xidl_rust_axum::ClientAuth,
     ) -> Self {
         Self {
-            client: xidl_rust_axum::Client::with_auth(base_url, auth),
+            client: ::xidl_rust_axum::Client::with_auth(base_url, auth),
         }
     }
     pub fn with_http(
         base_url: impl Into<String>,
-        http: xidl_rust_axum::reqwest::Client,
+        http: ::xidl_rust_axum::reqwest::Client,
     ) -> Self {
         Self {
-            client: xidl_rust_axum::Client::with_http(base_url, http),
+            client: ::xidl_rust_axum::Client::with_http(base_url, http),
         }
     }
     pub fn with_http_and_auth(
         base_url: impl Into<String>,
-        http: xidl_rust_axum::reqwest::Client,
-        auth: xidl_rust_axum::ClientAuth,
+        http: ::xidl_rust_axum::reqwest::Client,
+        auth: ::xidl_rust_axum::ClientAuth,
     ) -> Self {
         Self {
-            client: xidl_rust_axum::Client::with_http_and_auth(base_url, http, auth),
+            client: ::xidl_rust_axum::Client::with_http_and_auth(base_url, http, auth),
         }
     }
-    pub fn with_auth_override(&self, auth: Option<xidl_rust_axum::ClientAuth>) -> Self {
+    pub fn with_auth_override(
+        &self,
+        auth: Option<::xidl_rust_axum::ClientAuth>,
+    ) -> Self {
         Self {
             client: self.client.with_auth_override(auth),
         }
