@@ -11,6 +11,7 @@ use crate::generate::http_hir::{
     },
 };
 use crate::generate::rust::util::{rust_ident, rust_passthrough_attrs_from_annotations};
+use crate::generate::rust_axum::transport::{TransportDirection, TransportTracker, TypeRegistry};
 use crate::generate::rust_axum::{RustAxumRenderOutput, RustAxumRenderer};
 use convert_case::{Case, Casing};
 use serde::Serialize;
@@ -55,6 +56,8 @@ struct MethodContext {
     deprecated_note: Option<String>,
     params: Vec<String>,
     param_names: Vec<String>,
+    server_params: Vec<String>,
+    server_param_names: Vec<String>,
     ret: String,
     response_ty: String,
     request_body_flatten: bool,
@@ -96,6 +99,8 @@ struct MethodContext {
     is_client_stream: bool,
     is_bidi_stream: bool,
     request_item_ty: String,
+    ret_in_ty: String,
+    ret_out_ty: String,
     request_content_type: String,
     response_content_type: String,
 }
@@ -107,6 +112,8 @@ struct ParamContext {
     wire_name: String,
     path_template_name: String,
     ty: String,
+    in_ty: String,
+    out_ty: String,
     source: String,
     serde_rename: Option<String>,
     header_is_multi: bool,
@@ -147,11 +154,12 @@ pub fn render_interface_with_path(
     interface: &hir::InterfaceDcl,
     renderer: &RustAxumRenderer,
     module_path: &[String],
+    registry: &TypeRegistry,
 ) -> IdlcResult<RustAxumRenderOutput> {
     match &interface.decl {
         hir::InterfaceDclInner::InterfaceForwardDcl(_) => Ok(RustAxumRenderOutput::default()),
         hir::InterfaceDclInner::InterfaceDef(def) => {
-            render_interface_def(def, &interface.annotations, renderer, module_path)
+            render_interface_def(def, &interface.annotations, renderer, module_path, registry)
         }
     }
 }
@@ -161,9 +169,11 @@ fn render_interface_def(
     interface_annotations: &[hir::Annotation],
     renderer: &RustAxumRenderer,
     module_path: &[String],
+    registry: &TypeRegistry,
 ) -> IdlcResult<RustAxumRenderOutput> {
     let mut out = RustAxumRenderOutput::default();
     let mut methods = Vec::new();
+    let mut transport = TransportTracker::default();
     let http_hir = renderer.http_hir()?;
     let Some(http_interface) = http_hir.find_interface(module_path, &def.header.ident) else {
         return Ok(out);
@@ -186,7 +196,13 @@ fn render_interface_def(
                                 operation.name
                             ))
                         })?;
-                    methods.push(render_op_from_http(op, operation, &def.header.ident)?);
+                    methods.push(render_op_from_http(
+                        op,
+                        operation,
+                        &def.header.ident,
+                        registry,
+                        &mut transport,
+                    )?);
                 }
                 HttpOperationSource::AttributeGet
                 | HttpOperationSource::AttributeSet
@@ -203,11 +219,14 @@ fn render_interface_def(
                         attr,
                         operation,
                         &def.header.ident,
+                        registry,
+                        &mut transport,
                     )?);
                 }
             }
         }
     }
+    let transport_modules = transport.render_modules(registry, module_path)?;
 
     let mut route_bindings = HashMap::new();
     for method in &methods {
@@ -227,6 +246,8 @@ fn render_interface_def(
         "ident": rust_ident(&def.header.ident),
         "methods": methods,
         "rust_attrs": rust_passthrough_attrs_from_annotations(interface_annotations),
+        "inbound_transport": transport_modules.inbound,
+        "outbound_transport": transport_modules.outbound,
     });
     let rendered = renderer.render_template("interface.rs.j2", &ctx)?;
     out.source.push(rendered);
@@ -237,6 +258,8 @@ fn render_op_from_http(
     op: &hir::OpDcl,
     http_op: &HttpOperation,
     interface_name: &str,
+    registry: &TypeRegistry,
+    transport: &mut TransportTracker,
 ) -> IdlcResult<MethodContext> {
     let stream = http_op.stream;
     let is_server_stream = matches!(stream.kind, Some(HttpStreamKind::Server));
@@ -246,6 +269,18 @@ fn render_op_from_http(
     let ret = match &op.ty {
         hir::OpTypeSpec::Void => "()".to_string(),
         hir::OpTypeSpec::TypeSpec(ty) => axum_type(ty),
+    };
+    let ret_in_ty = match &op.ty {
+        hir::OpTypeSpec::Void => "()".to_string(),
+        hir::OpTypeSpec::TypeSpec(ty) => {
+            transport.map_type(ty, TransportDirection::In, registry)?
+        }
+    };
+    let ret_out_ty = match &op.ty {
+        hir::OpTypeSpec::Void => "()".to_string(),
+        hir::OpTypeSpec::TypeSpec(ty) => {
+            transport.map_type(ty, TransportDirection::Out, registry)?
+        }
     };
     let return_is_unit = matches!(&op.ty, hir::OpTypeSpec::Void);
     let (security, auth_source_interface, auth_source_method) = match &http_op.security {
@@ -364,6 +399,20 @@ fn render_op_from_http(
                 wire_name: shared.wire_name.clone(),
                 path_template_name: String::new(),
                 ty: inner_ty.clone(),
+                in_ty: transport_param_type(
+                    &param.ty,
+                    optional,
+                    TransportDirection::In,
+                    transport,
+                    registry,
+                )?,
+                out_ty: transport_param_type(
+                    &param.ty,
+                    optional,
+                    TransportDirection::Out,
+                    transport,
+                    registry,
+                )?,
                 source: param_source_code(http_param_kind(shared.kind)),
                 serde_rename: field_rename(&param.annotations, &name)
                     .or_else(|| serde_rename(&param.declarator.0, &name)),
@@ -375,7 +424,7 @@ fn render_op_from_http(
                 cookie_item_ty: cookie_item_ty(&param.ty),
                 cookie_item_is_string: cookie_item_is_string(&param.ty),
                 cookie_item_is_primitive: cookie_item_is_primitive(&param.ty),
-                optional: false,
+                optional,
                 inner_ty: inner_ty.clone(),
                 flatten: false,
             };
@@ -413,6 +462,20 @@ fn render_op_from_http(
             },
             wire_name,
             ty,
+            in_ty: transport_param_type(
+                &param.ty,
+                optional,
+                TransportDirection::In,
+                transport,
+                registry,
+            )?,
+            out_ty: transport_param_type(
+                &param.ty,
+                optional,
+                TransportDirection::Out,
+                transport,
+                registry,
+            )?,
             inner_ty: inner_ty.clone(),
             source: param_source_code(source),
             serde_rename: serde_rename(&serde_name, &name),
@@ -469,6 +532,7 @@ fn render_op_from_http(
     }
     let method = http_method_from_hir(http_op.method);
     let method_name = rust_ident(&op.ident);
+    let expose_auth_param = has_basic_auth || has_bearer_auth;
     let auth_in_request_struct = has_auth && !(is_client_stream || is_bidi_stream);
     let auth_wrapper_struct = if has_auth && (is_client_stream || is_bidi_stream) {
         Some(format!(
@@ -495,11 +559,18 @@ fn render_op_from_http(
     let request_ty = request_struct.clone().unwrap_or_else(|| "()".to_string());
     let mut auth_param = None;
     let mut auth_param_ty = String::new();
+    let mut server_params = param_list.clone();
+    let mut server_param_names = param_names.clone();
     if auth_source_method && (has_basic_auth || has_bearer_auth) {
         let name = "xidl_auth".to_string();
         param_list.push(format!("{name}: {auth_ty}"));
         auth_param = Some(name);
         auth_param_ty = auth_ty.clone();
+    }
+    if !is_client_stream && !is_bidi_stream && expose_auth_param {
+        let name = "xidl_auth".to_string();
+        server_params.push(format!("{name}: {auth_ty}"));
+        server_param_names.push(name);
     }
     let response_value_count = usize::from(!return_is_unit) + response_params.len();
     let response_body_count = usize::from(!return_is_unit) + response_body_params.len();
@@ -561,6 +632,8 @@ fn render_op_from_http(
         deprecated_note: deprecated.note,
         params: param_list,
         param_names,
+        server_params,
+        server_param_names,
         ret,
         response_ty,
         request_body_flatten,
@@ -602,6 +675,8 @@ fn render_op_from_http(
         is_client_stream,
         is_bidi_stream,
         request_item_ty,
+        ret_in_ty,
+        ret_out_ty,
         request_content_type: if is_client_stream {
             "application/x-ndjson".to_string()
         } else {
@@ -621,6 +696,8 @@ fn render_attr_operation_from_http(
     attr: Option<&hir::AttrDcl>,
     http_op: &HttpOperation,
     interface_name: &str,
+    registry: &TypeRegistry,
+    transport: &mut TransportTracker,
 ) -> IdlcResult<MethodContext> {
     let rust_attrs = attr
         .map(|attr| rust_passthrough_attrs_from_annotations(&attr.annotations))
@@ -696,6 +773,8 @@ fn render_attr_operation_from_http(
     let request_ty = request_struct.clone().unwrap_or_else(|| "()".to_string());
     let mut params = Vec::new();
     let mut param_names = Vec::new();
+    let mut server_params = Vec::new();
+    let mut server_param_names = Vec::new();
     let mut request_params = Vec::new();
     let mut body_params = Vec::new();
     if let Some(param) = http_op
@@ -707,12 +786,16 @@ fn render_attr_operation_from_http(
         let ty = axum_type(&param.ty);
         params.push(format!("{param_name}: {ty}"));
         param_names.push(param_name.clone());
+        server_params.push(format!("{param_name}: {ty}"));
+        server_param_names.push(param_name.clone());
         let request_param = ParamContext {
             name: param_name,
             raw_name: param.name.clone(),
             wire_name: param.wire_name.clone(),
             path_template_name: String::new(),
             ty: ty.clone(),
+            in_ty: transport.map_type(&param.ty, TransportDirection::In, registry)?,
+            out_ty: transport.map_type(&param.ty, TransportDirection::Out, registry)?,
             source: param_source_code(ParamSource::Body),
             serde_rename: None,
             header_is_multi: false,
@@ -735,7 +818,20 @@ fn render_attr_operation_from_http(
         .as_ref()
         .map(axum_type)
         .unwrap_or_else(|| "()".to_string());
+    let ret_in_ty = match &http_op.return_type {
+        Some(ty) => transport.map_type(ty, TransportDirection::In, registry)?,
+        None => "()".to_string(),
+    };
+    let ret_out_ty = match &http_op.return_type {
+        Some(ty) => transport.map_type(ty, TransportDirection::Out, registry)?,
+        None => "()".to_string(),
+    };
     let return_is_unit = http_op.return_type.is_none();
+    if has_basic_auth || has_bearer_auth {
+        let name = "xidl_auth".to_string();
+        server_params.push(format!("{name}: {auth_ty}"));
+        server_param_names.push(name);
+    }
     Ok(MethodContext {
         name: rust_ident(&http_op.name),
         raw_name: http_op.name.clone(),
@@ -746,6 +842,8 @@ fn render_attr_operation_from_http(
         deprecated_note: deprecated.note,
         params,
         param_names,
+        server_params,
+        server_param_names,
         ret: ret.clone(),
         response_ty: ret.clone(),
         request_body_flatten: false,
@@ -795,6 +893,8 @@ fn render_attr_operation_from_http(
         is_client_stream: matches!(http_op.stream.kind, Some(HttpStreamKind::Client)),
         is_bidi_stream: matches!(http_op.stream.kind, Some(HttpStreamKind::Bidi)),
         request_item_ty: "()".to_string(),
+        ret_in_ty,
+        ret_out_ty,
         request_content_type: if matches!(http_op.stream.kind, Some(HttpStreamKind::Client)) {
             "application/x-ndjson".to_string()
         } else {
@@ -892,6 +992,8 @@ fn render_op(
     interface_annotations: &[hir::Annotation],
     interface_name: &str,
     _module_path: &[String],
+    registry: &TypeRegistry,
+    transport: &mut TransportTracker,
 ) -> IdlcResult<MethodContext> {
     validate_http_annotations(&format!("operation '{}'", op.ident), &op.annotations)
         .map_err(IdlcError::rpc)?;
@@ -917,6 +1019,18 @@ fn render_op(
     let ret = match &op.ty {
         hir::OpTypeSpec::Void => "()".to_string(),
         hir::OpTypeSpec::TypeSpec(ty) => axum_type(ty),
+    };
+    let ret_in_ty = match &op.ty {
+        hir::OpTypeSpec::Void => "()".to_string(),
+        hir::OpTypeSpec::TypeSpec(ty) => {
+            transport.map_type(ty, TransportDirection::In, registry)?
+        }
+    };
+    let ret_out_ty = match &op.ty {
+        hir::OpTypeSpec::Void => "()".to_string(),
+        hir::OpTypeSpec::TypeSpec(ty) => {
+            transport.map_type(ty, TransportDirection::Out, registry)?
+        }
     };
     let return_is_unit = matches!(&op.ty, hir::OpTypeSpec::Void);
     let security_profile = effective_security_with_origin(interface_annotations, &op.annotations)
@@ -1102,6 +1216,20 @@ fn render_op(
                 wire_name: response_wire_name,
                 path_template_name: String::new(),
                 ty: inner_ty.clone(),
+                in_ty: transport_param_type(
+                    &param.ty,
+                    optional,
+                    TransportDirection::In,
+                    transport,
+                    registry,
+                )?,
+                out_ty: transport_param_type(
+                    &param.ty,
+                    optional,
+                    TransportDirection::Out,
+                    transport,
+                    registry,
+                )?,
                 source: param_source_code(response_source),
                 serde_rename: field_rename(&param.annotations, &name)
                     .or_else(|| serde_rename(&param.declarator.0, &name)),
@@ -1113,7 +1241,7 @@ fn render_op(
                 cookie_item_ty: cookie_item_ty(&param.ty),
                 cookie_item_is_string: cookie_item_is_string(&param.ty),
                 cookie_item_is_primitive: cookie_item_is_primitive(&param.ty),
-                optional: false,
+                optional,
                 inner_ty: inner_ty.clone(),
                 flatten: false,
             };
@@ -1169,6 +1297,20 @@ fn render_op(
             },
             wire_name,
             ty,
+            in_ty: transport_param_type(
+                &param.ty,
+                optional,
+                TransportDirection::In,
+                transport,
+                registry,
+            )?,
+            out_ty: transport_param_type(
+                &param.ty,
+                optional,
+                TransportDirection::Out,
+                transport,
+                registry,
+            )?,
             inner_ty: inner_ty.clone(),
             source: param_source_code(source),
             serde_rename: serde_rename(&serde_name, &name),
@@ -1314,6 +1456,13 @@ fn render_op(
         auth_param = Some(name);
         auth_param_ty = auth_ty.clone();
     }
+    let mut server_params = param_list.clone();
+    let mut server_param_names = param_names.clone();
+    if !is_client_stream && !is_bidi_stream && (has_basic_auth || has_bearer_auth) {
+        let name = "xidl_auth".to_string();
+        server_params.push(format!("{name}: {auth_ty}"));
+        server_param_names.push(name);
+    }
     let response_value_count = usize::from(!return_is_unit) + response_params.len();
     let response_body_count = usize::from(!return_is_unit) + response_body_params.len();
     let request_body_flatten = body_params.len() == 1 && body_params[0].flatten;
@@ -1373,6 +1522,8 @@ fn render_op(
         deprecated_note: deprecated.note,
         params: param_list,
         param_names,
+        server_params,
+        server_param_names,
         ret,
         response_ty,
         request_body_flatten,
@@ -1414,6 +1565,8 @@ fn render_op(
         is_client_stream,
         is_bidi_stream,
         request_item_ty,
+        ret_in_ty,
+        ret_out_ty,
         request_content_type: effective_media_type(
             interface_annotations,
             &op.annotations,
@@ -1435,6 +1588,8 @@ fn render_attr(
     interface_annotations: &[hir::Annotation],
     interface_name: &str,
     module_path: &[String],
+    _registry: &TypeRegistry,
+    _transport: &mut TransportTracker,
 ) -> Vec<MethodContext> {
     let _ = validate_http_annotations(
         &format!("attribute in interface '{interface_name}'"),
@@ -1510,6 +1665,16 @@ fn render_attr(
         auth_param = Some(name);
         auth_param_ty = auth_ty.clone();
     }
+    let server_auth_param_list = if has_basic_auth || has_bearer_auth {
+        vec![format!("xidl_auth: {auth_ty}")]
+    } else {
+        Vec::new()
+    };
+    let server_auth_param_names = if has_basic_auth || has_bearer_auth {
+        vec!["xidl_auth".to_string()]
+    } else {
+        Vec::new()
+    };
     let realm_hint = if has_basic_auth {
         find_basic_realm(&attr.annotations).or_else(|| find_basic_realm(interface_annotations))
     } else {
@@ -1552,6 +1717,8 @@ fn render_attr(
                     deprecated_note: deprecated.note.clone(),
                     params: auth_param_list.clone(),
                     param_names: Vec::new(),
+                    server_params: server_auth_param_list.clone(),
+                    server_param_names: server_auth_param_names.clone(),
                     ret: ret.clone(),
                     response_ty: ret.clone(),
                     request_body_flatten: false,
@@ -1593,6 +1760,8 @@ fn render_attr(
                     is_client_stream: false,
                     is_bidi_stream: false,
                     request_item_ty: "()".to_string(),
+                    ret_in_ty: ret.clone(),
+                    ret_out_ty: ret.clone(),
                     request_content_type: "application/json".to_string(),
                     response_content_type: "application/json".to_string(),
                 }];
@@ -1624,6 +1793,8 @@ fn render_attr(
                         deprecated_note: deprecated.note.clone(),
                         params: auth_param_list.clone(),
                         param_names: Vec::new(),
+                        server_params: Vec::new(),
+                        server_param_names: Vec::new(),
                         ret: ret.clone(),
                         response_ty: ret.clone(),
                         request_body_flatten: false,
@@ -1665,6 +1836,8 @@ fn render_attr(
                         is_client_stream: false,
                         is_bidi_stream: false,
                         request_item_ty: "()".to_string(),
+                        ret_in_ty: ret.clone(),
+                        ret_out_ty: ret.clone(),
                         request_content_type: "application/json".to_string(),
                         response_content_type: "text/event-stream".to_string(),
                     });
@@ -1706,6 +1879,8 @@ fn render_attr(
                             deprecated_note: deprecated.note.clone(),
                             params: auth_param_list.clone(),
                             param_names: Vec::new(),
+                            server_params: server_auth_param_list.clone(),
+                            server_param_names: server_auth_param_names.clone(),
                             ret: ret.clone(),
                             response_ty: ret.clone(),
                             request_body_flatten: false,
@@ -1747,6 +1922,8 @@ fn render_attr(
                             is_client_stream: false,
                             is_bidi_stream: false,
                             request_item_ty: "()".to_string(),
+                            ret_in_ty: ret.clone(),
+                            ret_out_ty: ret.clone(),
                             request_content_type: "application/json".to_string(),
                             response_content_type: "application/json".to_string(),
                         });
@@ -1770,6 +1947,8 @@ fn render_attr(
                             wire_name: raw_name.clone(),
                             path_template_name: String::new(),
                             ty: param.clone(),
+                            in_ty: param.clone(),
+                            out_ty: param.clone(),
                             source: param_source_code(ParamSource::Body),
                             serde_rename: None,
                             header_is_multi: false,
@@ -1795,7 +1974,20 @@ fn render_attr(
                             deprecated_after: deprecated.after.clone(),
                             deprecated_note: deprecated.note.clone(),
                             params,
-                            param_names: vec![param_name],
+                            param_names: vec![param_name.clone()],
+                            server_params: if has_auth {
+                                vec![
+                                    format!("{param_name}: {param}"),
+                                    format!("xidl_auth: {auth_ty}"),
+                                ]
+                            } else {
+                                vec![format!("{param_name}: {param}")]
+                            },
+                            server_param_names: if has_auth {
+                                vec![param_name.clone(), "xidl_auth".to_string()]
+                            } else {
+                                vec![param_name.clone()]
+                            },
                             ret: "()".to_string(),
                             response_ty: "()".to_string(),
                             request_body_flatten: false,
@@ -1839,6 +2031,8 @@ fn render_attr(
                             is_client_stream: false,
                             is_bidi_stream: false,
                             request_item_ty: "()".to_string(),
+                            ret_in_ty: "()".to_string(),
+                            ret_out_ty: "()".to_string(),
                             request_content_type: "application/json".to_string(),
                             response_content_type: "application/json".to_string(),
                         });
@@ -1871,6 +2065,8 @@ fn render_attr(
                                 deprecated_note: deprecated.note.clone(),
                                 params: auth_param_list.clone(),
                                 param_names: Vec::new(),
+                                server_params: Vec::new(),
+                                server_param_names: Vec::new(),
                                 ret: ret.clone(),
                                 response_ty: ret.clone(),
                                 request_body_flatten: false,
@@ -1912,6 +2108,8 @@ fn render_attr(
                                 is_client_stream: false,
                                 is_bidi_stream: false,
                                 request_item_ty: "()".to_string(),
+                                ret_in_ty: ret.clone(),
+                                ret_out_ty: ret.clone(),
                                 request_content_type: "application/json".to_string(),
                                 response_content_type: "text/event-stream".to_string(),
                             });
@@ -1949,6 +2147,8 @@ fn render_attr(
                         deprecated_note: deprecated.note.clone(),
                         params: auth_param_list.clone(),
                         param_names: Vec::new(),
+                        server_params: server_auth_param_list.clone(),
+                        server_param_names: server_auth_param_names.clone(),
                         ret: ret.clone(),
                         response_ty: ret.clone(),
                         request_body_flatten: false,
@@ -1990,6 +2190,8 @@ fn render_attr(
                         is_client_stream: false,
                         is_bidi_stream: false,
                         request_item_ty: "()".to_string(),
+                        ret_in_ty: ret.clone(),
+                        ret_out_ty: ret.clone(),
                         request_content_type: "application/json".to_string(),
                         response_content_type: "application/json".to_string(),
                     });
@@ -2012,6 +2214,8 @@ fn render_attr(
                         wire_name: raw_name.clone(),
                         path_template_name: String::new(),
                         ty: param.clone(),
+                        in_ty: param.clone(),
+                        out_ty: param.clone(),
                         source: param_source_code(ParamSource::Body),
                         serde_rename: None,
                         header_is_multi: false,
@@ -2037,7 +2241,20 @@ fn render_attr(
                         deprecated_after: deprecated.after.clone(),
                         deprecated_note: deprecated.note.clone(),
                         params,
-                        param_names: vec![param_name],
+                        param_names: vec![param_name.clone()],
+                        server_params: if has_auth {
+                            vec![
+                                format!("{param_name}: {param}"),
+                                format!("xidl_auth: {auth_ty}"),
+                            ]
+                        } else {
+                            vec![format!("{param_name}: {param}")]
+                        },
+                        server_param_names: if has_auth {
+                            vec![param_name.clone(), "xidl_auth".to_string()]
+                        } else {
+                            vec![param_name.clone()]
+                        },
                         ret: "()".to_string(),
                         response_ty: "()".to_string(),
                         request_body_flatten: false,
@@ -2081,6 +2298,8 @@ fn render_attr(
                         is_client_stream: false,
                         is_bidi_stream: false,
                         request_item_ty: "()".to_string(),
+                        ret_in_ty: "()".to_string(),
+                        ret_out_ty: "()".to_string(),
                         request_content_type: "application/json".to_string(),
                         response_content_type: "application/json".to_string(),
                     });
@@ -2112,6 +2331,8 @@ fn render_attr(
                             deprecated_note: deprecated.note.clone(),
                             params: auth_param_list.clone(),
                             param_names: Vec::new(),
+                            server_params: Vec::new(),
+                            server_param_names: Vec::new(),
                             ret: ret.clone(),
                             response_ty: ret.clone(),
                             request_body_flatten: false,
@@ -2153,6 +2374,8 @@ fn render_attr(
                             is_client_stream: false,
                             is_bidi_stream: false,
                             request_item_ty: "()".to_string(),
+                            ret_in_ty: ret.clone(),
+                            ret_out_ty: ret.clone(),
                             request_content_type: "application/json".to_string(),
                             response_content_type: "text/event-stream".to_string(),
                         });
@@ -2264,6 +2487,21 @@ fn render_param_type(
     } else {
         inner
     }
+}
+
+fn transport_param_type(
+    ty: &hir::TypeSpec,
+    optional: bool,
+    direction: TransportDirection,
+    transport: &mut TransportTracker,
+    registry: &TypeRegistry,
+) -> IdlcResult<String> {
+    let inner = transport.map_type(ty, direction, registry)?;
+    Ok(if optional {
+        format!("Option<{inner}>")
+    } else {
+        inner
+    })
 }
 
 fn param_direction(attr: Option<&hir::ParamAttribute>) -> ParamDirection {

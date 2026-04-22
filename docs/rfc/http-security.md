@@ -95,8 +95,8 @@ Axum mapping guidance:
 
 - generated axum handlers extract `TypedHeader<BearerHeader>` (via `axum_extra`)
   to allow empty tokens
-- the request payload type `T` includes `xidl_auth: BearerAuth` and is carried
-  inside `xidl_rust_axum::Request<T>`
+- generated unary server traits receive `xidl_auth: BearerAuth` as an extra
+  parameter
 - if the header is `Authorization: Bearer` (empty token), the token value is the
   default `String` value
 

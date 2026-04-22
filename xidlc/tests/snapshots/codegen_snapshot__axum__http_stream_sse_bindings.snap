@@ -12,12 +12,65 @@ pub trait HttpStreamSseBindingsService {
         req: ::xidl_rust_axum::Request<HttpStreamSseBindingsServiceWatchProjectRequest>,
     ) -> ::xidl_rust_axum::Result<xidl_rust_axum::stream::SseStream<ProjectEvent>>;
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
+mod __xidl_in {
+    use super::*;
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    pub(super) struct ProjectEvent {
+        id: String,
+        payload: String,
+    }
+    impl From<super::ProjectEvent> for ProjectEvent {
+        fn from(value: super::ProjectEvent) -> Self {
+            Self {
+                id: value.id,
+                payload: value.payload,
+            }
+        }
+    }
+    impl From<ProjectEvent> for super::ProjectEvent {
+        fn from(value: ProjectEvent) -> Self {
+            Self {
+                id: value.id,
+                payload: value.payload,
+            }
+        }
+    }
+}
+mod __xidl_out {
+    use super::*;
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    pub(super) struct ProjectEvent {
+        id: String,
+        payload: String,
+    }
+    impl From<super::ProjectEvent> for ProjectEvent {
+        fn from(value: super::ProjectEvent) -> Self {
+            Self {
+                id: value.id,
+                payload: value.payload,
+            }
+        }
+    }
+    impl From<ProjectEvent> for super::ProjectEvent {
+        fn from(value: ProjectEvent) -> Self {
+            Self {
+                id: value.id,
+                payload: value.payload,
+            }
+        }
+    }
+}
+#[derive(::serde::Deserialize)]
 struct HttpStreamSseBindingsServiceWatchProjectPath {
     project_id: String,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize, ::core::default::Default)]
-struct HttpStreamSseBindingsServiceWatchProjectQuery {
+#[derive(::serde::Serialize, ::core::default::Default)]
+struct HttpStreamSseBindingsServiceWatchProjectRequestOutQuery {
+    #[serde(default)]
+    cursor: Option<String>,
+}
+#[derive(::serde::Deserialize, ::core::default::Default)]
+struct HttpStreamSseBindingsServiceWatchProjectRequestInQuery {
     #[serde(default)]
     cursor: Option<String>,
 }
@@ -51,7 +104,7 @@ where
             )
             .with_state(svc)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn watch_project(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -65,19 +118,22 @@ where
         xidl_rust_axum::axum::extract::Query(
             query,
         ): xidl_rust_axum::axum::extract::Query<
-            HttpStreamSseBindingsServiceWatchProjectQuery,
+            HttpStreamSseBindingsServiceWatchProjectRequestInQuery,
         >,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         if !xidl_rust_axum::http::accepts_media_type(&headers, "text/event-stream") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpStreamSseBindingsServiceWatchProjectPath { project_id } = path;
-        let HttpStreamSseBindingsServiceWatchProjectQuery { cursor } = query;
+        let HttpStreamSseBindingsServiceWatchProjectRequestInQuery { cursor } = query;
         let trace_id: String = match headers.get("X-Trace-Id") {
             Some(header_value) => {
                 let header_str = header_value
                     .to_str()
-                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                    .map_err(|err| ::xidl_rust_axum::Error::new(
+                        400,
+                        format!("{err:?}"),
+                    ))?;
                 header_str.to_string()
             }
             None => ::core::default::Default::default(),
@@ -87,8 +143,10 @@ where
             cursor,
             trace_id,
         };
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.watch_project(req).await {
+        let mut resp = match svc
+            .watch_project(::xidl_rust_axum::Request::new(headers, data))
+            .await
+        {
             Ok(resp_value) => {
                 let mut resp = xidl_rust_axum::stream::sse_response(resp_value);
                 resp
@@ -152,6 +210,7 @@ impl HttpStreamSseBindingsServiceClient {
     }
 }
 impl HttpStreamSseBindingsServiceClient {
+    #[allow(clippy::useless_conversion)]
     pub async fn watch_project(
         &self,
         project_id: String,
@@ -184,7 +243,7 @@ impl HttpStreamSseBindingsServiceClient {
             )
             .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
         req.headers_mut().insert(header_name, header_value);
-        let query = HttpStreamSseBindingsServiceWatchProjectQuery {
+        let query = HttpStreamSseBindingsServiceWatchProjectRequestOutQuery {
             cursor,
         };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)

@@ -9,47 +9,143 @@ http_query_template.rs
 pub trait HttpQueryTemplateService {
     async fn get_user(
         &self,
-        req: ::xidl_rust_axum::Request<HttpQueryTemplateServiceGetUserRequest>,
+        id: u32,
+        lang: String,
+        region: String,
     ) -> ::xidl_rust_axum::Result<String>;
     async fn search(
         &self,
-        req: ::xidl_rust_axum::Request<HttpQueryTemplateServiceSearchRequest>,
+        keyword: String,
+        payload: String,
     ) -> ::xidl_rust_axum::Result<String>;
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
+mod __xidl_in {
+    use super::*;
+}
+mod __xidl_out {
+    use super::*;
+}
+#[derive(::serde::Deserialize)]
 struct HttpQueryTemplateServiceGetUserPath {
     id: u32,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize, ::core::default::Default)]
-struct HttpQueryTemplateServiceGetUserQuery {
+#[derive(::serde::Serialize, ::core::default::Default)]
+struct HttpQueryTemplateServiceGetUserRequestOutQuery {
     #[serde(default)]
     lang: String,
     #[serde(default)]
     region: String,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-pub struct HttpQueryTemplateServiceGetUserRequest {
-    pub id: u32,
-    pub lang: String,
-    pub region: String,
+#[derive(::serde::Deserialize, ::core::default::Default)]
+struct HttpQueryTemplateServiceGetUserRequestInQuery {
+    #[serde(default)]
+    lang: String,
+    #[serde(default)]
+    region: String,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize, ::core::default::Default)]
-struct HttpQueryTemplateServiceSearchQuery {
+#[derive(::serde::Deserialize)]
+struct HttpQueryTemplateServiceGetUserRequest {
+    id: u32,
+    lang: String,
+    region: String,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpQueryTemplateServiceGetUserRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+                HttpQueryTemplateServiceGetUserPath,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpQueryTemplateServiceGetUserPath { id } = path;
+            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+                HttpQueryTemplateServiceGetUserRequestInQuery,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpQueryTemplateServiceGetUserRequestInQuery { lang, region } = query;
+            let headers = &parts.headers;
+            Ok(Self { id, lang, region })
+        }
+    }
+}
+#[derive(::serde::Serialize, ::core::default::Default)]
+struct HttpQueryTemplateServiceSearchRequestOutQuery {
     #[serde(default)]
     keyword: String,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-struct HttpQueryTemplateServiceSearchBody {
-    #[serde(
-        default,
-        deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null"
-    )]
+#[derive(::serde::Deserialize, ::core::default::Default)]
+struct HttpQueryTemplateServiceSearchRequestInQuery {
+    #[serde(default)]
+    keyword: String,
+}
+#[derive(::serde::Serialize)]
+struct HttpQueryTemplateServiceSearchRequestOutBody {
+    #[serde(default)]
     payload: String,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-pub struct HttpQueryTemplateServiceSearchRequest {
-    pub keyword: String,
-    pub payload: String,
+#[derive(::serde::Deserialize)]
+struct HttpQueryTemplateServiceSearchRequestInBody {
+    payload: String,
+}
+#[derive(::serde::Deserialize)]
+struct HttpQueryTemplateServiceSearchRequest {
+    keyword: String,
+    payload: String,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpQueryTemplateServiceSearchRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+                HttpQueryTemplateServiceSearchRequestInQuery,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpQueryTemplateServiceSearchRequestInQuery { keyword } = query;
+            let headers = &parts.headers;
+            if !::xidl_rust_axum::http::content_type_matches(
+                headers,
+                "application/json",
+            ) {
+                return Err(::xidl_rust_axum::Error::unsupported_media_type());
+            }
+            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+            let body: HttpQueryTemplateServiceSearchRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body_bytes)?;
+            let HttpQueryTemplateServiceSearchRequestInBody { payload } = body;
+            Ok(Self { keyword, payload })
+        }
+    }
 }
 pub struct HttpQueryTemplateServiceServer<T> {
     inner: ::std::sync::Arc<T>,
@@ -73,35 +169,27 @@ where
             .route("/search", xidl_rust_axum::axum::routing::post(Self::search))
             .with_state(svc)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn get_user(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
-        ::xidl_rust_axum::axum::extract::Path(
-            path,
-        ): ::xidl_rust_axum::axum::extract::Path<HttpQueryTemplateServiceGetUserPath>,
-        xidl_rust_axum::axum::extract::Query(
-            query,
-        ): xidl_rust_axum::axum::extract::Query<HttpQueryTemplateServiceGetUserQuery>,
+        request: HttpQueryTemplateServiceGetUserRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        let HttpQueryTemplateServiceGetUserPath { id } = path;
-        let HttpQueryTemplateServiceGetUserQuery { lang, region } = query;
-        let data = HttpQueryTemplateServiceGetUserRequest {
-            id,
-            lang,
-            region,
-        };
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.get_user(req).await {
+        let HttpQueryTemplateServiceGetUserRequest { id, lang, region } = request;
+        let id: u32 = id.into();
+        let lang: String = lang.into();
+        let region: String = region.into();
+        let mut resp = match svc.get_user(id, lang, region).await {
             Ok(resp_value) => {
                 let mut resp = {
+                    let body_value: String = resp_value.into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                        .to_vec(&resp_value)?;
+                        .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(::xidl_rust_axum::axum::http::StatusCode::OK)
                         .header(
@@ -122,42 +210,26 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn search(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
-        xidl_rust_axum::axum::extract::Query(
-            query,
-        ): xidl_rust_axum::axum::extract::Query<HttpQueryTemplateServiceSearchQuery>,
-        body: ::xidl_rust_axum::axum::body::Body,
+        request: HttpQueryTemplateServiceSearchRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        if !xidl_rust_axum::http::content_type_matches(&headers, "application/json") {
-            return Err(xidl_rust_axum::Error::unsupported_media_type());
-        }
-        let HttpQueryTemplateServiceSearchQuery { keyword } = query;
-        let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
-            .await
-            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-        let body: HttpQueryTemplateServiceSearchBody = xidl_rust_axum::DeserializeFactory::new(
-                "application/json",
-            )
-            .from_slice(&body_bytes)?;
-        let HttpQueryTemplateServiceSearchBody { payload } = body;
-        let data = HttpQueryTemplateServiceSearchRequest {
-            keyword,
-            payload,
-        };
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.search(req).await {
+        let HttpQueryTemplateServiceSearchRequest { keyword, payload } = request;
+        let keyword: String = keyword.into();
+        let payload: String = payload.into();
+        let mut resp = match svc.search(keyword, payload).await {
             Ok(resp_value) => {
                 let mut resp = {
+                    let body_value: String = resp_value.into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                        .to_vec(&resp_value)?;
+                        .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(::xidl_rust_axum::axum::http::StatusCode::OK)
                         .header(
@@ -231,6 +303,7 @@ impl HttpQueryTemplateServiceClient {
     }
 }
 impl HttpQueryTemplateServiceClient {
+    #[allow(clippy::useless_conversion)]
     pub async fn get_user(
         &self,
         id: u32,
@@ -253,7 +326,7 @@ impl HttpQueryTemplateServiceClient {
                     )
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
-        let query = HttpQueryTemplateServiceGetUserQuery {
+        let query = HttpQueryTemplateServiceGetUserRequestOutQuery {
             lang,
             region,
         };
@@ -274,13 +347,18 @@ impl HttpQueryTemplateServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
+    #[allow(clippy::useless_conversion)]
     pub async fn search(
         &self,
         keyword: String,
@@ -301,7 +379,7 @@ impl HttpQueryTemplateServiceClient {
                     )
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
-        let query = HttpQueryTemplateServiceSearchQuery {
+        let query = HttpQueryTemplateServiceSearchRequestOutQuery {
             keyword,
         };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
@@ -310,8 +388,8 @@ impl HttpQueryTemplateServiceClient {
             req.url_mut().set_query(Some(&query));
         }
         let auth_target = &self.client;
-        let body = HttpQueryTemplateServiceSearchBody {
-            payload,
+        let body = HttpQueryTemplateServiceSearchRequestOutBody {
+            payload: payload.into(),
         };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;
@@ -335,7 +413,11 @@ impl HttpQueryTemplateServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();

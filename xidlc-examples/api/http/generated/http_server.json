@@ -121,6 +121,62 @@
         }
       }
     },
+    "/get_timestamp": {
+      "post": {
+        "operationId": "HttpServer.get_timestamp",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Timestamp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/is_admin": {
+      "post": {
+        "operationId": "HttpServer.is_admin",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminInfo"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/is_logined": {
       "post": {
         "operationId": "HttpServer.is_logined",
@@ -809,6 +865,21 @@
   },
   "components": {
     "schemas": {
+      "AdminInfo": {
+        "type": "object",
+        "required": [
+          "name",
+          "email"
+        ],
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
       "Error": {
         "type": "object",
         "required": [
@@ -1068,6 +1139,28 @@
             "properties": {
               "login_bearer": {
                 "$ref": "#/components/schemas/HttpServer_login_bearer_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_timestamp"
+            ],
+            "properties": {
+              "get_timestamp": {
+                "$ref": "#/components/schemas/HttpServer_get_timestamp_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "is_admin"
+            ],
+            "properties": {
+              "is_admin": {
+                "$ref": "#/components/schemas/HttpServer_is_admin_In"
               }
             }
           }
@@ -1344,6 +1437,28 @@
             "properties": {
               "login_bearer": {
                 "$ref": "#/components/schemas/HttpServer_login_bearer_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_timestamp"
+            ],
+            "properties": {
+              "get_timestamp": {
+                "$ref": "#/components/schemas/HttpServer_get_timestamp_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "is_admin"
+            ],
+            "properties": {
+              "is_admin": {
+                "$ref": "#/components/schemas/HttpServer_is_admin_Result"
               }
             }
           }
@@ -1684,6 +1799,43 @@
           }
         ]
       },
+      "HttpServer_get_timestamp_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "HttpServer_get_timestamp_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "$ref": "#/components/schemas/Timestamp"
+          }
+        }
+      },
+      "HttpServer_get_timestamp_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpServer_get_timestamp_Out"
+              }
+            }
+          }
+        ]
+      },
       "HttpServer_get_user_info_In": {
         "type": "object",
         "required": [
@@ -1718,6 +1870,43 @@
             "properties": {
               "result": {
                 "$ref": "#/components/schemas/HttpServer_get_user_info_Out"
+              }
+            }
+          }
+        ]
+      },
+      "HttpServer_is_admin_In": {
+        "type": "object",
+        "required": [
+          "info"
+        ],
+        "properties": {
+          "info": {
+            "$ref": "#/components/schemas/AdminInfo"
+          }
+        }
+      },
+      "HttpServer_is_admin_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "HttpServer_is_admin_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpServer_is_admin_Out"
               }
             }
           }
@@ -2151,6 +2340,25 @@
             }
           }
         ]
+      },
+      "Timestamp": {
+        "type": "object",
+        "required": [
+          "seconds",
+          "nanos"
+        ],
+        "properties": {
+          "nanos": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "seconds": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          }
+        }
       },
       "UserInfo": {
         "type": "object",

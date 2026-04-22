@@ -2,6 +2,7 @@ mod definition;
 mod interface;
 mod render;
 mod spec;
+mod transport;
 
 use crate::error::IdlcResult;
 use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactHir};

@@ -16,17 +16,22 @@ pub trait HttpClientStreamService {
         >,
     ) -> ::xidl_rust_axum::Result<String>;
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-struct HttpClientStreamServiceUploadChunkBody {
-    #[serde(
-        default,
-        deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null"
-    )]
+mod __xidl_in {
+    use super::*;
+}
+mod __xidl_out {
+    use super::*;
+}
+#[derive(::serde::Serialize)]
+struct HttpClientStreamServiceUploadChunkRequestOutBody {
+    #[serde(default)]
     file_id: String,
-    #[serde(
-        default,
-        deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null"
-    )]
+    #[serde(default)]
+    chunk: Vec<u8>,
+}
+#[derive(::serde::Deserialize)]
+struct HttpClientStreamServiceUploadChunkRequestInBody {
+    file_id: String,
     chunk: Vec<u8>,
 }
 #[derive(::serde::Serialize, ::serde::Deserialize)]
@@ -58,7 +63,7 @@ where
             )
             .with_state(svc)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn upload_chunk(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -73,12 +78,15 @@ where
             HttpClientStreamServiceUploadChunkRequest,
         >(body);
         let data = stream;
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.upload_chunk(req).await {
+        let mut resp = match svc
+            .upload_chunk(::xidl_rust_axum::Request::new(headers, data))
+            .await
+        {
             Ok(resp_value) => {
                 let mut resp = {
+                    let body_value: String = resp_value.into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                        .to_vec(&resp_value)?;
+                        .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(::xidl_rust_axum::axum::http::StatusCode::OK)
                         .header(
@@ -152,6 +160,7 @@ impl HttpClientStreamServiceClient {
     }
 }
 impl HttpClientStreamServiceClient {
+    #[allow(clippy::useless_conversion)]
     pub async fn upload_chunk(
         &self,
         file_id: String,
@@ -205,8 +214,11 @@ impl HttpClientStreamServiceClient {
                     .bytes()
                     .await
                     .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-                xidl_rust_axum::DeserializeFactory::new("application/json")
-                    .from_slice(&body)
+                let body: String = xidl_rust_axum::DeserializeFactory::new(
+                        "application/json",
+                    )
+                    .from_slice(&body)?;
+                Ok(body.into())
             } else {
                 let status = resp.status();
                 let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();

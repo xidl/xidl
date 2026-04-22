@@ -32,52 +32,31 @@ impl SimpleHttpServer {
 
 #[async_trait::async_trait]
 impl HttpServer for SimpleHttpServer {
-    async fn get_attribute_host(
-        &self,
-        _req: xidl_rust_axum::Request<()>,
-    ) -> Result<String, xidl_rust_axum::Error> {
+    async fn get_attribute_host(&self) -> Result<String, xidl_rust_axum::Error> {
         Ok(self.host.lock().await.clone())
     }
 
-    async fn set_attribute_host(
-        &self,
-        req: xidl_rust_axum::Request<HttpServerSetAttributeHostRequest>,
-    ) -> Result<(), xidl_rust_axum::Error> {
-        let req = req.into_inner();
-        *self.host.lock().await = req.host;
+    async fn set_attribute_host(&self, host: String) -> Result<(), xidl_rust_axum::Error> {
+        *self.host.lock().await = host;
         Ok(())
     }
 
-    async fn get_attribute_port(
-        &self,
-        req: xidl_rust_axum::Request<()>,
-    ) -> Result<u16, xidl_rust_axum::Error> {
+    async fn get_attribute_port(&self) -> Result<u16, xidl_rust_axum::Error> {
         Ok(8081)
     }
 
-    async fn get_server_name(
-        &self,
-        req: xidl_rust_axum::Request<()>,
-    ) -> Result<String, xidl_rust_axum::Error> {
+    async fn get_server_name(&self) -> Result<String, xidl_rust_axum::Error> {
         Ok(self.server_name.lock().await.clone())
     }
 
-    async fn set_server_name(
-        &self,
-        req: xidl_rust_axum::Request<HttpServerSetServerNameRequest>,
-    ) -> Result<(), xidl_rust_axum::Error> {
-        let req = req.into_inner();
-        *self.server_name.lock().await = req.name;
+    async fn set_server_name(&self, name: String) -> Result<(), xidl_rust_axum::Error> {
+        *self.server_name.lock().await = name;
         Ok(())
     }
 
-    async fn get_user_info(
-        &self,
-        req: xidl_rust_axum::Request<HttpServerGetUserInfoRequest>,
-    ) -> Result<UserInfo, xidl_rust_axum::Error> {
-        let req = req.into_inner();
+    async fn get_user_info(&self, id: u64) -> Result<UserInfo, xidl_rust_axum::Error> {
         let user_info = self.user_info.lock().await;
-        let user_info = user_info.get(&req.id);
+        let user_info = user_info.get(&id);
         if let Some(user_info) = user_info {
             return Ok(user_info.clone());
         }
@@ -85,61 +64,38 @@ impl HttpServer for SimpleHttpServer {
         Err(xidl_rust_axum::Error::not_found())
     }
 
-    async fn query_user_info(
-        &self,
-        req: xidl_rust_axum::Request<HttpServerQueryUserInfoRequest>,
-    ) -> Result<UserInfo, xidl_rust_axum::Error> {
-        self.get_user_info(xidl_rust_axum::Request::new(
-            req.headers().clone(),
-            HttpServerGetUserInfoRequest {
-                id: req.into_inner().id,
-            },
-        ))
-        .await
+    async fn query_user_info(&self, id: u64) -> Result<UserInfo, xidl_rust_axum::Error> {
+        self.get_user_info(id).await
     }
 
-    async fn post_user_info(
-        &self,
-        req: xidl_rust_axum::Request<HttpServerPostUserInfoRequest>,
-    ) -> Result<(), xidl_rust_axum::Error> {
-        let req = req.into_inner();
-        self.user_info.lock().await.insert(req.id, req.info);
+    async fn post_user_info(&self, id: u64, info: UserInfo) -> Result<(), xidl_rust_axum::Error> {
+        self.user_info.lock().await.insert(id, info);
         Ok(())
     }
 
     async fn put_key_value(
         &self,
-        req: xidl_rust_axum::Request<HttpServerPutKeyValueRequest>,
+        key: String,
+        value: String,
+        ttl: u64,
     ) -> Result<(), xidl_rust_axum::Error> {
-        let inner = req.into_inner();
-        println!("insert {}: {} at {}", inner.key, inner.value, inner.ttl);
-        self.key_store.lock().await.insert(inner.key, inner.value);
+        println!("insert {key}: {value} at {ttl}");
+        self.key_store.lock().await.insert(key, value);
         Ok(())
     }
 
-    async fn delete_key(
-        &self,
-        req: xidl_rust_axum::Request<HttpServerDeleteKeyRequest>,
-    ) -> Result<(), xidl_rust_axum::Error> {
-        self.key_store.lock().await.remove(&req.into_inner().key);
+    async fn delete_key(&self, key: String) -> Result<(), xidl_rust_axum::Error> {
+        self.key_store.lock().await.remove(&key);
         Ok(())
     }
 
-    async fn patch_key(
-        &self,
-        req: xidl_rust_axum::Request<HttpServerPatchKeyRequest>,
-    ) -> Result<(), xidl_rust_axum::Error> {
-        let rq = req.into_inner();
-        self.key_store.lock().await.insert(rq.key, rq.value);
+    async fn patch_key(&self, key: String, value: String) -> Result<(), xidl_rust_axum::Error> {
+        self.key_store.lock().await.insert(key, value);
         Ok(())
     }
 
-    async fn is_key_exists(
-        &self,
-        req: xidl_rust_axum::Request<HttpServerIsKeyExistsRequest>,
-    ) -> Result<(), xidl_rust_axum::Error> {
-        let req = req.into_inner();
-        if self.key_store.lock().await.contains_key(&req.key_alias) {
+    async fn is_key_exists(&self, key_alias: String) -> Result<(), xidl_rust_axum::Error> {
+        if self.key_store.lock().await.contains_key(&key_alias) {
             return Ok(());
         }
         Err(xidl_rust_axum::Error::not_found())
@@ -147,20 +103,18 @@ impl HttpServer for SimpleHttpServer {
 
     async fn get_key_options(
         &self,
-        req: xidl_rust_axum::Request<HttpServerGetKeyOptionsRequest>,
+        key: String,
     ) -> Result<HttpServerGetKeyOptionsResponse, xidl_rust_axum::Error> {
-        let req = req.into_inner();
         Ok(HttpServerGetKeyOptionsResponse {
-            exists: self.key_store.lock().await.contains_key(&req.key),
+            exists: self.key_store.lock().await.contains_key(&key),
         })
     }
 
     async fn get_key_1(
         &self,
-        req: xidl_rust_axum::Request<HttpServerGetKey1Request>,
+        key: String,
     ) -> Result<HttpServerGetKey1Response, xidl_rust_axum::Error> {
-        let req = req.into_inner();
-        if let Some(value) = self.key_store.lock().await.get(&req.key) {
+        if let Some(value) = self.key_store.lock().await.get(&key) {
             return Ok(HttpServerGetKey1Response {
                 value: value.clone(),
             });
@@ -171,14 +125,9 @@ impl HttpServer for SimpleHttpServer {
 
     async fn get_key_2(
         &self,
-        req: xidl_rust_axum::Request<HttpServerGetKey2Request>,
+        key: String,
     ) -> Result<HttpServerGetKey2Response, xidl_rust_axum::Error> {
-        let response = self
-            .get_key_1(xidl_rust_axum::Request {
-                headers: req.headers,
-                data: HttpServerGetKey1Request { key: req.data.key },
-            })
-            .await?;
+        let response = self.get_key_1(key).await?;
         Ok(HttpServerGetKey2Response {
             value: response.value,
         })
@@ -186,14 +135,9 @@ impl HttpServer for SimpleHttpServer {
 
     async fn get_key_3(
         &self,
-        req: xidl_rust_axum::Request<HttpServerGetKey3Request>,
+        key: String,
     ) -> Result<HttpServerGetKey3Response, xidl_rust_axum::Error> {
-        let response = self
-            .get_key_1(xidl_rust_axum::Request {
-                headers: req.headers,
-                data: HttpServerGetKey1Request { key: req.data.key },
-            })
-            .await?;
+        let response = self.get_key_1(key).await?;
         Ok(HttpServerGetKey3Response {
             value: response.value,
         })
@@ -201,14 +145,9 @@ impl HttpServer for SimpleHttpServer {
 
     async fn get_key_4(
         &self,
-        req: xidl_rust_axum::Request<HttpServerGetKey4Request>,
+        key: String,
     ) -> Result<HttpServerGetKey4Response, xidl_rust_axum::Error> {
-        let response = self
-            .get_key_1(xidl_rust_axum::Request {
-                headers: req.headers,
-                data: HttpServerGetKey1Request { key: req.data.key },
-            })
-            .await?;
+        let response = self.get_key_1(key).await?;
         Ok(HttpServerGetKey4Response {
             value: response.value,
         })
@@ -216,11 +155,10 @@ impl HttpServer for SimpleHttpServer {
 
     async fn login(
         &self,
-        req: xidl_rust_axum::Request<HttpServerLoginRequest>,
+        xidl_auth: xidl_rust_axum::auth::basic::BasicAuth,
     ) -> Result<HttpServerLoginResponse, xidl_rust_axum::Error> {
-        let auth = req.into_inner().xidl_auth;
-        println!("login: {:?}", auth);
-        match auth.password {
+        println!("login: {:?}", xidl_auth);
+        match xidl_auth.password {
             None => {
                 return Err(xidl_rust_axum::Error::unauthorized());
             }
@@ -237,11 +175,10 @@ impl HttpServer for SimpleHttpServer {
 
     async fn login_realm(
         &self,
-        req: xidl_rust_axum::Request<HttpServerLoginRealmRequest>,
+        xidl_auth: xidl_rust_axum::auth::basic::BasicAuth,
     ) -> Result<HttpServerLoginRealmResponse, xidl_rust_axum::Error> {
-        let auth = req.into_inner().xidl_auth;
-        println!("login: {:?}", auth);
-        match auth.password {
+        println!("login: {:?}", xidl_auth);
+        match xidl_auth.password {
             None => {
                 return Err(xidl_rust_axum::Error::unauthorized());
             }
@@ -256,24 +193,24 @@ impl HttpServer for SimpleHttpServer {
         })
     }
 
-    async fn is_logined(
-        &self,
-        req: xidl_rust_axum::Request<HttpServerIsLoginedRequest>,
-    ) -> Result<bool, xidl_rust_axum::Error> {
-        let req = req.into_inner();
-
-        println!("is_logined: {}", req.session_id);
-        Ok(!req.session_id.is_empty())
+    async fn is_logined(&self, session_id: String) -> Result<bool, xidl_rust_axum::Error> {
+        println!("is_logined: {}", session_id);
+        Ok(!session_id.is_empty())
     }
 
     async fn login_bearer(
         &self,
-        req: xidl_rust_axum::Request<HttpServerLoginBearerRequest>,
+        xidl_auth: xidl_rust_axum::auth::bearer::BearerAuth,
     ) -> Result<(), xidl_rust_axum::Error> {
-        let auth = req.into_inner().xidl_auth;
-        if auth.token.is_empty() {
+        if xidl_auth.token.is_empty() {
             return Err(xidl_rust_axum::Error::unauthorized());
         }
         Ok(())
+    }
+    async fn get_timestamp(&self) -> ::xidl_rust_axum::Result<Timestamp> {
+        todo!()
+    }
+    async fn is_admin(&self, info: AdminInfo) -> ::xidl_rust_axum::Result<()> {
+        todo!()
     }
 }

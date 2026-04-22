@@ -10,50 +10,142 @@ pub trait HttpSecurityService {
     #[deprecated(note = "Deprecated. Since 2026-03-13T00:00:00Z.")]
     async fn get_user(
         &self,
-        req: ::xidl_rust_axum::Request<HttpSecurityServiceGetUserRequest>,
+        id: u32,
+        locale: Option<String>,
+        trace_id: String,
+        xidl_auth: xidl_rust_axum::auth::basic::BasicAuth,
     ) -> ::xidl_rust_axum::Result<String>;
     async fn search_user(
         &self,
-        req: ::xidl_rust_axum::Request<HttpSecurityServiceSearchUserRequest>,
+        keyword: String,
+        page: Option<u32>,
     ) -> ::xidl_rust_axum::Result<String>;
     #[deprecated(
         note = "Deprecated. Since 2026-03-13T00:00:00Z. After 2026-03-14T23:59:59Z."
     )]
-    async fn health(
-        &self,
-        req: ::xidl_rust_axum::Request<()>,
-    ) -> ::xidl_rust_axum::Result<String>;
+    async fn health(&self) -> ::xidl_rust_axum::Result<String>;
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
+mod __xidl_in {
+    use super::*;
+}
+mod __xidl_out {
+    use super::*;
+}
+#[derive(::serde::Deserialize)]
 struct HttpSecurityServiceGetUserPath {
     id: u32,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize, ::core::default::Default)]
-struct HttpSecurityServiceGetUserQuery {
+#[derive(::serde::Serialize, ::core::default::Default)]
+struct HttpSecurityServiceGetUserRequestOutQuery {
     #[serde(default)]
     locale: Option<String>,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-pub struct HttpSecurityServiceGetUserRequest {
-    pub id: u32,
-    pub locale: Option<String>,
-    pub trace_id: String,
-    pub xidl_auth: xidl_rust_axum::auth::basic::BasicAuth,
+#[derive(::serde::Deserialize, ::core::default::Default)]
+struct HttpSecurityServiceGetUserRequestInQuery {
+    #[serde(default)]
+    locale: Option<String>,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-struct HttpSecurityServiceSearchUserBody {
-    #[serde(
-        default,
-        deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null"
-    )]
+#[derive(::serde::Deserialize)]
+struct HttpSecurityServiceGetUserRequest {
+    id: u32,
+    locale: Option<String>,
+    trace_id: String,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpSecurityServiceGetUserRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+                HttpSecurityServiceGetUserPath,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpSecurityServiceGetUserPath { id } = path;
+            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+                HttpSecurityServiceGetUserRequestInQuery,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpSecurityServiceGetUserRequestInQuery { locale } = query;
+            let headers = &parts.headers;
+            let trace_id: String = match headers.get("X-Trace-Id") {
+                Some(header_value) => {
+                    let header_str = header_value
+                        .to_str()
+                        .map_err(|err| ::xidl_rust_axum::Error::new(
+                            400,
+                            format!("{err:?}"),
+                        ))?;
+                    header_str.to_string()
+                }
+                None => ::core::default::Default::default(),
+            };
+            Ok(Self { id, locale, trace_id })
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct HttpSecurityServiceSearchUserRequestOutBody {
+    #[serde(default)]
     keyword: String,
     #[serde(default)]
     page: Option<u32>,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-pub struct HttpSecurityServiceSearchUserRequest {
-    pub keyword: String,
-    pub page: Option<u32>,
+#[derive(::serde::Deserialize)]
+struct HttpSecurityServiceSearchUserRequestInBody {
+    keyword: String,
+    #[serde(default)]
+    page: Option<u32>,
+}
+#[derive(::serde::Deserialize)]
+struct HttpSecurityServiceSearchUserRequest {
+    keyword: String,
+    page: Option<u32>,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpSecurityServiceSearchUserRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let headers = &parts.headers;
+            if !::xidl_rust_axum::http::content_type_matches(
+                headers,
+                "application/json",
+            ) {
+                return Err(::xidl_rust_axum::Error::unsupported_media_type());
+            }
+            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+            let body: HttpSecurityServiceSearchUserRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body_bytes)?;
+            let HttpSecurityServiceSearchUserRequestInBody { keyword, page } = body;
+            Ok(Self { keyword, page })
+        }
+    }
 }
 pub struct HttpSecurityServiceServer<T> {
     inner: ::std::sync::Arc<T>,
@@ -81,18 +173,13 @@ where
             .route("/health", xidl_rust_axum::axum::routing::post(Self::health))
             .with_state(svc)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn get_user(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
-        ::xidl_rust_axum::axum::extract::Path(
-            path,
-        ): ::xidl_rust_axum::axum::extract::Path<HttpSecurityServiceGetUserPath>,
-        xidl_rust_axum::axum::extract::Query(
-            query,
-        ): xidl_rust_axum::axum::extract::Query<HttpSecurityServiceGetUserQuery>,
+        request: HttpSecurityServiceGetUserRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
@@ -106,29 +193,16 @@ where
                 return Ok(resp);
             }
         };
-        let HttpSecurityServiceGetUserPath { id } = path;
-        let HttpSecurityServiceGetUserQuery { locale } = query;
-        let trace_id: String = match headers.get("X-Trace-Id") {
-            Some(header_value) => {
-                let header_str = header_value
-                    .to_str()
-                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-                header_str.to_string()
-            }
-            None => ::core::default::Default::default(),
-        };
-        let data = HttpSecurityServiceGetUserRequest {
-            id,
-            locale,
-            trace_id,
-            xidl_auth,
-        };
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.get_user(req).await {
+        let HttpSecurityServiceGetUserRequest { id, locale, trace_id } = request;
+        let id: u32 = id.into();
+        let locale: Option<String> = locale.into();
+        let trace_id: String = trace_id.into();
+        let mut resp = match svc.get_user(id, locale, trace_id, xidl_auth).await {
             Ok(resp_value) => {
                 let mut resp = {
+                    let body_value: String = resp_value.into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                        .to_vec(&resp_value)?;
+                        .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(::xidl_rust_axum::axum::http::StatusCode::OK)
                         .header(
@@ -167,38 +241,26 @@ where
             );
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn search_user(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
-        body: ::xidl_rust_axum::axum::body::Body,
+        request: HttpSecurityServiceSearchUserRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        if !xidl_rust_axum::http::content_type_matches(&headers, "application/json") {
-            return Err(xidl_rust_axum::Error::unsupported_media_type());
-        }
-        let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
-            .await
-            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-        let body: HttpSecurityServiceSearchUserBody = xidl_rust_axum::DeserializeFactory::new(
-                "application/json",
-            )
-            .from_slice(&body_bytes)?;
-        let HttpSecurityServiceSearchUserBody { keyword, page } = body;
-        let data = HttpSecurityServiceSearchUserRequest {
-            keyword,
-            page,
-        };
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.search_user(req).await {
+        let HttpSecurityServiceSearchUserRequest { keyword, page } = request;
+        let keyword: String = keyword.into();
+        let page: Option<u32> = page.into();
+        let mut resp = match svc.search_user(keyword, page).await {
             Ok(resp_value) => {
                 let mut resp = {
+                    let body_value: String = resp_value.into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                        .to_vec(&resp_value)?;
+                        .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(::xidl_rust_axum::axum::http::StatusCode::OK)
                         .header(
@@ -219,7 +281,7 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn health(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -229,13 +291,12 @@ where
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        let data = ();
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.health(req).await {
+        let mut resp = match svc.health().await {
             Ok(resp_value) => {
                 let mut resp = {
+                    let body_value: String = resp_value.into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                        .to_vec(&resp_value)?;
+                        .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(::xidl_rust_axum::axum::http::StatusCode::OK)
                         .header(
@@ -338,6 +399,7 @@ impl HttpSecurityServiceClient {
     }
 }
 impl HttpSecurityServiceClient {
+    #[allow(clippy::useless_conversion)]
     pub async fn get_user(
         &self,
         id: u32,
@@ -371,7 +433,7 @@ impl HttpSecurityServiceClient {
             )
             .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
         req.headers_mut().insert(header_name, header_value);
-        let query = HttpSecurityServiceGetUserQuery {
+        let query = HttpSecurityServiceGetUserRequestOutQuery {
             locale,
         };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
@@ -406,13 +468,18 @@ impl HttpSecurityServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
+    #[allow(clippy::useless_conversion)]
     pub async fn search_user(
         &self,
         keyword: String,
@@ -434,9 +501,9 @@ impl HttpSecurityServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
-        let body = HttpSecurityServiceSearchUserBody {
-            keyword,
-            page,
+        let body = HttpSecurityServiceSearchUserRequestOutBody {
+            keyword: keyword.into(),
+            page: page.into(),
         };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;
@@ -460,13 +527,18 @@ impl HttpSecurityServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
+    #[allow(clippy::useless_conversion)]
     pub async fn health(&self) -> Result<String, xidl_rust_axum::Error> {
         let path = "/health".to_string();
         let mut req = self
@@ -495,7 +567,11 @@ impl HttpSecurityServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();

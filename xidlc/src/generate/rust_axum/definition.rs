@@ -1,6 +1,7 @@
 use crate::error::IdlcResult;
 use crate::generate::rust::util::rust_ident;
 use crate::generate::rust_axum::interface::render_interface_with_path;
+use crate::generate::rust_axum::transport::{TypeRegistry, build_type_registry};
 use crate::generate::rust_axum::{RustAxumRender, RustAxumRenderOutput, RustAxumRenderer};
 use serde_json::json;
 use std::collections::HashMap;
@@ -10,7 +11,8 @@ impl RustAxumRender for hir::ModuleDcl {
     fn render(&self, renderer: &RustAxumRenderer) -> IdlcResult<RustAxumRenderOutput> {
         let defs = self.definition.iter().collect::<Vec<_>>();
         let module_path = vec![self.ident.clone()];
-        let body = render_module_body_with_path(&defs, renderer, &module_path)?;
+        let registry = build_type_registry(&defs, &module_path);
+        let body = render_module_body_with_path(&defs, renderer, &module_path, &registry)?;
         let rendered = renderer.render_template(
             "module.rs.j2",
             &json!({
@@ -29,7 +31,9 @@ impl RustAxumRender for hir::Definition {
         match self {
             hir::Definition::ModuleDcl(module) => module.render(renderer),
             hir::Definition::InterfaceDcl(interface) => {
-                render_interface_with_path(interface, renderer, &[])
+                let defs = [self];
+                let registry = build_type_registry(&defs, &[]);
+                render_interface_with_path(interface, renderer, &[], &registry)
             }
             _ => Ok(RustAxumRenderOutput::default()),
         }
@@ -40,13 +44,15 @@ pub(crate) fn render_module_body(
     defs: &[&hir::Definition],
     renderer: &RustAxumRenderer,
 ) -> IdlcResult<String> {
-    render_module_body_with_path(defs, renderer, &[])
+    let registry = build_type_registry(defs, &[]);
+    render_module_body_with_path(defs, renderer, &[], &registry)
 }
 
 fn render_module_body_with_path(
     defs: &[&hir::Definition],
     renderer: &RustAxumRenderer,
     module_path: &[String],
+    registry: &TypeRegistry,
 ) -> IdlcResult<String> {
     let mut out = Vec::new();
     let mut module_order = Vec::new();
@@ -62,11 +68,12 @@ fn render_module_body_with_path(
                 let defs = module.definition.iter().collect::<Vec<_>>();
                 let mut next_path = module_path.to_vec();
                 next_path.push(module.ident.clone());
-                let body = render_module_body_with_path(&defs, renderer, &next_path)?;
+                let body = render_module_body_with_path(&defs, renderer, &next_path, registry)?;
                 entry.push(body);
             }
             hir::Definition::InterfaceDcl(interface) => {
-                let rendered = render_interface_with_path(interface, renderer, module_path)?;
+                let rendered =
+                    render_interface_with_path(interface, renderer, module_path, registry)?;
                 out.extend(rendered.source);
             }
             _ => {}

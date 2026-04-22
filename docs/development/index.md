@@ -15,6 +15,8 @@ This section is for contributors, plugin authors, and maintainers.
 1. [Architecture](../architecture.md)
 2. [Plugin Development](../plugin.md)
 3. [Documentation Audit](doc-audit.md)
+4. [Axum Request Extractor Plan](axum-request-extractor-plan.md)
+5. [Axum Unary Parameter Expansion TODO](axum-request-extractor-todo.md)
 
 ## Repository map
 

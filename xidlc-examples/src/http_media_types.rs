@@ -6,22 +6,21 @@ pub struct HttpMediaTypesService;
 impl HttpMediaTypesApi for HttpMediaTypesService {
     async fn submit_profile(
         &self,
-        req: xidl_rust_axum::Request<HttpMediaTypesApiSubmitProfileRequest>,
+        name: String,
+        age: u32,
     ) -> Result<HttpMediaTypesApiSubmitProfileResponse, xidl_rust_axum::Error> {
-        let data = req.into_inner();
         Ok(HttpMediaTypesApiSubmitProfileResponse {
-            r#return: format!("{}:{}", data.name, data.age),
-            normalized_name: data.name.to_ascii_uppercase(),
+            r#return: format!("{name}:{age}"),
+            normalized_name: name.to_ascii_uppercase(),
         })
     }
 
     async fn get_msgpack_user(
         &self,
-        req: xidl_rust_axum::Request<HttpMediaTypesApiGetMsgpackUserRequest>,
+        user_id: String,
     ) -> Result<HttpMediaTypesApiGetMsgpackUserResponse, xidl_rust_axum::Error> {
-        let data = req.into_inner();
         Ok(HttpMediaTypesApiGetMsgpackUserResponse {
-            r#return: format!("user:{}", data.user_id),
+            r#return: format!("user:{user_id}"),
             score: 95,
         })
     }

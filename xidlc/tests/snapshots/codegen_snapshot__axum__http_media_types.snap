@@ -9,39 +9,105 @@ http_media_types.rs
 pub trait HttpMediaService {
     async fn submit_form(
         &self,
-        req: ::xidl_rust_axum::Request<HttpMediaServiceSubmitFormRequest>,
+        name: String,
+        age: u32,
     ) -> ::xidl_rust_axum::Result<String>;
-    async fn fetch_msgpack(
-        &self,
-        req: ::xidl_rust_axum::Request<HttpMediaServiceFetchMsgpackRequest>,
-    ) -> ::xidl_rust_axum::Result<String>;
+    async fn fetch_msgpack(&self, id: String) -> ::xidl_rust_axum::Result<String>;
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-struct HttpMediaServiceSubmitFormBody {
-    #[serde(
-        default,
-        deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null"
-    )]
+mod __xidl_in {
+    use super::*;
+}
+mod __xidl_out {
+    use super::*;
+}
+#[derive(::serde::Serialize)]
+struct HttpMediaServiceSubmitFormRequestOutBody {
+    #[serde(default)]
     name: String,
-    #[serde(
-        default,
-        deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null"
-    )]
+    #[serde(default)]
     age: u32,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-pub struct HttpMediaServiceSubmitFormRequest {
-    pub name: String,
-    pub age: u32,
+#[derive(::serde::Deserialize)]
+struct HttpMediaServiceSubmitFormRequestInBody {
+    name: String,
+    age: u32,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize, ::core::default::Default)]
-struct HttpMediaServiceFetchMsgpackQuery {
+#[derive(::serde::Deserialize)]
+struct HttpMediaServiceSubmitFormRequest {
+    name: String,
+    age: u32,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpMediaServiceSubmitFormRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let headers = &parts.headers;
+            if !::xidl_rust_axum::http::content_type_matches(
+                headers,
+                "application/x-www-form-urlencoded",
+            ) {
+                return Err(::xidl_rust_axum::Error::unsupported_media_type());
+            }
+            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+            let body: HttpMediaServiceSubmitFormRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+                    "application/x-www-form-urlencoded",
+                )
+                .from_slice(&body_bytes)?;
+            let HttpMediaServiceSubmitFormRequestInBody { name, age } = body;
+            Ok(Self { name, age })
+        }
+    }
+}
+#[derive(::serde::Serialize, ::core::default::Default)]
+struct HttpMediaServiceFetchMsgpackRequestOutQuery {
     #[serde(default)]
     id: String,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-pub struct HttpMediaServiceFetchMsgpackRequest {
-    pub id: String,
+#[derive(::serde::Deserialize, ::core::default::Default)]
+struct HttpMediaServiceFetchMsgpackRequestInQuery {
+    #[serde(default)]
+    id: String,
+}
+#[derive(::serde::Deserialize)]
+struct HttpMediaServiceFetchMsgpackRequest {
+    id: String,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpMediaServiceFetchMsgpackRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+                HttpMediaServiceFetchMsgpackRequestInQuery,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpMediaServiceFetchMsgpackRequestInQuery { id } = query;
+            let headers = &parts.headers;
+            Ok(Self { id })
+        }
+    }
 }
 pub struct HttpMediaServiceServer<T> {
     inner: ::std::sync::Arc<T>,
@@ -71,41 +137,26 @@ where
             )
             .with_state(svc)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn submit_form(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
-        body: ::xidl_rust_axum::axum::body::Body,
+        request: HttpMediaServiceSubmitFormRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        if !xidl_rust_axum::http::content_type_matches(
-            &headers,
-            "application/x-www-form-urlencoded",
-        ) {
-            return Err(xidl_rust_axum::Error::unsupported_media_type());
-        }
-        let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
-            .await
-            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-        let body: HttpMediaServiceSubmitFormBody = xidl_rust_axum::DeserializeFactory::new(
-                "application/x-www-form-urlencoded",
-            )
-            .from_slice(&body_bytes)?;
-        let HttpMediaServiceSubmitFormBody { name, age } = body;
-        let data = HttpMediaServiceSubmitFormRequest {
-            name,
-            age,
-        };
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.submit_form(req).await {
+        let HttpMediaServiceSubmitFormRequest { name, age } = request;
+        let name: String = name.into();
+        let age: u32 = age.into();
+        let mut resp = match svc.submit_form(name, age).await {
             Ok(resp_value) => {
                 let mut resp = {
+                    let body_value: String = resp_value.into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                        .to_vec(&resp_value)?;
+                        .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(::xidl_rust_axum::axum::http::StatusCode::OK)
                         .header(
@@ -126,31 +177,27 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn fetch_msgpack(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
-        xidl_rust_axum::axum::extract::Query(
-            query,
-        ): xidl_rust_axum::axum::extract::Query<HttpMediaServiceFetchMsgpackQuery>,
+        request: HttpMediaServiceFetchMsgpackRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/msgpack") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        let HttpMediaServiceFetchMsgpackQuery { id } = query;
-        let data = HttpMediaServiceFetchMsgpackRequest {
-            id,
-        };
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.fetch_msgpack(req).await {
+        let HttpMediaServiceFetchMsgpackRequest { id } = request;
+        let id: String = id.into();
+        let mut resp = match svc.fetch_msgpack(id).await {
             Ok(resp_value) => {
                 let mut resp = {
+                    let body_value: String = resp_value.into();
                     let body = xidl_rust_axum::SerializeFactory::new(
                             "application/msgpack",
                         )
-                        .to_vec(&resp_value)?;
+                        .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(::xidl_rust_axum::axum::http::StatusCode::OK)
                         .header(
@@ -224,6 +271,7 @@ impl HttpMediaServiceClient {
     }
 }
 impl HttpMediaServiceClient {
+    #[allow(clippy::useless_conversion)]
     pub async fn submit_form(
         &self,
         name: String,
@@ -245,9 +293,9 @@ impl HttpMediaServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
-        let body = HttpMediaServiceSubmitFormBody {
-            name,
-            age,
+        let body = HttpMediaServiceSubmitFormRequestOutBody {
+            name: name.into(),
+            age: age.into(),
         };
         let body = xidl_rust_axum::SerializeFactory::new(
                 "application/x-www-form-urlencoded",
@@ -273,13 +321,18 @@ impl HttpMediaServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
+    #[allow(clippy::useless_conversion)]
     pub async fn fetch_msgpack(
         &self,
         id: String,
@@ -299,7 +352,7 @@ impl HttpMediaServiceClient {
                     )
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
-        let query = HttpMediaServiceFetchMsgpackQuery {
+        let query = HttpMediaServiceFetchMsgpackRequestOutQuery {
             id,
         };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
@@ -319,8 +372,11 @@ impl HttpMediaServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/msgpack")
-                .from_slice(&body)
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/msgpack",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();

@@ -7,71 +7,209 @@ http_edge_cases.rs
 ===============
 #[async_trait::async_trait]
 pub trait HttpEdgeCasesService {
-    async fn health(
-        &self,
-        req: ::xidl_rust_axum::Request<HttpEdgeCasesServiceHealthRequest>,
-    ) -> ::xidl_rust_axum::Result<()>;
+    async fn health(&self, trace: String) -> ::xidl_rust_axum::Result<()>;
     async fn get_user(
         &self,
-        req: ::xidl_rust_axum::Request<HttpEdgeCasesServiceGetUserRequest>,
+        uid: u32,
+        locale: String,
     ) -> ::xidl_rust_axum::Result<String>;
     async fn get_item(
         &self,
-        req: ::xidl_rust_axum::Request<HttpEdgeCasesServiceGetItemRequest>,
+        order_id: u32,
+        item_id: u32,
     ) -> ::xidl_rust_axum::Result<String>;
     async fn lookup(
         &self,
-        req: ::xidl_rust_axum::Request<HttpEdgeCasesServiceLookupRequest>,
+        keyword: String,
+        page_size: u32,
     ) -> ::xidl_rust_axum::Result<String>;
 }
-#[derive(::serde::Serialize, ::serde::Deserialize, ::core::default::Default)]
-struct HttpEdgeCasesServiceHealthQuery {
+mod __xidl_in {
+    use super::*;
+}
+mod __xidl_out {
+    use super::*;
+}
+#[derive(::serde::Serialize, ::core::default::Default)]
+struct HttpEdgeCasesServiceHealthRequestOutQuery {
     #[serde(rename = "trace_id")]
     #[serde(default)]
     trace: String,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-pub struct HttpEdgeCasesServiceHealthRequest {
-    pub trace: String,
+#[derive(::serde::Deserialize, ::core::default::Default)]
+struct HttpEdgeCasesServiceHealthRequestInQuery {
+    #[serde(rename = "trace_id")]
+    #[serde(default)]
+    trace: String,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
+#[derive(::serde::Deserialize)]
+struct HttpEdgeCasesServiceHealthRequest {
+    trace: String,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpEdgeCasesServiceHealthRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+                HttpEdgeCasesServiceHealthRequestInQuery,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpEdgeCasesServiceHealthRequestInQuery { trace } = query;
+            let headers = &parts.headers;
+            Ok(Self { trace })
+        }
+    }
+}
+#[derive(::serde::Deserialize)]
 struct HttpEdgeCasesServiceGetUserPath {
     #[serde(rename = "id")]
     uid: u32,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize, ::core::default::Default)]
-struct HttpEdgeCasesServiceGetUserQuery {
+#[derive(::serde::Serialize, ::core::default::Default)]
+struct HttpEdgeCasesServiceGetUserRequestOutQuery {
     #[serde(rename = "lang")]
     #[serde(default)]
     locale: String,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-pub struct HttpEdgeCasesServiceGetUserRequest {
-    pub uid: u32,
-    pub locale: String,
+#[derive(::serde::Deserialize, ::core::default::Default)]
+struct HttpEdgeCasesServiceGetUserRequestInQuery {
+    #[serde(rename = "lang")]
+    #[serde(default)]
+    locale: String,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
+#[derive(::serde::Deserialize)]
+struct HttpEdgeCasesServiceGetUserRequest {
+    uid: u32,
+    locale: String,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpEdgeCasesServiceGetUserRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+                HttpEdgeCasesServiceGetUserPath,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpEdgeCasesServiceGetUserPath { uid } = path;
+            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+                HttpEdgeCasesServiceGetUserRequestInQuery,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpEdgeCasesServiceGetUserRequestInQuery { locale } = query;
+            let headers = &parts.headers;
+            Ok(Self { uid, locale })
+        }
+    }
+}
+#[derive(::serde::Deserialize)]
 struct HttpEdgeCasesServiceGetItemPath {
     order_id: u32,
     item_id: u32,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-pub struct HttpEdgeCasesServiceGetItemRequest {
-    pub order_id: u32,
-    pub item_id: u32,
+#[derive(::serde::Deserialize)]
+struct HttpEdgeCasesServiceGetItemRequest {
+    order_id: u32,
+    item_id: u32,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize, ::core::default::Default)]
-struct HttpEdgeCasesServiceLookupQuery {
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpEdgeCasesServiceGetItemRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+                HttpEdgeCasesServiceGetItemPath,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpEdgeCasesServiceGetItemPath { order_id, item_id } = path;
+            let headers = &parts.headers;
+            Ok(Self { order_id, item_id })
+        }
+    }
+}
+#[derive(::serde::Serialize, ::core::default::Default)]
+struct HttpEdgeCasesServiceLookupRequestOutQuery {
     #[serde(default)]
     keyword: String,
     #[serde(rename = "limit")]
     #[serde(default)]
     page_size: u32,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-pub struct HttpEdgeCasesServiceLookupRequest {
-    pub keyword: String,
-    pub page_size: u32,
+#[derive(::serde::Deserialize, ::core::default::Default)]
+struct HttpEdgeCasesServiceLookupRequestInQuery {
+    #[serde(default)]
+    keyword: String,
+    #[serde(rename = "limit")]
+    #[serde(default)]
+    page_size: u32,
+}
+#[derive(::serde::Deserialize)]
+struct HttpEdgeCasesServiceLookupRequest {
+    keyword: String,
+    page_size: u32,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpEdgeCasesServiceLookupRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+                HttpEdgeCasesServiceLookupRequestInQuery,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpEdgeCasesServiceLookupRequestInQuery { keyword, page_size } = query;
+            let headers = &parts.headers;
+            Ok(Self { keyword, page_size })
+        }
+    }
 }
 pub struct HttpEdgeCasesServiceServer<T> {
     inner: ::std::sync::Arc<T>,
@@ -101,25 +239,20 @@ where
             .route("/lookup", xidl_rust_axum::axum::routing::post(Self::lookup))
             .with_state(svc)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn health(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
-        xidl_rust_axum::axum::extract::Query(
-            query,
-        ): xidl_rust_axum::axum::extract::Query<HttpEdgeCasesServiceHealthQuery>,
+        request: HttpEdgeCasesServiceHealthRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        let HttpEdgeCasesServiceHealthQuery { trace } = query;
-        let data = HttpEdgeCasesServiceHealthRequest {
-            trace,
-        };
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.health(req).await {
+        let HttpEdgeCasesServiceHealthRequest { trace } = request;
+        let trace: String = trace.into();
+        let mut resp = match svc.health(trace).await {
             Ok(resp_value) => {
                 let mut resp = {
                     resp_value;
@@ -135,34 +268,26 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn get_user(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
-        ::xidl_rust_axum::axum::extract::Path(
-            path,
-        ): ::xidl_rust_axum::axum::extract::Path<HttpEdgeCasesServiceGetUserPath>,
-        xidl_rust_axum::axum::extract::Query(
-            query,
-        ): xidl_rust_axum::axum::extract::Query<HttpEdgeCasesServiceGetUserQuery>,
+        request: HttpEdgeCasesServiceGetUserRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        let HttpEdgeCasesServiceGetUserPath { uid } = path;
-        let HttpEdgeCasesServiceGetUserQuery { locale } = query;
-        let data = HttpEdgeCasesServiceGetUserRequest {
-            uid,
-            locale,
-        };
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.get_user(req).await {
+        let HttpEdgeCasesServiceGetUserRequest { uid, locale } = request;
+        let uid: u32 = uid.into();
+        let locale: String = locale.into();
+        let mut resp = match svc.get_user(uid, locale).await {
             Ok(resp_value) => {
                 let mut resp = {
+                    let body_value: String = resp_value.into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                        .to_vec(&resp_value)?;
+                        .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(::xidl_rust_axum::axum::http::StatusCode::OK)
                         .header(
@@ -183,30 +308,26 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn get_item(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
-        ::xidl_rust_axum::axum::extract::Path(
-            path,
-        ): ::xidl_rust_axum::axum::extract::Path<HttpEdgeCasesServiceGetItemPath>,
+        request: HttpEdgeCasesServiceGetItemRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        let HttpEdgeCasesServiceGetItemPath { order_id, item_id } = path;
-        let data = HttpEdgeCasesServiceGetItemRequest {
-            order_id,
-            item_id,
-        };
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.get_item(req).await {
+        let HttpEdgeCasesServiceGetItemRequest { order_id, item_id } = request;
+        let order_id: u32 = order_id.into();
+        let item_id: u32 = item_id.into();
+        let mut resp = match svc.get_item(order_id, item_id).await {
             Ok(resp_value) => {
                 let mut resp = {
+                    let body_value: String = resp_value.into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                        .to_vec(&resp_value)?;
+                        .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(::xidl_rust_axum::axum::http::StatusCode::OK)
                         .header(
@@ -227,30 +348,26 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn lookup(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
-        xidl_rust_axum::axum::extract::Query(
-            query,
-        ): xidl_rust_axum::axum::extract::Query<HttpEdgeCasesServiceLookupQuery>,
+        request: HttpEdgeCasesServiceLookupRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        let HttpEdgeCasesServiceLookupQuery { keyword, page_size } = query;
-        let data = HttpEdgeCasesServiceLookupRequest {
-            keyword,
-            page_size,
-        };
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.lookup(req).await {
+        let HttpEdgeCasesServiceLookupRequest { keyword, page_size } = request;
+        let keyword: String = keyword.into();
+        let page_size: u32 = page_size.into();
+        let mut resp = match svc.lookup(keyword, page_size).await {
             Ok(resp_value) => {
                 let mut resp = {
+                    let body_value: String = resp_value.into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                        .to_vec(&resp_value)?;
+                        .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(::xidl_rust_axum::axum::http::StatusCode::OK)
                         .header(
@@ -324,6 +441,7 @@ impl HttpEdgeCasesServiceClient {
     }
 }
 impl HttpEdgeCasesServiceClient {
+    #[allow(clippy::useless_conversion)]
     pub async fn health(&self, trace: String) -> Result<(), xidl_rust_axum::Error> {
         let path = "/v1/health".to_string();
         let mut req = self
@@ -340,7 +458,7 @@ impl HttpEdgeCasesServiceClient {
                     )
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
-        let query = HttpEdgeCasesServiceHealthQuery {
+        let query = HttpEdgeCasesServiceHealthRequestOutQuery {
             trace,
         };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
@@ -363,6 +481,7 @@ impl HttpEdgeCasesServiceClient {
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
+    #[allow(clippy::useless_conversion)]
     pub async fn get_user(
         &self,
         uid: u32,
@@ -384,7 +503,7 @@ impl HttpEdgeCasesServiceClient {
                     )
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
-        let query = HttpEdgeCasesServiceGetUserQuery {
+        let query = HttpEdgeCasesServiceGetUserRequestOutQuery {
             locale,
         };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
@@ -404,13 +523,18 @@ impl HttpEdgeCasesServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
+    #[allow(clippy::useless_conversion)]
     pub async fn get_item(
         &self,
         order_id: u32,
@@ -445,13 +569,18 @@ impl HttpEdgeCasesServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
+    #[allow(clippy::useless_conversion)]
     pub async fn lookup(
         &self,
         keyword: String,
@@ -472,7 +601,7 @@ impl HttpEdgeCasesServiceClient {
                     )
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
-        let query = HttpEdgeCasesServiceLookupQuery {
+        let query = HttpEdgeCasesServiceLookupRequestOutQuery {
             keyword,
             page_size,
         };
@@ -493,7 +622,11 @@ impl HttpEdgeCasesServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();

@@ -7,70 +7,213 @@ http_response_shape.rs
 ===============
 #[async_trait::async_trait]
 pub trait HttpResponseShapeService {
-    async fn hello(
-        &self,
-        req: ::xidl_rust_axum::Request<()>,
-    ) -> ::xidl_rust_axum::Result<String>;
+    async fn hello(&self) -> ::xidl_rust_axum::Result<String>;
     async fn get_count(
         &self,
-        req: ::xidl_rust_axum::Request<()>,
     ) -> ::xidl_rust_axum::Result<HttpResponseShapeServiceGetCountResponse>;
     async fn add(
         &self,
-        req: ::xidl_rust_axum::Request<HttpResponseShapeServiceAddRequest>,
+        a: i32,
+        b: i32,
     ) -> ::xidl_rust_axum::Result<HttpResponseShapeServiceAddResponse>;
     async fn bump(
         &self,
-        req: ::xidl_rust_axum::Request<HttpResponseShapeServiceBumpRequest>,
+        value: i32,
     ) -> ::xidl_rust_axum::Result<HttpResponseShapeServiceBumpResponse>;
-    async fn ping(
-        &self,
-        req: ::xidl_rust_axum::Request<()>,
-    ) -> ::xidl_rust_axum::Result<()>;
+    async fn ping(&self) -> ::xidl_rust_axum::Result<()>;
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
+mod __xidl_in {
+    use super::*;
+}
+mod __xidl_out {
+    use super::*;
+}
+#[derive(::serde::Serialize)]
+struct HttpResponseShapeServiceGetCountResponseOutBody {
+    count: i32,
+}
+#[derive(::serde::Deserialize)]
+struct HttpResponseShapeServiceGetCountResponseInBody {
+    count: i32,
+}
 pub struct HttpResponseShapeServiceGetCountResponse {
     pub count: i32,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-struct HttpResponseShapeServiceAddBody {
-    #[serde(
-        default,
-        deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null"
-    )]
+#[allow(clippy::useless_conversion)]
+impl From<HttpResponseShapeServiceGetCountResponse>
+for HttpResponseShapeServiceGetCountResponseOutBody {
+    fn from(value: HttpResponseShapeServiceGetCountResponse) -> Self {
+        Self { count: value.count.into() }
+    }
+}
+#[allow(clippy::useless_conversion)]
+impl From<HttpResponseShapeServiceGetCountResponseInBody>
+for HttpResponseShapeServiceGetCountResponse {
+    fn from(value: HttpResponseShapeServiceGetCountResponseInBody) -> Self {
+        Self { count: value.count.into() }
+    }
+}
+#[derive(::serde::Serialize)]
+struct HttpResponseShapeServiceAddRequestOutBody {
+    #[serde(default)]
     a: i32,
-    #[serde(
-        default,
-        deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null"
-    )]
+    #[serde(default)]
     b: i32,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-pub struct HttpResponseShapeServiceAddRequest {
-    pub a: i32,
-    pub b: i32,
+#[derive(::serde::Deserialize)]
+struct HttpResponseShapeServiceAddRequestInBody {
+    a: i32,
+    b: i32,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
+#[derive(::serde::Deserialize)]
+struct HttpResponseShapeServiceAddRequest {
+    a: i32,
+    b: i32,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpResponseShapeServiceAddRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let headers = &parts.headers;
+            if !::xidl_rust_axum::http::content_type_matches(
+                headers,
+                "application/json",
+            ) {
+                return Err(::xidl_rust_axum::Error::unsupported_media_type());
+            }
+            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+            let body: HttpResponseShapeServiceAddRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body_bytes)?;
+            let HttpResponseShapeServiceAddRequestInBody { a, b } = body;
+            Ok(Self { a, b })
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct HttpResponseShapeServiceAddResponseOutBody {
+    r#return: i32,
+    sum: i32,
+}
+#[derive(::serde::Deserialize)]
+struct HttpResponseShapeServiceAddResponseInBody {
+    r#return: i32,
+    sum: i32,
+}
 pub struct HttpResponseShapeServiceAddResponse {
     pub r#return: i32,
     pub sum: i32,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-struct HttpResponseShapeServiceBumpBody {
-    #[serde(
-        default,
-        deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null"
-    )]
+#[allow(clippy::useless_conversion)]
+impl From<HttpResponseShapeServiceAddResponse>
+for HttpResponseShapeServiceAddResponseOutBody {
+    fn from(value: HttpResponseShapeServiceAddResponse) -> Self {
+        Self {
+            r#return: value.r#return.into(),
+            sum: value.sum.into(),
+        }
+    }
+}
+#[allow(clippy::useless_conversion)]
+impl From<HttpResponseShapeServiceAddResponseInBody>
+for HttpResponseShapeServiceAddResponse {
+    fn from(value: HttpResponseShapeServiceAddResponseInBody) -> Self {
+        Self {
+            r#return: value.r#return.into(),
+            sum: value.sum.into(),
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct HttpResponseShapeServiceBumpRequestOutBody {
+    #[serde(default)]
     value: i32,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-pub struct HttpResponseShapeServiceBumpRequest {
-    pub value: i32,
+#[derive(::serde::Deserialize)]
+struct HttpResponseShapeServiceBumpRequestInBody {
+    value: i32,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
+#[derive(::serde::Deserialize)]
+struct HttpResponseShapeServiceBumpRequest {
+    value: i32,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpResponseShapeServiceBumpRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let headers = &parts.headers;
+            if !::xidl_rust_axum::http::content_type_matches(
+                headers,
+                "application/json",
+            ) {
+                return Err(::xidl_rust_axum::Error::unsupported_media_type());
+            }
+            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+            let body: HttpResponseShapeServiceBumpRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body_bytes)?;
+            let HttpResponseShapeServiceBumpRequestInBody { value } = body;
+            Ok(Self { value })
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct HttpResponseShapeServiceBumpResponseOutBody {
+    r#return: i32,
+    value: i32,
+}
+#[derive(::serde::Deserialize)]
+struct HttpResponseShapeServiceBumpResponseInBody {
+    r#return: i32,
+    value: i32,
+}
 pub struct HttpResponseShapeServiceBumpResponse {
     pub r#return: i32,
     pub value: i32,
+}
+#[allow(clippy::useless_conversion)]
+impl From<HttpResponseShapeServiceBumpResponse>
+for HttpResponseShapeServiceBumpResponseOutBody {
+    fn from(value: HttpResponseShapeServiceBumpResponse) -> Self {
+        Self {
+            r#return: value.r#return.into(),
+            value: value.value.into(),
+        }
+    }
+}
+#[allow(clippy::useless_conversion)]
+impl From<HttpResponseShapeServiceBumpResponseInBody>
+for HttpResponseShapeServiceBumpResponse {
+    fn from(value: HttpResponseShapeServiceBumpResponseInBody) -> Self {
+        Self {
+            r#return: value.r#return.into(),
+            value: value.value.into(),
+        }
+    }
 }
 pub struct HttpResponseShapeServiceServer<T> {
     inner: ::std::sync::Arc<T>,
@@ -97,7 +240,7 @@ where
             .route("/ping", xidl_rust_axum::axum::routing::post(Self::ping))
             .with_state(svc)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn hello(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -107,13 +250,12 @@ where
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        let data = ();
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.hello(req).await {
+        let mut resp = match svc.hello().await {
             Ok(resp_value) => {
                 let mut resp = {
+                    let body_value: String = resp_value.into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                        .to_vec(&resp_value)?;
+                        .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(::xidl_rust_axum::axum::http::StatusCode::OK)
                         .header(
@@ -134,7 +276,7 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn get_count(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -144,13 +286,13 @@ where
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        let data = ();
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.get_count(req).await {
+        let mut resp = match svc.get_count().await {
             Ok(resp_value) => {
                 let mut resp = {
+                    let body_value: HttpResponseShapeServiceGetCountResponseOutBody = resp_value
+                        .into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                        .to_vec(&resp_value)?;
+                        .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(::xidl_rust_axum::axum::http::StatusCode::OK)
                         .header(
@@ -171,38 +313,27 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn add(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
-        body: ::xidl_rust_axum::axum::body::Body,
+        request: HttpResponseShapeServiceAddRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        if !xidl_rust_axum::http::content_type_matches(&headers, "application/json") {
-            return Err(xidl_rust_axum::Error::unsupported_media_type());
-        }
-        let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
-            .await
-            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-        let body: HttpResponseShapeServiceAddBody = xidl_rust_axum::DeserializeFactory::new(
-                "application/json",
-            )
-            .from_slice(&body_bytes)?;
-        let HttpResponseShapeServiceAddBody { a, b } = body;
-        let data = HttpResponseShapeServiceAddRequest {
-            a,
-            b,
-        };
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.add(req).await {
+        let HttpResponseShapeServiceAddRequest { a, b } = request;
+        let a: i32 = a.into();
+        let b: i32 = b.into();
+        let mut resp = match svc.add(a, b).await {
             Ok(resp_value) => {
                 let mut resp = {
+                    let body_value: HttpResponseShapeServiceAddResponseOutBody = resp_value
+                        .into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                        .to_vec(&resp_value)?;
+                        .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(::xidl_rust_axum::axum::http::StatusCode::OK)
                         .header(
@@ -223,37 +354,26 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn bump(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
-        body: ::xidl_rust_axum::axum::body::Body,
+        request: HttpResponseShapeServiceBumpRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        if !xidl_rust_axum::http::content_type_matches(&headers, "application/json") {
-            return Err(xidl_rust_axum::Error::unsupported_media_type());
-        }
-        let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
-            .await
-            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-        let body: HttpResponseShapeServiceBumpBody = xidl_rust_axum::DeserializeFactory::new(
-                "application/json",
-            )
-            .from_slice(&body_bytes)?;
-        let HttpResponseShapeServiceBumpBody { value } = body;
-        let data = HttpResponseShapeServiceBumpRequest {
-            value,
-        };
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.bump(req).await {
+        let HttpResponseShapeServiceBumpRequest { value } = request;
+        let value: i32 = value.into();
+        let mut resp = match svc.bump(value).await {
             Ok(resp_value) => {
                 let mut resp = {
+                    let body_value: HttpResponseShapeServiceBumpResponseOutBody = resp_value
+                        .into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                        .to_vec(&resp_value)?;
+                        .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(::xidl_rust_axum::axum::http::StatusCode::OK)
                         .header(
@@ -274,7 +394,7 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn ping(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -284,9 +404,7 @@ where
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        let data = ();
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.ping(req).await {
+        let mut resp = match svc.ping().await {
             Ok(resp_value) => {
                 let mut resp = {
                     resp_value;
@@ -355,6 +473,7 @@ impl HttpResponseShapeServiceClient {
     }
 }
 impl HttpResponseShapeServiceClient {
+    #[allow(clippy::useless_conversion)]
     pub async fn hello(&self) -> Result<String, xidl_rust_axum::Error> {
         let path = "/hello".to_string();
         let mut req = self
@@ -383,13 +502,18 @@ impl HttpResponseShapeServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
+    #[allow(clippy::useless_conversion)]
     pub async fn get_count(
         &self,
     ) -> Result<HttpResponseShapeServiceGetCountResponse, xidl_rust_axum::Error> {
@@ -420,13 +544,18 @@ impl HttpResponseShapeServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+            let body: HttpResponseShapeServiceGetCountResponseInBody = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
+    #[allow(clippy::useless_conversion)]
     pub async fn add(
         &self,
         a: i32,
@@ -448,9 +577,9 @@ impl HttpResponseShapeServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
-        let body = HttpResponseShapeServiceAddBody {
-            a,
-            b,
+        let body = HttpResponseShapeServiceAddRequestOutBody {
+            a: a.into(),
+            b: b.into(),
         };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;
@@ -474,13 +603,18 @@ impl HttpResponseShapeServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+            let body: HttpResponseShapeServiceAddResponseInBody = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
+    #[allow(clippy::useless_conversion)]
     pub async fn bump(
         &self,
         value: i32,
@@ -501,8 +635,8 @@ impl HttpResponseShapeServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
-        let body = HttpResponseShapeServiceBumpBody {
-            value,
+        let body = HttpResponseShapeServiceBumpRequestOutBody {
+            value: value.into(),
         };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;
@@ -526,13 +660,18 @@ impl HttpResponseShapeServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+            let body: HttpResponseShapeServiceBumpResponseInBody = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
+    #[allow(clippy::useless_conversion)]
     pub async fn ping(&self) -> Result<(), xidl_rust_axum::Error> {
         let path = "/ping".to_string();
         let mut req = self

@@ -30,14 +30,15 @@ impl CityHttpStreamApi for CityHttpStreamService {
 
     async fn get_attribute_maintenance_mode(
         &self,
-        _req: xidl_rust_axum::Request<CityHttpStreamApiGetAttributeMaintenanceModeRequest>,
+        _xidl_auth: xidl_rust_axum::auth::basic::BasicAuth,
     ) -> Result<bool, xidl_rust_axum::Error> {
         Ok(false)
     }
 
     async fn set_attribute_maintenance_mode(
         &self,
-        _req: xidl_rust_axum::Request<CityHttpStreamApiSetAttributeMaintenanceModeRequest>,
+        _maintenance_mode: bool,
+        _xidl_auth: xidl_rust_axum::auth::basic::BasicAuth,
     ) -> Result<(), xidl_rust_axum::Error> {
         Ok(())
     }

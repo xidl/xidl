@@ -9,30 +9,88 @@ http_hir_shared_semantics.rs
 pub trait ReportApi {
     async fn get_report(
         &self,
-        req: ::xidl_rust_axum::Request<ReportApiGetReportRequest>,
+        id: String,
+        lang: Option<String>,
+        trace_id: String,
+        xidl_auth: xidl_rust_axum::auth::bearer::BearerAuth,
     ) -> ::xidl_rust_axum::Result<String>;
     async fn watch_report(
         &self,
         req: ::xidl_rust_axum::Request<ReportApiWatchReportRequest>,
     ) -> ::xidl_rust_axum::Result<xidl_rust_axum::stream::SseStream<String>>;
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
+mod __xidl_in {
+    use super::*;
+}
+mod __xidl_out {
+    use super::*;
+}
+#[derive(::serde::Deserialize)]
 struct ReportApiGetReportPath {
     id: String,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize, ::core::default::Default)]
-struct ReportApiGetReportQuery {
+#[derive(::serde::Serialize, ::core::default::Default)]
+struct ReportApiGetReportRequestOutQuery {
     #[serde(default)]
     lang: Option<String>,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-pub struct ReportApiGetReportRequest {
-    pub id: String,
-    pub lang: Option<String>,
-    pub trace_id: String,
-    pub xidl_auth: xidl_rust_axum::auth::bearer::BearerAuth,
+#[derive(::serde::Deserialize, ::core::default::Default)]
+struct ReportApiGetReportRequestInQuery {
+    #[serde(default)]
+    lang: Option<String>,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
+#[derive(::serde::Deserialize)]
+struct ReportApiGetReportRequest {
+    id: String,
+    lang: Option<String>,
+    trace_id: String,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S> for ReportApiGetReportRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+                ReportApiGetReportPath,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let ReportApiGetReportPath { id } = path;
+            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+                ReportApiGetReportRequestInQuery,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let ReportApiGetReportRequestInQuery { lang } = query;
+            let headers = &parts.headers;
+            let trace_id: String = match headers.get("X-Trace-Id") {
+                Some(header_value) => {
+                    let header_str = header_value
+                        .to_str()
+                        .map_err(|err| ::xidl_rust_axum::Error::new(
+                            400,
+                            format!("{err:?}"),
+                        ))?;
+                    header_str.to_string()
+                }
+                None => ::core::default::Default::default(),
+            };
+            Ok(Self { id, lang, trace_id })
+        }
+    }
+}
+#[derive(::serde::Deserialize)]
 struct ReportApiWatchReportPath {
     id: String,
 }
@@ -66,7 +124,7 @@ where
             )
             .with_state(svc)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn get_report(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -77,12 +135,7 @@ where
                 ::xidl_rust_axum::auth::bearer::BearerHeader,
             >,
         >,
-        ::xidl_rust_axum::axum::extract::Path(
-            path,
-        ): ::xidl_rust_axum::axum::extract::Path<ReportApiGetReportPath>,
-        xidl_rust_axum::axum::extract::Query(
-            query,
-        ): xidl_rust_axum::axum::extract::Query<ReportApiGetReportQuery>,
+        request: ReportApiGetReportRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
@@ -93,29 +146,16 @@ where
             }
             None => return Err(xidl_rust_axum::Error::unauthorized()),
         };
-        let ReportApiGetReportPath { id } = path;
-        let ReportApiGetReportQuery { lang } = query;
-        let trace_id: String = match headers.get("X-Trace-Id") {
-            Some(header_value) => {
-                let header_str = header_value
-                    .to_str()
-                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-                header_str.to_string()
-            }
-            None => ::core::default::Default::default(),
-        };
-        let data = ReportApiGetReportRequest {
-            id,
-            lang,
-            trace_id,
-            xidl_auth,
-        };
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.get_report(req).await {
+        let ReportApiGetReportRequest { id, lang, trace_id } = request;
+        let id: String = id.into();
+        let lang: Option<String> = lang.into();
+        let trace_id: String = trace_id.into();
+        let mut resp = match svc.get_report(id, lang, trace_id, xidl_auth).await {
             Ok(resp_value) => {
                 let mut resp = {
+                    let body_value: String = resp_value.into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                        .to_vec(&resp_value)?;
+                        .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(::xidl_rust_axum::axum::http::StatusCode::OK)
                         .header(
@@ -136,7 +176,7 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn watch_report(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -165,8 +205,10 @@ where
             id,
             xidl_auth,
         };
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.watch_report(req).await {
+        let mut resp = match svc
+            .watch_report(::xidl_rust_axum::Request::new(headers, data))
+            .await
+        {
             Ok(resp_value) => {
                 let mut resp = xidl_rust_axum::stream::sse_response(resp_value);
                 resp
@@ -230,6 +272,7 @@ impl ReportApiClient {
     }
 }
 impl ReportApiClient {
+    #[allow(clippy::useless_conversion)]
     pub async fn get_report(
         &self,
         id: String,
@@ -262,7 +305,9 @@ impl ReportApiClient {
             )
             .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
         req.headers_mut().insert(header_name, header_value);
-        let query = ReportApiGetReportQuery { lang };
+        let query = ReportApiGetReportRequestOutQuery {
+            lang,
+        };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
             .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
         if !query.is_empty() {
@@ -281,13 +326,18 @@ impl ReportApiClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
+    #[allow(clippy::useless_conversion)]
     pub async fn watch_report(
         &self,
         id: String,

@@ -9,40 +9,98 @@ rust_annotation_passthrough.rs
 #[async_trait::async_trait]
 pub trait RustHttp {
     #[cfg(feature = "server")]
-    async fn get_user(
-        &self,
-        req: ::xidl_rust_axum::Request<RustHttpGetUserRequest>,
-    ) -> ::xidl_rust_axum::Result<String>;
+    async fn get_user(&self, user_id: u32) -> ::xidl_rust_axum::Result<String>;
     #[cfg(feature = "server")]
-    async fn get_attribute_display_name(
-        &self,
-        req: ::xidl_rust_axum::Request<()>,
-    ) -> ::xidl_rust_axum::Result<String>;
+    async fn get_attribute_display_name(&self) -> ::xidl_rust_axum::Result<String>;
     #[cfg(feature = "server")]
     async fn set_attribute_display_name(
         &self,
-        req: ::xidl_rust_axum::Request<RustHttpSetAttributeDisplayNameRequest>,
+        display_name: String,
     ) -> ::xidl_rust_axum::Result<()>;
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
+mod __xidl_in {
+    use super::*;
+}
+mod __xidl_out {
+    use super::*;
+}
+#[derive(::serde::Deserialize)]
 struct RustHttpGetUserPath {
     user_id: u32,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-pub struct RustHttpGetUserRequest {
-    pub user_id: u32,
+#[derive(::serde::Deserialize)]
+struct RustHttpGetUserRequest {
+    user_id: u32,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-struct RustHttpSetAttributeDisplayNameBody {
-    #[serde(
-        default,
-        deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null"
-    )]
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S> for RustHttpGetUserRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+                RustHttpGetUserPath,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let RustHttpGetUserPath { user_id } = path;
+            let headers = &parts.headers;
+            Ok(Self { user_id })
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct RustHttpSetAttributeDisplayNameRequestOutBody {
+    #[serde(default)]
     display_name: String,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-pub struct RustHttpSetAttributeDisplayNameRequest {
-    pub display_name: String,
+#[derive(::serde::Deserialize)]
+struct RustHttpSetAttributeDisplayNameRequestInBody {
+    display_name: String,
+}
+#[derive(::serde::Deserialize)]
+struct RustHttpSetAttributeDisplayNameRequest {
+    display_name: String,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for RustHttpSetAttributeDisplayNameRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let headers = &parts.headers;
+            if !::xidl_rust_axum::http::content_type_matches(
+                headers,
+                "application/json",
+            ) {
+                return Err(::xidl_rust_axum::Error::unsupported_media_type());
+            }
+            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+            let body: RustHttpSetAttributeDisplayNameRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body_bytes)?;
+            let RustHttpSetAttributeDisplayNameRequestInBody { display_name } = body;
+            Ok(Self { display_name })
+        }
+    }
 }
 pub struct RustHttpServer<T> {
     inner: ::std::sync::Arc<T>,
@@ -76,27 +134,25 @@ where
             )
             .with_state(svc)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn get_user(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
-        ::xidl_rust_axum::axum::extract::Path(
-            path,
-        ): ::xidl_rust_axum::axum::extract::Path<RustHttpGetUserPath>,
+        request: RustHttpGetUserRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        let RustHttpGetUserPath { user_id } = path;
-        let data = RustHttpGetUserRequest { user_id };
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.get_user(req).await {
+        let RustHttpGetUserRequest { user_id } = request;
+        let user_id: u32 = user_id.into();
+        let mut resp = match svc.get_user(user_id).await {
             Ok(resp_value) => {
                 let mut resp = {
+                    let body_value: String = resp_value.into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                        .to_vec(&resp_value)?;
+                        .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(::xidl_rust_axum::axum::http::StatusCode::OK)
                         .header(
@@ -117,7 +173,7 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn get_attribute_display_name(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -127,13 +183,12 @@ where
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        let data = ();
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.get_attribute_display_name(req).await {
+        let mut resp = match svc.get_attribute_display_name().await {
             Ok(resp_value) => {
                 let mut resp = {
+                    let body_value: String = resp_value.into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                        .to_vec(&resp_value)?;
+                        .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(::xidl_rust_axum::axum::http::StatusCode::OK)
                         .header(
@@ -154,33 +209,20 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn set_attribute_display_name(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
-        body: ::xidl_rust_axum::axum::body::Body,
+        request: RustHttpSetAttributeDisplayNameRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        if !xidl_rust_axum::http::content_type_matches(&headers, "application/json") {
-            return Err(xidl_rust_axum::Error::unsupported_media_type());
-        }
-        let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
-            .await
-            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-        let body: RustHttpSetAttributeDisplayNameBody = xidl_rust_axum::DeserializeFactory::new(
-                "application/json",
-            )
-            .from_slice(&body_bytes)?;
-        let RustHttpSetAttributeDisplayNameBody { display_name } = body;
-        let data = RustHttpSetAttributeDisplayNameRequest {
-            display_name,
-        };
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.set_attribute_display_name(req).await {
+        let RustHttpSetAttributeDisplayNameRequest { display_name } = request;
+        let display_name: String = display_name.into();
+        let mut resp = match svc.set_attribute_display_name(display_name).await {
             Ok(resp_value) => {
                 let mut resp = {
                     resp_value;
@@ -249,6 +291,7 @@ impl RustHttpClient {
     }
 }
 impl RustHttpClient {
+    #[allow(clippy::useless_conversion)]
     pub async fn get_user(&self, user_id: u32) -> Result<String, xidl_rust_axum::Error> {
         let path = "/users/{user_id}".to_string();
         let path = path.replace("{user_id}", &user_id.to_string());
@@ -278,13 +321,18 @@ impl RustHttpClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
+    #[allow(clippy::useless_conversion)]
     pub async fn get_attribute_display_name(
         &self,
     ) -> Result<String, xidl_rust_axum::Error> {
@@ -315,13 +363,18 @@ impl RustHttpClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
+    #[allow(clippy::useless_conversion)]
     pub async fn set_attribute_display_name(
         &self,
         display_name: String,
@@ -342,8 +395,8 @@ impl RustHttpClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
-        let body = RustHttpSetAttributeDisplayNameBody {
-            display_name,
+        let body = RustHttpSetAttributeDisplayNameRequestOutBody {
+            display_name: display_name.into(),
         };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;

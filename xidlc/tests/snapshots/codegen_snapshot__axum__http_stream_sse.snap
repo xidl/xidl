@@ -11,25 +11,30 @@ pub trait HttpStreamSseService {
         &self,
         req: ::xidl_rust_axum::Request<HttpStreamSseServiceWatchTopicRequest>,
     ) -> ::xidl_rust_axum::Result<xidl_rust_axum::stream::SseStream<String>>;
-    async fn get_attribute_online(
-        &self,
-        req: ::xidl_rust_axum::Request<()>,
-    ) -> ::xidl_rust_axum::Result<bool>;
-    async fn set_attribute_online(
-        &self,
-        req: ::xidl_rust_axum::Request<HttpStreamSseServiceSetAttributeOnlineRequest>,
-    ) -> ::xidl_rust_axum::Result<()>;
+    async fn get_attribute_online(&self) -> ::xidl_rust_axum::Result<bool>;
+    async fn set_attribute_online(&self, online: bool) -> ::xidl_rust_axum::Result<()>;
     async fn watch_attribute_online(
         &self,
         req: ::xidl_rust_axum::Request<()>,
     ) -> ::xidl_rust_axum::Result<xidl_rust_axum::stream::SseStream<bool>>;
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
+mod __xidl_in {
+    use super::*;
+}
+mod __xidl_out {
+    use super::*;
+}
+#[derive(::serde::Deserialize)]
 struct HttpStreamSseServiceWatchTopicPath {
     topic: String,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize, ::core::default::Default)]
-struct HttpStreamSseServiceWatchTopicQuery {
+#[derive(::serde::Serialize, ::core::default::Default)]
+struct HttpStreamSseServiceWatchTopicRequestOutQuery {
+    #[serde(default)]
+    lang: String,
+}
+#[derive(::serde::Deserialize, ::core::default::Default)]
+struct HttpStreamSseServiceWatchTopicRequestInQuery {
     #[serde(default)]
     lang: String,
 }
@@ -38,17 +43,50 @@ pub struct HttpStreamSseServiceWatchTopicRequest {
     pub topic: String,
     pub lang: String,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-struct HttpStreamSseServiceSetAttributeOnlineBody {
-    #[serde(
-        default,
-        deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null"
-    )]
+#[derive(::serde::Serialize)]
+struct HttpStreamSseServiceSetAttributeOnlineRequestOutBody {
+    #[serde(default)]
     online: bool,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-pub struct HttpStreamSseServiceSetAttributeOnlineRequest {
-    pub online: bool,
+#[derive(::serde::Deserialize)]
+struct HttpStreamSseServiceSetAttributeOnlineRequestInBody {
+    online: bool,
+}
+#[derive(::serde::Deserialize)]
+struct HttpStreamSseServiceSetAttributeOnlineRequest {
+    online: bool,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpStreamSseServiceSetAttributeOnlineRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let headers = &parts.headers;
+            if !::xidl_rust_axum::http::content_type_matches(
+                headers,
+                "application/json",
+            ) {
+                return Err(::xidl_rust_axum::Error::unsupported_media_type());
+            }
+            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+            let body: HttpStreamSseServiceSetAttributeOnlineRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body_bytes)?;
+            let HttpStreamSseServiceSetAttributeOnlineRequestInBody { online } = body;
+            Ok(Self { online })
+        }
+    }
 }
 pub struct HttpStreamSseServiceServer<T> {
     inner: ::std::sync::Arc<T>,
@@ -86,7 +124,7 @@ where
             )
             .with_state(svc)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn watch_topic(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -97,19 +135,23 @@ where
         ): ::xidl_rust_axum::axum::extract::Path<HttpStreamSseServiceWatchTopicPath>,
         xidl_rust_axum::axum::extract::Query(
             query,
-        ): xidl_rust_axum::axum::extract::Query<HttpStreamSseServiceWatchTopicQuery>,
+        ): xidl_rust_axum::axum::extract::Query<
+            HttpStreamSseServiceWatchTopicRequestInQuery,
+        >,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         if !xidl_rust_axum::http::accepts_media_type(&headers, "text/event-stream") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpStreamSseServiceWatchTopicPath { topic } = path;
-        let HttpStreamSseServiceWatchTopicQuery { lang } = query;
+        let HttpStreamSseServiceWatchTopicRequestInQuery { lang } = query;
         let data = HttpStreamSseServiceWatchTopicRequest {
             topic,
             lang,
         };
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.watch_topic(req).await {
+        let mut resp = match svc
+            .watch_topic(::xidl_rust_axum::Request::new(headers, data))
+            .await
+        {
             Ok(resp_value) => {
                 let mut resp = xidl_rust_axum::stream::sse_response(resp_value);
                 resp
@@ -120,7 +162,7 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn get_attribute_online(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -130,13 +172,12 @@ where
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        let data = ();
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.get_attribute_online(req).await {
+        let mut resp = match svc.get_attribute_online().await {
             Ok(resp_value) => {
                 let mut resp = {
+                    let body_value: bool = resp_value.into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                        .to_vec(&resp_value)?;
+                        .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(::xidl_rust_axum::axum::http::StatusCode::OK)
                         .header(
@@ -157,33 +198,20 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn set_attribute_online(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
-        body: ::xidl_rust_axum::axum::body::Body,
+        request: HttpStreamSseServiceSetAttributeOnlineRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        if !xidl_rust_axum::http::content_type_matches(&headers, "application/json") {
-            return Err(xidl_rust_axum::Error::unsupported_media_type());
-        }
-        let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
-            .await
-            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-        let body: HttpStreamSseServiceSetAttributeOnlineBody = xidl_rust_axum::DeserializeFactory::new(
-                "application/json",
-            )
-            .from_slice(&body_bytes)?;
-        let HttpStreamSseServiceSetAttributeOnlineBody { online } = body;
-        let data = HttpStreamSseServiceSetAttributeOnlineRequest {
-            online,
-        };
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.set_attribute_online(req).await {
+        let HttpStreamSseServiceSetAttributeOnlineRequest { online } = request;
+        let online: bool = online.into();
+        let mut resp = match svc.set_attribute_online(online).await {
             Ok(resp_value) => {
                 let mut resp = {
                     resp_value;
@@ -199,7 +227,7 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn watch_attribute_online(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -210,8 +238,10 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let data = ();
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.watch_attribute_online(req).await {
+        let mut resp = match svc
+            .watch_attribute_online(::xidl_rust_axum::Request::new(headers, data))
+            .await
+        {
             Ok(resp_value) => {
                 let mut resp = xidl_rust_axum::stream::sse_response(resp_value);
                 resp
@@ -275,6 +305,7 @@ impl HttpStreamSseServiceClient {
     }
 }
 impl HttpStreamSseServiceClient {
+    #[allow(clippy::useless_conversion)]
     pub async fn watch_topic(
         &self,
         topic: String,
@@ -296,7 +327,7 @@ impl HttpStreamSseServiceClient {
                     )
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
-        let query = HttpStreamSseServiceWatchTopicQuery {
+        let query = HttpStreamSseServiceWatchTopicRequestOutQuery {
             lang,
         };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
@@ -307,6 +338,7 @@ impl HttpStreamSseServiceClient {
         let auth_target = &self.client;
         xidl_rust_axum::stream::open_sse::<String>(self.client.http(), req).await
     }
+    #[allow(clippy::useless_conversion)]
     pub async fn get_attribute_online(&self) -> Result<bool, xidl_rust_axum::Error> {
         let path = "/attribute/online".to_string();
         let mut req = self
@@ -335,13 +367,16 @@ impl HttpStreamSseServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+            let body: bool = xidl_rust_axum::DeserializeFactory::new("application/json")
+                .from_slice(&body)?;
+            Ok(body.into())
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
+    #[allow(clippy::useless_conversion)]
     pub async fn set_attribute_online(
         &self,
         online: bool,
@@ -362,8 +397,8 @@ impl HttpStreamSseServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
-        let body = HttpStreamSseServiceSetAttributeOnlineBody {
-            online,
+        let body = HttpStreamSseServiceSetAttributeOnlineRequestOutBody {
+            online: online.into(),
         };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;
@@ -390,6 +425,7 @@ impl HttpStreamSseServiceClient {
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
+    #[allow(clippy::useless_conversion)]
     pub async fn watch_attribute_online(
         &self,
     ) -> Result<xidl_rust_axum::stream::Reader<bool>, xidl_rust_axum::Error> {

@@ -44,9 +44,9 @@ struct HelloWorldImpl;
 impl HelloWorld for HelloWorldImpl {
     async fn sayHello(
         &self,
-        req: xidl_rust_axum::Request<imp::HelloWorldSayHelloRequest>,
+        name: String,
     ) -> Result<(), xidl_rust_axum::Error> {
-        println!("Hello, {}!", req.data.name);
+        println!("Hello, {}!", name);
         Ok(())
     }
 }
@@ -106,15 +106,10 @@ Server-side usage:
 impl UserApi for UserApiImpl {
     async fn getUser(
         &self,
-        req: xidl_rust_axum::Request<imp::UserApiGetUserRequest>,
+        id: String,
+        fields: String,
     ) -> Result<imp::User, xidl_rust_axum::Error> {
-        let id = req.data.id;
-        let fields = req.data.fields; // ?fields=...
-        let _request_id = req
-            .headers()
-            .get("x-request-id")
-            .and_then(|v| v.to_str().ok())
-            .map(|v| v.to_string());
+        let _fields = fields; // ?fields=...
         Ok(imp::User {
             id,
             name: "alice".to_string(),
@@ -189,7 +184,7 @@ let user = client
 - `Server`: Axum router wrapper that wires routes and request parsing
 - `Client`: HTTP client wrapper based on `reqwest` (requires the `client`
   feature)
-- `Request<T>`: carries headers and parsed request data
+- transport helper types for query/path/body extraction
 
 To generate only server or client code:
 

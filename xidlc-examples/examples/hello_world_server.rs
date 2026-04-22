@@ -1,16 +1,11 @@
 use xidlc_examples::hello_world::HelloWorld;
-use xidlc_examples::hello_world::HelloWorldSayHelloRequest;
 use xidlc_examples::hello_world::HelloWorldServer;
 
 struct HelloWorldImpl;
 
 #[async_trait::async_trait]
 impl HelloWorld for HelloWorldImpl {
-    async fn sayHello(
-        &self,
-        req: xidl_rust_axum::Request<HelloWorldSayHelloRequest>,
-    ) -> Result<(), xidl_rust_axum::Error> {
-        let HelloWorldSayHelloRequest { name } = req.data;
+    async fn sayHello(&self, name: String) -> Result<(), xidl_rust_axum::Error> {
         println!("Hello, {}!", name);
         Ok(())
     }

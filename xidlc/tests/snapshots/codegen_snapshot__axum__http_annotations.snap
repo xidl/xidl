@@ -1,5 +1,6 @@
 ---
 source: xidlc/tests/codegen_snapshot.rs
+assertion_line: 137
 expression: output
 ---
 ===============
@@ -7,155 +8,462 @@ http_annotations.rs
 ===============
 #[async_trait::async_trait]
 pub trait HttpAnnoService {
-    async fn get_user(
-        &self,
-        req: ::xidl_rust_axum::Request<HttpAnnoServiceGetUserRequest>,
-    ) -> ::xidl_rust_axum::Result<String>;
+    async fn get_user(&self, id: u32, lang: String) -> ::xidl_rust_axum::Result<String>;
     async fn create_user(
         &self,
-        req: ::xidl_rust_axum::Request<HttpAnnoServiceCreateUserRequest>,
+        name: String,
+        age: u32,
     ) -> ::xidl_rust_axum::Result<String>;
-    async fn get_name(
-        &self,
-        req: ::xidl_rust_axum::Request<HttpAnnoServiceGetNameRequest>,
-    ) -> ::xidl_rust_axum::Result<String>;
+    async fn get_name(&self, name: String) -> ::xidl_rust_axum::Result<String>;
     async fn search_user(
         &self,
-        req: ::xidl_rust_axum::Request<HttpAnnoServiceSearchUserRequest>,
+        keyword: String,
+        page: u32,
     ) -> ::xidl_rust_axum::Result<String>;
     async fn get_user_alias(
         &self,
-        req: ::xidl_rust_axum::Request<HttpAnnoServiceGetUserAliasRequest>,
+        user_id: u32,
+        locale: String,
     ) -> ::xidl_rust_axum::Result<String>;
     async fn add(
         &self,
-        req: ::xidl_rust_axum::Request<HttpAnnoServiceAddRequest>,
+        a: i32,
+        b: i32,
     ) -> ::xidl_rust_axum::Result<HttpAnnoServiceAddResponse>;
     async fn bump(
         &self,
-        req: ::xidl_rust_axum::Request<HttpAnnoServiceBumpRequest>,
+        value: i32,
     ) -> ::xidl_rust_axum::Result<HttpAnnoServiceBumpResponse>;
     async fn get_count(
         &self,
-        req: ::xidl_rust_axum::Request<()>,
     ) -> ::xidl_rust_axum::Result<HttpAnnoServiceGetCountResponse>;
-    async fn ping(
-        &self,
-        req: ::xidl_rust_axum::Request<()>,
-    ) -> ::xidl_rust_axum::Result<()>;
+    async fn ping(&self) -> ::xidl_rust_axum::Result<()>;
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
+mod __xidl_in {
+    use super::*;
+}
+mod __xidl_out {
+    use super::*;
+}
+#[derive(::serde::Deserialize)]
 struct HttpAnnoServiceGetUserPath {
     id: u32,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize, ::core::default::Default)]
-struct HttpAnnoServiceGetUserQuery {
+#[derive(::serde::Serialize, ::core::default::Default)]
+struct HttpAnnoServiceGetUserRequestOutQuery {
     #[serde(default)]
     lang: String,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-pub struct HttpAnnoServiceGetUserRequest {
-    pub id: u32,
-    pub lang: String,
+#[derive(::serde::Deserialize, ::core::default::Default)]
+struct HttpAnnoServiceGetUserRequestInQuery {
+    #[serde(default)]
+    lang: String,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-struct HttpAnnoServiceCreateUserBody {
-    #[serde(
-        default,
-        deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null"
-    )]
+#[derive(::serde::Deserialize)]
+struct HttpAnnoServiceGetUserRequest {
+    id: u32,
+    lang: String,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S> for HttpAnnoServiceGetUserRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+                HttpAnnoServiceGetUserPath,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpAnnoServiceGetUserPath { id } = path;
+            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+                HttpAnnoServiceGetUserRequestInQuery,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpAnnoServiceGetUserRequestInQuery { lang } = query;
+            let headers = &parts.headers;
+            Ok(Self { id, lang })
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct HttpAnnoServiceCreateUserRequestOutBody {
+    #[serde(default)]
     name: String,
-    #[serde(
-        default,
-        deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null"
-    )]
+    #[serde(default)]
     age: u32,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-pub struct HttpAnnoServiceCreateUserRequest {
-    pub name: String,
-    pub age: u32,
+#[derive(::serde::Deserialize)]
+struct HttpAnnoServiceCreateUserRequestInBody {
+    name: String,
+    age: u32,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize, ::core::default::Default)]
-struct HttpAnnoServiceGetNameQuery {
+#[derive(::serde::Deserialize)]
+struct HttpAnnoServiceCreateUserRequest {
+    name: String,
+    age: u32,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpAnnoServiceCreateUserRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let headers = &parts.headers;
+            if !::xidl_rust_axum::http::content_type_matches(
+                headers,
+                "application/json",
+            ) {
+                return Err(::xidl_rust_axum::Error::unsupported_media_type());
+            }
+            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+            let body: HttpAnnoServiceCreateUserRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body_bytes)?;
+            let HttpAnnoServiceCreateUserRequestInBody { name, age } = body;
+            Ok(Self { name, age })
+        }
+    }
+}
+#[derive(::serde::Serialize, ::core::default::Default)]
+struct HttpAnnoServiceGetNameRequestOutQuery {
     #[serde(default)]
     name: String,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-pub struct HttpAnnoServiceGetNameRequest {
-    pub name: String,
+#[derive(::serde::Deserialize, ::core::default::Default)]
+struct HttpAnnoServiceGetNameRequestInQuery {
+    #[serde(default)]
+    name: String,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize, ::core::default::Default)]
-struct HttpAnnoServiceSearchUserQuery {
+#[derive(::serde::Deserialize)]
+struct HttpAnnoServiceGetNameRequest {
+    name: String,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S> for HttpAnnoServiceGetNameRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+                HttpAnnoServiceGetNameRequestInQuery,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpAnnoServiceGetNameRequestInQuery { name } = query;
+            let headers = &parts.headers;
+            Ok(Self { name })
+        }
+    }
+}
+#[derive(::serde::Serialize, ::core::default::Default)]
+struct HttpAnnoServiceSearchUserRequestOutQuery {
     #[serde(default)]
     keyword: String,
     #[serde(default)]
     page: u32,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-pub struct HttpAnnoServiceSearchUserRequest {
-    pub keyword: String,
-    pub page: u32,
+#[derive(::serde::Deserialize, ::core::default::Default)]
+struct HttpAnnoServiceSearchUserRequestInQuery {
+    #[serde(default)]
+    keyword: String,
+    #[serde(default)]
+    page: u32,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
+#[derive(::serde::Deserialize)]
+struct HttpAnnoServiceSearchUserRequest {
+    keyword: String,
+    page: u32,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpAnnoServiceSearchUserRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+                HttpAnnoServiceSearchUserRequestInQuery,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpAnnoServiceSearchUserRequestInQuery { keyword, page } = query;
+            let headers = &parts.headers;
+            Ok(Self { keyword, page })
+        }
+    }
+}
+#[derive(::serde::Deserialize)]
 struct HttpAnnoServiceGetUserAliasPath {
     #[serde(rename = "id")]
     user_id: u32,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize, ::core::default::Default)]
-struct HttpAnnoServiceGetUserAliasQuery {
+#[derive(::serde::Serialize, ::core::default::Default)]
+struct HttpAnnoServiceGetUserAliasRequestOutQuery {
     #[serde(rename = "lang")]
     #[serde(default)]
     locale: String,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-pub struct HttpAnnoServiceGetUserAliasRequest {
-    pub user_id: u32,
-    pub locale: String,
+#[derive(::serde::Deserialize, ::core::default::Default)]
+struct HttpAnnoServiceGetUserAliasRequestInQuery {
+    #[serde(rename = "lang")]
+    #[serde(default)]
+    locale: String,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-struct HttpAnnoServiceAddBody {
-    #[serde(
-        default,
-        deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null"
-    )]
+#[derive(::serde::Deserialize)]
+struct HttpAnnoServiceGetUserAliasRequest {
+    user_id: u32,
+    locale: String,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpAnnoServiceGetUserAliasRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+                HttpAnnoServiceGetUserAliasPath,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpAnnoServiceGetUserAliasPath { user_id } = path;
+            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+                HttpAnnoServiceGetUserAliasRequestInQuery,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpAnnoServiceGetUserAliasRequestInQuery { locale } = query;
+            let headers = &parts.headers;
+            Ok(Self { user_id, locale })
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct HttpAnnoServiceAddRequestOutBody {
+    #[serde(default)]
     a: i32,
-    #[serde(
-        default,
-        deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null"
-    )]
+    #[serde(default)]
     b: i32,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-pub struct HttpAnnoServiceAddRequest {
-    pub a: i32,
-    pub b: i32,
+#[derive(::serde::Deserialize)]
+struct HttpAnnoServiceAddRequestInBody {
+    a: i32,
+    b: i32,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
+#[derive(::serde::Deserialize)]
+struct HttpAnnoServiceAddRequest {
+    a: i32,
+    b: i32,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S> for HttpAnnoServiceAddRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let headers = &parts.headers;
+            if !::xidl_rust_axum::http::content_type_matches(
+                headers,
+                "application/json",
+            ) {
+                return Err(::xidl_rust_axum::Error::unsupported_media_type());
+            }
+            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+            let body: HttpAnnoServiceAddRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body_bytes)?;
+            let HttpAnnoServiceAddRequestInBody { a, b } = body;
+            Ok(Self { a, b })
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct HttpAnnoServiceAddResponseOutBody {
+    r#return: i32,
+    sum: i32,
+}
+#[derive(::serde::Deserialize)]
+struct HttpAnnoServiceAddResponseInBody {
+    r#return: i32,
+    sum: i32,
+}
 pub struct HttpAnnoServiceAddResponse {
     pub r#return: i32,
     pub sum: i32,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-struct HttpAnnoServiceBumpBody {
-    #[serde(
-        default,
-        deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null"
-    )]
+#[allow(clippy::useless_conversion)]
+impl From<HttpAnnoServiceAddResponse> for HttpAnnoServiceAddResponseOutBody {
+    fn from(value: HttpAnnoServiceAddResponse) -> Self {
+        Self {
+            r#return: value.r#return.into(),
+            sum: value.sum.into(),
+        }
+    }
+}
+#[allow(clippy::useless_conversion)]
+impl From<HttpAnnoServiceAddResponseInBody> for HttpAnnoServiceAddResponse {
+    fn from(value: HttpAnnoServiceAddResponseInBody) -> Self {
+        Self {
+            r#return: value.r#return.into(),
+            sum: value.sum.into(),
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct HttpAnnoServiceBumpRequestOutBody {
+    #[serde(default)]
     value: i32,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-pub struct HttpAnnoServiceBumpRequest {
-    pub value: i32,
+#[derive(::serde::Deserialize)]
+struct HttpAnnoServiceBumpRequestInBody {
+    value: i32,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
+#[derive(::serde::Deserialize)]
+struct HttpAnnoServiceBumpRequest {
+    value: i32,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S> for HttpAnnoServiceBumpRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let headers = &parts.headers;
+            if !::xidl_rust_axum::http::content_type_matches(
+                headers,
+                "application/json",
+            ) {
+                return Err(::xidl_rust_axum::Error::unsupported_media_type());
+            }
+            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+            let body: HttpAnnoServiceBumpRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body_bytes)?;
+            let HttpAnnoServiceBumpRequestInBody { value } = body;
+            Ok(Self { value })
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct HttpAnnoServiceBumpResponseOutBody {
+    r#return: i32,
+    value: i32,
+}
+#[derive(::serde::Deserialize)]
+struct HttpAnnoServiceBumpResponseInBody {
+    r#return: i32,
+    value: i32,
+}
 pub struct HttpAnnoServiceBumpResponse {
     pub r#return: i32,
     pub value: i32,
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
+#[allow(clippy::useless_conversion)]
+impl From<HttpAnnoServiceBumpResponse> for HttpAnnoServiceBumpResponseOutBody {
+    fn from(value: HttpAnnoServiceBumpResponse) -> Self {
+        Self {
+            r#return: value.r#return.into(),
+            value: value.value.into(),
+        }
+    }
+}
+#[allow(clippy::useless_conversion)]
+impl From<HttpAnnoServiceBumpResponseInBody> for HttpAnnoServiceBumpResponse {
+    fn from(value: HttpAnnoServiceBumpResponseInBody) -> Self {
+        Self {
+            r#return: value.r#return.into(),
+            value: value.value.into(),
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct HttpAnnoServiceGetCountResponseOutBody {
+    count: i32,
+}
+#[derive(::serde::Deserialize)]
+struct HttpAnnoServiceGetCountResponseInBody {
+    count: i32,
+}
 pub struct HttpAnnoServiceGetCountResponse {
     pub count: i32,
+}
+#[allow(clippy::useless_conversion)]
+impl From<HttpAnnoServiceGetCountResponse> for HttpAnnoServiceGetCountResponseOutBody {
+    fn from(value: HttpAnnoServiceGetCountResponse) -> Self {
+        Self { count: value.count.into() }
+    }
+}
+#[allow(clippy::useless_conversion)]
+impl From<HttpAnnoServiceGetCountResponseInBody> for HttpAnnoServiceGetCountResponse {
+    fn from(value: HttpAnnoServiceGetCountResponseInBody) -> Self {
+        Self { count: value.count.into() }
+    }
 }
 pub struct HttpAnnoServiceServer<T> {
     inner: ::std::sync::Arc<T>,
@@ -194,34 +502,26 @@ where
             .route("/ping", xidl_rust_axum::axum::routing::post(Self::ping))
             .with_state(svc)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn get_user(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
-        ::xidl_rust_axum::axum::extract::Path(
-            path,
-        ): ::xidl_rust_axum::axum::extract::Path<HttpAnnoServiceGetUserPath>,
-        xidl_rust_axum::axum::extract::Query(
-            query,
-        ): xidl_rust_axum::axum::extract::Query<HttpAnnoServiceGetUserQuery>,
+        request: HttpAnnoServiceGetUserRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        let HttpAnnoServiceGetUserPath { id } = path;
-        let HttpAnnoServiceGetUserQuery { lang } = query;
-        let data = HttpAnnoServiceGetUserRequest {
-            id,
-            lang,
-        };
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.get_user(req).await {
+        let HttpAnnoServiceGetUserRequest { id, lang } = request;
+        let id: u32 = id.into();
+        let lang: String = lang.into();
+        let mut resp = match svc.get_user(id, lang).await {
             Ok(resp_value) => {
                 let mut resp = {
+                    let body_value: String = resp_value.into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                        .to_vec(&resp_value)?;
+                        .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(::xidl_rust_axum::axum::http::StatusCode::OK)
                         .header(
@@ -242,38 +542,26 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn create_user(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
-        body: ::xidl_rust_axum::axum::body::Body,
+        request: HttpAnnoServiceCreateUserRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        if !xidl_rust_axum::http::content_type_matches(&headers, "application/json") {
-            return Err(xidl_rust_axum::Error::unsupported_media_type());
-        }
-        let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
-            .await
-            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-        let body: HttpAnnoServiceCreateUserBody = xidl_rust_axum::DeserializeFactory::new(
-                "application/json",
-            )
-            .from_slice(&body_bytes)?;
-        let HttpAnnoServiceCreateUserBody { name, age } = body;
-        let data = HttpAnnoServiceCreateUserRequest {
-            name,
-            age,
-        };
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.create_user(req).await {
+        let HttpAnnoServiceCreateUserRequest { name, age } = request;
+        let name: String = name.into();
+        let age: u32 = age.into();
+        let mut resp = match svc.create_user(name, age).await {
             Ok(resp_value) => {
                 let mut resp = {
+                    let body_value: String = resp_value.into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                        .to_vec(&resp_value)?;
+                        .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(::xidl_rust_axum::axum::http::StatusCode::OK)
                         .header(
@@ -294,29 +582,25 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn get_name(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
-        xidl_rust_axum::axum::extract::Query(
-            query,
-        ): xidl_rust_axum::axum::extract::Query<HttpAnnoServiceGetNameQuery>,
+        request: HttpAnnoServiceGetNameRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        let HttpAnnoServiceGetNameQuery { name } = query;
-        let data = HttpAnnoServiceGetNameRequest {
-            name,
-        };
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.get_name(req).await {
+        let HttpAnnoServiceGetNameRequest { name } = request;
+        let name: String = name.into();
+        let mut resp = match svc.get_name(name).await {
             Ok(resp_value) => {
                 let mut resp = {
+                    let body_value: String = resp_value.into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                        .to_vec(&resp_value)?;
+                        .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(::xidl_rust_axum::axum::http::StatusCode::OK)
                         .header(
@@ -337,30 +621,26 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn search_user(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
-        xidl_rust_axum::axum::extract::Query(
-            query,
-        ): xidl_rust_axum::axum::extract::Query<HttpAnnoServiceSearchUserQuery>,
+        request: HttpAnnoServiceSearchUserRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        let HttpAnnoServiceSearchUserQuery { keyword, page } = query;
-        let data = HttpAnnoServiceSearchUserRequest {
-            keyword,
-            page,
-        };
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.search_user(req).await {
+        let HttpAnnoServiceSearchUserRequest { keyword, page } = request;
+        let keyword: String = keyword.into();
+        let page: u32 = page.into();
+        let mut resp = match svc.search_user(keyword, page).await {
             Ok(resp_value) => {
                 let mut resp = {
+                    let body_value: String = resp_value.into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                        .to_vec(&resp_value)?;
+                        .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(::xidl_rust_axum::axum::http::StatusCode::OK)
                         .header(
@@ -381,34 +661,26 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn get_user_alias(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
-        ::xidl_rust_axum::axum::extract::Path(
-            path,
-        ): ::xidl_rust_axum::axum::extract::Path<HttpAnnoServiceGetUserAliasPath>,
-        xidl_rust_axum::axum::extract::Query(
-            query,
-        ): xidl_rust_axum::axum::extract::Query<HttpAnnoServiceGetUserAliasQuery>,
+        request: HttpAnnoServiceGetUserAliasRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        let HttpAnnoServiceGetUserAliasPath { user_id } = path;
-        let HttpAnnoServiceGetUserAliasQuery { locale } = query;
-        let data = HttpAnnoServiceGetUserAliasRequest {
-            user_id,
-            locale,
-        };
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.get_user_alias(req).await {
+        let HttpAnnoServiceGetUserAliasRequest { user_id, locale } = request;
+        let user_id: u32 = user_id.into();
+        let locale: String = locale.into();
+        let mut resp = match svc.get_user_alias(user_id, locale).await {
             Ok(resp_value) => {
                 let mut resp = {
+                    let body_value: String = resp_value.into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                        .to_vec(&resp_value)?;
+                        .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(::xidl_rust_axum::axum::http::StatusCode::OK)
                         .header(
@@ -429,35 +701,27 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn add(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
-        body: ::xidl_rust_axum::axum::body::Body,
+        request: HttpAnnoServiceAddRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        if !xidl_rust_axum::http::content_type_matches(&headers, "application/json") {
-            return Err(xidl_rust_axum::Error::unsupported_media_type());
-        }
-        let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
-            .await
-            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-        let body: HttpAnnoServiceAddBody = xidl_rust_axum::DeserializeFactory::new(
-                "application/json",
-            )
-            .from_slice(&body_bytes)?;
-        let HttpAnnoServiceAddBody { a, b } = body;
-        let data = HttpAnnoServiceAddRequest { a, b };
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.add(req).await {
+        let HttpAnnoServiceAddRequest { a, b } = request;
+        let a: i32 = a.into();
+        let b: i32 = b.into();
+        let mut resp = match svc.add(a, b).await {
             Ok(resp_value) => {
                 let mut resp = {
+                    let body_value: HttpAnnoServiceAddResponseOutBody = resp_value
+                        .into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                        .to_vec(&resp_value)?;
+                        .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(::xidl_rust_axum::axum::http::StatusCode::OK)
                         .header(
@@ -478,37 +742,26 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn bump(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
-        body: ::xidl_rust_axum::axum::body::Body,
+        request: HttpAnnoServiceBumpRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        if !xidl_rust_axum::http::content_type_matches(&headers, "application/json") {
-            return Err(xidl_rust_axum::Error::unsupported_media_type());
-        }
-        let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
-            .await
-            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
-        let body: HttpAnnoServiceBumpBody = xidl_rust_axum::DeserializeFactory::new(
-                "application/json",
-            )
-            .from_slice(&body_bytes)?;
-        let HttpAnnoServiceBumpBody { value } = body;
-        let data = HttpAnnoServiceBumpRequest {
-            value,
-        };
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.bump(req).await {
+        let HttpAnnoServiceBumpRequest { value } = request;
+        let value: i32 = value.into();
+        let mut resp = match svc.bump(value).await {
             Ok(resp_value) => {
                 let mut resp = {
+                    let body_value: HttpAnnoServiceBumpResponseOutBody = resp_value
+                        .into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                        .to_vec(&resp_value)?;
+                        .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(::xidl_rust_axum::axum::http::StatusCode::OK)
                         .header(
@@ -529,7 +782,7 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn get_count(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -539,13 +792,13 @@ where
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        let data = ();
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.get_count(req).await {
+        let mut resp = match svc.get_count().await {
             Ok(resp_value) => {
                 let mut resp = {
+                    let body_value: HttpAnnoServiceGetCountResponseOutBody = resp_value
+                        .into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
-                        .to_vec(&resp_value)?;
+                        .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
                         .status(::xidl_rust_axum::axum::http::StatusCode::OK)
                         .header(
@@ -566,7 +819,7 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn ping(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -576,9 +829,7 @@ where
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
-        let data = ();
-        let req = ::xidl_rust_axum::Request::new(headers, data);
-        let mut resp = match svc.ping(req).await {
+        let mut resp = match svc.ping().await {
             Ok(resp_value) => {
                 let mut resp = {
                     resp_value;
@@ -647,6 +898,7 @@ impl HttpAnnoServiceClient {
     }
 }
 impl HttpAnnoServiceClient {
+    #[allow(clippy::useless_conversion)]
     pub async fn get_user(
         &self,
         id: u32,
@@ -668,7 +920,7 @@ impl HttpAnnoServiceClient {
                     )
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
-        let query = HttpAnnoServiceGetUserQuery {
+        let query = HttpAnnoServiceGetUserRequestOutQuery {
             lang,
         };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
@@ -688,13 +940,18 @@ impl HttpAnnoServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
+    #[allow(clippy::useless_conversion)]
     pub async fn create_user(
         &self,
         name: String,
@@ -716,9 +973,9 @@ impl HttpAnnoServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
-        let body = HttpAnnoServiceCreateUserBody {
-            name,
-            age,
+        let body = HttpAnnoServiceCreateUserRequestOutBody {
+            name: name.into(),
+            age: age.into(),
         };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;
@@ -742,13 +999,18 @@ impl HttpAnnoServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
+    #[allow(clippy::useless_conversion)]
     pub async fn get_name(&self, name: String) -> Result<String, xidl_rust_axum::Error> {
         let path = "/get_name".to_string();
         let mut req = self
@@ -765,7 +1027,7 @@ impl HttpAnnoServiceClient {
                     )
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
-        let query = HttpAnnoServiceGetNameQuery {
+        let query = HttpAnnoServiceGetNameRequestOutQuery {
             name,
         };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
@@ -785,13 +1047,18 @@ impl HttpAnnoServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
+    #[allow(clippy::useless_conversion)]
     pub async fn search_user(
         &self,
         keyword: String,
@@ -812,7 +1079,7 @@ impl HttpAnnoServiceClient {
                     )
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
-        let query = HttpAnnoServiceSearchUserQuery {
+        let query = HttpAnnoServiceSearchUserRequestOutQuery {
             keyword,
             page,
         };
@@ -833,13 +1100,18 @@ impl HttpAnnoServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
+    #[allow(clippy::useless_conversion)]
     pub async fn get_user_alias(
         &self,
         user_id: u32,
@@ -861,7 +1133,7 @@ impl HttpAnnoServiceClient {
                     )
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
-        let query = HttpAnnoServiceGetUserAliasQuery {
+        let query = HttpAnnoServiceGetUserAliasRequestOutQuery {
             locale,
         };
         let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
@@ -881,13 +1153,18 @@ impl HttpAnnoServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
+    #[allow(clippy::useless_conversion)]
     pub async fn add(
         &self,
         a: i32,
@@ -909,7 +1186,10 @@ impl HttpAnnoServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
-        let body = HttpAnnoServiceAddBody { a, b };
+        let body = HttpAnnoServiceAddRequestOutBody {
+            a: a.into(),
+            b: b.into(),
+        };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;
         req.headers_mut()
@@ -932,13 +1212,18 @@ impl HttpAnnoServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+            let body: HttpAnnoServiceAddResponseInBody = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
+    #[allow(clippy::useless_conversion)]
     pub async fn bump(
         &self,
         value: i32,
@@ -959,7 +1244,9 @@ impl HttpAnnoServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
-        let body = HttpAnnoServiceBumpBody { value };
+        let body = HttpAnnoServiceBumpRequestOutBody {
+            value: value.into(),
+        };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;
         req.headers_mut()
@@ -982,13 +1269,18 @@ impl HttpAnnoServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+            let body: HttpAnnoServiceBumpResponseInBody = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
+    #[allow(clippy::useless_conversion)]
     pub async fn get_count(
         &self,
     ) -> Result<HttpAnnoServiceGetCountResponse, xidl_rust_axum::Error> {
@@ -1019,13 +1311,18 @@ impl HttpAnnoServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            xidl_rust_axum::DeserializeFactory::new("application/json").from_slice(&body)
+            let body: HttpAnnoServiceGetCountResponseInBody = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
+    #[allow(clippy::useless_conversion)]
     pub async fn ping(&self) -> Result<(), xidl_rust_axum::Error> {
         let path = "/ping".to_string();
         let mut req = self

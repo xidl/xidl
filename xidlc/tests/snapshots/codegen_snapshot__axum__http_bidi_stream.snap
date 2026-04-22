@@ -17,17 +17,22 @@ pub trait HttpBidiStreamService {
         >,
     ) -> ::xidl_rust_axum::Result<()>;
 }
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-struct HttpBidiStreamServiceChatBody {
-    #[serde(
-        default,
-        deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null"
-    )]
+mod __xidl_in {
+    use super::*;
+}
+mod __xidl_out {
+    use super::*;
+}
+#[derive(::serde::Serialize)]
+struct HttpBidiStreamServiceChatRequestOutBody {
+    #[serde(default)]
     room: String,
-    #[serde(
-        default,
-        deserialize_with = "xidl_rust_axum::http::serde_ext::default_on_missing_reject_null"
-    )]
+    #[serde(default)]
+    text: String,
+}
+#[derive(::serde::Deserialize)]
+struct HttpBidiStreamServiceChatRequestInBody {
+    room: String,
     text: String,
 }
 #[derive(::serde::Serialize, ::serde::Deserialize)]
@@ -35,10 +40,40 @@ pub struct HttpBidiStreamServiceChatRequest {
     pub room: String,
     pub text: String,
 }
+#[derive(::serde::Serialize)]
+struct HttpBidiStreamServiceChatResponseOutBody {
+    from: String,
+    reply: String,
+}
+#[derive(::serde::Deserialize)]
+struct HttpBidiStreamServiceChatResponseInBody {
+    from: String,
+    reply: String,
+}
 #[derive(::serde::Serialize, ::serde::Deserialize)]
 pub struct HttpBidiStreamServiceChatResponse {
     pub from: String,
     pub reply: String,
+}
+#[allow(clippy::useless_conversion)]
+impl From<HttpBidiStreamServiceChatResponse>
+for HttpBidiStreamServiceChatResponseOutBody {
+    fn from(value: HttpBidiStreamServiceChatResponse) -> Self {
+        Self {
+            from: value.from.into(),
+            reply: value.reply.into(),
+        }
+    }
+}
+#[allow(clippy::useless_conversion)]
+impl From<HttpBidiStreamServiceChatResponseInBody>
+for HttpBidiStreamServiceChatResponse {
+    fn from(value: HttpBidiStreamServiceChatResponseInBody) -> Self {
+        Self {
+            from: value.from.into(),
+            reply: value.reply.into(),
+        }
+    }
 }
 pub struct HttpBidiStreamServiceServer<T> {
     inner: ::std::sync::Arc<T>,
@@ -61,7 +96,7 @@ where
             .route("/chat", xidl_rust_axum::axum::routing::get(Self::chat))
             .with_state(svc)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return)]
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
     async fn chat(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -147,6 +182,7 @@ impl HttpBidiStreamServiceClient {
     }
 }
 impl HttpBidiStreamServiceClient {
+    #[allow(clippy::useless_conversion)]
     pub async fn chat(
         &self,
         room: String,

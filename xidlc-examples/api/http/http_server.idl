@@ -109,10 +109,28 @@ interface HttpServer {
     @http_bearer
     void login_bearer();
 
+    Timestamp get_timestamp();
+
+    void is_admin(
+        AdminInfo info
+    );
+
 };
 
 @derive(Debug, Clone, Serialize, Deserialize)
 struct UserInfo {
+    string name;
+    string email;
+};
+
+@derive(Debug, Clone, Serialize)
+struct Timestamp {
+    uint64 seconds;
+    uint32 nanos;
+};
+
+@derive(Debug, Clone, Deserialize)
+struct AdminInfo {
     string name;
     string email;
 };
