@@ -1,0 +1,12 @@
+{
+  "name": "xidl-npm-workspace",
+  "private": true,
+  "version": "0.47.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "check": "node ./scripts/check-packages.mjs",
+    "stage:release": "node ./scripts/stage-release-assets.mjs"
+  }
+}

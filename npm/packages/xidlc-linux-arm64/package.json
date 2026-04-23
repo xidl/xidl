@@ -1,0 +1,24 @@
+{
+  "name": "@cathaysia/xidlc-linux-arm64",
+  "version": "0.47.0",
+  "description": "Linux arm64 native binary for xidlc",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xidl/xidl.git"
+  },
+  "homepage": "https://github.com/xidl/xidl",
+  "publishConfig": {
+    "access": "public"
+  },
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "arm64"
+  ],
+  "files": [
+    "bin/xidlc",
+    "README.md"
+  ]
+}

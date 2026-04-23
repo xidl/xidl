@@ -128,3 +128,57 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.ref_type == 'tag' && github.ref || 'refs/tags/nightly' }}
           features: fmt,cli
+
+  publish-npm:
+    name: publish-npm
+    if: ${{ github.ref_type == 'tag' }}
+    needs:
+      - upload-assets
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.17.1
+          registry-url: https://registry.npmjs.org
+
+      - name: Download release assets
+        run: |
+          mkdir -p release-assets
+          gh release download "${GITHUB_REF_NAME}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --dir release-assets \
+            --pattern 'xidlc-*.tar.gz' \
+            --pattern 'xidlc-*.zip'
+
+      - name: Stage npm packages
+        env:
+          XIDLC_RELEASE_DIR: ${{ github.workspace }}/release-assets
+          XIDLC_NPM_VERSION: ${{ github.ref_name }}
+        run: |
+          version="${XIDLC_NPM_VERSION#v}"
+          XIDLC_NPM_VERSION="${version}" npm --prefix npm run stage:release
+          npm --prefix npm run check
+
+      - name: Publish platform packages
+        run: |
+          npm publish --prefix npm --workspace @cathaysia/xidlc-darwin-arm64 --access public --provenance
+          npm publish --prefix npm --workspace @cathaysia/xidlc-darwin-x64 --access public --provenance
+          npm publish --prefix npm --workspace @cathaysia/xidlc-linux-arm64 --access public --provenance
+          npm publish --prefix npm --workspace @cathaysia/xidlc-linux-x64 --access public --provenance
+          npm publish --prefix npm --workspace @cathaysia/xidlc-win32-arm64 --access public --provenance
+          npm publish --prefix npm --workspace @cathaysia/xidlc-win32-x64 --access public --provenance
+
+      - name: Publish main package
+        run: npm publish --prefix npm --workspace @cathaysia/xidlc --access public --provenance

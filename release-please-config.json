@@ -57,6 +57,76 @@
           "jsonpath": "$.dependencies.xidl-jsonrpc.version"
         },
         {
+          "path": "npm/package.json",
+          "type": "json",
+          "jsonpath": "$.version"
+        },
+        {
+          "path": "npm/packages/xidlc/package.json",
+          "type": "json",
+          "jsonpath": "$.version"
+        },
+        {
+          "path": "npm/packages/xidlc/package.json",
+          "type": "json",
+          "jsonpath": "$.optionalDependencies['@cathaysia/xidlc-darwin-arm64']"
+        },
+        {
+          "path": "npm/packages/xidlc/package.json",
+          "type": "json",
+          "jsonpath": "$.optionalDependencies['@cathaysia/xidlc-darwin-x64']"
+        },
+        {
+          "path": "npm/packages/xidlc/package.json",
+          "type": "json",
+          "jsonpath": "$.optionalDependencies['@cathaysia/xidlc-linux-arm64']"
+        },
+        {
+          "path": "npm/packages/xidlc/package.json",
+          "type": "json",
+          "jsonpath": "$.optionalDependencies['@cathaysia/xidlc-linux-x64']"
+        },
+        {
+          "path": "npm/packages/xidlc/package.json",
+          "type": "json",
+          "jsonpath": "$.optionalDependencies['@cathaysia/xidlc-win32-arm64']"
+        },
+        {
+          "path": "npm/packages/xidlc/package.json",
+          "type": "json",
+          "jsonpath": "$.optionalDependencies['@cathaysia/xidlc-win32-x64']"
+        },
+        {
+          "path": "npm/packages/xidlc-darwin-arm64/package.json",
+          "type": "json",
+          "jsonpath": "$.version"
+        },
+        {
+          "path": "npm/packages/xidlc-darwin-x64/package.json",
+          "type": "json",
+          "jsonpath": "$.version"
+        },
+        {
+          "path": "npm/packages/xidlc-linux-arm64/package.json",
+          "type": "json",
+          "jsonpath": "$.version"
+        },
+        {
+          "path": "npm/packages/xidlc-linux-x64/package.json",
+          "type": "json",
+          "jsonpath": "$.version"
+        },
+        {
+          "path": "npm/packages/xidlc-win32-arm64/package.json",
+          "type": "json",
+          "jsonpath": "$.version"
+        },
+        {
+          "path": "npm/packages/xidlc-win32-x64/package.json",
+          "type": "json",
+          "jsonpath": "$.version"
+        },
+        {
           "path": "Cargo.lock",
           "type": "toml",
           "jsonpath": "$.package[?(@.name.value=='xidl-build')].version"
