@@ -78,9 +78,6 @@ Install `xidlc`:
 cargo install xidlc
 ```
 
-An npm distribution prototype also exists under [`npm/`](npm/README.md) for
-shipping the prebuilt `xidlc` CLI through npm.
-
 Format IDL files:
 
 ```bash
