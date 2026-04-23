@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.48.0](https://github.com/xidl/xidl/compare/v0.47.0...v0.48.0) (2026-04-23)
+
+
+### Features
+
+* **xidlc:** decouple axum unary request and response transport ([a1ed93b](https://github.com/xidl/xidl/commit/a1ed93b0a56b85d2aff5fc47b06c60338bd141dc))
+
 ## [0.47.0](https://github.com/xidl/xidl/compare/v0.46.0...v0.47.0) (2026-04-22)
 
 
