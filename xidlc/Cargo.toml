@@ -29,13 +29,13 @@ default = [
   "gen-openrpc",
 ]
 gen-rust = []
-gen-rust-jsonrpc = []
-gen-rust-axum = []
+gen-rust-jsonrpc = ["gen-rust"]
+gen-rust-axum = ["gen-rust"]
 gen-typescript = []
 gen-go = []
-gen-go-http = []
+gen-go-http = ["gen-go"]
 gen-python = []
-gen-python-http = []
+gen-python-http = ["gen-python"]
 gen-openapi = []
 gen-openrpc = []
 cli = [

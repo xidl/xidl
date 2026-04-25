@@ -33,6 +33,7 @@ mod serde_factory;
 /// MIME-aware serialization and deserialization helpers.
 pub use serde_factory::{DeserializeFactory, SerializeFactory};
 /// SSE, NDJSON, and WebSocket streaming primitives.
+#[cfg(feature = "stream")]
 pub mod stream;
 
 /// Authentication helpers shared by generated handlers and clients.
@@ -56,4 +57,5 @@ pub use serde_urlencoded;
 /// Re-export of `tokio` for generated async runtime integration.
 pub use tokio;
 /// Re-export of `tokio-tungstenite` for generated WebSocket clients.
+#[cfg(feature = "stream")]
 pub use tokio_tungstenite;
