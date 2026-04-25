@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.49.0](https://github.com/xidl/xidl/compare/v0.48.0...v0.49.0) (2026-04-25)
+
+
+### Features
+
+* reorganization features ([e462694](https://github.com/xidl/xidl/commit/e4626946b3f7821b39381baf6edf21454598be08))
+
 ## [0.48.0](https://github.com/xidl/xidl/compare/v0.47.0...v0.48.0) (2026-04-23)
 
 
