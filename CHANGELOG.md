@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.50.0](https://github.com/xidl/xidl/compare/v0.49.0...v0.50.0) (2026-04-27)
+
+
+### Features
+
+* **rust-axum:** add support for text/plain mime type ([0fdd2d4](https://github.com/xidl/xidl/commit/0fdd2d480da074d7894476bf4a7b3cb93d991b77))
+
 ## [0.49.0](https://github.com/xidl/xidl/compare/v0.48.0...v0.49.0) (2026-04-25)
 
 
