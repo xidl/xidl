@@ -96,6 +96,7 @@ fn is_supported_http_media_type(value: &str) -> bool {
     value.eq_ignore_ascii_case("application/json")
         || value.eq_ignore_ascii_case("application/x-www-form-urlencoded")
         || value.eq_ignore_ascii_case("application/msgpack")
+        || value.eq_ignore_ascii_case("text/plain")
 }
 
 fn validate_deprecated_range(since: &str, after: &str) -> Result<(), String> {

@@ -8,6 +8,7 @@ enum SerdeKind {
     Form,
     #[cfg(feature = "msgpack")]
     Msgpack,
+    Plain,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -28,8 +29,8 @@ impl SerializeFactory {
     /// Creates a serializer for a supported MIME type.
     ///
     /// Supported values are `application/json`,
-    /// `application/x-www-form-urlencoded`, and `application/msgpack` when the
-    /// `msgpack` feature is enabled.
+    /// `application/x-www-form-urlencoded`, `text/plain`, and
+    /// `application/msgpack` when the `msgpack` feature is enabled.
     pub const fn new(mime: &'static str) -> Self {
         Self {
             mime,
@@ -55,6 +56,9 @@ impl SerializeFactory {
                 .map_err(|err| Error::new(500, format!("serialize {} failed: {err}", self.mime))),
             #[cfg(feature = "msgpack")]
             SerdeKind::Msgpack => rmp_serde::to_vec(value)
+                .map_err(|err| Error::new(500, format!("serialize {} failed: {err}", self.mime))),
+            SerdeKind::Plain => serde_plain::to_string(value)
+                .map(|value| value.into_bytes())
                 .map_err(|err| Error::new(500, format!("serialize {} failed: {err}", self.mime))),
         }
     }
@@ -87,6 +91,14 @@ impl DeserializeFactory {
             #[cfg(feature = "msgpack")]
             SerdeKind::Msgpack => rmp_serde::from_slice(bytes)
                 .map_err(|err| Error::new(400, format!("deserialize {} failed: {err}", self.mime))),
+            SerdeKind::Plain => {
+                let s = std::str::from_utf8(bytes).map_err(|err| {
+                    Error::new(400, format!("deserialize {} failed: {err}", self.mime))
+                })?;
+                serde_plain::from_str(s).map_err(|err| {
+                    Error::new(400, format!("deserialize {} failed: {err}", self.mime))
+                })
+            }
         }
     }
 }
@@ -96,6 +108,8 @@ const fn supported_kind_from_mime(mime: &str) -> SerdeKind {
         SerdeKind::Json
     } else if eq_ignore_ascii_case(mime, "application/x-www-form-urlencoded") {
         SerdeKind::Form
+    } else if eq_ignore_ascii_case(mime, "text/plain") {
+        SerdeKind::Plain
     } else if cfg!(feature = "msgpack") && eq_ignore_ascii_case(mime, "application/msgpack") {
         #[cfg(feature = "msgpack")]
         {
@@ -174,6 +188,37 @@ mod tests {
             .from_slice(&bytes)
             .unwrap();
         assert_eq!(decoded, payload);
+    }
+
+    #[test]
+    fn plain_factory_round_trip() {
+        let payload = "hello world".to_string();
+        let bytes = SerializeFactory::new("text/plain")
+            .to_vec(&payload)
+            .unwrap();
+        assert_eq!(bytes, b"hello world");
+        let decoded: String = DeserializeFactory::new("text/plain")
+            .from_slice(&bytes)
+            .unwrap();
+        assert_eq!(decoded, payload);
+
+        let age = 42u32;
+        let bytes = SerializeFactory::new("text/plain").to_vec(&age).unwrap();
+        assert_eq!(bytes, b"42");
+        let decoded: u32 = DeserializeFactory::new("text/plain")
+            .from_slice(&bytes)
+            .unwrap();
+        assert_eq!(decoded, age);
+
+        let opt_age: Option<u32> = None;
+        let bytes = SerializeFactory::new("text/plain")
+            .to_vec(&opt_age)
+            .unwrap();
+        assert_eq!(bytes, b"");
+        let decoded: Option<u32> = DeserializeFactory::new("text/plain")
+            .from_slice(&bytes)
+            .unwrap();
+        assert_eq!(decoded, None);
     }
 
     #[cfg(feature = "msgpack")]

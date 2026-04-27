@@ -62,10 +62,10 @@ fn serde_factories_cover_mime_getters_and_failure_paths() {
 
 #[test]
 fn serde_factories_reject_unsupported_mime_types() {
-    let serializer = std::panic::catch_unwind(|| SerializeFactory::new("text/plain"));
+    let serializer = std::panic::catch_unwind(|| SerializeFactory::new("image/png"));
     assert!(serializer.is_err());
 
-    let deserializer = std::panic::catch_unwind(|| DeserializeFactory::new("text/plain"));
+    let deserializer = std::panic::catch_unwind(|| DeserializeFactory::new("image/png"));
     assert!(deserializer.is_err());
 }
 

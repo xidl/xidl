@@ -29,6 +29,7 @@ axum = { version = "0.8", features = ["macros"] }
 axum-extra = { version = "0.10", features = ["typed-header"] }
 reqwest = { workspace = true, features = ["json", "stream"], optional = true }
 serde_urlencoded = "0.7"
+serde_plain = "1.0"
 tokio = { workspace = true, features = [
   "net",
   "rt",
