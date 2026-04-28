@@ -146,11 +146,11 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let RustHttpGetUserRequest { user_id } = request;
-        let user_id: u32 = user_id.into();
+        let user_id: u32 = user_id;
         let mut resp = match svc.get_user(user_id).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -186,7 +186,7 @@ where
         let mut resp = match svc.get_attribute_display_name().await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -221,7 +221,7 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let RustHttpSetAttributeDisplayNameRequest { display_name } = request;
-        let display_name: String = display_name.into();
+        let display_name: String = display_name;
         let mut resp = match svc.set_attribute_display_name(display_name).await {
             Ok(resp_value) => {
                 let mut resp = {
@@ -325,7 +325,7 @@ impl RustHttpClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -367,7 +367,7 @@ impl RustHttpClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -396,7 +396,7 @@ impl RustHttpClient {
             );
         let auth_target = &self.client;
         let body = RustHttpSetAttributeDisplayNameRequestOutBody {
-            display_name: display_name.into(),
+            display_name: display_name,
         };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;

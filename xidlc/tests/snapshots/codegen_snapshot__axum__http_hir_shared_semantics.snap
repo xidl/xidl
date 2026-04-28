@@ -147,13 +147,13 @@ where
             None => return Err(xidl_rust_axum::Error::unauthorized()),
         };
         let ReportApiGetReportRequest { id, lang, trace_id } = request;
-        let id: String = id.into();
-        let lang: Option<String> = lang.into();
-        let trace_id: String = trace_id.into();
+        let id: String = id;
+        let lang: Option<String> = lang;
+        let trace_id: String = trace_id;
         let mut resp = match svc.get_report(id, lang, trace_id, xidl_auth).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -330,7 +330,7 @@ impl ReportApiClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();

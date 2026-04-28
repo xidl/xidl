@@ -175,7 +175,7 @@ where
         let mut resp = match svc.get_attribute_online().await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: bool = resp_value.into();
+                    let body_value: bool = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -210,7 +210,7 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpStreamSseServiceSetAttributeOnlineRequest { online } = request;
-        let online: bool = online.into();
+        let online: bool = online;
         let mut resp = match svc.set_attribute_online(online).await {
             Ok(resp_value) => {
                 let mut resp = {
@@ -369,7 +369,7 @@ impl HttpStreamSseServiceClient {
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
             let body: bool = xidl_rust_axum::DeserializeFactory::new("application/json")
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -398,7 +398,7 @@ impl HttpStreamSseServiceClient {
             );
         let auth_target = &self.client;
         let body = HttpStreamSseServiceSetAttributeOnlineRequestOutBody {
-            online: online.into(),
+            online: online,
         };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;

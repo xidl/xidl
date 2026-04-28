@@ -1,6 +1,5 @@
 ---
 source: xidlc/tests/codegen_snapshot.rs
-assertion_line: 137
 expression: output
 ---
 ===============
@@ -352,8 +351,8 @@ pub struct HttpAnnoServiceAddResponse {
 impl From<HttpAnnoServiceAddResponse> for HttpAnnoServiceAddResponseOutBody {
     fn from(value: HttpAnnoServiceAddResponse) -> Self {
         Self {
-            r#return: value.r#return.into(),
-            sum: value.sum.into(),
+            r#return: value.r#return,
+            sum: value.sum,
         }
     }
 }
@@ -361,8 +360,8 @@ impl From<HttpAnnoServiceAddResponse> for HttpAnnoServiceAddResponseOutBody {
 impl From<HttpAnnoServiceAddResponseInBody> for HttpAnnoServiceAddResponse {
     fn from(value: HttpAnnoServiceAddResponseInBody) -> Self {
         Self {
-            r#return: value.r#return.into(),
-            sum: value.sum.into(),
+            r#return: value.r#return,
+            sum: value.sum,
         }
     }
 }
@@ -428,8 +427,8 @@ pub struct HttpAnnoServiceBumpResponse {
 impl From<HttpAnnoServiceBumpResponse> for HttpAnnoServiceBumpResponseOutBody {
     fn from(value: HttpAnnoServiceBumpResponse) -> Self {
         Self {
-            r#return: value.r#return.into(),
-            value: value.value.into(),
+            r#return: value.r#return,
+            value: value.value,
         }
     }
 }
@@ -437,8 +436,8 @@ impl From<HttpAnnoServiceBumpResponse> for HttpAnnoServiceBumpResponseOutBody {
 impl From<HttpAnnoServiceBumpResponseInBody> for HttpAnnoServiceBumpResponse {
     fn from(value: HttpAnnoServiceBumpResponseInBody) -> Self {
         Self {
-            r#return: value.r#return.into(),
-            value: value.value.into(),
+            r#return: value.r#return,
+            value: value.value,
         }
     }
 }
@@ -456,13 +455,13 @@ pub struct HttpAnnoServiceGetCountResponse {
 #[allow(clippy::useless_conversion)]
 impl From<HttpAnnoServiceGetCountResponse> for HttpAnnoServiceGetCountResponseOutBody {
     fn from(value: HttpAnnoServiceGetCountResponse) -> Self {
-        Self { count: value.count.into() }
+        Self { count: value.count }
     }
 }
 #[allow(clippy::useless_conversion)]
 impl From<HttpAnnoServiceGetCountResponseInBody> for HttpAnnoServiceGetCountResponse {
     fn from(value: HttpAnnoServiceGetCountResponseInBody) -> Self {
-        Self { count: value.count.into() }
+        Self { count: value.count }
     }
 }
 pub struct HttpAnnoServiceServer<T> {
@@ -514,12 +513,12 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpAnnoServiceGetUserRequest { id, lang } = request;
-        let id: u32 = id.into();
-        let lang: String = lang.into();
+        let id: u32 = id;
+        let lang: String = lang;
         let mut resp = match svc.get_user(id, lang).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -554,12 +553,12 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpAnnoServiceCreateUserRequest { name, age } = request;
-        let name: String = name.into();
-        let age: u32 = age.into();
+        let name: String = name;
+        let age: u32 = age;
         let mut resp = match svc.create_user(name, age).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -594,11 +593,11 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpAnnoServiceGetNameRequest { name } = request;
-        let name: String = name.into();
+        let name: String = name;
         let mut resp = match svc.get_name(name).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -633,12 +632,12 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpAnnoServiceSearchUserRequest { keyword, page } = request;
-        let keyword: String = keyword.into();
-        let page: u32 = page.into();
+        let keyword: String = keyword;
+        let page: u32 = page;
         let mut resp = match svc.search_user(keyword, page).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -673,12 +672,12 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpAnnoServiceGetUserAliasRequest { user_id, locale } = request;
-        let user_id: u32 = user_id.into();
-        let locale: String = locale.into();
+        let user_id: u32 = user_id;
+        let locale: String = locale;
         let mut resp = match svc.get_user_alias(user_id, locale).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -713,8 +712,8 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpAnnoServiceAddRequest { a, b } = request;
-        let a: i32 = a.into();
-        let b: i32 = b.into();
+        let a: i32 = a;
+        let b: i32 = b;
         let mut resp = match svc.add(a, b).await {
             Ok(resp_value) => {
                 let mut resp = {
@@ -754,7 +753,7 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpAnnoServiceBumpRequest { value } = request;
-        let value: i32 = value.into();
+        let value: i32 = value;
         let mut resp = match svc.bump(value).await {
             Ok(resp_value) => {
                 let mut resp = {
@@ -944,7 +943,7 @@ impl HttpAnnoServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -974,8 +973,8 @@ impl HttpAnnoServiceClient {
             );
         let auth_target = &self.client;
         let body = HttpAnnoServiceCreateUserRequestOutBody {
-            name: name.into(),
-            age: age.into(),
+            name: name,
+            age: age,
         };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;
@@ -1003,7 +1002,7 @@ impl HttpAnnoServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -1051,7 +1050,7 @@ impl HttpAnnoServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -1104,7 +1103,7 @@ impl HttpAnnoServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -1157,7 +1156,7 @@ impl HttpAnnoServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -1187,8 +1186,8 @@ impl HttpAnnoServiceClient {
             );
         let auth_target = &self.client;
         let body = HttpAnnoServiceAddRequestOutBody {
-            a: a.into(),
-            b: b.into(),
+            a: a,
+            b: b,
         };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;
@@ -1245,7 +1244,7 @@ impl HttpAnnoServiceClient {
             );
         let auth_target = &self.client;
         let body = HttpAnnoServiceBumpRequestOutBody {
-            value: value.into(),
+            value: value,
         };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;

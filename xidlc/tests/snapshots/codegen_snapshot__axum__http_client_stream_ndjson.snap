@@ -84,7 +84,7 @@ where
         {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -218,7 +218,7 @@ impl HttpClientStreamServiceClient {
                         "application/json",
                     )
                     .from_slice(&body)?;
-                Ok(body.into())
+                Ok(body)
             } else {
                 let status = resp.status();
                 let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();

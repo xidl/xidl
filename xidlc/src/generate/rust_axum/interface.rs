@@ -8,7 +8,9 @@ use crate::generate::http_hir::{
     },
 };
 use crate::generate::rust::util::{rust_ident, rust_passthrough_attrs_from_annotations};
-use crate::generate::rust_axum::transport::{TransportDirection, TransportTracker, TypeRegistry};
+use crate::generate::rust_axum::transport::{
+    TransportDirection, TransportTracker, TypeRegistry, decode_expr, encode_expr,
+};
 use crate::generate::rust_axum::{RustAxumRenderOutput, RustAxumRenderer};
 use convert_case::{Case, Casing};
 use serde::Serialize;
@@ -98,6 +100,8 @@ struct MethodContext {
     request_item_ty: String,
     ret_in_ty: String,
     ret_out_ty: String,
+    ret_in_expr: String,
+    ret_out_expr: String,
     request_content_type: String,
     response_content_type: String,
 }
@@ -124,6 +128,10 @@ struct ParamContext {
     optional: bool,
     inner_ty: String,
     flatten: bool,
+    in_expr: String,
+    out_expr: String,
+    field_in_expr: String,
+    field_out_expr: String,
 }
 
 #[derive(Serialize, Clone)]
@@ -271,6 +279,14 @@ fn render_op_from_http(
             transport.map_type(ty, TransportDirection::Out, registry)?
         }
     };
+    let ret_in_expr = match &op.ty {
+        hir::OpTypeSpec::Void => "()".to_string(),
+        hir::OpTypeSpec::TypeSpec(ty) => decode_expr("body", ty, registry)?,
+    };
+    let ret_out_expr = match &op.ty {
+        hir::OpTypeSpec::Void => "()".to_string(),
+        hir::OpTypeSpec::TypeSpec(ty) => encode_expr("resp_value", ty, registry)?,
+    };
     let return_is_unit = matches!(&op.ty, hir::OpTypeSpec::Void);
     let (security, auth_source_interface, auth_source_method) = match &http_op.security {
         None => (None, false, false),
@@ -416,6 +432,10 @@ fn render_op_from_http(
                 optional,
                 inner_ty: inner_ty.clone(),
                 flatten: false,
+                in_expr: decode_expr(&name, &param.ty, registry)?,
+                out_expr: encode_expr(&name, &param.ty, registry)?,
+                field_in_expr: decode_expr(&format!("value.{name}"), &param.ty, registry)?,
+                field_out_expr: encode_expr(&format!("value.{name}"), &param.ty, registry)?,
             };
             match http_param_kind(shared.kind) {
                 ParamSource::Header => response_header_params.push(response_ctx.clone()),
@@ -478,6 +498,10 @@ fn render_op_from_http(
             cookie_item_is_primitive: cookie_item_is_primitive(&param.ty),
             optional,
             flatten,
+            in_expr: decode_expr(&name, &param.ty, registry)?,
+            out_expr: encode_expr(&name, &param.ty, registry)?,
+            field_in_expr: decode_expr(&format!("value.{name}"), &param.ty, registry)?,
+            field_out_expr: encode_expr(&format!("value.{name}"), &param.ty, registry)?,
         };
         request_params.push(ctx.clone());
         match source {
@@ -666,6 +690,8 @@ fn render_op_from_http(
         request_item_ty,
         ret_in_ty,
         ret_out_ty,
+        ret_in_expr,
+        ret_out_expr,
         request_content_type: if is_client_stream {
             "application/x-ndjson".to_string()
         } else {
@@ -778,7 +804,7 @@ fn render_attr_operation_from_http(
         server_params.push(format!("{param_name}: {ty}"));
         server_param_names.push(param_name.clone());
         let request_param = ParamContext {
-            name: param_name,
+            name: param_name.clone(),
             raw_name: param.name.clone(),
             wire_name: param.wire_name.clone(),
             path_template_name: String::new(),
@@ -798,6 +824,10 @@ fn render_attr_operation_from_http(
             optional: false,
             inner_ty: ty.clone(),
             flatten: false,
+            in_expr: decode_expr(&param_name, &param.ty, registry)?,
+            out_expr: encode_expr(&param_name, &param.ty, registry)?,
+            field_in_expr: decode_expr(&format!("value.{param_name}"), &param.ty, registry)?,
+            field_out_expr: encode_expr(&format!("value.{param_name}"), &param.ty, registry)?,
         };
         request_params.push(request_param.clone());
         body_params.push(request_param);
@@ -813,6 +843,14 @@ fn render_attr_operation_from_http(
     };
     let ret_out_ty = match &http_op.return_type {
         Some(ty) => transport.map_type(ty, TransportDirection::Out, registry)?,
+        None => "()".to_string(),
+    };
+    let ret_in_expr = match &http_op.return_type {
+        Some(ty) => decode_expr("body", ty, registry)?,
+        None => "()".to_string(),
+    };
+    let ret_out_expr = match &http_op.return_type {
+        Some(ty) => encode_expr("resp_value", ty, registry)?,
         None => "()".to_string(),
     };
     let return_is_unit = http_op.return_type.is_none();
@@ -884,6 +922,8 @@ fn render_attr_operation_from_http(
         request_item_ty: "()".to_string(),
         ret_in_ty,
         ret_out_ty,
+        ret_in_expr,
+        ret_out_expr,
         request_content_type: if matches!(http_op.stream.kind, Some(HttpStreamKind::Client)) {
             "application/x-ndjson".to_string()
         } else {

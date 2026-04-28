@@ -5,6 +5,8 @@
 #![allow(private_interfaces)]
 #![allow(dead_code)]
 #![allow(unused)]
+#![allow(clippy::redundant_field_names)]
+#![allow(clippy::map_identity)]
 
 pub mod hello_world {
     include!(concat!(env!("OUT_DIR"), "/hello_world.rs"));

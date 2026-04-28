@@ -337,10 +337,10 @@ mod __xidl_out {
                     fn from(value: {{ method.response_struct }}) -> Self {
                         Self {
                             {% if method.response_include_return %}
-                                r#return: value.r#return.into(),
+                                r#return: {{ method.ret_out_expr | replace("resp_value", "value.r#return") }},
                             {% endif %}
                             {% for param in method.response_body_params %}
-                                {{ param.name }}: value.{{ param.name }}.into(),
+                                {{ param.name }}: {{ param.field_out_expr }},
                             {% endfor %}
                         }
                     }
@@ -351,10 +351,10 @@ mod __xidl_out {
                     fn from(value: {{ method.struct_prefix }}ResponseInBody) -> Self {
                         Self {
                             {% if method.response_include_return %}
-                                r#return: value.r#return.into(),
+                                r#return: {{ method.ret_in_expr | replace("body", "value.r#return") }},
                             {% endif %}
                             {% for param in method.response_body_params %}
-                                {{ param.name }}: value.{{ param.name }}.into(),
+                                {{ param.name }}: {{ param.field_in_expr }},
                             {% endfor %}
                             {% for param in method.response_header_params %}
                                 {{ param.name }}: ::core::default::Default::default(),

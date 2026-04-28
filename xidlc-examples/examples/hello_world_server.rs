@@ -1,3 +1,4 @@
+use xidlc_examples::hello_world::ComplexStruct;
 use xidlc_examples::hello_world::HelloWorld;
 use xidlc_examples::hello_world::HelloWorldServer;
 
@@ -8,6 +9,10 @@ impl HelloWorld for HelloWorldImpl {
     async fn sayHello(&self, name: String) -> Result<(), xidl_rust_axum::Error> {
         println!("Hello, {}!", name);
         Ok(())
+    }
+
+    async fn getComplexStructs(&self) -> ::xidl_rust_axum::Result<Vec<ComplexStruct>> {
+        todo!()
     }
 }
 

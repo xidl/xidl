@@ -107,7 +107,7 @@ where
         let mut resp = match svc.get_attribute_version().await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -143,7 +143,7 @@ where
         let mut resp = match svc.get_attribute_name().await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -178,7 +178,7 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpAttributeServiceSetAttributeNameRequest { name } = request;
-        let name: String = name.into();
+        let name: String = name;
         let mut resp = match svc.set_attribute_name(name).await {
             Ok(resp_value) => {
                 let mut resp = {
@@ -281,7 +281,7 @@ impl HttpAttributeServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -321,7 +321,7 @@ impl HttpAttributeServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -350,7 +350,7 @@ impl HttpAttributeServiceClient {
             );
         let auth_target = &self.client;
         let body = HttpAttributeServiceSetAttributeNameRequestOutBody {
-            name: name.into(),
+            name: name,
         };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;

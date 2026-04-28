@@ -170,7 +170,7 @@ T: {{ ident }} + Send + Sync + 'static,
                         {% endfor %}
                     } = request;
                     {% for param in method.request_params %}
-                        let {{ param.name }}: {{ param.ty }} = {{ param.name }}.into();
+                        let {{ param.name }}: {{ param.ty }} = {{ param.in_expr }};
                     {% endfor %}
                 {% endif %}
                 {% if method.is_bidi_stream %}
@@ -326,9 +326,9 @@ T: {{ ident }} + Send + Sync + 'static,
                                 {% if method.response_struct and response_body_count > 0 %}
                                     let body_value: {{ method.struct_prefix }}ResponseOutBody = resp_value.into();
                                 {% elif not method.response_struct and method.response_include_return and method.response_params | length == 0 %}
-                                    let body_value: {{ method.ret_out_ty }} = resp_value.into();
+                                    let body_value: {{ method.ret_out_ty }} = {{ method.ret_out_expr }};
                                 {% elif not method.response_struct and method.return_is_unit and method.response_body_params | length == 1 and method.response_header_params | length == 0 and method.response_cookie_params | length == 0 %}
-                                    let body_value: {{ method.response_body_params[0].out_ty }} = resp_value.into();
+                                    let body_value: {{ method.response_body_params[0].out_ty }} = {{ method.response_body_params[0].out_expr | replace(method.response_body_params[0].name, "resp_value") }};
                                 {% else %}
                                     let body_value = resp_value;
                                 {% endif %}

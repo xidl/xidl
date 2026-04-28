@@ -11,6 +11,36 @@
     }
   ],
   "paths": {
+    "/getComplexStructs": {
+      "post": {
+        "operationId": "HelloWorld.getComplexStructs",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ComplexStruct"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/hello": {
       "post": {
         "operationId": "HelloWorld.sayHello",
@@ -122,6 +152,17 @@
                 "$ref": "#/components/schemas/HelloWorld_sayHello_In"
               }
             }
+          },
+          {
+            "type": "object",
+            "required": [
+              "getComplexStructs"
+            ],
+            "properties": {
+              "getComplexStructs": {
+                "$ref": "#/components/schemas/HelloWorld_getComplexStructs_In"
+              }
+            }
           }
         ]
       },
@@ -176,6 +217,57 @@
             "properties": {
               "sayHello": {
                 "$ref": "#/components/schemas/HelloWorld_sayHello_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "getComplexStructs"
+            ],
+            "properties": {
+              "getComplexStructs": {
+                "$ref": "#/components/schemas/HelloWorld_getComplexStructs_Result"
+              }
+            }
+          }
+        ]
+      },
+      "HelloWorld_getComplexStructs_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "HelloWorld_getComplexStructs_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ComplexStruct"
+            }
+          }
+        }
+      },
+      "HelloWorld_getComplexStructs_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HelloWorld_getComplexStructs_Out"
               }
             }
           }

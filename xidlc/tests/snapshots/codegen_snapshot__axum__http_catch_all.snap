@@ -147,11 +147,11 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpCatchAllServiceReadFileRequest { rel_path } = request;
-        let rel_path: String = rel_path.into();
+        let rel_path: String = rel_path;
         let mut resp = match svc.read_file(rel_path).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -186,12 +186,12 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpCatchAllServiceReadAssetRequest { key, version } = request;
-        let key: String = key.into();
-        let version: String = version.into();
+        let key: String = key;
+        let version: String = version;
         let mut resp = match svc.read_asset(key, version).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -304,7 +304,7 @@ impl HttpCatchAllServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -357,7 +357,7 @@ impl HttpCatchAllServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();

@@ -60,8 +60,8 @@ impl From<HttpBidiStreamServiceChatResponse>
 for HttpBidiStreamServiceChatResponseOutBody {
     fn from(value: HttpBidiStreamServiceChatResponse) -> Self {
         Self {
-            from: value.from.into(),
-            reply: value.reply.into(),
+            from: value.from,
+            reply: value.reply,
         }
     }
 }
@@ -70,8 +70,8 @@ impl From<HttpBidiStreamServiceChatResponseInBody>
 for HttpBidiStreamServiceChatResponse {
     fn from(value: HttpBidiStreamServiceChatResponseInBody) -> Self {
         Self {
-            from: value.from.into(),
-            reply: value.reply.into(),
+            from: value.from,
+            reply: value.reply,
         }
     }
 }
