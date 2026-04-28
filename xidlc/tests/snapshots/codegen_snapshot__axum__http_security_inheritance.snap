@@ -164,11 +164,11 @@ where
             }
         };
         let HttpSecurityInheritanceServiceGetReportRequest { id } = request;
-        let id: String = id.into();
+        let id: String = id;
         let mut resp = match svc.get_report(id, xidl_auth).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -203,12 +203,12 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpSecurityInheritanceServiceUpdateReportRequest { id, body } = request;
-        let id: String = id.into();
-        let body: String = body.into();
+        let id: String = id;
+        let body: String = body;
         let mut resp = match svc.update_report(id, body).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -244,7 +244,7 @@ where
         let mut resp = match svc.health().await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -363,7 +363,7 @@ impl HttpSecurityInheritanceServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -394,7 +394,7 @@ impl HttpSecurityInheritanceServiceClient {
             );
         let auth_target = &self.client;
         let body = HttpSecurityInheritanceServiceUpdateReportRequestOutBody {
-            body: body.into(),
+            body: body,
         };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;
@@ -422,7 +422,7 @@ impl HttpSecurityInheritanceServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -462,7 +462,7 @@ impl HttpSecurityInheritanceServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();

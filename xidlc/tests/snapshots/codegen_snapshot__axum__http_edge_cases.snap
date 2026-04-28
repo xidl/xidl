@@ -251,7 +251,7 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpEdgeCasesServiceHealthRequest { trace } = request;
-        let trace: String = trace.into();
+        let trace: String = trace;
         let mut resp = match svc.health(trace).await {
             Ok(resp_value) => {
                 let mut resp = {
@@ -280,12 +280,12 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpEdgeCasesServiceGetUserRequest { uid, locale } = request;
-        let uid: u32 = uid.into();
-        let locale: String = locale.into();
+        let uid: u32 = uid;
+        let locale: String = locale;
         let mut resp = match svc.get_user(uid, locale).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -320,12 +320,12 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpEdgeCasesServiceGetItemRequest { order_id, item_id } = request;
-        let order_id: u32 = order_id.into();
-        let item_id: u32 = item_id.into();
+        let order_id: u32 = order_id;
+        let item_id: u32 = item_id;
         let mut resp = match svc.get_item(order_id, item_id).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -360,12 +360,12 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpEdgeCasesServiceLookupRequest { keyword, page_size } = request;
-        let keyword: String = keyword.into();
-        let page_size: u32 = page_size.into();
+        let keyword: String = keyword;
+        let page_size: u32 = page_size;
         let mut resp = match svc.lookup(keyword, page_size).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -527,7 +527,7 @@ impl HttpEdgeCasesServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -573,7 +573,7 @@ impl HttpEdgeCasesServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -626,7 +626,7 @@ impl HttpEdgeCasesServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();

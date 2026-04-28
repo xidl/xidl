@@ -528,11 +528,11 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpDefaultsServiceGetNameRequest { name } = request;
-        let name: String = name.into();
+        let name: String = name;
         let mut resp = match svc.get_name(name).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -567,13 +567,13 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpDefaultsServiceListOrdersRequest { user_id, page, size } = request;
-        let user_id: u32 = user_id.into();
-        let page: u32 = page.into();
-        let size: u32 = size.into();
+        let user_id: u32 = user_id;
+        let page: u32 = page;
+        let size: u32 = size;
         let mut resp = match svc.list_orders(user_id, page, size).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -612,7 +612,7 @@ where
         let mut resp = match svc.create_user(req).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -651,7 +651,7 @@ where
         let mut resp = match svc.create_user_flat(req).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -686,12 +686,12 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpDefaultsServiceSearchUserRequest { name, age } = request;
-        let name: String = name.into();
-        let age: u32 = age.into();
+        let name: String = name;
+        let age: u32 = age;
         let mut resp = match svc.search_user(name, age).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -730,7 +730,7 @@ where
         let mut resp = match svc.preview_user(req).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -765,12 +765,12 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpDefaultsServiceGetUserRequest { id, lang } = request;
-        let id: u32 = id.into();
-        let lang: String = lang.into();
+        let id: u32 = id;
+        let lang: String = lang;
         let mut resp = match svc.get_user(id, lang).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -805,12 +805,12 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpDefaultsServiceGetUserAliasRequest { user_id, locale } = request;
-        let user_id: u32 = user_id.into();
-        let locale: String = locale.into();
+        let user_id: u32 = user_id;
+        let locale: String = locale;
         let mut resp = match svc.get_user_alias(user_id, locale).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -927,7 +927,7 @@ impl HttpDefaultsServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -982,7 +982,7 @@ impl HttpDefaultsServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -1039,7 +1039,7 @@ impl HttpDefaultsServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -1094,7 +1094,7 @@ impl HttpDefaultsServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -1124,8 +1124,8 @@ impl HttpDefaultsServiceClient {
             );
         let auth_target = &self.client;
         let body = HttpDefaultsServiceSearchUserRequestOutBody {
-            name: name.into(),
-            age: age.into(),
+            name: name,
+            age: age,
         };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;
@@ -1153,7 +1153,7 @@ impl HttpDefaultsServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -1210,7 +1210,7 @@ impl HttpDefaultsServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -1263,7 +1263,7 @@ impl HttpDefaultsServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -1316,7 +1316,7 @@ impl HttpDefaultsServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();

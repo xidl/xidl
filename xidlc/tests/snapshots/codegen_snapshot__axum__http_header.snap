@@ -304,19 +304,19 @@ pub mod test {
                 session_id,
                 prefs,
             } = request;
-            let id: u32 = id.into();
-            let req_id: String = req_id.into();
-            let flags: Vec<String> = flags.into();
-            let age: u32 = age.into();
-            let session_id: String = session_id.into();
-            let prefs: Vec<String> = prefs.into();
+            let id: u32 = id;
+            let req_id: String = req_id;
+            let flags: Vec<String> = flags.into_iter().map(|value| value).collect();
+            let age: u32 = age;
+            let session_id: String = session_id;
+            let prefs: Vec<String> = prefs.into_iter().map(|value| value).collect();
             let mut resp = match svc
                 .get_user(id, req_id, flags, age, session_id, prefs)
                 .await
             {
                 Ok(resp_value) => {
                     let mut resp = {
-                        let body_value: User = resp_value.into();
+                        let body_value: User = resp_value;
                         let body = xidl_rust_axum::SerializeFactory::new(
                                 "application/json",
                             )
@@ -357,9 +357,9 @@ pub mod test {
                 return Err(xidl_rust_axum::Error::not_acceptable());
             }
             let HeaderServiceCreateUserRequest { token, session_id, name } = request;
-            let token: String = token.into();
-            let session_id: String = session_id.into();
-            let name: String = name.into();
+            let token: String = token;
+            let session_id: String = session_id;
+            let name: String = name;
             let mut resp = match svc.create_user(token, session_id, name).await {
                 Ok(resp_value) => {
                     let mut resp = {
@@ -544,7 +544,7 @@ pub mod test {
                         "application/json",
                     )
                     .from_slice(&body)?;
-                Ok(body.into())
+                Ok(body)
             } else {
                 let status = resp.status();
                 let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -618,7 +618,7 @@ pub mod test {
             }
             let auth_target = &self.client;
             let body = HeaderServiceCreateUserRequestOutBody {
-                name: name.into(),
+                name: name,
             };
             let body = xidl_rust_axum::SerializeFactory::new("application/json")
                 .to_vec(&body)?;

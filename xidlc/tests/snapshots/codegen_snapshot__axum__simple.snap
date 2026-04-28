@@ -499,7 +499,7 @@ where
         let mut resp = match svc.get_state().await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: crate::api::state::StateResponse = resp_value.into();
+                    let body_value: crate::api::state::StateResponse = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -570,8 +570,8 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpServiceCreateSimpleRequest { local_addr, remote_port } = request;
-        let local_addr: String = local_addr.into();
-        let remote_port: u16 = remote_port.into();
+        let local_addr: String = local_addr;
+        let remote_port: u16 = remote_port;
         let mut resp = match svc.create_simple(local_addr, remote_port).await {
             Ok(resp_value) => {
                 let mut resp = {
@@ -610,7 +610,7 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpServiceStopSimpleRequest { id } = request;
-        let id: u32 = id.into();
+        let id: u32 = id;
         let mut resp = match svc.stop_simple(id).await {
             Ok(resp_value) => {
                 let mut resp = {
@@ -869,7 +869,7 @@ impl HttpServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -941,8 +941,8 @@ impl HttpServiceClient {
             );
         let auth_target = &self.client;
         let body = HttpServiceCreateSimpleRequestOutBody {
-            local_addr: local_addr.into(),
-            remote_port: remote_port.into(),
+            local_addr: local_addr,
+            remote_port: remote_port,
         };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;

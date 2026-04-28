@@ -43,14 +43,14 @@ pub struct HttpResponseShapeServiceGetCountResponse {
 impl From<HttpResponseShapeServiceGetCountResponse>
 for HttpResponseShapeServiceGetCountResponseOutBody {
     fn from(value: HttpResponseShapeServiceGetCountResponse) -> Self {
-        Self { count: value.count.into() }
+        Self { count: value.count }
     }
 }
 #[allow(clippy::useless_conversion)]
 impl From<HttpResponseShapeServiceGetCountResponseInBody>
 for HttpResponseShapeServiceGetCountResponse {
     fn from(value: HttpResponseShapeServiceGetCountResponseInBody) -> Self {
-        Self { count: value.count.into() }
+        Self { count: value.count }
     }
 }
 #[derive(::serde::Serialize)]
@@ -121,8 +121,8 @@ impl From<HttpResponseShapeServiceAddResponse>
 for HttpResponseShapeServiceAddResponseOutBody {
     fn from(value: HttpResponseShapeServiceAddResponse) -> Self {
         Self {
-            r#return: value.r#return.into(),
-            sum: value.sum.into(),
+            r#return: value.r#return,
+            sum: value.sum,
         }
     }
 }
@@ -131,8 +131,8 @@ impl From<HttpResponseShapeServiceAddResponseInBody>
 for HttpResponseShapeServiceAddResponse {
     fn from(value: HttpResponseShapeServiceAddResponseInBody) -> Self {
         Self {
-            r#return: value.r#return.into(),
-            sum: value.sum.into(),
+            r#return: value.r#return,
+            sum: value.sum,
         }
     }
 }
@@ -200,8 +200,8 @@ impl From<HttpResponseShapeServiceBumpResponse>
 for HttpResponseShapeServiceBumpResponseOutBody {
     fn from(value: HttpResponseShapeServiceBumpResponse) -> Self {
         Self {
-            r#return: value.r#return.into(),
-            value: value.value.into(),
+            r#return: value.r#return,
+            value: value.value,
         }
     }
 }
@@ -210,8 +210,8 @@ impl From<HttpResponseShapeServiceBumpResponseInBody>
 for HttpResponseShapeServiceBumpResponse {
     fn from(value: HttpResponseShapeServiceBumpResponseInBody) -> Self {
         Self {
-            r#return: value.r#return.into(),
-            value: value.value.into(),
+            r#return: value.r#return,
+            value: value.value,
         }
     }
 }
@@ -253,7 +253,7 @@ where
         let mut resp = match svc.hello().await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -325,8 +325,8 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpResponseShapeServiceAddRequest { a, b } = request;
-        let a: i32 = a.into();
-        let b: i32 = b.into();
+        let a: i32 = a;
+        let b: i32 = b;
         let mut resp = match svc.add(a, b).await {
             Ok(resp_value) => {
                 let mut resp = {
@@ -366,7 +366,7 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpResponseShapeServiceBumpRequest { value } = request;
-        let value: i32 = value.into();
+        let value: i32 = value;
         let mut resp = match svc.bump(value).await {
             Ok(resp_value) => {
                 let mut resp = {
@@ -506,7 +506,7 @@ impl HttpResponseShapeServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -578,8 +578,8 @@ impl HttpResponseShapeServiceClient {
             );
         let auth_target = &self.client;
         let body = HttpResponseShapeServiceAddRequestOutBody {
-            a: a.into(),
-            b: b.into(),
+            a: a,
+            b: b,
         };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;
@@ -636,7 +636,7 @@ impl HttpResponseShapeServiceClient {
             );
         let auth_target = &self.client;
         let body = HttpResponseShapeServiceBumpRequestOutBody {
-            value: value.into(),
+            value: value,
         };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;

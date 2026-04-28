@@ -6,6 +6,8 @@ interface HelloWorld {
         in string name
     );
 
+    sequence<ComplexStruct> getComplexStructs();
+
 };
 
 enum EnumFirstDefault {

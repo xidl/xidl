@@ -194,13 +194,13 @@ where
             }
         };
         let HttpSecurityServiceGetUserRequest { id, locale, trace_id } = request;
-        let id: u32 = id.into();
-        let locale: Option<String> = locale.into();
-        let trace_id: String = trace_id.into();
+        let id: u32 = id;
+        let locale: Option<String> = locale;
+        let trace_id: String = trace_id;
         let mut resp = match svc.get_user(id, locale, trace_id, xidl_auth).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -253,12 +253,12 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpSecurityServiceSearchUserRequest { keyword, page } = request;
-        let keyword: String = keyword.into();
-        let page: Option<u32> = page.into();
+        let keyword: String = keyword;
+        let page: Option<u32> = page;
         let mut resp = match svc.search_user(keyword, page).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -294,7 +294,7 @@ where
         let mut resp = match svc.health().await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -472,7 +472,7 @@ impl HttpSecurityServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -502,8 +502,8 @@ impl HttpSecurityServiceClient {
             );
         let auth_target = &self.client;
         let body = HttpSecurityServiceSearchUserRequestOutBody {
-            keyword: keyword.into(),
-            page: page.into(),
+            keyword: keyword,
+            page: page,
         };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;
@@ -531,7 +531,7 @@ impl HttpSecurityServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -571,7 +571,7 @@ impl HttpSecurityServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();

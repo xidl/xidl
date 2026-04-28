@@ -332,11 +332,19 @@ fn track_type(
     Ok(())
 }
 
-fn encode_expr(expr: &str, ty: &hir::TypeSpec, registry: &TypeRegistry) -> IdlcResult<String> {
+pub(crate) fn encode_expr(
+    expr: &str,
+    ty: &hir::TypeSpec,
+    registry: &TypeRegistry,
+) -> IdlcResult<String> {
     convert_expr(expr, ty, registry)
 }
 
-fn decode_expr(expr: &str, ty: &hir::TypeSpec, registry: &TypeRegistry) -> IdlcResult<String> {
+pub(crate) fn decode_expr(
+    expr: &str,
+    ty: &hir::TypeSpec,
+    registry: &TypeRegistry,
+) -> IdlcResult<String> {
     convert_expr(expr, ty, registry)
 }
 
@@ -354,7 +362,7 @@ fn convert_expr(expr: &str, ty: &hir::TypeSpec, registry: &TypeRegistry) -> Idlc
             let name = scoped_key(value);
             match registry.get(&name) {
                 Some(TransportTypeDef::Struct(_)) | Some(TransportTypeDef::Enum(_)) => {
-                    ".into()".replacen(".", expr, 1)
+                    format!("{expr}.into()")
                 }
                 Some(TransportTypeDef::Typedef(def)) => match &def.ty {
                     hir::TypedefType::TypeSpec(inner) => convert_expr(expr, inner, registry)?,

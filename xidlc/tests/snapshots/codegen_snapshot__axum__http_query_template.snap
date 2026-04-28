@@ -181,13 +181,13 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpQueryTemplateServiceGetUserRequest { id, lang, region } = request;
-        let id: u32 = id.into();
-        let lang: String = lang.into();
-        let region: String = region.into();
+        let id: u32 = id;
+        let lang: String = lang;
+        let region: String = region;
         let mut resp = match svc.get_user(id, lang, region).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -222,12 +222,12 @@ where
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let HttpQueryTemplateServiceSearchRequest { keyword, payload } = request;
-        let keyword: String = keyword.into();
-        let payload: String = payload.into();
+        let keyword: String = keyword;
+        let payload: String = payload;
         let mut resp = match svc.search(keyword, payload).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: String = resp_value.into();
+                    let body_value: String = resp_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -351,7 +351,7 @@ impl HttpQueryTemplateServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
@@ -389,7 +389,7 @@ impl HttpQueryTemplateServiceClient {
         }
         let auth_target = &self.client;
         let body = HttpQueryTemplateServiceSearchRequestOutBody {
-            payload: payload.into(),
+            payload: payload,
         };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;
@@ -417,7 +417,7 @@ impl HttpQueryTemplateServiceClient {
                     "application/json",
                 )
                 .from_slice(&body)?;
-            Ok(body.into())
+            Ok(body)
         } else {
             let status = resp.status();
             let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
