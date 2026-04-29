@@ -3601,7 +3601,7 @@ checksum = "9edde0db4769d2dc68579893f2306b26c6ecfbe0ef499b013d731b7b9247e0b9"
 
 [[package]]
 name = "xidl-build"
-version = "0.50.1"
+version = "0.50.2"
 dependencies = [
  "tokio",
  "xidlc",
@@ -3609,7 +3609,7 @@ dependencies = [
 
 [[package]]
 name = "xidl-jsonrpc"
-version = "0.50.1"
+version = "0.50.2"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -3631,7 +3631,7 @@ dependencies = [
 
 [[package]]
 name = "xidl-parser"
-version = "0.50.1"
+version = "0.50.2"
 dependencies = [
  "include_dir",
  "insta",
@@ -3647,7 +3647,7 @@ dependencies = [
 
 [[package]]
 name = "xidl-parser-derive"
-version = "0.50.1"
+version = "0.50.2"
 dependencies = [
  "convert_case",
  "darling",
@@ -3659,7 +3659,7 @@ dependencies = [
 
 [[package]]
 name = "xidl-rust-axum"
-version = "0.50.1"
+version = "0.50.2"
 dependencies = [
  "axum",
  "axum-extra",
@@ -3679,7 +3679,7 @@ dependencies = [
 
 [[package]]
 name = "xidl-typeobject"
-version = "0.50.1"
+version = "0.50.2"
 dependencies = [
  "md5",
  "xidl-xcdr",
@@ -3687,7 +3687,7 @@ dependencies = [
 
 [[package]]
 name = "xidl-xcdr"
-version = "0.50.1"
+version = "0.50.2"
 dependencies = [
  "bytes",
  "cbindgen",
@@ -3697,7 +3697,7 @@ dependencies = [
 
 [[package]]
 name = "xidlc"
-version = "0.50.1"
+version = "0.50.2"
 dependencies = [
  "async-trait",
  "clap",
@@ -3732,7 +3732,7 @@ dependencies = [
 
 [[package]]
 name = "xidlc-examples"
-version = "0.50.1"
+version = "0.50.2"
 dependencies = [
  "anyhow",
  "async-stream",

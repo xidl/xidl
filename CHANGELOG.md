@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.50.2](https://github.com/xidl/xidl/compare/v0.50.1...v0.50.2) (2026-04-29)
+
+
+### Bug Fixes
+
+* **xidl:** fix multi interface in same file ([02fe850](https://github.com/xidl/xidl/commit/02fe8503e0822bcfa2b298da641e3d6810317753))
+
 ## [0.50.1](https://github.com/xidl/xidl/compare/v0.50.0...v0.50.1) (2026-04-29)
 
 
