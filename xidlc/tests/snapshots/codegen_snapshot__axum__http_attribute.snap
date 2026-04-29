@@ -11,10 +11,10 @@ pub trait HttpAttributeService {
     async fn get_attribute_name(&self) -> ::xidl_rust_axum::Result<String>;
     async fn set_attribute_name(&self, name: String) -> ::xidl_rust_axum::Result<()>;
 }
-mod __xidl_in {
+mod __xidl_in_HttpAttributeService {
     use super::*;
 }
-mod __xidl_out {
+mod __xidl_out_HttpAttributeService {
     use super::*;
 }
 #[derive(::serde::Serialize)]

@@ -19,10 +19,10 @@ pub trait ReportApi {
         req: ::xidl_rust_axum::Request<ReportApiWatchReportRequest>,
     ) -> ::xidl_rust_axum::Result<xidl_rust_axum::stream::SseStream<String>>;
 }
-mod __xidl_in {
+mod __xidl_in_ReportApi {
     use super::*;
 }
-mod __xidl_out {
+mod __xidl_out_ReportApi {
     use super::*;
 }
 #[derive(::serde::Deserialize)]

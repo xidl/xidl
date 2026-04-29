@@ -22,7 +22,7 @@ pub trait HttpService {
     ) -> ::xidl_rust_axum::Result<CreateSimpleResponse>;
     async fn stop_simple(&self, id: u32) -> ::xidl_rust_axum::Result<()>;
 }
-mod __xidl_in {
+mod __xidl_in_HttpService {
     use super::*;
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub(super) struct CreateSimpleResponse {
@@ -120,7 +120,7 @@ mod __xidl_in {
         }
     }
 }
-mod __xidl_out {
+mod __xidl_out_HttpService {
     use super::*;
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub(super) struct CreateSimpleResponse {
@@ -365,7 +365,8 @@ where
         let mut resp = match svc.get_health().await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: __xidl_out::HealthResponse = resp_value.into();
+                    let body_value: __xidl_out_HttpService::HealthResponse = resp_value
+                        .into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -401,7 +402,8 @@ where
         let mut resp = match svc.get_version().await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: __xidl_out::VersionResponse = resp_value.into();
+                    let body_value: __xidl_out_HttpService::VersionResponse = resp_value
+                        .into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -437,7 +439,8 @@ where
         let mut resp = match svc.get_memory_info().await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: __xidl_out::MemoryResponse = resp_value.into();
+                    let body_value: __xidl_out_HttpService::MemoryResponse = resp_value
+                        .into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -535,7 +538,8 @@ where
         let mut resp = match svc.get_udp_stats().await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: __xidl_out::UdpStatsResponse = resp_value.into();
+                    let body_value: __xidl_out_HttpService::UdpStatsResponse = resp_value
+                        .into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -575,7 +579,8 @@ where
         let mut resp = match svc.create_simple(local_addr, remote_port).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: __xidl_out::CreateSimpleResponse = resp_value.into();
+                    let body_value: __xidl_out_HttpService::CreateSimpleResponse = resp_value
+                        .into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -709,7 +714,7 @@ impl HttpServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            let body: __xidl_in::HealthResponse = xidl_rust_axum::DeserializeFactory::new(
+            let body: __xidl_in_HttpService::HealthResponse = xidl_rust_axum::DeserializeFactory::new(
                     "application/json",
                 )
                 .from_slice(&body)?;
@@ -749,7 +754,7 @@ impl HttpServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            let body: __xidl_in::VersionResponse = xidl_rust_axum::DeserializeFactory::new(
+            let body: __xidl_in_HttpService::VersionResponse = xidl_rust_axum::DeserializeFactory::new(
                     "application/json",
                 )
                 .from_slice(&body)?;
@@ -791,7 +796,7 @@ impl HttpServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            let body: __xidl_in::MemoryResponse = xidl_rust_axum::DeserializeFactory::new(
+            let body: __xidl_in_HttpService::MemoryResponse = xidl_rust_axum::DeserializeFactory::new(
                     "application/json",
                 )
                 .from_slice(&body)?;
@@ -907,7 +912,7 @@ impl HttpServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            let body: __xidl_in::UdpStatsResponse = xidl_rust_axum::DeserializeFactory::new(
+            let body: __xidl_in_HttpService::UdpStatsResponse = xidl_rust_axum::DeserializeFactory::new(
                     "application/json",
                 )
                 .from_slice(&body)?;
@@ -966,7 +971,7 @@ impl HttpServiceClient {
                 .bytes()
                 .await
                 .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-            let body: __xidl_in::CreateSimpleResponse = xidl_rust_axum::DeserializeFactory::new(
+            let body: __xidl_in_HttpService::CreateSimpleResponse = xidl_rust_axum::DeserializeFactory::new(
                     "application/json",
                 )
                 .from_slice(&body)?;

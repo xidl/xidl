@@ -24,10 +24,10 @@ pub mod test {
             name: String,
         ) -> ::xidl_rust_axum::Result<()>;
     }
-    mod __xidl_in {
+    mod __xidl_in_HeaderService {
         use super::*;
     }
-    mod __xidl_out {
+    mod __xidl_out_HeaderService {
         use super::*;
     }
     #[derive(::serde::Deserialize)]

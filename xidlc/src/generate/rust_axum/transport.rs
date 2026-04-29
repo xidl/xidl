@@ -22,24 +22,37 @@ pub enum TransportDirection {
 }
 
 pub struct TransportModules {
+    pub inbound_name: String,
+    pub outbound_name: String,
     pub inbound: String,
     pub outbound: String,
 }
 
-#[derive(Default)]
 pub struct TransportTracker {
     inbound: BTreeSet<String>,
     outbound: BTreeSet<String>,
+    inbound_module: String,
+    outbound_module: String,
 }
 
 impl TransportTracker {
+    pub fn new(interface_ident: &str) -> Self {
+        Self {
+            inbound: BTreeSet::new(),
+            outbound: BTreeSet::new(),
+            inbound_module: transport_module("in", interface_ident),
+            outbound_module: transport_module("out", interface_ident),
+        }
+    }
+
     pub fn map_type(
         &mut self,
         ty: &hir::TypeSpec,
         direction: TransportDirection,
         registry: &TypeRegistry,
     ) -> IdlcResult<String> {
-        map_type_inner(ty, direction, registry, Some(self))
+        let module_name = self.module_name(direction).to_string();
+        map_type_inner(ty, direction, &module_name, registry, Some(self))
     }
 
     pub fn render_modules(
@@ -48,14 +61,30 @@ impl TransportTracker {
         module_path: &[String],
     ) -> IdlcResult<TransportModules> {
         Ok(TransportModules {
-            inbound: render_module(&self.inbound, TransportDirection::In, registry, module_path)?,
+            inbound_name: self.inbound_module.clone(),
+            outbound_name: self.outbound_module.clone(),
+            inbound: render_module(
+                &self.inbound,
+                TransportDirection::In,
+                &self.inbound_module,
+                registry,
+                module_path,
+            )?,
             outbound: render_module(
                 &self.outbound,
                 TransportDirection::Out,
+                &self.outbound_module,
                 registry,
                 module_path,
             )?,
         })
+    }
+
+    fn module_name(&self, direction: TransportDirection) -> &str {
+        match direction {
+            TransportDirection::In => &self.inbound_module,
+            TransportDirection::Out => &self.outbound_module,
+        }
     }
 }
 
@@ -112,6 +141,7 @@ fn collect_type_decl(ty: &hir::TypeDcl, module_path: &[String], out: &mut TypeRe
 fn render_module(
     names: &BTreeSet<String>,
     direction: TransportDirection,
+    module_name: &str,
     registry: &TypeRegistry,
     module_path: &[String],
 ) -> IdlcResult<String> {
@@ -121,9 +151,15 @@ fn render_module(
             continue;
         };
         match def {
-            TransportTypeDef::Struct(def) => {
-                render_struct(&mut out, name, def, direction, registry, module_path)?
-            }
+            TransportTypeDef::Struct(def) => render_struct(
+                &mut out,
+                name,
+                def,
+                direction,
+                module_name,
+                registry,
+                module_path,
+            )?,
             TransportTypeDef::Enum(def) => render_enum(&mut out, name, def, module_path)?,
             TransportTypeDef::Typedef(_) => {}
         }
@@ -136,6 +172,7 @@ fn render_struct(
     canonical: &str,
     def: &hir::StructDcl,
     direction: TransportDirection,
+    module_name: &str,
     registry: &TypeRegistry,
     module_path: &[String],
 ) -> IdlcResult<()> {
@@ -153,7 +190,7 @@ fn render_struct(
                 out.push_str("    #[serde(default)]\n");
             }
             let name = rust_ident(&declarator_name(decl));
-            let ty = member_ty(member, decl, direction, registry)?;
+            let ty = member_ty(member, decl, direction, module_name, registry)?;
             out.push_str(&format!("    {name}: {ty},\n"));
         }
     }
@@ -228,9 +265,10 @@ fn member_ty(
     member: &hir::Member,
     decl: &hir::Declarator,
     direction: TransportDirection,
+    module_name: &str,
     registry: &TypeRegistry,
 ) -> IdlcResult<String> {
-    let mut base = map_type_inner(&member.ty, direction, registry, None)?;
+    let mut base = map_type_inner(&member.ty, direction, module_name, registry, None)?;
     if member.is_optional() {
         base = format!("Option<{base}>");
     }
@@ -245,6 +283,7 @@ fn member_ty(
 fn map_type_inner(
     ty: &hir::TypeSpec,
     direction: TransportDirection,
+    module_name: &str,
     registry: &TypeRegistry,
     tracker: Option<&mut TransportTracker>,
 ) -> IdlcResult<String> {
@@ -261,11 +300,11 @@ fn map_type_inner(
         hir::TypeSpec::StringType(_) | hir::TypeSpec::WideStringType(_) => "String".to_string(),
         hir::TypeSpec::SequenceType(seq) => format!(
             "Vec<{}>",
-            map_type_inner(&seq.ty, direction, registry, tracker)?
+            map_type_inner(&seq.ty, direction, module_name, registry, tracker)?
         ),
         hir::TypeSpec::MapType(map) => {
-            let key_ty = map_type_inner(&map.key, direction, registry, None)?;
-            let value_ty = map_type_inner(&map.value, direction, registry, tracker)?;
+            let key_ty = map_type_inner(&map.key, direction, module_name, registry, None)?;
+            let value_ty = map_type_inner(&map.value, direction, module_name, registry, tracker)?;
             format!("::std::collections::BTreeMap<{key_ty}, {value_ty}>")
         }
         hir::TypeSpec::TemplateType(value) => format!(
@@ -274,17 +313,20 @@ fn map_type_inner(
             value
                 .args
                 .iter()
-                .map(|arg| map_type_inner(arg, direction, registry, None))
+                .map(|arg| map_type_inner(arg, direction, module_name, registry, None))
                 .collect::<Result<Vec<_>, _>>()?
                 .join(", "),
         ),
-        hir::TypeSpec::ScopedName(value) => map_scoped(value, direction, registry, tracker)?,
+        hir::TypeSpec::ScopedName(value) => {
+            map_scoped(value, direction, module_name, registry, tracker)?
+        }
     })
 }
 
 fn map_scoped(
     value: &hir::ScopedName,
     direction: TransportDirection,
+    module_name: &str,
     registry: &TypeRegistry,
     tracker: Option<&mut TransportTracker>,
 ) -> IdlcResult<String> {
@@ -292,16 +334,14 @@ fn map_scoped(
     match registry.get(&name) {
         Some(TransportTypeDef::Struct(_)) | Some(TransportTypeDef::Enum(_)) => {
             if let Some(tracker) = tracker {
-                track_type(&name, direction, registry, tracker)?;
+                track_type(&name, direction, module_name, registry, tracker)?;
             }
-            let module = match direction {
-                TransportDirection::In => "__xidl_in",
-                TransportDirection::Out => "__xidl_out",
-            };
-            Ok(format!("{module}::{}", transport_ident(&name)))
+            Ok(format!("{module_name}::{}", transport_ident(&name)))
         }
         Some(TransportTypeDef::Typedef(def)) => match &def.ty {
-            hir::TypedefType::TypeSpec(ty) => map_type_inner(ty, direction, registry, tracker),
+            hir::TypedefType::TypeSpec(ty) => {
+                map_type_inner(ty, direction, module_name, registry, tracker)
+            }
             hir::TypedefType::ConstrTypeDcl(_) => Err(IdlcError::rpc(format!(
                 "unsupported inline typedef transport for '{}'",
                 name
@@ -314,6 +354,7 @@ fn map_scoped(
 fn track_type(
     name: &str,
     direction: TransportDirection,
+    module_name: &str,
     registry: &TypeRegistry,
     tracker: &mut TransportTracker,
 ) -> IdlcResult<()> {
@@ -326,7 +367,7 @@ fn track_type(
     }
     if let Some(TransportTypeDef::Struct(def)) = registry.get(name) {
         for member in &def.member {
-            map_type_inner(&member.ty, direction, registry, Some(tracker))?;
+            map_type_inner(&member.ty, direction, module_name, registry, Some(tracker))?;
         }
     }
     Ok(())
@@ -398,6 +439,10 @@ fn transport_ident(value: &str) -> String {
         .map(|part| part.to_string())
         .collect::<Vec<_>>()
         .join("_")
+}
+
+fn transport_module(direction: &str, interface_ident: &str) -> String {
+    format!("__xidl_{direction}_{interface_ident}")
 }
 
 fn public_path_from_canonical(value: &str, module_path: &[String]) -> String {

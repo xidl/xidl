@@ -19,10 +19,10 @@ pub trait HttpSecurityInheritanceService {
     ) -> ::xidl_rust_axum::Result<String>;
     async fn health(&self) -> ::xidl_rust_axum::Result<String>;
 }
-mod __xidl_in {
+mod __xidl_in_HttpSecurityInheritanceService {
     use super::*;
 }
-mod __xidl_out {
+mod __xidl_out_HttpSecurityInheritanceService {
     use super::*;
 }
 #[derive(::serde::Deserialize)]

@@ -116,3 +116,48 @@ interface E2eTypeServer {
     );
 
 };
+// attribute
+interface E2eAttribute {
+    attribute string attr1;
+    readonly attribute sequence<string> attr2;
+    attribute EnumEmpty attr3;
+    attribute EnumSimple1 attr4;
+    attribute StructEmpty attr5;
+    attribute StructSimple attr6;
+    attribute sequence<string> attr7;
+    attribute sequence<EnumEmpty> attr8;
+    attribute sequence<EnumSimple1> attr9;
+    attribute sequence<StructEmpty> attr10;
+    attribute sequence<StructSimple> attr11;
+    attribute map<string, uint8> attr12;
+    attribute any attr13;
+    attribute sequence<any> attr14;
+    attribute map<string, any> attr15;
+};
+// path
+interface E2ePathSever {
+    @get("/v1/op_with_path/{param1}")
+    sequence<string> op_with_path(
+        in string param1
+    );
+
+    @get("/v1/op_with_query/{param1}?q={word}")
+    sequence<string> op_with_query(
+        in string param1,
+        string word
+    );
+
+    @post
+    @path("/v1/op_with_params/{path}")
+    sequence<string> op_with_params(
+        @path("path")
+        string path_name,
+        @query
+        sequence<string> q,
+        @cookie
+        sequence<uint8> b,
+        @body
+        map<string, any> a
+    );
+
+};

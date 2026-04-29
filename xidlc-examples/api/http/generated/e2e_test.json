@@ -69,9 +69,851 @@
         }
       }
     },
+    "/attribute/attr10": {
+      "get": {
+        "operationId": "E2eAttribute.get_attribute_attr10",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StructEmpty"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "E2eAttribute.set_attribute_attr10",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/StructEmpty"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attribute/attr11": {
+      "get": {
+        "operationId": "E2eAttribute.get_attribute_attr11",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StructSimple"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "E2eAttribute.set_attribute_attr11",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/StructSimple"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attribute/attr12": {
+      "get": {
+        "operationId": "E2eAttribute.get_attribute_attr12",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "integer",
+                    "format": "int32",
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "E2eAttribute.set_attribute_attr12",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer",
+                  "format": "int32",
+                  "minimum": 0
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attribute/attr13": {
+      "get": {
+        "operationId": "E2eAttribute.get_attribute_attr13",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "E2eAttribute.set_attribute_attr13",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attribute/attr14": {
+      "get": {
+        "operationId": "E2eAttribute.get_attribute_attr14",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "E2eAttribute.set_attribute_attr14",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attribute/attr15": {
+      "get": {
+        "operationId": "E2eAttribute.get_attribute_attr15",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "E2eAttribute.set_attribute_attr15",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/attribute/attr2": {
       "get": {
         "operationId": "E2eTypeServer.get_attribute_attr2",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attribute/attr3": {
+      "get": {
+        "operationId": "E2eAttribute.get_attribute_attr3",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnumEmpty"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "E2eAttribute.set_attribute_attr3",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnumEmpty"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attribute/attr4": {
+      "get": {
+        "operationId": "E2eAttribute.get_attribute_attr4",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnumSimple1"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "E2eAttribute.set_attribute_attr4",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnumSimple1"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attribute/attr5": {
+      "get": {
+        "operationId": "E2eAttribute.get_attribute_attr5",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StructEmpty"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "E2eAttribute.set_attribute_attr5",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StructEmpty"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attribute/attr6": {
+      "get": {
+        "operationId": "E2eAttribute.get_attribute_attr6",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StructSimple"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "E2eAttribute.set_attribute_attr6",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StructSimple"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attribute/attr7": {
+      "get": {
+        "operationId": "E2eAttribute.get_attribute_attr7",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "E2eAttribute.set_attribute_attr7",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attribute/attr8": {
+      "get": {
+        "operationId": "E2eAttribute.get_attribute_attr8",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnumEmpty"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "E2eAttribute.set_attribute_attr8",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EnumEmpty"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attribute/attr9": {
+      "get": {
+        "operationId": "E2eAttribute.get_attribute_attr9",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnumSimple1"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "E2eAttribute.set_attribute_attr9",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EnumSimple1"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/op_with_path": {
+      "get": {
+        "operationId": "E2ePathSever.op_with_path",
+        "parameters": [
+          {
+            "name": "param1",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/op_with_query": {
+      "get": {
+        "operationId": "E2ePathSever.op_with_query",
+        "parameters": [
+          {
+            "name": "param1",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "word",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -838,12 +1680,2187 @@
           }
         }
       }
+    },
+    "/v1/op_with_params/{path}": {
+      "post": {
+        "operationId": "E2ePathSever.op_with_params",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "b",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0
+              }
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
       "BitMaskSimple": {
         "type": "integer"
+      },
+      "E2eAttribute_Call": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr1"
+            ],
+            "properties": {
+              "get_attribute_attr1": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr1_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr1"
+            ],
+            "properties": {
+              "set_attribute_attr1": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr1_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr2"
+            ],
+            "properties": {
+              "get_attribute_attr2": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr2_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr3"
+            ],
+            "properties": {
+              "get_attribute_attr3": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr3_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr3"
+            ],
+            "properties": {
+              "set_attribute_attr3": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr3_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr4"
+            ],
+            "properties": {
+              "get_attribute_attr4": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr4_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr4"
+            ],
+            "properties": {
+              "set_attribute_attr4": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr4_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr5"
+            ],
+            "properties": {
+              "get_attribute_attr5": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr5_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr5"
+            ],
+            "properties": {
+              "set_attribute_attr5": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr5_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr6"
+            ],
+            "properties": {
+              "get_attribute_attr6": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr6_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr6"
+            ],
+            "properties": {
+              "set_attribute_attr6": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr6_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr7"
+            ],
+            "properties": {
+              "get_attribute_attr7": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr7_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr7"
+            ],
+            "properties": {
+              "set_attribute_attr7": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr7_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr8"
+            ],
+            "properties": {
+              "get_attribute_attr8": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr8_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr8"
+            ],
+            "properties": {
+              "set_attribute_attr8": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr8_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr9"
+            ],
+            "properties": {
+              "get_attribute_attr9": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr9_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr9"
+            ],
+            "properties": {
+              "set_attribute_attr9": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr9_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr10"
+            ],
+            "properties": {
+              "get_attribute_attr10": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr10_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr10"
+            ],
+            "properties": {
+              "set_attribute_attr10": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr10_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr11"
+            ],
+            "properties": {
+              "get_attribute_attr11": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr11_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr11"
+            ],
+            "properties": {
+              "set_attribute_attr11": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr11_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr12"
+            ],
+            "properties": {
+              "get_attribute_attr12": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr12_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr12"
+            ],
+            "properties": {
+              "set_attribute_attr12": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr12_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr13"
+            ],
+            "properties": {
+              "get_attribute_attr13": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr13_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr13"
+            ],
+            "properties": {
+              "set_attribute_attr13": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr13_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr14"
+            ],
+            "properties": {
+              "get_attribute_attr14": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr14_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr14"
+            ],
+            "properties": {
+              "set_attribute_attr14": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr14_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr15"
+            ],
+            "properties": {
+              "get_attribute_attr15": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr15_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr15"
+            ],
+            "properties": {
+              "set_attribute_attr15": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr15_In"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_Reply": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/E2eAttribute_Return"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
+          }
+        }
+      },
+      "E2eAttribute_Request": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/E2eAttribute_Call"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
+          }
+        }
+      },
+      "E2eAttribute_Return": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr1"
+            ],
+            "properties": {
+              "get_attribute_attr1": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr1_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr1"
+            ],
+            "properties": {
+              "set_attribute_attr1": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr1_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr2"
+            ],
+            "properties": {
+              "get_attribute_attr2": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr2_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr3"
+            ],
+            "properties": {
+              "get_attribute_attr3": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr3_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr3"
+            ],
+            "properties": {
+              "set_attribute_attr3": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr3_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr4"
+            ],
+            "properties": {
+              "get_attribute_attr4": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr4_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr4"
+            ],
+            "properties": {
+              "set_attribute_attr4": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr4_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr5"
+            ],
+            "properties": {
+              "get_attribute_attr5": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr5_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr5"
+            ],
+            "properties": {
+              "set_attribute_attr5": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr5_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr6"
+            ],
+            "properties": {
+              "get_attribute_attr6": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr6_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr6"
+            ],
+            "properties": {
+              "set_attribute_attr6": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr6_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr7"
+            ],
+            "properties": {
+              "get_attribute_attr7": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr7_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr7"
+            ],
+            "properties": {
+              "set_attribute_attr7": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr7_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr8"
+            ],
+            "properties": {
+              "get_attribute_attr8": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr8_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr8"
+            ],
+            "properties": {
+              "set_attribute_attr8": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr8_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr9"
+            ],
+            "properties": {
+              "get_attribute_attr9": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr9_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr9"
+            ],
+            "properties": {
+              "set_attribute_attr9": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr9_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr10"
+            ],
+            "properties": {
+              "get_attribute_attr10": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr10_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr10"
+            ],
+            "properties": {
+              "set_attribute_attr10": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr10_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr11"
+            ],
+            "properties": {
+              "get_attribute_attr11": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr11_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr11"
+            ],
+            "properties": {
+              "set_attribute_attr11": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr11_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr12"
+            ],
+            "properties": {
+              "get_attribute_attr12": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr12_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr12"
+            ],
+            "properties": {
+              "set_attribute_attr12": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr12_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr13"
+            ],
+            "properties": {
+              "get_attribute_attr13": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr13_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr13"
+            ],
+            "properties": {
+              "set_attribute_attr13": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr13_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr14"
+            ],
+            "properties": {
+              "get_attribute_attr14": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr14_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr14"
+            ],
+            "properties": {
+              "set_attribute_attr14": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr14_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr15"
+            ],
+            "properties": {
+              "get_attribute_attr15": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr15_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr15"
+            ],
+            "properties": {
+              "set_attribute_attr15": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr15_Result"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_get_attribute_attr10_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr10_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StructEmpty"
+            }
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr10_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr10_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_get_attribute_attr11_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr11_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StructSimple"
+            }
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr11_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr11_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_get_attribute_attr12_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr12_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr12_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr12_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_get_attribute_attr13_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr13_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "object"
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr13_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr13_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_get_attribute_attr14_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr14_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr14_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr14_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_get_attribute_attr15_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr15_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr15_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr15_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_get_attribute_attr1_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr1_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr1_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr1_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_get_attribute_attr2_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr2_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr2_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr2_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_get_attribute_attr3_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr3_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "$ref": "#/components/schemas/EnumEmpty"
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr3_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr3_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_get_attribute_attr4_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr4_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "$ref": "#/components/schemas/EnumSimple1"
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr4_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr4_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_get_attribute_attr5_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr5_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "$ref": "#/components/schemas/StructEmpty"
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr5_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr5_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_get_attribute_attr6_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr6_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "$ref": "#/components/schemas/StructSimple"
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr6_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr6_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_get_attribute_attr7_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr7_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr7_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr7_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_get_attribute_attr8_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr8_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnumEmpty"
+            }
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr8_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr8_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_get_attribute_attr9_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr9_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnumSimple1"
+            }
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr9_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr9_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_set_attribute_attr10_In": {
+        "type": "object",
+        "required": [
+          "attr10"
+        ],
+        "properties": {
+          "attr10": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StructEmpty"
+            }
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr10_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr10_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr10_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_set_attribute_attr11_In": {
+        "type": "object",
+        "required": [
+          "attr11"
+        ],
+        "properties": {
+          "attr11": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StructSimple"
+            }
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr11_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr11_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr11_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_set_attribute_attr12_In": {
+        "type": "object",
+        "required": [
+          "attr12"
+        ],
+        "properties": {
+          "attr12": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr12_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr12_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr12_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_set_attribute_attr13_In": {
+        "type": "object",
+        "required": [
+          "attr13"
+        ],
+        "properties": {
+          "attr13": {
+            "type": "object"
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr13_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr13_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr13_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_set_attribute_attr14_In": {
+        "type": "object",
+        "required": [
+          "attr14"
+        ],
+        "properties": {
+          "attr14": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr14_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr14_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr14_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_set_attribute_attr15_In": {
+        "type": "object",
+        "required": [
+          "attr15"
+        ],
+        "properties": {
+          "attr15": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr15_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr15_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr15_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_set_attribute_attr1_In": {
+        "type": "object",
+        "required": [
+          "attr1"
+        ],
+        "properties": {
+          "attr1": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr1_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr1_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr1_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_set_attribute_attr3_In": {
+        "type": "object",
+        "required": [
+          "attr3"
+        ],
+        "properties": {
+          "attr3": {
+            "$ref": "#/components/schemas/EnumEmpty"
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr3_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr3_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr3_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_set_attribute_attr4_In": {
+        "type": "object",
+        "required": [
+          "attr4"
+        ],
+        "properties": {
+          "attr4": {
+            "$ref": "#/components/schemas/EnumSimple1"
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr4_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr4_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr4_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_set_attribute_attr5_In": {
+        "type": "object",
+        "required": [
+          "attr5"
+        ],
+        "properties": {
+          "attr5": {
+            "$ref": "#/components/schemas/StructEmpty"
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr5_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr5_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr5_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_set_attribute_attr6_In": {
+        "type": "object",
+        "required": [
+          "attr6"
+        ],
+        "properties": {
+          "attr6": {
+            "$ref": "#/components/schemas/StructSimple"
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr6_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr6_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr6_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_set_attribute_attr7_In": {
+        "type": "object",
+        "required": [
+          "attr7"
+        ],
+        "properties": {
+          "attr7": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr7_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr7_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr7_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_set_attribute_attr8_In": {
+        "type": "object",
+        "required": [
+          "attr8"
+        ],
+        "properties": {
+          "attr8": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnumEmpty"
+            }
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr8_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr8_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr8_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_set_attribute_attr9_In": {
+        "type": "object",
+        "required": [
+          "attr9"
+        ],
+        "properties": {
+          "attr9": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnumSimple1"
+            }
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr9_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr9_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr9_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2ePathSever_Call": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "op_with_path"
+            ],
+            "properties": {
+              "op_with_path": {
+                "$ref": "#/components/schemas/E2ePathSever_op_with_path_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "op_with_query"
+            ],
+            "properties": {
+              "op_with_query": {
+                "$ref": "#/components/schemas/E2ePathSever_op_with_query_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "op_with_params"
+            ],
+            "properties": {
+              "op_with_params": {
+                "$ref": "#/components/schemas/E2ePathSever_op_with_params_In"
+              }
+            }
+          }
+        ]
+      },
+      "E2ePathSever_Reply": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/E2ePathSever_Return"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
+          }
+        }
+      },
+      "E2ePathSever_Request": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/E2ePathSever_Call"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
+          }
+        }
+      },
+      "E2ePathSever_Return": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "op_with_path"
+            ],
+            "properties": {
+              "op_with_path": {
+                "$ref": "#/components/schemas/E2ePathSever_op_with_path_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "op_with_query"
+            ],
+            "properties": {
+              "op_with_query": {
+                "$ref": "#/components/schemas/E2ePathSever_op_with_query_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "op_with_params"
+            ],
+            "properties": {
+              "op_with_params": {
+                "$ref": "#/components/schemas/E2ePathSever_op_with_params_Result"
+              }
+            }
+          }
+        ]
+      },
+      "E2ePathSever_op_with_params_In": {
+        "type": "object",
+        "required": [
+          "path_name",
+          "q",
+          "b",
+          "a"
+        ],
+        "properties": {
+          "a": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          },
+          "b": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          },
+          "path_name": {
+            "type": "string"
+          },
+          "q": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "E2ePathSever_op_with_params_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "E2ePathSever_op_with_params_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2ePathSever_op_with_params_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2ePathSever_op_with_path_In": {
+        "type": "object",
+        "required": [
+          "param1"
+        ],
+        "properties": {
+          "param1": {
+            "type": "string"
+          }
+        }
+      },
+      "E2ePathSever_op_with_path_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "E2ePathSever_op_with_path_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2ePathSever_op_with_path_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2ePathSever_op_with_query_In": {
+        "type": "object",
+        "required": [
+          "param1",
+          "word"
+        ],
+        "properties": {
+          "param1": {
+            "type": "string"
+          },
+          "word": {
+            "type": "string"
+          }
+        }
+      },
+      "E2ePathSever_op_with_query_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "E2ePathSever_op_with_query_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2ePathSever_op_with_query_Out"
+              }
+            }
+          }
+        ]
       },
       "E2eTypeServer_Call": {
         "oneOf": [

@@ -170,12 +170,11 @@ fn render_interface_def(
 ) -> IdlcResult<RustAxumRenderOutput> {
     let mut out = RustAxumRenderOutput::default();
     let mut methods = Vec::new();
-    let mut transport = TransportTracker::default();
+    let mut transport = TransportTracker::new(&def.header.ident);
     let http_hir = renderer.http_hir()?;
     let Some(http_interface) = http_hir.find_interface(module_path, &def.header.ident) else {
         return Ok(out);
     };
-
     if let Some(body) = &def.interface_body {
         for operation in &http_interface.operations {
             match operation.source {
@@ -237,12 +236,13 @@ fn render_interface_def(
             }
         }
     }
-
     let ctx = serde_json::json!({
         "metadata": http_hir.document,
         "ident": rust_ident(&def.header.ident),
         "methods": methods,
         "rust_attrs": rust_passthrough_attrs_from_annotations(interface_annotations),
+        "inbound_transport_name": transport_modules.inbound_name,
+        "outbound_transport_name": transport_modules.outbound_name,
         "inbound_transport": transport_modules.inbound,
         "outbound_transport": transport_modules.outbound,
     });

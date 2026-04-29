@@ -14,10 +14,10 @@ pub trait HttpCatchAllService {
         version: String,
     ) -> ::xidl_rust_axum::Result<String>;
 }
-mod __xidl_in {
+mod __xidl_in_HttpCatchAllService {
     use super::*;
 }
-mod __xidl_out {
+mod __xidl_out_HttpCatchAllService {
     use super::*;
 }
 #[derive(::serde::Deserialize)]
