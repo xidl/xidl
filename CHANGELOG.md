@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.50.1](https://github.com/xidl/xidl/compare/v0.50.0...v0.50.1) (2026-04-29)
+
+
+### Bug Fixes
+
+* **xidlc:** fix return value with sequence ([0173ef3](https://github.com/xidl/xidl/commit/0173ef39f6b0dd72108c3bf048cf27db495f2e44))
+
 ## [0.50.0](https://github.com/xidl/xidl/compare/v0.49.0...v0.50.0) (2026-04-27)
 
 
