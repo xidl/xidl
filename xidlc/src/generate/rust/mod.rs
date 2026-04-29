@@ -13,7 +13,6 @@ mod type_dcl;
 mod union_def;
 pub(crate) mod util;
 
-use convert_case::{Case, Casing};
 pub use render::{RustRender, RustRenderOutput, RustRenderer};
 
 use crate::error::IdlcResult;
@@ -31,8 +30,7 @@ pub fn generate_with_properties(
         .file_stem()
         .and_then(|value| value.to_str())
         .unwrap_or("output");
-    let base = stem.to_case(Case::Snake);
-    let filename = format!("{base}.rs");
+    let filename = format!("{stem}.rs");
 
     let typeobject_path = "xidl_typeobject";
 
@@ -78,5 +76,26 @@ fn map_codegen_error(err: crate::error::IdlcError) -> xidl_jsonrpc::Error {
         code: xidl_jsonrpc::ErrorCode::ServerError,
         message: err.to_string(),
         data: None,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::generate_with_properties;
+    use std::collections::HashMap;
+    use std::path::Path;
+    use xidl_parser::hir;
+
+    #[test]
+    fn preserves_numeric_file_stem_in_output_path() {
+        let artifacts = generate_with_properties(
+            &hir::Specification(vec![]),
+            Path::new("e2e_test.idl"),
+            &HashMap::new(),
+        )
+        .expect("rust generation should succeed");
+
+        assert_eq!(artifacts.len(), 1);
+        assert_eq!(artifacts[0].as_file().path, "e2e_test.rs");
     }
 }

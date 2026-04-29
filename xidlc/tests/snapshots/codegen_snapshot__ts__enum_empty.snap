@@ -401,6 +401,11 @@ enum_empty.rs
 ===============
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum A {}
+impl Default for A {
+    fn default() -> Self {
+        panic!("A has no variants")
+    }
+}
 ===============
 enum_empty.zod.ts
 ===============

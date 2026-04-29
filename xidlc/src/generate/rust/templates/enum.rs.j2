@@ -38,6 +38,14 @@ pub enum {{ ident }} {
     {%- endfor %}
 }
 
+{% if members | length == 0 %}
+    impl Default for {{ ident }} {
+        fn default() -> Self {
+            panic!("{{ ident }} has no variants")
+        }
+    }
+{% endif %}
+
 {% if opt.enable_serialize %}
     impl xidl_xcdr::XcdrSerialize for {{ ident }} {
         fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(

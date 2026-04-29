@@ -22,7 +22,9 @@ pub struct {{ ident }} {
 }
 
 impl {{ ident }} {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::{{ serialize_kind }};
+    {% if opt.enable_serialize or opt.enable_deserialize %}
+        pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::{{ serialize_kind }};
+    {% endif %}
 }
 
 {% if opt.enable_serialize %}
