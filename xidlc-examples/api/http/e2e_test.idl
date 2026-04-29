@@ -1,0 +1,118 @@
+#pragma xidlc package E2E Test
+#pragma xidlc version v1.0.0
+#pragma xidlc service http://127.0.0.1:8080 dev server
+#pragma xidlc service http://127.0.0.1:8080 product
+// Type E2E Test
+enum EnumEmpty {
+};
+
+enum EnumSimple1 {
+    V1,
+    V2,
+    V3,
+
+};
+
+struct StructEmpty {
+};
+
+struct StructSimple {
+    EnumEmpty member1;
+    EnumSimple1 member2;
+    StructEmpty member3;
+};
+// union UnionSimple switch(EnumEmpty) {
+//     case EnumSimple1::V1:
+//         uint8 case1;
+//     case EnumSimple1::V2:
+//     case EnumSimple1::V3:
+//         sequence<any> case2;
+//     default:
+//         map<string, string> case3;
+// };
+//
+bitset MyBitset {
+    bitfield<3> a;
+    bitfield<1> b;
+    bitfield<4> ;
+    bitfield<10> c;
+    bitfield<12, short> d;
+};
+
+bitmask BitMaskSimple {
+    FLAG0,
+    FLAG1,
+    FLAG2,
+    FLAG3,
+    FLAG4,
+    FLAG5,
+    FLAG6,
+    FLAG7
+};
+// Interface
+interface E2eTypeServer {
+    attribute string attr1;
+    readonly attribute sequence<string> attr2;
+    void simple_op();
+
+    string simple_op_with_return1();
+
+    EnumEmpty simple_op_with_return2();
+
+    EnumSimple1 simple_op_with_return3();
+
+    StructEmpty simple_op_with_return4();
+
+    StructSimple simple_op_with_return5();
+
+    sequence<string> return_with_sequence1();
+
+    sequence<EnumEmpty> return_with_sequence2();
+
+    sequence<EnumSimple1> return_with_sequence3();
+
+    sequence<StructEmpty> return_with_sequence4();
+
+    sequence<StructSimple> return_with_sequence5();
+
+    map<string, uint8> return_with_map();
+
+    any return_with_any();
+
+    sequence<any> return_with_any_sequence();
+
+    map<string, any> return_with_any_map();
+    // map<any, any> return_with_any_map();
+    void parameter_op(
+        string a
+    );
+
+    void parameter_op2(
+        in string a
+    );
+
+    void parameter_op3(
+        in string a,
+        out uint8 b,
+        inout sequence<any> c
+    );
+
+    void parameter_op4(
+        out string a,
+        out uint8 b,
+        inout sequence<any> c
+    );
+
+    sequence<any> parameter_op5(
+        out string a,
+        out uint8 b,
+        inout sequence<any> c
+    );
+
+    map<string, any> parameter_op6(
+        out string a,
+        out uint8 b,
+        inout sequence<any> c
+    );
+
+};

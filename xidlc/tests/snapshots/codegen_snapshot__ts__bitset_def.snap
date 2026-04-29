@@ -402,15 +402,11 @@ import{z}from"zod";
 bitset_def.rs
 ===============
 pub struct A {}
-impl A {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
+impl A {}
 pub struct A {
     pub base: B,
 }
-impl A {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
+impl A {}
 pub struct A {
     pub base: B,
     pub a: bool,
@@ -418,9 +414,7 @@ pub struct A {
     pub b: bool,
     pub c: bool,
 }
-impl A {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
+impl A {}
 ===============
 bitset_def.zod.ts
 ===============

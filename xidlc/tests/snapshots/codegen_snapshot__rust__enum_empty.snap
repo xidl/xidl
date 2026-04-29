@@ -12,6 +12,11 @@ enum_empty.rs
 #![allow(unreachable_patterns)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum A {}
+impl Default for A {
+    fn default() -> Self {
+        panic!("A has no variants")
+    }
+}
 impl xidl_xcdr::XcdrSerialize for A {
     fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
         &self,

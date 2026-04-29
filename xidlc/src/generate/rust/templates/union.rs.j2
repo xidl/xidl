@@ -42,7 +42,7 @@ impl Drop for {{ ident }} {
 }
 
 impl {{ ident }} {
-    {% if opt.enable_serialize and opt.enable_deserialize %}
+    {% if opt.enable_serialize or opt.enable_deserialize %}
         pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::{{ serialize_kind }};
     {% endif %}
 
