@@ -25,10 +25,10 @@ pub trait HttpSecurityService {
     )]
     async fn health(&self) -> ::xidl_rust_axum::Result<String>;
 }
-mod __xidl_in {
+mod __xidl_in_HttpSecurityService {
     use super::*;
 }
-mod __xidl_out {
+mod __xidl_out_HttpSecurityService {
     use super::*;
 }
 #[derive(::serde::Deserialize)]

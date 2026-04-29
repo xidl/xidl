@@ -16,7 +16,7 @@ pub trait HttpClientStreamReportService {
         >,
     ) -> ::xidl_rust_axum::Result<UploadSummary>;
 }
-mod __xidl_in {
+mod __xidl_in_HttpClientStreamReportService {
     use super::*;
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub(super) struct UploadChunk {
@@ -61,7 +61,7 @@ mod __xidl_in {
         }
     }
 }
-mod __xidl_out {
+mod __xidl_out_HttpClientStreamReportService {
     use super::*;
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub(super) struct UploadChunk {
@@ -109,11 +109,11 @@ mod __xidl_out {
 #[derive(::serde::Serialize)]
 struct HttpClientStreamReportServiceUploadPartsRequestOutBody {
     #[serde(default)]
-    chunk: __xidl_out::UploadChunk,
+    chunk: __xidl_out_HttpClientStreamReportService::UploadChunk,
 }
 #[derive(::serde::Deserialize)]
 struct HttpClientStreamReportServiceUploadPartsRequestInBody {
-    chunk: __xidl_in::UploadChunk,
+    chunk: __xidl_in_HttpClientStreamReportService::UploadChunk,
 }
 #[derive(::serde::Serialize, ::serde::Deserialize)]
 pub struct HttpClientStreamReportServiceUploadPartsRequest {
@@ -164,7 +164,8 @@ where
         {
             Ok(resp_value) => {
                 let mut resp = {
-                    let body_value: __xidl_out::UploadSummary = resp_value.into();
+                    let body_value: __xidl_out_HttpClientStreamReportService::UploadSummary = resp_value
+                        .into();
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -293,7 +294,7 @@ impl HttpClientStreamReportServiceClient {
                     .bytes()
                     .await
                     .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
-                let body: __xidl_in::UploadSummary = xidl_rust_axum::DeserializeFactory::new(
+                let body: __xidl_in_HttpClientStreamReportService::UploadSummary = xidl_rust_axum::DeserializeFactory::new(
                         "application/json",
                     )
                     .from_slice(&body)?;

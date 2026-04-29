@@ -19,10 +19,10 @@ pub trait HttpQueryTemplateService {
         payload: String,
     ) -> ::xidl_rust_axum::Result<String>;
 }
-mod __xidl_in {
+mod __xidl_in_HttpQueryTemplateService {
     use super::*;
 }
-mod __xidl_out {
+mod __xidl_out_HttpQueryTemplateService {
     use super::*;
 }
 #[derive(::serde::Deserialize)]

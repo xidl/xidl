@@ -16,10 +16,10 @@ pub trait HttpClientStreamService {
         >,
     ) -> ::xidl_rust_axum::Result<String>;
 }
-mod __xidl_in {
+mod __xidl_in_HttpClientStreamService {
     use super::*;
 }
-mod __xidl_out {
+mod __xidl_out_HttpClientStreamService {
     use super::*;
 }
 #[derive(::serde::Serialize)]

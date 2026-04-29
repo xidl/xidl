@@ -12,7 +12,7 @@ pub trait HttpStreamSseBindingsService {
         req: ::xidl_rust_axum::Request<HttpStreamSseBindingsServiceWatchProjectRequest>,
     ) -> ::xidl_rust_axum::Result<xidl_rust_axum::stream::SseStream<ProjectEvent>>;
 }
-mod __xidl_in {
+mod __xidl_in_HttpStreamSseBindingsService {
     use super::*;
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub(super) struct ProjectEvent {
@@ -36,7 +36,7 @@ mod __xidl_in {
         }
     }
 }
-mod __xidl_out {
+mod __xidl_out_HttpStreamSseBindingsService {
     use super::*;
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub(super) struct ProjectEvent {

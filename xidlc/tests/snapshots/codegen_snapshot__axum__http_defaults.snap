@@ -38,7 +38,7 @@ pub trait HttpDefaultsService {
         locale: String,
     ) -> ::xidl_rust_axum::Result<String>;
 }
-mod __xidl_in {
+mod __xidl_in_HttpDefaultsService {
     use super::*;
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub(super) struct CreateUserRequest {
@@ -62,7 +62,7 @@ mod __xidl_in {
         }
     }
 }
-mod __xidl_out {
+mod __xidl_out_HttpDefaultsService {
     use super::*;
     #[derive(::serde::Serialize, ::serde::Deserialize)]
     pub(super) struct CreateUserRequest {
@@ -188,15 +188,15 @@ where
 #[derive(::serde::Serialize)]
 struct HttpDefaultsServiceCreateUserRequestOutBody {
     #[serde(default)]
-    req: __xidl_out::CreateUserRequest,
+    req: __xidl_out_HttpDefaultsService::CreateUserRequest,
 }
 #[derive(::serde::Deserialize)]
 struct HttpDefaultsServiceCreateUserRequestInBody {
-    req: __xidl_in::CreateUserRequest,
+    req: __xidl_in_HttpDefaultsService::CreateUserRequest,
 }
 #[derive(::serde::Deserialize)]
 struct HttpDefaultsServiceCreateUserRequest {
-    req: __xidl_in::CreateUserRequest,
+    req: __xidl_in_HttpDefaultsService::CreateUserRequest,
 }
 #[allow(clippy::manual_async_fn)]
 impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
@@ -230,11 +230,11 @@ where
         }
     }
 }
-type HttpDefaultsServiceCreateUserFlatRequestOutBody = __xidl_out::CreateUserRequest;
-type HttpDefaultsServiceCreateUserFlatRequestInBody = __xidl_in::CreateUserRequest;
+type HttpDefaultsServiceCreateUserFlatRequestOutBody = __xidl_out_HttpDefaultsService::CreateUserRequest;
+type HttpDefaultsServiceCreateUserFlatRequestInBody = __xidl_in_HttpDefaultsService::CreateUserRequest;
 #[derive(::serde::Deserialize)]
 struct HttpDefaultsServiceCreateUserFlatRequest {
-    req: __xidl_in::CreateUserRequest,
+    req: __xidl_in_HttpDefaultsService::CreateUserRequest,
 }
 #[allow(clippy::manual_async_fn)]
 impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
@@ -321,16 +321,16 @@ where
 struct HttpDefaultsServicePreviewUserRequestOutBody {
     #[serde(rename = "user")]
     #[serde(default)]
-    req: __xidl_out::CreateUserRequest,
+    req: __xidl_out_HttpDefaultsService::CreateUserRequest,
 }
 #[derive(::serde::Deserialize)]
 struct HttpDefaultsServicePreviewUserRequestInBody {
     #[serde(rename = "user")]
-    req: __xidl_in::CreateUserRequest,
+    req: __xidl_in_HttpDefaultsService::CreateUserRequest,
 }
 #[derive(::serde::Deserialize)]
 struct HttpDefaultsServicePreviewUserRequest {
-    req: __xidl_in::CreateUserRequest,
+    req: __xidl_in_HttpDefaultsService::CreateUserRequest,
 }
 #[allow(clippy::manual_async_fn)]
 impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
@@ -1067,7 +1067,7 @@ impl HttpDefaultsServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
-        let body: __xidl_out::CreateUserRequest = req.into();
+        let body: __xidl_out_HttpDefaultsService::CreateUserRequest = req.into();
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;
         req.headers_mut()

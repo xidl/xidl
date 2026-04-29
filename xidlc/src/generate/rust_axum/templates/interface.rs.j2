@@ -22,12 +22,12 @@ pub trait {{ ident }} {
     {% endfor %}
 }
 
-mod __xidl_in {
+mod {{ inbound_transport_name }} {
     use super::*;
     {{ inbound_transport }}
 }
 
-mod __xidl_out {
+mod {{ outbound_transport_name }} {
     use super::*;
     {{ outbound_transport }}
 }

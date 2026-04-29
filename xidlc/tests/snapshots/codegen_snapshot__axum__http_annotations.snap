@@ -38,10 +38,10 @@ pub trait HttpAnnoService {
     ) -> ::xidl_rust_axum::Result<HttpAnnoServiceGetCountResponse>;
     async fn ping(&self) -> ::xidl_rust_axum::Result<()>;
 }
-mod __xidl_in {
+mod __xidl_in_HttpAnnoService {
     use super::*;
 }
-mod __xidl_out {
+mod __xidl_out_HttpAnnoService {
     use super::*;
 }
 #[derive(::serde::Deserialize)]

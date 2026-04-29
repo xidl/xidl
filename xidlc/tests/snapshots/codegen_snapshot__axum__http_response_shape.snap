@@ -22,10 +22,10 @@ pub trait HttpResponseShapeService {
     ) -> ::xidl_rust_axum::Result<HttpResponseShapeServiceBumpResponse>;
     async fn ping(&self) -> ::xidl_rust_axum::Result<()>;
 }
-mod __xidl_in {
+mod __xidl_in_HttpResponseShapeService {
     use super::*;
 }
-mod __xidl_out {
+mod __xidl_out_HttpResponseShapeService {
     use super::*;
 }
 #[derive(::serde::Serialize)]

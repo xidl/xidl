@@ -24,10 +24,10 @@ pub trait HttpEdgeCasesService {
         page_size: u32,
     ) -> ::xidl_rust_axum::Result<String>;
 }
-mod __xidl_in {
+mod __xidl_in_HttpEdgeCasesService {
     use super::*;
 }
-mod __xidl_out {
+mod __xidl_out_HttpEdgeCasesService {
     use super::*;
 }
 #[derive(::serde::Serialize, ::core::default::Default)]

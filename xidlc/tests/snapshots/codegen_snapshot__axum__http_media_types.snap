@@ -14,10 +14,10 @@ pub trait HttpMediaService {
     ) -> ::xidl_rust_axum::Result<String>;
     async fn fetch_msgpack(&self, id: String) -> ::xidl_rust_axum::Result<String>;
 }
-mod __xidl_in {
+mod __xidl_in_HttpMediaService {
     use super::*;
 }
-mod __xidl_out {
+mod __xidl_out_HttpMediaService {
     use super::*;
 }
 #[derive(::serde::Serialize)]

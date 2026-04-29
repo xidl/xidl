@@ -18,10 +18,10 @@ pub trait RustHttp {
         display_name: String,
     ) -> ::xidl_rust_axum::Result<()>;
 }
-mod __xidl_in {
+mod __xidl_in_RustHttp {
     use super::*;
 }
-mod __xidl_out {
+mod __xidl_out_RustHttp {
     use super::*;
 }
 #[derive(::serde::Deserialize)]

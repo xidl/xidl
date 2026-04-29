@@ -18,10 +18,10 @@ pub trait HttpStreamSseService {
         req: ::xidl_rust_axum::Request<()>,
     ) -> ::xidl_rust_axum::Result<xidl_rust_axum::stream::SseStream<bool>>;
 }
-mod __xidl_in {
+mod __xidl_in_HttpStreamSseService {
     use super::*;
 }
-mod __xidl_out {
+mod __xidl_out_HttpStreamSseService {
     use super::*;
 }
 #[derive(::serde::Deserialize)]
