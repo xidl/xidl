@@ -673,6 +673,60 @@
         }
       }
     },
+    "/attribute/attr61": {
+      "get": {
+        "operationId": "E2eAttribute.get_attribute_attr61",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnionSimple"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "E2eAttribute.set_attribute_attr61",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnionSimple"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/attribute/attr7": {
       "get": {
         "operationId": "E2eAttribute.get_attribute_attr7",
@@ -906,7 +960,7 @@
             }
           },
           {
-            "name": "word",
+            "name": "q",
             "in": "query",
             "required": false,
             "schema": {
@@ -1756,6 +1810,59 @@
           }
         }
       }
+    },
+    "/v1/op_with_query/{all}": {
+      "get": {
+        "operationId": "E2ePathSever.op_with_query2",
+        "parameters": [
+          {
+            "name": "all",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "word",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1894,6 +2001,28 @@
             "properties": {
               "set_attribute_attr6": {
                 "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr6_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr61"
+            ],
+            "properties": {
+              "get_attribute_attr61": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr61_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr61"
+            ],
+            "properties": {
+              "set_attribute_attr61": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr61_In"
               }
             }
           },
@@ -2258,6 +2387,28 @@
             "properties": {
               "set_attribute_attr6": {
                 "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr6_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr61"
+            ],
+            "properties": {
+              "get_attribute_attr61": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr61_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "set_attribute_attr61"
+            ],
+            "properties": {
+              "set_attribute_attr61": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr61_Result"
               }
             }
           },
@@ -2888,6 +3039,43 @@
           }
         ]
       },
+      "E2eAttribute_get_attribute_attr61_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr61_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "$ref": "#/components/schemas/UnionSimple"
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr61_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr61_Out"
+              }
+            }
+          }
+        ]
+      },
       "E2eAttribute_get_attribute_attr6_In": {
         "type": "object",
         "required": [
@@ -3432,6 +3620,43 @@
           }
         ]
       },
+      "E2eAttribute_set_attribute_attr61_In": {
+        "type": "object",
+        "required": [
+          "attr61"
+        ],
+        "properties": {
+          "attr61": {
+            "$ref": "#/components/schemas/UnionSimple"
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr61_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_set_attribute_attr61_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr61_Out"
+              }
+            }
+          }
+        ]
+      },
       "E2eAttribute_set_attribute_attr6_In": {
         "type": "object",
         "required": [
@@ -3634,6 +3859,17 @@
                 "$ref": "#/components/schemas/E2ePathSever_op_with_params_In"
               }
             }
+          },
+          {
+            "type": "object",
+            "required": [
+              "op_with_query2"
+            ],
+            "properties": {
+              "op_with_query2": {
+                "$ref": "#/components/schemas/E2ePathSever_op_with_query2_In"
+              }
+            }
           }
         ]
       },
@@ -3710,6 +3946,17 @@
             "properties": {
               "op_with_params": {
                 "$ref": "#/components/schemas/E2ePathSever_op_with_params_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "op_with_query2"
+            ],
+            "properties": {
+              "op_with_query2": {
+                "$ref": "#/components/schemas/E2ePathSever_op_with_query2_Result"
               }
             }
           }
@@ -3818,17 +4065,62 @@
           }
         ]
       },
+      "E2ePathSever_op_with_query2_In": {
+        "type": "object",
+        "required": [
+          "all",
+          "word",
+          "q"
+        ],
+        "properties": {
+          "all": {
+            "type": "string"
+          },
+          "q": {
+            "type": "string"
+          },
+          "word": {
+            "type": "string"
+          }
+        }
+      },
+      "E2ePathSever_op_with_query2_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "E2ePathSever_op_with_query2_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2ePathSever_op_with_query2_Out"
+              }
+            }
+          }
+        ]
+      },
       "E2ePathSever_op_with_query_In": {
         "type": "object",
         "required": [
           "param1",
-          "word"
+          "q"
         ],
         "properties": {
           "param1": {
             "type": "string"
           },
-          "word": {
+          "q": {
             "type": "string"
           }
         }
@@ -5499,6 +5791,64 @@
             "$ref": "#/components/schemas/StructEmpty"
           }
         }
+      },
+      "UnionSimple": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "case1"
+            ],
+            "properties": {
+              "case1": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "case2"
+            ],
+            "properties": {
+              "case2": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "case3"
+            ],
+            "properties": {
+              "case3": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "default"
+            ],
+            "properties": {
+              "default": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0
+              }
+            }
+          }
+        ]
       }
     }
   }

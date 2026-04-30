@@ -21,16 +21,19 @@ struct StructSimple {
     EnumSimple1 member2;
     StructEmpty member3;
 };
-// union UnionSimple switch(EnumEmpty) {
-//     case EnumSimple1::V1:
-//         uint8 case1;
-//     case EnumSimple1::V2:
-//     case EnumSimple1::V3:
-//         sequence<any> case2;
-//     default:
-//         map<string, string> case3;
-// };
-//
+
+@derive(Serialize, Deserialize)
+union UnionSimple switch (EnumSimple1) {
+    case EnumSimple1::V1:
+        uint8 case1;
+    case EnumSimple1::V2:
+        sequence<any> case2;
+    case EnumSimple1::V3:
+        map<string, string> case3;
+    default:
+        uint8 default;
+};
+
 bitset MyBitset {
     bitfield<3> a;
     bitfield<1> b;
@@ -124,6 +127,7 @@ interface E2eAttribute {
     attribute EnumSimple1 attr4;
     attribute StructEmpty attr5;
     attribute StructSimple attr6;
+    attribute UnionSimple attr61;
     attribute sequence<string> attr7;
     attribute sequence<EnumEmpty> attr8;
     attribute sequence<EnumSimple1> attr9;
@@ -141,10 +145,10 @@ interface E2ePathSever {
         in string param1
     );
 
-    @get("/v1/op_with_query/{param1}?q={word}")
+    @get("/v1/op_with_query/{param1}{?q}")
     sequence<string> op_with_query(
         in string param1,
-        string word
+        string q
     );
 
     @post
@@ -158,6 +162,15 @@ interface E2ePathSever {
         sequence<uint8> b,
         @body
         map<string, any> a
+    );
+
+    @get
+    @path("/v1/op_with_query/{*all}{?word,q}")
+    string op_with_query2(
+        string all,
+        @query
+        string word,
+        string q
     );
 
 };
