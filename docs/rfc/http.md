@@ -757,3 +757,23 @@ Recommended practices:
   an existing operation unless a new route or operation is introduced
 - when changing success status codes, prefer introducing a new route or
   operation rather than silently changing an existing one
+
+## Annotation
+
+| Annotation                                    | Applicable type elements   |
+| --------------------------------------------- | -------------------------- |
+| @get, @post, @put, @delete, @head, @options   | method                     |
+| @query, @body, @header, @cookie, @path        | params                     |
+| @flatten, @optional                           | params                     |
+| @path                                         | method                     |
+| @Consumes, @Produces                          | interface, method          |
+| @deprecated                                   | method                     |
+
+## Pragma
+
+```idl
+#pragma xidlc package XIDLC HTTP Example
+#pragma xidlc version v0.0.1
+#pragma xidlc service http://127.0.0.1:8080 dev server
+#pragma xidlc service http://127.0.0.1:8080 product server
+```
