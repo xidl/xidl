@@ -10,6 +10,7 @@ nav:
       - Quickstart: user/quickstart.md
       - Using xidlc: user/xidlc.md
       - Using xidl-build: user/xidl-build.md
+      - IDL Basic: user/language-basic.md
       - IDL Guide: user/idl.md
       - HTTP Guide: user/http.md
       - JSON-RPC Guide: user/jsonrpc.md
