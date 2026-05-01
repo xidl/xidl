@@ -1,6 +1,6 @@
 ---
-import type { Props } from '@astrojs/starlight/props';
 import Default from '@astrojs/starlight/components/SiteTitle.astro';
+import type { Props } from '@astrojs/starlight/props';
 
 const { locale } = Astro.props;
 const prefix = locale ? `/${locale}` : '';
@@ -9,20 +9,20 @@ const prefix = locale ? `/${locale}` : '';
 <div class="flex items-center gap-8">
 	<Default {...Astro.props}><slot /></Default>
 	<nav class="hidden md:flex gap-6">
-		<a 
-			href={`${prefix}/guide/`} 
+		<a
+			href={`${prefix}/guide/`}
 			class="text-sm font-normal text-[var(--sl-color-gray-3)] no-underline hover:text-[var(--sl-color-white)] transition-colors"
 		>
 			Guide
 		</a>
-		<a 
-			href={`${prefix}/docs/`} 
+		<a
+			href={`${prefix}/docs/`}
 			class="text-sm font-normal text-[var(--sl-color-gray-3)] no-underline hover:text-[var(--sl-color-white)] transition-colors"
 		>
 			Docs
 		</a>
-		<a 
-			href={`${prefix}/zh-cn/rfc/`} 
+		<a
+			href={`${prefix}/zh-cn/rfc/`}
 			class="text-sm font-normal text-[var(--sl-color-gray-3)] no-underline hover:text-[var(--sl-color-white)] transition-colors"
 		>
 			RFC

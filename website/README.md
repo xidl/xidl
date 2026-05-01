@@ -1,6 +1,7 @@
 # XIDL Documentation Website
 
-This is the new documentation site for XIDL, built with [Starlight](https://starlight.astro.build/).
+This is the new documentation site for XIDL, built with
+[Starlight](https://starlight.astro.build/).
 
 ## Project Structure
 
@@ -11,9 +12,12 @@ This is the new documentation site for XIDL, built with [Starlight](https://star
 
 ## Workflow
 
-1.  **Write in Chinese**: New content should be authored first in `src/content/docs/zh-cn/`.
-2.  **Translate to English**: Use AI to translate the Chinese content into English and place it in the corresponding `src/content/docs/en/` path.
-3.  **Update Status**: Maintain the `status` and `translationStatus` in the frontmatter.
+1. **Write in Chinese**: New content should be authored first in
+   `src/content/docs/zh-cn/`.
+2. **Translate to English**: Use AI to translate the Chinese content into
+   English and place it in the corresponding `src/content/docs/en/` path.
+3. **Update Status**: Maintain the `status` and `translationStatus` in the
+   frontmatter.
 
 ## Frontmatter Fields
 

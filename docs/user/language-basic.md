@@ -1,13 +1,16 @@
 # Language Basics
 
-XIDL is an Interface Definition Language (IDL) based on the standard OMG IDL, extended with modern features such as Annotations and Pragmas. It is primarily used to define cross-language, cross-platform serialization protocols and RPC interfaces.
+XIDL is an Interface Definition Language (IDL) based on the standard OMG IDL,
+extended with modern features such as Annotations and Pragmas. It is primarily
+used to define cross-language, cross-platform serialization protocols and RPC
+interfaces.
 
 ## Base Types
 
 XIDL supports the following base data types:
 
 | Type                 | Description                     | Notes                                      |
-| :---                 | :---                            | :---                                       |
+| :------------------- | :------------------------------ | :----------------------------------------- |
 | `boolean`            | Boolean value                   | `true` or `false`                          |
 | `int8`               | Signed 8-bit integer            | Equivalent to `int8_t`                     |
 | `uint8`              | Unsigned 8-bit integer          | Equivalent to `uint8_t`                    |
@@ -30,7 +33,8 @@ XIDL supports the following base data types:
 
 ### Struct
 
-Structs are used to group multiple fields of different types. Inheritance is supported.
+Structs are used to group multiple fields of different types. Inheritance is
+supported.
 
 ```idl
 struct SimpleStruct {
@@ -58,7 +62,8 @@ enum Status {
 
 ### Union
 
-Unions allow storing different types in a single memory location, determined by a discriminant (`switch`).
+Unions allow storing different types in a single memory location, determined by
+a discriminant (`switch`).
 
 ```idl
 union MyUnion switch (long) {
@@ -136,7 +141,8 @@ interface MyService {
 
 ## Annotation
 
-Annotations are used to add metadata to IDL elements, affecting code generation or serialization behavior.
+Annotations are used to add metadata to IDL elements, affecting code generation
+or serialization behavior.
 
 ```idl
 @post(path = "/hello")
@@ -146,6 +152,7 @@ void sayHello(
 ```
 
 Common built-in annotations:
+
 - `@id(value)`: Specifies the field ID.
 - `@optional`: Marks a field as optional.
 - `@default(value)`: Specifies a default value.
@@ -153,7 +160,8 @@ Common built-in annotations:
 
 ## Pragma
 
-Preprocessing instructions start with `#pragma` and are used to configure compiler behavior.
+Preprocessing instructions start with `#pragma` and are used to configure
+compiler behavior.
 
 ```idl
 #pragma xidlc service http://127.0.0.1:8080 dev server
@@ -161,4 +169,6 @@ Preprocessing instructions start with `#pragma` and are used to configure compil
 
 ## Comments
 
-Supports single-line comments `//` and multi-line comments `/* ... */`. Additionally, documentation comments (starting with `/**` or `///`) are supported; these comments are extracted and preserved in the generated code.
+Supports single-line comments `//` and multi-line comments `/* ... */`.
+Additionally, documentation comments (starting with `/**` or `///`) are
+supported; these comments are extracted and preserved in the generated code.
