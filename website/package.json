@@ -1,18 +1,4 @@
 {
-  "name": "website",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "astro dev",
-    "start": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro",
-    "check": "astro check",
-    "format": "biome format --write .",
-    "lint": "biome lint --write ."
-  },
   "dependencies": {
     "@astrojs/starlight": "^0.38.0",
     "@tailwindcss/vite": "^4.2.4",
@@ -23,5 +9,19 @@
   "devDependencies": {
     "@biomejs/biome": "2.4.10",
     "typescript": "^5.7.0"
-  }
+  },
+  "name": "website",
+  "private": true,
+  "scripts": {
+    "astro": "astro",
+    "build": "astro build",
+    "check": "astro check",
+    "dev": "astro dev",
+    "format": "biome format --write .",
+    "lint": "biome lint --write .",
+    "preview": "astro preview",
+    "start": "astro dev"
+  },
+  "type": "module",
+  "version": "0.1.0"
 }

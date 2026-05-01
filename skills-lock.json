@@ -1,10 +1,10 @@
 {
-  "version": 1,
   "skills": {
     "clean-code-design": {
+      "computedHash": "8e84d9a086ea2be039c7bca843dc14bfb4d72b63ecb79602d7fba6a756cc7c76",
       "source": "cathaysia/skills",
-      "sourceType": "github",
-      "computedHash": "8e84d9a086ea2be039c7bca843dc14bfb4d72b63ecb79602d7fba6a756cc7c76"
+      "sourceType": "github"
     }
-  }
+  },
+  "version": 1
 }

@@ -760,14 +760,14 @@ Recommended practices:
 
 ## Annotation
 
-| Annotation                                    | Applicable type elements   |
-| --------------------------------------------- | -------------------------- |
-| @get, @post, @put, @delete, @head, @options   | method                     |
-| @query, @body, @header, @cookie, @path        | params                     |
-| @flatten, @optional                           | params                     |
-| @path                                         | method                     |
-| @Consumes, @Produces                          | interface, method          |
-| @deprecated                                   | method                     |
+| Annotation                                  | Applicable type elements |
+| ------------------------------------------- | ------------------------ |
+| @get, @post, @put, @delete, @head, @options | method                   |
+| @query, @body, @header, @cookie, @path      | params                   |
+| @flatten, @optional                         | params                   |
+| @path                                       | method                   |
+| @Consumes, @Produces                        | interface, method        |
+| @deprecated                                 | method                   |
 
 ## Pragma
 
