@@ -5,3 +5,4 @@ xidl-playground/out
 xidl-playground/public/wasm
 website/dist
 website/.astro
+website/.netlify

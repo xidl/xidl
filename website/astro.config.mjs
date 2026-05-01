@@ -2,9 +2,12 @@ import starlight from '@astrojs/starlight';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
 
+import netlify from '@astrojs/netlify';
+
 // https://astro.build/config
 export default defineConfig({
-  base: '/xidl/',
+  base: '/',
+
   integrations: [
     starlight({
       components: {
@@ -51,9 +54,12 @@ export default defineConfig({
       title: 'XIDL',
     }),
   ],
-  site: 'https://xidl.github.io',
+
+  site: 'https://xidl.netlify.app/',
 
   vite: {
     plugins: [tailwindcss()],
   },
+
+  adapter: netlify(),
 });
