@@ -17,30 +17,42 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v6
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         with:
-          python-version: "3.12"
+          version: 10
 
-      - name: Install docs dependencies
-        run: pip install -r docs/requirements.txt
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: website/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: website
 
       - name: Build docs
-        run: mkdocs build -f mkdocs.yml -d site
+        run: pnpm build
+        working-directory: website
 
       - name: Upload Pages artifact
         if: github.event_name != 'pull_request'
-        uses: actions/upload-pages-artifact@v5
+        uses: actions/upload-pages-artifact@v3
         with:
-          path: site
+          path: website/dist
 
   deploy:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@v4
