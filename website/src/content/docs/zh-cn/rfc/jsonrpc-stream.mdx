@@ -1,9 +1,122 @@
 ---
-title: "RFC: JSON-RPC Stream"
-description: "RFC: JSON-RPC Stream - XIDL Documentation"
-template: doc
+title: "JSON-RPC Stream RFC"
+description: "XIDL JSON-RPC 流式扩展的帧模型、方向规则和生命周期。"
 ---
 
-> 状态：规划中
+# XIDL JSON-RPC Stream 映射规范
 
-此页面尚未编写。
+本页定义 JSON-RPC 请求/响应模型上的流式扩展。
+
+和普通 JSON-RPC 2.0 不同，这个配置文件允许长生命周期、全双工的流式消息交换。
+
+## 设计目标
+
+- 尽量保持 JSON-RPC 控制消息形状
+- 在同一模型里表达 server / client / bidirectional stream
+- 不把设计强绑到 HTTP 的半双工约束上
+
+## 流帧模型
+
+每个流帧仍然是 JSON-RPC 消息，只是 `params` 或 `result` 里承载了流式包络字段。
+
+通用包络示例：
+
+```json
+{
+  "seq": 1,
+  "kind": "next",
+  "data": { "value": 1 }
+}
+```
+
+常见字段：
+
+- `seq`：单向递增序号
+- `kind`：`next|complete|cancel|error|ack|heartbeat`
+- `data`：业务负载
+- `err`：流内错误对象
+- `meta`：附加元数据
+
+## 方法声明
+
+流式方法使用以下注解之一：
+
+- `@server_stream`
+- `@client_stream`
+- `@bidi_stream`
+
+默认 stream codec 是 JSON 语义。
+
+这些注解互斥。
+
+## 控制方法名
+
+对于流方法 `chat`，可以派生出：
+
+- `...chat.push`
+- `...chat.close`
+- `...chat.cancel`
+
+这让实现可以在普通 JSON-RPC 消息模型上表达持续会话。
+
+## 方向规则
+
+方向语义复用 XIDL 本身的 `in` / `out` / `inout`：
+
+- 请求侧字段：`in` + `inout`
+- 响应侧字段：`out` + `inout` + 返回值
+
+流式解释：
+
+- `@server_stream`：服务端持续发送 `next`
+- `@client_stream`：客户端持续发送 `next`
+- `@bidi_stream`：双方都可以并发发送 `next`
+
+## attribute stream
+
+属性流最典型的派生操作是：
+
+- `watch_attribute_<name>`
+
+适用于希望观察属性变化的场景。
+
+## 错误和取消
+
+两层错误需要区分：
+
+- JSON-RPC 协议错误
+- 业务级流错误
+
+建议：
+
+- 非法消息结构 -> JSON-RPC error object
+- 业务流失败 -> `kind=error`
+
+取消方式：
+
+- 显式 `cancel`
+- 连接断开隐式取消活动流
+
+## 顺序和可靠性
+
+- `seq` 必须在每个方向、每个流里单调递增
+- 不要求跨多个流存在全局总序
+- 更强的投递保证应由运行时承担，而不是由 RFC 隐式承诺
+
+## 运行时校验
+
+- 流注解互斥
+- 非单调 `seq` 视为协议错误
+- 终止帧之后继续发送 `next` 视为非法
+
+## 传输说明
+
+本 RFC 保持传输无关。
+
+常见选择包括：
+
+- TCP 上的换行分隔 JSON
+- WebSocket 文本帧
+- 进程内 channel
+
+多路复用是否存在、如何实现，属于运行时责任。

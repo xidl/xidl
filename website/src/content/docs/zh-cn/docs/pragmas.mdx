@@ -1,9 +1,98 @@
 ---
-title: "Pragmas"
-description: "Pragmas - XIDL Documentation"
-template: doc
+title: "Pragma"
+description: "xidlc 识别的 #pragma xidlc 指令。"
 ---
 
-> 状态：规划中
+# Pragma
 
-此页面尚未编写。
+XIDL 在标准 IDL `#pragma` 基础上扩展了 `#pragma xidlc ...` 指令，
+用于给编译器和生成器提供额外配置。
+
+## 基本语法
+
+```txt
+#pragma xidlc ...
+```
+
+## 序列化版本
+
+支持：
+
+```txt
+#pragma xidlc XCDR1
+#pragma xidlc XCDR2
+```
+
+等价写法：
+
+```txt
+#pragma xidlc serialize(XCDR1)
+#pragma xidlc serialize(XCDR2)
+```
+
+效果：
+
+- 控制序列化版本推断
+
+## 显式序列化种类
+
+支持：
+
+```txt
+#pragma xidlc serialize(CDR)
+#pragma xidlc serialize(PLAIN_CDR)
+#pragma xidlc serialize(PL_CDR)
+#pragma xidlc serialize(PLAIN_CDR2)
+#pragma xidlc serialize(DELIMITED_CDR)
+#pragma xidlc serialize(PL_CDR2)
+```
+
+效果：
+
+- 直接选择具体序列化形式
+- 覆盖基于版本的默认推断
+
+## OpenAPI 元数据
+
+支持：
+
+```txt
+#pragma xidlc package rev-tunnel
+#pragma xidlc package "rev-tunnel"
+```
+
+效果：
+
+- 设置 OpenAPI `info.title`
+
+## OpenAPI 版本号
+
+支持：
+
+```txt
+#pragma xidlc version v1.0.0
+#pragma xidlc version "1.0.0"
+```
+
+效果：
+
+- 设置 OpenAPI `info.version`
+
+## 作用范围和覆盖规则
+
+- pragma 按文件顺序生效
+- 同类配置后写覆盖前写
+- 引号和不带引号的值都能接受
+- `package` 和 `version` 目前主要影响 `openapi`
+
+## 什么时候会用到这些 pragma
+
+- 你需要控制 XCDR 相关序列化语义
+- 你要生成 OpenAPI，并希望给它设置明确的标题和版本
+- 你希望把生成器行为的一部分留在 IDL 文件内，而不是交给外部脚本
+
+## 继续阅读
+
+- [XCDR RFC](../rfc/xcdr/)
+- [目标生成器](./targets/)
+- [HTTP](./http/)

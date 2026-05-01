@@ -1,9 +1,121 @@
 ---
-title: "RFC: HTTP Security"
-description: "RFC: HTTP Security - XIDL Documentation"
-template: doc
+title: "HTTP 安全 RFC"
+description: "XIDL HTTP 映射的安全注解和继承规则。"
 ---
 
-> 状态：规划中
+# XIDL HTTP 安全映射规范
 
-此页面尚未编写。
+本页定义 HTTP 映射上的安全补充模型，用来描述：
+
+- 接口级和方法级安全声明
+- Basic / Bearer / API Key / OAuth2 的映射
+- 安全要求的继承与覆盖规则
+
+## 目标
+
+这份 RFC 关注的是“如何声明安全要求”，而不是：
+
+- TLS 协商
+- 会话管理
+- 复杂授权策略语言
+- 传输层细节
+
+## 支持的注解
+
+- `@no_security`
+- `@http_basic`
+- `@http_bearer`
+- `@api_key(in = "header", name = "X-API-Key")`
+- `@api_key(in = "cookie", name = "sid")`
+- `@api_key(in = "query", name = "api_key")`
+- `@oauth2(scopes = ["scope1", "scope2"])`
+
+## 接口级和方法级声明
+
+规则：
+
+- 接口级安全注解定义默认要求
+- 方法级安全注解会替换接口级默认要求
+- `@no_security` 显式声明匿名访问，并清空继承来的安全要求
+
+## Basic Auth
+
+```txt
+@http_basic
+```
+
+语义：
+
+- 使用 `Authorization: Basic ...`
+- 未授权时应返回 `401 Unauthorized`
+- 实现可附带 `WWW-Authenticate: Basic ...`
+
+## Bearer Auth
+
+```txt
+@http_bearer
+```
+
+语义：
+
+- 使用 `Authorization: Bearer <token>`
+- token 内容由运行时解释，本 RFC 不规定具体令牌格式
+
+## API Key
+
+```txt
+@api_key(in = "header", name = "X-API-Key")
+```
+
+语义：
+
+- `in` 决定凭证位于 `header`、`cookie` 或 `query`
+- `name` 决定使用的字段名
+- API Key 被当作不透明字符串处理
+
+## OAuth2
+
+```txt
+@oauth2(scopes = ["read:users"])
+```
+
+语义：
+
+- 用于表达带 scope 的授权要求
+- 这里定义 scope 语义，不定义完整授权流
+- 具体 token URL、authorization URL 等细节通常由外围文档或生成器补充
+
+## 多个安全要求的组合
+
+默认语义是“可替代集合”：
+
+- 当同一目标上同时声明多种安全注解时，通常按逻辑 OR 解释
+- 同一个 `@oauth2(scopes = [...])` 内的多个 scope 按逻辑 AND 理解
+
+## 与普通 HTTP 映射的关系
+
+安全注解不会改变：
+
+- 路由解析
+- 参数来源规则
+- 请求体和响应体整形
+
+它们只增加请求被接受之前必须满足的前置条件。
+
+## 响应建议
+
+- 缺少或无效凭证 -> `401 Unauthorized`
+- 已认证但权限不足 -> `403 Forbidden`
+
+## 文档生成建议
+
+当目标是 OpenAPI 等文档格式时，安全信息应尽量保留：
+
+- 安全方案映射到 `securitySchemes`
+- 接口级和方法级要求映射到 `security`
+
+## 实现建议
+
+- 安全凭证不应混入业务参数列表
+- 认证结果更适合通过运行时上下文传递
+- `@no_security` 与其他安全注解不应同时出现

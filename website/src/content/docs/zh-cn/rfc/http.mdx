@@ -1,9 +1,176 @@
 ---
-title: "RFC: HTTP"
-description: "RFC: HTTP - XIDL Documentation"
-template: doc
+title: "HTTP RFC"
+description: "XIDL interface 到 HTTP API 的映射规范。"
 ---
 
-> 状态：规划中
+# XIDL HTTP 映射规范
 
-此页面尚未编写。
+本页定义 XIDL `interface` 到 HTTP API 的核心映射规则，包括：
+
+- 方法和路由映射
+- 参数来源解析
+- 请求/响应编码
+- attribute 映射
+
+本页不讨论 OpenAPI 生成细节，也不承担教程角色。
+
+## 范围
+
+本 RFC 主要覆盖：
+
+- HTTP 动词和路径注解
+- 路由模板解析
+- 参数来源优先级
+- 请求体与响应体整形
+- `in` / `out` / `inout` 的 HTTP 语义
+
+## 支持的主要注解
+
+### 方法级注解
+
+- `@get(path = "...")`
+- `@post(path = "...")`
+- `@put(path = "...")`
+- `@patch(path = "...")`
+- `@delete(path = "...")`
+- `@head(path = "...")`
+- `@options(path = "...")`
+- `@path("...")`
+- `@Consumes("mime/type")`
+- `@Produces("mime/type")`
+- `@deprecated`
+
+### 参数级注解
+
+- `@path`
+- `@query`
+- `@body`
+- `@header`
+- `@cookie`
+- `@flatten`
+- `@optional`
+
+## HTTP 方法解析
+
+规则：
+
+- 一个方法只能有一个 HTTP 动词注解
+- 没有显式动词时，默认等价于 `@post`
+- 路径既可以来自动词注解里的 `path`，也可以来自方法级 `@path(...)`
+- 多个路径声明会合并，规范化后去重
+
+## 路由模板
+
+支持：
+
+- `/users/{id}`
+- `/files/{*path}`
+- `/users/{id}{?lang,region}`
+
+语义：
+
+- `{name}`：普通路径变量
+- `{*name}`：捕获尾部多段路径
+- `{?a,b}`：声明查询参数名
+
+## 路由规范化
+
+在冲突检测和实际绑定前，所有路由都会先规范化：
+
+1. 去掉首尾空白
+2. 保证以 `/` 开头
+3. 合并重复 `/`
+4. 去掉末尾多余 `/`
+5. 保持大小写，不自动改写段内容
+
+## 自动路径生成
+
+当方法没有显式路径时：
+
+1. 以 `/{method_name}` 作为基础路径
+2. 按声明顺序追加所有 Path 参数
+3. Query 参数不参与路径模板生成
+
+例如：
+
+```txt
+void findUser(@path uint32 id, @query string locale);
+```
+
+会得到：
+
+```text
+POST /findUser/{id}
+```
+
+## 参数来源优先级
+
+每个参数按以下优先级解析来源：
+
+1. 显式 `@path`
+2. 显式 `@query`
+3. 显式 `@body`
+4. 显式 `@header`
+5. 显式 `@cookie`
+6. 根据 HTTP 方法和方向做默认推断
+
+默认推断实践：
+
+- `GET` / `DELETE` / `HEAD` / `OPTIONS` 的未标注请求参数通常进入 Query
+- `POST` / `PUT` / `PATCH` 的未标注请求参数通常进入 Body
+
+## 请求侧和响应侧
+
+方向规则：
+
+- `in`：只参与请求侧
+- `out`：只参与响应侧
+- `inout`：两边都参与
+
+HTTP 映射中最常见的理解方式：
+
+- 请求侧参数决定路径、查询、头、Cookie、Body
+- 响应侧由返回值和 `out` / `inout` 参数共同决定
+
+## `HEAD` 特殊规则
+
+`@head` 有额外约束：
+
+- 返回类型必须是 `void`
+- 只能包含请求侧参数
+- 响应不包含内容体
+
+## 媒体类型
+
+`@Consumes` 和 `@Produces` 分别定义：
+
+- 请求体解码格式
+- 响应体编码格式
+
+默认值是 `application/json`。
+
+接口级注解作为默认值，方法级注解覆盖接口级配置。
+
+## `@optional`
+
+HTTP 场景里：
+
+- 可选 Query 参数可以省略
+- 可选 Body 字段可以省略
+- 路径参数不能可选
+
+这决定了 OpenAPI 和运行时校验时对字段必填性的理解。
+
+## attribute 映射
+
+attribute 会映射成隐含操作，再继续走 HTTP 普通映射规则。
+
+也就是说，attribute 本身不是独立特殊通道，而是通过生成出来的访问操作进入 HTTP 语义。
+
+## 实现建议
+
+如果你在实现生成器或运行时：
+
+- 先做严格校验，不要悄悄容忍冲突注解
+- 路由规范化、参数来源解析和响应整形要稳定可复现
+- 教程页面可以简化，但 RFC 规则不能模糊

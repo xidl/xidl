@@ -1,9 +1,117 @@
 ---
 title: "JSON-RPC"
-description: "JSON-RPC - XIDL Documentation"
-template: doc
+description: "XIDL 的 JSON-RPC 使用方式、常见映射和相关输出。"
 ---
 
-> 状态：规划中
+# JSON-RPC
 
-此页面尚未编写。
+XIDL 的 JSON-RPC 家族覆盖：
+
+1. 普通 JSON-RPC 请求/响应映射
+2. JSON-RPC Stream
+3. 运行时层面的安全与部署约定
+
+最常见的输出目标是：
+
+- `rust-jsonrpc`
+- `openrpc`
+
+## 基本映射方式
+
+JSON-RPC 方法名由模块、接口和操作名组合而来。
+
+```txt
+module math {
+    interface Calc {
+        long add(in long a, in long b);
+    };
+};
+```
+
+这个方法会映射成：
+
+```text
+math.Calc.add
+```
+
+## 参数和结果怎么映射
+
+实践上可以这样理解：
+
+- 请求 `params` 是一个对象
+- `in` 和 `inout` 参数出现在请求侧
+- 返回值、`out` 和 `inout` 出现在结果侧
+
+示例：
+
+```txt
+interface SmartCityRpcApi {
+    string quoteTrip(
+        in string rider_id,
+        in string zone_id,
+        out long amount_cents,
+        out string currency
+    );
+};
+```
+
+这会自然形成：
+
+- 一个请求参数对象
+- 一个结果对象
+
+## 生成结果
+
+`rust-jsonrpc` 当前通常会生成：
+
+- 业务 trait
+- 服务端包装器
+- 客户端包装器
+- 每个方法的参数结构
+
+`openrpc` 当前通常会生成：
+
+- `openrpc.json`
+
+## JSON-RPC Stream
+
+JSON-RPC Stream 在请求/响应模型上增加流式消息交换。
+
+常见注解：
+
+- `@server_stream`
+- `@client_stream`
+- `@bidi_stream`
+
+实践上需要知道：
+
+- 它比 HTTP Stream 更接近全双工模型
+- 传输层可以是 TCP、WebSocket 或其他运行时通道
+- 当前仓库已经支持相关概念，但这部分也偏实现驱动
+
+## 安全边界
+
+当前仓库没有单独的 JSON-RPC 安全 RFC。
+
+实际部署中，JSON-RPC 的安全通常由外围传输层决定，例如：
+
+- HTTP
+- WebSocket 握手
+- IPC 边界
+- 进程边界
+
+所以你应该把 JSON-RPC 安全理解为“运行时和部署问题”，而不是这份
+契约语言本身再发明一套独立认证协议。
+
+## 推荐工作流
+
+1. 用 IDL 定义接口和数据类型
+2. 用 `rust-jsonrpc` 生成可运行绑定
+3. 用 `openrpc` 生成 Schema
+4. 需要精确行为时再看 RFC
+
+## 继续阅读
+
+- [目标生成器](./targets/)
+- [JSON-RPC RFC](../rfc/jsonrpc/)
+- [JSON-RPC Stream RFC](../rfc/jsonrpc-stream/)

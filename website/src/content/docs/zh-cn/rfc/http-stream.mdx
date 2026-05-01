@@ -1,9 +1,152 @@
 ---
-title: "RFC: HTTP Stream"
-description: "RFC: HTTP Stream - XIDL Documentation"
-template: doc
+title: "HTTP Stream RFC"
+description: "XIDL HTTP 流式映射的交互模型、编解码和生命周期规则。"
 ---
 
-> 状态：规划中
+# XIDL HTTP Stream 映射规范
 
-此页面尚未编写。
+本页定义构建在 HTTP 映射之上的流式配置文件，用于表达长连接请求或响应流。
+
+## 范围
+
+本 RFC 主要定义：
+
+- 流式方法模型
+- 注解和类型约束
+- HTTP 线协议建议
+- codec 选择
+- 生命周期、取消和错误语义
+
+本页不定义：
+
+- 消息代理传输
+- 超出 HTTP 本身能力的可靠性语义
+- 恰好一次投递
+
+## 流式方法注解
+
+一个方法只要带有以下注解之一，就会被视为流式方法：
+
+- `@server_stream`
+- `@client_stream`
+
+可选注解：
+
+- `@path("...")`
+- `@stream_codec("ndjson" | "sse")`
+- HTTP 安全相关注解
+
+默认值：
+
+- HTTP 方法：`POST`
+- codec：`ndjson`
+- 路径：`/{method_name}`
+
+## 类型约束
+
+- `@client_stream` 必须有且仅有一个流式输入参数，类型为 `sequence<T>`
+- `@server_stream` 的返回值必须是 `sequence<T>`
+- `@server_stream` 和 `@client_stream` 互斥
+
+## 交互模型
+
+### Server Stream
+
+- 客户端发送一个请求对象
+- 服务端持续返回多个流项
+
+### Client Stream
+
+- 客户端持续发送多个流项
+- 服务端最终返回一个完成结果
+
+## 路由模板
+
+Stream 方法沿用普通 HTTP RFC 的路径模板规则：
+
+- `{name}`
+- `{*name}`
+- `{?name1,name2,...}`
+
+Query 和 Path 变量仍由 `@query`、`@path` 绑定。
+
+## 安全模型
+
+Stream 方法复用 HTTP 安全 RFC 的规则：
+
+- 接口级声明提供默认值
+- 方法级声明覆盖默认值
+- `@no_security` 清空继承要求
+
+流式额外说明：
+
+- 认证发生在流建立之前
+- 凭证不属于流项 payload
+- token 刷新和会话续期属于实现问题
+
+## Wire Profile
+
+### 通用 HTTP 要求
+
+- `Content-Type` 必须匹配选中的 codec
+- 长连接响应通常使用 chunked 传输
+- 代理或网关侧应尽量避免额外缓冲
+
+### NDJSON
+
+默认 codec 为 `ndjson`。
+
+常见 MIME：
+
+- `application/x-ndjson`
+
+帧对象示例：
+
+```json
+{ "t": "next", "seq": 1, "data": 42 }
+```
+
+常见字段：
+
+- `t`：帧类型
+- `seq`：单向递增序号
+- `data`：业务数据
+- `error`：错误信息
+- `meta`：附加元数据
+
+### SSE
+
+`sse` 仅适用于 `@server_stream`。
+
+常见映射：
+
+- `event: next`
+- `event: error`
+- `event: complete`
+
+## 生命周期
+
+开始：
+
+- 服务端接受请求并返回成功状态后，流才算真正建立
+
+结束：
+
+- 收到 `complete`
+- 收到 `error`
+- 显式 `cancel`
+- 传输断开
+
+## 字节流建模
+
+如果你要表达字节流，可以把流项类型建模为 `octet`：
+
+- `sequence<octet>` 表示字节序列项
+
+具体在线上如何编码，取决于所选 codec。
+
+## 实现建议
+
+- 先优先做好 `server_stream`
+- codec 和安全规则要与普通 HTTP 映射保持一致
+- `seq` 应保证每个方向、每个流单调递增

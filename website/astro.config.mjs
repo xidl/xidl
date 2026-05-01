@@ -1,11 +1,11 @@
+import netlify from '@astrojs/netlify';
 import starlight from '@astrojs/starlight';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
 
-import netlify from '@astrojs/netlify';
-
 // https://astro.build/config
 export default defineConfig({
+  adapter: netlify(),
   base: '/',
 
   integrations: [
@@ -28,12 +28,32 @@ export default defineConfig({
       sidebar: [
         {
           items: [
-            { label: 'Overview', link: '/guide/' },
-            { label: 'Quickstart', link: '/guide/quickstart/' },
-            { label: 'First HTTP API', link: '/guide/first-http-api/' },
-            { label: 'First Rust Project', link: '/guide/first-rust-project/' },
+            {
+              label: 'Quickstart',
+              link: '/guide/',
+              translations: {
+                'zh-CN': '快速开始',
+              },
+            },
+            {
+              label: 'First HTTP API',
+              link: '/guide/first-http-api/',
+              translations: {
+                'zh-CN': '第一个 HTTP API',
+              },
+            },
+            {
+              label: 'Editor',
+              link: '/guide/editor/',
+              translations: {
+                'zh-CN': '编辑器',
+              },
+            },
           ],
           label: 'Guide',
+          translations: {
+            'zh-CN': '指南',
+          },
         },
         {
           autogenerate: { directory: 'docs' },
@@ -60,6 +80,4 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
   },
-
-  adapter: netlify(),
 });
