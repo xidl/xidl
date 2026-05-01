@@ -1,10 +1,12 @@
 {
   "dependencies": {
+    "@astrojs/cloudflare": "^13.3.0",
     "@astrojs/starlight": "^0.38.0",
     "@tailwindcss/vite": "^4.2.4",
     "astro": "^6.0.0",
     "sharp": "^0.33.3",
-    "tailwindcss": "^4.2.4"
+    "tailwindcss": "^4.2.4",
+    "wrangler": "^4.87.0"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.10",
@@ -19,9 +21,15 @@
     "dev": "astro dev",
     "format": "biome format --write .",
     "lint": "biome lint --write .",
-    "preview": "astro preview",
-    "start": "astro dev"
+    "start": "astro dev",
+    "generate-types": "wrangler types",
+    "deploy": "pnpm run build && wrangler deploy",
+    "preview": "pnpm run build && wrangler dev"
   },
   "type": "module",
-  "version": "0.1.0"
+  "version": "0.1.0",
+  "overrides": {
+    "vite": "^7"
+  }
 }
+

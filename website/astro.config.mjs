@@ -2,9 +2,12 @@ import starlight from '@astrojs/starlight';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
 
+import cloudflare from '@astrojs/cloudflare';
+
 // https://astro.build/config
 export default defineConfig({
-  base: '/xidl/',
+  base: '/',
+
   integrations: [
     starlight({
       components: {
@@ -43,7 +46,7 @@ export default defineConfig({
       ],
       social: [
         {
-          href: 'https://github.com/loongtao/xidl',
+          href: 'https://github.com/loongtao/',
           icon: 'github',
           label: 'GitHub',
         },
@@ -51,9 +54,12 @@ export default defineConfig({
       title: 'XIDL',
     }),
   ],
+
   site: 'https://xidl.github.io',
 
   vite: {
     plugins: [tailwindcss()],
   },
+
+  adapter: cloudflare(),
 });
