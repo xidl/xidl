@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@astrojs/netlify": "^7.0.8",
     "@astrojs/starlight": "^0.38.0",
     "@tailwindcss/vite": "^4.2.4",
     "astro": "^6.0.0",
