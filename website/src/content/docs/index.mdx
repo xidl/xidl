@@ -1,0 +1,48 @@
+---
+title: "XIDL"
+description: "Define once, connect seamlessly across languages and protocols."
+template: splash
+hero:
+  tagline: "High-performance, strongly-typed IDL designed for modern distributed systems."
+  image:
+    file: ../../assets/favicon.svg
+  actions:
+    - text: "Get Started"
+      link: /guide/
+      icon: right-arrow
+      variant: primary
+    - text: "Read RFC"
+      link: /rfc/
+      icon: external
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## Why XIDL?
+
+<CardGrid stagger>
+	<Card title="Cross-language" icon="setting">
+		Define once, generate clients and servers for Rust, Go, Python, and more.
+	</Card>
+	<Card title="Multi-protocol" icon="add-document">
+		Native support for HTTP (REST) and JSON-RPC.
+	</Card>
+	<Card title="Type Safe" icon="pencil">
+		Strong typing system to catch errors at compile time.
+	</Card>
+	<Card title="Modern Tooling" icon="rocket">
+		Integrated with `xidlc` compiler and modern build systems.
+	</Card>
+</CardGrid>
+
+## What can you build?
+
+- **Microservices**: Reliable connections between services in different languages.
+- **Web APIs**: Fast, spec-compliant HTTP interfaces.
+- **Real-time Streams**: Built-in support for streaming data.
+
+## Next Steps
+
+- [Quickstart](/guide/quickstart/)
+- [IDL Syntax](/docs/idl/)
+- [Supported Targets](/docs/targets/)
