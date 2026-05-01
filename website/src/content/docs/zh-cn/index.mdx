@@ -1,0 +1,48 @@
+---
+title: "XIDL"
+description: "定义一次，跨语言、跨协议无缝连接。"
+template: splash
+hero:
+  tagline: "高效、强类型的接口描述语言，专为现代分布式系统设计。"
+  image:
+    file: ../../../assets/favicon.svg
+  actions:
+    - text: "开始使用"
+      link: /zh-cn/guide/
+      icon: right-arrow
+      variant: primary
+    - text: "阅读 RFC"
+      link: /zh-cn/rfc/
+      icon: external
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## 为什么选择 XIDL？
+
+<CardGrid stagger>
+	<Card title="跨语言支持" icon="setting">
+		一次定义接口，自动生成 Rust、Go、Python 等多种语言的客户端与服务端代码。
+	</Card>
+	<Card title="多协议兼容" icon="add-document">
+		原生支持 HTTP (REST) 和 JSON-RPC，轻松应对不同的业务场景。
+	</Card>
+	<Card title="强类型安全" icon="pencil">
+		基于强类型系统，在编译期拦截错误，提升开发效率与系统稳定性。
+	</Card>
+	<Card title="现代工具链" icon="rocket">
+		配套完整的编译器 `xidlc` 与构建系统，深度集成现有开发工作流。
+	</Card>
+</CardGrid>
+
+## 你可以构建什么？
+
+- **微服务通信**：在不同语言编写的服务之间建立可靠的连接。
+- **Web API**：快速生成符合规范的 HTTP 接口。
+- **实时流**：利用 XIDL 对流式数据的原生支持，构建实时应用。
+
+## 接下来...
+
+- [快速入门](/zh-cn/guide/quickstart/)
+- [深入了解 IDL 语法](/zh-cn/docs/idl/)
+- [查看支持的目标语言](/zh-cn/docs/targets/)
