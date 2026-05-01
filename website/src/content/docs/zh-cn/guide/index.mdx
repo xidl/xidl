@@ -1,9 +1,38 @@
 ---
-title: "Guide"
-description: "Guide - XIDL Documentation"
-template: doc
+title: "快速开始"
+description: "用最短路径安装 xidlc、写一个 IDL，并生成第一份产物。"
 ---
 
-> 状态：规划中
+import { TabItem, Tabs } from '@astrojs/starlight/components';
 
-此页面尚未编写。
+## 1. 安装 `xidlc`
+
+<Tabs>
+  <TabItem label="macOS / Linux">
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://xidl.github.io/xidl/public/install.sh | sh
+```
+
+  </TabItem>
+  <TabItem label="Windows PowerShell">
+
+```bash
+iwr -useb https://xidl.github.io/xidl/public/install.ps1 | iex
+```
+
+  </TabItem>
+  <TabItem label="Cargo">
+
+```bash
+cargo install xidlc
+```
+
+  </TabItem>
+</Tabs>
+
+## 下一步
+
+- 想继续走推荐主线：看[第一个 HTTP API](./first-http-api/)
+- 想理解 CLI 参数：看[使用 xidlc](../docs/xidlc/)
+- 想学习语法：看[IDL 语言](../docs/idl/)

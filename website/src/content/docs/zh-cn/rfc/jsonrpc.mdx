@@ -1,9 +1,146 @@
 ---
-title: "RFC: JSON-RPC"
-description: "RFC: JSON-RPC - XIDL Documentation"
-template: doc
+title: "JSON-RPC RFC"
+description: "XIDL 到 JSON-RPC 2.0 的方法名、参数和结果映射。"
 ---
 
-> 状态：规划中
+# XIDL JSON-RPC 映射规范
 
-此页面尚未编写。
+本页定义 XIDL `interface` 到 JSON-RPC API 的映射规则，包括：
+
+- 方法名解析
+- 请求参数映射
+- 结果对象映射
+- attribute 规则
+- 错误处理建议
+
+## 范围
+
+本 RFC 定义的是 JSON-RPC 2.0 应用层模型，而不是具体网络传输协议。
+
+## 基本消息形状
+
+请求示例：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "pkg.Interface.method",
+  "params": { "arg": 1 }
+}
+```
+
+响应示例：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": { "ok": true }
+}
+```
+
+错误示例：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "error": {
+    "code": -32601,
+    "message": "method not found",
+    "data": null
+  }
+}
+```
+
+## 方法名解析
+
+方法名由模块路径、接口名和操作名拼接：
+
+- 有模块时：`{module_path}.{interface}.{method}`
+- 无模块时：`{interface}.{method}`
+
+HTTP 相关注解不会影响 JSON-RPC 方法名。
+
+## 参数映射
+
+请求 `params` 始终建模为对象。
+
+规则：
+
+- 参数键名默认使用参数名
+- `in` 和 `inout` 出现在请求侧
+- `out` 不出现在请求侧
+
+零参数方法通常得到空对象 `{}``。
+
+## 结果映射
+
+结果集由以下部分组成：
+
+- 返回值
+- 所有 `out` 参数
+- 所有 `inout` 参数
+
+JSON-RPC `result` 统一建模为对象。
+
+规则：
+
+- 无输出 -> `{}`
+- 只有返回值 -> `{ "return": <value> }`
+- 有 `out` / `inout` 时，返回值字段名固定为 `return`
+
+## attribute 映射
+
+每个 attribute 会生成隐含操作：
+
+- `get_attribute_<name>`
+- `set_attribute_<name>`
+
+随后这些隐含操作再按普通 JSON-RPC 规则生成方法名和参数/结果对象。
+
+## 类型映射说明
+
+本 RFC 更关心 JSON 形状，而不是目标语言实现细节。
+
+常见理解：
+
+- `sequence<T>` -> 数组
+- `map<K, V>` -> 对象或映射结构
+- `string` -> JSON 字符串
+- 数值标量 -> JSON 数字
+
+## 错误处理建议
+
+推荐复用 JSON-RPC 标准错误码：
+
+- Parse error: `-32700`
+- Invalid request: `-32600`
+- Method not found: `-32601`
+- Invalid params: `-32602`
+- Internal error: `-32603`
+
+常见映射建议：
+
+- 参数解码失败 -> `Invalid params`
+- 未知方法 -> `Method not found`
+- 内部处理失败 -> `Server error` 或 `Internal error`
+
+## 运行时校验
+
+- 缺少或非法 `method` -> invalid request
+- 参数解码失败 -> invalid params
+- 未知方法 -> method not found
+- 请求/响应 `id` 不匹配 -> 协议错误
+
+## 传输说明
+
+本 RFC 保持传输无关。
+
+当前仓库中的 Rust 运行时可能采用：
+
+- 换行分隔 JSON
+- 基于流式 I/O 的请求/响应通道
+
+但这些都属于实现细节，而不是协议定义的一部分。

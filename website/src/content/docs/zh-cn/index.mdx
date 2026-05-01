@@ -1,48 +1,80 @@
 ---
 title: "XIDL"
-description: "定义一次，跨语言、跨协议无缝连接。"
+description: "一个面向现代分布式系统的 IDL 工具链：一次定义，生成多种协议、代码和规范。"
 template: splash
 hero:
-  tagline: "高效、强类型的接口描述语言，专为现代分布式系统设计。"
-  image:
-    file: ../../../assets/favicon.svg
+  tagline: "用一份 IDL 驱动 HTTP、JSON-RPC、Rust 代码、OpenAPI、OpenRPC 和更多目标。"
   actions:
-    - text: "开始使用"
-      link: /zh-cn/guide/
+    - text: "从指南开始"
+      link: ./guide/
       icon: right-arrow
       variant: primary
+    - text: "查看详细文档"
+      link: ./docs/
+      icon: document
     - text: "阅读 RFC"
-      link: /zh-cn/rfc/
+      link: ./rfc/
       icon: external
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
 
-## 为什么选择 XIDL？
+## 为什么是 XIDL
+
+XIDL 不是单纯的“代码生成器”，而是一套围绕契约定义构建的工作流：
+你先写 IDL，再由同一份契约生成服务端、客户端、Schema、辅助运行时和
+工具链产物。
 
 <CardGrid stagger>
-	<Card title="跨语言支持" icon="setting">
-		一次定义接口，自动生成 Rust、Go、Python 等多种语言的客户端与服务端代码。
-	</Card>
-	<Card title="多协议兼容" icon="add-document">
-		原生支持 HTTP (REST) 和 JSON-RPC，轻松应对不同的业务场景。
-	</Card>
-	<Card title="强类型安全" icon="pencil">
-		基于强类型系统，在编译期拦截错误，提升开发效率与系统稳定性。
-	</Card>
-	<Card title="现代工具链" icon="rocket">
-		配套完整的编译器 `xidlc` 与构建系统，深度集成现有开发工作流。
-	</Card>
+  <Card title="一份契约，多种输出" icon="seti:document">
+    同一份 IDL 可以生成 Rust 类型、Axum HTTP 接口、JSON-RPC 绑定、
+    OpenAPI、OpenRPC，以及面向调试和工具链的中间产物。
+  </Card>
+  <Card title="协议规则显式化" icon="seti:gear">
+    HTTP 路由、参数来源、流式交互和安全声明直接写在契约里，而不是散落在
+    各个运行时框架和注释约定中。
+  </Card>
+  <Card title="对人和工具都友好" icon="seti:search">
+    结构化 IDL 既方便团队评审，也方便生成器、编辑器、语言服务器和 AI 工具
+    理解与处理。
+  </Card>
+  <Card title="先学主线，再扩展" icon="seti:rocket">
+    文档主线以 `xidlc` 为入口，用最短路径带你跑通第一个 HTTP + Rust 例子；
+    其他目标和协议再按需深入。
+  </Card>
 </CardGrid>
 
-## 你可以构建什么？
+## 你可以用它做什么
 
-- **微服务通信**：在不同语言编写的服务之间建立可靠的连接。
-- **Web API**：快速生成符合规范的 HTTP 接口。
-- **实时流**：利用 XIDL 对流式数据的原生支持，构建实时应用。
+- 定义 HTTP API，并生成 `rust-axum` 服务端/客户端代码。
+- 定义 JSON-RPC 接口，并生成 `rust-jsonrpc` 绑定与 `openrpc.json`。
+- 从同一份契约生成 OpenAPI，避免代码实现和文档规范漂移。
+- 让生成流程进入 Rust `build.rs`，或者直接通过 `xidlc` 手动生成产物。
+- 为流式 API 和安全策略建立可审查、可追踪的显式声明。
 
-## 接下来...
+## 从哪里开始
 
-- [快速入门](/zh-cn/guide/quickstart/)
-- [深入了解 IDL 语法](/zh-cn/docs/idl/)
-- [查看支持的目标语言](/zh-cn/docs/targets/)
+- 第一次接触 XIDL：看[指南总览](./guide/)和[快速开始](./guide/quickstart/)。
+- 想先跑通 HTTP + Rust：看[第一个 HTTP API](./guide/first-http-api/)。
+- 想理解 CLI、语言和目标生成器：看[详细文档](./docs/)。
+- 想确认精确语义和映射规则：看[RFC](./rfc/)。
+
+## 推荐路径
+
+1. 安装 `xidlc`。
+2. 写一个最小 `.idl` 文件。
+3. 用 `xidlc` 生成 `rust-axum` 或 `openapi`。
+4. 再回到详细文档查询语法、注解和目标差异。
+
+## 典型使用场景
+
+- 团队想把 HTTP 接口、客户端、Schema 文档收敛到同一份契约。
+- Rust 服务需要稳定地生成类型和 Axum 接口层，但又不想把契约绑定死在框架代码里。
+- 需要同时维护 HTTP 和 JSON-RPC 风格的 API，但不希望使用两套完全割裂的建模方式。
+- 想让编辑器工具、生成器和自动化脚本都围绕同一份结构化定义工作。
+
+## 文档分区
+
+- [Guide](./guide/)：新手入口，强调最低学习成本。
+- [Docs](./docs/)：详细说明和参考资料。
+- [RFC](./rfc/)：规范性说明，定义精确映射和约束。

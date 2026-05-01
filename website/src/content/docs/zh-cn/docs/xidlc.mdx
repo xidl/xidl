@@ -1,9 +1,120 @@
 ---
-title: "xidlc"
-description: "xidlc - XIDL Documentation"
-template: doc
+title: "使用 xidlc"
+description: "XIDL CLI 的核心心智模型、常见参数和典型工作流。"
 ---
 
-> 状态：规划中
+# 使用 `xidlc`
 
-此页面尚未编写。
+`xidlc` 是 XIDL 的标准入口。它读取一个或多个 `.idl` 文件，并为选定目标生成产物。
+
+## 先建立正确心智模型
+
+`xidlc` 的工作方式很简单：
+
+1. 输入一份或多份 IDL
+2. 选择一个目标生成器
+3. 指定输出目录
+4. 获得该目标对应的文件
+
+最小命令：
+
+```bash
+xidlc --lang rust --out-dir out path/to/file.idl
+```
+
+短写：
+
+```bash
+xidlc -l rust -o out path/to/file.idl
+```
+
+## 常用参数
+
+- `--lang`, `-l`：选择目标生成器
+- `--out-dir`, `-o`：指定输出目录
+- `--client`：只生成客户端相关产物
+- `--server`：控制是否生成服务端相关产物
+- `--dry-run`：执行解析和生成流程，但不落盘
+
+## 常见工作流
+
+### 生成 Rust 类型
+
+```bash
+xidlc -l rust -o src/generated api.idl
+```
+
+### 生成 Axum HTTP 绑定
+
+```bash
+xidlc -l rust-axum -o src/generated api.idl
+```
+
+### 生成 JSON-RPC 绑定
+
+```bash
+xidlc -l rust-jsonrpc -o src/generated api.idl
+```
+
+### 生成 OpenAPI
+
+```bash
+xidlc -l openapi -o generated api.idl
+```
+
+### 生成 OpenRPC
+
+```bash
+xidlc -l openrpc -o generated api.idl
+```
+
+## 格式化
+
+CLI 同时提供格式化子命令：
+
+```bash
+xidlc fmt path/to/file.idl
+```
+
+就地改写：
+
+```bash
+xidlc fmt --inplace path/to/file.idl
+```
+
+## 选择目标时怎么想
+
+- 只需要 Rust 数据模型：`rust`
+- 需要 HTTP 服务/客户端绑定：`rust-axum`
+- 需要 JSON-RPC 绑定：`rust-jsonrpc`
+- 需要 HTTP Schema：`openapi`
+- 需要 JSON-RPC Schema：`openrpc`
+- 需要 TypeScript 产物：`typescript`
+
+完整列表见[目标生成器](./targets/)。
+
+## 推荐使用顺序
+
+第一次使用时建议：
+
+1. 先手动运行 `xidlc`
+2. 看懂输出目录里的生成结果
+3. 再决定是否接入 `xidl-build`
+
+这样你会更容易理解：
+
+- 是 IDL 本身的问题
+- 还是目标映射的问题
+- 还是运行时集成的问题
+
+## 一个现实提醒
+
+目前文档里统一使用可执行文件名 `xidlc`。CLI 内部实现上有 `idlc` 的命名痕迹，
+但你在实际使用时以发布出来的 `xidlc` 命令为准。
+
+## 继续阅读
+
+- [IDL 语言](./idl/)
+- [HTTP](./http/)
+- [JSON-RPC](./jsonrpc/)
+- [Rust 集成](./rust-integration/)

@@ -1,9 +1,141 @@
 ---
 title: "HTTP"
-description: "HTTP - XIDL Documentation"
-template: doc
+description: "XIDL 的 HTTP 使用方式、常见映射和相关目标。"
 ---
 
-> 状态：规划中
+# HTTP
 
-此页面尚未编写。
+XIDL 的 HTTP 家族不是单一功能，而是一组彼此关联的能力：
+
+1. 普通 HTTP 映射
+2. HTTP Stream 映射
+3. HTTP 安全映射
+
+最常见的输出目标是：
+
+- `rust-axum`
+- `openapi`
+
+## 最基本的 HTTP 映射
+
+对方法使用 HTTP 动词注解：
+
+```txt
+interface HelloWorld {
+    @post(path = "/hello")
+    void sayHello(in string name);
+};
+```
+
+## 参数来源规则
+
+最常见的参数来源注解有：
+
+- `@path`
+- `@query`
+- `@body`
+- `@header`
+- `@cookie`
+
+实践上记住这些规则就够了：
+
+- 路径变量用 `@path`
+- 查询字符串用 `@query`
+- `POST` / `PUT` / `PATCH` 的未标注输入通常进入请求体
+- `GET` / `DELETE` / `HEAD` / `OPTIONS` 的未标注输入通常进入查询字符串
+
+## 一个典型例子
+
+```txt
+interface UserApi {
+    @get(path = "/users/{id}{?lang}")
+    string getUser(
+        @path("id") string id,
+        @query("lang") @optional string locale,
+        out string display_name
+    );
+
+    @post(path = "/users")
+    string createUser(
+        string display_name,
+        string email,
+        out string user_id
+    );
+};
+```
+
+## 生成结果
+
+`rust-axum` 当前通常会生成：
+
+- 业务逻辑 trait
+- 暴露路由的服务包装器
+- 客户端包装器
+- 传输辅助类型
+
+`openapi` 当前通常会生成：
+
+- `openapi.json`
+
+如果你需要文档或下游生态集成，通常会把 `rust-axum` 和 `openapi` 一起生成。
+
+## HTTP Stream
+
+HTTP Stream 在普通 HTTP 映射上扩展长连接流式交互。
+
+当前常见注解：
+
+- `@server_stream`
+- `@client_stream`
+- `@bidi_stream`
+- `@stream_codec("ndjson" | "sse")`
+
+实践上：
+
+- 服务器推流最常见
+- `ndjson` 是默认流编码
+- `sse` 主要用于服务端流
+- 这部分能力存在，但比普通 HTTP 映射更偏实现驱动
+
+## HTTP 安全
+
+安全模型把认证声明附着在接口或方法上，而不是塞进业务参数列表。
+
+常见注解：
+
+- `@no_security`
+- `@http_basic`
+- `@http_bearer`
+- `@api_key(...)`
+- `@oauth2(...)`
+
+通常规则：
+
+- 接口级声明是默认值
+- 方法级声明会替换继承来的默认值
+- `@no_security` 会显式清空继承的安全要求
+
+## `@optional` 在 HTTP 里的重要性
+
+HTTP 里“参数缺席”和“参数值为空”不是一回事。
+
+所以：
+
+- 可选查询参数可以完全省略
+- 可选请求体字段可以不出现
+- 路径参数不能是可选的
+
+## 推荐工作流
+
+1. 用 IDL 写出接口和 HTTP 注解
+2. 生成 `rust-axum`
+3. 同时生成 `openapi`
+4. 需要精确规则时再看 RFC
+
+## 继续阅读
+
+- [目标生成器](./targets/)
+- [注解](./annotations/)
+- [HTTP RFC](../rfc/http/)
+- [HTTP Stream RFC](../rfc/http-stream/)
+- [HTTP 安全 RFC](../rfc/http-security/)

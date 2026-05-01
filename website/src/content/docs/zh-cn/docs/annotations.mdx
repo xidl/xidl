@@ -1,9 +1,114 @@
 ---
-title: "Annotations"
-description: "Annotations - XIDL Documentation"
-template: doc
+title: "注解"
+description: "XIDL 当前常用注解的作用、适用范围和实践说明。"
 ---
 
-> 状态：规划中
+# 注解
 
-此页面尚未编写。
+注解决定的是“同一段 IDL 如何被解释和生成”。它们不只是语法糖，而是
+XIDL 能把一个契约映射到不同协议和目标的关键。
+
+## 核心形状注解
+
+### `@optional`
+
+作用：
+
+- 表示字段或参数允许省略
+
+实践说明：
+
+- 会影响 Rust、HTTP、OpenAPI、TypeScript 等目标
+- 不适用于 HTTP 路径参数
+
+### `@name("...")`
+
+作用：
+
+- 改变序列化或外部呈现时使用的名字
+
+适用场景：
+
+- 字段命名和外部协议命名不一致
+- 需要兼容既有命名格式
+
+## HTTP 相关注解
+
+HTTP 动词：
+
+- `@get`
+- `@post`
+- `@put`
+- `@patch`
+- `@delete`
+- `@head`
+- `@options`
+
+参数来源：
+
+- `@path`
+- `@query`
+- `@body`
+- `@header`
+- `@cookie`
+
+内容和行为：
+
+- `@Consumes`
+- `@Produces`
+- `@deprecated`
+
+这些注解应该配合[HTTP 文档](./http/)和[HTTP RFC](../rfc/http/)一起理解。
+
+## 流式相关注解
+
+当前流式能力主要使用：
+
+- `@server_stream`
+- `@client_stream`
+- `@bidi_stream`
+- `@stream_codec(...)`
+
+实践说明：
+
+- 普通 unary 映射已经比较稳定
+- stream 支持存在，但整体仍更偏实现驱动
+
+## HTTP 安全相关注解
+
+常见安全注解：
+
+- `@no_security`
+- `@http_basic`
+- `@http_bearer`
+- `@api_key(...)`
+- `@oauth2(...)`
+
+使用建议：
+
+- 接口级声明适合做默认值
+- 方法级声明适合做覆盖
+- `@no_security` 用于显式清除继承的安全要求
+
+## Rust 透传注解
+
+当前仓库支持 Rust 定向透传注解，例如：
+
+- `@rust-serde(...)`
+- 其他 `@rust-...` 形式
+
+这些注解通常只影响会生成 Rust 代码的目标。
+
+## 怎么判断一个注解是否适合当前场景
+
+建议按这个顺序判断：
+
+1. 它是协议映射注解，还是目标透传注解
+2. 它会影响请求/响应语义，还是只影响生成代码属性
+3. 它在当前目标里是否真的生效
+
+## 继续阅读
+
+- [IDL 语言](./idl/)
+- [HTTP](./http/)
+- [Pragma](./pragmas/)

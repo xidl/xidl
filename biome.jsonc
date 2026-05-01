@@ -48,6 +48,11 @@
       }
     }
   },
+  "overrides": [
+    {
+      "includes": ["**/*.astro"]
+    }
+  ],
   "vcs": {
     "clientKind": "git",
     "enabled": true,
