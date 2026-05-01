@@ -12,7 +12,8 @@ protocol mapping, code generation, and interactive tooling into one workflow.
 
 [![publish-release](https://github.com/xidl/xidl/actions/workflows/publish-release.yml/badge.svg)](https://github.com/xidl/xidl/actions/workflows/publish-release.yml)
 [![publish-crates](https://github.com/xidl/xidl/actions/workflows/publish-crates.yml/badge.svg)](https://github.com/xidl/xidl/actions/workflows/publish-crates.yml)
-[![deploy-docs](https://github.com/xidl/xidl/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/xidl/xidl/actions/workflows/deploy-docs.yml)
+[![build-docs](https://github.com/xidl/xidl/actions/workflows/build-docs.yml/badge.svg)](https://github.com/xidl/xidl/actions/workflows/build-docs.yml)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/aa1dd32f-337a-4845-b38a-6e3c84efcb23/deploy-status)](https://app.netlify.com/projects/xidl/deploys)
 ![Crates.io Version](<https://img.shields.io/crates/v/xidlc?label=xidlc(crates.io)>)
 ![Crates.io Version](<https://img.shields.io/crates/v/xidl-build?label=xidl-build(crates.io)>)
 ![GitHub Release](https://img.shields.io/github/v/release/xidl/xidl)
