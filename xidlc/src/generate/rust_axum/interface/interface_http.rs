@@ -1,3 +1,7 @@
+use crate::generate::rust_axum::interface::{
+    ApiKeyContext, DeprecatedContext, HttpMethod, ParamSource,
+};
+use xidl_parser::hir;
 use xidl_parser::http_hir::{
     HttpMethod as HttpHirMethod, HttpOperation, HttpParam as HttpHirParam,
     HttpParamKind as HttpHirParamKind,
@@ -5,10 +9,6 @@ use xidl_parser::http_hir::{
         HttpApiKeyLocation, HttpSecurityOrigin, HttpSecurityProfile, HttpSecurityRequirement,
     },
 };
-use crate::generate::rust_axum::interface::{
-    ApiKeyContext, DeprecatedContext, HttpMethod, ParamSource,
-};
-use xidl_parser::hir;
 
 pub(crate) fn find_http_param<'a>(
     params: &'a [HttpHirParam],

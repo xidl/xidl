@@ -69,7 +69,11 @@ pub(super) fn render_const_expr(expr: &hir::ConstExpr) -> String {
         match value {
             hir::Literal::IntegerLiteral(value) => value.0.clone(),
             hir::Literal::FloatingPtLiteral(value) => {
-                let sign = value.sign.as_ref().map(hir::IntegerSign::as_str).unwrap_or("");
+                let sign = value
+                    .sign
+                    .as_ref()
+                    .map(hir::IntegerSign::as_str)
+                    .unwrap_or("");
                 format!("{}{}.{}", sign, value.integer.0, value.fraction.0)
             }
             hir::Literal::CharLiteral(value)

@@ -141,10 +141,12 @@ impl CodegenSession {
 
     async fn connect_inproc_with_retry(endpoint: &str) -> IdlcResult<RpcStream> {
         support::retry_connect(
-            || std::future::ready(
-                xidl_jsonrpc::connect_inproc(endpoint)
-                    .map(|stream| Box::new(stream) as RpcStream),
-            ),
+            || {
+                std::future::ready(
+                    xidl_jsonrpc::connect_inproc(endpoint)
+                        .map(|stream| Box::new(stream) as RpcStream),
+                )
+            },
             "failed to connect inproc endpoint".to_string(),
         )
         .await

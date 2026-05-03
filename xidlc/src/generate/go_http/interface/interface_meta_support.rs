@@ -1,10 +1,10 @@
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::go_http::{HttpMethod, ParamMeta, ParamSource, definition};
+use convert_case::{Case, Casing};
 use xidl_parser::http_hir::{
     HttpMethod as HttpHirMethod, HttpOperation, HttpParamKind as HttpHirParamKind,
     semantics::{HttpStreamCodec, HttpStreamKind},
 };
-use convert_case::{Case, Casing};
 
 pub(super) fn validate_stream_support(op: &HttpOperation) -> IdlcResult<()> {
     match op.stream.kind {

@@ -1,8 +1,8 @@
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::go_http::{MethodMeta, definition};
-use xidl_parser::http_hir::semantics::HttpStreamKind;
 use std::collections::HashMap;
 use std::fmt::Write;
+use xidl_parser::http_hir::semantics::HttpStreamKind;
 
 use super::GoHttpRenderer;
 use super::interface_binding::render_request_binding;

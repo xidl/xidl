@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::hir;
+use serde::{Deserialize, Serialize};
 
 use super::annotations::{annotation_name, annotation_params, normalize_annotation_params};
 

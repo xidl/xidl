@@ -3,9 +3,9 @@ mod annotations;
 mod security;
 mod stream;
 
+use crate::hir;
 use jiff::{Timestamp, civil, tz::TimeZone};
 use serde::{Deserialize, Serialize};
-use crate::hir;
 
 pub use self::annotations::{
     annotation_name, annotation_params, effective_media_type, has_annotation,

@@ -6,7 +6,6 @@ use super::schema::{
 };
 use super::security::register_security_schemes;
 use super::stream::{OpenApiStreamPatch, request_stream_content_type, stream_patch_item_schema};
-use xidl_parser::http_hir::HttpHirDocument;
 use crate::openapi::RefOr;
 use crate::openapi::path::PathItem;
 use crate::openapi::schema::{ObjectBuilder, Schema, Type};
@@ -14,6 +13,7 @@ use crate::openapi::server::Server;
 use std::collections::{BTreeMap, HashMap};
 use std::mem;
 use xidl_parser::hir;
+use xidl_parser::http_hir::HttpHirDocument;
 
 #[derive(Default)]
 pub(crate) struct OpenApiContext {

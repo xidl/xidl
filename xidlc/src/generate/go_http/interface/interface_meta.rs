@@ -1,10 +1,10 @@
 use crate::error::IdlcResult;
 use crate::generate::go_http::{MethodMeta, ParamSource, definition};
+use convert_case::{Case, Casing};
 use xidl_parser::http_hir::{
     HttpOperation,
     semantics::{HttpStreamCodec, HttpStreamKind},
 };
-use convert_case::{Case, Casing};
 
 use super::interface_meta_support::{
     deprecated_context, http_method, param_meta, request_body_context, response_body_context,

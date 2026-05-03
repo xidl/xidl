@@ -1,6 +1,6 @@
 use crate::error::IdlcResult;
-use xidl_parser::http_hir::semantics::HttpStreamKind;
 use std::fmt::Write;
+use xidl_parser::http_hir::semantics::HttpStreamKind;
 
 use super::is_server_stream;
 use super::spec_binding::{render_request_value, stream_codec_name};

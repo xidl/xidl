@@ -11,11 +11,12 @@ use std::collections::HashMap;
 use std::path::Path;
 use xidl_parser::hir;
 use xidl_parser::hir::ParserProperties;
+use xidl_parser::jsonrpc_hir::JsonRpcHirDocument;
 
 pub use render::{JsonRpcRender, JsonRpcRenderOutput, JsonRpcRenderer};
 
 pub fn generate(
-    spec: hir::Specification,
+    document: JsonRpcHirDocument,
     input_path: &Path,
     props: HashMap<String, serde_json::Value>,
 ) -> IdlcResult<Vec<Artifact>> {
@@ -24,7 +25,7 @@ pub fn generate(
 
     let mut renderer = JsonRpcRenderer::new()?;
     renderer.extend(&props);
-    let output = spec.render(&renderer)?;
+    let output = document.render(&renderer)?;
 
     let content = renderer.render_template(
         "spec.rs.j2",
@@ -38,7 +39,7 @@ pub fn generate(
         content,
     })];
 
-    let non_interface = strip_interfaces(spec);
+    let non_interface = strip_interfaces(document.spec);
     if !non_interface.0.is_empty() {
         let props = hashmap! {
             "enable_render_header" => false,
@@ -68,6 +69,7 @@ impl crate::jsonrpc::Codegen for RustJsonRpcCodegen {
 
     async fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
         Ok(hashmap! {
+            "hir_kind" => "jsonrpc",
             "expand_interface" => false,
             "enable_render_header" => true,
             "enable_serialize" => true,
@@ -82,8 +84,8 @@ impl crate::jsonrpc::Codegen for RustJsonRpcCodegen {
         path: String,
         props: ::xidl_parser::hir::ParserProperties,
     ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
-        let hir = input_hir.into_rpc_hir();
-        generate(hir, Path::new(&path), props).map_err(|err| xidl_jsonrpc::Error::Rpc {
+        let jsonrpc_hir = input_hir.into_jsonrpc_hir();
+        generate(jsonrpc_hir, Path::new(&path), props).map_err(|err| xidl_jsonrpc::Error::Rpc {
             code: xidl_jsonrpc::ErrorCode::ServerError,
             message: err.to_string(),
             data: None,

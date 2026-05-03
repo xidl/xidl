@@ -2,15 +2,6 @@ use crate::generate::rust::util::rust_ident;
 use itertools::Itertools;
 use xidl_parser::hir;
 
-pub(super) fn attr_return_type(ty: &hir::TypeSpec) -> String {
-    jsonrpc_type(ty)
-}
-
-pub(super) fn render_param_type(ty: &hir::TypeSpec, attr: Option<&hir::ParamAttribute>) -> String {
-    let _ = attr;
-    jsonrpc_type(ty)
-}
-
 pub(super) fn jsonrpc_type(ty: &hir::TypeSpec) -> String {
     match ty {
         hir::TypeSpec::IntegerType(value) => rust_integer_type(value),

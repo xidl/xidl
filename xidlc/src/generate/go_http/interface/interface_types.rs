@@ -1,7 +1,7 @@
 use crate::error::IdlcResult;
 use crate::generate::go_http::{MethodMeta, ParamMeta, definition};
-use xidl_parser::http_hir::semantics::{HttpApiKeyLocation, HttpSecurityRequirement};
 use std::fmt::Write;
+use xidl_parser::http_hir::semantics::{HttpApiKeyLocation, HttpSecurityRequirement};
 
 use super::GoHttpRenderer;
 use super::interface_binding::render_decode_response_fn;

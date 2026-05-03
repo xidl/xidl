@@ -3,6 +3,7 @@ use super::{
     expand_annotations, include, interface_codegen, parse_xidlc_pragma,
 };
 use crate::http_hir::{self, HirProjectionKind, ProjectedHir};
+use crate::jsonrpc_hir;
 use serde_json::Value;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -41,10 +42,12 @@ impl Specification {
         properties: ParserProperties,
         path: impl AsRef<Path>,
     ) -> crate::error::ParserResult<ProjectedHir> {
-        let spec = spec_from_typed_ast_with_path(value, expand_interface(&properties), path.as_ref())?;
+        let spec =
+            spec_from_typed_ast_with_path(value, expand_interface(&properties), path.as_ref())?;
         match hir_projection_kind(&properties) {
             HirProjectionKind::Rpc => Ok(ProjectedHir::Rpc(spec)),
             HirProjectionKind::Http => http_hir::project(&spec).map(ProjectedHir::Http),
+            HirProjectionKind::JsonRpc => jsonrpc_hir::project(&spec).map(ProjectedHir::JsonRpc),
         }
     }
 }
@@ -178,6 +181,11 @@ fn expand_interface(properties: &ParserProperties) -> bool {
 fn hir_projection_kind(properties: &ParserProperties) -> HirProjectionKind {
     match properties.get("hir_kind").and_then(Value::as_str) {
         Some(value) if value.eq_ignore_ascii_case("http") => HirProjectionKind::Http,
+        Some(value)
+            if value.eq_ignore_ascii_case("jsonrpc") || value.eq_ignore_ascii_case("json-rpc") =>
+        {
+            HirProjectionKind::JsonRpc
+        }
         _ => HirProjectionKind::Rpc,
     }
 }

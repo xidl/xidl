@@ -1,30 +1,4 @@
-use super::interface_model::{OutputField, StreamKind};
-use super::interface_names::response_struct_name;
-
-pub(super) fn response_kind(fields: &[OutputField]) -> String {
-    if fields.is_empty() {
-        "empty".to_string()
-    } else if fields.len() == 1 && fields[0].json_name == "return" {
-        "single_return".to_string()
-    } else if fields.len() == 1 {
-        "single_output".to_string()
-    } else {
-        "multi".to_string()
-    }
-}
-
-pub(super) fn response_return_type(
-    kind: &str,
-    fields: &[OutputField],
-    interface_name: &str,
-    method_name: &str,
-) -> String {
-    match kind {
-        "empty" => "()".to_string(),
-        "single_return" | "single_output" => fields[0].ty.clone(),
-        _ => response_struct_name(interface_name, method_name),
-    }
-}
+use super::interface_model::StreamKind;
 
 pub(super) fn stream_signature(
     kind: StreamKind,

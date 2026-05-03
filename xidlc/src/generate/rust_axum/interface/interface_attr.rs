@@ -1,7 +1,4 @@
 use crate::error::IdlcResult;
-use xidl_parser::http_hir::{
-    HttpOperation, HttpParamKind as HttpHirParamKind, semantics::HttpStreamKind,
-};
 use crate::generate::rust::util::{rust_ident, rust_passthrough_attrs_from_annotations};
 use crate::generate::rust_axum::interface::interface_http::{
     deprecated_context_from_http, http_method_code, http_method_fn, http_method_from_hir,
@@ -13,6 +10,9 @@ use crate::generate::rust_axum::transport::{
     TransportDirection, TransportTracker, decode_expr, encode_expr,
 };
 use xidl_parser::hir;
+use xidl_parser::http_hir::{
+    HttpOperation, HttpParamKind as HttpHirParamKind, semantics::HttpStreamKind,
+};
 
 pub(crate) fn render_attr_operation_from_http(
     attr: Option<&hir::AttrDcl>,

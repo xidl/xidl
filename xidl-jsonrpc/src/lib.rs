@@ -18,6 +18,8 @@ pub use server::{Handler, Server, ServerBuilder};
 #[cfg(feature = "tokio")]
 pub mod transport;
 pub use futures_util;
+#[cfg(feature = "transport-tcp")]
+pub use transport::TcpListener;
 #[cfg(feature = "tokio")]
 pub use transport::{BoundListener, Listener, Stream, bind, connect, connect_inproc};
 #[cfg(feature = "tokio")]
@@ -26,8 +28,6 @@ pub use transport::{InprocListener, IoListener};
 pub use transport::{IpcListener, connect_ipc};
 #[cfg(all(feature = "transport-quic", not(tarpaulin_include)))]
 pub use transport::{QuicListener, connect_quic};
-#[cfg(feature = "transport-tcp")]
-pub use transport::TcpListener;
 #[cfg(all(feature = "transport-tls", not(tarpaulin_include)))]
 pub use transport::{TlsListener, connect_tls};
 #[cfg(all(feature = "transport-websocket", not(tarpaulin_include)))]

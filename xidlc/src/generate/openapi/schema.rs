@@ -1,4 +1,3 @@
-use xidl_parser::http_hir::semantics::DeprecatedInfo;
 use crate::generate::openapi::naming::{declarator_name, field_rename};
 use crate::generate::utils::doc_lines_from_annotations;
 use crate::openapi::path::{Parameter, ParameterBuilder, ParameterIn};
@@ -8,6 +7,7 @@ use crate::openapi::schema::{
 };
 use crate::openapi::{Content, Ref, RefOr, Required};
 use xidl_parser::hir;
+use xidl_parser::http_hir::semantics::DeprecatedInfo;
 
 pub(crate) fn body_payload_schema(
     props: Vec<(String, RefOr<Schema>)>,

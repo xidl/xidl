@@ -1,5 +1,5 @@
-use convert_case::{Case, Casing};
 use crate::hir;
+use convert_case::{Case, Casing};
 
 use super::route::{attribute_path, default_path, operation_id, readonly_attr_names};
 use super::semantics::{

@@ -72,7 +72,10 @@ fn projects_attribute_operations_and_document_metadata() {
     assert_eq!(ops.len(), 2);
     assert_eq!(ops[0].source, super::HttpOperationSource::AttributeGet);
     assert_eq!(ops[1].source, super::HttpOperationSource::AttributeWatch);
-    assert_eq!(ops[1].stream.kind, Some(super::semantics::HttpStreamKind::Server));
+    assert_eq!(
+        ops[1].stream.kind,
+        Some(super::semantics::HttpStreamKind::Server)
+    );
 }
 
 #[test]
@@ -93,11 +96,20 @@ fn projects_stream_operations_with_http_stream_metadata() {
     let doc = super::project(&spec).expect("http hir");
     let ops = &doc.interfaces[0].operations;
 
-    assert_eq!(ops[0].stream.kind, Some(super::semantics::HttpStreamKind::Server));
+    assert_eq!(
+        ops[0].stream.kind,
+        Some(super::semantics::HttpStreamKind::Server)
+    );
     assert_eq!(ops[0].stream.codec, super::semantics::HttpStreamCodec::Sse);
     assert_eq!(ops[0].method, super::HttpMethod::Get);
 
-    assert_eq!(ops[1].stream.kind, Some(super::semantics::HttpStreamKind::Client));
-    assert_eq!(ops[1].stream.codec, super::semantics::HttpStreamCodec::Ndjson);
+    assert_eq!(
+        ops[1].stream.kind,
+        Some(super::semantics::HttpStreamKind::Client)
+    );
+    assert_eq!(
+        ops[1].stream.codec,
+        super::semantics::HttpStreamCodec::Ndjson
+    );
     assert_eq!(ops[1].method, super::HttpMethod::Post);
 }
