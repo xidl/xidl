@@ -44,7 +44,8 @@ pub fn generate(
             "enable_render_header" => false,
             "enable_metadata" => false,
             "enable_serialize" => false,
-            "enable_deserialize" => false
+            "enable_deserialize" => false,
+            "enable_default_derive" => false
         };
 
         artifacts.push(Artifact::new_hir(ArtifactHir {

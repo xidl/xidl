@@ -226,6 +226,10 @@ impl<S> {{ ident }}Client<S>
 where
 S: xidl_jsonrpc::Stream + Unpin + Send + 'static,
 {
+    pub fn new(stream: S) -> Self {
+        Self::from_stream(stream, None)
+    }
+
     fn from_stream(stream: S, endpoint: Option<String>) -> Self {
         Self {
             client: std::sync::Arc::new(tokio::sync::Mutex::new(xidl_jsonrpc::Client::new(stream))),
