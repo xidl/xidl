@@ -1,19 +1,7 @@
 use crate::Error;
 use crate::server::handler::MultiHandler;
-use crate::transport::{IoListener, Listener};
+use crate::transport::{IoListener, Listener, Stream};
 use std::sync::Arc;
-use tokio::io::{AsyncRead, AsyncWrite};
-
-pub struct Io<R, W> {
-    pub reader: R,
-    pub writer: W,
-}
-
-impl<R, W> Io<R, W> {
-    pub fn new(reader: R, writer: W) -> Self {
-        Self { reader, writer }
-    }
-}
 
 struct ServerBinding {
     listener: Box<dyn Listener>,
@@ -90,12 +78,11 @@ impl ServerBuilder {
         self
     }
 
-    pub fn with_io<R, W>(self, io: Io<R, W>) -> Self
+    pub fn with_stream<S>(self, stream: S) -> Self
     where
-        R: AsyncRead + Unpin + Send + 'static,
-        W: AsyncWrite + Unpin + Send + 'static,
+        S: Stream + Unpin + Send + 'static,
     {
-        self.with_listener(IoListener::from_io(io))
+        self.with_listener(IoListener::from_stream(stream))
     }
 
     async fn resolve_binding(self) -> Result<(ServerBinding, Vec<Box<dyn crate::Handler>>), Error> {

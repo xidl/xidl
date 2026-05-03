@@ -1,4 +1,3 @@
-use tokio::io::{BufReader, split};
 #[cfg(feature = "transport-tcp")]
 use tokio::net::TcpStream;
 use xidl_jsonrpc::Client;
@@ -24,10 +23,9 @@ impl Handler for EchoHandler {
 
 async fn call_echo_over_stream<S>(stream: S) -> Result<String, Error>
 where
-    S: tokio::io::AsyncRead + tokio::io::AsyncWrite + Unpin,
+    S: xidl_jsonrpc::Stream + Unpin,
 {
-    let (reader, writer) = split(stream);
-    let mut client = Client::new(BufReader::new(reader), writer);
+    let mut client = Client::new(stream);
     client
         .call::<_, String>("echo", serde_json::json!("ok"))
         .await
@@ -39,7 +37,7 @@ async fn connect_with_retry(
 ) -> std::io::Result<Box<dyn xidl_jsonrpc::transport::Stream + Unpin + Send + 'static>> {
     let mut last_err = None;
     for _ in 0..50 {
-        match xidl_jsonrpc::transport::connect(endpoint).await {
+        match xidl_jsonrpc::connect(endpoint).await {
             Ok(stream) => return Ok(stream),
             Err(err) => {
                 last_err = Some(err);
@@ -80,7 +78,7 @@ async fn serve_on_inproc_uri() {
 
     tokio::time::sleep(std::time::Duration::from_millis(50)).await;
 
-    let stream = xidl_jsonrpc::transport::connect_inproc(&endpoint).expect("connect inproc");
+    let stream = xidl_jsonrpc::connect_inproc(&endpoint).expect("connect inproc");
     let result = call_echo_over_stream(stream).await.expect("rpc call");
     assert_eq!(result, "ok");
 
@@ -149,7 +147,7 @@ async fn ipc_uri_is_unsupported() {
             .contains("ipc transport is unsupported on windows")
     );
 
-    let err = match xidl_jsonrpc::transport::connect(endpoint).await {
+    let err = match xidl_jsonrpc::connect(endpoint).await {
         Ok(_) => panic!("ipc connect should be unsupported"),
         Err(err) => err,
     };
@@ -159,7 +157,7 @@ async fn ipc_uri_is_unsupported() {
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn inproc_connect_before_bind() {
     let endpoint = random_endpoint("connect-before-bind");
-    let stream = xidl_jsonrpc::transport::connect_inproc(&endpoint).expect("connect inproc");
+    let stream = xidl_jsonrpc::connect_inproc(&endpoint).expect("connect inproc");
 
     let call_task = tokio::spawn(async move { call_echo_over_stream(stream).await });
 
@@ -242,7 +240,11 @@ async fn build_tcp_zero_exposes_bound_endpoint() {
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 #[cfg(feature = "transport-websocket")]
 async fn serve_on_websocket_uri() {
-    let probe = std::net::TcpListener::bind("127.0.0.1:0").expect("bind probe");
+    let probe = match std::net::TcpListener::bind("127.0.0.1:0") {
+        Ok(probe) => probe,
+        Err(err) if err.kind() == std::io::ErrorKind::PermissionDenied => return,
+        Err(err) => panic!("bind probe: {err}"),
+    };
     let addr = probe.local_addr().expect("probe addr");
     drop(probe);
 
@@ -257,7 +259,7 @@ async fn serve_on_websocket_uri() {
 
     tokio::time::sleep(std::time::Duration::from_millis(50)).await;
 
-    let stream = xidl_jsonrpc::transport::connect(&uri)
+    let stream = xidl_jsonrpc::connect(&uri)
         .await
         .expect("connect websocket");
     let result = call_echo_over_stream(stream).await.expect("rpc call");
@@ -294,7 +296,7 @@ async fn tls_requires_cert_and_key() {
 #[cfg(feature = "transport-websocket")]
 async fn wss_connect_requires_ca() {
     let endpoint = "wss://127.0.0.1:18443/rpc";
-    let err = match xidl_jsonrpc::transport::connect(endpoint).await {
+    let err = match xidl_jsonrpc::connect(endpoint).await {
         Ok(_) => panic!("wss client should require ca"),
         Err(err) => err,
     };
@@ -305,7 +307,7 @@ async fn wss_connect_requires_ca() {
 #[cfg(feature = "transport-tls")]
 async fn tls_connect_requires_ca() {
     let endpoint = "tls://127.0.0.1:19443";
-    let err = match xidl_jsonrpc::transport::connect(endpoint).await {
+    let err = match xidl_jsonrpc::connect(endpoint).await {
         Ok(_) => panic!("tls client should require ca"),
         Err(err) => err,
     };

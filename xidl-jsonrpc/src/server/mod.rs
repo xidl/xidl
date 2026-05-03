@@ -6,4 +6,4 @@ mod session;
 mod tests;
 
 pub use handler::Handler;
-pub use runtime::{Io, Server, ServerBuilder};
+pub use runtime::{Server, ServerBuilder};

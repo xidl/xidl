@@ -1,22 +1,19 @@
 use crate::driver::lang::Plugin;
 use crate::error::IdlcResult;
 use crate::jsonrpc::CodegenClient;
-use tokio::io::{AsyncRead, AsyncWrite};
 use tokio::task::JoinHandle;
 
 mod support;
 
-type RpcReader = Box<dyn AsyncRead + Unpin + Send>;
-type RpcWriter = Box<dyn AsyncWrite + Unpin + Send>;
 type RpcStream = Box<dyn xidl_jsonrpc::transport::Stream + Unpin + Send + 'static>;
 
 struct SessionParts {
-    client: CodegenClient<RpcReader, RpcWriter>,
+    client: CodegenClient<RpcStream>,
     server: JoinHandle<IdlcResult<()>>,
 }
 
 pub struct CodegenSession {
-    pub client: CodegenClient<RpcReader, RpcWriter>,
+    pub client: CodegenClient<RpcStream>,
     server: JoinHandle<IdlcResult<()>>,
 }
 
@@ -54,21 +51,13 @@ impl CodegenSession {
         let server = Self::spawn_builtin_codegen_server(plugin, endpoint.clone()).await?;
         let stream = Self::connect_inproc_with_retry(&endpoint).await?;
         Ok(SessionParts {
-            client: Self::client_from_duplex_stream(stream),
+            client: Self::client_from_stream(stream),
             server,
         })
     }
 
-    fn client_from_stream(stream: RpcStream) -> CodegenClient<RpcReader, RpcWriter> {
-        let (reader, writer) = tokio::io::split(stream);
-        CodegenClient::new(Box::new(reader), Box::new(writer))
-    }
-
-    fn client_from_duplex_stream(
-        stream: tokio::io::DuplexStream,
-    ) -> CodegenClient<RpcReader, RpcWriter> {
-        let (reader, writer) = tokio::io::split(stream);
-        CodegenClient::new(Box::new(reader), Box::new(writer))
+    fn client_from_stream(stream: RpcStream) -> CodegenClient<RpcStream> {
+        CodegenClient::new(stream)
     }
 
     async fn spawn_builtin_codegen_server(
@@ -144,15 +133,18 @@ impl CodegenSession {
 
     async fn connect_with_retry(endpoint: &str) -> IdlcResult<RpcStream> {
         support::retry_connect(
-            || xidl_jsonrpc::transport::connect(endpoint),
+            || xidl_jsonrpc::connect(endpoint),
             format!("failed to connect rpc endpoint: {endpoint}"),
         )
         .await
     }
 
-    async fn connect_inproc_with_retry(endpoint: &str) -> IdlcResult<tokio::io::DuplexStream> {
+    async fn connect_inproc_with_retry(endpoint: &str) -> IdlcResult<RpcStream> {
         support::retry_connect(
-            || std::future::ready(xidl_jsonrpc::transport::connect_inproc(endpoint)),
+            || std::future::ready(
+                xidl_jsonrpc::connect_inproc(endpoint)
+                    .map(|stream| Box::new(stream) as RpcStream),
+            ),
             "failed to connect inproc endpoint".to_string(),
         )
         .await

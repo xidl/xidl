@@ -14,12 +14,24 @@ pub mod stream;
 pub use client::Client;
 pub use error::{Error, ErrorCode};
 #[cfg(feature = "tokio")]
-pub use server::{Handler, Io, Server, ServerBuilder};
+pub use server::{Handler, Server, ServerBuilder};
 #[cfg(feature = "tokio")]
 pub mod transport;
 pub use futures_util;
 #[cfg(feature = "tokio")]
-pub use transport::{Listener, Stream};
+pub use transport::{BoundListener, Listener, Stream, bind, connect, connect_inproc};
+#[cfg(feature = "tokio")]
+pub use transport::{InprocListener, IoListener};
+#[cfg(all(feature = "transport-ipc", unix))]
+pub use transport::{IpcListener, connect_ipc};
+#[cfg(all(feature = "transport-quic", not(tarpaulin_include)))]
+pub use transport::{QuicListener, connect_quic};
+#[cfg(feature = "transport-tcp")]
+pub use transport::TcpListener;
+#[cfg(all(feature = "transport-tls", not(tarpaulin_include)))]
+pub use transport::{TlsListener, connect_tls};
+#[cfg(all(feature = "transport-websocket", not(tarpaulin_include)))]
+pub use transport::{WebSocketListener, connect_websocket};
 
 const JSONRPC_VERSION: &str = "2.0";
 

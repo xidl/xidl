@@ -178,14 +178,12 @@ T: {{ ident }} + Send + Sync,
     }
 }
 
-pub struct {{ ident }}Client<R, W> {
-    client: std::sync::Arc<tokio::sync::Mutex<xidl_jsonrpc::Client<tokio::io::BufReader<R>, W>>>,
+pub struct {{ ident }}Client<S> {
+    client: std::sync::Arc<tokio::sync::Mutex<xidl_jsonrpc::Client<S>>>,
     endpoint: Option<String>,
 }
 
 type {{ ident }}Transport = Box<dyn xidl_jsonrpc::transport::Stream + Unpin + Send + 'static>;
-type {{ ident }}ReadHalf = tokio::io::ReadHalf<{{ ident }}Transport>;
-type {{ ident }}WriteHalf = tokio::io::WriteHalf<{{ ident }}Transport>;
 
 pub struct {{ ident }}ClientBuilder {
     endpoint: Option<String>,
@@ -207,42 +205,39 @@ impl {{ ident }}ClientBuilder {
         self
     }
 
-    pub async fn build(self) -> Result<{{ ident }}Client<{{ ident }}ReadHalf, {{ ident }}WriteHalf>, xidl_jsonrpc::Error> {
+    pub async fn build(self) -> Result<{{ ident }}Client<{{ ident }}Transport>, xidl_jsonrpc::Error> {
         let endpoint = self
         .endpoint
         .ok_or(xidl_jsonrpc::Error::Protocol("missing endpoint"))?;
-        let io = xidl_jsonrpc::transport::connect(&endpoint)
+        let stream = xidl_jsonrpc::connect(&endpoint)
         .await
         .map_err(xidl_jsonrpc::Error::Io)?;
-        let (reader, writer) = tokio::io::split(io);
-        Ok({{ ident }}Client::from_io(reader, writer, Some(endpoint)))
+        Ok({{ ident }}Client::from_stream(stream, Some(endpoint)))
     }
 }
 
-impl {{ ident }}Client<{{ ident }}ReadHalf, {{ ident }}WriteHalf> {
+impl {{ ident }}Client<{{ ident }}Transport> {
     pub fn builder() -> {{ ident }}ClientBuilder {
         {{ ident }}ClientBuilder::new()
     }
 }
 
-impl<R, W> {{ ident }}Client<R, W>
+impl<S> {{ ident }}Client<S>
 where
-R: tokio::io::AsyncRead + Unpin + Send + 'static,
-W: tokio::io::AsyncWrite + Unpin + Send + 'static,
+S: xidl_jsonrpc::Stream + Unpin + Send + 'static,
 {
-    fn from_io(reader: R, writer: W, endpoint: Option<String>) -> Self {
+    fn from_stream(stream: S, endpoint: Option<String>) -> Self {
         Self {
-            client: std::sync::Arc::new(tokio::sync::Mutex::new(xidl_jsonrpc::Client::new(tokio::io::BufReader::new(reader), writer))),
+            client: std::sync::Arc::new(tokio::sync::Mutex::new(xidl_jsonrpc::Client::new(stream))),
             endpoint,
         }
     }
 }
 
 #[async_trait::async_trait]
-impl<R, W> {{ ident }} for {{ ident }}Client<R, W>
+impl<S> {{ ident }} for {{ ident }}Client<S>
 where
-R: tokio::io::AsyncRead + Unpin + Send + 'static,
-W: tokio::io::AsyncWrite + Unpin + Send + 'static,
+S: xidl_jsonrpc::Stream + Unpin + Send + 'static,
 {
     {% for method in methods %}
         {% if method.kind == "rpc" %}
@@ -275,7 +270,7 @@ W: tokio::io::AsyncWrite + Unpin + Send + 'static,
                         {{ field.name }},
                     {% endfor %}
                 };
-                let stream = xidl_jsonrpc::transport::connect(&endpoint)
+                let stream = xidl_jsonrpc::connect(&endpoint)
                 .await
                 .map_err(xidl_jsonrpc::Error::Io)?;
                 let reader = xidl_jsonrpc::stream::open_server_stream_client(
@@ -292,7 +287,7 @@ W: tokio::io::AsyncWrite + Unpin + Send + 'static,
             .endpoint
             .clone()
             .ok_or(xidl_jsonrpc::Error::Protocol("missing endpoint for stream method"))?;
-            let mut io = xidl_jsonrpc::transport::connect(&endpoint)
+            let mut io = xidl_jsonrpc::connect(&endpoint)
             .await
             .map_err(xidl_jsonrpc::Error::Io)?;
             let request = ::serde_json::json!({
@@ -346,10 +341,9 @@ W: tokio::io::AsyncWrite + Unpin + Send + 'static,
 {% endfor %}
 }
 
-impl<R, W> {{ ident }}Client<R, W>
+impl<S> {{ ident }}Client<S>
 where
-R: tokio::io::AsyncRead + Unpin + Send + 'static,
-W: tokio::io::AsyncWrite + Unpin + Send + 'static,
+S: xidl_jsonrpc::Stream + Unpin + Send + 'static,
 {
     {% for method in watch_methods %}
         pub async fn {{ method.getter_name }}(&self) -> Result<xidl_jsonrpc::stream::Reader<'static, {{ method.item_ty }}>, xidl_jsonrpc::Error> {
@@ -357,7 +351,7 @@ W: tokio::io::AsyncWrite + Unpin + Send + 'static,
         .endpoint
         .clone()
         .ok_or(xidl_jsonrpc::Error::Protocol("missing endpoint for stream method"))?;
-        let io = xidl_jsonrpc::transport::connect(&endpoint)
+        let io = xidl_jsonrpc::connect(&endpoint)
         .await
         .map_err(xidl_jsonrpc::Error::Io)?;
         let mut source = xidl_jsonrpc::stream::open_server_stream_client(
@@ -382,7 +376,7 @@ W: tokio::io::AsyncWrite + Unpin + Send + 'static,
             .endpoint
             .clone()
             .ok_or(xidl_jsonrpc::Error::Protocol("missing endpoint for stream method"))?;
-            let mut io = xidl_jsonrpc::transport::connect(&endpoint)
+            let mut io = xidl_jsonrpc::connect(&endpoint)
             .await
             .map_err(xidl_jsonrpc::Error::Io)?;
             let request = ::serde_json::json!({
@@ -448,7 +442,7 @@ W: tokio::io::AsyncWrite + Unpin + Send + 'static,
             .endpoint
             .clone()
             .ok_or(xidl_jsonrpc::Error::Protocol("missing endpoint for bidi stream"))?;
-            let stream = xidl_jsonrpc::transport::connect(&endpoint)
+            let stream = xidl_jsonrpc::connect(&endpoint)
             .await
             .map_err(xidl_jsonrpc::Error::Io)?;
             xidl_jsonrpc::stream::open_bidi_client(stream, "{{ method.rpc_name }}").await
