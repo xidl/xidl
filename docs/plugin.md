@@ -22,13 +22,13 @@ diagnostics, or HIR creation.
 ## Conventions
 
 - Plugin executable name: `xidl-<lang>` (for example, `xidl-foo`).
-- Invocation example: `xidlc --lang foo --out-dir out path/to/file.idl`
+- Invocation example: `xidlc gen --out-dir out foo path/to/file.idl`
 - Transport:
   - Unix: `ipc://...` over Unix domain sockets
   - Windows: `tcp://127.0.0.1:PORT`
 - Protocol: JSON-RPC 2.0 over the endpoint passed in `--endpoint`.
 
-The `<lang>` portion is the target string the user passes to `--lang`.
+The `<lang>` portion is the generator subcommand the user passes to `xidlc gen`.
 
 ## Required Methods
 
@@ -120,7 +120,7 @@ Generate the RPC bindings from `ipc.idl`, then use the generated `Codegen`
 interface in your plugin:
 
 ```sh
-xidlc --lang rust-jsonrpc --out-dir src ipc.idl
+xidlc gen --out-dir src rust-jsonrpc ipc.idl
 ```
 
 ### Step 2. Implement the generated trait
@@ -178,7 +178,7 @@ async fn main() {
 If your plugin binary is named `xidl-foo`, users can run:
 
 ```bash
-xidlc --lang foo --out-dir out path/to/file.idl
+xidlc gen --out-dir out foo path/to/file.idl
 ```
 
 The compiler will resolve `foo` to the external executable, start it, and
@@ -191,7 +191,7 @@ deliver the generation request over the endpoint passed in `--endpoint`.
 3. Implement `parser_properties`.
 4. Implement `generate`.
 5. Return a file list from `generate`.
-6. Run `xidlc --lang foo ...` against a sample IDL file.
+6. Run `xidlc gen foo ...` against a sample IDL file.
 7. Verify the produced files in the output directory.
 
 ## Data contract details

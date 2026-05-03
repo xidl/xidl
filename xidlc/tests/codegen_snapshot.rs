@@ -167,11 +167,11 @@ async fn skip_cdr_codec_matches_disabling_serialize_and_deserialize() {
     fs::create_dir_all(&out_dir).expect("create output dir");
     let cli = xidlc::cli::Cli::parse_from([
         "xidlc",
-        "--lang",
-        "rust",
+        "gen",
         "--out-dir",
         out_dir.to_str().expect("utf8 path"),
         "--skip-cdr-codec",
+        "rust",
         case_path.to_str().expect("utf8 path"),
     ]);
     cli.run().await.expect("run cli");

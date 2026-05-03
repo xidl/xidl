@@ -38,19 +38,19 @@ When you need orientation, read these docs first:
 Generate Rust:
 
 ```bash
-xidlc --lang rust --out-dir out api.idl
+xidlc gen --out-dir out rust api.idl
 ```
 
 Generate Axum:
 
 ```bash
-xidlc --lang rust-axum --out-dir out api.idl
+xidlc gen --out-dir out rust-axum api.idl
 ```
 
 Generate OpenAPI:
 
 ```bash
-xidlc --lang openapi --out-dir out api.idl
+xidlc gen --out-dir out openapi api.idl
 ```
 
 Use Rust build integration:

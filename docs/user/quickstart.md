@@ -34,7 +34,7 @@ cargo binstall xidlc
 ## Generate code
 
 ```bash
-xidlc -l rust -o out your.idl
+xidlc gen -o out rust your.idl
 ```
 
 ## Built-in targets
@@ -45,10 +45,12 @@ xidlc -l rust -o out your.idl
 - `rust-jsonrpc`
 - `rust-axum`
 - `ts` / `typescript`
+- `go`
+- `go-http`
+- `python`
+- `python-http`
 - `openapi`
 - `openrpc`
-- `hir`
-- `typed-ast`
 
 ## Related guides
 

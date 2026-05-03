@@ -23,13 +23,13 @@ description: "在 Rust 项目中使用 XIDL 的常见接入方式。"
 例子：
 
 ```bash
-xidlc -l rust -o src/generated api.idl
+xidlc gen -o src/generated rust api.idl
 ```
 
 或者：
 
 ```bash
-xidlc -l rust-axum -o src/generated api.idl
+xidlc gen -o src/generated rust-axum api.idl
 ```
 
 ### 2. 用 `xidl-build` 接入 `build.rs`

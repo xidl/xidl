@@ -19,21 +19,21 @@ description: "XIDL CLI 的核心心智模型、常见参数和典型工作流。
 最小命令：
 
 ```bash
-xidlc --lang rust --out-dir out path/to/file.idl
+xidlc gen --out-dir out rust path/to/file.idl
 ```
 
 短写：
 
 ```bash
-xidlc -l rust -o out path/to/file.idl
+xidlc gen -o out rust path/to/file.idl
 ```
 
 ## 常用参数
 
-- `--lang`, `-l`：选择目标生成器
 - `--out-dir`, `-o`：指定输出目录
-- `--client`：只生成客户端相关产物
-- `--server`：控制是否生成服务端相关产物
+- `<lang>`：选择 `xidlc gen` 下的目标生成器子命令
+- `--client`：为支持该参数的目标额外生成客户端相关产物
+- `--server`：为支持该参数的目标生成服务端相关产物
 - `--dry-run`：执行解析和生成流程，但不落盘
 
 ## 常见工作流
@@ -41,31 +41,31 @@ xidlc -l rust -o out path/to/file.idl
 ### 生成 Rust 类型
 
 ```bash
-xidlc -l rust -o src/generated api.idl
+xidlc gen -o src/generated rust api.idl
 ```
 
 ### 生成 Axum HTTP 绑定
 
 ```bash
-xidlc -l rust-axum -o src/generated api.idl
+xidlc gen -o src/generated rust-axum api.idl
 ```
 
 ### 生成 JSON-RPC 绑定
 
 ```bash
-xidlc -l rust-jsonrpc -o src/generated api.idl
+xidlc gen -o src/generated rust-jsonrpc api.idl
 ```
 
 ### 生成 OpenAPI
 
 ```bash
-xidlc -l openapi -o generated api.idl
+xidlc gen -o generated openapi api.idl
 ```
 
 ### 生成 OpenRPC
 
 ```bash
-xidlc -l openrpc -o generated api.idl
+xidlc gen -o generated openrpc api.idl
 ```
 
 ## 格式化

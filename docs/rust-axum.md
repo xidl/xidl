@@ -6,13 +6,13 @@ clients.
 ## Minimal flow
 
 ```bash
-xidlc --lang rust-axum --out-dir generated hello_world.idl
+xidlc gen --out-dir generated rust-axum hello_world.idl
 ```
 
 Generate OpenAPI alongside it when you need a schema document:
 
 ```bash
-xidlc --lang openapi --out-dir generated hello_world.idl
+xidlc gen --out-dir generated openapi hello_world.idl
 ```
 
 ## What gets generated
