@@ -6,6 +6,9 @@ use super::annotations::{
     annotation_name, annotation_params, normalize_annotation_params, parse_string_array,
 };
 
+#[cfg(test)]
+mod tests;
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum HttpApiKeyLocation {
     Header,
