@@ -20,6 +20,7 @@ XIDL 能把一个契约映射到不同协议和目标的关键。
 
 - 会影响 Rust、HTTP、OpenAPI、TypeScript 等目标
 - 不适用于 HTTP 路径参数
+- 在 HTTP 里，它是“保留缺席语义”的关键注解
 
 ### `@name("...")`
 
@@ -52,11 +53,64 @@ HTTP 动词：
 - `@header`
 - `@cookie`
 
+补充说明：
+
+- 这些注解既可以写成无参形式，例如 `@path`、`@query`
+- 也可以写成显式命名形式，例如 `@path("id")`、`@header("X-Trace-Id")`
+- 如果外部名字和 IDL 参数名不同，优先用显式命名形式
+
 内容和行为：
 
 - `@Consumes`
 - `@Produces`
 - `@deprecated`
+
+实践上可以把它们分成三类理解：
+
+- 路由和来源：`@get`、`@post`、`@path`、`@query`、`@body`、`@header`、`@cookie`
+- payload 形状：`@flatten`、`@optional`
+- 行为和元数据：`@Consumes`、`@Produces`、`@deprecated`
+
+### `@flatten`
+
+作用：
+
+- 单个 body 参数直接展开为请求体，而不是按参数名包一层对象
+
+实践说明：
+
+- 只适合“恰好一个 body 参数”的场景
+- 更适合 wire format 已经固定的 HTTP API
+- 如果领域上本来就存在一个明确的请求对象，仍然优先考虑直接传 struct
+
+### `@Consumes` / `@Produces`
+
+作用：
+
+- 指定请求体解码媒体类型和响应体编码媒体类型
+
+实践说明：
+
+- 可以放在接口级作为默认值
+- 也可以放在方法级做局部覆盖
+- 如果一个接口里大多数方法都一致，优先用接口级
+
+### `@deprecated`
+
+作用：
+
+- 标记接口、方法或 attribute 已废弃
+
+常见形式：
+
+- `@deprecated`
+- `@deprecated("2026-01-01")`
+- `@deprecated(since = "...", after = "...")`
+
+实践说明：
+
+- 接口级声明会被更具体的成员继承
+- 方法级和 attribute 级声明更适合表达局部差异
 
 这些注解应该配合[HTTP 文档](./http/)和[HTTP RFC](../rfc/http/)一起理解。
 
@@ -89,6 +143,12 @@ HTTP 动词：
 - 接口级声明适合做默认值
 - 方法级声明适合做覆盖
 - `@no_security` 用于显式清除继承的安全要求
+
+额外建议：
+
+- `@http_basic(realm = "...")` 适合需要明确登录域提示的接口
+- `@api_key(...)` 的 `in` 常见是 `header`、`cookie`、`query`
+- 设计接口时，先决定“默认安全策略”，再决定哪些方法需要覆盖或公开
 
 ## Rust 透传注解
 
