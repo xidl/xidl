@@ -7,7 +7,9 @@
 {%- if derive and derive | length > 0 %}
     #[derive({{ derive | join(", ") }})]
 {%- endif %}
+{% if opt.enable_default_derive is undefined or opt.enable_default_derive %}
 #[derive(Default)]
+{% endif %}
 pub struct {{ ident }} {
     {% if parent %}
         pub base: {{ parent }},

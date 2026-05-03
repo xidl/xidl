@@ -57,7 +57,7 @@ pub(super) fn rpc_endpoint(_lang: &str) -> IdlcResult<String> {
 
 pub(super) async fn verify_engine_version<S>(client: &CodegenClient<S>) -> IdlcResult<()>
 where
-    S: xidl_jsonrpc::transport::Stream + Unpin + Send,
+    S: xidl_jsonrpc::transport::Stream + Unpin + Send + 'static,
 {
     let engine_req: String = client
         .get_engine_version()
