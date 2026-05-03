@@ -1,0 +1,116 @@
+#pragma xidlc package xidlc
+#pragma xidlc version v1.0.0
+
+struct MatrixBody {
+    string name;
+    @optional
+    string alias;
+    sequence<string> tags;
+};
+
+@deprecated("2026-01-15")
+@Consumes("application/json")
+@Produces("application/json")
+interface HttpScopeMatrixService {
+    readonly attribute string inherited_attr;
+
+    @deprecated
+    readonly attribute string bare_attr;
+
+    @post(path = "/v2/scope/default")
+    string default_scope(
+        MatrixBody req
+    );
+
+    @post(path = "/v2/scope/override-consumes")
+    @Consumes("application/x-www-form-urlencoded")
+    string override_consumes_only(
+        string name,
+        @optional
+        uint32 age,
+        out string normalized_name
+    );
+
+    @get(path = "/v2/scope/override-produces/{id}")
+    @Produces("application/msgpack")
+    MatrixBody override_produces_only(
+        @path
+        string id,
+        out uint32 revision
+    );
+
+    @post(path = "/v2/scope/override-both")
+    @Consumes("application/x-www-form-urlencoded")
+    @Produces("application/msgpack")
+    MatrixBody override_both_media(
+        string name,
+        @optional
+        uint32 age,
+        out string normalized_name
+    );
+
+    @deprecated
+    @get(path = "/v2/scope/deprecated/plain/{id}")
+    string deprecated_plain(
+        @path
+        string id
+    );
+
+    @deprecated("2026-02-01")
+    @get(path = "/v2/scope/deprecated/since/{id}")
+    string deprecated_since_only(
+        @path
+        string id
+    );
+
+    @deprecated(since = "2026-03-01", after = "2026-12-31")
+    @get(path = "/v2/scope/deprecated/window/{id}")
+    string deprecated_window(
+        @path
+        string id
+    );
+};
+
+@http_basic(realm = "matrix realm")
+@api_key(in = "query", name = "org_key")
+interface HttpSecurityMatrixService {
+    @get(path = "/v2/security/inherited/{id}")
+    string inherited_security(
+        @path
+        string id,
+        @header
+        string x_trace_id
+    );
+
+    @http_bearer
+    @api_key(in = "cookie", name = "session_key")
+    @post(path = "/v2/security/bearer-cookie")
+    string bearer_or_cookie_security(
+        string action,
+        @optional
+        string note
+    );
+
+    @http_bearer
+    @api_key(in = "header", name = "X-Alt-Key")
+    @get(path = "/v2/security/alternatives/{id}")
+    string alternative_security(
+        @path
+        string id,
+        @query("locale")
+        @optional
+        string locale
+    );
+
+    @oauth2(scopes = "reports:write,reports:read")
+    @post(path = "/v2/security/oauth-search")
+    string oauth_security(
+        string keyword,
+        @optional
+        uint32 page
+    );
+
+    @no_security
+    @get(path = "/v2/security/public/ping")
+    string public_ping();
+};

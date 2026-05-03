@@ -499,6 +499,45 @@ export class HttpEdgeCasesServiceClient{
         return data as string;
     }
 
+    async dedup_user(
+    id : number
+    ) : Promise<
+    string
+    >{
+        const parsed = zodSchemas.HttpEdgeCasesServiceDedupUserRequestSchema.parse(
+        {
+            "id" : id
+        }
+        );
+        let path = "/v1/dedup/{id}";
+        path = path.replace(
+        "{"+"id"+"}", encodePathSegment(
+        parsed["id"]
+        )
+        );
+        const headers = new Headers(
+        this.defaultHeaders
+        );
+        const options = {
+            method : "GET", headers
+        };
+        const url = joinUrl(
+        this.baseUrl, path
+        );
+        const resp = await this.fetchImpl(
+        url, options
+        );
+        if(!resp.ok){
+            throw await parseXidlError(
+            resp
+            );
+        }
+        const data = await resp.json(
+
+        );
+        return data as string;
+    }
+
     async get_item(
     order_id : number, item_id : number
     ) : Promise<
@@ -613,6 +652,10 @@ export interface HttpEdgeCasesServiceGetUserRequest{
     locale : string;
 }
 
+export interface HttpEdgeCasesServiceDedupUserRequest{
+    id : number;
+}
+
 export interface HttpEdgeCasesServiceGetItemRequest{
     order_id : number;
     item_id : number;
@@ -652,6 +695,20 @@ export const HttpEdgeCasesServiceGetUserRequestSchema = z.object(
 );
 export type HttpEdgeCasesServiceGetUserRequest = z.infer<
 typeof HttpEdgeCasesServiceGetUserRequestSchema
+>;
+export const HttpEdgeCasesServiceDedupUserRequestSchema = z.object(
+{
+    id : z.number(
+
+    ).int(
+
+    ).nonnegative(
+
+    ),
+}
+);
+export type HttpEdgeCasesServiceDedupUserRequest = z.infer<
+typeof HttpEdgeCasesServiceDedupUserRequestSchema
 >;
 export const HttpEdgeCasesServiceGetItemRequestSchema = z.object(
 {

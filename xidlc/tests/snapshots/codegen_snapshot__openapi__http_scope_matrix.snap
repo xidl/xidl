@@ -1,0 +1,1712 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+openapi.json
+===============
+{
+  "components": {
+    "schemas": {
+      "Error": {
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "details": {
+            "type": "object"
+          },
+          "msg": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "msg"
+        ],
+        "type": "object"
+      },
+      "HttpScopeMatrixService_Call": {
+        "oneOf": [
+          {
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            },
+            "required": [
+              "unknownOp"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "get_attribute_inherited_attr": {
+                "$ref": "#/components/schemas/HttpScopeMatrixService_get_attribute_inherited_attr_In"
+              }
+            },
+            "required": [
+              "get_attribute_inherited_attr"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "get_attribute_bare_attr": {
+                "$ref": "#/components/schemas/HttpScopeMatrixService_get_attribute_bare_attr_In"
+              }
+            },
+            "required": [
+              "get_attribute_bare_attr"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "default_scope": {
+                "$ref": "#/components/schemas/HttpScopeMatrixService_default_scope_In"
+              }
+            },
+            "required": [
+              "default_scope"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "override_consumes_only": {
+                "$ref": "#/components/schemas/HttpScopeMatrixService_override_consumes_only_In"
+              }
+            },
+            "required": [
+              "override_consumes_only"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "override_produces_only": {
+                "$ref": "#/components/schemas/HttpScopeMatrixService_override_produces_only_In"
+              }
+            },
+            "required": [
+              "override_produces_only"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "override_both_media": {
+                "$ref": "#/components/schemas/HttpScopeMatrixService_override_both_media_In"
+              }
+            },
+            "required": [
+              "override_both_media"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "deprecated_plain": {
+                "$ref": "#/components/schemas/HttpScopeMatrixService_deprecated_plain_In"
+              }
+            },
+            "required": [
+              "deprecated_plain"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "deprecated_since_only": {
+                "$ref": "#/components/schemas/HttpScopeMatrixService_deprecated_since_only_In"
+              }
+            },
+            "required": [
+              "deprecated_since_only"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "deprecated_window": {
+                "$ref": "#/components/schemas/HttpScopeMatrixService_deprecated_window_In"
+              }
+            },
+            "required": [
+              "deprecated_window"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpScopeMatrixService_Reply": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/HttpScopeMatrixService_Return"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
+          }
+        },
+        "required": [
+          "header",
+          "data"
+        ],
+        "type": "object"
+      },
+      "HttpScopeMatrixService_Request": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/HttpScopeMatrixService_Call"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
+          }
+        },
+        "required": [
+          "header",
+          "data"
+        ],
+        "type": "object"
+      },
+      "HttpScopeMatrixService_Return": {
+        "oneOf": [
+          {
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            },
+            "required": [
+              "unknownOp"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "get_attribute_inherited_attr": {
+                "$ref": "#/components/schemas/HttpScopeMatrixService_get_attribute_inherited_attr_Result"
+              }
+            },
+            "required": [
+              "get_attribute_inherited_attr"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "get_attribute_bare_attr": {
+                "$ref": "#/components/schemas/HttpScopeMatrixService_get_attribute_bare_attr_Result"
+              }
+            },
+            "required": [
+              "get_attribute_bare_attr"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "default_scope": {
+                "$ref": "#/components/schemas/HttpScopeMatrixService_default_scope_Result"
+              }
+            },
+            "required": [
+              "default_scope"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "override_consumes_only": {
+                "$ref": "#/components/schemas/HttpScopeMatrixService_override_consumes_only_Result"
+              }
+            },
+            "required": [
+              "override_consumes_only"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "override_produces_only": {
+                "$ref": "#/components/schemas/HttpScopeMatrixService_override_produces_only_Result"
+              }
+            },
+            "required": [
+              "override_produces_only"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "override_both_media": {
+                "$ref": "#/components/schemas/HttpScopeMatrixService_override_both_media_Result"
+              }
+            },
+            "required": [
+              "override_both_media"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "deprecated_plain": {
+                "$ref": "#/components/schemas/HttpScopeMatrixService_deprecated_plain_Result"
+              }
+            },
+            "required": [
+              "deprecated_plain"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "deprecated_since_only": {
+                "$ref": "#/components/schemas/HttpScopeMatrixService_deprecated_since_only_Result"
+              }
+            },
+            "required": [
+              "deprecated_since_only"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "deprecated_window": {
+                "$ref": "#/components/schemas/HttpScopeMatrixService_deprecated_window_Result"
+              }
+            },
+            "required": [
+              "deprecated_window"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpScopeMatrixService_default_scope_In": {
+        "properties": {
+          "req": {
+            "$ref": "#/components/schemas/MatrixBody"
+          }
+        },
+        "required": [
+          "req"
+        ],
+        "type": "object"
+      },
+      "HttpScopeMatrixService_default_scope_Out": {
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "return_"
+        ],
+        "type": "object"
+      },
+      "HttpScopeMatrixService_default_scope_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpScopeMatrixService_default_scope_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpScopeMatrixService_deprecated_plain_In": {
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "HttpScopeMatrixService_deprecated_plain_Out": {
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "return_"
+        ],
+        "type": "object"
+      },
+      "HttpScopeMatrixService_deprecated_plain_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpScopeMatrixService_deprecated_plain_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpScopeMatrixService_deprecated_since_only_In": {
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "HttpScopeMatrixService_deprecated_since_only_Out": {
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "return_"
+        ],
+        "type": "object"
+      },
+      "HttpScopeMatrixService_deprecated_since_only_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpScopeMatrixService_deprecated_since_only_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpScopeMatrixService_deprecated_window_In": {
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "HttpScopeMatrixService_deprecated_window_Out": {
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "return_"
+        ],
+        "type": "object"
+      },
+      "HttpScopeMatrixService_deprecated_window_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpScopeMatrixService_deprecated_window_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpScopeMatrixService_get_attribute_bare_attr_In": {
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        },
+        "required": [
+          "dummy"
+        ],
+        "type": "object"
+      },
+      "HttpScopeMatrixService_get_attribute_bare_attr_Out": {
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "return_"
+        ],
+        "type": "object"
+      },
+      "HttpScopeMatrixService_get_attribute_bare_attr_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpScopeMatrixService_get_attribute_bare_attr_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpScopeMatrixService_get_attribute_inherited_attr_In": {
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        },
+        "required": [
+          "dummy"
+        ],
+        "type": "object"
+      },
+      "HttpScopeMatrixService_get_attribute_inherited_attr_Out": {
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "return_"
+        ],
+        "type": "object"
+      },
+      "HttpScopeMatrixService_get_attribute_inherited_attr_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpScopeMatrixService_get_attribute_inherited_attr_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpScopeMatrixService_override_both_media_In": {
+        "properties": {
+          "age": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "age"
+        ],
+        "type": "object"
+      },
+      "HttpScopeMatrixService_override_both_media_Out": {
+        "properties": {
+          "normalized_name": {
+            "type": "string"
+          },
+          "return_": {
+            "$ref": "#/components/schemas/MatrixBody"
+          }
+        },
+        "required": [
+          "normalized_name",
+          "return_"
+        ],
+        "type": "object"
+      },
+      "HttpScopeMatrixService_override_both_media_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpScopeMatrixService_override_both_media_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpScopeMatrixService_override_consumes_only_In": {
+        "properties": {
+          "age": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "age"
+        ],
+        "type": "object"
+      },
+      "HttpScopeMatrixService_override_consumes_only_Out": {
+        "properties": {
+          "normalized_name": {
+            "type": "string"
+          },
+          "return_": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "normalized_name",
+          "return_"
+        ],
+        "type": "object"
+      },
+      "HttpScopeMatrixService_override_consumes_only_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpScopeMatrixService_override_consumes_only_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpScopeMatrixService_override_produces_only_In": {
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "HttpScopeMatrixService_override_produces_only_Out": {
+        "properties": {
+          "return_": {
+            "$ref": "#/components/schemas/MatrixBody"
+          },
+          "revision": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "revision",
+          "return_"
+        ],
+        "type": "object"
+      },
+      "HttpScopeMatrixService_override_produces_only_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpScopeMatrixService_override_produces_only_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpSecurityMatrixService_Call": {
+        "oneOf": [
+          {
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            },
+            "required": [
+              "unknownOp"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "inherited_security": {
+                "$ref": "#/components/schemas/HttpSecurityMatrixService_inherited_security_In"
+              }
+            },
+            "required": [
+              "inherited_security"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "bearer_or_cookie_security": {
+                "$ref": "#/components/schemas/HttpSecurityMatrixService_bearer_or_cookie_security_In"
+              }
+            },
+            "required": [
+              "bearer_or_cookie_security"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "alternative_security": {
+                "$ref": "#/components/schemas/HttpSecurityMatrixService_alternative_security_In"
+              }
+            },
+            "required": [
+              "alternative_security"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "oauth_security": {
+                "$ref": "#/components/schemas/HttpSecurityMatrixService_oauth_security_In"
+              }
+            },
+            "required": [
+              "oauth_security"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "public_ping": {
+                "$ref": "#/components/schemas/HttpSecurityMatrixService_public_ping_In"
+              }
+            },
+            "required": [
+              "public_ping"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpSecurityMatrixService_Reply": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/HttpSecurityMatrixService_Return"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
+          }
+        },
+        "required": [
+          "header",
+          "data"
+        ],
+        "type": "object"
+      },
+      "HttpSecurityMatrixService_Request": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/HttpSecurityMatrixService_Call"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
+          }
+        },
+        "required": [
+          "header",
+          "data"
+        ],
+        "type": "object"
+      },
+      "HttpSecurityMatrixService_Return": {
+        "oneOf": [
+          {
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            },
+            "required": [
+              "unknownOp"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "inherited_security": {
+                "$ref": "#/components/schemas/HttpSecurityMatrixService_inherited_security_Result"
+              }
+            },
+            "required": [
+              "inherited_security"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "bearer_or_cookie_security": {
+                "$ref": "#/components/schemas/HttpSecurityMatrixService_bearer_or_cookie_security_Result"
+              }
+            },
+            "required": [
+              "bearer_or_cookie_security"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "alternative_security": {
+                "$ref": "#/components/schemas/HttpSecurityMatrixService_alternative_security_Result"
+              }
+            },
+            "required": [
+              "alternative_security"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "oauth_security": {
+                "$ref": "#/components/schemas/HttpSecurityMatrixService_oauth_security_Result"
+              }
+            },
+            "required": [
+              "oauth_security"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "public_ping": {
+                "$ref": "#/components/schemas/HttpSecurityMatrixService_public_ping_Result"
+              }
+            },
+            "required": [
+              "public_ping"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpSecurityMatrixService_alternative_security_In": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "locale"
+        ],
+        "type": "object"
+      },
+      "HttpSecurityMatrixService_alternative_security_Out": {
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "return_"
+        ],
+        "type": "object"
+      },
+      "HttpSecurityMatrixService_alternative_security_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpSecurityMatrixService_alternative_security_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpSecurityMatrixService_bearer_or_cookie_security_In": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "action",
+          "note"
+        ],
+        "type": "object"
+      },
+      "HttpSecurityMatrixService_bearer_or_cookie_security_Out": {
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "return_"
+        ],
+        "type": "object"
+      },
+      "HttpSecurityMatrixService_bearer_or_cookie_security_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpSecurityMatrixService_bearer_or_cookie_security_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpSecurityMatrixService_inherited_security_In": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "x_trace_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "x_trace_id"
+        ],
+        "type": "object"
+      },
+      "HttpSecurityMatrixService_inherited_security_Out": {
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "return_"
+        ],
+        "type": "object"
+      },
+      "HttpSecurityMatrixService_inherited_security_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpSecurityMatrixService_inherited_security_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpSecurityMatrixService_oauth_security_In": {
+        "properties": {
+          "keyword": {
+            "type": "string"
+          },
+          "page": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "keyword",
+          "page"
+        ],
+        "type": "object"
+      },
+      "HttpSecurityMatrixService_oauth_security_Out": {
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "return_"
+        ],
+        "type": "object"
+      },
+      "HttpSecurityMatrixService_oauth_security_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpSecurityMatrixService_oauth_security_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpSecurityMatrixService_public_ping_In": {
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        },
+        "required": [
+          "dummy"
+        ],
+        "type": "object"
+      },
+      "HttpSecurityMatrixService_public_ping_Out": {
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "return_"
+        ],
+        "type": "object"
+      },
+      "HttpSecurityMatrixService_public_ping_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpSecurityMatrixService_public_ping_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "MatrixBody": {
+        "properties": {
+          "alias": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "tags"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "api_key-cookie-session_key": {
+        "in": "cookie",
+        "name": "session_key",
+        "type": "apiKey"
+      },
+      "api_key-header-x-alt-key": {
+        "in": "header",
+        "name": "X-Alt-Key",
+        "type": "apiKey"
+      },
+      "api_key-query-org_key": {
+        "in": "query",
+        "name": "org_key",
+        "type": "apiKey"
+      },
+      "http_basic": {
+        "scheme": "basic",
+        "type": "http"
+      },
+      "http_bearer": {
+        "scheme": "bearer",
+        "type": "http"
+      },
+      "oauth2": {
+        "flows": {
+          "clientCredentials": {
+            "scopes": {
+              "reports:read": "reports:read",
+              "reports:write": "reports:write"
+            },
+            "tokenUrl": "https://example.invalid/token"
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "xidlc",
+    "version": "v1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/attribute/bare_attr": {
+      "get": {
+        "deprecated": true,
+        "description": "Deprecated.",
+        "operationId": "HttpScopeMatrixService.get_attribute_bare_attr",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        }
+      }
+    },
+    "/attribute/inherited_attr": {
+      "get": {
+        "deprecated": true,
+        "description": "Deprecated. Since 2026-01-15T00:00:00Z.",
+        "operationId": "HttpScopeMatrixService.get_attribute_inherited_attr",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        }
+      }
+    },
+    "/v2/scope/default": {
+      "post": {
+        "deprecated": true,
+        "description": "Deprecated. Since 2026-01-15T00:00:00Z.",
+        "operationId": "HttpScopeMatrixService.default_scope",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatrixBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        }
+      }
+    },
+    "/v2/scope/deprecated/plain/{id}": {
+      "get": {
+        "deprecated": true,
+        "description": "Deprecated.",
+        "operationId": "HttpScopeMatrixService.deprecated_plain",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        }
+      }
+    },
+    "/v2/scope/deprecated/since/{id}": {
+      "get": {
+        "deprecated": true,
+        "description": "Deprecated. Since 2026-02-01T00:00:00Z.",
+        "operationId": "HttpScopeMatrixService.deprecated_since_only",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        }
+      }
+    },
+    "/v2/scope/deprecated/window/{id}": {
+      "get": {
+        "deprecated": true,
+        "description": "Deprecated. Since 2026-03-01T00:00:00Z. After 2026-12-31T23:59:59Z.",
+        "operationId": "HttpScopeMatrixService.deprecated_window",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        }
+      }
+    },
+    "/v2/scope/override-both": {
+      "post": {
+        "deprecated": true,
+        "description": "Deprecated. Since 2026-01-15T00:00:00Z.",
+        "operationId": "HttpScopeMatrixService.override_both_media",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "properties": {
+                  "age": {
+                    "format": "int32",
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/msgpack": {
+                "schema": {
+                  "properties": {
+                    "normalized_name": {
+                      "type": "string"
+                    },
+                    "return": {
+                      "$ref": "#/components/schemas/MatrixBody"
+                    }
+                  },
+                  "required": [
+                    "return",
+                    "normalized_name"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        }
+      }
+    },
+    "/v2/scope/override-consumes": {
+      "post": {
+        "deprecated": true,
+        "description": "Deprecated. Since 2026-01-15T00:00:00Z.",
+        "operationId": "HttpScopeMatrixService.override_consumes_only",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "properties": {
+                  "age": {
+                    "format": "int32",
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "normalized_name": {
+                      "type": "string"
+                    },
+                    "return": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "return",
+                    "normalized_name"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        }
+      }
+    },
+    "/v2/scope/override-produces/{id}": {
+      "get": {
+        "deprecated": true,
+        "description": "Deprecated. Since 2026-01-15T00:00:00Z.",
+        "operationId": "HttpScopeMatrixService.override_produces_only",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/msgpack": {
+                "schema": {
+                  "properties": {
+                    "return": {
+                      "$ref": "#/components/schemas/MatrixBody"
+                    },
+                    "revision": {
+                      "format": "int32",
+                      "minimum": 0,
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "return",
+                    "revision"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        }
+      }
+    },
+    "/v2/security/alternatives/{id}": {
+      "get": {
+        "operationId": "HttpSecurityMatrixService.alternative_security",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "locale",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "http_bearer": []
+          },
+          {
+            "api_key-header-x-alt-key": []
+          }
+        ]
+      }
+    },
+    "/v2/security/bearer-cookie": {
+      "post": {
+        "operationId": "HttpSecurityMatrixService.bearer_or_cookie_security",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "action": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "http_bearer": []
+          },
+          {
+            "api_key-cookie-session_key": []
+          }
+        ]
+      }
+    },
+    "/v2/security/inherited/{id}": {
+      "get": {
+        "operationId": "HttpSecurityMatrixService.inherited_security",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x_trace_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "http_basic": []
+          },
+          {
+            "api_key-query-org_key": []
+          }
+        ]
+      }
+    },
+    "/v2/security/oauth-search": {
+      "post": {
+        "operationId": "HttpSecurityMatrixService.oauth_security",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "keyword": {
+                    "type": "string"
+                  },
+                  "page": {
+                    "format": "int32",
+                    "minimum": 0,
+                    "type": "integer"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "reports:write",
+              "reports:read"
+            ]
+          }
+        ]
+      }
+    },
+    "/v2/security/public/ping": {
+      "get": {
+        "operationId": "HttpSecurityMatrixService.public_ping",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": []
+      }
+    }
+  }
+}

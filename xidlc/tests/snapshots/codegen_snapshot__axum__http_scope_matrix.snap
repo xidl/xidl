@@ -1,0 +1,2418 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+http_scope_matrix.rs
+===============
+#[async_trait::async_trait]
+pub trait HttpScopeMatrixService {
+    #[deprecated(note = "Deprecated. Since 2026-01-15T00:00:00Z.")]
+    async fn get_attribute_inherited_attr(&self) -> ::xidl_rust_axum::Result<String>;
+    #[deprecated(note = "Deprecated.")]
+    async fn get_attribute_bare_attr(&self) -> ::xidl_rust_axum::Result<String>;
+    #[deprecated(note = "Deprecated. Since 2026-01-15T00:00:00Z.")]
+    async fn default_scope(&self, req: MatrixBody) -> ::xidl_rust_axum::Result<String>;
+    #[deprecated(note = "Deprecated. Since 2026-01-15T00:00:00Z.")]
+    async fn override_consumes_only(
+        &self,
+        name: String,
+        age: Option<u32>,
+    ) -> ::xidl_rust_axum::Result<HttpScopeMatrixServiceOverrideConsumesOnlyResponse>;
+    #[deprecated(note = "Deprecated. Since 2026-01-15T00:00:00Z.")]
+    async fn override_produces_only(
+        &self,
+        id: String,
+    ) -> ::xidl_rust_axum::Result<HttpScopeMatrixServiceOverrideProducesOnlyResponse>;
+    #[deprecated(note = "Deprecated. Since 2026-01-15T00:00:00Z.")]
+    async fn override_both_media(
+        &self,
+        name: String,
+        age: Option<u32>,
+    ) -> ::xidl_rust_axum::Result<HttpScopeMatrixServiceOverrideBothMediaResponse>;
+    #[deprecated(note = "Deprecated.")]
+    async fn deprecated_plain(&self, id: String) -> ::xidl_rust_axum::Result<String>;
+    #[deprecated(note = "Deprecated. Since 2026-02-01T00:00:00Z.")]
+    async fn deprecated_since_only(
+        &self,
+        id: String,
+    ) -> ::xidl_rust_axum::Result<String>;
+    #[deprecated(
+        note = "Deprecated. Since 2026-03-01T00:00:00Z. After 2026-12-31T23:59:59Z."
+    )]
+    async fn deprecated_window(&self, id: String) -> ::xidl_rust_axum::Result<String>;
+}
+mod __xidl_in_HttpScopeMatrixService {
+    use super::*;
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    pub(super) struct MatrixBody {
+        name: String,
+        #[serde(default)]
+        alias: Option<String>,
+        tags: Vec<String>,
+    }
+    impl From<super::MatrixBody> for MatrixBody {
+        fn from(value: super::MatrixBody) -> Self {
+            Self {
+                name: value.name,
+                alias: value.alias,
+                tags: value.tags.into_iter().map(|value| value).collect(),
+            }
+        }
+    }
+    impl From<MatrixBody> for super::MatrixBody {
+        fn from(value: MatrixBody) -> Self {
+            Self {
+                name: value.name,
+                alias: value.alias,
+                tags: value.tags.into_iter().map(|value| value).collect(),
+            }
+        }
+    }
+}
+mod __xidl_out_HttpScopeMatrixService {
+    use super::*;
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    pub(super) struct MatrixBody {
+        name: String,
+        #[serde(default)]
+        alias: Option<String>,
+        tags: Vec<String>,
+    }
+    impl From<super::MatrixBody> for MatrixBody {
+        fn from(value: super::MatrixBody) -> Self {
+            Self {
+                name: value.name,
+                alias: value.alias,
+                tags: value.tags.into_iter().map(|value| value).collect(),
+            }
+        }
+    }
+    impl From<MatrixBody> for super::MatrixBody {
+        fn from(value: MatrixBody) -> Self {
+            Self {
+                name: value.name,
+                alias: value.alias,
+                tags: value.tags.into_iter().map(|value| value).collect(),
+            }
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct HttpScopeMatrixServiceDefaultScopeRequestOutBody {
+    #[serde(default)]
+    req: __xidl_out_HttpScopeMatrixService::MatrixBody,
+}
+#[derive(::serde::Deserialize)]
+struct HttpScopeMatrixServiceDefaultScopeRequestInBody {
+    req: __xidl_in_HttpScopeMatrixService::MatrixBody,
+}
+#[derive(::serde::Deserialize)]
+struct HttpScopeMatrixServiceDefaultScopeRequest {
+    req: __xidl_in_HttpScopeMatrixService::MatrixBody,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpScopeMatrixServiceDefaultScopeRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let headers = &parts.headers;
+            if !::xidl_rust_axum::http::content_type_matches(
+                headers,
+                "application/json",
+            ) {
+                return Err(::xidl_rust_axum::Error::unsupported_media_type());
+            }
+            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+            let body: HttpScopeMatrixServiceDefaultScopeRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body_bytes)?;
+            let HttpScopeMatrixServiceDefaultScopeRequestInBody { req } = body;
+            Ok(Self { req })
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct HttpScopeMatrixServiceOverrideConsumesOnlyRequestOutBody {
+    #[serde(default)]
+    name: String,
+    #[serde(default)]
+    age: Option<u32>,
+}
+#[derive(::serde::Deserialize)]
+struct HttpScopeMatrixServiceOverrideConsumesOnlyRequestInBody {
+    name: String,
+    #[serde(default)]
+    age: Option<u32>,
+}
+#[derive(::serde::Deserialize)]
+struct HttpScopeMatrixServiceOverrideConsumesOnlyRequest {
+    name: String,
+    age: Option<u32>,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpScopeMatrixServiceOverrideConsumesOnlyRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let headers = &parts.headers;
+            if !::xidl_rust_axum::http::content_type_matches(
+                headers,
+                "application/x-www-form-urlencoded",
+            ) {
+                return Err(::xidl_rust_axum::Error::unsupported_media_type());
+            }
+            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+            let body: HttpScopeMatrixServiceOverrideConsumesOnlyRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+                    "application/x-www-form-urlencoded",
+                )
+                .from_slice(&body_bytes)?;
+            let HttpScopeMatrixServiceOverrideConsumesOnlyRequestInBody { name, age } = body;
+            Ok(Self { name, age })
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct HttpScopeMatrixServiceOverrideConsumesOnlyResponseOutBody {
+    r#return: String,
+    normalized_name: String,
+}
+#[derive(::serde::Deserialize)]
+struct HttpScopeMatrixServiceOverrideConsumesOnlyResponseInBody {
+    r#return: String,
+    normalized_name: String,
+}
+pub struct HttpScopeMatrixServiceOverrideConsumesOnlyResponse {
+    pub r#return: String,
+    pub normalized_name: String,
+}
+#[allow(clippy::useless_conversion)]
+impl From<HttpScopeMatrixServiceOverrideConsumesOnlyResponse>
+for HttpScopeMatrixServiceOverrideConsumesOnlyResponseOutBody {
+    fn from(value: HttpScopeMatrixServiceOverrideConsumesOnlyResponse) -> Self {
+        Self {
+            r#return: value.r#return,
+            normalized_name: value.normalized_name,
+        }
+    }
+}
+#[allow(clippy::useless_conversion)]
+impl From<HttpScopeMatrixServiceOverrideConsumesOnlyResponseInBody>
+for HttpScopeMatrixServiceOverrideConsumesOnlyResponse {
+    fn from(value: HttpScopeMatrixServiceOverrideConsumesOnlyResponseInBody) -> Self {
+        Self {
+            r#return: value.r#return,
+            normalized_name: value.normalized_name,
+        }
+    }
+}
+#[derive(::serde::Deserialize)]
+struct HttpScopeMatrixServiceOverrideProducesOnlyPath {
+    id: String,
+}
+#[derive(::serde::Deserialize)]
+struct HttpScopeMatrixServiceOverrideProducesOnlyRequest {
+    id: String,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpScopeMatrixServiceOverrideProducesOnlyRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+                HttpScopeMatrixServiceOverrideProducesOnlyPath,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpScopeMatrixServiceOverrideProducesOnlyPath { id } = path;
+            let headers = &parts.headers;
+            Ok(Self { id })
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct HttpScopeMatrixServiceOverrideProducesOnlyResponseOutBody {
+    r#return: __xidl_out_HttpScopeMatrixService::MatrixBody,
+    revision: u32,
+}
+#[derive(::serde::Deserialize)]
+struct HttpScopeMatrixServiceOverrideProducesOnlyResponseInBody {
+    r#return: __xidl_in_HttpScopeMatrixService::MatrixBody,
+    revision: u32,
+}
+pub struct HttpScopeMatrixServiceOverrideProducesOnlyResponse {
+    pub r#return: MatrixBody,
+    pub revision: u32,
+}
+#[allow(clippy::useless_conversion)]
+impl From<HttpScopeMatrixServiceOverrideProducesOnlyResponse>
+for HttpScopeMatrixServiceOverrideProducesOnlyResponseOutBody {
+    fn from(value: HttpScopeMatrixServiceOverrideProducesOnlyResponse) -> Self {
+        Self {
+            r#return: value.r#return.into(),
+            revision: value.revision,
+        }
+    }
+}
+#[allow(clippy::useless_conversion)]
+impl From<HttpScopeMatrixServiceOverrideProducesOnlyResponseInBody>
+for HttpScopeMatrixServiceOverrideProducesOnlyResponse {
+    fn from(value: HttpScopeMatrixServiceOverrideProducesOnlyResponseInBody) -> Self {
+        Self {
+            r#return: value.r#return.into(),
+            revision: value.revision,
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct HttpScopeMatrixServiceOverrideBothMediaRequestOutBody {
+    #[serde(default)]
+    name: String,
+    #[serde(default)]
+    age: Option<u32>,
+}
+#[derive(::serde::Deserialize)]
+struct HttpScopeMatrixServiceOverrideBothMediaRequestInBody {
+    name: String,
+    #[serde(default)]
+    age: Option<u32>,
+}
+#[derive(::serde::Deserialize)]
+struct HttpScopeMatrixServiceOverrideBothMediaRequest {
+    name: String,
+    age: Option<u32>,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpScopeMatrixServiceOverrideBothMediaRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let headers = &parts.headers;
+            if !::xidl_rust_axum::http::content_type_matches(
+                headers,
+                "application/x-www-form-urlencoded",
+            ) {
+                return Err(::xidl_rust_axum::Error::unsupported_media_type());
+            }
+            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+            let body: HttpScopeMatrixServiceOverrideBothMediaRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+                    "application/x-www-form-urlencoded",
+                )
+                .from_slice(&body_bytes)?;
+            let HttpScopeMatrixServiceOverrideBothMediaRequestInBody { name, age } = body;
+            Ok(Self { name, age })
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct HttpScopeMatrixServiceOverrideBothMediaResponseOutBody {
+    r#return: __xidl_out_HttpScopeMatrixService::MatrixBody,
+    normalized_name: String,
+}
+#[derive(::serde::Deserialize)]
+struct HttpScopeMatrixServiceOverrideBothMediaResponseInBody {
+    r#return: __xidl_in_HttpScopeMatrixService::MatrixBody,
+    normalized_name: String,
+}
+pub struct HttpScopeMatrixServiceOverrideBothMediaResponse {
+    pub r#return: MatrixBody,
+    pub normalized_name: String,
+}
+#[allow(clippy::useless_conversion)]
+impl From<HttpScopeMatrixServiceOverrideBothMediaResponse>
+for HttpScopeMatrixServiceOverrideBothMediaResponseOutBody {
+    fn from(value: HttpScopeMatrixServiceOverrideBothMediaResponse) -> Self {
+        Self {
+            r#return: value.r#return.into(),
+            normalized_name: value.normalized_name,
+        }
+    }
+}
+#[allow(clippy::useless_conversion)]
+impl From<HttpScopeMatrixServiceOverrideBothMediaResponseInBody>
+for HttpScopeMatrixServiceOverrideBothMediaResponse {
+    fn from(value: HttpScopeMatrixServiceOverrideBothMediaResponseInBody) -> Self {
+        Self {
+            r#return: value.r#return.into(),
+            normalized_name: value.normalized_name,
+        }
+    }
+}
+#[derive(::serde::Deserialize)]
+struct HttpScopeMatrixServiceDeprecatedPlainPath {
+    id: String,
+}
+#[derive(::serde::Deserialize)]
+struct HttpScopeMatrixServiceDeprecatedPlainRequest {
+    id: String,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpScopeMatrixServiceDeprecatedPlainRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+                HttpScopeMatrixServiceDeprecatedPlainPath,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpScopeMatrixServiceDeprecatedPlainPath { id } = path;
+            let headers = &parts.headers;
+            Ok(Self { id })
+        }
+    }
+}
+#[derive(::serde::Deserialize)]
+struct HttpScopeMatrixServiceDeprecatedSinceOnlyPath {
+    id: String,
+}
+#[derive(::serde::Deserialize)]
+struct HttpScopeMatrixServiceDeprecatedSinceOnlyRequest {
+    id: String,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpScopeMatrixServiceDeprecatedSinceOnlyRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+                HttpScopeMatrixServiceDeprecatedSinceOnlyPath,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpScopeMatrixServiceDeprecatedSinceOnlyPath { id } = path;
+            let headers = &parts.headers;
+            Ok(Self { id })
+        }
+    }
+}
+#[derive(::serde::Deserialize)]
+struct HttpScopeMatrixServiceDeprecatedWindowPath {
+    id: String,
+}
+#[derive(::serde::Deserialize)]
+struct HttpScopeMatrixServiceDeprecatedWindowRequest {
+    id: String,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpScopeMatrixServiceDeprecatedWindowRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+                HttpScopeMatrixServiceDeprecatedWindowPath,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpScopeMatrixServiceDeprecatedWindowPath { id } = path;
+            let headers = &parts.headers;
+            Ok(Self { id })
+        }
+    }
+}
+pub struct HttpScopeMatrixServiceServer<T> {
+    inner: ::std::sync::Arc<T>,
+}
+impl<T> HttpScopeMatrixServiceServer<T>
+where
+    T: HttpScopeMatrixService + Send + Sync + 'static,
+{
+    pub fn new(inner: T) -> Self {
+        Self {
+            inner: ::std::sync::Arc::new(inner),
+        }
+    }
+    pub fn from_arc(inner: ::std::sync::Arc<T>) -> Self {
+        Self { inner }
+    }
+    pub fn router(self) -> xidl_rust_axum::axum::Router {
+        let svc = self.inner;
+        xidl_rust_axum::axum::Router::new()
+            .route(
+                "/attribute/inherited_attr",
+                xidl_rust_axum::axum::routing::get(Self::get_attribute_inherited_attr),
+            )
+            .route(
+                "/attribute/bare_attr",
+                xidl_rust_axum::axum::routing::get(Self::get_attribute_bare_attr),
+            )
+            .route(
+                "/v2/scope/default",
+                xidl_rust_axum::axum::routing::post(Self::default_scope),
+            )
+            .route(
+                "/v2/scope/override-consumes",
+                xidl_rust_axum::axum::routing::post(Self::override_consumes_only),
+            )
+            .route(
+                "/v2/scope/override-produces/{id}",
+                xidl_rust_axum::axum::routing::get(Self::override_produces_only),
+            )
+            .route(
+                "/v2/scope/override-both",
+                xidl_rust_axum::axum::routing::post(Self::override_both_media),
+            )
+            .route(
+                "/v2/scope/deprecated/plain/{id}",
+                xidl_rust_axum::axum::routing::get(Self::deprecated_plain),
+            )
+            .route(
+                "/v2/scope/deprecated/since/{id}",
+                xidl_rust_axum::axum::routing::get(Self::deprecated_since_only),
+            )
+            .route(
+                "/v2/scope/deprecated/window/{id}",
+                xidl_rust_axum::axum::routing::get(Self::deprecated_window),
+            )
+            .with_state(svc)
+    }
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    async fn get_attribute_inherited_attr(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let mut resp = match svc.get_attribute_inherited_attr().await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    let body_value: String = resp_value;
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                        .to_vec(&body_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        resp.headers_mut()
+            .insert(
+                ::xidl_rust_axum::axum::http::HeaderName::from_static(
+                    "x-api-deprecated",
+                ),
+                ::xidl_rust_axum::axum::http::HeaderValue::from_static("true"),
+            );
+        let value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(
+                "2026-01-15T00:00:00Z",
+            )
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        resp.headers_mut()
+            .insert(
+                ::xidl_rust_axum::axum::http::HeaderName::from_static(
+                    "x-api-deprecated-since",
+                ),
+                value,
+            );
+        Ok(resp)
+    }
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    async fn get_attribute_bare_attr(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let mut resp = match svc.get_attribute_bare_attr().await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    let body_value: String = resp_value;
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                        .to_vec(&body_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        resp.headers_mut()
+            .insert(
+                ::xidl_rust_axum::axum::http::HeaderName::from_static(
+                    "x-api-deprecated",
+                ),
+                ::xidl_rust_axum::axum::http::HeaderValue::from_static("true"),
+            );
+        Ok(resp)
+    }
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    async fn default_scope(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        request: HttpScopeMatrixServiceDefaultScopeRequest,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let HttpScopeMatrixServiceDefaultScopeRequest { req } = request;
+        let req: MatrixBody = req.into();
+        let mut resp = match svc.default_scope(req).await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    let body_value: String = resp_value;
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                        .to_vec(&body_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        resp.headers_mut()
+            .insert(
+                ::xidl_rust_axum::axum::http::HeaderName::from_static(
+                    "x-api-deprecated",
+                ),
+                ::xidl_rust_axum::axum::http::HeaderValue::from_static("true"),
+            );
+        let value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(
+                "2026-01-15T00:00:00Z",
+            )
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        resp.headers_mut()
+            .insert(
+                ::xidl_rust_axum::axum::http::HeaderName::from_static(
+                    "x-api-deprecated-since",
+                ),
+                value,
+            );
+        Ok(resp)
+    }
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    async fn override_consumes_only(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        request: HttpScopeMatrixServiceOverrideConsumesOnlyRequest,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let HttpScopeMatrixServiceOverrideConsumesOnlyRequest { name, age } = request;
+        let name: String = name;
+        let age: Option<u32> = age;
+        let mut resp = match svc.override_consumes_only(name, age).await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    let body_value: HttpScopeMatrixServiceOverrideConsumesOnlyResponseOutBody = resp_value
+                        .into();
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                        .to_vec(&body_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        resp.headers_mut()
+            .insert(
+                ::xidl_rust_axum::axum::http::HeaderName::from_static(
+                    "x-api-deprecated",
+                ),
+                ::xidl_rust_axum::axum::http::HeaderValue::from_static("true"),
+            );
+        let value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(
+                "2026-01-15T00:00:00Z",
+            )
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        resp.headers_mut()
+            .insert(
+                ::xidl_rust_axum::axum::http::HeaderName::from_static(
+                    "x-api-deprecated-since",
+                ),
+                value,
+            );
+        Ok(resp)
+    }
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    async fn override_produces_only(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        request: HttpScopeMatrixServiceOverrideProducesOnlyRequest,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/msgpack") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let HttpScopeMatrixServiceOverrideProducesOnlyRequest { id } = request;
+        let id: String = id;
+        let mut resp = match svc.override_produces_only(id).await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    let body_value: HttpScopeMatrixServiceOverrideProducesOnlyResponseOutBody = resp_value
+                        .into();
+                    let body = xidl_rust_axum::SerializeFactory::new(
+                            "application/msgpack",
+                        )
+                        .to_vec(&body_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/msgpack",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        resp.headers_mut()
+            .insert(
+                ::xidl_rust_axum::axum::http::HeaderName::from_static(
+                    "x-api-deprecated",
+                ),
+                ::xidl_rust_axum::axum::http::HeaderValue::from_static("true"),
+            );
+        let value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(
+                "2026-01-15T00:00:00Z",
+            )
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        resp.headers_mut()
+            .insert(
+                ::xidl_rust_axum::axum::http::HeaderName::from_static(
+                    "x-api-deprecated-since",
+                ),
+                value,
+            );
+        Ok(resp)
+    }
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    async fn override_both_media(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        request: HttpScopeMatrixServiceOverrideBothMediaRequest,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/msgpack") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let HttpScopeMatrixServiceOverrideBothMediaRequest { name, age } = request;
+        let name: String = name;
+        let age: Option<u32> = age;
+        let mut resp = match svc.override_both_media(name, age).await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    let body_value: HttpScopeMatrixServiceOverrideBothMediaResponseOutBody = resp_value
+                        .into();
+                    let body = xidl_rust_axum::SerializeFactory::new(
+                            "application/msgpack",
+                        )
+                        .to_vec(&body_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/msgpack",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        resp.headers_mut()
+            .insert(
+                ::xidl_rust_axum::axum::http::HeaderName::from_static(
+                    "x-api-deprecated",
+                ),
+                ::xidl_rust_axum::axum::http::HeaderValue::from_static("true"),
+            );
+        let value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(
+                "2026-01-15T00:00:00Z",
+            )
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        resp.headers_mut()
+            .insert(
+                ::xidl_rust_axum::axum::http::HeaderName::from_static(
+                    "x-api-deprecated-since",
+                ),
+                value,
+            );
+        Ok(resp)
+    }
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    async fn deprecated_plain(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        request: HttpScopeMatrixServiceDeprecatedPlainRequest,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let HttpScopeMatrixServiceDeprecatedPlainRequest { id } = request;
+        let id: String = id;
+        let mut resp = match svc.deprecated_plain(id).await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    let body_value: String = resp_value;
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                        .to_vec(&body_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        resp.headers_mut()
+            .insert(
+                ::xidl_rust_axum::axum::http::HeaderName::from_static(
+                    "x-api-deprecated",
+                ),
+                ::xidl_rust_axum::axum::http::HeaderValue::from_static("true"),
+            );
+        Ok(resp)
+    }
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    async fn deprecated_since_only(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        request: HttpScopeMatrixServiceDeprecatedSinceOnlyRequest,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let HttpScopeMatrixServiceDeprecatedSinceOnlyRequest { id } = request;
+        let id: String = id;
+        let mut resp = match svc.deprecated_since_only(id).await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    let body_value: String = resp_value;
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                        .to_vec(&body_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        resp.headers_mut()
+            .insert(
+                ::xidl_rust_axum::axum::http::HeaderName::from_static(
+                    "x-api-deprecated",
+                ),
+                ::xidl_rust_axum::axum::http::HeaderValue::from_static("true"),
+            );
+        let value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(
+                "2026-02-01T00:00:00Z",
+            )
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        resp.headers_mut()
+            .insert(
+                ::xidl_rust_axum::axum::http::HeaderName::from_static(
+                    "x-api-deprecated-since",
+                ),
+                value,
+            );
+        Ok(resp)
+    }
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    async fn deprecated_window(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        request: HttpScopeMatrixServiceDeprecatedWindowRequest,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let HttpScopeMatrixServiceDeprecatedWindowRequest { id } = request;
+        let id: String = id;
+        let mut resp = match svc.deprecated_window(id).await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    let body_value: String = resp_value;
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                        .to_vec(&body_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        resp.headers_mut()
+            .insert(
+                ::xidl_rust_axum::axum::http::HeaderName::from_static(
+                    "x-api-deprecated",
+                ),
+                ::xidl_rust_axum::axum::http::HeaderValue::from_static("true"),
+            );
+        let value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(
+                "2026-03-01T00:00:00Z",
+            )
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        resp.headers_mut()
+            .insert(
+                ::xidl_rust_axum::axum::http::HeaderName::from_static(
+                    "x-api-deprecated-since",
+                ),
+                value,
+            );
+        let value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(
+                "2026-12-31T23:59:59Z",
+            )
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        resp.headers_mut()
+            .insert(
+                ::xidl_rust_axum::axum::http::HeaderName::from_static(
+                    "x-api-deprecated-from",
+                ),
+                value,
+            );
+        Ok(resp)
+    }
+}
+impl<T> xidl_rust_axum::Service for HttpScopeMatrixServiceServer<T>
+where
+    T: HttpScopeMatrixService + Send + Sync + 'static,
+{
+    fn into_router(self) -> xidl_rust_axum::axum::Router {
+        self.router()
+    }
+}
+pub struct HttpScopeMatrixServiceClient {
+    client: ::xidl_rust_axum::Client,
+}
+impl HttpScopeMatrixServiceClient {
+    pub fn new(base_url: impl Into<String>) -> Self {
+        Self {
+            client: ::xidl_rust_axum::Client::new(base_url),
+        }
+    }
+    pub fn with_auth(
+        base_url: impl Into<String>,
+        auth: ::xidl_rust_axum::ClientAuth,
+    ) -> Self {
+        Self {
+            client: ::xidl_rust_axum::Client::with_auth(base_url, auth),
+        }
+    }
+    pub fn with_http(
+        base_url: impl Into<String>,
+        http: ::xidl_rust_axum::reqwest::Client,
+    ) -> Self {
+        Self {
+            client: ::xidl_rust_axum::Client::with_http(base_url, http),
+        }
+    }
+    pub fn with_http_and_auth(
+        base_url: impl Into<String>,
+        http: ::xidl_rust_axum::reqwest::Client,
+        auth: ::xidl_rust_axum::ClientAuth,
+    ) -> Self {
+        Self {
+            client: ::xidl_rust_axum::Client::with_http_and_auth(base_url, http, auth),
+        }
+    }
+    pub fn with_auth_override(
+        &self,
+        auth: Option<::xidl_rust_axum::ClientAuth>,
+    ) -> Self {
+        Self {
+            client: self.client.with_auth_override(auth),
+        }
+    }
+}
+impl HttpScopeMatrixServiceClient {
+    #[allow(clippy::useless_conversion)]
+    pub async fn get_attribute_inherited_attr(
+        &self,
+    ) -> Result<String, xidl_rust_axum::Error> {
+        let path = "/attribute/inherited_attr".to_string();
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let auth_target = &self.client;
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body)
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+    #[allow(clippy::useless_conversion)]
+    pub async fn get_attribute_bare_attr(
+        &self,
+    ) -> Result<String, xidl_rust_axum::Error> {
+        let path = "/attribute/bare_attr".to_string();
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let auth_target = &self.client;
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body)
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+    #[allow(clippy::useless_conversion)]
+    pub async fn default_scope(
+        &self,
+        req: MatrixBody,
+    ) -> Result<String, xidl_rust_axum::Error> {
+        let path = "/v2/scope/default".to_string();
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let auth_target = &self.client;
+        let body = HttpScopeMatrixServiceDefaultScopeRequestOutBody {
+            req: req.into(),
+        };
+        let body = xidl_rust_axum::SerializeFactory::new("application/json")
+            .to_vec(&body)?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::CONTENT_TYPE,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body)
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+    #[allow(clippy::useless_conversion)]
+    pub async fn override_consumes_only(
+        &self,
+        name: String,
+        age: Option<u32>,
+    ) -> Result<
+        HttpScopeMatrixServiceOverrideConsumesOnlyResponse,
+        xidl_rust_axum::Error,
+    > {
+        let path = "/v2/scope/override-consumes".to_string();
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let auth_target = &self.client;
+        let body = HttpScopeMatrixServiceOverrideConsumesOnlyRequestOutBody {
+            name: name,
+            age: age,
+        };
+        let body = xidl_rust_axum::SerializeFactory::new(
+                "application/x-www-form-urlencoded",
+            )
+            .to_vec(&body)?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::CONTENT_TYPE,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/x-www-form-urlencoded",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            let body: HttpScopeMatrixServiceOverrideConsumesOnlyResponseInBody = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+    #[allow(clippy::useless_conversion)]
+    pub async fn override_produces_only(
+        &self,
+        id: String,
+    ) -> Result<
+        HttpScopeMatrixServiceOverrideProducesOnlyResponse,
+        xidl_rust_axum::Error,
+    > {
+        let path = "/v2/scope/override-produces/{id}".to_string();
+        let path = path.replace("{id}", &id.to_string());
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/msgpack",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let auth_target = &self.client;
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            let body: HttpScopeMatrixServiceOverrideProducesOnlyResponseInBody = xidl_rust_axum::DeserializeFactory::new(
+                    "application/msgpack",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+    #[allow(clippy::useless_conversion)]
+    pub async fn override_both_media(
+        &self,
+        name: String,
+        age: Option<u32>,
+    ) -> Result<HttpScopeMatrixServiceOverrideBothMediaResponse, xidl_rust_axum::Error> {
+        let path = "/v2/scope/override-both".to_string();
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/msgpack",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let auth_target = &self.client;
+        let body = HttpScopeMatrixServiceOverrideBothMediaRequestOutBody {
+            name: name,
+            age: age,
+        };
+        let body = xidl_rust_axum::SerializeFactory::new(
+                "application/x-www-form-urlencoded",
+            )
+            .to_vec(&body)?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::CONTENT_TYPE,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/x-www-form-urlencoded",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            let body: HttpScopeMatrixServiceOverrideBothMediaResponseInBody = xidl_rust_axum::DeserializeFactory::new(
+                    "application/msgpack",
+                )
+                .from_slice(&body)?;
+            Ok(body.into())
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+    #[allow(clippy::useless_conversion)]
+    pub async fn deprecated_plain(
+        &self,
+        id: String,
+    ) -> Result<String, xidl_rust_axum::Error> {
+        let path = "/v2/scope/deprecated/plain/{id}".to_string();
+        let path = path.replace("{id}", &id.to_string());
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let auth_target = &self.client;
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body)
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+    #[allow(clippy::useless_conversion)]
+    pub async fn deprecated_since_only(
+        &self,
+        id: String,
+    ) -> Result<String, xidl_rust_axum::Error> {
+        let path = "/v2/scope/deprecated/since/{id}".to_string();
+        let path = path.replace("{id}", &id.to_string());
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let auth_target = &self.client;
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body)
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+    #[allow(clippy::useless_conversion)]
+    pub async fn deprecated_window(
+        &self,
+        id: String,
+    ) -> Result<String, xidl_rust_axum::Error> {
+        let path = "/v2/scope/deprecated/window/{id}".to_string();
+        let path = path.replace("{id}", &id.to_string());
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let auth_target = &self.client;
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body)
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+}
+#[async_trait::async_trait]
+pub trait HttpSecurityMatrixService {
+    async fn inherited_security(
+        &self,
+        id: String,
+        x_trace_id: String,
+        xidl_auth: xidl_rust_axum::auth::basic::BasicAuth,
+    ) -> ::xidl_rust_axum::Result<String>;
+    async fn bearer_or_cookie_security(
+        &self,
+        action: String,
+        note: Option<String>,
+        xidl_auth: xidl_rust_axum::auth::bearer::BearerAuth,
+    ) -> ::xidl_rust_axum::Result<String>;
+    async fn alternative_security(
+        &self,
+        id: String,
+        locale: Option<String>,
+        xidl_auth: xidl_rust_axum::auth::bearer::BearerAuth,
+    ) -> ::xidl_rust_axum::Result<String>;
+    async fn oauth_security(
+        &self,
+        keyword: String,
+        page: Option<u32>,
+    ) -> ::xidl_rust_axum::Result<String>;
+    async fn public_ping(&self) -> ::xidl_rust_axum::Result<String>;
+}
+mod __xidl_in_HttpSecurityMatrixService {
+    use super::*;
+}
+mod __xidl_out_HttpSecurityMatrixService {
+    use super::*;
+}
+#[derive(::serde::Deserialize)]
+struct HttpSecurityMatrixServiceInheritedSecurityPath {
+    id: String,
+}
+#[derive(::serde::Deserialize)]
+struct HttpSecurityMatrixServiceInheritedSecurityRequest {
+    id: String,
+    x_trace_id: String,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpSecurityMatrixServiceInheritedSecurityRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+                HttpSecurityMatrixServiceInheritedSecurityPath,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpSecurityMatrixServiceInheritedSecurityPath { id } = path;
+            let headers = &parts.headers;
+            let x_trace_id: String = match headers.get("x_trace_id") {
+                Some(header_value) => {
+                    let header_str = header_value
+                        .to_str()
+                        .map_err(|err| ::xidl_rust_axum::Error::new(
+                            400,
+                            format!("{err:?}"),
+                        ))?;
+                    header_str.to_string()
+                }
+                None => ::core::default::Default::default(),
+            };
+            Ok(Self { id, x_trace_id })
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct HttpSecurityMatrixServiceBearerOrCookieSecurityRequestOutBody {
+    #[serde(default)]
+    action: String,
+    #[serde(default)]
+    note: Option<String>,
+}
+#[derive(::serde::Deserialize)]
+struct HttpSecurityMatrixServiceBearerOrCookieSecurityRequestInBody {
+    action: String,
+    #[serde(default)]
+    note: Option<String>,
+}
+#[derive(::serde::Deserialize)]
+struct HttpSecurityMatrixServiceBearerOrCookieSecurityRequest {
+    action: String,
+    note: Option<String>,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpSecurityMatrixServiceBearerOrCookieSecurityRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let headers = &parts.headers;
+            if !::xidl_rust_axum::http::content_type_matches(
+                headers,
+                "application/json",
+            ) {
+                return Err(::xidl_rust_axum::Error::unsupported_media_type());
+            }
+            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+            let body: HttpSecurityMatrixServiceBearerOrCookieSecurityRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body_bytes)?;
+            let HttpSecurityMatrixServiceBearerOrCookieSecurityRequestInBody {
+                action,
+                note,
+            } = body;
+            Ok(Self { action, note })
+        }
+    }
+}
+#[derive(::serde::Deserialize)]
+struct HttpSecurityMatrixServiceAlternativeSecurityPath {
+    id: String,
+}
+#[derive(::serde::Serialize, ::core::default::Default)]
+struct HttpSecurityMatrixServiceAlternativeSecurityRequestOutQuery {
+    #[serde(default)]
+    locale: Option<String>,
+}
+#[derive(::serde::Deserialize, ::core::default::Default)]
+struct HttpSecurityMatrixServiceAlternativeSecurityRequestInQuery {
+    #[serde(default)]
+    locale: Option<String>,
+}
+#[derive(::serde::Deserialize)]
+struct HttpSecurityMatrixServiceAlternativeSecurityRequest {
+    id: String,
+    locale: Option<String>,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpSecurityMatrixServiceAlternativeSecurityRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+                HttpSecurityMatrixServiceAlternativeSecurityPath,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpSecurityMatrixServiceAlternativeSecurityPath { id } = path;
+            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+                HttpSecurityMatrixServiceAlternativeSecurityRequestInQuery,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpSecurityMatrixServiceAlternativeSecurityRequestInQuery { locale } = query;
+            let headers = &parts.headers;
+            Ok(Self { id, locale })
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct HttpSecurityMatrixServiceOauthSecurityRequestOutBody {
+    #[serde(default)]
+    keyword: String,
+    #[serde(default)]
+    page: Option<u32>,
+}
+#[derive(::serde::Deserialize)]
+struct HttpSecurityMatrixServiceOauthSecurityRequestInBody {
+    keyword: String,
+    #[serde(default)]
+    page: Option<u32>,
+}
+#[derive(::serde::Deserialize)]
+struct HttpSecurityMatrixServiceOauthSecurityRequest {
+    keyword: String,
+    page: Option<u32>,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpSecurityMatrixServiceOauthSecurityRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let headers = &parts.headers;
+            if !::xidl_rust_axum::http::content_type_matches(
+                headers,
+                "application/json",
+            ) {
+                return Err(::xidl_rust_axum::Error::unsupported_media_type());
+            }
+            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+            let body: HttpSecurityMatrixServiceOauthSecurityRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body_bytes)?;
+            let HttpSecurityMatrixServiceOauthSecurityRequestInBody { keyword, page } = body;
+            Ok(Self { keyword, page })
+        }
+    }
+}
+pub struct HttpSecurityMatrixServiceServer<T> {
+    inner: ::std::sync::Arc<T>,
+}
+impl<T> HttpSecurityMatrixServiceServer<T>
+where
+    T: HttpSecurityMatrixService + Send + Sync + 'static,
+{
+    pub fn new(inner: T) -> Self {
+        Self {
+            inner: ::std::sync::Arc::new(inner),
+        }
+    }
+    pub fn from_arc(inner: ::std::sync::Arc<T>) -> Self {
+        Self { inner }
+    }
+    pub fn router(self) -> xidl_rust_axum::axum::Router {
+        let svc = self.inner;
+        xidl_rust_axum::axum::Router::new()
+            .route(
+                "/v2/security/inherited/{id}",
+                xidl_rust_axum::axum::routing::get(Self::inherited_security),
+            )
+            .route(
+                "/v2/security/bearer-cookie",
+                xidl_rust_axum::axum::routing::post(Self::bearer_or_cookie_security),
+            )
+            .route(
+                "/v2/security/alternatives/{id}",
+                xidl_rust_axum::axum::routing::get(Self::alternative_security),
+            )
+            .route(
+                "/v2/security/oauth-search",
+                xidl_rust_axum::axum::routing::post(Self::oauth_security),
+            )
+            .route(
+                "/v2/security/public/ping",
+                xidl_rust_axum::axum::routing::get(Self::public_ping),
+            )
+            .with_state(svc)
+    }
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    async fn inherited_security(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        request: HttpSecurityMatrixServiceInheritedSecurityRequest,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let xidl_auth = match xidl_rust_axum::auth::basic::extract_basic_auth(&headers) {
+            Ok(auth) => auth,
+            Err(_) => {
+                let resp = xidl_rust_axum::auth::basic::unauthorized_response(
+                    "matrix realm",
+                );
+                return Ok(resp);
+            }
+        };
+        let HttpSecurityMatrixServiceInheritedSecurityRequest { id, x_trace_id } = request;
+        let id: String = id;
+        let x_trace_id: String = x_trace_id;
+        let mut resp = match svc.inherited_security(id, x_trace_id, xidl_auth).await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    let body_value: String = resp_value;
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                        .to_vec(&body_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        Ok(resp)
+    }
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    async fn bearer_or_cookie_security(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        auth_header: Option<
+            ::xidl_rust_axum::axum_extra::extract::TypedHeader<
+                ::xidl_rust_axum::auth::bearer::BearerHeader,
+            >,
+        >,
+        request: HttpSecurityMatrixServiceBearerOrCookieSecurityRequest,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let xidl_auth = match auth_header {
+            Some(::xidl_rust_axum::axum_extra::extract::TypedHeader(auth_header)) => {
+                xidl_rust_axum::auth::bearer::BearerAuth::from_header(auth_header)
+            }
+            None => return Err(xidl_rust_axum::Error::unauthorized()),
+        };
+        let HttpSecurityMatrixServiceBearerOrCookieSecurityRequest { action, note } = request;
+        let action: String = action;
+        let note: Option<String> = note;
+        let mut resp = match svc.bearer_or_cookie_security(action, note, xidl_auth).await
+        {
+            Ok(resp_value) => {
+                let mut resp = {
+                    let body_value: String = resp_value;
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                        .to_vec(&body_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        Ok(resp)
+    }
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    async fn alternative_security(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        auth_header: Option<
+            ::xidl_rust_axum::axum_extra::extract::TypedHeader<
+                ::xidl_rust_axum::auth::bearer::BearerHeader,
+            >,
+        >,
+        request: HttpSecurityMatrixServiceAlternativeSecurityRequest,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let xidl_auth = match auth_header {
+            Some(::xidl_rust_axum::axum_extra::extract::TypedHeader(auth_header)) => {
+                xidl_rust_axum::auth::bearer::BearerAuth::from_header(auth_header)
+            }
+            None => return Err(xidl_rust_axum::Error::unauthorized()),
+        };
+        let HttpSecurityMatrixServiceAlternativeSecurityRequest { id, locale } = request;
+        let id: String = id;
+        let locale: Option<String> = locale;
+        let mut resp = match svc.alternative_security(id, locale, xidl_auth).await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    let body_value: String = resp_value;
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                        .to_vec(&body_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        Ok(resp)
+    }
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    async fn oauth_security(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        request: HttpSecurityMatrixServiceOauthSecurityRequest,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let HttpSecurityMatrixServiceOauthSecurityRequest { keyword, page } = request;
+        let keyword: String = keyword;
+        let page: Option<u32> = page;
+        let mut resp = match svc.oauth_security(keyword, page).await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    let body_value: String = resp_value;
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                        .to_vec(&body_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        Ok(resp)
+    }
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    async fn public_ping(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let mut resp = match svc.public_ping().await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    let body_value: String = resp_value;
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                        .to_vec(&body_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        Ok(resp)
+    }
+}
+impl<T> xidl_rust_axum::Service for HttpSecurityMatrixServiceServer<T>
+where
+    T: HttpSecurityMatrixService + Send + Sync + 'static,
+{
+    fn into_router(self) -> xidl_rust_axum::axum::Router {
+        self.router()
+    }
+}
+pub struct HttpSecurityMatrixServiceClient {
+    client: ::xidl_rust_axum::Client,
+}
+impl HttpSecurityMatrixServiceClient {
+    pub fn new(base_url: impl Into<String>) -> Self {
+        Self {
+            client: ::xidl_rust_axum::Client::new(base_url),
+        }
+    }
+    pub fn with_auth(
+        base_url: impl Into<String>,
+        auth: ::xidl_rust_axum::ClientAuth,
+    ) -> Self {
+        Self {
+            client: ::xidl_rust_axum::Client::with_auth(base_url, auth),
+        }
+    }
+    pub fn with_http(
+        base_url: impl Into<String>,
+        http: ::xidl_rust_axum::reqwest::Client,
+    ) -> Self {
+        Self {
+            client: ::xidl_rust_axum::Client::with_http(base_url, http),
+        }
+    }
+    pub fn with_http_and_auth(
+        base_url: impl Into<String>,
+        http: ::xidl_rust_axum::reqwest::Client,
+        auth: ::xidl_rust_axum::ClientAuth,
+    ) -> Self {
+        Self {
+            client: ::xidl_rust_axum::Client::with_http_and_auth(base_url, http, auth),
+        }
+    }
+    pub fn with_auth_override(
+        &self,
+        auth: Option<::xidl_rust_axum::ClientAuth>,
+    ) -> Self {
+        Self {
+            client: self.client.with_auth_override(auth),
+        }
+    }
+}
+impl HttpSecurityMatrixServiceClient {
+    #[allow(clippy::useless_conversion)]
+    pub async fn inherited_security(
+        &self,
+        id: String,
+        x_trace_id: String,
+    ) -> Result<String, xidl_rust_axum::Error> {
+        let path = "/v2/security/inherited/{id}".to_string();
+        let path = path.replace("{id}", &id.to_string());
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes(
+                "x_trace_id".as_bytes(),
+            )
+            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+        let header_value_str = x_trace_id;
+        let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                &header_value_str,
+            )
+            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+        req.headers_mut().insert(header_name, header_value);
+        let auth_target = &self.client;
+        auth_target.apply_auth(&mut req, xidl_rust_axum::ClientAuthRequirement::Basic)?;
+        auth_target
+            .apply_auth(
+                &mut req,
+                xidl_rust_axum::ClientAuthRequirement::ApiKey {
+                    location: xidl_rust_axum::ClientApiKeyLocation::Query,
+                    name: "org_key",
+                },
+            )?;
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body)
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+    #[allow(clippy::useless_conversion)]
+    pub async fn bearer_or_cookie_security(
+        &self,
+        action: String,
+        note: Option<String>,
+        xidl_auth: xidl_rust_axum::auth::bearer::BearerAuth,
+    ) -> Result<String, xidl_rust_axum::Error> {
+        let path = "/v2/security/bearer-cookie".to_string();
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let auth = xidl_rust_axum::ClientAuth {
+            basic: None,
+            bearer: Some(xidl_auth.token.clone()),
+            api_keys: vec![],
+        };
+        let auth_client = self.client.with_auth_override(Some(auth));
+        let auth_target = &auth_client;
+        auth_target.apply_auth(&mut req, xidl_rust_axum::ClientAuthRequirement::Bearer)?;
+        auth_target
+            .apply_auth(
+                &mut req,
+                xidl_rust_axum::ClientAuthRequirement::ApiKey {
+                    location: xidl_rust_axum::ClientApiKeyLocation::Cookie,
+                    name: "session_key",
+                },
+            )?;
+        let body = HttpSecurityMatrixServiceBearerOrCookieSecurityRequestOutBody {
+            action: action,
+            note: note,
+        };
+        let body = xidl_rust_axum::SerializeFactory::new("application/json")
+            .to_vec(&body)?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::CONTENT_TYPE,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body)
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+    #[allow(clippy::useless_conversion)]
+    pub async fn alternative_security(
+        &self,
+        id: String,
+        locale: Option<String>,
+        xidl_auth: xidl_rust_axum::auth::bearer::BearerAuth,
+    ) -> Result<String, xidl_rust_axum::Error> {
+        let path = "/v2/security/alternatives/{id}".to_string();
+        let path = path.replace("{id}", &id.to_string());
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let query = HttpSecurityMatrixServiceAlternativeSecurityRequestOutQuery {
+            locale,
+        };
+        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if !query.is_empty() {
+            req.url_mut().set_query(Some(&query));
+        }
+        let auth = xidl_rust_axum::ClientAuth {
+            basic: None,
+            bearer: Some(xidl_auth.token.clone()),
+            api_keys: vec![],
+        };
+        let auth_client = self.client.with_auth_override(Some(auth));
+        let auth_target = &auth_client;
+        auth_target.apply_auth(&mut req, xidl_rust_axum::ClientAuthRequirement::Bearer)?;
+        auth_target
+            .apply_auth(
+                &mut req,
+                xidl_rust_axum::ClientAuthRequirement::ApiKey {
+                    location: xidl_rust_axum::ClientApiKeyLocation::Header,
+                    name: "X-Alt-Key",
+                },
+            )?;
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body)
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+    #[allow(clippy::useless_conversion)]
+    pub async fn oauth_security(
+        &self,
+        keyword: String,
+        page: Option<u32>,
+    ) -> Result<String, xidl_rust_axum::Error> {
+        let path = "/v2/security/oauth-search".to_string();
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let auth_target = &self.client;
+        let body = HttpSecurityMatrixServiceOauthSecurityRequestOutBody {
+            keyword: keyword,
+            page: page,
+        };
+        let body = xidl_rust_axum::SerializeFactory::new("application/json")
+            .to_vec(&body)?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::CONTENT_TYPE,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body)
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+    #[allow(clippy::useless_conversion)]
+    pub async fn public_ping(&self) -> Result<String, xidl_rust_axum::Error> {
+        let path = "/v2/security/public/ping".to_string();
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let auth_target = &self.client;
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body)
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+}
+===============
+http_scope_matrix.rs
+===============
+#[derive(Default)]
+pub struct MatrixBody {
+    pub name: String,
+    pub alias: Option<String>,
+    pub tags: Vec<String>,
+}
+impl MatrixBody {}

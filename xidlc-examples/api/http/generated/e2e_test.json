@@ -427,6 +427,35 @@
         }
       }
     },
+    "/attribute/attr16": {
+      "get": {
+        "description": "Deprecated. Since 2026-01-01T00:00:00Z.",
+        "operationId": "E2eAttribute.get_attribute_attr16",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
     "/attribute/attr2": {
       "get": {
         "operationId": "E2eTypeServer.get_attribute_attr2",
@@ -907,6 +936,94 @@
         }
       }
     },
+    "/attribute/bare_attr": {
+      "get": {
+        "description": "Deprecated.",
+        "operationId": "E2eHttpScopeMatrix.get_attribute_bare_attr",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/attribute/inherited_attr": {
+      "get": {
+        "description": "Deprecated. Since 2026-01-15T00:00:00Z.",
+        "operationId": "E2eHttpScopeMatrix.get_attribute_inherited_attr",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/healthz": {
+      "post": {
+        "description": "Deprecated. Since 2026-01-01T00:00:00Z. After 2026-06-01T23:59:59Z.",
+        "operationId": "E2eHttpSecurity.healthz",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true,
+        "security": []
+      }
+    },
     "/op_with_path": {
       "get": {
         "operationId": "E2ePathSever.op_with_path",
@@ -1294,6 +1411,112 @@
                       }
                     }
                   }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/r/{id}": {
+      "get": {
+        "operationId": "E2eHttpRouteAndBody.get_resource",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Trace-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/resources/{id}": {
+      "get": {
+        "operationId": "E2eHttpRouteAndBody.get_resource",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Trace-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
                 }
               }
             }
@@ -1863,6 +2086,1467 @@
           }
         }
       }
+    },
+    "/v2/dedup/{id}": {
+      "get": {
+        "operationId": "E2eHttpRouteAndBody.dedup_resource",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x_trace_id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/defaults/resources": {
+      "delete": {
+        "operationId": "E2eHttpDefaultsMatrix.delete_resource_default_query",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "revision",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/defaults/resources/head": {
+      "head": {
+        "operationId": "E2eHttpDefaultsMatrix.probe_resource_default_query",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "revision",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/defaults/resources/options": {
+      "options": {
+        "operationId": "E2eHttpDefaultsMatrix.resource_options_default_query",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "revision",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/defaults/resources/{id}": {
+      "put": {
+        "operationId": "E2eHttpDefaultsMatrix.replace_resource_default_body",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "alias": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StructHttpBody"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "E2eHttpDefaultsMatrix.patch_resource_default_body",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "alias": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StructHttpBody"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/files/{path}": {
+      "get": {
+        "operationId": "E2eHttpRouteAndBody.get_file",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "download",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/forms/profile": {
+      "post": {
+        "operationId": "E2eHttpForm.submit_profile",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "age": {
+                    "type": "integer",
+                    "format": "int32",
+                    "minimum": 0
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "return",
+                    "normalized_name"
+                  ],
+                  "properties": {
+                    "normalized_name": {
+                      "type": "string"
+                    },
+                    "return": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/msgpack/resources/{id}": {
+      "get": {
+        "operationId": "E2eHttpRouteAndBody.get_msgpack_resource",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/msgpack": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "return",
+                    "revision"
+                  ],
+                  "properties": {
+                    "return": {
+                      "$ref": "#/components/schemas/StructHttpBody"
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "format": "int32",
+                      "minimum": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/resources": {
+      "post": {
+        "operationId": "E2eHttpRouteAndBody.create_resource",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StructHttpBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StructHttpBody"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/resources/preview": {
+      "get": {
+        "operationId": "E2eHttpRouteAndBody.preview_resource",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StructHttpBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StructHttpBody"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/resources/{id}": {
+      "get": {
+        "operationId": "E2eHttpRouteAndBody.get_resource",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Trace-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "E2eHttpRouteAndBody.replace_resource",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StructHttpBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "E2eHttpRouteAndBody.delete_resource",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "operationId": "E2eHttpRouteAndBody.resource_options",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "head": {
+        "operationId": "E2eHttpRouteAndBody.probe_resource",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "E2eHttpRouteAndBody.patch_resource",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dry_run",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "sid",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/scope/default": {
+      "post": {
+        "description": "Deprecated. Since 2026-01-15T00:00:00Z.",
+        "operationId": "E2eHttpScopeMatrix.default_scope",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StructHttpBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/v2/scope/deprecated/plain/{id}": {
+      "get": {
+        "description": "Deprecated.",
+        "operationId": "E2eHttpScopeMatrix.deprecated_plain",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/v2/scope/deprecated/since/{id}": {
+      "get": {
+        "description": "Deprecated. Since 2026-02-01T00:00:00Z.",
+        "operationId": "E2eHttpScopeMatrix.deprecated_since_only",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/v2/scope/deprecated/window/{id}": {
+      "get": {
+        "description": "Deprecated. Since 2026-03-01T00:00:00Z. After 2026-12-31T23:59:59Z.",
+        "operationId": "E2eHttpScopeMatrix.deprecated_window",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/v2/scope/override-both": {
+      "post": {
+        "description": "Deprecated. Since 2026-01-15T00:00:00Z.",
+        "operationId": "E2eHttpScopeMatrix.override_both_media",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "age": {
+                    "type": "integer",
+                    "format": "int32",
+                    "minimum": 0
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/msgpack": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "return",
+                    "normalized_name"
+                  ],
+                  "properties": {
+                    "normalized_name": {
+                      "type": "string"
+                    },
+                    "return": {
+                      "$ref": "#/components/schemas/StructHttpBody"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/v2/scope/override-consumes": {
+      "post": {
+        "description": "Deprecated. Since 2026-01-15T00:00:00Z.",
+        "operationId": "E2eHttpScopeMatrix.override_consumes_only",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "age": {
+                    "type": "integer",
+                    "format": "int32",
+                    "minimum": 0
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "return",
+                    "normalized_name"
+                  ],
+                  "properties": {
+                    "normalized_name": {
+                      "type": "string"
+                    },
+                    "return": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/v2/scope/override-produces/{id}": {
+      "get": {
+        "description": "Deprecated. Since 2026-01-15T00:00:00Z.",
+        "operationId": "E2eHttpScopeMatrix.override_produces_only",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/msgpack": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "return",
+                    "revision"
+                  ],
+                  "properties": {
+                    "return": {
+                      "$ref": "#/components/schemas/StructHttpBody"
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "format": "int32",
+                      "minimum": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/v2/secure/search": {
+      "post": {
+        "operationId": "E2eHttpSecurity.search_secure_user",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "keyword": {
+                    "type": "string"
+                  },
+                  "page": {
+                    "type": "integer",
+                    "format": "int32",
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "reports:write",
+              "reports:read"
+            ]
+          }
+        ]
+      }
+    },
+    "/v2/secure/users/{id}": {
+      "get": {
+        "description": "Deprecated. Since 2026-01-01T00:00:00Z.",
+        "operationId": "E2eHttpSecurity.get_secure_user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Trace-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true,
+        "security": [
+          {
+            "http_basic": []
+          },
+          {
+            "api_key-header-x-org-key": []
+          }
+        ]
+      }
+    },
+    "/v2/security/alternatives/{id}": {
+      "get": {
+        "operationId": "E2eHttpSecurityMatrix.alternative_security",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "http_bearer": []
+          },
+          {
+            "api_key-header-x-alt-key": []
+          }
+        ]
+      }
+    },
+    "/v2/security/bearer-cookie": {
+      "post": {
+        "operationId": "E2eHttpSecurityMatrix.bearer_or_cookie_security",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "http_bearer": []
+          },
+          {
+            "api_key-cookie-session_key": []
+          }
+        ]
+      }
+    },
+    "/v2/security/inherited/{id}": {
+      "get": {
+        "operationId": "E2eHttpSecurityMatrix.inherited_security",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Trace-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "http_basic": []
+          },
+          {
+            "api_key-query-org_key": []
+          }
+        ]
+      }
+    },
+    "/v2/security/oauth-search": {
+      "post": {
+        "operationId": "E2eHttpSecurityMatrix.oauth_security",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "keyword": {
+                    "type": "string"
+                  },
+                  "page": {
+                    "type": "integer",
+                    "format": "int32",
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "reports:write",
+              "reports:read"
+            ]
+          }
+        ]
+      }
+    },
+    "/v2/security/public/ping": {
+      "get": {
+        "operationId": "E2eHttpSecurityMatrix.public_ping",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
     }
   },
   "components": {
@@ -2221,6 +3905,17 @@
             "properties": {
               "set_attribute_attr15": {
                 "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr15_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr16"
+            ],
+            "properties": {
+              "get_attribute_attr16": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr16_In"
               }
             }
           }
@@ -2609,6 +4304,17 @@
                 "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr15_Result"
               }
             }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr16"
+            ],
+            "properties": {
+              "get_attribute_attr16": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr16_Result"
+              }
+            }
           }
         ]
       },
@@ -2846,6 +4552,43 @@
             "properties": {
               "result": {
                 "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr15_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eAttribute_get_attribute_attr16_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr16_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eAttribute_get_attribute_attr16_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eAttribute_get_attribute_attr16_Out"
               }
             }
           }
@@ -3809,6 +5552,2534 @@
             "properties": {
               "result": {
                 "$ref": "#/components/schemas/E2eAttribute_set_attribute_attr9_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpDefaultsMatrix_Call": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "delete_resource_default_query"
+            ],
+            "properties": {
+              "delete_resource_default_query": {
+                "$ref": "#/components/schemas/E2eHttpDefaultsMatrix_delete_resource_default_query_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "probe_resource_default_query"
+            ],
+            "properties": {
+              "probe_resource_default_query": {
+                "$ref": "#/components/schemas/E2eHttpDefaultsMatrix_probe_resource_default_query_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "resource_options_default_query"
+            ],
+            "properties": {
+              "resource_options_default_query": {
+                "$ref": "#/components/schemas/E2eHttpDefaultsMatrix_resource_options_default_query_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "replace_resource_default_body"
+            ],
+            "properties": {
+              "replace_resource_default_body": {
+                "$ref": "#/components/schemas/E2eHttpDefaultsMatrix_replace_resource_default_body_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "patch_resource_default_body"
+            ],
+            "properties": {
+              "patch_resource_default_body": {
+                "$ref": "#/components/schemas/E2eHttpDefaultsMatrix_patch_resource_default_body_In"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpDefaultsMatrix_Reply": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/E2eHttpDefaultsMatrix_Return"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
+          }
+        }
+      },
+      "E2eHttpDefaultsMatrix_Request": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/E2eHttpDefaultsMatrix_Call"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
+          }
+        }
+      },
+      "E2eHttpDefaultsMatrix_Return": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "delete_resource_default_query"
+            ],
+            "properties": {
+              "delete_resource_default_query": {
+                "$ref": "#/components/schemas/E2eHttpDefaultsMatrix_delete_resource_default_query_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "probe_resource_default_query"
+            ],
+            "properties": {
+              "probe_resource_default_query": {
+                "$ref": "#/components/schemas/E2eHttpDefaultsMatrix_probe_resource_default_query_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "resource_options_default_query"
+            ],
+            "properties": {
+              "resource_options_default_query": {
+                "$ref": "#/components/schemas/E2eHttpDefaultsMatrix_resource_options_default_query_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "replace_resource_default_body"
+            ],
+            "properties": {
+              "replace_resource_default_body": {
+                "$ref": "#/components/schemas/E2eHttpDefaultsMatrix_replace_resource_default_body_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "patch_resource_default_body"
+            ],
+            "properties": {
+              "patch_resource_default_body": {
+                "$ref": "#/components/schemas/E2eHttpDefaultsMatrix_patch_resource_default_body_Result"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpDefaultsMatrix_delete_resource_default_query_In": {
+        "type": "object",
+        "required": [
+          "id",
+          "revision"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          }
+        }
+      },
+      "E2eHttpDefaultsMatrix_delete_resource_default_query_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpDefaultsMatrix_delete_resource_default_query_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpDefaultsMatrix_delete_resource_default_query_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpDefaultsMatrix_patch_resource_default_body_In": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "alias"
+        ],
+        "properties": {
+          "alias": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpDefaultsMatrix_patch_resource_default_body_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "$ref": "#/components/schemas/StructHttpBody"
+          }
+        }
+      },
+      "E2eHttpDefaultsMatrix_patch_resource_default_body_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpDefaultsMatrix_patch_resource_default_body_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpDefaultsMatrix_probe_resource_default_query_In": {
+        "type": "object",
+        "required": [
+          "id",
+          "revision"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          }
+        }
+      },
+      "E2eHttpDefaultsMatrix_probe_resource_default_query_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eHttpDefaultsMatrix_probe_resource_default_query_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpDefaultsMatrix_probe_resource_default_query_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpDefaultsMatrix_replace_resource_default_body_In": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "alias"
+        ],
+        "properties": {
+          "alias": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpDefaultsMatrix_replace_resource_default_body_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "$ref": "#/components/schemas/StructHttpBody"
+          }
+        }
+      },
+      "E2eHttpDefaultsMatrix_replace_resource_default_body_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpDefaultsMatrix_replace_resource_default_body_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpDefaultsMatrix_resource_options_default_query_In": {
+        "type": "object",
+        "required": [
+          "id",
+          "revision"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          }
+        }
+      },
+      "E2eHttpDefaultsMatrix_resource_options_default_query_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eHttpDefaultsMatrix_resource_options_default_query_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpDefaultsMatrix_resource_options_default_query_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpForm_Call": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "submit_profile"
+            ],
+            "properties": {
+              "submit_profile": {
+                "$ref": "#/components/schemas/E2eHttpForm_submit_profile_In"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpForm_Reply": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/E2eHttpForm_Return"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
+          }
+        }
+      },
+      "E2eHttpForm_Request": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/E2eHttpForm_Call"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
+          }
+        }
+      },
+      "E2eHttpForm_Return": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "submit_profile"
+            ],
+            "properties": {
+              "submit_profile": {
+                "$ref": "#/components/schemas/E2eHttpForm_submit_profile_Result"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpForm_submit_profile_In": {
+        "type": "object",
+        "required": [
+          "name",
+          "age"
+        ],
+        "properties": {
+          "age": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpForm_submit_profile_Out": {
+        "type": "object",
+        "required": [
+          "normalized_name",
+          "return_"
+        ],
+        "properties": {
+          "normalized_name": {
+            "type": "string"
+          },
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpForm_submit_profile_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpForm_submit_profile_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpRouteAndBody_Call": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_resource"
+            ],
+            "properties": {
+              "get_resource": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_get_resource_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_file"
+            ],
+            "properties": {
+              "get_file": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_get_file_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "create_resource"
+            ],
+            "properties": {
+              "create_resource": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_create_resource_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "replace_resource"
+            ],
+            "properties": {
+              "replace_resource": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_replace_resource_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "patch_resource"
+            ],
+            "properties": {
+              "patch_resource": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_patch_resource_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "delete_resource"
+            ],
+            "properties": {
+              "delete_resource": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_delete_resource_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "probe_resource"
+            ],
+            "properties": {
+              "probe_resource": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_probe_resource_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "resource_options"
+            ],
+            "properties": {
+              "resource_options": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_resource_options_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_msgpack_resource"
+            ],
+            "properties": {
+              "get_msgpack_resource": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_get_msgpack_resource_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "dedup_resource"
+            ],
+            "properties": {
+              "dedup_resource": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_dedup_resource_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "preview_resource"
+            ],
+            "properties": {
+              "preview_resource": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_preview_resource_In"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpRouteAndBody_Reply": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/E2eHttpRouteAndBody_Return"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
+          }
+        }
+      },
+      "E2eHttpRouteAndBody_Request": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/E2eHttpRouteAndBody_Call"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
+          }
+        }
+      },
+      "E2eHttpRouteAndBody_Return": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_resource"
+            ],
+            "properties": {
+              "get_resource": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_get_resource_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_file"
+            ],
+            "properties": {
+              "get_file": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_get_file_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "create_resource"
+            ],
+            "properties": {
+              "create_resource": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_create_resource_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "replace_resource"
+            ],
+            "properties": {
+              "replace_resource": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_replace_resource_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "patch_resource"
+            ],
+            "properties": {
+              "patch_resource": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_patch_resource_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "delete_resource"
+            ],
+            "properties": {
+              "delete_resource": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_delete_resource_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "probe_resource"
+            ],
+            "properties": {
+              "probe_resource": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_probe_resource_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "resource_options"
+            ],
+            "properties": {
+              "resource_options": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_resource_options_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_msgpack_resource"
+            ],
+            "properties": {
+              "get_msgpack_resource": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_get_msgpack_resource_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "dedup_resource"
+            ],
+            "properties": {
+              "dedup_resource": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_dedup_resource_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "preview_resource"
+            ],
+            "properties": {
+              "preview_resource": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_preview_resource_Result"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpRouteAndBody_create_resource_In": {
+        "type": "object",
+        "required": [
+          "resource_body"
+        ],
+        "properties": {
+          "resource_body": {
+            "$ref": "#/components/schemas/StructHttpBody"
+          }
+        }
+      },
+      "E2eHttpRouteAndBody_create_resource_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "$ref": "#/components/schemas/StructHttpBody"
+          }
+        }
+      },
+      "E2eHttpRouteAndBody_create_resource_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_create_resource_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpRouteAndBody_dedup_resource_In": {
+        "type": "object",
+        "required": [
+          "id",
+          "x_trace_id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "x_trace_id": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpRouteAndBody_dedup_resource_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpRouteAndBody_dedup_resource_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_dedup_resource_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpRouteAndBody_delete_resource_In": {
+        "type": "object",
+        "required": [
+          "resource_id",
+          "force"
+        ],
+        "properties": {
+          "force": {
+            "type": "boolean"
+          },
+          "resource_id": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpRouteAndBody_delete_resource_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eHttpRouteAndBody_delete_resource_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_delete_resource_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpRouteAndBody_get_file_In": {
+        "type": "object",
+        "required": [
+          "file_path",
+          "download",
+          "version"
+        ],
+        "properties": {
+          "download": {
+            "type": "boolean"
+          },
+          "file_path": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpRouteAndBody_get_file_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpRouteAndBody_get_file_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_get_file_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpRouteAndBody_get_msgpack_resource_In": {
+        "type": "object",
+        "required": [
+          "resource_id"
+        ],
+        "properties": {
+          "resource_id": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpRouteAndBody_get_msgpack_resource_Out": {
+        "type": "object",
+        "required": [
+          "revision",
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "$ref": "#/components/schemas/StructHttpBody"
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          }
+        }
+      },
+      "E2eHttpRouteAndBody_get_msgpack_resource_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_get_msgpack_resource_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpRouteAndBody_get_resource_In": {
+        "type": "object",
+        "required": [
+          "resource_id",
+          "locale",
+          "trace_id"
+        ],
+        "properties": {
+          "locale": {
+            "type": "string"
+          },
+          "resource_id": {
+            "type": "string"
+          },
+          "trace_id": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpRouteAndBody_get_resource_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpRouteAndBody_get_resource_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_get_resource_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpRouteAndBody_patch_resource_In": {
+        "type": "object",
+        "required": [
+          "resource_id",
+          "dry_run",
+          "session_id",
+          "changes"
+        ],
+        "properties": {
+          "changes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          },
+          "dry_run": {
+            "type": "boolean"
+          },
+          "resource_id": {
+            "type": "string"
+          },
+          "session_id": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpRouteAndBody_patch_resource_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "E2eHttpRouteAndBody_patch_resource_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_patch_resource_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpRouteAndBody_preview_resource_In": {
+        "type": "object",
+        "required": [
+          "resource"
+        ],
+        "properties": {
+          "resource": {
+            "$ref": "#/components/schemas/StructHttpBody"
+          }
+        }
+      },
+      "E2eHttpRouteAndBody_preview_resource_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "$ref": "#/components/schemas/StructHttpBody"
+          }
+        }
+      },
+      "E2eHttpRouteAndBody_preview_resource_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_preview_resource_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpRouteAndBody_probe_resource_In": {
+        "type": "object",
+        "required": [
+          "resource_id",
+          "if_none_match"
+        ],
+        "properties": {
+          "if_none_match": {
+            "type": "string"
+          },
+          "resource_id": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpRouteAndBody_probe_resource_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eHttpRouteAndBody_probe_resource_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_probe_resource_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpRouteAndBody_replace_resource_In": {
+        "type": "object",
+        "required": [
+          "resource_id",
+          "etag",
+          "payload"
+        ],
+        "properties": {
+          "etag": {
+            "type": "string"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/StructHttpBody"
+          },
+          "resource_id": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpRouteAndBody_replace_resource_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eHttpRouteAndBody_replace_resource_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_replace_resource_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpRouteAndBody_resource_options_In": {
+        "type": "object",
+        "required": [
+          "resource_id"
+        ],
+        "properties": {
+          "resource_id": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpRouteAndBody_resource_options_Out": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eHttpRouteAndBody_resource_options_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpRouteAndBody_resource_options_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpScopeMatrix_Call": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_inherited_attr"
+            ],
+            "properties": {
+              "get_attribute_inherited_attr": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_get_attribute_inherited_attr_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_bare_attr"
+            ],
+            "properties": {
+              "get_attribute_bare_attr": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_get_attribute_bare_attr_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "default_scope"
+            ],
+            "properties": {
+              "default_scope": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_default_scope_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "override_consumes_only"
+            ],
+            "properties": {
+              "override_consumes_only": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_override_consumes_only_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "override_produces_only"
+            ],
+            "properties": {
+              "override_produces_only": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_override_produces_only_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "override_both_media"
+            ],
+            "properties": {
+              "override_both_media": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_override_both_media_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "deprecated_plain"
+            ],
+            "properties": {
+              "deprecated_plain": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_deprecated_plain_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "deprecated_since_only"
+            ],
+            "properties": {
+              "deprecated_since_only": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_deprecated_since_only_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "deprecated_window"
+            ],
+            "properties": {
+              "deprecated_window": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_deprecated_window_In"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpScopeMatrix_Reply": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/E2eHttpScopeMatrix_Return"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
+          }
+        }
+      },
+      "E2eHttpScopeMatrix_Request": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/E2eHttpScopeMatrix_Call"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
+          }
+        }
+      },
+      "E2eHttpScopeMatrix_Return": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_inherited_attr"
+            ],
+            "properties": {
+              "get_attribute_inherited_attr": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_get_attribute_inherited_attr_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_bare_attr"
+            ],
+            "properties": {
+              "get_attribute_bare_attr": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_get_attribute_bare_attr_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "default_scope"
+            ],
+            "properties": {
+              "default_scope": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_default_scope_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "override_consumes_only"
+            ],
+            "properties": {
+              "override_consumes_only": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_override_consumes_only_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "override_produces_only"
+            ],
+            "properties": {
+              "override_produces_only": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_override_produces_only_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "override_both_media"
+            ],
+            "properties": {
+              "override_both_media": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_override_both_media_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "deprecated_plain"
+            ],
+            "properties": {
+              "deprecated_plain": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_deprecated_plain_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "deprecated_since_only"
+            ],
+            "properties": {
+              "deprecated_since_only": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_deprecated_since_only_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "deprecated_window"
+            ],
+            "properties": {
+              "deprecated_window": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_deprecated_window_Result"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpScopeMatrix_default_scope_In": {
+        "type": "object",
+        "required": [
+          "request_body"
+        ],
+        "properties": {
+          "request_body": {
+            "$ref": "#/components/schemas/StructHttpBody"
+          }
+        }
+      },
+      "E2eHttpScopeMatrix_default_scope_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpScopeMatrix_default_scope_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_default_scope_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpScopeMatrix_deprecated_plain_In": {
+        "type": "object",
+        "required": [
+          "resource_id"
+        ],
+        "properties": {
+          "resource_id": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpScopeMatrix_deprecated_plain_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpScopeMatrix_deprecated_plain_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_deprecated_plain_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpScopeMatrix_deprecated_since_only_In": {
+        "type": "object",
+        "required": [
+          "resource_id"
+        ],
+        "properties": {
+          "resource_id": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpScopeMatrix_deprecated_since_only_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpScopeMatrix_deprecated_since_only_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_deprecated_since_only_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpScopeMatrix_deprecated_window_In": {
+        "type": "object",
+        "required": [
+          "resource_id"
+        ],
+        "properties": {
+          "resource_id": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpScopeMatrix_deprecated_window_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpScopeMatrix_deprecated_window_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_deprecated_window_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpScopeMatrix_get_attribute_bare_attr_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eHttpScopeMatrix_get_attribute_bare_attr_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpScopeMatrix_get_attribute_bare_attr_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_get_attribute_bare_attr_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpScopeMatrix_get_attribute_inherited_attr_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eHttpScopeMatrix_get_attribute_inherited_attr_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpScopeMatrix_get_attribute_inherited_attr_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_get_attribute_inherited_attr_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpScopeMatrix_override_both_media_In": {
+        "type": "object",
+        "required": [
+          "name",
+          "age"
+        ],
+        "properties": {
+          "age": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpScopeMatrix_override_both_media_Out": {
+        "type": "object",
+        "required": [
+          "normalized_name",
+          "return_"
+        ],
+        "properties": {
+          "normalized_name": {
+            "type": "string"
+          },
+          "return_": {
+            "$ref": "#/components/schemas/StructHttpBody"
+          }
+        }
+      },
+      "E2eHttpScopeMatrix_override_both_media_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_override_both_media_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpScopeMatrix_override_consumes_only_In": {
+        "type": "object",
+        "required": [
+          "name",
+          "age"
+        ],
+        "properties": {
+          "age": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpScopeMatrix_override_consumes_only_Out": {
+        "type": "object",
+        "required": [
+          "normalized_name",
+          "return_"
+        ],
+        "properties": {
+          "normalized_name": {
+            "type": "string"
+          },
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpScopeMatrix_override_consumes_only_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_override_consumes_only_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpScopeMatrix_override_produces_only_In": {
+        "type": "object",
+        "required": [
+          "resource_id"
+        ],
+        "properties": {
+          "resource_id": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpScopeMatrix_override_produces_only_Out": {
+        "type": "object",
+        "required": [
+          "revision",
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "$ref": "#/components/schemas/StructHttpBody"
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          }
+        }
+      },
+      "E2eHttpScopeMatrix_override_produces_only_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_override_produces_only_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpSecurityMatrix_Call": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "inherited_security"
+            ],
+            "properties": {
+              "inherited_security": {
+                "$ref": "#/components/schemas/E2eHttpSecurityMatrix_inherited_security_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "bearer_or_cookie_security"
+            ],
+            "properties": {
+              "bearer_or_cookie_security": {
+                "$ref": "#/components/schemas/E2eHttpSecurityMatrix_bearer_or_cookie_security_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "alternative_security"
+            ],
+            "properties": {
+              "alternative_security": {
+                "$ref": "#/components/schemas/E2eHttpSecurityMatrix_alternative_security_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "oauth_security"
+            ],
+            "properties": {
+              "oauth_security": {
+                "$ref": "#/components/schemas/E2eHttpSecurityMatrix_oauth_security_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "public_ping"
+            ],
+            "properties": {
+              "public_ping": {
+                "$ref": "#/components/schemas/E2eHttpSecurityMatrix_public_ping_In"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpSecurityMatrix_Reply": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/E2eHttpSecurityMatrix_Return"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
+          }
+        }
+      },
+      "E2eHttpSecurityMatrix_Request": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/E2eHttpSecurityMatrix_Call"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
+          }
+        }
+      },
+      "E2eHttpSecurityMatrix_Return": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "inherited_security"
+            ],
+            "properties": {
+              "inherited_security": {
+                "$ref": "#/components/schemas/E2eHttpSecurityMatrix_inherited_security_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "bearer_or_cookie_security"
+            ],
+            "properties": {
+              "bearer_or_cookie_security": {
+                "$ref": "#/components/schemas/E2eHttpSecurityMatrix_bearer_or_cookie_security_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "alternative_security"
+            ],
+            "properties": {
+              "alternative_security": {
+                "$ref": "#/components/schemas/E2eHttpSecurityMatrix_alternative_security_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "oauth_security"
+            ],
+            "properties": {
+              "oauth_security": {
+                "$ref": "#/components/schemas/E2eHttpSecurityMatrix_oauth_security_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "public_ping"
+            ],
+            "properties": {
+              "public_ping": {
+                "$ref": "#/components/schemas/E2eHttpSecurityMatrix_public_ping_Result"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpSecurityMatrix_alternative_security_In": {
+        "type": "object",
+        "required": [
+          "resource_id",
+          "locale"
+        ],
+        "properties": {
+          "locale": {
+            "type": "string"
+          },
+          "resource_id": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpSecurityMatrix_alternative_security_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpSecurityMatrix_alternative_security_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpSecurityMatrix_alternative_security_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpSecurityMatrix_bearer_or_cookie_security_In": {
+        "type": "object",
+        "required": [
+          "action",
+          "note"
+        ],
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpSecurityMatrix_bearer_or_cookie_security_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpSecurityMatrix_bearer_or_cookie_security_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpSecurityMatrix_bearer_or_cookie_security_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpSecurityMatrix_inherited_security_In": {
+        "type": "object",
+        "required": [
+          "resource_id",
+          "trace_id"
+        ],
+        "properties": {
+          "resource_id": {
+            "type": "string"
+          },
+          "trace_id": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpSecurityMatrix_inherited_security_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpSecurityMatrix_inherited_security_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpSecurityMatrix_inherited_security_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpSecurityMatrix_oauth_security_In": {
+        "type": "object",
+        "required": [
+          "keyword",
+          "page"
+        ],
+        "properties": {
+          "keyword": {
+            "type": "string"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          }
+        }
+      },
+      "E2eHttpSecurityMatrix_oauth_security_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpSecurityMatrix_oauth_security_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpSecurityMatrix_oauth_security_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpSecurityMatrix_public_ping_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eHttpSecurityMatrix_public_ping_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpSecurityMatrix_public_ping_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpSecurityMatrix_public_ping_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpSecurity_Call": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_secure_user"
+            ],
+            "properties": {
+              "get_secure_user": {
+                "$ref": "#/components/schemas/E2eHttpSecurity_get_secure_user_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "search_secure_user"
+            ],
+            "properties": {
+              "search_secure_user": {
+                "$ref": "#/components/schemas/E2eHttpSecurity_search_secure_user_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "healthz"
+            ],
+            "properties": {
+              "healthz": {
+                "$ref": "#/components/schemas/E2eHttpSecurity_healthz_In"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpSecurity_Reply": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/E2eHttpSecurity_Return"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
+          }
+        }
+      },
+      "E2eHttpSecurity_Request": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/E2eHttpSecurity_Call"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
+          }
+        }
+      },
+      "E2eHttpSecurity_Return": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_secure_user"
+            ],
+            "properties": {
+              "get_secure_user": {
+                "$ref": "#/components/schemas/E2eHttpSecurity_get_secure_user_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "search_secure_user"
+            ],
+            "properties": {
+              "search_secure_user": {
+                "$ref": "#/components/schemas/E2eHttpSecurity_search_secure_user_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "healthz"
+            ],
+            "properties": {
+              "healthz": {
+                "$ref": "#/components/schemas/E2eHttpSecurity_healthz_Result"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpSecurity_get_secure_user_In": {
+        "type": "object",
+        "required": [
+          "user_id",
+          "locale",
+          "trace_id"
+        ],
+        "properties": {
+          "locale": {
+            "type": "string"
+          },
+          "trace_id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpSecurity_get_secure_user_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpSecurity_get_secure_user_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpSecurity_get_secure_user_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpSecurity_healthz_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eHttpSecurity_healthz_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpSecurity_healthz_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpSecurity_healthz_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpSecurity_search_secure_user_In": {
+        "type": "object",
+        "required": [
+          "keyword",
+          "page"
+        ],
+        "properties": {
+          "keyword": {
+            "type": "string"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          }
+        }
+      },
+      "E2eHttpSecurity_search_secure_user_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpSecurity_search_secure_user_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpSecurity_search_secure_user_Out"
               }
             }
           }
@@ -5773,6 +10044,34 @@
       "StructEmpty": {
         "type": "object"
       },
+      "StructHttpBody": {
+        "type": "object",
+        "required": [
+          "name",
+          "tags",
+          "labels"
+        ],
+        "properties": {
+          "alias": {
+            "type": "string"
+          },
+          "labels": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "name": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "StructSimple": {
         "type": "object",
         "required": [
@@ -5849,6 +10148,48 @@
             }
           }
         ]
+      }
+    },
+    "securitySchemes": {
+      "api_key-cookie-session_key": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "session_key"
+      },
+      "api_key-header-x-alt-key": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Alt-Key"
+      },
+      "api_key-header-x-org-key": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Org-Key"
+      },
+      "api_key-query-org_key": {
+        "type": "apiKey",
+        "in": "query",
+        "name": "org_key"
+      },
+      "http_basic": {
+        "type": "http",
+        "scheme": "basic"
+      },
+      "http_bearer": {
+        "type": "http",
+        "scheme": "bearer"
+      },
+      "oauth2": {
+        "type": "oauth2",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://example.invalid/token",
+            "scopes": {
+              "reports:read": "reports:read",
+              "reports:write": "reports:write"
+            }
+          }
+        }
       }
     }
   }

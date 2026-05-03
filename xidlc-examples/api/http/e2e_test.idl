@@ -22,6 +22,14 @@ struct StructSimple {
     StructEmpty member3;
 };
 
+struct StructHttpBody {
+    string name;
+    @optional
+    string alias;
+    sequence<string> tags;
+    map<string, string> labels;
+};
+
 @derive(Serialize, Deserialize)
 union UnionSimple switch (EnumSimple1) {
     case EnumSimple1::V1:
@@ -137,6 +145,8 @@ interface E2eAttribute {
     attribute any attr13;
     attribute sequence<any> attr14;
     attribute map<string, any> attr15;
+    @deprecated("2026-01-01")
+    readonly attribute string attr16;
 };
 // path
 interface E2ePathSever {
@@ -172,5 +182,293 @@ interface E2ePathSever {
         string word,
         string q
     );
+
+};
+
+@Consumes("application/x-www-form-urlencoded")
+interface E2eHttpForm {
+    @post(path = "/v2/forms/profile")
+    string submit_profile(
+        string name,
+        @optional
+        uint32 age,
+        out string normalized_name
+    );
+
+};
+
+@deprecated("2026-01-15")
+@Consumes("application/json")
+@Produces("application/json")
+interface E2eHttpScopeMatrix {
+    readonly attribute string inherited_attr;
+    @deprecated
+    readonly attribute string bare_attr;
+    @post(path = "/v2/scope/default")
+    string default_scope(
+        StructHttpBody request_body
+    );
+
+    @post(path = "/v2/scope/override-consumes")
+    @Consumes("application/x-www-form-urlencoded")
+    string override_consumes_only(
+        string name,
+        @optional
+        uint32 age,
+        out string normalized_name
+    );
+
+    @get(path = "/v2/scope/override-produces/{id}")
+    @Produces("application/msgpack")
+    StructHttpBody override_produces_only(
+        @path("id")
+        string resource_id,
+        out uint32 revision
+    );
+
+    @post(path = "/v2/scope/override-both")
+    @Consumes("application/x-www-form-urlencoded")
+    @Produces("application/msgpack")
+    StructHttpBody override_both_media(
+        string name,
+        @optional
+        uint32 age,
+        out string normalized_name
+    );
+
+    @deprecated
+    @get(path = "/v2/scope/deprecated/plain/{id}")
+    string deprecated_plain(
+        @path("id")
+        string resource_id
+    );
+
+    @deprecated("2026-02-01")
+    @get(path = "/v2/scope/deprecated/since/{id}")
+    string deprecated_since_only(
+        @path("id")
+        string resource_id
+    );
+
+    @deprecated(since = "2026-03-01", after = "2026-12-31")
+    @get(path = "/v2/scope/deprecated/window/{id}")
+    string deprecated_window(
+        @path("id")
+        string resource_id
+    );
+
+};
+
+interface E2eHttpRouteAndBody {
+    @get(path = "/v2/resources/{id}")
+    @path("/resources/{id}")
+    @path("/r/{id}")
+    string get_resource(
+        @path("id")
+        string resource_id,
+        @query("lang")
+        @optional
+        string locale,
+        @header("X-Trace-Id")
+        string trace_id
+    );
+
+    @get(path = "/v2/files/{*path}{?download,version}")
+    string get_file(
+        @path("path")
+        string file_path,
+        @query("download")
+        boolean download,
+        @query("version")
+        @optional
+        string version
+    );
+
+    @post(path = "/v2/resources")
+    StructHttpBody create_resource(
+        @flatten
+        StructHttpBody resource_body
+    );
+
+    @put(path = "/v2/resources/{id}")
+    void replace_resource(
+        @path("id")
+        string resource_id,
+        @header("If-Match")
+        string etag,
+        @body("payload")
+        StructHttpBody payload
+    );
+
+    @patch(path = "/v2/resources/{id}")
+    map<string, any> patch_resource(
+        @path("id")
+        string resource_id,
+        @query("dry_run")
+        boolean dry_run,
+        @cookie("sid")
+        string session_id,
+        @body("changes")
+        map<string, any> changes
+    );
+
+    @delete(path = "/v2/resources/{id}")
+    void delete_resource(
+        @path("id")
+        string resource_id,
+        @query("force")
+        @optional
+        boolean force
+    );
+
+    @head(path = "/v2/resources/{id}")
+    void probe_resource(
+        @path("id")
+        string resource_id,
+        @header("If-None-Match")
+        string if_none_match
+    );
+
+    @options(path = "/v2/resources/{id}")
+    void resource_options(
+        @path("id")
+        string resource_id
+    );
+
+    @get(path = "/v2/msgpack/resources/{id}")
+    @Produces("application/msgpack")
+    StructHttpBody get_msgpack_resource(
+        @path("id")
+        string resource_id,
+        out uint32 revision
+    );
+
+    @get(path = " //v2//dedup/{id}/ ")
+    @path("/v2/dedup/{id}")
+    string dedup_resource(
+        @path
+        string id,
+        @header
+        string x_trace_id
+    );
+
+    @get(path = "/v2/resources/preview")
+    StructHttpBody preview_resource(
+        @body("resource")
+        StructHttpBody resource
+    );
+
+};
+
+interface E2eHttpDefaultsMatrix {
+    @delete(path = "/v2/defaults/resources")
+    string delete_resource_default_query(
+        string id,
+        uint32 revision
+    );
+
+    @head(path = "/v2/defaults/resources/head")
+    void probe_resource_default_query(
+        string id,
+        uint32 revision
+    );
+
+    @options(path = "/v2/defaults/resources/options")
+    void resource_options_default_query(
+        string id,
+        uint32 revision
+    );
+
+    @put(path = "/v2/defaults/resources/{id}")
+    StructHttpBody replace_resource_default_body(
+        @path("id")
+        string id,
+        string name,
+        @optional
+        string alias
+    );
+
+    @patch(path = "/v2/defaults/resources/{id}")
+    StructHttpBody patch_resource_default_body(
+        @path("id")
+        string id,
+        string name,
+        @optional
+        string alias
+    );
+
+};
+
+@http_basic
+@api_key(in = "header", name = "X-Org-Key")
+interface E2eHttpSecurity {
+    @get(path = "/v2/secure/users/{id}")
+    @deprecated("2026-01-01")
+    string get_secure_user(
+        @path("id")
+        string user_id,
+        @query("locale")
+        @optional
+        string locale,
+        @header("X-Trace-Id")
+        string trace_id
+    );
+
+    @oauth2(scopes = "reports:write,reports:read")
+    @post(path = "/v2/secure/search")
+    string search_secure_user(
+        string keyword,
+        @optional
+        uint32 page
+    );
+
+    @no_security
+    @deprecated(since = "2026-01-01", after = "2026-06-01")
+    string healthz();
+
+};
+
+@http_basic(realm = "matrix realm")
+@api_key(in = "query", name = "org_key")
+interface E2eHttpSecurityMatrix {
+    @get(path = "/v2/security/inherited/{id}")
+    string inherited_security(
+        @path("id")
+        string resource_id,
+        @header("X-Trace-Id")
+        string trace_id
+    );
+
+    @http_bearer
+    @api_key(in = "cookie", name = "session_key")
+    @post(path = "/v2/security/bearer-cookie")
+    string bearer_or_cookie_security(
+        string action,
+        @optional
+        string note
+    );
+
+    @http_bearer
+    @api_key(in = "header", name = "X-Alt-Key")
+    @get(path = "/v2/security/alternatives/{id}")
+    string alternative_security(
+        @path("id")
+        string resource_id,
+        @query("locale")
+        @optional
+        string locale
+    );
+
+    @oauth2(scopes = "reports:write,reports:read")
+    @post(path = "/v2/security/oauth-search")
+    string oauth_security(
+        string keyword,
+        @optional
+        uint32 page
+    );
+
+    @no_security
+    @get(path = "/v2/security/public/ping")
+    string public_ping();
 
 };

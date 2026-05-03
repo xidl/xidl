@@ -37,6 +37,25 @@ pub trait HttpDefaultsService {
         user_id: u32,
         locale: String,
     ) -> ::xidl_rust_axum::Result<String>;
+    async fn delete_user(
+        &self,
+        id: u32,
+        revision: u32,
+    ) -> ::xidl_rust_axum::Result<String>;
+    async fn probe_user(&self, id: u32, revision: u32) -> ::xidl_rust_axum::Result<()>;
+    async fn user_options(&self, id: u32, revision: u32) -> ::xidl_rust_axum::Result<()>;
+    async fn replace_user(
+        &self,
+        user_id: u32,
+        name: String,
+        age: u32,
+    ) -> ::xidl_rust_axum::Result<String>;
+    async fn patch_user(
+        &self,
+        user_id: u32,
+        name: String,
+        age: u32,
+    ) -> ::xidl_rust_axum::Result<String>;
 }
 mod __xidl_in_HttpDefaultsService {
     use super::*;
@@ -473,6 +492,267 @@ where
         }
     }
 }
+#[derive(::serde::Serialize, ::core::default::Default)]
+struct HttpDefaultsServiceDeleteUserRequestOutQuery {
+    #[serde(default)]
+    id: u32,
+    #[serde(default)]
+    revision: u32,
+}
+#[derive(::serde::Deserialize, ::core::default::Default)]
+struct HttpDefaultsServiceDeleteUserRequestInQuery {
+    #[serde(default)]
+    id: u32,
+    #[serde(default)]
+    revision: u32,
+}
+#[derive(::serde::Deserialize)]
+struct HttpDefaultsServiceDeleteUserRequest {
+    id: u32,
+    revision: u32,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpDefaultsServiceDeleteUserRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+                HttpDefaultsServiceDeleteUserRequestInQuery,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpDefaultsServiceDeleteUserRequestInQuery { id, revision } = query;
+            let headers = &parts.headers;
+            Ok(Self { id, revision })
+        }
+    }
+}
+#[derive(::serde::Serialize, ::core::default::Default)]
+struct HttpDefaultsServiceProbeUserRequestOutQuery {
+    #[serde(default)]
+    id: u32,
+    #[serde(default)]
+    revision: u32,
+}
+#[derive(::serde::Deserialize, ::core::default::Default)]
+struct HttpDefaultsServiceProbeUserRequestInQuery {
+    #[serde(default)]
+    id: u32,
+    #[serde(default)]
+    revision: u32,
+}
+#[derive(::serde::Deserialize)]
+struct HttpDefaultsServiceProbeUserRequest {
+    id: u32,
+    revision: u32,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpDefaultsServiceProbeUserRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+                HttpDefaultsServiceProbeUserRequestInQuery,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpDefaultsServiceProbeUserRequestInQuery { id, revision } = query;
+            let headers = &parts.headers;
+            Ok(Self { id, revision })
+        }
+    }
+}
+#[derive(::serde::Serialize, ::core::default::Default)]
+struct HttpDefaultsServiceUserOptionsRequestOutQuery {
+    #[serde(default)]
+    id: u32,
+    #[serde(default)]
+    revision: u32,
+}
+#[derive(::serde::Deserialize, ::core::default::Default)]
+struct HttpDefaultsServiceUserOptionsRequestInQuery {
+    #[serde(default)]
+    id: u32,
+    #[serde(default)]
+    revision: u32,
+}
+#[derive(::serde::Deserialize)]
+struct HttpDefaultsServiceUserOptionsRequest {
+    id: u32,
+    revision: u32,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpDefaultsServiceUserOptionsRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
+                HttpDefaultsServiceUserOptionsRequestInQuery,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpDefaultsServiceUserOptionsRequestInQuery { id, revision } = query;
+            let headers = &parts.headers;
+            Ok(Self { id, revision })
+        }
+    }
+}
+#[derive(::serde::Deserialize)]
+struct HttpDefaultsServiceReplaceUserPath {
+    #[serde(rename = "id")]
+    user_id: u32,
+}
+#[derive(::serde::Serialize)]
+struct HttpDefaultsServiceReplaceUserRequestOutBody {
+    #[serde(default)]
+    name: String,
+    #[serde(default)]
+    age: u32,
+}
+#[derive(::serde::Deserialize)]
+struct HttpDefaultsServiceReplaceUserRequestInBody {
+    name: String,
+    age: u32,
+}
+#[derive(::serde::Deserialize)]
+struct HttpDefaultsServiceReplaceUserRequest {
+    user_id: u32,
+    name: String,
+    age: u32,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpDefaultsServiceReplaceUserRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+                HttpDefaultsServiceReplaceUserPath,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpDefaultsServiceReplaceUserPath { user_id } = path;
+            let headers = &parts.headers;
+            if !::xidl_rust_axum::http::content_type_matches(
+                headers,
+                "application/json",
+            ) {
+                return Err(::xidl_rust_axum::Error::unsupported_media_type());
+            }
+            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+            let body: HttpDefaultsServiceReplaceUserRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body_bytes)?;
+            let HttpDefaultsServiceReplaceUserRequestInBody { name, age } = body;
+            Ok(Self { user_id, name, age })
+        }
+    }
+}
+#[derive(::serde::Deserialize)]
+struct HttpDefaultsServicePatchUserPath {
+    #[serde(rename = "id")]
+    user_id: u32,
+}
+#[derive(::serde::Serialize)]
+struct HttpDefaultsServicePatchUserRequestOutBody {
+    #[serde(default)]
+    name: String,
+    #[serde(default)]
+    age: u32,
+}
+#[derive(::serde::Deserialize)]
+struct HttpDefaultsServicePatchUserRequestInBody {
+    name: String,
+    age: u32,
+}
+#[derive(::serde::Deserialize)]
+struct HttpDefaultsServicePatchUserRequest {
+    user_id: u32,
+    name: String,
+    age: u32,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpDefaultsServicePatchUserRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+                HttpDefaultsServicePatchUserPath,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpDefaultsServicePatchUserPath { user_id } = path;
+            let headers = &parts.headers;
+            if !::xidl_rust_axum::http::content_type_matches(
+                headers,
+                "application/json",
+            ) {
+                return Err(::xidl_rust_axum::Error::unsupported_media_type());
+            }
+            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+            let body: HttpDefaultsServicePatchUserRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body_bytes)?;
+            let HttpDefaultsServicePatchUserRequestInBody { name, age } = body;
+            Ok(Self { user_id, name, age })
+        }
+    }
+}
 pub struct HttpDefaultsServiceServer<T> {
     inner: ::std::sync::Arc<T>,
 }
@@ -514,6 +794,14 @@ where
                 "/get_user_alias/{id}",
                 xidl_rust_axum::axum::routing::post(Self::get_user_alias),
             )
+            .route("/users", xidl_rust_axum::axum::routing::delete(Self::delete_user))
+            .route("/users/head", xidl_rust_axum::axum::routing::head(Self::probe_user))
+            .route(
+                "/users/options",
+                xidl_rust_axum::axum::routing::options(Self::user_options),
+            )
+            .route("/users/{id}", xidl_rust_axum::axum::routing::put(Self::replace_user))
+            .route("/users/{id}", xidl_rust_axum::axum::routing::patch(Self::patch_user))
             .with_state(svc)
     }
     #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
@@ -808,6 +1096,188 @@ where
         let user_id: u32 = user_id;
         let locale: String = locale;
         let mut resp = match svc.get_user_alias(user_id, locale).await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    let body_value: String = resp_value;
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                        .to_vec(&body_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        Ok(resp)
+    }
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    async fn delete_user(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        request: HttpDefaultsServiceDeleteUserRequest,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let HttpDefaultsServiceDeleteUserRequest { id, revision } = request;
+        let id: u32 = id;
+        let revision: u32 = revision;
+        let mut resp = match svc.delete_user(id, revision).await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    let body_value: String = resp_value;
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                        .to_vec(&body_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        Ok(resp)
+    }
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    async fn probe_user(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        request: HttpDefaultsServiceProbeUserRequest,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let HttpDefaultsServiceProbeUserRequest { id, revision } = request;
+        let id: u32 = id;
+        let revision: u32 = revision;
+        let mut resp = match svc.probe_user(id, revision).await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    resp_value;
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(
+                        ::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT,
+                    )
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        Ok(resp)
+    }
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    async fn user_options(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        request: HttpDefaultsServiceUserOptionsRequest,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let HttpDefaultsServiceUserOptionsRequest { id, revision } = request;
+        let id: u32 = id;
+        let revision: u32 = revision;
+        let mut resp = match svc.user_options(id, revision).await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    resp_value;
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(
+                        ::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT,
+                    )
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        Ok(resp)
+    }
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    async fn replace_user(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        request: HttpDefaultsServiceReplaceUserRequest,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let HttpDefaultsServiceReplaceUserRequest { user_id, name, age } = request;
+        let user_id: u32 = user_id;
+        let name: String = name;
+        let age: u32 = age;
+        let mut resp = match svc.replace_user(user_id, name, age).await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    let body_value: String = resp_value;
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                        .to_vec(&body_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        Ok(resp)
+    }
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    async fn patch_user(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        request: HttpDefaultsServicePatchUserRequest,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let HttpDefaultsServicePatchUserRequest { user_id, name, age } = request;
+        let user_id: u32 = user_id;
+        let name: String = name;
+        let age: u32 = age;
+        let mut resp = match svc.patch_user(user_id, name, age).await {
             Ok(resp_value) => {
                 let mut resp = {
                     let body_value: String = resp_value;
@@ -1301,6 +1771,271 @@ impl HttpDefaultsServiceClient {
             req.url_mut().set_query(Some(&query));
         }
         let auth_target = &self.client;
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body)
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+    #[allow(clippy::useless_conversion)]
+    pub async fn delete_user(
+        &self,
+        id: u32,
+        revision: u32,
+    ) -> Result<String, xidl_rust_axum::Error> {
+        let path = "/users".to_string();
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::DELETE, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let query = HttpDefaultsServiceDeleteUserRequestOutQuery {
+            id,
+            revision,
+        };
+        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if !query.is_empty() {
+            req.url_mut().set_query(Some(&query));
+        }
+        let auth_target = &self.client;
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body)
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+    #[allow(clippy::useless_conversion)]
+    pub async fn probe_user(
+        &self,
+        id: u32,
+        revision: u32,
+    ) -> Result<(), xidl_rust_axum::Error> {
+        let path = "/users/head".to_string();
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::HEAD, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let query = HttpDefaultsServiceProbeUserRequestOutQuery {
+            id,
+            revision,
+        };
+        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if !query.is_empty() {
+            req.url_mut().set_query(Some(&query));
+        }
+        let auth_target = &self.client;
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            Ok(())
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+    #[allow(clippy::useless_conversion)]
+    pub async fn user_options(
+        &self,
+        id: u32,
+        revision: u32,
+    ) -> Result<(), xidl_rust_axum::Error> {
+        let path = "/users/options".to_string();
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::OPTIONS, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let query = HttpDefaultsServiceUserOptionsRequestOutQuery {
+            id,
+            revision,
+        };
+        let query = xidl_rust_axum::serde_urlencoded::to_string(&query)
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if !query.is_empty() {
+            req.url_mut().set_query(Some(&query));
+        }
+        let auth_target = &self.client;
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            Ok(())
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+    #[allow(clippy::useless_conversion)]
+    pub async fn replace_user(
+        &self,
+        user_id: u32,
+        name: String,
+        age: u32,
+    ) -> Result<String, xidl_rust_axum::Error> {
+        let path = "/users/{id}".to_string();
+        let path = path.replace("{id}", &user_id.to_string());
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::PUT, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let auth_target = &self.client;
+        let body = HttpDefaultsServiceReplaceUserRequestOutBody {
+            name: name,
+            age: age,
+        };
+        let body = xidl_rust_axum::SerializeFactory::new("application/json")
+            .to_vec(&body)?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::CONTENT_TYPE,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body)
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+    #[allow(clippy::useless_conversion)]
+    pub async fn patch_user(
+        &self,
+        user_id: u32,
+        name: String,
+        age: u32,
+    ) -> Result<String, xidl_rust_axum::Error> {
+        let path = "/users/{id}".to_string();
+        let path = path.replace("{id}", &user_id.to_string());
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::PATCH, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let auth_target = &self.client;
+        let body = HttpDefaultsServicePatchUserRequestOutBody {
+            name: name,
+            age: age,
+        };
+        let body = xidl_rust_axum::SerializeFactory::new("application/json")
+            .to_vec(&body)?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::CONTENT_TYPE,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
         let resp = self
             .client
             .http()
