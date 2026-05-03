@@ -1,9 +1,8 @@
 use super::File;
 use crate::diagnostic::DiagnosticRunner;
 use crate::driver::generate_session::CodegenSession;
-use crate::driver::lang::Plugin;
 use crate::error::{IdlcError, IdlcResult};
-use crate::jsonrpc::{Artifact, ArtifactKind, Codegen};
+use crate::jsonrpc::{Artifact, ArtifactKind, Codegen, CodegenInput};
 use crate::macros::hashmap;
 use std::collections::HashMap;
 use std::path::Path;
@@ -39,7 +38,7 @@ impl Generator {
         target_props.extend(self.metadata(source, props, ts));
 
         let empty = xidl_parser::hir::Specification(vec![]);
-        self.generate_for_lang("hir", empty, path, target_props)
+        self.generate_for_lang("hir", CodegenInput::new_rpc_hir(empty), path, target_props)
             .await
     }
 
@@ -62,7 +61,7 @@ impl Generator {
     async fn generate_for_lang(
         &mut self,
         lang: &str,
-        hir: xidl_parser::hir::Specification,
+        input_hir: CodegenInput,
         input: &Path,
         base: HashMap<String, serde_json::Value>,
     ) -> IdlcResult<Vec<File>> {
@@ -79,7 +78,7 @@ impl Generator {
 
         let artifacts: Vec<Artifact> = session
             .client
-            .generate(hir, input_str.to_string(), properties.clone())
+            .generate(input_hir, input_str.to_string(), properties.clone())
             .await
             .map_err(|err| IdlcError::rpc(err.to_string()))?;
 
@@ -125,11 +124,13 @@ impl Generator {
         let data = artifact.into_hir();
         let mut props = properties.clone();
         props.extend(data.props);
-        let next_lang = match Plugin::from(data.lang.as_str()).uses_http_hir() {
-            true => "http-hir",
-            false => data.lang.as_str(),
-        };
-        Box::pin(self.generate_for_lang(next_lang, data.hir, input, props)).await
+        Box::pin(self.generate_for_lang(
+            data.lang.as_str(),
+            CodegenInput::new_rpc_hir(data.hir),
+            input,
+            props,
+        ))
+        .await
     }
 
     async fn expand_http_hir_artifact(
@@ -141,11 +142,13 @@ impl Generator {
         let data = artifact.into_http_hir();
         let mut props = properties.clone();
         props.extend(data.props);
-        props.insert(
-            "http_hir".to_string(),
-            serde_json::to_value(&data.http_hir).map_err(|err| IdlcError::rpc(err.to_string()))?,
-        );
-        Box::pin(self.generate_for_lang(&data.lang, data.hir, input, props)).await
+        Box::pin(self.generate_for_lang(
+            &data.lang,
+            CodegenInput::new_http_hir(data.http_hir),
+            input,
+            props,
+        ))
+        .await
     }
 
     fn artifact_to_file(artifact: Artifact) -> File {

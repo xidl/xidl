@@ -1,6 +1,6 @@
-use crate::error::{IdlcError, IdlcResult};
+use crate::error::{ParseError, ParserResult};
 use serde::{Deserialize, Serialize};
-use xidl_parser::hir;
+use crate::hir;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum HttpMethod {
@@ -85,19 +85,20 @@ pub struct HttpInterface {
     pub operations: Vec<HttpOperation>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HttpHirDocument {
+    pub spec: hir::Specification,
     pub document: HttpDocumentMetadata,
     pub interfaces: Vec<HttpInterface>,
 }
 
 impl HttpHirDocument {
-    pub fn from_props(props: &hir::ParserProperties) -> IdlcResult<Self> {
+    pub fn from_props(props: &hir::ParserProperties) -> ParserResult<Self> {
         let value = props
             .get("http_hir")
             .cloned()
-            .ok_or_else(|| IdlcError::rpc("missing http_hir properties".to_string()))?;
-        serde_json::from_value(value).map_err(|err| IdlcError::rpc(err.to_string()))
+            .ok_or_else(|| ParseError::Message("missing http_hir properties".to_string()))?;
+        serde_json::from_value(value).map_err(|err| ParseError::Message(err.to_string()))
     }
 
     pub fn find_interface(&self, module_path: &[String], name: &str) -> Option<&HttpInterface> {

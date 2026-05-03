@@ -1,6 +1,6 @@
-use crate::error::{IdlcError, IdlcResult};
+use crate::error::{ParseError, ParserResult};
 use std::collections::HashSet;
-use xidl_parser::hir;
+use crate::hir;
 
 use super::attr::project_attribute;
 use super::project_params::project_params;
@@ -20,13 +20,18 @@ use super::{
     HttpOperationSource,
 };
 
-pub fn project(spec: &hir::Specification) -> IdlcResult<HttpHirDocument> {
+pub fn project(spec: &hir::Specification) -> ParserResult<HttpHirDocument> {
     let mut ctx = ProjectionContext::default();
     ctx.collect_spec(spec, &[])?;
     Ok(HttpHirDocument {
+        spec: spec.clone(),
         document: ctx.document,
         interfaces: ctx.interfaces,
     })
+}
+
+fn parse_err(message: String) -> ParseError {
+    ParseError::Message(message)
 }
 
 #[derive(Default)]
@@ -40,14 +45,14 @@ impl ProjectionContext {
         &mut self,
         spec: &hir::Specification,
         module_path: &[String],
-    ) -> IdlcResult<()> {
+    ) -> ParserResult<()> {
         for def in &spec.0 {
             self.collect_def(def, module_path)?;
         }
         Ok(())
     }
 
-    fn collect_def(&mut self, def: &hir::Definition, module_path: &[String]) -> IdlcResult<()> {
+    fn collect_def(&mut self, def: &hir::Definition, module_path: &[String]) -> ParserResult<()> {
         match def {
             hir::Definition::ModuleDcl(module) => {
                 let mut next = module_path.to_vec();
@@ -102,7 +107,7 @@ fn normalize_pragma_scalar(value: &str) -> String {
 fn project_interface(
     interface: &hir::InterfaceDcl,
     module_path: &[String],
-) -> IdlcResult<Option<HttpInterface>> {
+) -> ParserResult<Option<HttpInterface>> {
     let hir::InterfaceDclInner::InterfaceDef(def) = &interface.decl else {
         return Ok(None);
     };
@@ -110,7 +115,7 @@ fn project_interface(
         &format!("interface '{}'", def.header.ident),
         &interface.annotations,
     )
-    .map_err(IdlcError::rpc)?;
+    .map_err(ParseError::Message)?;
 
     let mut operations = Vec::new();
     if let Some(body) = &def.interface_body {
@@ -145,16 +150,16 @@ fn project_attribute_group(
     module_path: &[String],
     interface_annotations: &[hir::Annotation],
     attr: &hir::AttrDcl,
-) -> IdlcResult<Vec<HttpOperation>> {
+) -> ParserResult<Vec<HttpOperation>> {
     validate_http_annotations(
         &format!("attribute in interface '{interface_name}'"),
         &attr.annotations,
     )
-    .map_err(IdlcError::rpc)?;
+    .map_err(ParseError::Message)?;
     let deprecated =
-        effective_deprecated(interface_annotations, &attr.annotations).map_err(IdlcError::rpc)?;
+        effective_deprecated(interface_annotations, &attr.annotations).map_err(ParseError::Message)?;
     let security = effective_security_with_origin(interface_annotations, &attr.annotations)
-        .map_err(IdlcError::rpc)?;
+        .map_err(ParseError::Message)?;
     Ok(project_attribute(
         interface_name,
         module_path,
@@ -170,11 +175,11 @@ fn project_operation(
     module_path: &[String],
     interface_annotations: &[hir::Annotation],
     op: &hir::OpDcl,
-) -> IdlcResult<HttpOperation> {
+) -> ParserResult<HttpOperation> {
     validate_http_annotations(&format!("operation '{}'", op.ident), &op.annotations)
-        .map_err(IdlcError::rpc)?;
-    let stream = http_stream_config(&op.annotations).map_err(IdlcError::rpc)?;
-    validate_stream_shape(&op.ident, stream)?;
+        .map_err(ParseError::Message)?;
+    let stream = http_stream_config(&op.annotations).map_err(ParseError::Message)?;
+    validate_stream_shape(&op.ident, stream).map_err(parse_err)?;
     let default_method = if matches!(
         stream.kind,
         Some(HttpStreamKind::Server) | Some(HttpStreamKind::Bidi)
@@ -183,15 +188,16 @@ fn project_operation(
     } else {
         super::HttpMethod::Post
     };
-    let (method, mut route_paths) = route_from_annotations(&op.annotations, default_method)?;
-    validate_stream_method(&op.ident, stream.kind, method)?;
+    let (method, mut route_paths) =
+        route_from_annotations(&op.annotations, default_method).map_err(parse_err)?;
+    validate_stream_method(&op.ident, stream.kind, method).map_err(parse_err)?;
     if route_paths.is_empty() {
-        route_paths.push(auto_default_method_path(op, method)?);
+        route_paths.push(auto_default_method_path(op, method).map_err(parse_err)?);
     }
     let routes = route_paths
         .iter()
-        .map(|path| parse_route_template(path))
-        .collect::<IdlcResult<Vec<_>>>()?;
+        .map(|path| parse_route_template(path).map_err(parse_err))
+        .collect::<ParserResult<Vec<_>>>()?;
     let route_path_names = routes
         .iter()
         .map(|route| route.path_params.iter().cloned().collect::<HashSet<_>>())
@@ -208,15 +214,17 @@ fn project_operation(
             stream.kind,
             &route_path_names,
             &route_query_names,
-        )?;
+        )
+        .map_err(parse_err)?;
 
     validate_route_bindings(
         &op.ident,
         &routes,
         &path_binding_count,
         &query_binding_count,
-    )?;
-    validate_request_shape(&op.ident, stream.kind, &request_params)?;
+    )
+    .map_err(parse_err)?;
+    validate_request_shape(&op.ident, stream.kind, &request_params).map_err(parse_err)?;
     validate_head_constraints(
         &op.ident,
         method,
@@ -225,7 +233,8 @@ fn project_operation(
             hir::OpTypeSpec::Void => None,
             hir::OpTypeSpec::TypeSpec(ty) => Some(ty),
         },
-    )?;
+    )
+    .map_err(parse_err)?;
 
     Ok(HttpOperation {
         name: op.ident.clone(),
@@ -245,10 +254,10 @@ fn project_operation(
             "Produces",
         ),
         security: effective_security_with_origin(interface_annotations, &op.annotations)
-            .map_err(IdlcError::rpc)?,
+            .map_err(ParseError::Message)?,
         basic_auth_realm: effective_basic_auth_realm(interface_annotations, &op.annotations),
         deprecated: effective_deprecated(interface_annotations, &op.annotations)
-            .map_err(IdlcError::rpc)?,
+            .map_err(ParseError::Message)?,
         request_params,
         response_params,
         return_type: match &op.ty {

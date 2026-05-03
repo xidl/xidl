@@ -5,8 +5,8 @@ mod spec_render;
 mod spec_types;
 
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::http_hir::semantics::HttpStreamKind;
-use crate::generate::http_hir::{HttpHirDocument, HttpOperation};
+use xidl_parser::http_hir::semantics::HttpStreamKind;
+use xidl_parser::http_hir::{HttpHirDocument, HttpOperation, HttpOperationSource};
 use crate::generate::python_http::PythonHttpRenderer;
 use serde::Serialize;
 use std::collections::HashMap;
@@ -150,9 +150,9 @@ fn validate_route_bindings(methods: &[spec_context::MethodContext]) -> IdlcResul
 fn skips_operation(operation: &HttpOperation) -> bool {
     matches!(
         operation.source,
-        crate::generate::http_hir::HttpOperationSource::AttributeGet
-            | crate::generate::http_hir::HttpOperationSource::AttributeSet
-            | crate::generate::http_hir::HttpOperationSource::AttributeWatch
+        HttpOperationSource::AttributeGet
+            | HttpOperationSource::AttributeSet
+            | HttpOperationSource::AttributeWatch
     )
 }
 

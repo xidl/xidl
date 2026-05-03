@@ -74,9 +74,9 @@ async fn io_listener_accepts_once_and_then_breaks() {
     let listener = IoListener::from_stream(listener_stream);
     let (mut stream, peer) = listener.accept().await.unwrap();
     assert_eq!(peer, std::net::SocketAddr::from(([127, 0, 0, 1], 0)));
-    let mut buf = String::new();
-    stream.read_to_string(&mut buf).await.unwrap();
-    assert_eq!(buf, "ping");
+    let mut buf = [0_u8; 4];
+    stream.read_exact(&mut buf).await.unwrap();
+    assert_eq!(&buf, b"ping");
     assert!(!stream.is_write_vectored() || stream.is_write_vectored());
 
     let written = stream

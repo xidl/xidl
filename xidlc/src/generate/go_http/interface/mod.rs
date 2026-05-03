@@ -9,7 +9,7 @@ mod interface_types;
 
 use crate::error::IdlcResult;
 use crate::generate::go_http::MethodMeta;
-use crate::generate::http_hir::{HttpHirDocument, HttpOperationSource};
+use xidl_parser::http_hir::{HttpHirDocument, HttpOperationSource};
 use std::fmt::Write;
 use xidl_parser::hir;
 
@@ -56,7 +56,7 @@ pub(crate) fn render_interface(
 }
 
 fn render_service_method(out: &mut String, method: &MethodMeta) {
-    use crate::generate::http_hir::semantics::HttpStreamKind;
+    use xidl_parser::http_hir::semantics::HttpStreamKind;
 
     match method.stream_kind {
         Some(HttpStreamKind::Server) => writeln!(

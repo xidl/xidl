@@ -18,10 +18,11 @@ impl crate::jsonrpc::Codegen for TypedAstGen {
 
     async fn generate(
         &self,
-        hir: xidl_parser::hir::Specification,
+        input_hir: crate::jsonrpc::CodegenInput,
         input: String,
         props: ParserProperties,
     ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
+        let hir = input_hir.into_rpc_hir();
         let source: String = serde_json::from_value(props.get("idl").unwrap().clone()).unwrap();
         let target_lang: String =
             serde_json::from_value(props.get("target_lang").unwrap().clone()).unwrap();

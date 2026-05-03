@@ -6,7 +6,7 @@ use super::schema::{
 };
 use super::security::register_security_schemes;
 use super::stream::{OpenApiStreamPatch, request_stream_content_type, stream_patch_item_schema};
-use crate::generate::http_hir::HttpHirDocument;
+use xidl_parser::http_hir::HttpHirDocument;
 use crate::openapi::RefOr;
 use crate::openapi::path::PathItem;
 use crate::openapi::schema::{ObjectBuilder, Schema, Type};

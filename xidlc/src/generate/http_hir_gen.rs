@@ -4,8 +4,6 @@ use xidl_parser::hir;
 
 use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactHttpHir};
 
-use super::project;
-
 pub(crate) struct HttpHirCodegen;
 
 #[async_trait::async_trait]
@@ -15,12 +13,15 @@ impl crate::jsonrpc::Codegen for HttpHirCodegen {
     }
 
     async fn get_properties(&self) -> Result<hir::ParserProperties, xidl_jsonrpc::Error> {
-        Ok(HashMap::new())
+        Ok(HashMap::from([(
+            "hir_kind".to_string(),
+            serde_json::Value::String("http".to_string()),
+        )]))
     }
 
     async fn generate(
         &self,
-        hir: hir::Specification,
+        input_hir: crate::jsonrpc::CodegenInput,
         path: String,
         props: hir::ParserProperties,
     ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
@@ -31,11 +32,7 @@ impl crate::jsonrpc::Codegen for HttpHirCodegen {
                 .unwrap_or_else(|| serde_json::Value::String("http-hir".to_string())),
         )
         .map_err(|err| xidl_jsonrpc::Error::invalid_params(err.to_string()))?;
-        let http_hir = project(&hir).map_err(|err| xidl_jsonrpc::Error::Rpc {
-            code: xidl_jsonrpc::ErrorCode::ServerError,
-            message: err.to_string(),
-            data: None,
-        })?;
+        let http_hir = input_hir.into_http_hir();
 
         if target_lang == "http-hir" {
             let content = serde_json::to_string_pretty(&http_hir)?;
@@ -46,7 +43,6 @@ impl crate::jsonrpc::Codegen for HttpHirCodegen {
         } else {
             Ok(vec![Artifact::new_http_hir(ArtifactHttpHir {
                 lang: target_lang,
-                hir,
                 http_hir,
                 props,
             })])

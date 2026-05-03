@@ -1,7 +1,5 @@
-use std::collections::HashMap;
-
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::http_hir::HttpHirDocument;
+use xidl_parser::http_hir::HttpHirDocument;
 use crate::generate::utils::{format_timestamp_filter, rust_format_filter};
 use convert_case::Casing;
 use include_dir::{Dir, include_dir};
@@ -21,7 +19,7 @@ pub trait RustAxumRender {
 
 pub struct RustAxumRenderer {
     env: Environment<'static>,
-    props: HashMap<String, serde_json::Value>,
+    http_hir: Option<HttpHirDocument>,
 }
 
 impl RustAxumRenderer {
@@ -33,7 +31,7 @@ impl RustAxumRenderer {
         env.add_filter("to_case", to_case);
         Ok(Self {
             env,
-            props: HashMap::new(),
+            http_hir: None,
         })
     }
 
@@ -45,14 +43,20 @@ impl RustAxumRenderer {
             .map_err(|err| IdlcError::template(err.to_string()))
     }
 
-    pub fn extend(&mut self, props: &HashMap<String, serde_json::Value>) {
-        self.props.extend(props.clone());
+    pub fn extend(
+        &mut self,
+        props: &std::collections::HashMap<String, serde_json::Value>,
+        http_hir: HttpHirDocument,
+    ) {
+        self.http_hir = Some(http_hir);
         self.env
             .add_global("opt", minijinja::Value::from_serialize(props));
     }
 
     pub fn http_hir(&self) -> IdlcResult<HttpHirDocument> {
-        HttpHirDocument::from_props(&self.props)
+        self.http_hir
+            .clone()
+            .ok_or_else(|| IdlcError::rpc("missing http_hir in rust axum renderer".to_string()))
     }
 }
 

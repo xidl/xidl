@@ -10,7 +10,7 @@ use serde_json::json;
 use std::collections::HashMap;
 use std::path::Path;
 use xidl_parser::hir;
-use xidl_parser::hir::{ParserProperties, Specification};
+use xidl_parser::hir::ParserProperties;
 
 pub use render::{JsonRpcRender, JsonRpcRenderOutput, JsonRpcRenderer};
 
@@ -78,10 +78,11 @@ impl crate::jsonrpc::Codegen for RustJsonRpcCodegen {
 
     async fn generate(
         &self,
-        hir: Specification,
+        input_hir: crate::jsonrpc::CodegenInput,
         path: String,
         props: ::xidl_parser::hir::ParserProperties,
     ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
+        let hir = input_hir.into_rpc_hir();
         generate(hir, Path::new(&path), props).map_err(|err| xidl_jsonrpc::Error::Rpc {
             code: xidl_jsonrpc::ErrorCode::ServerError,
             message: err.to_string(),

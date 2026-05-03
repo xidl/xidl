@@ -1,5 +1,5 @@
-use crate::generate::http_hir::HttpMethod;
-use crate::generate::http_hir::semantics::{
+use xidl_parser::http_hir::HttpMethod;
+use xidl_parser::http_hir::semantics::{
     annotation_name, annotation_params, normalize_annotation_params,
 };
 use crate::openapi::path::HttpMethod as OpenApiHttpMethod;

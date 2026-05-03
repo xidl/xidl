@@ -5,7 +5,7 @@ mod stream;
 
 use jiff::{Timestamp, civil, tz::TimeZone};
 use serde::{Deserialize, Serialize};
-use xidl_parser::hir;
+use crate::hir;
 
 pub use self::annotations::{
     annotation_name, annotation_params, effective_media_type, has_annotation,

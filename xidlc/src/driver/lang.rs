@@ -53,15 +53,6 @@ impl From<&str> for Plugin {
     }
 }
 
-impl Plugin {
-    pub fn uses_http_hir(&self) -> bool {
-        matches!(
-            self,
-            Self::Axum | Self::GoHttp | Self::PythonHttp | Self::Openapi
-        )
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -109,12 +100,4 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_plugin_uses_http_hir() {
-        assert!(Plugin::Axum.uses_http_hir());
-        assert!(Plugin::GoHttp.uses_http_hir());
-        assert!(Plugin::PythonHttp.uses_http_hir());
-        assert!(Plugin::Openapi.uses_http_hir());
-        assert!(!Plugin::Rust.uses_http_hir());
-    }
 }

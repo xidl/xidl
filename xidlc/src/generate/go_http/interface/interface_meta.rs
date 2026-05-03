@@ -1,6 +1,6 @@
 use crate::error::IdlcResult;
 use crate::generate::go_http::{MethodMeta, ParamSource, definition};
-use crate::generate::http_hir::{
+use xidl_parser::http_hir::{
     HttpOperation,
     semantics::{HttpStreamCodec, HttpStreamKind},
 };

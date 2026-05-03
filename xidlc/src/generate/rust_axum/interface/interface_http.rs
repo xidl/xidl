@@ -1,4 +1,4 @@
-use crate::generate::http_hir::{
+use xidl_parser::http_hir::{
     HttpMethod as HttpHirMethod, HttpOperation, HttpParam as HttpHirParam,
     HttpParamKind as HttpHirParamKind,
     semantics::{

@@ -1,6 +1,6 @@
 use crate::error::IdlcResult;
 use crate::generate::go_http::{MethodMeta, ParamMeta, definition};
-use crate::generate::http_hir::semantics::{HttpApiKeyLocation, HttpSecurityRequirement};
+use xidl_parser::http_hir::semantics::{HttpApiKeyLocation, HttpSecurityRequirement};
 use std::fmt::Write;
 
 use super::GoHttpRenderer;

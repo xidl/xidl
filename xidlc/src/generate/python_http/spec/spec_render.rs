@@ -1,5 +1,5 @@
 use crate::error::IdlcResult;
-use crate::generate::http_hir::semantics::HttpStreamKind;
+use xidl_parser::http_hir::semantics::HttpStreamKind;
 use std::fmt::Write;
 
 use super::is_server_stream;

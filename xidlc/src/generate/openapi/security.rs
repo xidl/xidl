@@ -1,4 +1,4 @@
-use crate::generate::http_hir::semantics::{HttpApiKeyLocation, HttpSecurityRequirement};
+use xidl_parser::http_hir::semantics::{HttpApiKeyLocation, HttpSecurityRequirement};
 use crate::openapi::security::{
     ApiKey, ApiKeyValue, Http, HttpAuthScheme, OAuth2, Scopes, SecurityRequirement, SecurityScheme,
 };

@@ -1,5 +1,6 @@
 use xidl_jsonrpc::{Error, ErrorCode};
-use xidl_parser::hir::{ParserProperties, Specification};
+use xidl_parser::hir::ParserProperties;
+use xidl_parser::http_hir::ProjectedHir;
 
 use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactHir};
 
@@ -19,7 +20,7 @@ impl crate::jsonrpc::Codegen for HirGen {
 
     async fn generate(
         &self,
-        _hir: Specification,
+        _input_hir: crate::jsonrpc::CodegenInput,
         _input: String,
         props: ::xidl_parser::hir::ParserProperties,
     ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
@@ -32,7 +33,7 @@ impl crate::jsonrpc::Codegen for HirGen {
             message: err.to_string(),
             data: None,
         })?;
-        let hir = xidl_parser::hir::Specification::from_typed_ast_with_properties_and_path(
+        let projected = xidl_parser::hir::Specification::project_typed_ast_with_properties_and_path(
             typed,
             props.clone(),
             std::path::Path::new(&_input),
@@ -43,17 +44,35 @@ impl crate::jsonrpc::Codegen for HirGen {
             data: None,
         })?;
 
-        if target_lang == "hir" {
-            Ok(vec![Artifact::new_file(ArtifactFile {
-                path: _input,
-                content: serde_json::to_string(&hir)?,
-            })])
-        } else {
-            Ok(vec![Artifact::new_hir(ArtifactHir {
-                lang: target_lang,
-                hir,
-                props,
-            })])
+        match projected {
+            ProjectedHir::Rpc(hir) => {
+                if target_lang == "hir" {
+                    Ok(vec![Artifact::new_file(ArtifactFile {
+                        path: _input,
+                        content: serde_json::to_string(&hir)?,
+                    })])
+                } else {
+                    Ok(vec![Artifact::new_hir(ArtifactHir {
+                        lang: target_lang,
+                        hir,
+                        props,
+                    })])
+                }
+            }
+            ProjectedHir::Http(http_hir) => {
+                if target_lang == "http-hir" {
+                    Ok(vec![Artifact::new_file(ArtifactFile {
+                        path: _input.replace(".idl", ".http_hir.json"),
+                        content: serde_json::to_string_pretty(&http_hir)?,
+                    })])
+                } else {
+                    Ok(vec![Artifact::new_http_hir(crate::jsonrpc::ArtifactHttpHir {
+                        lang: target_lang,
+                        http_hir,
+                        props,
+                    })])
+                }
+            }
         }
     }
 }

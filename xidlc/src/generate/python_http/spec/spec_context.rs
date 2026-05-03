@@ -1,5 +1,5 @@
 use crate::error::IdlcResult;
-use crate::generate::http_hir::{
+use xidl_parser::http_hir::{
     HttpOperation, HttpParam,
     semantics::{HttpStreamCodec, HttpStreamKind},
 };
@@ -91,7 +91,7 @@ pub(super) fn build_method(
         requires_request_content_type: operation
             .request_params
             .iter()
-            .any(|param| matches!(param.kind, crate::generate::http_hir::HttpParamKind::Body))
+            .any(|param| matches!(param.kind, xidl_parser::http_hir::HttpParamKind::Body))
             || matches!(stream_kind, Some(HttpStreamKind::Client)),
         security_expr: security_expr(operation.security.as_ref()),
         stream_expr: stream_expr(operation.stream),

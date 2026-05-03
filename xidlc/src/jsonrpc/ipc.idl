@@ -8,9 +8,22 @@ struct ArtifactHir {
 @derive(Debug, Serialize, Deserialize)
 struct ArtifactHttpHir {
     string lang;
-    ::xidl_parser::hir::Specification hir;
-    crate::generate::http_hir::HttpHirDocument http_hir;
+    ::xidl_parser::http_hir::HttpHirDocument http_hir;
     ::xidl_parser::hir::ParserProperties props;
+};
+
+@derive(Debug, Serialize, Deserialize)
+enum CodegenInputKind {
+    RpcHir,
+    HttpHir
+};
+
+@derive(Serialize, Deserialize)
+union CodegenInput switch (CodegenInputKind) {
+    case CodegenInputKind::RpcHir:
+        ::xidl_parser::hir::Specification rpc_hir;
+    case CodegenInputKind::HttpHir:
+        ::xidl_parser::http_hir::HttpHirDocument http_hir;
 };
 
 @derive(Debug, Serialize, Deserialize)
@@ -42,7 +55,7 @@ interface Codegen {
     ::xidl_parser::hir::ParserProperties get_properties();
 
     sequence<Artifact> generate(
-        in ::xidl_parser::hir::Specification hir,
+        in CodegenInput input,
         in string path,
         in ::xidl_parser::hir::ParserProperties props
     );

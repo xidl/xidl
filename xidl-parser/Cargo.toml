@@ -22,6 +22,8 @@ serde_json.workspace = true
 md5.workspace = true
 minijinja = { workspace = true }
 include_dir = "0.7"
+jiff = "0.2"
+convert_case.workspace = true
 
 [dev-dependencies]
 insta.workspace = true

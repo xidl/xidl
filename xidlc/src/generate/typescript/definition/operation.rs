@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::http_hir::semantics::{HttpStreamKind, http_stream_config};
+use xidl_parser::http_hir::semantics::{HttpStreamKind, http_stream_config};
 use crate::generate::utils::doc_lines_from_annotations;
 use xidl_parser::hir;
 

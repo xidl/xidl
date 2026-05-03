@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use xidl_parser::hir;
+use crate::hir;
 
 use super::annotation_parse::{
     parse_raw_params, parse_string_array as parse_string_array_impl, render_const_expr, trim_quotes,

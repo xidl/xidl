@@ -1,5 +1,5 @@
 use crate::error::IdlcResult;
-use crate::generate::http_hir::{
+use xidl_parser::http_hir::{
     HttpOperation, HttpParamKind as HttpHirParamKind, semantics::HttpStreamKind,
 };
 use crate::generate::rust::util::{rust_ident, rust_passthrough_attrs_from_annotations};
