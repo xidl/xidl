@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.51.0](https://github.com/xidl/xidl/compare/v0.50.2...v0.51.0) (2026-05-03)
+
+
+### Features
+
+* **jsonrpc:** unify client transport around stream ([4eecedc](https://github.com/xidl/xidl/commit/4eecedc57ae839fc6b94b11c0a9c169ed603864d))
+
+
+### Bug Fixes
+
+* **xidlc:** resync ipc jsonrpc bindings ([3287c39](https://github.com/xidl/xidl/commit/3287c39e59bc739d06290d1bb3f6920f735e6617))
+
 ## [0.50.2](https://github.com/xidl/xidl/compare/v0.50.1...v0.50.2) (2026-04-29)
 
 
