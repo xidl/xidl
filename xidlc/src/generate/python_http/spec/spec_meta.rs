@@ -1,5 +1,5 @@
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::http_hir::{
+use xidl_parser::http_hir::{
     HttpMethod, HttpOperation, HttpParamKind,
     semantics::{
         HttpApiKeyLocation, HttpSecurityProfile, HttpSecurityRequirement, HttpStreamCodec,

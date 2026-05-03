@@ -1,4 +1,4 @@
-use crate::generate::http_hir::semantics::HttpStreamCodec;
+use xidl_parser::http_hir::semantics::HttpStreamCodec;
 use std::fmt::Write;
 
 use super::spec_context::{MethodContext, ParamContext, ParamSource};

@@ -1,10 +1,9 @@
-use crate::error::{IdlcError, IdlcResult};
+use crate::hir;
 use std::collections::{BTreeSet, HashSet};
-use xidl_parser::hir;
 
 use super::semantics::{annotation_name, annotation_params, normalize_annotation_params};
 use super::validate::HttpParamDirection;
-use super::{HttpMethod, HttpParamKind, HttpRoute};
+use super::{HttpHirResult, HttpMethod, HttpParamKind, HttpRoute};
 
 #[derive(Clone)]
 pub(super) struct SourceBinding {
@@ -12,7 +11,9 @@ pub(super) struct SourceBinding {
     pub(super) bound_name: String,
 }
 
-pub(super) fn explicit_param_binding(param: &hir::ParamDcl) -> IdlcResult<Option<SourceBinding>> {
+pub(super) fn explicit_param_binding(
+    param: &hir::ParamDcl,
+) -> HttpHirResult<Option<SourceBinding>> {
     let mut found = None;
     for annotation in &param.annotations {
         let Some(name) = annotation_name(annotation) else {
@@ -32,18 +33,13 @@ pub(super) fn explicit_param_binding(param: &hir::ParamDcl) -> IdlcResult<Option
             .and_then(|params| params.get("value").cloned())
             .unwrap_or_else(|| param.declarator.0.clone());
         match &found {
-            None => {
-                found = Some(SourceBinding {
-                    source: current,
-                    bound_name,
-                })
-            }
+            None => found = Some(SourceBinding { source: current, bound_name }),
             Some(previous) if previous.source == current && previous.bound_name == bound_name => {}
             Some(_) => {
-                return Err(IdlcError::rpc(format!(
+                return Err(format!(
                     "parameter '{}' has conflicting source annotations (@path/@query/@body/@header/@cookie)",
                     param.declarator.0
-                )));
+                ));
             }
         }
     }
@@ -53,7 +49,7 @@ pub(super) fn explicit_param_binding(param: &hir::ParamDcl) -> IdlcResult<Option
 pub(super) fn route_from_annotations(
     annotations: &[hir::Annotation],
     default_method: HttpMethod,
-) -> IdlcResult<(HttpMethod, Vec<String>)> {
+) -> HttpHirResult<(HttpMethod, Vec<String>)> {
     let mut method = None;
     let mut paths = Vec::new();
     for annotation in annotations {
@@ -61,12 +57,10 @@ pub(super) fn route_from_annotations(
             continue;
         };
         if let Some(current) = method_from_annotation(annotation) {
-            if let Some(previous) = method
-                && previous != current
-            {
-                return Err(IdlcError::rpc(
-                    "more than one HTTP verb annotation is not allowed on a method",
-                ));
+            if let Some(previous) = method && previous != current {
+                return Err(
+                    "more than one HTTP verb annotation is not allowed on a method".to_string()
+                );
             }
             method = Some(current);
             if let Some(path) = annotation_params(annotation)
@@ -77,8 +71,8 @@ pub(super) fn route_from_annotations(
             }
             continue;
         }
-        if name.eq_ignore_ascii_case("path") {
-            if let Some(path) = annotation_params(annotation)
+        if name.eq_ignore_ascii_case("path")
+            && let Some(path) = annotation_params(annotation)
                 .map(normalize_annotation_params)
                 .and_then(|params| {
                     params
@@ -86,9 +80,8 @@ pub(super) fn route_from_annotations(
                         .cloned()
                         .or_else(|| params.get("path").cloned())
                 })
-            {
-                paths.push(normalize_path(&path));
-            }
+        {
+            paths.push(normalize_path(&path));
         }
     }
     let mut dedup = BTreeSet::new();
@@ -96,13 +89,12 @@ pub(super) fn route_from_annotations(
     Ok((method.unwrap_or(default_method), paths))
 }
 
-pub(super) fn auto_default_method_path(op: &hir::OpDcl, method: HttpMethod) -> IdlcResult<String> {
+pub(super) fn auto_default_method_path(
+    op: &hir::OpDcl,
+    method: HttpMethod,
+) -> HttpHirResult<String> {
     let mut path = normalize_path(&op.ident);
-    let params = op
-        .parameter
-        .as_ref()
-        .map(|value| value.0.as_slice())
-        .unwrap_or(&[]);
+    let params = op.parameter.as_ref().map(|value| value.0.as_slice()).unwrap_or(&[]);
     for param in params {
         if matches!(
             super::validate::param_direction(param.attr.as_ref()),
@@ -129,7 +121,7 @@ pub(super) fn auto_default_method_path(op: &hir::OpDcl, method: HttpMethod) -> I
     Ok(path)
 }
 
-pub(super) fn parse_route_template(path: &str) -> IdlcResult<HttpRoute> {
+pub(super) fn parse_route_template(path: &str) -> HttpHirResult<HttpRoute> {
     let (path, query_params) = split_query_template(path)?;
     validate_route_template(&path)?;
     let path = normalize_path(&path);
@@ -137,32 +129,28 @@ pub(super) fn parse_route_template(path: &str) -> IdlcResult<HttpRoute> {
     let mut query_params = query_params.into_iter().collect::<Vec<_>>();
     path_params.sort();
     query_params.sort();
-    Ok(HttpRoute {
-        path,
-        path_params,
-        query_params,
-    })
+    Ok(HttpRoute { path, path_params, query_params })
 }
 
-fn split_query_template(path: &str) -> IdlcResult<(String, HashSet<String>)> {
+fn split_query_template(path: &str) -> HttpHirResult<(String, HashSet<String>)> {
     let mut query_params = HashSet::new();
     if let Some(pos) = path.find("{?") {
         if !path.ends_with('}') {
-            return Err(IdlcError::rpc(format!(
+            return Err(format!(
                 "query template must terminate with '}}' in route '{path}'"
-            )));
+            ));
         }
         let tail = &path[pos + 2..path.len() - 1];
         if tail.trim().is_empty() {
-            return Err(IdlcError::rpc(format!(
+            return Err(format!(
                 "query template must include at least one variable in route '{path}'"
-            )));
+            ));
         }
         for name in tail.split(',').map(str::trim) {
             if name.is_empty() {
-                return Err(IdlcError::rpc(format!(
+                return Err(format!(
                     "query template contains empty variable name in route '{path}'"
-                )));
+                ));
             }
             query_params.insert(name.to_string());
         }
@@ -172,7 +160,7 @@ fn split_query_template(path: &str) -> IdlcResult<(String, HashSet<String>)> {
     }
 }
 
-fn validate_route_template(path: &str) -> IdlcResult<()> {
+fn validate_route_template(path: &str) -> HttpHirResult<()> {
     let mut start = 0usize;
     let mut catch_all_count = 0usize;
     while let Some(open_rel) = path[start..].find('{') {
@@ -180,28 +168,24 @@ fn validate_route_template(path: &str) -> IdlcResult<()> {
         let close = path[open + 1..]
             .find('}')
             .map(|value| open + 1 + value)
-            .ok_or_else(|| {
-                IdlcError::rpc(format!("route template has unmatched '{{' in '{path}'"))
-            })?;
+            .ok_or_else(|| format!("route template has unmatched '{{' in '{path}'"))?;
         let token = &path[open + 1..close];
         let is_catch_all = token.starts_with('*');
         let name = token.strip_prefix('*').unwrap_or(token);
         if name.is_empty() {
-            return Err(IdlcError::rpc(format!(
-                "route template has empty path variable in '{path}'"
-            )));
+            return Err(format!("route template has empty path variable in '{path}'"));
         }
         if is_catch_all {
             catch_all_count += 1;
             if catch_all_count > 1 {
-                return Err(IdlcError::rpc(format!(
+                return Err(format!(
                     "route template contains more than one catch-all variable: '{path}'"
-                )));
+                ));
             }
             if close + 1 != path.len() {
-                return Err(IdlcError::rpc(format!(
+                return Err(format!(
                     "catch-all variable must be at the end of route template: '{path}'"
-                )));
+                ));
             }
         }
         start = close + 1;

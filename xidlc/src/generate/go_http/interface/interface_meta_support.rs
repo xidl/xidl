@@ -1,6 +1,6 @@
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::go_http::{HttpMethod, ParamMeta, ParamSource, definition};
-use crate::generate::http_hir::{
+use xidl_parser::http_hir::{
     HttpMethod as HttpHirMethod, HttpOperation, HttpParamKind as HttpHirParamKind,
     semantics::{HttpStreamCodec, HttpStreamKind},
 };
@@ -117,7 +117,7 @@ pub(super) fn http_method(method: HttpHirMethod) -> HttpMethod {
     }
 }
 
-pub(super) fn param_meta(param: &crate::generate::http_hir::HttpParam) -> ParamMeta {
+pub(super) fn param_meta(param: &xidl_parser::http_hir::HttpParam) -> ParamMeta {
     ParamMeta {
         field_name: param.name.to_case(Case::Pascal),
         raw_name: param.name.clone(),

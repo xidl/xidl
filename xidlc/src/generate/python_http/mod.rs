@@ -2,22 +2,21 @@ mod render;
 mod spec;
 
 use crate::error::IdlcResult;
-use crate::generate::http_hir::HttpHirDocument;
 use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactHir};
 use crate::macros::hashmap;
 use convert_case::{Case, Casing};
 use std::path::Path;
 use xidl_parser::hir;
-use xidl_parser::hir::{ParserProperties, Specification};
+use xidl_parser::hir::ParserProperties;
 
 pub use render::PythonHttpRenderer;
 
 pub fn generate(
-    spec: hir::Specification,
+    http_hir: xidl_parser::http_hir::HttpHirDocument,
     input_path: &Path,
-    props: ParserProperties,
+    _props: ParserProperties,
 ) -> IdlcResult<Vec<Artifact>> {
-    let http_hir = HttpHirDocument::from_props(&props)?;
+    let spec = http_hir.spec.clone();
     let stem = input_path
         .file_stem()
         .and_then(|value| value.to_str())
@@ -57,6 +56,7 @@ impl crate::jsonrpc::Codegen for PythonHttpCodegen {
     async fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
         Ok(hashmap! {
             "expand_interface" => false,
+            "hir_kind" => "http",
             "enable_client" => true,
             "enable_server" => true,
             "enable_metadata" => true
@@ -65,11 +65,12 @@ impl crate::jsonrpc::Codegen for PythonHttpCodegen {
 
     async fn generate(
         &self,
-        hir: Specification,
+        input_hir: crate::jsonrpc::CodegenInput,
         input: String,
         props: ::xidl_parser::hir::ParserProperties,
     ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
-        generate(hir, Path::new(&input), props).map_err(|err| xidl_jsonrpc::Error::Rpc {
+        let http_hir = input_hir.into_http_hir();
+        generate(http_hir, Path::new(&input), props).map_err(|err| xidl_jsonrpc::Error::Rpc {
             code: xidl_jsonrpc::ErrorCode::ServerError,
             message: err.to_string(),
             data: None,

@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
-use xidl_parser::hir;
+use crate::hir;
 
 use super::annotations::{
     annotation_name, annotation_params, normalize_annotation_params, parse_string_array,

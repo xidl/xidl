@@ -1,5 +1,5 @@
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::http_hir::semantics::{
+use xidl_parser::http_hir::semantics::{
     HttpStreamCodec, HttpStreamConfig, HttpStreamKind, HttpStreamTargetSupport,
     validate_http_stream_method, validate_http_stream_target,
 };

@@ -12,7 +12,7 @@ mod schema_types;
 
 use serde_json::{Value, json};
 use xidl_parser::hir;
-use xidl_parser::hir::{ParserProperties, Specification};
+use xidl_parser::hir::ParserProperties;
 
 use crate::jsonrpc::{Artifact, ArtifactFile};
 use context::OpenRpcContext;
@@ -31,10 +31,11 @@ impl crate::jsonrpc::Codegen for OpenRpcCodegen {
 
     async fn generate(
         &self,
-        hir: Specification,
+        input_hir: crate::jsonrpc::CodegenInput,
         _path: String,
         _props: ParserProperties,
     ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
+        let hir = input_hir.into_rpc_hir();
         let openrpc = render_openrpc(&hir);
         let content = serde_json::to_string_pretty(&openrpc)?;
         Ok(vec![Artifact::new_file(ArtifactFile {

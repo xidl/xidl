@@ -1,6 +1,5 @@
-use crate::error::IdlcResult;
+use crate::hir;
 use std::collections::{HashMap, HashSet};
-use xidl_parser::hir;
 
 use super::route::{SourceBinding, explicit_param_binding};
 use super::semantics::{HttpStreamKind, has_annotation, has_optional_annotation};
@@ -8,7 +7,7 @@ use super::validate::{
     HttpParamDirection, default_param_source, param_direction, validate_cookie_name,
     validate_header_name, validate_projected_param,
 };
-use super::{HttpParam, HttpParamKind};
+use super::{HttpHirResult, HttpParam, HttpParamKind};
 
 #[allow(clippy::type_complexity)]
 pub(super) fn project_params(
@@ -17,7 +16,7 @@ pub(super) fn project_params(
     stream_kind: Option<HttpStreamKind>,
     route_path_names: &[HashSet<String>],
     route_query_names: &[HashSet<String>],
-) -> IdlcResult<(
+) -> HttpHirResult<(
     Vec<HttpParam>,
     Vec<HttpParam>,
     HashMap<String, usize>,

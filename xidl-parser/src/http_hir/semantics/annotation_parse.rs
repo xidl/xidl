@@ -1,4 +1,5 @@
-use xidl_parser::hir;
+use crate::hir;
+use convert_case::{Case, Casing};
 
 pub(super) fn parse_string_array(raw: &str) -> Vec<String> {
     let trimmed = raw.trim();
@@ -50,11 +51,66 @@ pub(super) fn trim_quotes(value: &str) -> Option<String> {
 }
 
 pub(super) fn render_const_expr(expr: &hir::ConstExpr) -> String {
-    crate::generate::render_const_expr(
-        expr,
-        &crate::generate::rust::util::rust_scoped_name,
-        &crate::generate::rust::util::rust_literal,
-    )
+    fn scoped_name(value: &hir::ScopedName) -> String {
+        let parts = value
+            .name
+            .iter()
+            .map(|part| part.to_case(Case::Snake))
+            .collect::<Vec<_>>()
+            .join("::");
+        if value.is_root {
+            format!("::{parts}")
+        } else {
+            parts
+        }
+    }
+
+    fn literal(value: &hir::Literal) -> String {
+        match value {
+            hir::Literal::IntegerLiteral(value) => value.0.clone(),
+            hir::Literal::FloatingPtLiteral(value) => {
+                let sign = value.sign.as_ref().map(hir::IntegerSign::as_str).unwrap_or("");
+                format!("{}{}.{}", sign, value.integer.0, value.fraction.0)
+            }
+            hir::Literal::CharLiteral(value)
+            | hir::Literal::WideCharacterLiteral(value)
+            | hir::Literal::StringLiteral(value)
+            | hir::Literal::WideStringLiteral(value) => value.clone(),
+            hir::Literal::BooleanLiteral(value) => value.to_string(),
+        }
+    }
+
+    fn render(expr: &hir::ConstExpr) -> String {
+        match expr {
+            hir::ConstExpr::ScopedName(value) => scoped_name(value),
+            hir::ConstExpr::Literal(value) => literal(value),
+            hir::ConstExpr::UnaryExpr(op, value) => {
+                let op = match op {
+                    hir::UnaryOperator::Add => "+",
+                    hir::UnaryOperator::Sub => "-",
+                    hir::UnaryOperator::Not => "~",
+                };
+                format!("({op}{})", render(value))
+            }
+            hir::ConstExpr::BinaryExpr(op, left, right) => {
+                let op = match op {
+                    hir::BinaryOperator::Or => "|",
+                    hir::BinaryOperator::Xor => "^",
+                    hir::BinaryOperator::And => "&",
+                    hir::BinaryOperator::LeftShift => "<<",
+                    hir::BinaryOperator::RightShift => ">>",
+                    hir::BinaryOperator::Add => "+",
+                    hir::BinaryOperator::Sub => "-",
+                    hir::BinaryOperator::Mult => "*",
+                    hir::BinaryOperator::Div => "/",
+                    hir::BinaryOperator::Mod => "%",
+                };
+                format!("({} {op} {})", render(left), render(right))
+            }
+        }
+    }
+
+    render(expr)
 }
 
 fn split_top_level(raw: &str, separator: char) -> Vec<String> {

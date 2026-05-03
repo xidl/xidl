@@ -1,5 +1,5 @@
 use crate::error::IdlcResult;
-use crate::generate::http_hir::HttpHirDocument;
+use xidl_parser::http_hir::HttpHirDocument;
 use xidl_parser::hir;
 
 use super::{GoHttpRenderOutput, GoHttpRenderer};

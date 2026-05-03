@@ -4,7 +4,6 @@ mod render;
 mod spec;
 
 use crate::error::IdlcResult;
-use crate::generate::http_hir::HttpHirDocument;
 use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactHir};
 use crate::macros::hashmap;
 use convert_case::{Case, Casing};
@@ -12,15 +11,14 @@ pub use render::GoHttpRenderer;
 use serde::Serialize;
 use std::collections::HashMap;
 use std::path::Path;
-use xidl_parser::hir;
-use xidl_parser::hir::{ParserProperties, Specification};
+use xidl_parser::hir::ParserProperties;
 
 pub fn generate(
-    spec: hir::Specification,
+    http_hir: xidl_parser::http_hir::HttpHirDocument,
     input_path: &Path,
-    props: HashMap<String, serde_json::Value>,
+    _props: HashMap<String, serde_json::Value>,
 ) -> IdlcResult<Vec<Artifact>> {
-    let http_hir = HttpHirDocument::from_props(&props)?;
+    let spec = http_hir.spec.clone();
     let stem = input_path
         .file_stem()
         .and_then(|value| value.to_str())
@@ -62,6 +60,7 @@ impl crate::jsonrpc::Codegen for GoHttpCodegen {
     async fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
         Ok(hashmap! {
             "expand_interface" => false,
+            "hir_kind" => "http",
             "enable_client" => true,
             "enable_server" => true,
             "enable_render_header" => true,
@@ -71,11 +70,12 @@ impl crate::jsonrpc::Codegen for GoHttpCodegen {
 
     async fn generate(
         &self,
-        hir: Specification,
+        input_hir: crate::jsonrpc::CodegenInput,
         input: String,
         props: ::xidl_parser::hir::ParserProperties,
     ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
-        generate(hir, Path::new(&input), props).map_err(|err| xidl_jsonrpc::Error::Rpc {
+        let http_hir = input_hir.into_http_hir();
+        generate(http_hir, Path::new(&input), props).map_err(|err| xidl_jsonrpc::Error::Rpc {
             code: xidl_jsonrpc::ErrorCode::ServerError,
             message: err.to_string(),
             data: None,
@@ -139,9 +139,9 @@ pub(crate) struct MethodMeta {
     pub(crate) response_header_params: Vec<ParamMeta>,
     pub(crate) response_cookie_params: Vec<ParamMeta>,
     pub(crate) return_ty: Option<String>,
-    pub(crate) stream_kind: Option<crate::generate::http_hir::semantics::HttpStreamKind>,
-    pub(crate) stream_codec: crate::generate::http_hir::semantics::HttpStreamCodec,
-    pub(crate) security: Vec<crate::generate::http_hir::semantics::HttpSecurityRequirement>,
+    pub(crate) stream_kind: Option<xidl_parser::http_hir::semantics::HttpStreamKind>,
+    pub(crate) stream_codec: xidl_parser::http_hir::semantics::HttpStreamCodec,
+    pub(crate) security: Vec<xidl_parser::http_hir::semantics::HttpSecurityRequirement>,
     pub(crate) basic_realm: Option<String>,
     pub(crate) deprecated: bool,
     pub(crate) deprecated_since: Option<String>,

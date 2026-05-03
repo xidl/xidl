@@ -4,7 +4,7 @@ use super::schema::{
     request_body_schema, schema_for_type,
 };
 use super::security::openapi_security_requirement;
-use crate::generate::http_hir::{
+use xidl_parser::http_hir::{
     HttpMethod as HttpHirMethod, HttpOperation, HttpParamKind as HttpHirParamKind,
     semantics::{HttpSecurityRequirement, HttpStreamCodec, HttpStreamKind},
 };

@@ -3633,8 +3633,10 @@ dependencies = [
 name = "xidl-parser"
 version = "0.50.2"
 dependencies = [
+ "convert_case",
  "include_dir",
  "insta",
+ "jiff",
  "md5",
  "minijinja",
  "serde",

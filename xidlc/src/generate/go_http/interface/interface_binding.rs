@@ -117,7 +117,7 @@ pub(super) fn render_request_binding(
         method: RequestBindingMethod {
             is_client_stream: matches!(
                 method.stream_kind,
-                Some(crate::generate::http_hir::semantics::HttpStreamKind::Client)
+                Some(xidl_parser::http_hir::semantics::HttpStreamKind::Client)
             ),
             request_struct: &method.request_struct,
             request_body_struct: method.request_body_struct.as_deref(),

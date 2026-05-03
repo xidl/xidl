@@ -1,5 +1,5 @@
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::http_hir::{HttpOperation, semantics::HttpStreamKind};
+use xidl_parser::http_hir::{HttpOperation, semantics::HttpStreamKind};
 use crate::generate::rust::util::{rust_ident, rust_passthrough_attrs_from_annotations};
 use crate::generate::rust_axum::interface::interface_http::{
     deprecated_context_from_http, http_method_code, http_method_fn, http_method_from_hir,

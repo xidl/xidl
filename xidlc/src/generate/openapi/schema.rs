@@ -1,4 +1,4 @@
-use crate::generate::http_hir::semantics::DeprecatedInfo;
+use xidl_parser::http_hir::semantics::DeprecatedInfo;
 use crate::generate::openapi::naming::{declarator_name, field_rename};
 use crate::generate::utils::doc_lines_from_annotations;
 use crate::openapi::path::{Parameter, ParameterBuilder, ParameterIn};

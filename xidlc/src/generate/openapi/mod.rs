@@ -9,13 +9,13 @@ mod stream;
 #[cfg(test)]
 mod tests;
 
-use crate::generate::http_hir::HttpHirDocument;
+use xidl_parser::http_hir::HttpHirDocument;
 use crate::jsonrpc::{Artifact, ArtifactFile};
 use crate::openapi::{InfoBuilder, OpenApi, OpenApiBuilder};
 use serde_json::Value;
 use std::collections::HashMap;
 use xidl_parser::hir;
-use xidl_parser::hir::{ParserProperties, Specification};
+use xidl_parser::hir::ParserProperties;
 
 pub(crate) struct OpenApiCodegen;
 
@@ -26,22 +26,20 @@ impl crate::jsonrpc::Codegen for OpenApiCodegen {
     }
 
     async fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
-        Ok(HashMap::new())
+        Ok(HashMap::from([(
+            "hir_kind".to_string(),
+            serde_json::Value::String("http".to_string()),
+        )]))
     }
 
     async fn generate(
         &self,
-        hir: Specification,
+        input_hir: crate::jsonrpc::CodegenInput,
         _path: String,
-        props: ParserProperties,
+        _props: ParserProperties,
     ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
-        let http_hir =
-            HttpHirDocument::from_props(&props).map_err(|err| xidl_jsonrpc::Error::Rpc {
-                code: xidl_jsonrpc::ErrorCode::ServerError,
-                message: err.to_string(),
-                data: None,
-            })?;
-        let openapi = render_openapi_json(&hir, &http_hir)?;
+        let http_hir = input_hir.into_http_hir();
+        let openapi = render_openapi_json(&http_hir.spec, &http_hir)?;
         let content = serde_json::to_string_pretty(&openapi)?;
         Ok(vec![Artifact::new_file(ArtifactFile {
             path: "openapi.json".to_string(),

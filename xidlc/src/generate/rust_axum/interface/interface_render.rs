@@ -1,5 +1,5 @@
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::http_hir::HttpOperationSource;
+use xidl_parser::http_hir::HttpOperationSource;
 use crate::generate::rust::util::{rust_ident, rust_passthrough_attrs_from_annotations};
 use crate::generate::rust_axum::RustAxumRenderOutput;
 use crate::generate::rust_axum::interface::interface_attr::render_attr_operation_from_http;

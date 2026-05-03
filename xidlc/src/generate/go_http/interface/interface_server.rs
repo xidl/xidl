@@ -1,6 +1,6 @@
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::go_http::{MethodMeta, definition};
-use crate::generate::http_hir::semantics::HttpStreamKind;
+use xidl_parser::http_hir::semantics::HttpStreamKind;
 use std::collections::HashMap;
 use std::fmt::Write;
 
