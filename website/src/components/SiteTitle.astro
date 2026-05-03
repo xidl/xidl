@@ -2,8 +2,9 @@
 import Default from '@astrojs/starlight/components/SiteTitle.astro';
 import type { Props } from '@astrojs/starlight/props';
 
-const { locale } = Astro.props;
+const locale = Astro.locals.starlightRoute.locale;
 const prefix = locale ? `/${locale}` : '';
+const isZhCn = locale === 'zh-cn';
 ---
 
 <div class="flex items-center gap-8">
@@ -13,19 +14,19 @@ const prefix = locale ? `/${locale}` : '';
 			href={`${prefix}/guide/`}
 			class="text-sm font-normal text-[var(--sl-color-gray-3)] no-underline hover:text-[var(--sl-color-white)] transition-colors"
 		>
-			Guide
+			{isZhCn ? '指南' : 'Guide'}
 		</a>
 		<a
 			href={`${prefix}/docs/`}
 			class="text-sm font-normal text-[var(--sl-color-gray-3)] no-underline hover:text-[var(--sl-color-white)] transition-colors"
 		>
-			Docs
+			{isZhCn ? '文档' : 'Docs'}
 		</a>
 		<a
-			href={`${prefix}/zh-cn/rfc/`}
+			href={`${prefix}/rfc/`}
 			class="text-sm font-normal text-[var(--sl-color-gray-3)] no-underline hover:text-[var(--sl-color-white)] transition-colors"
 		>
-			RFC
+			{isZhCn ? '规范' : 'RFC'}
 		</a>
 	</nav>
 </div>
