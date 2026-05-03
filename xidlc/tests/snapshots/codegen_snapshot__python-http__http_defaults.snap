@@ -121,6 +121,53 @@ class HttpDefaultsServiceGetUserAliasRequest:
 class HttpDefaultsServiceGetUserAliasResponse:
     value: str
 
+@dataclass
+class HttpDefaultsServiceDeleteUserRequest:
+    id: int
+    revision: int
+
+@dataclass
+class HttpDefaultsServiceDeleteUserResponse:
+    value: str
+
+@dataclass
+class HttpDefaultsServiceProbeUserRequest:
+    id: int
+    revision: int
+
+@dataclass
+class HttpDefaultsServiceProbeUserResponse:
+    pass
+
+@dataclass
+class HttpDefaultsServiceUserOptionsRequest:
+    id: int
+    revision: int
+
+@dataclass
+class HttpDefaultsServiceUserOptionsResponse:
+    pass
+
+@dataclass
+class HttpDefaultsServiceReplaceUserRequest:
+    user_id: int
+    name: str
+    age: int
+
+@dataclass
+class HttpDefaultsServiceReplaceUserResponse:
+    value: str
+
+@dataclass
+class HttpDefaultsServicePatchUserRequest:
+    user_id: int
+    name: str
+    age: int
+
+@dataclass
+class HttpDefaultsServicePatchUserResponse:
+    value: str
+
 class HttpDefaultsServiceService(abc.ABC):
     @abc.abstractmethod
     async def get_name(self, request: HttpDefaultsServiceGetNameRequest) -> HttpDefaultsServiceGetNameResponse:
@@ -152,6 +199,26 @@ class HttpDefaultsServiceService(abc.ABC):
 
     @abc.abstractmethod
     async def get_user_alias(self, request: HttpDefaultsServiceGetUserAliasRequest) -> HttpDefaultsServiceGetUserAliasResponse:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    async def delete_user(self, request: HttpDefaultsServiceDeleteUserRequest) -> HttpDefaultsServiceDeleteUserResponse:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    async def probe_user(self, request: HttpDefaultsServiceProbeUserRequest) -> HttpDefaultsServiceProbeUserResponse:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    async def user_options(self, request: HttpDefaultsServiceUserOptionsRequest) -> HttpDefaultsServiceUserOptionsResponse:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    async def replace_user(self, request: HttpDefaultsServiceReplaceUserRequest) -> HttpDefaultsServiceReplaceUserResponse:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    async def patch_user(self, request: HttpDefaultsServicePatchUserRequest) -> HttpDefaultsServicePatchUserResponse:
         raise NotImplementedError
 
 async def _http_defaults_service_get_name_endpoint(service: HttpDefaultsServiceService, request: Request):
@@ -335,6 +402,122 @@ def _http_defaults_service_get_user_alias_route(service: HttpDefaultsServiceServ
         metadata=RouteMetadata(request_content_type="application/json", response_content_type="application/json", security=[], stream=None),
     )
 
+async def _http_defaults_service_delete_user_endpoint(service: HttpDefaultsServiceService, request: Request):
+    require_accept(request, "application/json")
+    request_value = HttpDefaultsServiceDeleteUserRequest(
+        id=read_scalar(query_value(request, "id"), "int", optional=False, default_on_missing=False, wire_name="id"),
+        revision=read_scalar(query_value(request, "revision"), "int", optional=False, default_on_missing=False, wire_name="revision"),
+    )
+    response_value = await service.delete_user(request_value)
+    return encode_json_response(response_value)
+
+def _http_defaults_service_delete_user_route(service: HttpDefaultsServiceService) -> Route:
+    async def endpoint(request: Request):
+        return await _http_defaults_service_delete_user_endpoint(service, request)
+    return Route(
+        method="DELETE",
+        paths=["/users"],
+        endpoint=endpoint,
+        handler=service.delete_user,
+        request_model=HttpDefaultsServiceDeleteUserRequest,
+        response_model=HttpDefaultsServiceDeleteUserResponse,
+        metadata=RouteMetadata(request_content_type="application/json", response_content_type="application/json", security=[], stream=None),
+    )
+
+async def _http_defaults_service_probe_user_endpoint(service: HttpDefaultsServiceService, request: Request):
+    require_accept(request, "application/json")
+    request_value = HttpDefaultsServiceProbeUserRequest(
+        id=read_scalar(query_value(request, "id"), "int", optional=False, default_on_missing=False, wire_name="id"),
+        revision=read_scalar(query_value(request, "revision"), "int", optional=False, default_on_missing=False, wire_name="revision"),
+    )
+    response_value = await service.probe_user(request_value)
+    return encode_json_response(response_value)
+
+def _http_defaults_service_probe_user_route(service: HttpDefaultsServiceService) -> Route:
+    async def endpoint(request: Request):
+        return await _http_defaults_service_probe_user_endpoint(service, request)
+    return Route(
+        method="HEAD",
+        paths=["/users/head"],
+        endpoint=endpoint,
+        handler=service.probe_user,
+        request_model=HttpDefaultsServiceProbeUserRequest,
+        response_model=HttpDefaultsServiceProbeUserResponse,
+        metadata=RouteMetadata(request_content_type="application/json", response_content_type="application/json", security=[], stream=None),
+    )
+
+async def _http_defaults_service_user_options_endpoint(service: HttpDefaultsServiceService, request: Request):
+    require_accept(request, "application/json")
+    request_value = HttpDefaultsServiceUserOptionsRequest(
+        id=read_scalar(query_value(request, "id"), "int", optional=False, default_on_missing=False, wire_name="id"),
+        revision=read_scalar(query_value(request, "revision"), "int", optional=False, default_on_missing=False, wire_name="revision"),
+    )
+    response_value = await service.user_options(request_value)
+    return encode_json_response(response_value)
+
+def _http_defaults_service_user_options_route(service: HttpDefaultsServiceService) -> Route:
+    async def endpoint(request: Request):
+        return await _http_defaults_service_user_options_endpoint(service, request)
+    return Route(
+        method="OPTIONS",
+        paths=["/users/options"],
+        endpoint=endpoint,
+        handler=service.user_options,
+        request_model=HttpDefaultsServiceUserOptionsRequest,
+        response_model=HttpDefaultsServiceUserOptionsResponse,
+        metadata=RouteMetadata(request_content_type="application/json", response_content_type="application/json", security=[], stream=None),
+    )
+
+async def _http_defaults_service_replace_user_endpoint(service: HttpDefaultsServiceService, request: Request):
+    require_accept(request, "application/json")
+    require_content_type(request, "application/json")
+    body = read_json_body(request)
+    request_value = HttpDefaultsServiceReplaceUserRequest(
+        user_id=read_scalar(path_value(request, "id"), "int", optional=False, default_on_missing=False, wire_name="id"),
+        name=read_json_field(body, "name", "str", optional=False),
+        age=read_json_field(body, "age", "int", optional=False),
+    )
+    response_value = await service.replace_user(request_value)
+    return encode_json_response(response_value)
+
+def _http_defaults_service_replace_user_route(service: HttpDefaultsServiceService) -> Route:
+    async def endpoint(request: Request):
+        return await _http_defaults_service_replace_user_endpoint(service, request)
+    return Route(
+        method="PUT",
+        paths=["/users/{id}"],
+        endpoint=endpoint,
+        handler=service.replace_user,
+        request_model=HttpDefaultsServiceReplaceUserRequest,
+        response_model=HttpDefaultsServiceReplaceUserResponse,
+        metadata=RouteMetadata(request_content_type="application/json", response_content_type="application/json", security=[], stream=None),
+    )
+
+async def _http_defaults_service_patch_user_endpoint(service: HttpDefaultsServiceService, request: Request):
+    require_accept(request, "application/json")
+    require_content_type(request, "application/json")
+    body = read_json_body(request)
+    request_value = HttpDefaultsServicePatchUserRequest(
+        user_id=read_scalar(path_value(request, "id"), "int", optional=False, default_on_missing=False, wire_name="id"),
+        name=read_json_field(body, "name", "str", optional=False),
+        age=read_json_field(body, "age", "int", optional=False),
+    )
+    response_value = await service.patch_user(request_value)
+    return encode_json_response(response_value)
+
+def _http_defaults_service_patch_user_route(service: HttpDefaultsServiceService) -> Route:
+    async def endpoint(request: Request):
+        return await _http_defaults_service_patch_user_endpoint(service, request)
+    return Route(
+        method="PATCH",
+        paths=["/users/{id}"],
+        endpoint=endpoint,
+        handler=service.patch_user,
+        request_model=HttpDefaultsServicePatchUserRequest,
+        response_model=HttpDefaultsServicePatchUserResponse,
+        metadata=RouteMetadata(request_content_type="application/json", response_content_type="application/json", security=[], stream=None),
+    )
+
 def http_defaults_service_routes(service: HttpDefaultsServiceService) -> list[Route]:
     return [
         _http_defaults_service_get_name_route(service),
@@ -345,4 +528,9 @@ def http_defaults_service_routes(service: HttpDefaultsServiceService) -> list[Ro
         _http_defaults_service_preview_user_route(service),
         _http_defaults_service_get_user_route(service),
         _http_defaults_service_get_user_alias_route(service),
+        _http_defaults_service_delete_user_route(service),
+        _http_defaults_service_probe_user_route(service),
+        _http_defaults_service_user_options_route(service),
+        _http_defaults_service_replace_user_route(service),
+        _http_defaults_service_patch_user_route(service),
     ]

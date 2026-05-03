@@ -1,0 +1,63 @@
+#pragma xidlc package E2E HTTP Stream Test
+#pragma xidlc version v1.0.0
+#pragma xidlc service http://127.0.0.1:8080 dev server
+#pragma xidlc service http://127.0.0.1:8080 product
+
+enum EnumEmpty {
+};
+
+enum EnumSimple1 {
+    V1,
+    V2,
+    V3,
+
+};
+
+struct StructEmpty {
+};
+
+struct StructSimple {
+    EnumEmpty member1;
+    EnumSimple1 member2;
+    StructEmpty member3;
+};
+
+struct StructStreamEvent {
+    string id;
+    StructSimple payload;
+};
+
+struct StructUploadResult {
+    boolean ok;
+    uint64 bytes;
+};
+
+interface E2eStreamAttribute {
+    @server_stream
+    readonly attribute boolean attr17;
+};
+
+@http_bearer
+interface E2eHttpStream {
+    @server_stream
+    @stream_codec("sse")
+    @get(path = "/v2/stream/events/{channel}{?cursor}")
+    StructStreamEvent watch_channel(
+        @path("channel")
+        string channel,
+        @query("cursor")
+        @optional
+        string cursor,
+        @header("X-Trace-Id")
+        string trace_id
+    );
+
+    @client_stream
+    @stream_codec("ndjson")
+    @path("/v2/stream/upload")
+    StructUploadResult upload_chunks(
+        in string file_id,
+        in sequence<octet> chunk
+    );
+
+};

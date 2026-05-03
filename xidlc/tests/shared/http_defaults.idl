@@ -58,4 +58,38 @@ interface HttpDefaultsService {
         @query("lang")
         string locale
     );
+    // default source for DELETE parameters -> query
+    @delete(path = "/users")
+    string delete_user(
+        uint32 id,
+        uint32 revision
+    );
+    // default source for HEAD parameters -> query
+    @head(path = "/users/head")
+    void probe_user(
+        uint32 id,
+        uint32 revision
+    );
+    // default source for OPTIONS parameters -> query
+    @options(path = "/users/options")
+    void user_options(
+        uint32 id,
+        uint32 revision
+    );
+    // default source for PUT parameters -> body except explicit path
+    @put(path = "/users/{id}")
+    string replace_user(
+        @path("id")
+        uint32 user_id,
+        string name,
+        uint32 age
+    );
+    // default source for PATCH parameters -> body except explicit path
+    @patch(path = "/users/{id}")
+    string patch_user(
+        @path("id")
+        uint32 user_id,
+        string name,
+        uint32 age
+    );
 };

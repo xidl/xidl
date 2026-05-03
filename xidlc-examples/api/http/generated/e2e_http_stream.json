@@ -1,0 +1,593 @@
+{
+  "openapi": "3.2.0",
+  "info": {
+    "title": "E2E HTTP Stream Test",
+    "version": "v1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8080",
+      "description": "dev server"
+    },
+    {
+      "url": "http://127.0.0.1:8080",
+      "description": "product"
+    }
+  ],
+  "paths": {
+    "/E2eStreamAttribute/watch_attribute_attr17": {
+      "get": {
+        "operationId": "E2eStreamAttribute.watch_attribute_attr17",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/event-stream": {
+                "itemSchema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attribute/attr17": {
+      "get": {
+        "operationId": "E2eStreamAttribute.get_attribute_attr17",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/stream/events/{channel}": {
+      "get": {
+        "operationId": "E2eHttpStream.watch_channel",
+        "parameters": [
+          {
+            "name": "channel",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Trace-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/event-stream": {
+                "itemSchema": {
+                  "$ref": "#/components/schemas/StructStreamEvent"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "http_bearer": []
+          }
+        ]
+      }
+    },
+    "/v2/stream/upload": {
+      "post": {
+        "operationId": "E2eHttpStream.upload_chunks",
+        "requestBody": {
+          "content": {
+            "application/x-ndjson": {
+              "itemSchema": {
+                "type": "object",
+                "properties": {
+                  "chunk": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "format": "int32",
+                      "minimum": 0
+                    }
+                  },
+                  "file_id": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StructUploadResult"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "http_bearer": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "E2eHttpStream_Call": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "watch_channel"
+            ],
+            "properties": {
+              "watch_channel": {
+                "$ref": "#/components/schemas/E2eHttpStream_watch_channel_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "upload_chunks"
+            ],
+            "properties": {
+              "upload_chunks": {
+                "$ref": "#/components/schemas/E2eHttpStream_upload_chunks_In"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpStream_Reply": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/E2eHttpStream_Return"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
+          }
+        }
+      },
+      "E2eHttpStream_Request": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/E2eHttpStream_Call"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
+          }
+        }
+      },
+      "E2eHttpStream_Return": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "watch_channel"
+            ],
+            "properties": {
+              "watch_channel": {
+                "$ref": "#/components/schemas/E2eHttpStream_watch_channel_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "upload_chunks"
+            ],
+            "properties": {
+              "upload_chunks": {
+                "$ref": "#/components/schemas/E2eHttpStream_upload_chunks_Result"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpStream_upload_chunks_In": {
+        "type": "object",
+        "required": [
+          "file_id",
+          "chunk"
+        ],
+        "properties": {
+          "chunk": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          },
+          "file_id": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpStream_upload_chunks_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "$ref": "#/components/schemas/StructUploadResult"
+          }
+        }
+      },
+      "E2eHttpStream_upload_chunks_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpStream_upload_chunks_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eHttpStream_watch_channel_In": {
+        "type": "object",
+        "required": [
+          "channel",
+          "cursor",
+          "trace_id"
+        ],
+        "properties": {
+          "channel": {
+            "type": "string"
+          },
+          "cursor": {
+            "type": "string"
+          },
+          "trace_id": {
+            "type": "string"
+          }
+        }
+      },
+      "E2eHttpStream_watch_channel_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "$ref": "#/components/schemas/StructStreamEvent"
+          }
+        }
+      },
+      "E2eHttpStream_watch_channel_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eHttpStream_watch_channel_Out"
+              }
+            }
+          }
+        ]
+      },
+      "E2eStreamAttribute_Call": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr17"
+            ],
+            "properties": {
+              "get_attribute_attr17": {
+                "$ref": "#/components/schemas/E2eStreamAttribute_get_attribute_attr17_In"
+              }
+            }
+          }
+        ]
+      },
+      "E2eStreamAttribute_Reply": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/E2eStreamAttribute_Return"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
+          }
+        }
+      },
+      "E2eStreamAttribute_Request": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/E2eStreamAttribute_Call"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
+          }
+        }
+      },
+      "E2eStreamAttribute_Return": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_attr17"
+            ],
+            "properties": {
+              "get_attribute_attr17": {
+                "$ref": "#/components/schemas/E2eStreamAttribute_get_attribute_attr17_Result"
+              }
+            }
+          }
+        ]
+      },
+      "E2eStreamAttribute_get_attribute_attr17_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "E2eStreamAttribute_get_attribute_attr17_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "type": "boolean"
+          }
+        }
+      },
+      "E2eStreamAttribute_get_attribute_attr17_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/E2eStreamAttribute_get_attribute_attr17_Out"
+              }
+            }
+          }
+        ]
+      },
+      "EnumEmpty": {
+        "type": "string",
+        "enum": []
+      },
+      "EnumSimple1": {
+        "type": "string",
+        "enum": [
+          "V1",
+          "V2",
+          "V3"
+        ]
+      },
+      "Error": {
+        "type": "object",
+        "required": [
+          "code",
+          "msg"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "details": {
+            "type": "object"
+          },
+          "msg": {
+            "type": "string"
+          }
+        }
+      },
+      "StructEmpty": {
+        "type": "object"
+      },
+      "StructSimple": {
+        "type": "object",
+        "required": [
+          "member1",
+          "member2",
+          "member3"
+        ],
+        "properties": {
+          "member1": {
+            "$ref": "#/components/schemas/EnumEmpty"
+          },
+          "member2": {
+            "$ref": "#/components/schemas/EnumSimple1"
+          },
+          "member3": {
+            "$ref": "#/components/schemas/StructEmpty"
+          }
+        }
+      },
+      "StructStreamEvent": {
+        "type": "object",
+        "required": [
+          "id",
+          "payload"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/StructSimple"
+          }
+        }
+      },
+      "StructUploadResult": {
+        "type": "object",
+        "required": [
+          "ok",
+          "bytes"
+        ],
+        "properties": {
+          "bytes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "http_bearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

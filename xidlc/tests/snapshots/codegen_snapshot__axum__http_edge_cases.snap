@@ -13,6 +13,7 @@ pub trait HttpEdgeCasesService {
         uid: u32,
         locale: String,
     ) -> ::xidl_rust_axum::Result<String>;
+    async fn dedup_user(&self, id: u32) -> ::xidl_rust_axum::Result<String>;
     async fn get_item(
         &self,
         order_id: u32,
@@ -129,6 +130,40 @@ where
     }
 }
 #[derive(::serde::Deserialize)]
+struct HttpEdgeCasesServiceDedupUserPath {
+    id: u32,
+}
+#[derive(::serde::Deserialize)]
+struct HttpEdgeCasesServiceDedupUserRequest {
+    id: u32,
+}
+#[allow(clippy::manual_async_fn)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpEdgeCasesServiceDedupUserRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+                HttpEdgeCasesServiceDedupUserPath,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpEdgeCasesServiceDedupUserPath { id } = path;
+            let headers = &parts.headers;
+            Ok(Self { id })
+        }
+    }
+}
+#[derive(::serde::Deserialize)]
 struct HttpEdgeCasesServiceGetItemPath {
     order_id: u32,
     item_id: u32,
@@ -233,6 +268,10 @@ where
             .route("/v1/users/{id}", xidl_rust_axum::axum::routing::get(Self::get_user))
             .route("/v2/users/{id}", xidl_rust_axum::axum::routing::get(Self::get_user))
             .route(
+                "/v1/dedup/{id}",
+                xidl_rust_axum::axum::routing::get(Self::dedup_user),
+            )
+            .route(
                 "/orders/{order_id}/items/{item_id}",
                 xidl_rust_axum::axum::routing::get(Self::get_item),
             )
@@ -283,6 +322,45 @@ where
         let uid: u32 = uid;
         let locale: String = locale;
         let mut resp = match svc.get_user(uid, locale).await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    let body_value: String = resp_value;
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                        .to_vec(&body_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        Ok(resp)
+    }
+    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    async fn dedup_user(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        request: HttpEdgeCasesServiceDedupUserRequest,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let HttpEdgeCasesServiceDedupUserRequest { id } = request;
+        let id: u32 = id;
+        let mut resp = match svc.dedup_user(id).await {
             Ok(resp_value) => {
                 let mut resp = {
                     let body_value: String = resp_value;
@@ -511,6 +589,47 @@ impl HttpEdgeCasesServiceClient {
         if !query.is_empty() {
             req.url_mut().set_query(Some(&query));
         }
+        let auth_target = &self.client;
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body)
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+    #[allow(clippy::useless_conversion)]
+    pub async fn dedup_user(&self, id: u32) -> Result<String, xidl_rust_axum::Error> {
+        let path = "/v1/dedup/{id}".to_string();
+        let path = path.replace("{id}", &id.to_string());
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
         let auth_target = &self.client;
         let resp = self
             .client

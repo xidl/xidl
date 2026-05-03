@@ -782,6 +782,253 @@ export class HttpDefaultsServiceClient{
         );
         return data as string;
     }
+
+    async delete_user(
+    id : number, revision : number
+    ) : Promise<
+    string
+    >{
+        const parsed = zodSchemas.HttpDefaultsServiceDeleteUserRequestSchema.parse(
+        {
+            "id" : id, "revision" : revision
+        }
+        );
+        let path = "/users";
+        const query = new URLSearchParams(
+
+        );
+        query.set(
+        "id", encodeQueryValue(
+        parsed["id"]
+        )
+        );
+        query.set(
+        "revision", encodeQueryValue(
+        parsed["revision"]
+        )
+        );
+        const queryString = query.toString(
+
+        );
+        if(queryString.length>0){
+            path = `${path}?${queryString}`;
+        }
+        const headers = new Headers(
+        this.defaultHeaders
+        );
+        const options = {
+            method : "DELETE", headers
+        };
+        const url = joinUrl(
+        this.baseUrl, path
+        );
+        const resp = await this.fetchImpl(
+        url, options
+        );
+        if(!resp.ok){
+            throw await parseXidlError(
+            resp
+            );
+        }
+        const data = await resp.json(
+
+        );
+        return data as string;
+    }
+
+    async probe_user(
+    id : number, revision : number
+    ) : Promise<
+    void
+    >{
+        const parsed = zodSchemas.HttpDefaultsServiceProbeUserRequestSchema.parse(
+        {
+            "id" : id, "revision" : revision
+        }
+        );
+        let path = "/users/head";
+        const query = new URLSearchParams(
+
+        );
+        query.set(
+        "id", encodeQueryValue(
+        parsed["id"]
+        )
+        );
+        query.set(
+        "revision", encodeQueryValue(
+        parsed["revision"]
+        )
+        );
+        const queryString = query.toString(
+
+        );
+        if(queryString.length>0){
+            path = `${path}?${queryString}`;
+        }
+        const headers = new Headers(
+        this.defaultHeaders
+        );
+        const options = {
+            method : "HEAD", headers
+        };
+        const url = joinUrl(
+        this.baseUrl, path
+        );
+        const resp = await this.fetchImpl(
+        url, options
+        );
+        if(!resp.ok){
+            throw await parseXidlError(
+            resp
+            );
+        }
+        return;
+    }
+
+    async user_options(
+    id : number, revision : number
+    ) : Promise<
+    void
+    >{
+        const parsed = zodSchemas.HttpDefaultsServiceUserOptionsRequestSchema.parse(
+        {
+            "id" : id, "revision" : revision
+        }
+        );
+        let path = "/users/options";
+        const query = new URLSearchParams(
+
+        );
+        query.set(
+        "id", encodeQueryValue(
+        parsed["id"]
+        )
+        );
+        query.set(
+        "revision", encodeQueryValue(
+        parsed["revision"]
+        )
+        );
+        const queryString = query.toString(
+
+        );
+        if(queryString.length>0){
+            path = `${path}?${queryString}`;
+        }
+        const headers = new Headers(
+        this.defaultHeaders
+        );
+        const options = {
+            method : "OPTIONS", headers
+        };
+        const url = joinUrl(
+        this.baseUrl, path
+        );
+        const resp = await this.fetchImpl(
+        url, options
+        );
+        if(!resp.ok){
+            throw await parseXidlError(
+            resp
+            );
+        }
+        return;
+    }
+
+    async replace_user(
+    user_id : number, name : string, age : number
+    ) : Promise<
+    string
+    >{
+        const parsed = zodSchemas.HttpDefaultsServiceReplaceUserRequestSchema.parse(
+        {
+            "user_id" : user_id, "name" : name, "age" : age
+        }
+        );
+        let path = "/users/{id}";
+        path = path.replace(
+        "{"+"id"+"}", encodePathSegment(
+        parsed["user_id"]
+        )
+        );
+        const body = {
+            "name" : parsed["name"], "age" : parsed["age"],
+        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
+        headers.set(
+        "Content-Type", "application/json"
+        );
+        const options = {
+            method : "PUT", headers, body : JSON.stringify(
+            body
+            )
+        };
+        const url = joinUrl(
+        this.baseUrl, path
+        );
+        const resp = await this.fetchImpl(
+        url, options
+        );
+        if(!resp.ok){
+            throw await parseXidlError(
+            resp
+            );
+        }
+        const data = await resp.json(
+
+        );
+        return data as string;
+    }
+
+    async patch_user(
+    user_id : number, name : string, age : number
+    ) : Promise<
+    string
+    >{
+        const parsed = zodSchemas.HttpDefaultsServicePatchUserRequestSchema.parse(
+        {
+            "user_id" : user_id, "name" : name, "age" : age
+        }
+        );
+        let path = "/users/{id}";
+        path = path.replace(
+        "{"+"id"+"}", encodePathSegment(
+        parsed["user_id"]
+        )
+        );
+        const body = {
+            "name" : parsed["name"], "age" : parsed["age"],
+        };
+        const headers = new Headers(
+        this.defaultHeaders
+        );
+        headers.set(
+        "Content-Type", "application/json"
+        );
+        const options = {
+            method : "PATCH", headers, body : JSON.stringify(
+            body
+            )
+        };
+        const url = joinUrl(
+        this.baseUrl, path
+        );
+        const resp = await this.fetchImpl(
+        url, options
+        );
+        if(!resp.ok){
+            throw await parseXidlError(
+            resp
+            );
+        }
+        const data = await resp.json(
+
+        );
+        return data as string;
+    }
 }
 ===============
 http_defaults.d.ts
@@ -830,6 +1077,33 @@ export interface HttpDefaultsServiceGetUserRequest{
 export interface HttpDefaultsServiceGetUserAliasRequest{
     user_id : number;
     locale : string;
+}
+
+export interface HttpDefaultsServiceDeleteUserRequest{
+    id : number;
+    revision : number;
+}
+
+export interface HttpDefaultsServiceProbeUserRequest{
+    id : number;
+    revision : number;
+}
+
+export interface HttpDefaultsServiceUserOptionsRequest{
+    id : number;
+    revision : number;
+}
+
+export interface HttpDefaultsServiceReplaceUserRequest{
+    user_id : number;
+    name : string;
+    age : number;
+}
+
+export interface HttpDefaultsServicePatchUserRequest{
+    user_id : number;
+    name : string;
+    age : number;
 }
 ===============
 http_defaults.iface.zod.ts
@@ -943,6 +1217,110 @@ export const HttpDefaultsServiceGetUserAliasRequestSchema = z.object(
 );
 export type HttpDefaultsServiceGetUserAliasRequest = z.infer<
 typeof HttpDefaultsServiceGetUserAliasRequestSchema
+>;
+export const HttpDefaultsServiceDeleteUserRequestSchema = z.object(
+{
+    id : z.number(
+
+    ).int(
+
+    ).nonnegative(
+
+    ), revision : z.number(
+
+    ).int(
+
+    ).nonnegative(
+
+    ),
+}
+);
+export type HttpDefaultsServiceDeleteUserRequest = z.infer<
+typeof HttpDefaultsServiceDeleteUserRequestSchema
+>;
+export const HttpDefaultsServiceProbeUserRequestSchema = z.object(
+{
+    id : z.number(
+
+    ).int(
+
+    ).nonnegative(
+
+    ), revision : z.number(
+
+    ).int(
+
+    ).nonnegative(
+
+    ),
+}
+);
+export type HttpDefaultsServiceProbeUserRequest = z.infer<
+typeof HttpDefaultsServiceProbeUserRequestSchema
+>;
+export const HttpDefaultsServiceUserOptionsRequestSchema = z.object(
+{
+    id : z.number(
+
+    ).int(
+
+    ).nonnegative(
+
+    ), revision : z.number(
+
+    ).int(
+
+    ).nonnegative(
+
+    ),
+}
+);
+export type HttpDefaultsServiceUserOptionsRequest = z.infer<
+typeof HttpDefaultsServiceUserOptionsRequestSchema
+>;
+export const HttpDefaultsServiceReplaceUserRequestSchema = z.object(
+{
+    user_id : z.number(
+
+    ).int(
+
+    ).nonnegative(
+
+    ), name : z.string(
+
+    ), age : z.number(
+
+    ).int(
+
+    ).nonnegative(
+
+    ),
+}
+);
+export type HttpDefaultsServiceReplaceUserRequest = z.infer<
+typeof HttpDefaultsServiceReplaceUserRequestSchema
+>;
+export const HttpDefaultsServicePatchUserRequestSchema = z.object(
+{
+    user_id : z.number(
+
+    ).int(
+
+    ).nonnegative(
+
+    ), name : z.string(
+
+    ), age : z.number(
+
+    ).int(
+
+    ).nonnegative(
+
+    ),
+}
+);
+export type HttpDefaultsServicePatchUserRequest = z.infer<
+typeof HttpDefaultsServicePatchUserRequestSchema
 >;
 ===============
 http_defaults.rs

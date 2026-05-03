@@ -16,6 +16,13 @@ interface HttpEdgeCasesService {
         @query("lang") string locale
     );
 
+    // Duplicate routes after normalization should be de-duplicated.
+    @get(path = " //v1//dedup/{id}/ ")
+    @path("/v1/dedup/{id}")
+    string dedup_user(
+        @path uint32 id
+    );
+
     // Path source inferred from route template variables.
     @get(path = "/orders/{order_id}/items/{item_id}")
     string get_item(

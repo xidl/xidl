@@ -143,6 +143,61 @@ openapi.json
               "get_user_alias"
             ],
             "type": "object"
+          },
+          {
+            "properties": {
+              "delete_user": {
+                "$ref": "#/components/schemas/HttpDefaultsService_delete_user_In"
+              }
+            },
+            "required": [
+              "delete_user"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "probe_user": {
+                "$ref": "#/components/schemas/HttpDefaultsService_probe_user_In"
+              }
+            },
+            "required": [
+              "probe_user"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "user_options": {
+                "$ref": "#/components/schemas/HttpDefaultsService_user_options_In"
+              }
+            },
+            "required": [
+              "user_options"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "replace_user": {
+                "$ref": "#/components/schemas/HttpDefaultsService_replace_user_In"
+              }
+            },
+            "required": [
+              "replace_user"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "patch_user": {
+                "$ref": "#/components/schemas/HttpDefaultsService_patch_user_In"
+              }
+            },
+            "required": [
+              "patch_user"
+            ],
+            "type": "object"
           }
         ]
       },
@@ -276,6 +331,61 @@ openapi.json
               "get_user_alias"
             ],
             "type": "object"
+          },
+          {
+            "properties": {
+              "delete_user": {
+                "$ref": "#/components/schemas/HttpDefaultsService_delete_user_Result"
+              }
+            },
+            "required": [
+              "delete_user"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "probe_user": {
+                "$ref": "#/components/schemas/HttpDefaultsService_probe_user_Result"
+              }
+            },
+            "required": [
+              "probe_user"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "user_options": {
+                "$ref": "#/components/schemas/HttpDefaultsService_user_options_Result"
+              }
+            },
+            "required": [
+              "user_options"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "replace_user": {
+                "$ref": "#/components/schemas/HttpDefaultsService_replace_user_Result"
+              }
+            },
+            "required": [
+              "replace_user"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "patch_user": {
+                "$ref": "#/components/schemas/HttpDefaultsService_patch_user_Result"
+              }
+            },
+            "required": [
+              "patch_user"
+            ],
+            "type": "object"
           }
         ]
       },
@@ -344,6 +454,51 @@ openapi.json
             "properties": {
               "result": {
                 "$ref": "#/components/schemas/HttpDefaultsService_create_user_flat_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpDefaultsService_delete_user_In": {
+        "properties": {
+          "id": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "revision": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "revision"
+        ],
+        "type": "object"
+      },
+      "HttpDefaultsService_delete_user_Out": {
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "return_"
+        ],
+        "type": "object"
+      },
+      "HttpDefaultsService_delete_user_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpDefaultsService_delete_user_Out"
               }
             },
             "required": [
@@ -527,6 +682,55 @@ openapi.json
           }
         ]
       },
+      "HttpDefaultsService_patch_user_In": {
+        "properties": {
+          "age": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "user_id": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "user_id",
+          "name",
+          "age"
+        ],
+        "type": "object"
+      },
+      "HttpDefaultsService_patch_user_Out": {
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "return_"
+        ],
+        "type": "object"
+      },
+      "HttpDefaultsService_patch_user_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpDefaultsService_patch_user_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
       "HttpDefaultsService_preview_user_In": {
         "properties": {
           "req": {
@@ -555,6 +759,100 @@ openapi.json
             "properties": {
               "result": {
                 "$ref": "#/components/schemas/HttpDefaultsService_preview_user_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpDefaultsService_probe_user_In": {
+        "properties": {
+          "id": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "revision": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "revision"
+        ],
+        "type": "object"
+      },
+      "HttpDefaultsService_probe_user_Out": {
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        },
+        "required": [
+          "dummy"
+        ],
+        "type": "object"
+      },
+      "HttpDefaultsService_probe_user_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpDefaultsService_probe_user_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpDefaultsService_replace_user_In": {
+        "properties": {
+          "age": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "user_id": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "user_id",
+          "name",
+          "age"
+        ],
+        "type": "object"
+      },
+      "HttpDefaultsService_replace_user_Out": {
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "return_"
+        ],
+        "type": "object"
+      },
+      "HttpDefaultsService_replace_user_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpDefaultsService_replace_user_Out"
               }
             },
             "required": [
@@ -598,6 +896,51 @@ openapi.json
             "properties": {
               "result": {
                 "$ref": "#/components/schemas/HttpDefaultsService_search_user_Out"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpDefaultsService_user_options_In": {
+        "properties": {
+          "id": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "revision": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "revision"
+        ],
+        "type": "object"
+      },
+      "HttpDefaultsService_user_options_Out": {
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        },
+        "required": [
+          "dummy"
+        ],
+        "type": "object"
+      },
+      "HttpDefaultsService_user_options_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpDefaultsService_user_options_Out"
               }
             },
             "required": [
@@ -759,6 +1102,53 @@ openapi.json
       }
     },
     "/users": {
+      "delete": {
+        "operationId": "HttpDefaultsService.delete_user",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "id",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "revision",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        }
+      },
       "post": {
         "operationId": "HttpDefaultsService.create_user",
         "requestBody": {
@@ -830,6 +1220,90 @@ openapi.json
         }
       }
     },
+    "/users/head": {
+      "head": {
+        "operationId": "HttpDefaultsService.probe_user",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "id",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "revision",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        }
+      }
+    },
+    "/users/options": {
+      "options": {
+        "operationId": "HttpDefaultsService.user_options",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "id",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "revision",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        }
+      }
+    },
     "/users/preview": {
       "get": {
         "operationId": "HttpDefaultsService.preview_user",
@@ -869,6 +1343,120 @@ openapi.json
     "/users/search": {
       "post": {
         "operationId": "HttpDefaultsService.search_user",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "age": {
+                    "format": "int32",
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "patch": {
+        "operationId": "HttpDefaultsService.patch_user",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "age": {
+                    "format": "int32",
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        }
+      },
+      "put": {
+        "operationId": "HttpDefaultsService.replace_user",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {

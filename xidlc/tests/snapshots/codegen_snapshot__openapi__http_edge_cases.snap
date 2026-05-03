@@ -63,6 +63,17 @@ openapi.json
           },
           {
             "properties": {
+              "dedup_user": {
+                "$ref": "#/components/schemas/HttpEdgeCasesService_dedup_user_In"
+              }
+            },
+            "required": [
+              "dedup_user"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
               "get_item": {
                 "$ref": "#/components/schemas/HttpEdgeCasesService_get_item_In"
               }
@@ -152,6 +163,17 @@ openapi.json
           },
           {
             "properties": {
+              "dedup_user": {
+                "$ref": "#/components/schemas/HttpEdgeCasesService_dedup_user_Result"
+              }
+            },
+            "required": [
+              "dedup_user"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
               "get_item": {
                 "$ref": "#/components/schemas/HttpEdgeCasesService_get_item_Result"
               }
@@ -169,6 +191,45 @@ openapi.json
             },
             "required": [
               "lookup"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "HttpEdgeCasesService_dedup_user_In": {
+        "properties": {
+          "id": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "HttpEdgeCasesService_dedup_user_Out": {
+        "properties": {
+          "return_": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "return_"
+        ],
+        "type": "object"
+      },
+      "HttpEdgeCasesService_dedup_user_Result": {
+        "oneOf": [
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/HttpEdgeCasesService_dedup_user_Out"
+              }
+            },
+            "required": [
+              "result"
             ],
             "type": "object"
           }
@@ -414,6 +475,45 @@ openapi.json
           {
             "in": "path",
             "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        }
+      }
+    },
+    "/v1/dedup/{id}": {
+      "get": {
+        "operationId": "HttpEdgeCasesService.dedup_user",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
             "required": true,
             "schema": {
               "format": "int32",
