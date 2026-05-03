@@ -6,24 +6,25 @@ target.
 ## Minimal command
 
 ```bash
-xidlc --lang rust --out-dir out path/to/file.idl
+xidlc gen --out-dir out rust path/to/file.idl
 ```
 
 Short form:
 
 ```bash
-xidlc -l rust -o out path/to/file.idl
+xidlc gen -o out rust path/to/file.idl
 ```
 
 ## CLI options
 
-The current generator arguments are:
+The current generator structure is:
 
-- `--lang`, `-l`: select the target language or generator
+- `gen`: enter code generation mode
 - `--out-dir`, `-o`: choose the output directory
-- `--client`: request client-only output for generators that support it
-- `--server`: request server output for generators that support it
 - `--dry-run`: parse and generate without writing files
+- `<lang>`: select the target language or generator as a `gen` subcommand
+- `--client`: include client output for generators that support it
+- `--server`: include server output for generators that support it
 
 ## Supported built-in targets
 
@@ -34,11 +35,13 @@ The repository currently recognizes these built-in targets:
 - `rust`
 - `rust-jsonrpc`
 - `rust-axum`
+- `go`
+- `go-http`
+- `python`
+- `python-http`
 - `ts` / `typescript`
 - `openapi`
 - `openrpc`
-- `hir`
-- `typed-ast`
 
 Alias examples:
 
@@ -51,32 +54,32 @@ Alias examples:
 ### Generate Rust types
 
 ```bash
-xidlc --lang rust --out-dir src/generated api.idl
+xidlc gen --out-dir src/generated rust api.idl
 ```
 
 ### Generate an Axum server/client surface
 
 ```bash
-xidlc --lang rust-axum --out-dir src/generated api.idl
+xidlc gen --out-dir src/generated rust-axum api.idl
 ```
 
 ### Generate OpenAPI
 
 ```bash
-xidlc --lang openapi --out-dir generated api.idl
+xidlc gen --out-dir generated openapi api.idl
 ```
 
 ### Generate OpenRPC
 
 ```bash
-xidlc --lang openrpc --out-dir generated api.idl
+xidlc gen --out-dir generated openrpc api.idl
 ```
 
 ## End-to-end flow
 
 1. Write IDL definitions for your data and interfaces.
 2. Choose a target based on the runtime or schema artifact you need.
-3. Run `xidlc`.
+3. Run `xidlc gen`.
 4. Compile or publish the generated output with the target’s runtime crate or
    consumer toolchain.
 

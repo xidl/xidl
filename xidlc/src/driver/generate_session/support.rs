@@ -2,6 +2,9 @@ use crate::error::{IdlcError, IdlcResult};
 use crate::jsonrpc::{Codegen, CodegenClient};
 use semver::{Version, VersionReq};
 use std::future::Future;
+use std::sync::atomic::{AtomicU64, Ordering};
+
+static ENDPOINT_COUNTER: AtomicU64 = AtomicU64::new(0);
 
 pub(super) async fn retry_connect<T, F, Fut>(mut connect: F, error_message: String) -> IdlcResult<T>
 where
@@ -27,7 +30,8 @@ pub(super) fn random_inproc_endpoint(lang: &str) -> String {
         .duration_since(std::time::UNIX_EPOCH)
         .expect("system time before epoch")
         .as_nanos();
-    format!("xidlc.codegen.{lang}.{nanos}")
+    let seq = ENDPOINT_COUNTER.fetch_add(1, Ordering::Relaxed);
+    format!("xidlc.codegen.{lang}.{nanos}.{seq}")
 }
 
 #[cfg(unix)]

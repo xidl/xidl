@@ -98,19 +98,19 @@ repos:
 Generate Rust types:
 
 ```bash
-xidlc --lang rust --out-dir out api.idl
+xidlc gen --out-dir out rust api.idl
 ```
 
 Generate an Axum HTTP surface:
 
 ```bash
-xidlc --lang rust-axum --out-dir out api.idl
+xidlc gen --out-dir out rust-axum api.idl
 ```
 
 Generate OpenAPI:
 
 ```bash
-xidlc --lang openapi --out-dir generated api.idl
+xidlc gen --out-dir generated openapi api.idl
 ```
 
 ## Documentation

@@ -6,8 +6,9 @@ The `rust-jsonrpc` target generates Rust JSON-RPC service/client code from IDL.
 
 ```bash
 xidlc \
-  --lang rust-jsonrpc \
+  gen \
   --out-dir out \
+  rust-jsonrpc \
   your.idl
 ```
 

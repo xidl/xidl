@@ -5,7 +5,7 @@ The `openapi` target emits `openapi.json` for HTTP-oriented interfaces.
 ## Generate OpenAPI
 
 ```bash
-xidlc --lang openapi --out-dir generated api.idl
+xidlc gen --out-dir generated openapi api.idl
 ```
 
 ## Metadata pragmas
