@@ -4,14 +4,14 @@ use super::schema::{
     request_body_schema, schema_for_type,
 };
 use super::security::openapi_security_requirement;
-use xidl_parser::http_hir::{
-    HttpMethod as HttpHirMethod, HttpOperation, HttpParamKind as HttpHirParamKind,
-    semantics::{HttpSecurityRequirement, HttpStreamCodec, HttpStreamKind},
-};
 use crate::openapi::path::{HttpMethod as OpenApiHttpMethod, Parameter, ParameterIn};
 use crate::openapi::request_body::RequestBody;
 use crate::openapi::schema::Schema;
 use crate::openapi::{RefOr, security::SecurityRequirement};
+use xidl_parser::http_hir::{
+    HttpMethod as HttpHirMethod, HttpOperation, HttpParamKind as HttpHirParamKind,
+    semantics::{HttpSecurityRequirement, HttpStreamCodec, HttpStreamKind},
+};
 
 pub(crate) struct MethodInfo {
     pub(crate) http_method: OpenApiHttpMethod,

@@ -1,5 +1,5 @@
-use xidl_parser::http_hir::semantics::HttpStreamCodec;
 use std::fmt::Write;
+use xidl_parser::http_hir::semantics::HttpStreamCodec;
 
 use super::spec_context::{MethodContext, ParamContext, ParamSource};
 use super::spec_types::py_bool;

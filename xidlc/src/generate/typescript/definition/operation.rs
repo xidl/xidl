@@ -1,9 +1,9 @@
 use std::collections::{HashMap, HashSet};
 
 use crate::error::{IdlcError, IdlcResult};
-use xidl_parser::http_hir::semantics::{HttpStreamKind, http_stream_config};
 use crate::generate::utils::doc_lines_from_annotations;
 use xidl_parser::hir;
+use xidl_parser::http_hir::semantics::{HttpStreamKind, http_stream_config};
 
 use super::annotations::has_optional_annotation;
 use super::http::{

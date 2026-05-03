@@ -1,6 +1,6 @@
 use crate::error::{ParseError, ParserResult};
-use std::collections::HashSet;
 use crate::hir;
+use std::collections::HashSet;
 
 use super::attr::project_attribute;
 use super::project_params::project_params;
@@ -156,8 +156,8 @@ fn project_attribute_group(
         &attr.annotations,
     )
     .map_err(ParseError::Message)?;
-    let deprecated =
-        effective_deprecated(interface_annotations, &attr.annotations).map_err(ParseError::Message)?;
+    let deprecated = effective_deprecated(interface_annotations, &attr.annotations)
+        .map_err(ParseError::Message)?;
     let security = effective_security_with_origin(interface_annotations, &attr.annotations)
         .map_err(ParseError::Message)?;
     Ok(project_attribute(

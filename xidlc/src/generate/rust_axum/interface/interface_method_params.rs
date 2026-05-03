@@ -1,5 +1,4 @@
 use crate::error::IdlcResult;
-use xidl_parser::http_hir::{HttpOperation, semantics::has_optional_annotation};
 use crate::generate::rust::util::rust_ident;
 use crate::generate::rust_axum::interface::interface_annotations::{
     field_rename, field_rename_raw, has_flatten_annotation, serde_rename,
@@ -18,6 +17,7 @@ use crate::generate::rust_axum::transport::{
     TransportDirection, TransportTracker, decode_expr, encode_expr,
 };
 use xidl_parser::hir;
+use xidl_parser::http_hir::{HttpOperation, semantics::has_optional_annotation};
 
 #[derive(Default)]
 pub(crate) struct MethodParams {

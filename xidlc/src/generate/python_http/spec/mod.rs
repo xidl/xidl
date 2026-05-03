@@ -5,13 +5,13 @@ mod spec_render;
 mod spec_types;
 
 use crate::error::{IdlcError, IdlcResult};
-use xidl_parser::http_hir::semantics::HttpStreamKind;
-use xidl_parser::http_hir::{HttpHirDocument, HttpOperation, HttpOperationSource};
 use crate::generate::python_http::PythonHttpRenderer;
 use serde::Serialize;
 use std::collections::HashMap;
 use std::fmt::Write;
 use xidl_parser::hir;
+use xidl_parser::http_hir::semantics::HttpStreamKind;
+use xidl_parser::http_hir::{HttpHirDocument, HttpOperation, HttpOperationSource};
 
 use self::spec_context::build_method;
 use self::spec_render::{render_endpoint_helper, render_method_types, render_route_builder};

@@ -99,5 +99,4 @@ mod tests {
             assert_eq!(plugin, expected);
         }
     }
-
 }

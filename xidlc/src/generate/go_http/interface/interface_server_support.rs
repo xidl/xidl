@@ -1,7 +1,7 @@
 use crate::error::IdlcResult;
 use crate::generate::go_http::MethodMeta;
-use xidl_parser::http_hir::semantics::{HttpStreamCodec, HttpStreamKind};
 use std::fmt::Write;
+use xidl_parser::http_hir::semantics::{HttpStreamCodec, HttpStreamKind};
 
 use super::GoHttpRenderer;
 use super::interface_binding::render_response_write;

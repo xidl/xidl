@@ -97,8 +97,10 @@ pub(super) fn validate_stream_shape(
     op_name: &str,
     stream: super::semantics::HttpStreamConfig,
 ) -> HttpHirResult<()> {
-    if matches!(stream.kind, Some(HttpStreamKind::Client | HttpStreamKind::Bidi))
-        && stream.codec == HttpStreamCodec::Sse
+    if matches!(
+        stream.kind,
+        Some(HttpStreamKind::Client | HttpStreamKind::Bidi)
+    ) && stream.codec == HttpStreamCodec::Sse
     {
         return Err(format!(
             "@stream_codec(\"sse\") requires @server_stream on method '{}'",
@@ -146,14 +148,20 @@ pub(super) fn validate_projected_param(
     if !matches!(param.kind, HttpParamKind::Path) {
         return Ok(());
     }
-    if route_path_names.iter().any(|set| set.contains(&param.wire_name)) {
+    if route_path_names
+        .iter()
+        .any(|set| set.contains(&param.wire_name))
+    {
         if param.optional {
             return Err(format!(
                 "@optional cannot be applied to path parameter '{}' of method '{}'",
                 param.name, op_name
             ));
         }
-        if !route_path_names.iter().all(|set| set.contains(&param.wire_name)) {
+        if !route_path_names
+            .iter()
+            .all(|set| set.contains(&param.wire_name))
+        {
             return Err(format!(
                 "parameter '{}' is bound to path variable '{}' but it is not present in every route template of method '{}'",
                 param.name, param.wire_name, op_name
@@ -231,8 +239,10 @@ pub(super) fn validate_request_shape(
     let has_non_body_request_params = request_params
         .iter()
         .any(|param| !matches!(param.kind, HttpParamKind::Body));
-    if matches!(stream_kind, Some(HttpStreamKind::Client | HttpStreamKind::Bidi))
-        && has_non_body_request_params
+    if matches!(
+        stream_kind,
+        Some(HttpStreamKind::Client | HttpStreamKind::Bidi)
+    ) && has_non_body_request_params
     {
         let label = if matches!(stream_kind, Some(HttpStreamKind::Bidi)) {
             "@bidi_stream"

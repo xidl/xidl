@@ -33,7 +33,12 @@ pub(super) fn explicit_param_binding(
             .and_then(|params| params.get("value").cloned())
             .unwrap_or_else(|| param.declarator.0.clone());
         match &found {
-            None => found = Some(SourceBinding { source: current, bound_name }),
+            None => {
+                found = Some(SourceBinding {
+                    source: current,
+                    bound_name,
+                })
+            }
             Some(previous) if previous.source == current && previous.bound_name == bound_name => {}
             Some(_) => {
                 return Err(format!(
@@ -57,9 +62,11 @@ pub(super) fn route_from_annotations(
             continue;
         };
         if let Some(current) = method_from_annotation(annotation) {
-            if let Some(previous) = method && previous != current {
+            if let Some(previous) = method
+                && previous != current
+            {
                 return Err(
-                    "more than one HTTP verb annotation is not allowed on a method".to_string()
+                    "more than one HTTP verb annotation is not allowed on a method".to_string(),
                 );
             }
             method = Some(current);
@@ -94,7 +101,11 @@ pub(super) fn auto_default_method_path(
     method: HttpMethod,
 ) -> HttpHirResult<String> {
     let mut path = normalize_path(&op.ident);
-    let params = op.parameter.as_ref().map(|value| value.0.as_slice()).unwrap_or(&[]);
+    let params = op
+        .parameter
+        .as_ref()
+        .map(|value| value.0.as_slice())
+        .unwrap_or(&[]);
     for param in params {
         if matches!(
             super::validate::param_direction(param.attr.as_ref()),
@@ -129,7 +140,11 @@ pub(super) fn parse_route_template(path: &str) -> HttpHirResult<HttpRoute> {
     let mut query_params = query_params.into_iter().collect::<Vec<_>>();
     path_params.sort();
     query_params.sort();
-    Ok(HttpRoute { path, path_params, query_params })
+    Ok(HttpRoute {
+        path,
+        path_params,
+        query_params,
+    })
 }
 
 fn split_query_template(path: &str) -> HttpHirResult<(String, HashSet<String>)> {
@@ -173,7 +188,9 @@ fn validate_route_template(path: &str) -> HttpHirResult<()> {
         let is_catch_all = token.starts_with('*');
         let name = token.strip_prefix('*').unwrap_or(token);
         if name.is_empty() {
-            return Err(format!("route template has empty path variable in '{path}'"));
+            return Err(format!(
+                "route template has empty path variable in '{path}'"
+            ));
         }
         if is_catch_all {
             catch_all_count += 1;

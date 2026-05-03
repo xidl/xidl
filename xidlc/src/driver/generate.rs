@@ -111,6 +111,10 @@ impl Generator {
                 self.expand_http_hir_artifact(artifact, input, properties)
                     .await
             }
+            ArtifactKind::JsonRpcHir => {
+                self.expand_jsonrpc_hir_artifact(artifact, input, properties)
+                    .await
+            }
             ArtifactKind::File => Ok(vec![Self::artifact_to_file(artifact)]),
         }
     }
@@ -145,6 +149,24 @@ impl Generator {
         Box::pin(self.generate_for_lang(
             &data.lang,
             CodegenInput::new_http_hir(data.http_hir),
+            input,
+            props,
+        ))
+        .await
+    }
+
+    async fn expand_jsonrpc_hir_artifact(
+        &mut self,
+        artifact: Artifact,
+        input: &Path,
+        properties: &HashMap<String, serde_json::Value>,
+    ) -> IdlcResult<Vec<File>> {
+        let data = artifact.into_jsonrpc_hir();
+        let mut props = properties.clone();
+        props.extend(data.props);
+        Box::pin(self.generate_for_lang(
+            &data.lang,
+            CodegenInput::new_jsonrpc_hir(data.jsonrpc_hir),
             input,
             props,
         ))

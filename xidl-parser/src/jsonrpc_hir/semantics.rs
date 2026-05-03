@@ -1,39 +1,32 @@
-use crate::error::{IdlcError, IdlcResult};
 use std::collections::HashSet;
-use xidl_parser::hir;
 
-use super::interface_model::{ParamMode, StreamKind};
+use crate::error::{ParseError, ParserResult};
+use crate::hir;
 
-pub(super) fn stream_mode_name(kind: StreamKind) -> &'static str {
-    match kind {
-        StreamKind::Server => "server",
-        StreamKind::Client => "client",
-        StreamKind::Bidi => "bidi",
-    }
+use super::JsonRpcMethodKind;
+
+pub(super) fn param_is_input(attr: Option<&hir::ParamAttribute>) -> bool {
+    !matches!(attr.map(|value| value.0.as_str()), Some("out"))
 }
 
-pub(super) fn param_mode(attr: Option<&hir::ParamAttribute>) -> ParamMode {
-    match attr.map(|value| value.0.as_str()) {
-        Some("out") => ParamMode::Out,
-        Some("inout") => ParamMode::InOut,
-        _ => ParamMode::In,
-    }
+pub(super) fn param_is_output(attr: Option<&hir::ParamAttribute>) -> bool {
+    matches!(attr.map(|value| value.0.as_str()), Some("out" | "inout"))
 }
 
-pub(super) fn stream_kind_from_annotations(
+pub(super) fn stream_kind(
     annotations: &[hir::Annotation],
-) -> IdlcResult<Option<StreamKind>> {
+) -> ParserResult<Option<JsonRpcMethodKind>> {
     let mut out = None;
     for annotation in annotations {
         let Some(name) = annotation_name(annotation) else {
             continue;
         };
         let current = if name.eq_ignore_ascii_case("server_stream") {
-            Some(StreamKind::Server)
+            Some(JsonRpcMethodKind::ServerStream)
         } else if name.eq_ignore_ascii_case("client_stream") {
-            Some(StreamKind::Client)
+            Some(JsonRpcMethodKind::ClientStream)
         } else if name.eq_ignore_ascii_case("bidi_stream") {
-            Some(StreamKind::Bidi)
+            Some(JsonRpcMethodKind::BidiStream)
         } else {
             None
         };
@@ -44,8 +37,8 @@ pub(super) fn stream_kind_from_annotations(
             None => out = Some(current),
             Some(prev) if prev == current => {}
             Some(_) => {
-                return Err(IdlcError::rpc(
-                    "@server_stream/@client_stream/@bidi_stream are mutually exclusive",
+                return Err(ParseError::Message(
+                    "@server_stream/@client_stream/@bidi_stream are mutually exclusive".to_string(),
                 ));
             }
         }
@@ -66,7 +59,7 @@ pub(super) fn validate_attr_collision(
     attr_name: &str,
     getter: &str,
     setter: &str,
-) -> IdlcResult<()> {
+) -> ParserResult<()> {
     let getter_conflict = user_ops.contains(getter);
     let setter_conflict = !setter.is_empty() && user_ops.contains(setter);
     if getter_conflict || setter_conflict {
@@ -75,7 +68,7 @@ pub(super) fn validate_attr_collision(
         } else {
             format!("`{getter}` or `{setter}`")
         };
-        return Err(IdlcError::fmt(format!(
+        return Err(ParseError::Message(format!(
             "attribute `{attr_name}` conflicts with user-defined operation `{conflict}`"
         )));
     }

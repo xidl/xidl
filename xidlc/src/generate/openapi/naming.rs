@@ -1,9 +1,9 @@
+use crate::openapi::path::HttpMethod as OpenApiHttpMethod;
+use xidl_parser::hir;
 use xidl_parser::http_hir::HttpMethod;
 use xidl_parser::http_hir::semantics::{
     annotation_name, annotation_params, normalize_annotation_params,
 };
-use crate::openapi::path::HttpMethod as OpenApiHttpMethod;
-use xidl_parser::hir;
 
 pub(crate) fn declarator_name(decl: &hir::Declarator) -> String {
     match decl {

@@ -1,81 +1,47 @@
 use crate::error::IdlcResult;
-use crate::generate::rust::util::rust_ident;
+use crate::generate::rust_jsonrpc::JsonRpcRenderer;
 use crate::generate::rust_jsonrpc::interface::render_interface_with_path;
-use crate::generate::rust_jsonrpc::{JsonRpcRender, JsonRpcRenderOutput, JsonRpcRenderer};
-use serde_json::json;
-use std::collections::HashMap;
-use xidl_parser::hir;
-
-impl JsonRpcRender for hir::ModuleDcl {
-    fn render(&self, renderer: &JsonRpcRenderer) -> IdlcResult<JsonRpcRenderOutput> {
-        let defs = self.definition.iter().collect::<Vec<_>>();
-        let module_path = vec![self.ident.clone()];
-        let body = render_module_body_with_path(&defs, renderer, &module_path)?;
-        let rendered = renderer.render_template(
-            "module.rs.j2",
-            &json!({
-                "ident": rust_ident(&self.ident),
-                "body": body,
-            }),
-        )?;
-        Ok(JsonRpcRenderOutput {
-            source: vec![rendered],
-        })
-    }
-}
-
-impl JsonRpcRender for hir::Definition {
-    fn render(&self, renderer: &JsonRpcRenderer) -> IdlcResult<JsonRpcRenderOutput> {
-        match self {
-            hir::Definition::ModuleDcl(module) => module.render(renderer),
-            hir::Definition::InterfaceDcl(interface) => {
-                render_interface_with_path(interface, renderer, &[])
-            }
-            _ => Ok(JsonRpcRenderOutput::default()),
-        }
-    }
-}
+use xidl_parser::jsonrpc_hir::JsonRpcInterface;
 
 pub(crate) fn render_module_body(
-    defs: &[&hir::Definition],
+    interfaces: &[JsonRpcInterface],
     renderer: &JsonRpcRenderer,
 ) -> IdlcResult<String> {
-    render_module_body_with_path(defs, renderer, &[])
+    render_module_body_with_path(interfaces, renderer, &[])
 }
 
 fn render_module_body_with_path(
-    defs: &[&hir::Definition],
+    interfaces: &[JsonRpcInterface],
     renderer: &JsonRpcRenderer,
     module_path: &[String],
 ) -> IdlcResult<String> {
     let mut out = Vec::new();
     let mut module_order = Vec::new();
-    let mut module_map: HashMap<String, Vec<String>> = HashMap::new();
 
-    for def in defs {
-        match def {
-            hir::Definition::ModuleDcl(module) => {
-                let entry = module_map.entry(module.ident.clone()).or_insert_with(|| {
-                    module_order.push(module.ident.clone());
-                    Vec::new()
-                });
-                let defs = module.definition.iter().collect::<Vec<_>>();
-                let mut next_path = module_path.to_vec();
-                next_path.push(module.ident.clone());
-                let body = render_module_body_with_path(&defs, renderer, &next_path)?;
-                entry.push(body);
-            }
-            hir::Definition::InterfaceDcl(interface) => {
-                let rendered = render_interface_with_path(interface, renderer, module_path)?;
-                out.extend(rendered.source);
-            }
-            _ => {}
+    for interface in interfaces
+        .iter()
+        .filter(|item| item.module_path == module_path)
+    {
+        let rendered = render_interface_with_path(interface, renderer)?;
+        out.extend(rendered.source);
+    }
+
+    for interface in interfaces {
+        if interface.module_path.len() <= module_path.len()
+            || interface.module_path[..module_path.len()] != *module_path
+        {
+            continue;
+        }
+        let next = interface.module_path[module_path.len()].clone();
+        if !module_order.contains(&next) {
+            module_order.push(next);
         }
     }
 
     for name in module_order {
-        let modules = module_map.remove(&name).unwrap_or_default();
-        let body = modules.join("\n");
+        let mut next_path = module_path.to_vec();
+        next_path.push(name.clone());
+        let body = render_module_body_with_path(interfaces, renderer, &next_path)?;
         let rendered = renderer.render_template(
             "module.rs.j2",
             &serde_json::json!({

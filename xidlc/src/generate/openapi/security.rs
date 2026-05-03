@@ -1,8 +1,8 @@
-use xidl_parser::http_hir::semantics::{HttpApiKeyLocation, HttpSecurityRequirement};
 use crate::openapi::security::{
     ApiKey, ApiKeyValue, Http, HttpAuthScheme, OAuth2, Scopes, SecurityRequirement, SecurityScheme,
 };
 use std::collections::BTreeMap;
+use xidl_parser::http_hir::semantics::{HttpApiKeyLocation, HttpSecurityRequirement};
 
 pub(crate) fn openapi_security_requirement(
     requirement: HttpSecurityRequirement,

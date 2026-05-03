@@ -1,13 +1,11 @@
 use crate::error::IdlcResult;
 use crate::generate::rust_jsonrpc::definition::render_module_body;
 use crate::generate::rust_jsonrpc::{JsonRpcRender, JsonRpcRenderOutput, JsonRpcRenderer};
-use itertools::Itertools;
-use xidl_parser::hir;
+use xidl_parser::jsonrpc_hir::JsonRpcHirDocument;
 
-impl JsonRpcRender for hir::Specification {
+impl JsonRpcRender for JsonRpcHirDocument {
     fn render(&self, renderer: &JsonRpcRenderer) -> IdlcResult<JsonRpcRenderOutput> {
-        let defs = self.0.iter().collect_vec();
-        let body = render_module_body(&defs, renderer)?;
+        let body = render_module_body(&self.interfaces, renderer)?;
         Ok(JsonRpcRenderOutput { source: vec![body] })
     }
 }

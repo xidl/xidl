@@ -1,10 +1,10 @@
 use crate::error::{IdlcError, IdlcResult};
-use xidl_parser::http_hir::HttpHirDocument;
 use crate::generate::utils::{format_timestamp_filter, rust_format_filter};
 use convert_case::Casing;
 use include_dir::{Dir, include_dir};
 use minijinja::{Environment, Error, ErrorKind};
 use serde::Serialize;
+use xidl_parser::http_hir::HttpHirDocument;
 
 static TEMPLATES: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/src/generate/rust_axum/templates");
 

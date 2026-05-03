@@ -9,9 +9,9 @@ mod interface_types;
 
 use crate::error::IdlcResult;
 use crate::generate::go_http::MethodMeta;
-use xidl_parser::http_hir::{HttpHirDocument, HttpOperationSource};
 use std::fmt::Write;
 use xidl_parser::hir;
+use xidl_parser::http_hir::{HttpHirDocument, HttpOperationSource};
 
 use super::GoHttpRenderer;
 use interface_client::render_client;

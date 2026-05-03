@@ -39,26 +39,9 @@ pub(super) struct WatchMethodContext {
     pub(super) stream_rpc_name: String,
 }
 
-pub(super) struct RenderedAttr {
-    pub(super) methods: Vec<MethodContext>,
-    pub(super) watch_methods: Vec<WatchMethodContext>,
-}
-
-pub(super) struct AttrNames {
-    pub(super) raw_attr: String,
-    pub(super) raw_getter: String,
-}
-
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub(super) enum StreamKind {
     Server,
     Client,
     Bidi,
-}
-
-#[derive(Copy, Clone, Eq, PartialEq)]
-pub(super) enum ParamMode {
-    In,
-    Out,
-    InOut,
 }

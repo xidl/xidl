@@ -1,5 +1,4 @@
 use crate::error::{IdlcError, IdlcResult};
-use xidl_parser::http_hir::HttpOperationSource;
 use crate::generate::rust::util::{rust_ident, rust_passthrough_attrs_from_annotations};
 use crate::generate::rust_axum::RustAxumRenderOutput;
 use crate::generate::rust_axum::interface::interface_attr::render_attr_operation_from_http;
@@ -10,6 +9,7 @@ use crate::generate::rust_axum::transport::TransportTracker;
 use serde_json::json;
 use std::collections::HashMap;
 use xidl_parser::hir;
+use xidl_parser::http_hir::HttpOperationSource;
 
 pub(crate) fn render_interface_def(
     def: &hir::InterfaceDef,

@@ -18,6 +18,7 @@ pub use project::project;
 pub enum HirProjectionKind {
     Rpc,
     Http,
+    JsonRpc,
 }
 
 /// Represents either the standard DDS/RPC HIR or the projected HTTP HIR.
@@ -25,6 +26,7 @@ pub enum HirProjectionKind {
 pub enum ProjectedHir {
     Rpc(crate::hir::Specification),
     Http(HttpHirDocument),
+    JsonRpc(crate::jsonrpc_hir::JsonRpcHirDocument),
 }
 
 pub(crate) type HttpHirResult<T> = Result<T, String>;

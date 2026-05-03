@@ -9,13 +9,13 @@ mod stream;
 #[cfg(test)]
 mod tests;
 
-use xidl_parser::http_hir::HttpHirDocument;
 use crate::jsonrpc::{Artifact, ArtifactFile};
 use crate::openapi::{InfoBuilder, OpenApi, OpenApiBuilder};
 use serde_json::Value;
 use std::collections::HashMap;
 use xidl_parser::hir;
 use xidl_parser::hir::ParserProperties;
+use xidl_parser::http_hir::HttpHirDocument;
 
 pub(crate) struct OpenApiCodegen;
 
