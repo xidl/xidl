@@ -95,30 +95,25 @@ where
     }
 }
 
-pub struct CodegenClient<R, W> {
-    client: tokio::sync::Mutex<xidl_jsonrpc::Client<tokio::io::BufReader<R>, W>>,
+pub struct CodegenClient<S> {
+    client: tokio::sync::Mutex<xidl_jsonrpc::Client<S>>,
 }
 
-impl<R, W> CodegenClient<R, W>
+impl<S> CodegenClient<S>
 where
-    R: tokio::io::AsyncRead + Unpin + Send,
-    W: tokio::io::AsyncWrite + Unpin + Send,
+    S: xidl_jsonrpc::transport::Stream + Unpin + Send,
 {
-    pub fn new(reader: R, writer: W) -> Self {
+    pub fn new(stream: S) -> Self {
         Self {
-            client: tokio::sync::Mutex::new(xidl_jsonrpc::Client::new(
-                tokio::io::BufReader::new(reader),
-                writer,
-            )),
+            client: tokio::sync::Mutex::new(xidl_jsonrpc::Client::new(stream)),
         }
     }
 }
 
 #[async_trait::async_trait]
-impl<R, W> Codegen for CodegenClient<R, W>
+impl<S> Codegen for CodegenClient<S>
 where
-    R: tokio::io::AsyncRead + Unpin + Send,
-    W: tokio::io::AsyncWrite + Unpin + Send,
+    S: xidl_jsonrpc::transport::Stream + Unpin + Send,
 {
     async fn get_engine_version(&self) -> Result<String, xidl_jsonrpc::Error> {
         let params = CodegengetEngineVersionParams {};

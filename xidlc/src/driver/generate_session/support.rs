@@ -2,7 +2,6 @@ use crate::error::{IdlcError, IdlcResult};
 use crate::jsonrpc::{Codegen, CodegenClient};
 use semver::{Version, VersionReq};
 use std::future::Future;
-use tokio::io::{AsyncRead, AsyncWrite};
 
 pub(super) async fn retry_connect<T, F, Fut>(mut connect: F, error_message: String) -> IdlcResult<T>
 where
@@ -56,10 +55,9 @@ pub(super) fn rpc_endpoint(_lang: &str) -> IdlcResult<String> {
     Ok(format!("tcp://{addr}"))
 }
 
-pub(super) async fn verify_engine_version<R, W>(client: &CodegenClient<R, W>) -> IdlcResult<()>
+pub(super) async fn verify_engine_version<S>(client: &CodegenClient<S>) -> IdlcResult<()>
 where
-    R: AsyncRead + Unpin + Send,
-    W: AsyncWrite + Unpin + Send,
+    S: xidl_jsonrpc::transport::Stream + Unpin + Send,
 {
     let engine_req: String = client
         .get_engine_version()

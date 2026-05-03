@@ -2,27 +2,25 @@
 mod test;
 
 use crate::line_io::{read_json_line, write_json_line};
+use crate::transport::Stream;
 use crate::{Error, ErrorCode, JSONRPC_VERSION, RpcRequest, RpcResponse};
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 use serde_json::Value;
-use tokio::io::{AsyncBufRead, AsyncWrite};
+use tokio::io::BufStream;
 
-pub struct Client<R, W> {
-    reader: R,
-    writer: W,
+pub struct Client<S> {
+    stream: BufStream<S>,
     next_id: u64,
 }
 
-impl<R, W> Client<R, W>
+impl<S> Client<S>
 where
-    R: AsyncBufRead + Unpin,
-    W: AsyncWrite + Unpin,
+    S: Stream + Unpin,
 {
-    pub fn new(reader: R, writer: W) -> Self {
+    pub fn new(stream: S) -> Self {
         Self {
-            reader,
-            writer,
+            stream: BufStream::new(stream),
             next_id: 1,
         }
     }
@@ -41,9 +39,9 @@ where
             method,
             params,
         };
-        write_json_line(&mut self.writer, &request).await?;
+        write_json_line(&mut self.stream, &request).await?;
 
-        let Some(response) = read_json_line::<_, RpcResponse>(&mut self.reader).await? else {
+        let Some(response) = read_json_line::<_, RpcResponse>(&mut self.stream).await? else {
             return Err(Error::Protocol("no response"));
         };
         if response.id != Some(id) {

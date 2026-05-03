@@ -1,4 +1,4 @@
-use crate::server::runtime::{Io, Server};
+use crate::server::runtime::Server;
 use crate::transport::Listener;
 use crate::{Error, Handler};
 use serde_json::Value;
@@ -87,14 +87,6 @@ impl Listener for SingleAcceptListener {
 }
 
 #[tokio::test]
-async fn io_constructor_sets_fields() {
-    let (reader, writer) = tokio::io::duplex(64);
-    let io = Io::new(reader, writer);
-    let _ = io.reader;
-    let _ = io.writer;
-}
-
-#[tokio::test]
 async fn builder_rejects_invalid_binding_configurations() {
     let err = match Server::builder().build().await {
         Ok(_) => panic!("expected missing listener"),
@@ -145,10 +137,10 @@ async fn builder_resolves_listener_endpoint_and_service() {
 
 #[tokio::test]
 async fn builder_supports_io_builders_and_endpoint_shortcuts() {
-    let (reader, writer) = tokio::io::duplex(64);
+    let (stream, _peer) = tokio::io::duplex(64);
     let server = Server::builder()
         .with_service(StubHandler)
-        .with_io(Io::new(reader, writer))
+        .with_stream(stream)
         .build()
         .await
         .unwrap();

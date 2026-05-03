@@ -1,4 +1,3 @@
-use crate::Io;
 use crate::transport::{
     BoundListener, InprocListener, IoListener, Listener, bind, connect, connect_inproc,
 };
@@ -63,14 +62,16 @@ fn bound_listener_keeps_endpoint() {
 #[cfg(not(tarpaulin_include))]
 #[tokio::test]
 async fn io_listener_accepts_once_and_then_breaks() {
-    let (reader, mut writer) = tokio::io::duplex(64);
-    let (stream_writer, mut outgoing_reader) = tokio::io::duplex(64);
+    let (listener_stream, mut peer_stream) = tokio::io::duplex(64);
     let writer_task = tokio::spawn(async move {
-        writer.write_all(b"ping").await.unwrap();
-        writer.shutdown().await.unwrap();
+        peer_stream.write_all(b"ping").await.unwrap();
+        let mut pong = [0_u8; 4];
+        peer_stream.read_exact(&mut pong).await.unwrap();
+        assert_eq!(&pong, b"pong");
+        peer_stream.shutdown().await.unwrap();
     });
 
-    let listener = IoListener::from_io(Io::new(reader, stream_writer));
+    let listener = IoListener::from_stream(listener_stream);
     let (mut stream, peer) = listener.accept().await.unwrap();
     assert_eq!(peer, std::net::SocketAddr::from(([127, 0, 0, 1], 0)));
     let mut buf = String::new();
@@ -84,9 +85,6 @@ async fn io_listener_accepts_once_and_then_breaks() {
         .unwrap();
     assert_eq!(written, 4);
     stream.flush().await.unwrap();
-    let mut pong = [0_u8; 4];
-    outgoing_reader.read_exact(&mut pong).await.unwrap();
-    assert_eq!(&pong, b"pong");
     stream.shutdown().await.unwrap();
 
     let err = match listener.accept().await {
@@ -100,8 +98,8 @@ async fn io_listener_accepts_once_and_then_breaks() {
 #[cfg(tarpaulin_include)]
 #[tokio::test]
 async fn io_listener_tarpaulin_stub_reports_broken_pipe() {
-    let (reader, writer) = tokio::io::duplex(16);
-    let listener = IoListener::from_io(Io::new(reader, writer));
+    let (stream, _peer) = tokio::io::duplex(16);
+    let listener = IoListener::from_stream(stream);
     let err = listener.accept().await.unwrap_err();
     assert_eq!(err.kind(), std::io::ErrorKind::BrokenPipe);
 }

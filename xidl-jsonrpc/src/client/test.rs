@@ -1,12 +1,11 @@
 use super::Client;
 use crate::Error;
 use serde_json::json;
-use tokio::io::{AsyncReadExt, AsyncWriteExt, BufReader, duplex};
+use tokio::io::{AsyncReadExt, AsyncWriteExt, duplex};
 
 #[tokio::test]
 async fn call_sends_request_and_parses_result() {
     let (client_side, server_side) = duplex(512);
-    let (client_read, client_write) = tokio::io::split(client_side);
     let (mut server_read, mut server_write) = tokio::io::split(server_side);
 
     let server = tokio::spawn(async move {
@@ -35,7 +34,7 @@ async fn call_sends_request_and_parses_result() {
         server_write.write_all(b"\n").await.unwrap();
     });
 
-    let mut client = Client::new(BufReader::new(client_read), client_write);
+    let mut client = Client::new(client_side);
     let value: serde_json::Value = client.call("sum", json!({"a": 1})).await.unwrap();
     assert_eq!(value, json!({"total": 2}));
     server.await.unwrap();
@@ -44,7 +43,6 @@ async fn call_sends_request_and_parses_result() {
 #[tokio::test]
 async fn call_handles_protocol_and_server_errors() {
     let (client_side, server_side) = duplex(512);
-    let (client_read, client_write) = tokio::io::split(client_side);
     let (mut server_read, mut server_write) = tokio::io::split(server_side);
 
     let server = tokio::spawn(async move {
@@ -68,7 +66,7 @@ async fn call_handles_protocol_and_server_errors() {
         server_write.write_all(b"\n").await.unwrap();
     });
 
-    let mut client = Client::new(BufReader::new(client_read), client_write);
+    let mut client = Client::new(client_side);
     assert!(matches!(
         client.call::<_, serde_json::Value>("sum", json!({})).await,
         Err(Error::Protocol("unexpected JSON-RPC id"))
@@ -76,7 +74,6 @@ async fn call_handles_protocol_and_server_errors() {
     server.await.unwrap();
 
     let (client_side, server_side) = duplex(512);
-    let (client_read, client_write) = tokio::io::split(client_side);
     let (_server_read, mut server_write) = tokio::io::split(server_side);
     let server = tokio::spawn(async move {
         server_write
@@ -86,7 +83,7 @@ async fn call_handles_protocol_and_server_errors() {
         server_write.write_all(b"\n").await.unwrap();
     });
 
-    let mut client = Client::new(BufReader::new(client_read), client_write);
+    let mut client = Client::new(client_side);
     assert!(matches!(
         client.call::<_, serde_json::Value>("sum", json!({})).await,
         Err(Error::Rpc { message, .. }) if message == "boom"
@@ -97,7 +94,6 @@ async fn call_handles_protocol_and_server_errors() {
 #[tokio::test]
 async fn call_errors_when_response_is_missing() {
     let (client_side, server_side) = duplex(64);
-    let (client_read, client_write) = tokio::io::split(client_side);
     let server = tokio::spawn(async move {
         let mut server_side = server_side;
         let mut request = Vec::new();
@@ -113,7 +109,7 @@ async fn call_errors_when_response_is_missing() {
             }
         }
     });
-    let mut client = Client::new(BufReader::new(client_read), client_write);
+    let mut client = Client::new(client_side);
 
     let err = client
         .call::<_, serde_json::Value>("sum", json!({}))
