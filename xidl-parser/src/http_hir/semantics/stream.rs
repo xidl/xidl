@@ -3,6 +3,9 @@ use serde::{Deserialize, Serialize};
 
 use super::annotations::{annotation_name, annotation_params, normalize_annotation_params};
 
+#[cfg(test)]
+mod tests;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum HttpStreamKind {
     Server,

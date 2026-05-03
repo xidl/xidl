@@ -1,6 +1,9 @@
 use crate::hir;
 use convert_case::{Case, Casing};
 
+#[cfg(test)]
+mod tests;
+
 pub(super) fn parse_string_array(raw: &str) -> Vec<String> {
     let trimmed = raw.trim();
     let unquoted = trim_quotes(trimmed).unwrap_or_else(|| trimmed.to_string());

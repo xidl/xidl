@@ -5,6 +5,9 @@ use super::semantics::{annotation_name, annotation_params, normalize_annotation_
 use super::validate::HttpParamDirection;
 use super::{HttpHirResult, HttpMethod, HttpParamKind, HttpRoute};
 
+#[cfg(test)]
+mod tests;
+
 #[derive(Clone)]
 pub(super) struct SourceBinding {
     pub(super) source: HttpParamKind,
