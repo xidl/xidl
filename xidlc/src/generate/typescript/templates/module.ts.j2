@@ -1,3 +1,5 @@
 export namespace {{ ident }} {
-    {{ body }}
+    {%- for block in blocks %}
+        {{- block }}
+    {%- endfor %}
 }

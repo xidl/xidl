@@ -12,12 +12,12 @@ impl RustAxumRender for hir::ModuleDcl {
         let defs = self.definition.iter().collect::<Vec<_>>();
         let module_path = vec![self.ident.clone()];
         let registry = build_type_registry(&defs, &module_path);
-        let body = render_module_body_with_path(&defs, renderer, &module_path, &registry)?;
+        let definitions = render_module_body_with_path(&defs, renderer, &module_path, &registry)?;
         let rendered = renderer.render_template(
             "module.rs.j2",
             &json!({
                 "ident": rust_ident(&self.ident),
-                "body": body,
+                "definitions": definitions,
             }),
         )?;
         Ok(RustAxumRenderOutput {
@@ -43,7 +43,7 @@ impl RustAxumRender for hir::Definition {
 pub(crate) fn render_module_body(
     defs: &[&hir::Definition],
     renderer: &RustAxumRenderer,
-) -> IdlcResult<String> {
+) -> IdlcResult<Vec<String>> {
     let registry = build_type_registry(defs, &[]);
     render_module_body_with_path(defs, renderer, &[], &registry)
 }
@@ -53,10 +53,10 @@ fn render_module_body_with_path(
     renderer: &RustAxumRenderer,
     module_path: &[String],
     registry: &TypeRegistry,
-) -> IdlcResult<String> {
+) -> IdlcResult<Vec<String>> {
     let mut out = Vec::new();
     let mut module_order = Vec::new();
-    let mut module_map: HashMap<String, Vec<String>> = HashMap::new();
+    let mut module_map: HashMap<String, Vec<Vec<String>>> = HashMap::new();
 
     for def in defs {
         match def {
@@ -68,8 +68,9 @@ fn render_module_body_with_path(
                 let defs = module.definition.iter().collect::<Vec<_>>();
                 let mut next_path = module_path.to_vec();
                 next_path.push(module.ident.clone());
-                let body = render_module_body_with_path(&defs, renderer, &next_path, registry)?;
-                entry.push(body);
+                let definitions =
+                    render_module_body_with_path(&defs, renderer, &next_path, registry)?;
+                entry.push(definitions);
             }
             hir::Definition::InterfaceDcl(interface) => {
                 let rendered =
@@ -82,16 +83,16 @@ fn render_module_body_with_path(
 
     for name in module_order {
         let modules = module_map.remove(&name).unwrap_or_default();
-        let body = modules.join("\n");
+        let definitions = modules.into_iter().flatten().collect::<Vec<_>>();
         let rendered = renderer.render_template(
             "module.rs.j2",
             &serde_json::json!({
                 "ident": crate::generate::rust::util::rust_ident(&name),
-                "body": &body,
+                "definitions": &definitions,
             }),
         )?;
         out.push(rendered);
     }
 
-    Ok(out.join("\n"))
+    Ok(out)
 }

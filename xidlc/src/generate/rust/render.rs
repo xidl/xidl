@@ -13,6 +13,17 @@ pub struct RustRenderOutput {
     pub source: Vec<String>,
 }
 
+#[derive(Serialize)]
+struct RustModuleTemplate<'a> {
+    ident: String,
+    definitions: &'a [String],
+}
+
+#[derive(Serialize)]
+struct RustSpecTemplate<'a> {
+    definitions: &'a [String],
+}
+
 impl RustRenderOutput {
     pub fn empty() -> Self {
         Self::default()
@@ -73,23 +84,18 @@ impl RustRenderer {
             .map(|rendered| RustRenderOutput::default().push_source(rendered))
     }
 
-    pub fn render_module(&self, ident: &str, body: &str) -> IdlcResult<String> {
+    pub fn render_module(&self, ident: &str, definitions: &[String]) -> IdlcResult<String> {
         self.render_template(
             "module.rs.j2",
-            &serde_json::json!({
-                "ident": crate::generate::rust::util::rust_ident(ident),
-                "body": body,
-            }),
+            &RustModuleTemplate {
+                ident: crate::generate::rust::util::rust_ident(ident),
+                definitions,
+            },
         )
     }
 
     pub fn render_spec(&self, definitions: &[String]) -> IdlcResult<String> {
-        self.render_template(
-            "spec.rs.j2",
-            &serde_json::json!({
-                "definitions": definitions,
-            }),
-        )
+        self.render_template("spec.rs.j2", &RustSpecTemplate { definitions })
     }
 
     pub fn enrich_ctx(&self, mut ctx: serde_json::Value, doc: &[String]) -> serde_json::Value {

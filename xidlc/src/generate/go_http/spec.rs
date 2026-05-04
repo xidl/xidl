@@ -10,13 +10,17 @@ pub(crate) fn render_spec(
     http_hir: &HttpHirDocument,
 ) -> IdlcResult<String> {
     let renderer = GoHttpRenderer::new()?;
-    let mut out = String::new();
+    let mut blocks = Vec::new();
     for def in &spec.0 {
-        render_definition(&mut out, def, &[], &renderer, http_hir)?;
+        let mut block = String::new();
+        render_definition(&mut block, def, &[], &renderer, http_hir)?;
+        if !block.is_empty() {
+            blocks.push(block);
+        }
     }
     renderer.render_spec(&GoHttpRenderOutput {
         package_name: package_name.to_string(),
-        body: out,
+        blocks,
     })
 }
 

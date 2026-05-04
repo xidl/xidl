@@ -10,8 +10,8 @@ use xidl_parser::hir;
 impl RustRender for hir::ModuleDcl {
     fn render(&self, renderer: &RustRenderer) -> IdlcResult<RustRenderOutput> {
         let defs = self.definition.iter().collect::<Vec<_>>();
-        let body = render_module_body(&defs, renderer)?;
-        let rendered = renderer.render_module(&self.ident, &body)?;
+        let definitions = render_module_body(&defs, renderer)?;
+        let rendered = renderer.render_module(&self.ident, &definitions)?;
         Ok(RustRenderOutput::default().push_source(rendered))
     }
 }
@@ -33,7 +33,7 @@ impl RustRender for hir::Definition {
 pub(crate) fn render_module_body(
     defs: &[&hir::Definition],
     renderer: &RustRenderer,
-) -> IdlcResult<String> {
+) -> IdlcResult<Vec<String>> {
     DefinitionRenderContext::root(renderer).render_module_body(defs)
 }
 
@@ -52,10 +52,10 @@ impl<'a> DefinitionRenderContext<'a> {
         }
     }
 
-    fn render_module_body(&mut self, defs: &[&hir::Definition]) -> IdlcResult<String> {
+    fn render_module_body(&mut self, defs: &[&hir::Definition]) -> IdlcResult<Vec<String>> {
         let mut out = Vec::new();
         let mut module_order = Vec::new();
-        let mut module_map: HashMap<String, Vec<String>> = HashMap::new();
+        let mut module_map: HashMap<String, Vec<Vec<String>>> = HashMap::new();
 
         for def in defs {
             match def {
@@ -68,8 +68,7 @@ impl<'a> DefinitionRenderContext<'a> {
                         Vec::new()
                     });
                     let defs = module.definition.iter().collect::<Vec<_>>();
-                    let body = self.for_module(&module.ident).render_module_body(&defs)?;
-                    entry.push(body);
+                    entry.push(self.for_module(&module.ident).render_module_body(&defs)?);
                 }
                 other => {
                     let rendered = self.render_definition(other)?;
@@ -80,10 +79,11 @@ impl<'a> DefinitionRenderContext<'a> {
 
         for name in module_order {
             let modules = module_map.remove(&name).unwrap_or_default();
-            out.push(self.renderer.render_module(&name, &modules.join("\n"))?);
+            let definitions = modules.into_iter().flatten().collect::<Vec<_>>();
+            out.push(self.renderer.render_module(&name, &definitions)?);
         }
 
-        Ok(out.join("\n"))
+        Ok(out)
     }
 
     fn for_module(&self, ident: &str) -> Self {

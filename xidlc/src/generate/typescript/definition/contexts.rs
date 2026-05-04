@@ -15,7 +15,7 @@ pub(crate) struct ClientFileContext {
 #[derive(Serialize)]
 pub(crate) struct ModuleContext {
     pub(crate) ident: String,
-    pub(crate) body: String,
+    pub(crate) blocks: Vec<String>,
 }
 
 #[derive(Serialize)]

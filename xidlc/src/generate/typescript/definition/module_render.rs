@@ -132,7 +132,7 @@ fn render_module_block(
         "module.ts.j2",
         &ModuleContext {
             ident,
-            body: indent_block(&body, 1),
+            blocks: vec![indent_block(&body, 1)],
         },
     )
 }

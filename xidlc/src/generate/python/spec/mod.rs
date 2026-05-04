@@ -17,7 +17,7 @@ use self::spec_render_types::{
 #[derive(Serialize)]
 struct PythonSpecTemplate {
     module_name: String,
-    body: String,
+    blocks: Vec<String>,
 }
 
 pub(crate) fn render_spec(
@@ -26,34 +26,62 @@ pub(crate) fn render_spec(
     _properties: &ParserProperties,
 ) -> IdlcResult<String> {
     let renderer = PythonRenderer::new()?;
-    let mut body = String::new();
+    let mut blocks = Vec::new();
     for def in &spec.0 {
-        render_definition(&mut body, def, &[])?;
+        render_definition(&mut blocks, def, &[])?;
     }
     renderer.render_template(
         "spec.py.j2",
         &PythonSpecTemplate {
             module_name: module_name.to_string(),
-            body,
+            blocks,
         },
     )
 }
 
-fn render_definition(out: &mut String, def: &hir::Definition, prefix: &[String]) -> IdlcResult<()> {
+fn render_definition(
+    out: &mut Vec<String>,
+    def: &hir::Definition,
+    prefix: &[String],
+) -> IdlcResult<()> {
     match def {
         hir::Definition::ModuleDcl(module) => {
             let mut next = prefix.to_vec();
             next.push(module.ident.clone());
-            writeln!(out, "# module {}", next.join(".")).unwrap();
+            let mut block = String::new();
+            writeln!(block, "# module {}", next.join(".")).unwrap();
+            out.push(block);
             for inner in &module.definition {
                 render_definition(out, inner, &next)?;
             }
         }
-        hir::Definition::ConstDcl(const_dcl) => render_const(out, const_dcl),
-        hir::Definition::ExceptDcl(except_dcl) => render_exception(out, except_dcl),
-        hir::Definition::InterfaceDcl(interface) => render_interface(out, interface),
-        hir::Definition::TypeDcl(type_dcl) => render_type_decl(out, type_dcl),
-        hir::Definition::ConstrTypeDcl(constr) => render_constr_type(out, constr),
+        hir::Definition::ConstDcl(const_dcl) => {
+            let mut block = String::new();
+            render_const(&mut block, const_dcl);
+            out.push(block);
+        }
+        hir::Definition::ExceptDcl(except_dcl) => {
+            let mut block = String::new();
+            render_exception(&mut block, except_dcl);
+            out.push(block);
+        }
+        hir::Definition::InterfaceDcl(interface) => {
+            let mut block = String::new();
+            render_interface(&mut block, interface);
+            if !block.is_empty() {
+                out.push(block);
+            }
+        }
+        hir::Definition::TypeDcl(type_dcl) => {
+            let mut block = String::new();
+            render_type_decl(&mut block, type_dcl);
+            out.push(block);
+        }
+        hir::Definition::ConstrTypeDcl(constr) => {
+            let mut block = String::new();
+            render_constr_type(&mut block, constr);
+            out.push(block);
+        }
         hir::Definition::Pragma(_) => {}
     }
     Ok(())

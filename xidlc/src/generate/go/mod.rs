@@ -87,11 +87,11 @@ impl GoRenderContext {
         }
     }
 
-    pub(crate) fn finish(self) -> GoRenderOutput {
+    pub(crate) fn finish(self, blocks: Vec<String>) -> GoRenderOutput {
         GoRenderOutput {
             package_name: self.package_name,
             uses_context: self.state.uses_context,
-            body: self.body,
+            blocks,
         }
     }
 }
@@ -100,7 +100,7 @@ impl GoRenderContext {
 pub struct GoRenderOutput {
     package_name: String,
     uses_context: bool,
-    body: String,
+    blocks: Vec<String>,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]

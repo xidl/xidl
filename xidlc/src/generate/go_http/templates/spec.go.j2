@@ -19,4 +19,4 @@ _ = url.Values{}
 _ = strings.TrimSpace
 )
 
-{{ body }}
+{% for block in blocks %}{{ block }}{%- endfor %}

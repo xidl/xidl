@@ -13,14 +13,20 @@ use xidl_parser::hir;
 use xidl_parser::http_hir::semantics::HttpStreamKind;
 use xidl_parser::http_hir::{HttpHirDocument, HttpOperation, HttpOperationSource};
 
-use self::spec_context::build_method;
+use self::spec_context::{ParamSource, build_method};
 use self::spec_render::{render_endpoint_helper, render_method_types, render_route_builder};
 use self::spec_types::{py_field_name, py_type_name};
 
 #[derive(Serialize)]
 struct PythonHttpSpecTemplate {
     module_name: String,
-    body: String,
+    imports: PythonHttpImports,
+    blocks: Vec<String>,
+}
+
+#[derive(Serialize)]
+struct PythonHttpImports {
+    read_json_value: bool,
 }
 
 pub(crate) fn render_spec(
@@ -29,32 +35,37 @@ pub(crate) fn render_spec(
     http_hir: &HttpHirDocument,
 ) -> IdlcResult<String> {
     let renderer = PythonHttpRenderer::new()?;
-    let mut body = String::new();
-    render_definitions(&mut body, &spec.0, &[], http_hir)?;
+    let mut blocks = Vec::new();
+    let mut imports = PythonHttpImports {
+        read_json_value: false,
+    };
+    render_definitions(&mut blocks, &spec.0, &[], http_hir, &mut imports)?;
     renderer.render_template(
         "spec.py.j2",
         &PythonHttpSpecTemplate {
             module_name: module_name.to_string(),
-            body,
+            imports,
+            blocks,
         },
     )
 }
 
 fn render_definitions(
-    out: &mut String,
+    out: &mut Vec<String>,
     defs: &[hir::Definition],
     module_path: &[String],
     http_hir: &HttpHirDocument,
+    imports: &mut PythonHttpImports,
 ) -> IdlcResult<()> {
     for def in defs {
         match def {
             hir::Definition::ModuleDcl(module) => {
                 let mut next = module_path.to_vec();
                 next.push(module.ident.clone());
-                render_definitions(out, &module.definition, &next, http_hir)?;
+                render_definitions(out, &module.definition, &next, http_hir, imports)?;
             }
             hir::Definition::InterfaceDcl(interface) => {
-                render_interface(out, interface, module_path, http_hir)?
+                render_interface(out, interface, module_path, http_hir, imports)?
             }
             _ => {}
         }
@@ -63,10 +74,11 @@ fn render_definitions(
 }
 
 fn render_interface(
-    out: &mut String,
+    out: &mut Vec<String>,
     interface: &hir::InterfaceDcl,
     module_path: &[String],
     http_hir: &HttpHirDocument,
+    imports: &mut PythonHttpImports,
 ) -> IdlcResult<()> {
     let hir::InterfaceDclInner::InterfaceDef(def) = &interface.decl else {
         return Ok(());
@@ -83,52 +95,63 @@ fn render_interface(
         .map(|operation| build_method(operation, &interface_name))
         .collect::<IdlcResult<Vec<_>>>()?;
 
+    imports.read_json_value |= methods.iter().any(method_uses_read_json_value);
+
     validate_route_bindings(&methods)?;
 
+    let mut block = String::new();
     for method in &methods {
-        render_method_types(out, method)?;
+        render_method_types(&mut block, method)?;
     }
 
-    writeln!(out, "class {}Service(abc.ABC):", interface_name).unwrap();
+    writeln!(block, "class {}Service(abc.ABC):", interface_name).unwrap();
     if methods.is_empty() {
-        writeln!(out, "    pass").unwrap();
+        writeln!(block, "    pass").unwrap();
     } else {
         for method in &methods {
-            writeln!(out, "    @abc.abstractmethod").unwrap();
+            writeln!(block, "    @abc.abstractmethod").unwrap();
             writeln!(
-                out,
+                block,
                 "    async def {}(self, request: {}) -> {}:",
                 method.method_name, method.request_type, method.response_type
             )
             .unwrap();
-            writeln!(out, "        raise NotImplementedError").unwrap();
-            writeln!(out).unwrap();
+            writeln!(block, "        raise NotImplementedError").unwrap();
+            writeln!(block).unwrap();
         }
     }
 
     for method in &methods {
-        render_endpoint_helper(out, &interface_name, method)?;
-        render_route_builder(out, &interface_name, method)?;
+        render_endpoint_helper(&mut block, &interface_name, method)?;
+        render_route_builder(&mut block, &interface_name, method)?;
     }
 
     writeln!(
-        out,
+        block,
         "def {}_routes(service: {}Service) -> list[Route]:",
         py_field_name(&def.header.ident),
         interface_name
     )
     .unwrap();
     if methods.is_empty() {
-        writeln!(out, "    return []").unwrap();
+        writeln!(block, "    return []").unwrap();
     } else {
-        writeln!(out, "    return [").unwrap();
+        writeln!(block, "    return [").unwrap();
         for method in &methods {
-            writeln!(out, "        {}(service),", method.route_builder_name).unwrap();
+            writeln!(block, "        {}(service),", method.route_builder_name).unwrap();
         }
-        writeln!(out, "    ]").unwrap();
+        writeln!(block, "    ]").unwrap();
     }
-    writeln!(out).unwrap();
+    writeln!(block).unwrap();
+    out.push(block);
     Ok(())
+}
+
+fn method_uses_read_json_value(method: &spec_context::MethodContext) -> bool {
+    method
+        .request_params
+        .iter()
+        .any(|param| matches!(param.source, ParamSource::Body) && param.flatten)
 }
 
 fn validate_route_bindings(methods: &[spec_context::MethodContext]) -> IdlcResult<()> {
