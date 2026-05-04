@@ -1,4 +1,6 @@
 mod interface;
+mod model;
+mod server;
 mod spec;
 
 use crate::error::{IdlcError, IdlcResult};
@@ -15,13 +17,17 @@ pub fn generate(
     input_path: &Path,
     props: HashMap<String, serde_json::Value>,
 ) -> IdlcResult<Vec<Artifact>> {
-    if !props
+    let enable_client = props
         .get("enable_client")
         .and_then(serde_json::Value::as_bool)
-        .unwrap_or(true)
-    {
+        .unwrap_or(true);
+    let enable_server = props
+        .get("enable_server")
+        .and_then(serde_json::Value::as_bool)
+        .unwrap_or(true);
+    if !enable_client && !enable_server {
         return Err(IdlcError::rpc(
-            "typescript-http currently supports client generation only",
+            "typescript-http requires enable_client or enable_server",
         ));
     }
 
@@ -40,11 +46,19 @@ pub fn generate(
             path: format!("{file_name}.iface.zod.ts"),
             content: output.zod,
         }),
-        Artifact::new_file(ArtifactFile {
+    ];
+    if enable_client {
+        artifacts.push(Artifact::new_file(ArtifactFile {
             path: format!("{file_name}.client.ts"),
             content: output.client,
-        }),
-    ];
+        }));
+    }
+    if enable_server {
+        artifacts.push(Artifact::new_file(ArtifactFile {
+            path: format!("{file_name}.server.ts"),
+            content: output.server,
+        }));
+    }
 
     let non_interface = strip_interfaces(spec);
     if !non_interface.0.is_empty() {
@@ -73,7 +87,7 @@ impl crate::jsonrpc::Codegen for TypescriptHttpCodegen {
             "expand_interface" => false,
             "hir_kind" => "http",
             "enable_client" => true,
-            "enable_server" => false
+            "enable_server" => true
         })
     }
 

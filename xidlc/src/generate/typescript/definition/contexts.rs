@@ -141,7 +141,7 @@ pub(crate) struct ClientMethodContext {
     pub(crate) doc: Vec<String>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub(crate) struct ClientParamContext {
     pub(crate) name: String,
     pub(crate) ty: String,
