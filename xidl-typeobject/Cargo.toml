@@ -13,5 +13,4 @@ repository.workspace = true
 workspace = true
 
 [dependencies]
-xidl-xcdr = { workspace = true }
 md5.workspace = true

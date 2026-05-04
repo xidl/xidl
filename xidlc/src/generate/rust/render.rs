@@ -45,14 +45,10 @@ pub trait RustRender {
 
 pub struct RustRenderer {
     env: Environment<'static>,
-    typeobject_path: String,
 }
 
 impl RustRenderer {
-    pub fn new(
-        typeobject_path: String,
-        attribute: HashMap<String, serde_json::Value>,
-    ) -> IdlcResult<Self> {
+    pub fn new(attribute: HashMap<String, serde_json::Value>) -> IdlcResult<Self> {
         let mut env = Environment::new();
         env.set_loader(|name| load_template(name).map(Some));
         env.add_function("md5_14", |value: String| md5_prefix(value.as_bytes(), 14));
@@ -61,10 +57,7 @@ impl RustRenderer {
         env.add_filter("rustfmt", rust_format_filter);
         env.add_filter("fmt_timestamp", format_timestamp_filter);
         env.add_global("opt", minijinja::Value::from_serialize(&attribute));
-        Ok(Self {
-            env,
-            typeobject_path,
-        })
+        Ok(Self { env })
     }
 
     pub fn render_template<T: Serialize>(&self, template: &str, ctx: &T) -> IdlcResult<String> {
@@ -100,10 +93,6 @@ impl RustRenderer {
 
     pub fn enrich_ctx(&self, mut ctx: serde_json::Value, doc: &[String]) -> serde_json::Value {
         if let Some(obj) = ctx.as_object_mut() {
-            obj.insert(
-                "typeobject_path".to_string(),
-                serde_json::json!(self.typeobject_path()),
-            );
             obj.insert("doc".to_string(), serde_json::json!(doc));
         }
         ctx
@@ -130,10 +119,6 @@ impl RustRenderer {
             obj.insert("module_path".to_string(), serde_json::json!(module_path));
         }
         ctx
-    }
-
-    pub fn typeobject_path(&self) -> &str {
-        self.typeobject_path.as_str()
     }
 }
 

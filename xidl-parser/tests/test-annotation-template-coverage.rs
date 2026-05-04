@@ -6,7 +6,7 @@ fn parses_raw_custom_and_doc_annotations() {
         r#"
         /// doc "quoted"
         @foo::bar(key=1)
-        @data-representation([XCDR2])
+        @data-representation([XML])
         struct Item {
             /// field docs
             @id(7)

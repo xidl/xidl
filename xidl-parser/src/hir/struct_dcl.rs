@@ -27,16 +27,6 @@ pub struct Member {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Default(pub ConstExpr);
 
-impl StructDcl {
-    pub fn serialize_kind(&self, config: &SerializeConfig) -> SerializeKind {
-        if self.member.iter().any(Member::is_optional) {
-            config.resolve(Extensibility::Mutable)
-        } else {
-            config.resolve_for_annotations(&self.annotations)
-        }
-    }
-}
-
 impl Member {
     pub fn is_optional(&self) -> bool {
         self.annotations.iter().any(|annotation| match annotation {

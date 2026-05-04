@@ -4,9 +4,8 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use serde_json::json;
 use xidl_parser::hir::{
-    Annotation, AnnotationParams, Definition, Extensibility, Pragma, SerializeConfig,
-    SerializeKind, SerializeVersion, Specification, annotation_id_value, const_expr_to_i64,
-    extensibility_from_annotations,
+    Annotation, AnnotationParams, Definition, Pragma, Specification, annotation_id_value,
+    const_expr_to_i64,
 };
 use xidl_parser::parser::{normalize_source_for_tree_sitter, parser_text};
 use xidl_parser::typed_ast::{
@@ -133,8 +132,6 @@ fn hir_parses_pragmas_and_include_errors() {
     write_file(
         &pragma,
         r#"
-        #pragma xidlc XCDR2
-        #pragma xidlc serialize(PL_CDR)
         #pragma xidlc package "demo.pkg"
         #pragma xidlc openapi version "1.2.3"
         #pragma xidlc service "https://example.test" "Demo service"
@@ -147,27 +144,19 @@ fn hir_parses_pragmas_and_include_errors() {
     let hir = parse_hir_with_path(&pragma).expect("pragma parse should succeed");
     assert!(matches!(
         hir.0[0],
-        Definition::Pragma(Pragma::XidlcVersion(SerializeVersion::Xcdr2))
-    ));
-    assert!(matches!(
-        hir.0[1],
-        Definition::Pragma(Pragma::XidlcSerialize(SerializeKind::PlCdr))
-    ));
-    assert!(matches!(
-        hir.0[2],
         Definition::Pragma(Pragma::XidlcPackage(ref value)) if value == "demo.pkg"
     ));
     assert!(matches!(
-        hir.0[3],
+        hir.0[1],
         Definition::Pragma(Pragma::XidlcOpenApiVersion(ref value)) if value == "1.2.3"
     ));
     assert!(matches!(
-        hir.0[4],
+        hir.0[2],
         Definition::Pragma(Pragma::XidlcOpenApiService { ref base_url, ref description })
             if base_url == "https://example.test" && description.as_deref() == Some("Demo service")
     ));
     assert!(matches!(
-        hir.0[5],
+        hir.0[3],
         Definition::Pragma(Pragma::Custom(ref value))
             if value.directive == "#pragma" && value.argument.as_deref() == Some("vendor keep-me")
     ));
@@ -180,7 +169,7 @@ fn hir_parses_pragmas_and_include_errors() {
 }
 
 #[test]
-fn serialize_config_and_expr_helpers_cover_resolution_branches() {
+fn expr_and_annotation_helpers_cover_resolution_branches() {
     let annotations = vec![
         Annotation::Appendable,
         Annotation::Builtin {
@@ -193,35 +182,6 @@ fn serialize_config_and_expr_helpers_cover_resolution_branches() {
     ];
 
     assert_eq!(annotation_id_value(&annotations), Some(42));
-    assert!(matches!(
-        extensibility_from_annotations(&annotations),
-        Extensibility::Mutable
-    ));
-
-    let mut config = SerializeConfig::default();
-    assert!(matches!(
-        config.resolve(Extensibility::None),
-        SerializeKind::Cdr
-    ));
-    config.apply_pragma(Pragma::XidlcVersion(SerializeVersion::Xcdr1));
-    assert!(matches!(
-        config.resolve(Extensibility::Mutable),
-        SerializeKind::PlCdr
-    ));
-    assert!(matches!(
-        config.resolve(Extensibility::Appendable),
-        SerializeKind::Cdr
-    ));
-    assert!(matches!(
-        config.resolve(Extensibility::None),
-        SerializeKind::PlainCdr
-    ));
-    config.apply_pragma(Pragma::XidlcSerialize(SerializeKind::DelimitedCdr));
-    assert!(matches!(
-        config.resolve_for_annotations(&annotations),
-        SerializeKind::DelimitedCdr
-    ));
-
     assert_eq!(
         const_expr_to_i64(&int_expr(IntegerLiteral::BinNumber("0b1_010".to_string())).into()),
         Some(10)

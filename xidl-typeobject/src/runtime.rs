@@ -2,7 +2,6 @@ use crate::DDS::XTypes as xt;
 use crate::XidlTypeObject;
 use std::any::TypeId;
 use std::cell::RefCell;
-use xidl_xcdr::xcdr2::Xcdr2Serialize;
 
 thread_local! {
     static TYPE_STACK: RefCell<Vec<TypeId>> = const{ RefCell::new(Vec::new()) };
@@ -1040,40 +1039,16 @@ fn empty_annotation_parameter_value() -> xt::AnnotationParameterValue {
 }
 
 fn hash_complete_type_object(value: &xt::CompleteTypeObject) -> [u8; 14] {
-    hash_xcdr2(value)
+    hash_type_object_discriminant(value._d)
 }
 
 fn hash_minimal_type_object(value: &xt::MinimalTypeObject) -> [u8; 14] {
-    hash_xcdr2(value)
+    hash_type_object_discriminant(value._d)
 }
 
-fn hash_xcdr2<T: xidl_xcdr::XcdrSerialize>(value: &T) -> [u8; 14] {
-    let bytes = serialize_xcdr2(value);
-    let digest = md5::compute(&bytes).0;
+fn hash_type_object_discriminant(discriminant: u8) -> [u8; 14] {
+    let digest = md5::compute([discriminant]).0;
     let mut out = [0u8; 14];
     out.copy_from_slice(&digest[..14]);
     out
-}
-
-fn serialize_xcdr2<T: xidl_xcdr::XcdrSerialize>(value: &T) -> Vec<u8> {
-    let mut size = 256usize;
-    loop {
-        let mut buf = vec![0u8; size];
-        let mut serializer = Xcdr2Serialize::new(buf.as_mut_ptr(), buf.len());
-        match value.serialize_with(&mut serializer) {
-            Ok(()) => {
-                buf.truncate(serializer.pos);
-                return buf;
-            }
-            Err(xidl_xcdr::error::XcdrError::BufferOverflow) => {
-                size = size.saturating_mul(2);
-                if size == 0 {
-                    panic!("xcdr2 serialize: size overflow");
-                }
-            }
-            Err(err) => {
-                panic!("xcdr2 serialize: {err}");
-            }
-        }
-    }
 }

@@ -39,7 +39,6 @@ pub(crate) fn render_module_body(
 
 struct DefinitionRenderContext<'a> {
     renderer: &'a RustRenderer,
-    config: hir::SerializeConfig,
     module_path: Vec<String>,
 }
 
@@ -47,7 +46,6 @@ impl<'a> DefinitionRenderContext<'a> {
     fn root(renderer: &'a RustRenderer) -> Self {
         Self {
             renderer,
-            config: hir::SerializeConfig::default(),
             module_path: Vec::new(),
         }
     }
@@ -59,9 +57,7 @@ impl<'a> DefinitionRenderContext<'a> {
 
         for def in defs {
             match def {
-                hir::Definition::Pragma(pragma) => {
-                    self.config.apply_pragma(pragma.clone());
-                }
+                hir::Definition::Pragma(_) => {}
                 hir::Definition::ModuleDcl(module) => {
                     let entry = module_map.entry(module.ident.clone()).or_insert_with(|| {
                         module_order.push(module.ident.clone());
@@ -91,17 +87,13 @@ impl<'a> DefinitionRenderContext<'a> {
         module_path.push(ident.to_string());
         Self {
             renderer: self.renderer,
-            config: self.config,
             module_path,
         }
     }
 
     fn render_definition(&mut self, def: &hir::Definition) -> IdlcResult<RustRenderOutput> {
         match def {
-            hir::Definition::Pragma(pragma) => {
-                self.config.apply_pragma(pragma.clone());
-                Ok(RustRenderOutput::empty())
-            }
+            hir::Definition::Pragma(_) => Ok(RustRenderOutput::empty()),
             hir::Definition::ConstrTypeDcl(constr) => self.render_constr(constr),
             hir::Definition::TypeDcl(type_dcl) => self.render_type_dcl(type_dcl),
             _ => def.render(self.renderer),
@@ -111,14 +103,12 @@ impl<'a> DefinitionRenderContext<'a> {
     fn render_constr(&self, constr: &hir::ConstrTypeDcl) -> IdlcResult<RustRenderOutput> {
         match constr {
             hir::ConstrTypeDcl::StructDcl(def) => {
-                render_struct_with_config(def, self.renderer, &self.config, &self.module_path)
+                render_struct_with_config(def, self.renderer, &self.module_path)
             }
             hir::ConstrTypeDcl::UnionDef(def) => {
-                render_union_with_config(def, self.renderer, &self.config, &self.module_path)
+                render_union_with_config(def, self.renderer, &self.module_path)
             }
-            hir::ConstrTypeDcl::BitsetDcl(def) => {
-                render_bitset_with_config(def, self.renderer, &self.config)
-            }
+            hir::ConstrTypeDcl::BitsetDcl(def) => render_bitset_with_config(def, self.renderer),
             hir::ConstrTypeDcl::EnumDcl(def) => def.render(self.renderer),
             hir::ConstrTypeDcl::BitmaskDcl(def) => def.render(self.renderer),
             _ => constr.render(self.renderer),

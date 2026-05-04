@@ -8,7 +8,6 @@ members = [
   "xidl-rust-axum",
   "xidlc",
   "xidl-parser",
-  "xidl-xcdr",
   "xidl-typeobject",
 ]
 
@@ -28,7 +27,6 @@ strip = true
 [workspace.dependencies]
 xidl-parser = { version = "0.53.0", path = "xidl-parser" }
 xidl-parser-derive = { version = "0.53.0", path = "xidl-parser-derive" }
-xidl-xcdr = { version = "0.53.0", path = "xidl-xcdr" }
 xidl-jsonrpc = { version = "0.53.0", path = "xidl-jsonrpc" }
 xidl-rust-axum = { version = "0.53.0", path = "xidl-rust-axum" }
 xidl-build = { version = "0.53.0", path = "xidl-build" }

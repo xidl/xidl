@@ -21,5 +21,5 @@ pub use self::util_derives::{
 #[allow(unused_imports)]
 pub use self::util_types::{
     bitfield_type, render_const, rust_const_type, rust_ident, rust_integer_type, rust_literal,
-    rust_scoped_name, rust_switch_type, rust_type, serialize_kind_name,
+    rust_scoped_name, rust_switch_type, rust_type,
 };

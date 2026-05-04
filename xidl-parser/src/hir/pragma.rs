@@ -1,11 +1,8 @@
-use super::{SerializeKind, SerializeVersion};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum Pragma {
     Custom(CustomPragma),
-    XidlcSerialize(SerializeKind),
-    XidlcVersion(SerializeVersion),
     XidlcPackage(String),
     XidlcOpenApiVersion(String),
     XidlcOpenApiService {
@@ -41,12 +38,6 @@ pub(crate) fn parse_xidlc_pragma(call: &crate::typed_ast::PreprocCall) -> Option
         return Some(Pragma::Custom(CustomPragma::from(call)));
     };
     let rest = parts.collect::<Vec<_>>().join(" ");
-    if token.eq_ignore_ascii_case("XCDR1") {
-        return Some(Pragma::XidlcVersion(SerializeVersion::Xcdr1));
-    }
-    if token.eq_ignore_ascii_case("XCDR2") {
-        return Some(Pragma::XidlcVersion(SerializeVersion::Xcdr2));
-    }
     if token.eq_ignore_ascii_case("package") {
         return Some(if rest.is_empty() {
             Pragma::Custom(CustomPragma::from(call))
@@ -78,11 +69,7 @@ pub(crate) fn parse_xidlc_pragma(call: &crate::typed_ast::PreprocCall) -> Option
         );
     }
 
-    token
-        .strip_prefix("serialize(")
-        .and_then(|value| value.strip_suffix(')'))
-        .and_then(parse_serialize_pragma)
-        .or_else(|| Some(Pragma::Custom(CustomPragma::from(call))))
+    Some(Pragma::Custom(CustomPragma::from(call)))
 }
 
 pub(crate) fn trim_pragma_value(value: &str) -> String {
@@ -115,17 +102,6 @@ fn parse_nested_openapi_pragma(rest: &str) -> Option<Pragma> {
     None
 }
 
-fn parse_serialize_pragma(value: &str) -> Option<Pragma> {
-    let value = value.trim();
-    if value.eq_ignore_ascii_case("XCDR1") {
-        return Some(Pragma::XidlcVersion(SerializeVersion::Xcdr1));
-    }
-    if value.eq_ignore_ascii_case("XCDR2") {
-        return Some(Pragma::XidlcVersion(SerializeVersion::Xcdr2));
-    }
-    parse_serialize_kind(value).map(Pragma::XidlcSerialize)
-}
-
 fn parse_pragma_service(value: &str) -> Option<(String, Option<String>)> {
     let value = value.trim();
     if value.is_empty() {
@@ -143,24 +119,6 @@ fn parse_pragma_service(value: &str) -> Option<(String, Option<String>)> {
 
     let description = (!remainder.is_empty()).then(|| trim_pragma_value(remainder));
     Some((base_url, description))
-}
-
-fn parse_serialize_kind(value: &str) -> Option<SerializeKind> {
-    if value.eq_ignore_ascii_case("CDR") {
-        Some(SerializeKind::Cdr)
-    } else if value.eq_ignore_ascii_case("PLAIN_CDR") {
-        Some(SerializeKind::PlainCdr)
-    } else if value.eq_ignore_ascii_case("PL_CDR") {
-        Some(SerializeKind::PlCdr)
-    } else if value.eq_ignore_ascii_case("PLAIN_CDR2") {
-        Some(SerializeKind::PlainCdr2)
-    } else if value.eq_ignore_ascii_case("DELIMITED_CDR") {
-        Some(SerializeKind::DelimitedCdr)
-    } else if value.eq_ignore_ascii_case("PL_CDR2") {
-        Some(SerializeKind::PlCdr2)
-    } else {
-        None
-    }
 }
 
 impl From<&crate::typed_ast::PreprocCall> for CustomPragma {

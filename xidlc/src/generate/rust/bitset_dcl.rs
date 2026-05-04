@@ -1,7 +1,7 @@
 use crate::error::IdlcResult;
 use crate::generate::rust::util::{
     bitfield_type, render_const, rust_derive_info_with_extra,
-    rust_passthrough_attrs_from_annotations, rust_scoped_name, serialize_kind_name,
+    rust_passthrough_attrs_from_annotations, rust_scoped_name,
 };
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::doc_lines_from_annotations;
@@ -10,14 +10,13 @@ use xidl_parser::hir;
 
 impl RustRender for hir::BitsetDcl {
     fn render(&self, renderer: &RustRenderer) -> IdlcResult<RustRenderOutput> {
-        render_bitset_with_config(self, renderer, &hir::SerializeConfig::default())
+        render_bitset_with_config(self, renderer)
     }
 }
 
 pub(crate) fn render_bitset_with_config(
     def: &hir::BitsetDcl,
     renderer: &RustRenderer,
-    config: &hir::SerializeConfig,
 ) -> IdlcResult<RustRenderOutput> {
     let parent = def.parent.as_ref().map(rust_scoped_name);
     let fields = def
@@ -37,14 +36,12 @@ pub(crate) fn render_bitset_with_config(
             })
         })
         .collect::<Vec<_>>();
-    let serialize_kind = serialize_kind_name(def.serialize_kind(config));
     let derive = rust_derive_info_with_extra(&def.annotations, &def.annotations);
     let ctx = renderer.enrich_ctx(
         json!({
             "ident": crate::generate::rust::util::rust_ident(&def.ident),
             "parent": parent,
             "fields": fields,
-            "serialize_kind": serialize_kind,
             "derive": derive.all,
             "rust_attrs": rust_passthrough_attrs_from_annotations(&def.annotations),
         }),

@@ -14,28 +14,6 @@ description: "xidlc 扩展的 pragma 指令、作用域和覆盖规则。"
 
 ## 常见 pragma
 
-### 序列化版本
-
-```txt
-#pragma xidlc XCDR1
-#pragma xidlc XCDR2
-```
-
-也支持：
-
-```txt
-#pragma xidlc serialize(XCDR1)
-#pragma xidlc serialize(XCDR2)
-```
-
-### 显式序列化种类
-
-```txt
-#pragma xidlc serialize(CDR)
-#pragma xidlc serialize(PLAIN_CDR)
-#pragma xidlc serialize(PL_CDR)
-```
-
 ### OpenAPI 元数据
 
 ```txt
@@ -47,4 +25,3 @@ description: "xidlc 扩展的 pragma 指令、作用域和覆盖规则。"
 
 - 同类 pragma 按文件顺序生效，后写覆盖前写
 - `package` / `version` 只影响 `openapi`
-- `XCDR1`、`XCDR2` 与 `serialize(...)` 影响序列化配置

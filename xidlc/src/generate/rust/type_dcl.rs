@@ -58,18 +58,15 @@ pub(crate) fn render_typedef_with_config(
             }
         }
         hir::TypedefType::ConstrTypeDcl(constr) => {
-            let config = hir::SerializeConfig::default();
             let rendered = match constr {
                 hir::ConstrTypeDcl::StructDcl(def) => {
-                    render_struct_with_config(def, renderer, &config, module_path)?
+                    render_struct_with_config(def, renderer, module_path)?
                 }
                 hir::ConstrTypeDcl::UnionDef(def) => {
-                    render_union_with_config(def, renderer, &config, module_path)?
+                    render_union_with_config(def, renderer, module_path)?
                 }
                 hir::ConstrTypeDcl::EnumDcl(def) => def.render(renderer)?,
-                hir::ConstrTypeDcl::BitsetDcl(def) => {
-                    render_bitset_with_config(def, renderer, &config)?
-                }
+                hir::ConstrTypeDcl::BitsetDcl(def) => render_bitset_with_config(def, renderer)?,
                 hir::ConstrTypeDcl::BitmaskDcl(def) => def.render(renderer)?,
                 hir::ConstrTypeDcl::StructForwardDcl(_)
                 | hir::ConstrTypeDcl::UnionForwardDcl(_) => RustRenderOutput::default(),

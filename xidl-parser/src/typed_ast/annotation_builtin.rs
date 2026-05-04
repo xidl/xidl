@@ -154,10 +154,7 @@ pub enum TryConstructFailAction {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum DataRepresentationKind {
-    Xcdr,
-    Xcdr1,
     Xml,
-    Xcdr2,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -233,10 +230,7 @@ impl TryConstructFailAction {
 impl DataRepresentationKind {
     pub fn as_str(&self) -> &'static str {
         match self {
-            Self::Xcdr => "XCDR",
-            Self::Xcdr1 => "XCDR1",
             Self::Xml => "XML",
-            Self::Xcdr2 => "XCDR2",
         }
     }
 }

@@ -1,6 +1,4 @@
 /* dds-xtypes_typeobject.idl */
-// The types in this file shall be serialized with XCDR encoding version 2
-#pragma xidlc XCDR2
 module DDS {
     module XTypes {
         // ---------- Equivalence Kinds -------------------
@@ -104,8 +102,7 @@ module DDS {
         typedef string<TYPE_NAME_MAX_LENGTH> QualifiedTypeName;
         // Every type has an ID. Those of the primitive types are pre-defined.
         typedef octet PrimitiveTypeId;
-        // First 14 bytes of MD5 of the serialized TypeObject using XCDR
-        // version 2 with Little Endian encoding
+        // First 14 bytes of MD5 of the serialized TypeObject.
         typedef octet EquivalenceHash[14];
         // First 4 bytes of MD5 of of a member name converted to bytes
         // using UTF-8 encoding and without a 'nul' terminator.

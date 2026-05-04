@@ -85,7 +85,7 @@ fn parse_builtin_annotations_with_structured_args() {
         r#"
         @range(min=1, max=8)
         @topic("orders", DDS)
-        @data_representation(allowed_kinds = XCDR1 | XCDR2)
+        @data_representation(allowed_kinds = XML)
         struct S {};
         "#,
     )
@@ -128,7 +128,7 @@ fn parse_builtin_annotations_with_structured_args() {
     assert!(matches!(
         data_representation,
         BuiltinAnnotation::DataRepresentation { kinds }
-            if kinds == &[DataRepresentationKind::Xcdr1, DataRepresentationKind::Xcdr2]
+            if kinds == &[DataRepresentationKind::Xml]
     ));
 }
 

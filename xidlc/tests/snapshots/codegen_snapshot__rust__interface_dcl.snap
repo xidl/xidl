@@ -41,64 +41,12 @@ pub const A_set_attribute_attr1_Hash: i32 = 2553876227;
 pub struct A_func1_In {
     pub dummy: dds::rpc::UnusedMember,
 }
-impl A_func1_In {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_func1_In {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.dummy, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_func1_In {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let dummy = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { dummy })
-    }
-}
+impl A_func1_In {}
 #[derive(Default)]
 pub struct A_func1_Out {
     pub dummy: dds::rpc::UnusedMember,
 }
-impl A_func1_Out {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_func1_Out {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.dummy, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_func1_Out {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let dummy = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { dummy })
-    }
-}
+impl A_func1_Out {}
 pub struct A_func1_Result {
     tag: i32,
     data: A_func1_ResultData,
@@ -118,7 +66,6 @@ impl Drop for A_func1_Result {
     }
 }
 impl A_func1_Result {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
     pub fn new_result(value: A_func1_Out) -> Self {
         Self {
             tag: dds::RETCODE_OK,
@@ -149,111 +96,16 @@ impl A_func1_Result {
         &self.tag
     }
 }
-impl xidl_xcdr::XcdrSerialize for A_func1_Result {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
-        serializer.end_field()?;
-        match self.tag {
-            dds::RETCODE_OK => {
-                let value = unsafe { self.data.result.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            _ => {}
-        }
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_func1_Result {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = match tag {
-            dds::RETCODE_OK => {
-                A_func1_ResultData {
-                    result: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            _ => todo!(),
-        };
-        Ok(Self { tag, data })
-    }
-}
 #[derive(Default)]
 pub struct A_func1_In {
     pub dummy: dds::rpc::UnusedMember,
 }
-impl A_func1_In {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_func1_In {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.dummy, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_func1_In {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let dummy = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { dummy })
-    }
-}
+impl A_func1_In {}
 #[derive(Default)]
 pub struct A_func1_Out {
     pub dummy: dds::rpc::UnusedMember,
 }
-impl A_func1_Out {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_func1_Out {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.dummy, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_func1_Out {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let dummy = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { dummy })
-    }
-}
+impl A_func1_Out {}
 pub struct A_func1_Result {
     tag: i32,
     data: A_func1_ResultData,
@@ -279,7 +131,6 @@ impl Drop for A_func1_Result {
     }
 }
 impl A_func1_Result {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
     pub fn new_result(value: A_func1_Out) -> Self {
         Self {
             tag: dds::RETCODE_OK,
@@ -336,124 +187,16 @@ impl A_func1_Result {
         &self.tag
     }
 }
-impl xidl_xcdr::XcdrSerialize for A_func1_Result {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
-        serializer.end_field()?;
-        match self.tag {
-            dds::RETCODE_OK => {
-                let value = unsafe { self.data.result.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_Ex_Hash => {
-                let value = unsafe { self.data.a_ex.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            _ => {}
-        }
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_func1_Result {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = match tag {
-            dds::RETCODE_OK => {
-                A_func1_ResultData {
-                    result: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_Ex_Hash => {
-                A_func1_ResultData {
-                    a_ex: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            _ => todo!(),
-        };
-        Ok(Self { tag, data })
-    }
-}
 #[derive(Default)]
 pub struct A_func1_In {
     pub dummy: dds::rpc::UnusedMember,
 }
-impl A_func1_In {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_func1_In {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.dummy, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_func1_In {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let dummy = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { dummy })
-    }
-}
+impl A_func1_In {}
 #[derive(Default)]
 pub struct A_func1_Out {
     pub dummy: dds::rpc::UnusedMember,
 }
-impl A_func1_Out {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_func1_Out {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.dummy, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_func1_Out {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let dummy = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { dummy })
-    }
-}
+impl A_func1_Out {}
 pub struct A_func1_Result {
     tag: i32,
     data: A_func1_ResultData,
@@ -491,7 +234,6 @@ impl Drop for A_func1_Result {
     }
 }
 impl A_func1_Result {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
     pub fn new_result(value: A_func1_Out) -> Self {
         Self {
             tag: dds::RETCODE_OK,
@@ -600,150 +342,16 @@ impl A_func1_Result {
         &self.tag
     }
 }
-impl xidl_xcdr::XcdrSerialize for A_func1_Result {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
-        serializer.end_field()?;
-        match self.tag {
-            dds::RETCODE_OK => {
-                let value = unsafe { self.data.result.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_Ex_Hash => {
-                let value = unsafe { self.data.a_ex.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            B_Ex_Hash => {
-                let value = unsafe { self.data.b_ex.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            C_Ex_Hash => {
-                let value = unsafe { self.data.c_ex.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            _ => {}
-        }
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_func1_Result {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = match tag {
-            dds::RETCODE_OK => {
-                A_func1_ResultData {
-                    result: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_Ex_Hash => {
-                A_func1_ResultData {
-                    a_ex: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            B_Ex_Hash => {
-                A_func1_ResultData {
-                    b_ex: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            C_Ex_Hash => {
-                A_func1_ResultData {
-                    c_ex: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            _ => todo!(),
-        };
-        Ok(Self { tag, data })
-    }
-}
 #[derive(Default)]
 pub struct A_func1_In {
     pub attr: u8,
 }
-impl A_func1_In {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_func1_In {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.attr, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_func1_In {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let attr = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { attr })
-    }
-}
+impl A_func1_In {}
 #[derive(Default)]
 pub struct A_func1_Out {
     pub attr: u16,
 }
-impl A_func1_Out {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_func1_Out {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.attr, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_func1_Out {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let attr = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { attr })
-    }
-}
+impl A_func1_Out {}
 pub struct A_func1_Result {
     tag: i32,
     data: A_func1_ResultData,
@@ -763,7 +371,6 @@ impl Drop for A_func1_Result {
     }
 }
 impl A_func1_Result {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
     pub fn new_result(value: A_func1_Out) -> Self {
         Self {
             tag: dds::RETCODE_OK,
@@ -794,111 +401,16 @@ impl A_func1_Result {
         &self.tag
     }
 }
-impl xidl_xcdr::XcdrSerialize for A_func1_Result {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
-        serializer.end_field()?;
-        match self.tag {
-            dds::RETCODE_OK => {
-                let value = unsafe { self.data.result.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            _ => {}
-        }
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_func1_Result {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = match tag {
-            dds::RETCODE_OK => {
-                A_func1_ResultData {
-                    result: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            _ => todo!(),
-        };
-        Ok(Self { tag, data })
-    }
-}
 #[derive(Default)]
 pub struct A_func1_In {
     pub attr: u8,
 }
-impl A_func1_In {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_func1_In {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.attr, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_func1_In {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let attr = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { attr })
-    }
-}
+impl A_func1_In {}
 #[derive(Default)]
 pub struct A_func1_Out {
     pub attr: u16,
 }
-impl A_func1_Out {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_func1_Out {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.attr, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_func1_Out {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let attr = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { attr })
-    }
-}
+impl A_func1_Out {}
 pub struct A_func1_Result {
     tag: i32,
     data: A_func1_ResultData,
@@ -924,7 +436,6 @@ impl Drop for A_func1_Result {
     }
 }
 impl A_func1_Result {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
     pub fn new_result(value: A_func1_Out) -> Self {
         Self {
             tag: dds::RETCODE_OK,
@@ -981,124 +492,16 @@ impl A_func1_Result {
         &self.tag
     }
 }
-impl xidl_xcdr::XcdrSerialize for A_func1_Result {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
-        serializer.end_field()?;
-        match self.tag {
-            dds::RETCODE_OK => {
-                let value = unsafe { self.data.result.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_Ex_Hash => {
-                let value = unsafe { self.data.a_ex.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            _ => {}
-        }
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_func1_Result {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = match tag {
-            dds::RETCODE_OK => {
-                A_func1_ResultData {
-                    result: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_Ex_Hash => {
-                A_func1_ResultData {
-                    a_ex: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            _ => todo!(),
-        };
-        Ok(Self { tag, data })
-    }
-}
 #[derive(Default)]
 pub struct A_func1_In {
     pub attr: u8,
 }
-impl A_func1_In {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_func1_In {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.attr, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_func1_In {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let attr = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { attr })
-    }
-}
+impl A_func1_In {}
 #[derive(Default)]
 pub struct A_func1_Out {
     pub attr: u16,
 }
-impl A_func1_Out {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_func1_Out {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.attr, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_func1_Out {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let attr = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { attr })
-    }
-}
+impl A_func1_Out {}
 pub struct A_func1_Result {
     tag: i32,
     data: A_func1_ResultData,
@@ -1136,7 +539,6 @@ impl Drop for A_func1_Result {
     }
 }
 impl A_func1_Result {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
     pub fn new_result(value: A_func1_Out) -> Self {
         Self {
             tag: dds::RETCODE_OK,
@@ -1245,150 +647,16 @@ impl A_func1_Result {
         &self.tag
     }
 }
-impl xidl_xcdr::XcdrSerialize for A_func1_Result {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
-        serializer.end_field()?;
-        match self.tag {
-            dds::RETCODE_OK => {
-                let value = unsafe { self.data.result.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_Ex_Hash => {
-                let value = unsafe { self.data.a_ex.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            B_Ex_Hash => {
-                let value = unsafe { self.data.b_ex.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            C_Ex_Hash => {
-                let value = unsafe { self.data.c_ex.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            _ => {}
-        }
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_func1_Result {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = match tag {
-            dds::RETCODE_OK => {
-                A_func1_ResultData {
-                    result: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_Ex_Hash => {
-                A_func1_ResultData {
-                    a_ex: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            B_Ex_Hash => {
-                A_func1_ResultData {
-                    b_ex: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            C_Ex_Hash => {
-                A_func1_ResultData {
-                    c_ex: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            _ => todo!(),
-        };
-        Ok(Self { tag, data })
-    }
-}
 #[derive(Default)]
 pub struct A_get_attribute_attr1_In {
     pub dummy: dds::rpc::UnusedMember,
 }
-impl A_get_attribute_attr1_In {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_get_attribute_attr1_In {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.dummy, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_In {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let dummy = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { dummy })
-    }
-}
+impl A_get_attribute_attr1_In {}
 #[derive(Default)]
 pub struct A_get_attribute_attr1_Out {
     pub return_: u8,
 }
-impl A_get_attribute_attr1_Out {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_get_attribute_attr1_Out {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.return_, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_Out {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let return_ = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { return_ })
-    }
-}
+impl A_get_attribute_attr1_Out {}
 pub struct A_get_attribute_attr1_Result {
     tag: i32,
     data: A_get_attribute_attr1_ResultData,
@@ -1408,7 +676,6 @@ impl Drop for A_get_attribute_attr1_Result {
     }
 }
 impl A_get_attribute_attr1_Result {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
     pub fn new_result(value: A_get_attribute_attr1_Out) -> Self {
         Self {
             tag: dds::RETCODE_OK,
@@ -1439,111 +706,16 @@ impl A_get_attribute_attr1_Result {
         &self.tag
     }
 }
-impl xidl_xcdr::XcdrSerialize for A_get_attribute_attr1_Result {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
-        serializer.end_field()?;
-        match self.tag {
-            dds::RETCODE_OK => {
-                let value = unsafe { self.data.result.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            _ => {}
-        }
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_Result {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = match tag {
-            dds::RETCODE_OK => {
-                A_get_attribute_attr1_ResultData {
-                    result: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            _ => todo!(),
-        };
-        Ok(Self { tag, data })
-    }
-}
 #[derive(Default)]
 pub struct A_get_attribute_attr1_In {
     pub dummy: dds::rpc::UnusedMember,
 }
-impl A_get_attribute_attr1_In {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_get_attribute_attr1_In {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.dummy, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_In {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let dummy = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { dummy })
-    }
-}
+impl A_get_attribute_attr1_In {}
 #[derive(Default)]
 pub struct A_get_attribute_attr1_Out {
     pub return_: u8,
 }
-impl A_get_attribute_attr1_Out {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_get_attribute_attr1_Out {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.return_, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_Out {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let return_ = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { return_ })
-    }
-}
+impl A_get_attribute_attr1_Out {}
 pub struct A_get_attribute_attr1_Result {
     tag: i32,
     data: A_get_attribute_attr1_ResultData,
@@ -1563,7 +735,6 @@ impl Drop for A_get_attribute_attr1_Result {
     }
 }
 impl A_get_attribute_attr1_Result {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
     pub fn new_result(value: A_get_attribute_attr1_Out) -> Self {
         Self {
             tag: dds::RETCODE_OK,
@@ -1594,111 +765,16 @@ impl A_get_attribute_attr1_Result {
         &self.tag
     }
 }
-impl xidl_xcdr::XcdrSerialize for A_get_attribute_attr1_Result {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
-        serializer.end_field()?;
-        match self.tag {
-            dds::RETCODE_OK => {
-                let value = unsafe { self.data.result.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            _ => {}
-        }
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_Result {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = match tag {
-            dds::RETCODE_OK => {
-                A_get_attribute_attr1_ResultData {
-                    result: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            _ => todo!(),
-        };
-        Ok(Self { tag, data })
-    }
-}
 #[derive(Default)]
 pub struct A_get_attribute_attr1_In {
     pub dummy: dds::rpc::UnusedMember,
 }
-impl A_get_attribute_attr1_In {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_get_attribute_attr1_In {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.dummy, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_In {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let dummy = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { dummy })
-    }
-}
+impl A_get_attribute_attr1_In {}
 #[derive(Default)]
 pub struct A_get_attribute_attr1_Out {
     pub return_: u8,
 }
-impl A_get_attribute_attr1_Out {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_get_attribute_attr1_Out {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.return_, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_Out {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let return_ = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { return_ })
-    }
-}
+impl A_get_attribute_attr1_Out {}
 pub struct A_get_attribute_attr1_Result {
     tag: i32,
     data: A_get_attribute_attr1_ResultData,
@@ -1718,7 +794,6 @@ impl Drop for A_get_attribute_attr1_Result {
     }
 }
 impl A_get_attribute_attr1_Result {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
     pub fn new_result(value: A_get_attribute_attr1_Out) -> Self {
         Self {
             tag: dds::RETCODE_OK,
@@ -1749,111 +824,16 @@ impl A_get_attribute_attr1_Result {
         &self.tag
     }
 }
-impl xidl_xcdr::XcdrSerialize for A_get_attribute_attr1_Result {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
-        serializer.end_field()?;
-        match self.tag {
-            dds::RETCODE_OK => {
-                let value = unsafe { self.data.result.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            _ => {}
-        }
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_Result {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = match tag {
-            dds::RETCODE_OK => {
-                A_get_attribute_attr1_ResultData {
-                    result: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            _ => todo!(),
-        };
-        Ok(Self { tag, data })
-    }
-}
 #[derive(Default)]
 pub struct A_get_attribute_attr1_In {
     pub dummy: dds::rpc::UnusedMember,
 }
-impl A_get_attribute_attr1_In {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_get_attribute_attr1_In {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.dummy, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_In {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let dummy = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { dummy })
-    }
-}
+impl A_get_attribute_attr1_In {}
 #[derive(Default)]
 pub struct A_get_attribute_attr1_Out {
     pub return_: u8,
 }
-impl A_get_attribute_attr1_Out {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_get_attribute_attr1_Out {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.return_, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_Out {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let return_ = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { return_ })
-    }
-}
+impl A_get_attribute_attr1_Out {}
 pub struct A_get_attribute_attr1_Result {
     tag: i32,
     data: A_get_attribute_attr1_ResultData,
@@ -1873,7 +853,6 @@ impl Drop for A_get_attribute_attr1_Result {
     }
 }
 impl A_get_attribute_attr1_Result {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
     pub fn new_result(value: A_get_attribute_attr1_Out) -> Self {
         Self {
             tag: dds::RETCODE_OK,
@@ -1902,113 +881,18 @@ impl A_get_attribute_attr1_Result {
     }
     pub fn tag(&self) -> &i32 {
         &self.tag
-    }
-}
-impl xidl_xcdr::XcdrSerialize for A_get_attribute_attr1_Result {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
-        serializer.end_field()?;
-        match self.tag {
-            dds::RETCODE_OK => {
-                let value = unsafe { self.data.result.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            _ => {}
-        }
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_Result {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = match tag {
-            dds::RETCODE_OK => {
-                A_get_attribute_attr1_ResultData {
-                    result: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            _ => todo!(),
-        };
-        Ok(Self { tag, data })
     }
 }
 #[derive(Default)]
 pub struct A_set_attribute_attr1_In {
     pub attr1: u8,
 }
-impl A_set_attribute_attr1_In {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_set_attribute_attr1_In {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.attr1, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr1_In {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let attr1 = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { attr1 })
-    }
-}
+impl A_set_attribute_attr1_In {}
 #[derive(Default)]
 pub struct A_set_attribute_attr1_Out {
     pub dummy: dds::rpc::UnusedMember,
 }
-impl A_set_attribute_attr1_Out {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_set_attribute_attr1_Out {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.dummy, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr1_Out {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let dummy = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { dummy })
-    }
-}
+impl A_set_attribute_attr1_Out {}
 pub struct A_set_attribute_attr1_Result {
     tag: i32,
     data: A_set_attribute_attr1_ResultData,
@@ -2028,7 +912,6 @@ impl Drop for A_set_attribute_attr1_Result {
     }
 }
 impl A_set_attribute_attr1_Result {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
     pub fn new_result(value: A_set_attribute_attr1_Out) -> Self {
         Self {
             tag: dds::RETCODE_OK,
@@ -2059,111 +942,16 @@ impl A_set_attribute_attr1_Result {
         &self.tag
     }
 }
-impl xidl_xcdr::XcdrSerialize for A_set_attribute_attr1_Result {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
-        serializer.end_field()?;
-        match self.tag {
-            dds::RETCODE_OK => {
-                let value = unsafe { self.data.result.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            _ => {}
-        }
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr1_Result {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = match tag {
-            dds::RETCODE_OK => {
-                A_set_attribute_attr1_ResultData {
-                    result: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            _ => todo!(),
-        };
-        Ok(Self { tag, data })
-    }
-}
 #[derive(Default)]
 pub struct A_get_attribute_attr2_In {
     pub dummy: dds::rpc::UnusedMember,
 }
-impl A_get_attribute_attr2_In {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_get_attribute_attr2_In {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.dummy, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr2_In {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let dummy = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { dummy })
-    }
-}
+impl A_get_attribute_attr2_In {}
 #[derive(Default)]
 pub struct A_get_attribute_attr2_Out {
     pub return_: u8,
 }
-impl A_get_attribute_attr2_Out {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_get_attribute_attr2_Out {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.return_, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr2_Out {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let return_ = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { return_ })
-    }
-}
+impl A_get_attribute_attr2_Out {}
 pub struct A_get_attribute_attr2_Result {
     tag: i32,
     data: A_get_attribute_attr2_ResultData,
@@ -2183,7 +971,6 @@ impl Drop for A_get_attribute_attr2_Result {
     }
 }
 impl A_get_attribute_attr2_Result {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
     pub fn new_result(value: A_get_attribute_attr2_Out) -> Self {
         Self {
             tag: dds::RETCODE_OK,
@@ -2214,111 +1001,16 @@ impl A_get_attribute_attr2_Result {
         &self.tag
     }
 }
-impl xidl_xcdr::XcdrSerialize for A_get_attribute_attr2_Result {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
-        serializer.end_field()?;
-        match self.tag {
-            dds::RETCODE_OK => {
-                let value = unsafe { self.data.result.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            _ => {}
-        }
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr2_Result {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = match tag {
-            dds::RETCODE_OK => {
-                A_get_attribute_attr2_ResultData {
-                    result: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            _ => todo!(),
-        };
-        Ok(Self { tag, data })
-    }
-}
 #[derive(Default)]
 pub struct A_set_attribute_attr2_In {
     pub attr2: u8,
 }
-impl A_set_attribute_attr2_In {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_set_attribute_attr2_In {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.attr2, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr2_In {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let attr2 = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { attr2 })
-    }
-}
+impl A_set_attribute_attr2_In {}
 #[derive(Default)]
 pub struct A_set_attribute_attr2_Out {
     pub dummy: dds::rpc::UnusedMember,
 }
-impl A_set_attribute_attr2_Out {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_set_attribute_attr2_Out {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.dummy, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr2_Out {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let dummy = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { dummy })
-    }
-}
+impl A_set_attribute_attr2_Out {}
 pub struct A_set_attribute_attr2_Result {
     tag: i32,
     data: A_set_attribute_attr2_ResultData,
@@ -2338,7 +1030,6 @@ impl Drop for A_set_attribute_attr2_Result {
     }
 }
 impl A_set_attribute_attr2_Result {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
     pub fn new_result(value: A_set_attribute_attr2_Out) -> Self {
         Self {
             tag: dds::RETCODE_OK,
@@ -2369,111 +1060,16 @@ impl A_set_attribute_attr2_Result {
         &self.tag
     }
 }
-impl xidl_xcdr::XcdrSerialize for A_set_attribute_attr2_Result {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
-        serializer.end_field()?;
-        match self.tag {
-            dds::RETCODE_OK => {
-                let value = unsafe { self.data.result.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            _ => {}
-        }
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr2_Result {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = match tag {
-            dds::RETCODE_OK => {
-                A_set_attribute_attr2_ResultData {
-                    result: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            _ => todo!(),
-        };
-        Ok(Self { tag, data })
-    }
-}
 #[derive(Default)]
 pub struct A_get_attribute_attr3_In {
     pub dummy: dds::rpc::UnusedMember,
 }
-impl A_get_attribute_attr3_In {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_get_attribute_attr3_In {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.dummy, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr3_In {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let dummy = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { dummy })
-    }
-}
+impl A_get_attribute_attr3_In {}
 #[derive(Default)]
 pub struct A_get_attribute_attr3_Out {
     pub return_: u8,
 }
-impl A_get_attribute_attr3_Out {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_get_attribute_attr3_Out {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.return_, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr3_Out {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let return_ = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { return_ })
-    }
-}
+impl A_get_attribute_attr3_Out {}
 pub struct A_get_attribute_attr3_Result {
     tag: i32,
     data: A_get_attribute_attr3_ResultData,
@@ -2493,7 +1089,6 @@ impl Drop for A_get_attribute_attr3_Result {
     }
 }
 impl A_get_attribute_attr3_Result {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
     pub fn new_result(value: A_get_attribute_attr3_Out) -> Self {
         Self {
             tag: dds::RETCODE_OK,
@@ -2524,111 +1119,16 @@ impl A_get_attribute_attr3_Result {
         &self.tag
     }
 }
-impl xidl_xcdr::XcdrSerialize for A_get_attribute_attr3_Result {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
-        serializer.end_field()?;
-        match self.tag {
-            dds::RETCODE_OK => {
-                let value = unsafe { self.data.result.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            _ => {}
-        }
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr3_Result {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = match tag {
-            dds::RETCODE_OK => {
-                A_get_attribute_attr3_ResultData {
-                    result: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            _ => todo!(),
-        };
-        Ok(Self { tag, data })
-    }
-}
 #[derive(Default)]
 pub struct A_set_attribute_attr3_In {
     pub attr3: u8,
 }
-impl A_set_attribute_attr3_In {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_set_attribute_attr3_In {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.attr3, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr3_In {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let attr3 = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { attr3 })
-    }
-}
+impl A_set_attribute_attr3_In {}
 #[derive(Default)]
 pub struct A_set_attribute_attr3_Out {
     pub dummy: dds::rpc::UnusedMember,
 }
-impl A_set_attribute_attr3_Out {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_set_attribute_attr3_Out {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.dummy, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr3_Out {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let dummy = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { dummy })
-    }
-}
+impl A_set_attribute_attr3_Out {}
 pub struct A_set_attribute_attr3_Result {
     tag: i32,
     data: A_set_attribute_attr3_ResultData,
@@ -2648,7 +1148,6 @@ impl Drop for A_set_attribute_attr3_Result {
     }
 }
 impl A_set_attribute_attr3_Result {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
     pub fn new_result(value: A_set_attribute_attr3_Out) -> Self {
         Self {
             tag: dds::RETCODE_OK,
@@ -2679,111 +1178,16 @@ impl A_set_attribute_attr3_Result {
         &self.tag
     }
 }
-impl xidl_xcdr::XcdrSerialize for A_set_attribute_attr3_Result {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
-        serializer.end_field()?;
-        match self.tag {
-            dds::RETCODE_OK => {
-                let value = unsafe { self.data.result.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            _ => {}
-        }
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr3_Result {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = match tag {
-            dds::RETCODE_OK => {
-                A_set_attribute_attr3_ResultData {
-                    result: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            _ => todo!(),
-        };
-        Ok(Self { tag, data })
-    }
-}
 #[derive(Default)]
 pub struct A_get_attribute_attr1_In {
     pub dummy: dds::rpc::UnusedMember,
 }
-impl A_get_attribute_attr1_In {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_get_attribute_attr1_In {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.dummy, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_In {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let dummy = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { dummy })
-    }
-}
+impl A_get_attribute_attr1_In {}
 #[derive(Default)]
 pub struct A_get_attribute_attr1_Out {
     pub return_: u8,
 }
-impl A_get_attribute_attr1_Out {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_get_attribute_attr1_Out {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.return_, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_Out {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let return_ = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { return_ })
-    }
-}
+impl A_get_attribute_attr1_Out {}
 pub struct A_get_attribute_attr1_Result {
     tag: i32,
     data: A_get_attribute_attr1_ResultData,
@@ -2809,7 +1213,6 @@ impl Drop for A_get_attribute_attr1_Result {
     }
 }
 impl A_get_attribute_attr1_Result {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
     pub fn new_result(value: A_get_attribute_attr1_Out) -> Self {
         Self {
             tag: dds::RETCODE_OK,
@@ -2866,124 +1269,16 @@ impl A_get_attribute_attr1_Result {
         &self.tag
     }
 }
-impl xidl_xcdr::XcdrSerialize for A_get_attribute_attr1_Result {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
-        serializer.end_field()?;
-        match self.tag {
-            dds::RETCODE_OK => {
-                let value = unsafe { self.data.result.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_Ex_Hash => {
-                let value = unsafe { self.data.a_ex.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            _ => {}
-        }
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_Result {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = match tag {
-            dds::RETCODE_OK => {
-                A_get_attribute_attr1_ResultData {
-                    result: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_Ex_Hash => {
-                A_get_attribute_attr1_ResultData {
-                    a_ex: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            _ => todo!(),
-        };
-        Ok(Self { tag, data })
-    }
-}
 #[derive(Default)]
 pub struct A_set_attribute_attr1_In {
     pub attr1: u8,
 }
-impl A_set_attribute_attr1_In {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_set_attribute_attr1_In {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.attr1, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr1_In {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let attr1 = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { attr1 })
-    }
-}
+impl A_set_attribute_attr1_In {}
 #[derive(Default)]
 pub struct A_set_attribute_attr1_Out {
     pub dummy: dds::rpc::UnusedMember,
 }
-impl A_set_attribute_attr1_Out {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_set_attribute_attr1_Out {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.dummy, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr1_Out {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let dummy = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { dummy })
-    }
-}
+impl A_set_attribute_attr1_Out {}
 pub struct A_set_attribute_attr1_Result {
     tag: i32,
     data: A_set_attribute_attr1_ResultData,
@@ -3003,7 +1298,6 @@ impl Drop for A_set_attribute_attr1_Result {
     }
 }
 impl A_set_attribute_attr1_Result {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
     pub fn new_result(value: A_set_attribute_attr1_Out) -> Self {
         Self {
             tag: dds::RETCODE_OK,
@@ -3034,111 +1328,16 @@ impl A_set_attribute_attr1_Result {
         &self.tag
     }
 }
-impl xidl_xcdr::XcdrSerialize for A_set_attribute_attr1_Result {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
-        serializer.end_field()?;
-        match self.tag {
-            dds::RETCODE_OK => {
-                let value = unsafe { self.data.result.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            _ => {}
-        }
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr1_Result {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = match tag {
-            dds::RETCODE_OK => {
-                A_set_attribute_attr1_ResultData {
-                    result: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            _ => todo!(),
-        };
-        Ok(Self { tag, data })
-    }
-}
 #[derive(Default)]
 pub struct A_get_attribute_attr1_In {
     pub dummy: dds::rpc::UnusedMember,
 }
-impl A_get_attribute_attr1_In {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_get_attribute_attr1_In {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.dummy, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_In {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let dummy = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { dummy })
-    }
-}
+impl A_get_attribute_attr1_In {}
 #[derive(Default)]
 pub struct A_get_attribute_attr1_Out {
     pub return_: u8,
 }
-impl A_get_attribute_attr1_Out {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_get_attribute_attr1_Out {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.return_, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_Out {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let return_ = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { return_ })
-    }
-}
+impl A_get_attribute_attr1_Out {}
 pub struct A_get_attribute_attr1_Result {
     tag: i32,
     data: A_get_attribute_attr1_ResultData,
@@ -3176,7 +1375,6 @@ impl Drop for A_get_attribute_attr1_Result {
     }
 }
 impl A_get_attribute_attr1_Result {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
     pub fn new_result(value: A_get_attribute_attr1_Out) -> Self {
         Self {
             tag: dds::RETCODE_OK,
@@ -3285,150 +1483,16 @@ impl A_get_attribute_attr1_Result {
         &self.tag
     }
 }
-impl xidl_xcdr::XcdrSerialize for A_get_attribute_attr1_Result {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
-        serializer.end_field()?;
-        match self.tag {
-            dds::RETCODE_OK => {
-                let value = unsafe { self.data.result.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_Ex_Hash => {
-                let value = unsafe { self.data.a_ex.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            B_Ex_Hash => {
-                let value = unsafe { self.data.b_ex.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            C_Ex_Hash => {
-                let value = unsafe { self.data.c_ex.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            _ => {}
-        }
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_Result {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = match tag {
-            dds::RETCODE_OK => {
-                A_get_attribute_attr1_ResultData {
-                    result: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_Ex_Hash => {
-                A_get_attribute_attr1_ResultData {
-                    a_ex: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            B_Ex_Hash => {
-                A_get_attribute_attr1_ResultData {
-                    b_ex: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            C_Ex_Hash => {
-                A_get_attribute_attr1_ResultData {
-                    c_ex: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            _ => todo!(),
-        };
-        Ok(Self { tag, data })
-    }
-}
 #[derive(Default)]
 pub struct A_set_attribute_attr1_In {
     pub attr1: u8,
 }
-impl A_set_attribute_attr1_In {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_set_attribute_attr1_In {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.attr1, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr1_In {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let attr1 = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { attr1 })
-    }
-}
+impl A_set_attribute_attr1_In {}
 #[derive(Default)]
 pub struct A_set_attribute_attr1_Out {
     pub dummy: dds::rpc::UnusedMember,
 }
-impl A_set_attribute_attr1_Out {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_set_attribute_attr1_Out {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.dummy, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr1_Out {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let dummy = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { dummy })
-    }
-}
+impl A_set_attribute_attr1_Out {}
 pub struct A_set_attribute_attr1_Result {
     tag: i32,
     data: A_set_attribute_attr1_ResultData,
@@ -3454,7 +1518,6 @@ impl Drop for A_set_attribute_attr1_Result {
     }
 }
 impl A_set_attribute_attr1_Result {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
     pub fn new_result(value: A_set_attribute_attr1_Out) -> Self {
         Self {
             tag: dds::RETCODE_OK,
@@ -3511,124 +1574,16 @@ impl A_set_attribute_attr1_Result {
         &self.tag
     }
 }
-impl xidl_xcdr::XcdrSerialize for A_set_attribute_attr1_Result {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
-        serializer.end_field()?;
-        match self.tag {
-            dds::RETCODE_OK => {
-                let value = unsafe { self.data.result.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_Ex_Hash => {
-                let value = unsafe { self.data.a_ex.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            _ => {}
-        }
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr1_Result {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = match tag {
-            dds::RETCODE_OK => {
-                A_set_attribute_attr1_ResultData {
-                    result: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_Ex_Hash => {
-                A_set_attribute_attr1_ResultData {
-                    a_ex: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            _ => todo!(),
-        };
-        Ok(Self { tag, data })
-    }
-}
 #[derive(Default)]
 pub struct A_get_attribute_attr1_In {
     pub dummy: dds::rpc::UnusedMember,
 }
-impl A_get_attribute_attr1_In {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_get_attribute_attr1_In {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.dummy, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_In {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let dummy = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { dummy })
-    }
-}
+impl A_get_attribute_attr1_In {}
 #[derive(Default)]
 pub struct A_get_attribute_attr1_Out {
     pub return_: u8,
 }
-impl A_get_attribute_attr1_Out {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_get_attribute_attr1_Out {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.return_, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_Out {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let return_ = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { return_ })
-    }
-}
+impl A_get_attribute_attr1_Out {}
 pub struct A_get_attribute_attr1_Result {
     tag: i32,
     data: A_get_attribute_attr1_ResultData,
@@ -3648,7 +1603,6 @@ impl Drop for A_get_attribute_attr1_Result {
     }
 }
 impl A_get_attribute_attr1_Result {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
     pub fn new_result(value: A_get_attribute_attr1_Out) -> Self {
         Self {
             tag: dds::RETCODE_OK,
@@ -3679,111 +1633,16 @@ impl A_get_attribute_attr1_Result {
         &self.tag
     }
 }
-impl xidl_xcdr::XcdrSerialize for A_get_attribute_attr1_Result {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
-        serializer.end_field()?;
-        match self.tag {
-            dds::RETCODE_OK => {
-                let value = unsafe { self.data.result.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            _ => {}
-        }
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_get_attribute_attr1_Result {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = match tag {
-            dds::RETCODE_OK => {
-                A_get_attribute_attr1_ResultData {
-                    result: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            _ => todo!(),
-        };
-        Ok(Self { tag, data })
-    }
-}
 #[derive(Default)]
 pub struct A_set_attribute_attr1_In {
     pub attr1: u8,
 }
-impl A_set_attribute_attr1_In {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_set_attribute_attr1_In {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.attr1, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr1_In {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let attr1 = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { attr1 })
-    }
-}
+impl A_set_attribute_attr1_In {}
 #[derive(Default)]
 pub struct A_set_attribute_attr1_Out {
     pub dummy: dds::rpc::UnusedMember,
 }
-impl A_set_attribute_attr1_Out {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_set_attribute_attr1_Out {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.dummy, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr1_Out {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let dummy = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { dummy })
-    }
-}
+impl A_set_attribute_attr1_Out {}
 pub struct A_set_attribute_attr1_Result {
     tag: i32,
     data: A_set_attribute_attr1_ResultData,
@@ -3809,7 +1668,6 @@ impl Drop for A_set_attribute_attr1_Result {
     }
 }
 impl A_set_attribute_attr1_Result {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
     pub fn new_result(value: A_set_attribute_attr1_Out) -> Self {
         Self {
             tag: dds::RETCODE_OK,
@@ -3864,62 +1722,6 @@ impl A_set_attribute_attr1_Result {
     }
     pub fn tag(&self) -> &i32 {
         &self.tag
-    }
-}
-impl xidl_xcdr::XcdrSerialize for A_set_attribute_attr1_Result {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
-        serializer.end_field()?;
-        match self.tag {
-            dds::RETCODE_OK => {
-                let value = unsafe { self.data.result.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_Ex_Hash => {
-                let value = unsafe { self.data.a_ex.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            _ => {}
-        }
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_set_attribute_attr1_Result {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = match tag {
-            dds::RETCODE_OK => {
-                A_set_attribute_attr1_ResultData {
-                    result: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_Ex_Hash => {
-                A_set_attribute_attr1_ResultData {
-                    a_ex: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            _ => todo!(),
-        };
-        Ok(Self { tag, data })
     }
 }
 pub struct A_Call {
@@ -4053,7 +1855,6 @@ impl Drop for A_Call {
     }
 }
 impl A_Call {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
     pub fn new_unknownOp(value: dds::rpc::UnknownOperation) -> Self {
         Self {
             tag: i32::default(),
@@ -4266,356 +2067,12 @@ impl A_Call {
         &self.tag
     }
 }
-impl xidl_xcdr::XcdrSerialize for A_Call {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
-        serializer.end_field()?;
-        match self.tag {
-            _ => {
-                let value = unsafe { self.data.unknownOp.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_func1_Hash => {
-                let value = unsafe { self.data.func1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_func1_Hash => {
-                let value = unsafe { self.data.func1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_func1_Hash => {
-                let value = unsafe { self.data.func1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_func1_Hash => {
-                let value = unsafe { self.data.func1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_func1_Hash => {
-                let value = unsafe { self.data.func1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_func1_Hash => {
-                let value = unsafe { self.data.func1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_get_attribute_attr1_Hash => {
-                let value = unsafe { self.data.get_attribute_attr1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_get_attribute_attr1_Hash => {
-                let value = unsafe { self.data.get_attribute_attr1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_get_attribute_attr1_Hash => {
-                let value = unsafe { self.data.get_attribute_attr1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_get_attribute_attr1_Hash => {
-                let value = unsafe { self.data.get_attribute_attr1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_set_attribute_attr1_Hash => {
-                let value = unsafe { self.data.set_attribute_attr1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_get_attribute_attr2_Hash => {
-                let value = unsafe { self.data.get_attribute_attr2.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(5u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_set_attribute_attr2_Hash => {
-                let value = unsafe { self.data.set_attribute_attr2.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(6u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_get_attribute_attr3_Hash => {
-                let value = unsafe { self.data.get_attribute_attr3.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(7u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_set_attribute_attr3_Hash => {
-                let value = unsafe { self.data.set_attribute_attr3.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(8u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_get_attribute_attr1_Hash => {
-                let value = unsafe { self.data.get_attribute_attr1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_set_attribute_attr1_Hash => {
-                let value = unsafe { self.data.set_attribute_attr1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_get_attribute_attr1_Hash => {
-                let value = unsafe { self.data.get_attribute_attr1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_set_attribute_attr1_Hash => {
-                let value = unsafe { self.data.set_attribute_attr1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_get_attribute_attr1_Hash => {
-                let value = unsafe { self.data.get_attribute_attr1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_set_attribute_attr1_Hash => {
-                let value = unsafe { self.data.set_attribute_attr1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-        }
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_Call {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = match tag {
-            _ => {
-                A_CallData {
-                    unknownOp: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_func1_Hash => {
-                A_CallData {
-                    func1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_func1_Hash => {
-                A_CallData {
-                    func1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_func1_Hash => {
-                A_CallData {
-                    func1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_func1_Hash => {
-                A_CallData {
-                    func1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_func1_Hash => {
-                A_CallData {
-                    func1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_func1_Hash => {
-                A_CallData {
-                    func1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_get_attribute_attr1_Hash => {
-                A_CallData {
-                    get_attribute_attr1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_get_attribute_attr1_Hash => {
-                A_CallData {
-                    get_attribute_attr1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_get_attribute_attr1_Hash => {
-                A_CallData {
-                    get_attribute_attr1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_get_attribute_attr1_Hash => {
-                A_CallData {
-                    get_attribute_attr1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_set_attribute_attr1_Hash => {
-                A_CallData {
-                    set_attribute_attr1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_get_attribute_attr2_Hash => {
-                A_CallData {
-                    get_attribute_attr2: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_set_attribute_attr2_Hash => {
-                A_CallData {
-                    set_attribute_attr2: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_get_attribute_attr3_Hash => {
-                A_CallData {
-                    get_attribute_attr3: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_set_attribute_attr3_Hash => {
-                A_CallData {
-                    set_attribute_attr3: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_get_attribute_attr1_Hash => {
-                A_CallData {
-                    get_attribute_attr1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_set_attribute_attr1_Hash => {
-                A_CallData {
-                    set_attribute_attr1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_get_attribute_attr1_Hash => {
-                A_CallData {
-                    get_attribute_attr1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_set_attribute_attr1_Hash => {
-                A_CallData {
-                    set_attribute_attr1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_get_attribute_attr1_Hash => {
-                A_CallData {
-                    get_attribute_attr1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_set_attribute_attr1_Hash => {
-                A_CallData {
-                    set_attribute_attr1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-        };
-        Ok(Self { tag, data })
-    }
-}
 #[derive(Default)]
 pub struct A_Request {
     pub header: dds::rpc::RequestHeader,
     pub data: A_Call,
 }
-impl A_Request {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_Request {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
-        serializer.end_field()?;
-        serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.data, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_Request {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { header, data })
-    }
-}
+impl A_Request {}
 pub struct A_Return {
     tag: i32,
     data: A_ReturnData,
@@ -4747,7 +2204,6 @@ impl Drop for A_Return {
     }
 }
 impl A_Return {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
     pub fn new_unknownOp(value: dds::rpc::UnknownOperation) -> Self {
         Self {
             tag: i32::default(),
@@ -4960,356 +2416,12 @@ impl A_Return {
         &self.tag
     }
 }
-impl xidl_xcdr::XcdrSerialize for A_Return {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
-        serializer.end_field()?;
-        match self.tag {
-            _ => {
-                let value = unsafe { self.data.unknownOp.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_func1_Hash => {
-                let value = unsafe { self.data.func1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_func1_Hash => {
-                let value = unsafe { self.data.func1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_func1_Hash => {
-                let value = unsafe { self.data.func1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_func1_Hash => {
-                let value = unsafe { self.data.func1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_func1_Hash => {
-                let value = unsafe { self.data.func1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_func1_Hash => {
-                let value = unsafe { self.data.func1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_get_attribute_attr1_Hash => {
-                let value = unsafe { self.data.get_attribute_attr1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_get_attribute_attr1_Hash => {
-                let value = unsafe { self.data.get_attribute_attr1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_get_attribute_attr1_Hash => {
-                let value = unsafe { self.data.get_attribute_attr1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_get_attribute_attr1_Hash => {
-                let value = unsafe { self.data.get_attribute_attr1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_set_attribute_attr1_Hash => {
-                let value = unsafe { self.data.set_attribute_attr1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_get_attribute_attr2_Hash => {
-                let value = unsafe { self.data.get_attribute_attr2.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(5u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_set_attribute_attr2_Hash => {
-                let value = unsafe { self.data.set_attribute_attr2.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(6u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_get_attribute_attr3_Hash => {
-                let value = unsafe { self.data.get_attribute_attr3.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(7u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_set_attribute_attr3_Hash => {
-                let value = unsafe { self.data.set_attribute_attr3.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(8u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_get_attribute_attr1_Hash => {
-                let value = unsafe { self.data.get_attribute_attr1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_set_attribute_attr1_Hash => {
-                let value = unsafe { self.data.set_attribute_attr1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_get_attribute_attr1_Hash => {
-                let value = unsafe { self.data.get_attribute_attr1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_set_attribute_attr1_Hash => {
-                let value = unsafe { self.data.set_attribute_attr1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_get_attribute_attr1_Hash => {
-                let value = unsafe { self.data.get_attribute_attr1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(3u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_set_attribute_attr1_Hash => {
-                let value = unsafe { self.data.set_attribute_attr1.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(4u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-        }
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_Return {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = match tag {
-            _ => {
-                A_ReturnData {
-                    unknownOp: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_func1_Hash => {
-                A_ReturnData {
-                    func1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_func1_Hash => {
-                A_ReturnData {
-                    func1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_func1_Hash => {
-                A_ReturnData {
-                    func1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_func1_Hash => {
-                A_ReturnData {
-                    func1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_func1_Hash => {
-                A_ReturnData {
-                    func1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_func1_Hash => {
-                A_ReturnData {
-                    func1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_get_attribute_attr1_Hash => {
-                A_ReturnData {
-                    get_attribute_attr1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_get_attribute_attr1_Hash => {
-                A_ReturnData {
-                    get_attribute_attr1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_get_attribute_attr1_Hash => {
-                A_ReturnData {
-                    get_attribute_attr1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_get_attribute_attr1_Hash => {
-                A_ReturnData {
-                    get_attribute_attr1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_set_attribute_attr1_Hash => {
-                A_ReturnData {
-                    set_attribute_attr1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_get_attribute_attr2_Hash => {
-                A_ReturnData {
-                    get_attribute_attr2: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_set_attribute_attr2_Hash => {
-                A_ReturnData {
-                    set_attribute_attr2: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_get_attribute_attr3_Hash => {
-                A_ReturnData {
-                    get_attribute_attr3: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_set_attribute_attr3_Hash => {
-                A_ReturnData {
-                    set_attribute_attr3: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_get_attribute_attr1_Hash => {
-                A_ReturnData {
-                    get_attribute_attr1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_set_attribute_attr1_Hash => {
-                A_ReturnData {
-                    set_attribute_attr1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_get_attribute_attr1_Hash => {
-                A_ReturnData {
-                    get_attribute_attr1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_set_attribute_attr1_Hash => {
-                A_ReturnData {
-                    set_attribute_attr1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_get_attribute_attr1_Hash => {
-                A_ReturnData {
-                    get_attribute_attr1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_set_attribute_attr1_Hash => {
-                A_ReturnData {
-                    set_attribute_attr1: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-        };
-        Ok(Self { tag, data })
-    }
-}
 #[derive(Default)]
 pub struct A_Reply {
     pub header: dds::rpc::ReplyHeader,
     pub data: A_Return,
 }
-impl A_Reply {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_Reply {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
-        serializer.end_field()?;
-        serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.data, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_Reply {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { header, data })
-    }
-}
+impl A_Reply {}
 pub trait A {
     fn func1(&self) -> ();
     fn func1(&self) -> ();
@@ -5338,64 +2450,12 @@ pub const A_opA_Hash: i32 = 3927698569;
 pub struct A_opA_In {
     pub l_1: L1,
 }
-impl A_opA_In {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_opA_In {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.l_1, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_opA_In {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let l_1 = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { l_1 })
-    }
-}
+impl A_opA_In {}
 #[derive(Default)]
 pub struct A_opA_Out {
     pub return_: i16,
 }
-impl A_opA_Out {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_opA_Out {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.return_, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_opA_Out {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let return_ = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { return_ })
-    }
-}
+impl A_opA_Out {}
 pub struct A_opA_Result {
     tag: i32,
     data: A_opA_ResultData,
@@ -5415,7 +2475,6 @@ impl Drop for A_opA_Result {
     }
 }
 impl A_opA_Result {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
     pub fn new_result(value: A_opA_Out) -> Self {
         Self {
             tag: dds::RETCODE_OK,
@@ -5446,49 +2505,6 @@ impl A_opA_Result {
         &self.tag
     }
 }
-impl xidl_xcdr::XcdrSerialize for A_opA_Result {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
-        serializer.end_field()?;
-        match self.tag {
-            dds::RETCODE_OK => {
-                let value = unsafe { self.data.result.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            _ => {}
-        }
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_opA_Result {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = match tag {
-            dds::RETCODE_OK => {
-                A_opA_ResultData {
-                    result: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            _ => todo!(),
-        };
-        Ok(Self { tag, data })
-    }
-}
 pub struct A_Call {
     tag: i32,
     data: A_CallData,
@@ -5514,7 +2530,6 @@ impl Drop for A_Call {
     }
 }
 impl A_Call {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
     pub fn new_unknownOp(value: dds::rpc::UnknownOperation) -> Self {
         Self {
             tag: i32::default(),
@@ -5571,96 +2586,12 @@ impl A_Call {
         &self.tag
     }
 }
-impl xidl_xcdr::XcdrSerialize for A_Call {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
-        serializer.end_field()?;
-        match self.tag {
-            _ => {
-                let value = unsafe { self.data.unknownOp.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_opA_Hash => {
-                let value = unsafe { self.data.opA.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-        }
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_Call {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = match tag {
-            _ => {
-                A_CallData {
-                    unknownOp: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_opA_Hash => {
-                A_CallData {
-                    opA: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-        };
-        Ok(Self { tag, data })
-    }
-}
 #[derive(Default)]
 pub struct A_Request {
     pub header: dds::rpc::RequestHeader,
     pub data: A_Call,
 }
-impl A_Request {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_Request {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
-        serializer.end_field()?;
-        serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.data, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_Request {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { header, data })
-    }
-}
+impl A_Request {}
 pub struct A_Return {
     tag: i32,
     data: A_ReturnData,
@@ -5686,7 +2617,6 @@ impl Drop for A_Return {
     }
 }
 impl A_Return {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
     pub fn new_unknownOp(value: dds::rpc::UnknownOperation) -> Self {
         Self {
             tag: i32::default(),
@@ -5743,96 +2673,12 @@ impl A_Return {
         &self.tag
     }
 }
-impl xidl_xcdr::XcdrSerialize for A_Return {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(0), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.tag, serializer)?;
-        serializer.end_field()?;
-        match self.tag {
-            _ => {
-                let value = unsafe { self.data.unknownOp.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-            A_opA_Hash => {
-                let value = unsafe { self.data.opA.as_ref() };
-                serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-                xidl_xcdr::XcdrSerialize::serialize_with(value, serializer)?;
-                serializer.end_field()?;
-            }
-        }
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_Return {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let tag = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = match tag {
-            _ => {
-                A_ReturnData {
-                    unknownOp: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-            A_opA_Hash => {
-                A_ReturnData {
-                    opA: core::mem::ManuallyDrop::new(
-                        xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?,
-                    ),
-                }
-            }
-        };
-        Ok(Self { tag, data })
-    }
-}
 #[derive(Default)]
 pub struct A_Reply {
     pub header: dds::rpc::ReplyHeader,
     pub data: A_Return,
 }
-impl A_Reply {
-    pub const SERIALIZE_KIND: xidl_xcdr::SerializeKind = xidl_xcdr::SerializeKind::Cdr;
-}
-impl xidl_xcdr::XcdrSerialize for A_Reply {
-    fn serialize_kind(&self) -> xidl_xcdr::SerializeKind {
-        Self::SERIALIZE_KIND
-    }
-    fn serialize_with<S: xidl_xcdr::XcdrSerializer + ?Sized>(
-        &self,
-        serializer: &mut S,
-    ) -> xidl_xcdr::error::XcdrResult<()> {
-        serializer.begin_struct_with_kind(Self::SERIALIZE_KIND)?;
-        serializer.begin_field(xidl_xcdr::FieldId(1u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.header, serializer)?;
-        serializer.end_field()?;
-        serializer.begin_field(xidl_xcdr::FieldId(2u32), false, 0)?;
-        xidl_xcdr::XcdrSerialize::serialize_with(&self.data, serializer)?;
-        serializer.end_field()?;
-        serializer.end_struct()?;
-        Ok(())
-    }
-}
-impl xidl_xcdr::XcdrDeserialize for A_Reply {
-    fn deserialize<D: xidl_xcdr::XcdrDeserializer + ?Sized>(
-        deserializer: &mut D,
-    ) -> xidl_xcdr::error::XcdrResult<Self> {
-        let header = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        let data = xidl_xcdr::XcdrDeserialize::deserialize(deserializer)?;
-        Ok(Self { header, data })
-    }
-}
+impl A_Reply {}
 pub type L1 = i32;
 pub const a: int = 10;
 #[derive(Debug, Clone)]

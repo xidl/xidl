@@ -28,12 +28,6 @@ struct ArgsGen {
     out_dir: String,
     #[arg(long = "dry-run", default_value_t = false)]
     dry_run: bool,
-    #[arg(
-        long = "skip-cdr-codec",
-        default_value_t = false,
-        help = "Skip generating CDR serialization and deserialization code"
-    )]
-    skip_cdr_codec: bool,
     #[command(subcommand)]
     lang: GenLang,
 }
@@ -124,17 +118,12 @@ struct SharedGenArgs {
 
 impl ArgsGen {
     fn into_driver_args(self) -> IdlcResult<(ArgsGenerate, HashMap<String, serde_json::Value>)> {
-        let mut extra_props = HashMap::new();
-        if self.skip_cdr_codec {
-            extra_props.insert("enable_serialize".into(), false.into());
-            extra_props.insert("enable_deserialize".into(), false.into());
-        }
         let shared = SharedGenArgs {
             out_dir: self.out_dir,
             dry_run: self.dry_run,
         };
         let args = self.lang.into_driver_args(shared)?;
-        Ok((args, extra_props))
+        Ok((args, HashMap::new()))
     }
 }
 
