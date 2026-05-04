@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.52.0](https://github.com/xidl/xidl/compare/v0.51.0...v0.52.0) (2026-05-04)
+
+
+### Features
+
+* **xidlc:** split typescript http generation ([793ea44](https://github.com/xidl/xidl/commit/793ea44d646b45b18a4b244c3845b6c88a4cda15))
+
 ## [0.51.0](https://github.com/xidl/xidl/compare/v0.50.2...v0.51.0) (2026-05-03)
 
 
