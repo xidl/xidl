@@ -22,5 +22,7 @@ pub mod rust_jsonrpc;
 pub mod typed_ast_gen;
 #[cfg(feature = "gen-typescript")]
 pub mod typescript;
+#[cfg(feature = "gen-typescript-http")]
+pub mod typescript_http;
 mod utils;
 pub use const_expr::render_const_expr;

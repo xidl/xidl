@@ -21,6 +21,7 @@ default = [
   "gen-rust-jsonrpc",
   "gen-rust-axum",
   "gen-typescript",
+  "gen-typescript-http",
   "gen-go",
   "gen-go-http",
   "gen-python",
@@ -32,6 +33,7 @@ gen-rust = []
 gen-rust-jsonrpc = ["gen-rust"]
 gen-rust-axum = ["gen-rust"]
 gen-typescript = []
+gen-typescript-http = ["gen-typescript"]
 gen-go = []
 gen-go-http = ["gen-go"]
 gen-python = []

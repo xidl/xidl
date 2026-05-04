@@ -67,6 +67,13 @@ enum GenLang {
     RustAxum(ClientServerArgs),
     #[command(name = "typescript", alias = "ts")]
     Typescript(ClientServerArgs),
+    #[command(
+        name = "typescript-http",
+        alias = "typescript_http",
+        alias = "ts-http",
+        alias = "ts_http"
+    )]
+    TypescriptHttp(ClientOnlyArgs),
     #[command(name = "go", alias = "golang")]
     Go(ClientServerArgs),
     #[command(name = "go-http", alias = "go_http")]
@@ -99,6 +106,13 @@ struct ClientServerArgs {
     client: bool,
     #[arg(long = "server", default_value_t = true)]
     server: bool,
+    files: Vec<PathBuf>,
+}
+
+#[derive(Debug, Args)]
+struct ClientOnlyArgs {
+    #[arg(long = "client", default_value_t = true)]
+    client: bool,
     files: Vec<PathBuf>,
 }
 
@@ -135,6 +149,7 @@ impl GenLang {
             Self::RustJsonRpc(args) => Ok(shared.into_client_server("rust-jsonrpc", args)),
             Self::RustAxum(args) => Ok(shared.into_client_server("rust-axum", args)),
             Self::Typescript(args) => Ok(shared.into_client_server("typescript", args)),
+            Self::TypescriptHttp(args) => Ok(shared.into_client_only("typescript-http", args)),
             Self::Go(args) => Ok(shared.into_client_server("go", args)),
             Self::GoHttp(args) => Ok(shared.into_client_server("go-http", args)),
             Self::Python(args) => Ok(shared.into_client_server("python", args)),
@@ -160,6 +175,7 @@ impl GenLang {
             Self::RustJsonRpc(_) => gen_cmd.find_subcommand_mut("rust-jsonrpc"),
             Self::RustAxum(_) => gen_cmd.find_subcommand_mut("rust-axum"),
             Self::Typescript(_) => gen_cmd.find_subcommand_mut("typescript"),
+            Self::TypescriptHttp(_) => gen_cmd.find_subcommand_mut("typescript-http"),
             Self::Go(_) => gen_cmd.find_subcommand_mut("go"),
             Self::GoHttp(_) => gen_cmd.find_subcommand_mut("go-http"),
             Self::Python(_) => gen_cmd.find_subcommand_mut("python"),
@@ -185,6 +201,7 @@ impl GenLang {
             Self::RustJsonRpc(_) => "xidlc gen rust-jsonrpc [OPTIONS] [FILES]...",
             Self::RustAxum(_) => "xidlc gen rust-axum [OPTIONS] [FILES]...",
             Self::Typescript(_) => "xidlc gen typescript [OPTIONS] [FILES]...",
+            Self::TypescriptHttp(_) => "xidlc gen typescript-http [OPTIONS] [FILES]...",
             Self::Go(_) => "xidlc gen go [OPTIONS] [FILES]...",
             Self::GoHttp(_) => "xidlc gen go-http [OPTIONS] [FILES]...",
             Self::Python(_) => "xidlc gen python [OPTIONS] [FILES]...",
@@ -214,6 +231,17 @@ impl SharedGenArgs {
             out_dir: self.out_dir,
             client: args.client,
             server: args.server,
+            dry_run: self.dry_run,
+            files: args.files,
+        }
+    }
+
+    fn into_client_only(self, lang: impl Into<String>, args: ClientOnlyArgs) -> ArgsGenerate {
+        ArgsGenerate {
+            lang: lang.into(),
+            out_dir: self.out_dir,
+            client: args.client,
+            server: false,
             dry_run: self.dry_run,
             files: args.files,
         }

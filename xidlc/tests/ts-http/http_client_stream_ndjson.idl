@@ -1,0 +1,1 @@
+#include "../shared/http_client_stream_ndjson.idl"

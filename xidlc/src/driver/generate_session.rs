@@ -107,6 +107,10 @@ impl CodegenSession {
             Plugin::Openrpc => run_server!(crate::generate::openrpc::OpenRpcCodegen),
             #[cfg(feature = "gen-typescript")]
             Plugin::Typescript => run_server!(crate::generate::typescript::TypescriptCodegen),
+            #[cfg(feature = "gen-typescript-http")]
+            Plugin::TypescriptHttp => {
+                run_server!(crate::generate::typescript_http::TypescriptHttpCodegen)
+            }
             Plugin::Custom(_) => unreachable!("custom plugins use spawn_custom_codegen_server"),
             var => panic!("does not support {var:?}"),
         }
