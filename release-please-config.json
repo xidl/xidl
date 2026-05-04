@@ -26,11 +26,6 @@
           "type": "toml"
         },
         {
-          "jsonpath": "$.workspace.dependencies.xidl-xcdr.version",
-          "path": "Cargo.toml",
-          "type": "toml"
-        },
-        {
           "jsonpath": "$.workspace.dependencies.xidl-jsonrpc.version",
           "path": "Cargo.toml",
           "type": "toml"
@@ -87,11 +82,6 @@
         },
         {
           "jsonpath": "$.package[?(@.name.value=='xidl-parser')].version",
-          "path": "Cargo.lock",
-          "type": "toml"
-        },
-        {
-          "jsonpath": "$.package[?(@.name.value=='xidl-xcdr')].version",
           "path": "Cargo.lock",
           "type": "toml"
         },

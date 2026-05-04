@@ -23,7 +23,6 @@
 | `docs/rust-axum.md`              | Docs           | `rust-integration.mdx`            | Move                |
 | `docs/rust-jsonrpc.md`           | Docs           | `jsonrpc.mdx`                     | Merge               |
 | `docs/openapi.md`                | Docs           | `http.mdx`                        | Merge               |
-| `docs/xcdr.md`                   | RFC            | `xcdr.mdx`                        | New RFC Page        |
 | `docs/development/*`             | Defer          | -                                 | Internal use        |
 | `docs/ai/*`                      | Defer          | -                                 | Internal use        |
 

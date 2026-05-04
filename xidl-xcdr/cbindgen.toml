@@ -1,6 +1,0 @@
-language = "C"
-include_guard = "XIDL_XCDR_H"
-pragma_once = false
-
-[parse]
-expand = ["xidl-xcdr"]

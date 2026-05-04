@@ -99,24 +99,6 @@ pub struct BitValue {
     pub ident: String,
 }
 
-impl UnionDef {
-    pub fn serialize_kind(&self, config: &SerializeConfig) -> SerializeKind {
-        config.resolve_for_annotations(&self.annotations)
-    }
-}
-
-impl BitsetDcl {
-    pub fn serialize_kind(&self, config: &SerializeConfig) -> SerializeKind {
-        config.resolve_for_annotations(&self.annotations)
-    }
-}
-
-impl BitmaskDcl {
-    pub fn serialize_kind(&self, config: &SerializeConfig) -> SerializeKind {
-        config.resolve_for_annotations(&self.annotations)
-    }
-}
-
 impl From<crate::typed_ast::ConstrTypeDcl> for ConstrTypeDcl {
     fn from(value: crate::typed_ast::ConstrTypeDcl) -> Self {
         match value {

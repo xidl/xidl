@@ -295,10 +295,10 @@ fn maps_builtin_annotations_to_hir_variants() {
         ),
         (
             BuiltinAnnotation::DataRepresentation {
-                kinds: vec![DataRepresentationKind::Xcdr1, DataRepresentationKind::Xml],
+                kinds: vec![DataRepresentationKind::Xml],
             },
             Annotation::DataRepresentation {
-                kinds: vec!["XCDR1".to_string(), "XML".to_string()],
+                kinds: vec!["XML".to_string()],
             },
         ),
         (

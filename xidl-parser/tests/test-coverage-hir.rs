@@ -153,17 +153,6 @@ fn hir_struct_and_type_dcl_cover_optional_and_inline_typedef_paths() {
     };
     assert!(item.member[0].is_optional());
 
-    let no_optional = xidl_parser::hir::StructDcl {
-        annotations: vec![xidl_parser::hir::Annotation::Appendable],
-        ident: "Plain".to_string(),
-        parent: Vec::new(),
-        member: Vec::new(),
-    };
-    assert!(matches!(
-        no_optional.serialize_kind(&xidl_parser::hir::SerializeConfig::default()),
-        xidl_parser::hir::SerializeKind::Cdr
-    ));
-
     let scoped_optional = xidl_parser::hir::Member {
         annotations: vec![xidl_parser::hir::Annotation::ScopedName {
             name: xidl_parser::hir::ScopedName {

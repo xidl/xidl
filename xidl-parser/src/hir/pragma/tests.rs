@@ -11,18 +11,6 @@ fn pragma(argument: &str) -> PreprocCall {
 #[test]
 fn parses_supported_xidlc_pragmas() {
     assert!(matches!(
-        parse_xidlc_pragma(&pragma("xidlc XCDR1")),
-        Some(Pragma::XidlcVersion(SerializeVersion::Xcdr1))
-    ));
-    assert!(matches!(
-        parse_xidlc_pragma(&pragma("xidlc XCDR2")),
-        Some(Pragma::XidlcVersion(SerializeVersion::Xcdr2))
-    ));
-    assert!(matches!(
-        parse_xidlc_pragma(&pragma("xidlc serialize(plain_cdr2)")),
-        Some(Pragma::XidlcSerialize(SerializeKind::PlainCdr2))
-    ));
-    assert!(matches!(
         parse_xidlc_pragma(&pragma("xidlc package \"demo.pkg\"")),
         Some(Pragma::XidlcPackage(value)) if value == "demo.pkg"
     ));
@@ -56,14 +44,14 @@ fn rejects_non_xidlc_or_incomplete_pragmas() {
     assert!(
         parse_xidlc_pragma(&PreprocCall {
             directive: PreprocDirective("#define".to_string()),
-            argument: Some(PreprocArg("xidlc XCDR1".to_string())),
+            argument: Some(PreprocArg("xidlc package demo".to_string())),
         })
         .is_none()
     );
     assert!(matches!(
-        parse_xidlc_pragma(&pragma("other XCDR1")),
+        parse_xidlc_pragma(&pragma("other package demo")),
         Some(Pragma::Custom(CustomPragma { directive, argument }))
-            if directive == "#pragma" && argument.as_deref() == Some("other XCDR1")
+            if directive == "#pragma" && argument.as_deref() == Some("other package demo")
     ));
     assert!(matches!(
         parse_xidlc_pragma(&pragma("xidlc")),
@@ -86,9 +74,9 @@ fn rejects_non_xidlc_or_incomplete_pragmas() {
             if directive == "#pragma" && argument.as_deref() == Some("xidlc service")
     ));
     assert!(matches!(
-        parse_xidlc_pragma(&pragma("xidlc serialize(unknown)")),
+        parse_xidlc_pragma(&pragma("xidlc unknown(value)")),
         Some(Pragma::Custom(CustomPragma { directive, argument }))
-            if directive == "#pragma" && argument.as_deref() == Some("xidlc serialize(unknown)")
+            if directive == "#pragma" && argument.as_deref() == Some("xidlc unknown(value)")
     ));
     assert!(matches!(
         parse_xidlc_pragma(&PreprocCall {
@@ -108,29 +96,7 @@ fn trims_quoted_and_unquoted_values() {
 }
 
 #[test]
-fn parses_all_serialize_kinds_and_invalid_openapi_tokens() {
-    for (name, kind) in [
-        ("CDR", SerializeKind::Cdr),
-        ("PLAIN_CDR", SerializeKind::PlainCdr),
-        ("PL_CDR", SerializeKind::PlCdr),
-        ("PLAIN_CDR2", SerializeKind::PlainCdr2),
-        ("DELIMITED_CDR", SerializeKind::DelimitedCdr),
-        ("PL_CDR2", SerializeKind::PlCdr2),
-    ] {
-        assert!(matches!(
-            parse_xidlc_pragma(&pragma(&format!("xidlc serialize({name})"))),
-            Some(Pragma::XidlcSerialize(value)) if std::mem::discriminant(&value) == std::mem::discriminant(&kind)
-        ));
-    }
-    assert!(matches!(
-        parse_xidlc_pragma(&pragma("xidlc serialize(XCDR1)")),
-        Some(Pragma::XidlcVersion(SerializeVersion::Xcdr1))
-    ));
-    assert!(matches!(
-        parse_xidlc_pragma(&pragma("xidlc serialize(XCDR2)")),
-        Some(Pragma::XidlcVersion(SerializeVersion::Xcdr2))
-    ));
-
+fn rejects_invalid_openapi_tokens() {
     assert!(matches!(
         parse_xidlc_pragma(&pragma("xidlc openapi unknown value")),
         Some(Pragma::Custom(CustomPragma { directive, argument }))

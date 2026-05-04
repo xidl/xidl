@@ -32,9 +32,7 @@ pub fn generate_with_properties(
         .unwrap_or("output");
     let filename = format!("{stem}.rs");
 
-    let typeobject_path = "xidl_typeobject";
-
-    let renderer = RustRenderer::new(typeobject_path.to_string(), properties.clone())?;
+    let renderer = RustRenderer::new(properties.clone())?;
     let output = spec.render(&renderer)?;
     let source = renderer.render_spec(&output.source)?;
 
@@ -55,8 +53,6 @@ impl crate::jsonrpc::Codegen for RustCodegen {
     async fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
         Ok(crate::macros::hashmap! {
             "enable_render_header" => true,
-            "enable_serialize" => true,
-            "enable_deserialize" => true,
             "enable_metadata" => true
         })
     }

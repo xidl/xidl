@@ -418,7 +418,7 @@ impl<'a> FromTreeSitter<'a> for DataRepresentationKind {
         node: tree_sitter::Node<'a>,
         ctx: &mut crate::parser::ParseContext<'a>,
     ) -> crate::error::ParserResult<Self> {
-        parse_enum!(Self, node, ctx, { "XCDR" => Self::Xcdr, "XCDR1" => Self::Xcdr1, "XML" => Self::Xml, "XCDR2" => Self::Xcdr2 })
+        parse_enum!(Self, node, ctx, { "XML" => Self::Xml })
     }
 }
 
