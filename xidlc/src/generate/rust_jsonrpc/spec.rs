@@ -5,7 +5,7 @@ use xidl_parser::jsonrpc_hir::JsonRpcHirDocument;
 
 impl JsonRpcRender for JsonRpcHirDocument {
     fn render(&self, renderer: &JsonRpcRenderer) -> IdlcResult<JsonRpcRenderOutput> {
-        let body = render_module_body(&self.interfaces, renderer)?;
-        Ok(JsonRpcRenderOutput { source: vec![body] })
+        let source = render_module_body(&self.interfaces, renderer)?;
+        Ok(JsonRpcRenderOutput { source })
     }
 }

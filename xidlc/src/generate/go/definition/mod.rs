@@ -21,11 +21,22 @@ pub(crate) use self::definition_types::{
 };
 use super::GoRenderContext;
 
-pub(crate) fn render_spec(ctx: &mut GoRenderContext, spec: &hir::Specification) -> IdlcResult<()> {
+pub(crate) fn render_spec(
+    ctx: &mut GoRenderContext,
+    spec: &hir::Specification,
+) -> IdlcResult<Vec<String>> {
+    let mut blocks = Vec::new();
     for def in &spec.0 {
+        let mut body = String::new();
+        std::mem::swap(&mut body, &mut ctx.body);
         render_definition(ctx, def, &[])?;
+        let block = std::mem::take(&mut ctx.body);
+        ctx.body = body;
+        if !block.is_empty() {
+            blocks.push(block);
+        }
     }
-    Ok(())
+    Ok(blocks)
 }
 
 fn render_definition(

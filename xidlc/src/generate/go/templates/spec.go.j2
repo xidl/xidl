@@ -6,4 +6,4 @@ package {{ package_name }}
     import "context"
 
 {%- endif %}
-{{ body }}
+{% for block in blocks %}{{ block }}{%- endfor %}

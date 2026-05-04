@@ -6,7 +6,7 @@ use xidl_parser::jsonrpc_hir::JsonRpcInterface;
 pub(crate) fn render_module_body(
     interfaces: &[JsonRpcInterface],
     renderer: &JsonRpcRenderer,
-) -> IdlcResult<String> {
+) -> IdlcResult<Vec<String>> {
     render_module_body_with_path(interfaces, renderer, &[])
 }
 
@@ -14,7 +14,7 @@ fn render_module_body_with_path(
     interfaces: &[JsonRpcInterface],
     renderer: &JsonRpcRenderer,
     module_path: &[String],
-) -> IdlcResult<String> {
+) -> IdlcResult<Vec<String>> {
     let mut out = Vec::new();
     let mut module_order = Vec::new();
 
@@ -41,16 +41,16 @@ fn render_module_body_with_path(
     for name in module_order {
         let mut next_path = module_path.to_vec();
         next_path.push(name.clone());
-        let body = render_module_body_with_path(interfaces, renderer, &next_path)?;
+        let definitions = render_module_body_with_path(interfaces, renderer, &next_path)?;
         let rendered = renderer.render_template(
             "module.rs.j2",
             &serde_json::json!({
                 "ident": crate::generate::rust::util::rust_ident(&name),
-                "body": &body,
+                "definitions": &definitions,
             }),
         )?;
         out.push(rendered);
     }
 
-    Ok(out.join("\n"))
+    Ok(out)
 }

@@ -19,7 +19,7 @@ path_value,
 query_value,
 read_json_body,
 read_json_field,
-{%- if "read_json_value(" in body %}
+{%- if imports.read_json_value %}
     read_json_value,
 {%- endif %}
 read_scalar,
@@ -30,4 +30,4 @@ require_security,
 
 # generated http module: {{ module_name }}
 
-{{ body }}
+{% for block in blocks %}{{ block }}{%- endfor %}

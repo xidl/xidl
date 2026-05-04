@@ -152,5 +152,5 @@ pub(crate) struct MethodMeta {
 #[derive(Serialize)]
 pub struct GoHttpRenderOutput {
     package_name: String,
-    body: String,
+    blocks: Vec<String>,
 }

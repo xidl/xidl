@@ -15,21 +15,21 @@ struct TypesFileContext {
 #[derive(Serialize)]
 struct ClientFileContext {
     file_stem: String,
-    helpers: String,
+    helpers: Vec<String>,
     blocks: Vec<String>,
 }
 
 #[derive(Serialize)]
 struct ServerFileContext {
     file_stem: String,
-    helpers: String,
+    helpers: Vec<String>,
     blocks: Vec<String>,
 }
 
 #[derive(Serialize)]
 struct ModuleContext {
     ident: String,
-    body: String,
+    blocks: Vec<String>,
 }
 
 pub(crate) struct TsHttpOutput {
@@ -59,7 +59,7 @@ pub(crate) fn render_spec(
             "http/client.ts.j2",
             &ClientFileContext {
                 file_stem: file_stem.to_string(),
-                helpers: renderer.render_template("http/client_helpers.ts.j2", &())?,
+                helpers: vec![renderer.render_template("http/client_helpers.ts.j2", &())?],
                 blocks: blocks.client,
             },
         )?,
@@ -67,7 +67,7 @@ pub(crate) fn render_spec(
             "http/server.ts.j2",
             &ServerFileContext {
                 file_stem: file_stem.to_string(),
-                helpers: renderer.render_template("http/server_helpers.ts.j2", &())?,
+                helpers: vec![renderer.render_template("http/server_helpers.ts.j2", &())?],
                 blocks: blocks.server,
             },
         )?,
@@ -119,7 +119,7 @@ fn render_module(renderer: &TypescriptRenderer, ident: &str, body: &str) -> Idlc
         "http/module.ts.j2",
         &ModuleContext {
             ident: ident.to_string(),
-            body: crate::generate::typescript::definition::names::indent_block(body, 1),
+            blocks: vec![crate::generate::typescript::definition::names::indent_block(body, 1)],
         },
     )
 }

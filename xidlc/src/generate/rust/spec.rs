@@ -6,7 +6,7 @@ use xidl_parser::hir;
 impl RustRender for hir::Specification {
     fn render(&self, renderer: &RustRenderer) -> IdlcResult<RustRenderOutput> {
         let defs = self.0.iter().collect::<Vec<_>>();
-        let body = render_module_body(&defs, renderer)?;
-        Ok(RustRenderOutput { source: vec![body] })
+        let source = render_module_body(&defs, renderer)?;
+        Ok(RustRenderOutput { source })
     }
 }

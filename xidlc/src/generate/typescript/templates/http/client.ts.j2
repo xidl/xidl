@@ -3,7 +3,9 @@
     import type * as types from "./{{ file_stem }}";
     import type * as ifaceTypes from "./{{ file_stem }}.iface";
     import * as ifaceSchemas from "./{{ file_stem }}.iface.zod";
-    {{ helpers }}
+    {% for helper in helpers %}
+        {{ helper }}
+    {% endfor %}
     {% for block in blocks %}
         {{ block }}
     {% endfor %}
