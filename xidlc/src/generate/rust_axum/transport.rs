@@ -3,6 +3,7 @@ use crate::generate::rust::util::{
     array_type, declarator_dims, declarator_name, rust_ident, rust_scoped_name,
     serde_rename_from_annotations,
 };
+use serde::Serialize;
 use std::collections::{BTreeSet, HashMap};
 use xidl_parser::hir;
 
@@ -21,11 +22,35 @@ pub enum TransportDirection {
     Out,
 }
 
+#[derive(Serialize)]
 pub struct TransportModules {
-    pub inbound_name: String,
-    pub outbound_name: String,
-    pub inbound: String,
-    pub outbound: String,
+    pub inbound: TransportModuleContext,
+    pub outbound: TransportModuleContext,
+}
+
+#[derive(Serialize)]
+pub struct TransportModuleContext {
+    pub name: String,
+    pub items: Vec<TransportItemContext>,
+}
+
+#[derive(Serialize)]
+pub struct TransportItemContext {
+    pub kind: String,
+    pub transport_ident: String,
+    pub public_path: String,
+    pub fields: Vec<TransportFieldContext>,
+    pub variants: Vec<String>,
+}
+
+#[derive(Serialize)]
+pub struct TransportFieldContext {
+    pub name: String,
+    pub ty: String,
+    pub serde_rename: Option<String>,
+    pub optional: bool,
+    pub encode_expr: String,
+    pub decode_expr: String,
 }
 
 pub struct TransportTracker {
@@ -61,8 +86,6 @@ impl TransportTracker {
         module_path: &[String],
     ) -> IdlcResult<TransportModules> {
         Ok(TransportModules {
-            inbound_name: self.inbound_module.clone(),
-            outbound_name: self.outbound_module.clone(),
             inbound: render_module(
                 &self.inbound,
                 TransportDirection::In,
@@ -144,121 +167,80 @@ fn render_module(
     module_name: &str,
     registry: &TypeRegistry,
     module_path: &[String],
-) -> IdlcResult<String> {
-    let mut out = String::new();
+) -> IdlcResult<TransportModuleContext> {
+    let mut items = Vec::new();
     for name in names {
         let Some(def) = registry.get(name) else {
             continue;
         };
         match def {
-            TransportTypeDef::Struct(def) => render_struct(
-                &mut out,
+            TransportTypeDef::Struct(def) => items.push(render_struct(
                 name,
                 def,
                 direction,
                 module_name,
                 registry,
                 module_path,
-            )?,
-            TransportTypeDef::Enum(def) => render_enum(&mut out, name, def, module_path)?,
+            )?),
+            TransportTypeDef::Enum(def) => items.push(render_enum(name, def, module_path)),
             TransportTypeDef::Typedef(_) => {}
         }
     }
-    Ok(out)
+    Ok(TransportModuleContext {
+        name: module_name.to_string(),
+        items,
+    })
 }
 
 fn render_struct(
-    out: &mut String,
     canonical: &str,
     def: &hir::StructDcl,
     direction: TransportDirection,
     module_name: &str,
     registry: &TypeRegistry,
     module_path: &[String],
-) -> IdlcResult<()> {
-    let transport = transport_ident(canonical);
-    let public = public_path_from_canonical(canonical, module_path);
-    out.push_str("#[derive(::serde::Serialize, ::serde::Deserialize)]\n");
-    out.push_str(&format!("pub(super) struct {transport} {{\n"));
+) -> IdlcResult<TransportItemContext> {
+    let mut fields = Vec::new();
     for member in &def.member {
         let rename = serde_rename_from_annotations(&member.annotations);
         for decl in &member.ident {
-            if let Some(rename) = &rename {
-                out.push_str(&format!("    #[serde(rename = \"{rename}\")]\n"));
-            }
-            if member.is_optional() {
-                out.push_str("    #[serde(default)]\n");
-            }
             let name = rust_ident(&declarator_name(decl));
             let ty = member_ty(member, decl, direction, module_name, registry)?;
-            out.push_str(&format!("    {name}: {ty},\n"));
+            fields.push(TransportFieldContext {
+                name: name.clone(),
+                ty,
+                serde_rename: rename.clone(),
+                optional: member.is_optional(),
+                encode_expr: encode_expr(&format!("value.{name}"), &member.ty, registry)?,
+                decode_expr: decode_expr(&format!("value.{name}"), &member.ty, registry)?,
+            });
         }
     }
-    out.push_str("}\n\n");
-    out.push_str(&format!("impl From<{public}> for {transport} {{\n"));
-    out.push_str(&format!("    fn from(value: {public}) -> Self {{\n"));
-    out.push_str("        Self {\n");
-    for member in &def.member {
-        for decl in &member.ident {
-            let name = rust_ident(&declarator_name(decl));
-            out.push_str(&format!(
-                "            {name}: {} ,\n",
-                encode_expr(&format!("value.{name}"), &member.ty, registry)?
-            ));
-        }
-    }
-    out.push_str("        }\n    }\n}\n\n");
-    out.push_str(&format!("impl From<{transport}> for {public} {{\n"));
-    out.push_str(&format!("    fn from(value: {transport}) -> Self {{\n"));
-    out.push_str("        Self {\n");
-    for member in &def.member {
-        for decl in &member.ident {
-            let name = rust_ident(&declarator_name(decl));
-            out.push_str(&format!(
-                "            {name}: {} ,\n",
-                decode_expr(&format!("value.{name}"), &member.ty, registry)?
-            ));
-        }
-    }
-    out.push_str("        }\n    }\n}\n\n");
-    Ok(())
+    Ok(TransportItemContext {
+        kind: "struct".to_string(),
+        transport_ident: transport_ident(canonical),
+        public_path: public_path_from_canonical(canonical, module_path),
+        fields,
+        variants: Vec::new(),
+    })
 }
 
 fn render_enum(
-    out: &mut String,
     canonical: &str,
     def: &hir::EnumDcl,
     module_path: &[String],
-) -> IdlcResult<()> {
-    let transport = transport_ident(canonical);
-    let public = public_path_from_canonical(canonical, module_path);
-    out.push_str("#[derive(::serde::Serialize, ::serde::Deserialize)]\n");
-    out.push_str(&format!("pub(super) enum {transport} {{\n"));
-    for item in &def.member {
-        out.push_str(&format!("    {},\n", rust_ident(&item.ident)));
+) -> TransportItemContext {
+    TransportItemContext {
+        kind: "enum".to_string(),
+        transport_ident: transport_ident(canonical),
+        public_path: public_path_from_canonical(canonical, module_path),
+        fields: Vec::new(),
+        variants: def
+            .member
+            .iter()
+            .map(|item| rust_ident(&item.ident))
+            .collect(),
     }
-    out.push_str("}\n\n");
-    out.push_str(&format!("impl From<{public}> for {transport} {{\n"));
-    out.push_str(&format!(
-        "    fn from(value: {public}) -> Self {{\n        match value {{\n"
-    ));
-    for item in &def.member {
-        let name = rust_ident(&item.ident);
-        out.push_str(&format!("            {public}::{name} => Self::{name},\n"));
-    }
-    out.push_str("        }\n    }\n}\n\n");
-    out.push_str(&format!("impl From<{transport}> for {public} {{\n"));
-    out.push_str(&format!(
-        "    fn from(value: {transport}) -> Self {{\n        match value {{\n"
-    ));
-    for item in &def.member {
-        let name = rust_ident(&item.ident);
-        out.push_str(&format!(
-            "            {transport}::{name} => Self::{name},\n"
-        ));
-    }
-    out.push_str("        }\n    }\n}\n\n");
-    Ok(())
 }
 
 fn member_ty(
@@ -462,3 +444,7 @@ fn public_path_from_canonical(value: &str, module_path: &[String]) -> String {
 fn render_public_scoped(value: &hir::ScopedName) -> String {
     rust_scoped_name(value)
 }
+
+#[cfg(test)]
+#[path = "transport/tests.rs"]
+mod tests;

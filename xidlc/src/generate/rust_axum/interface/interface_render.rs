@@ -74,8 +74,6 @@ pub(crate) fn render_interface_def(
         "ident": rust_ident(&def.header.ident),
         "methods": methods,
         "rust_attrs": rust_passthrough_attrs_from_annotations(interface_annotations),
-        "inbound_transport_name": transport_modules.inbound_name,
-        "outbound_transport_name": transport_modules.outbound_name,
         "inbound_transport": transport_modules.inbound,
         "outbound_transport": transport_modules.outbound,
     });

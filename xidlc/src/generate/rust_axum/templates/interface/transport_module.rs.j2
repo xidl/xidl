@@ -1,0 +1,66 @@
+mod {{ module.name }} {
+    use super::*;
+    {% for item in module.items %}
+        #[derive(::serde::Serialize, ::serde::Deserialize)]
+        {% if item.kind == "struct" %}
+            pub(super) struct {{ item.transport_ident }} {
+                {% for field in item.fields %}
+                    {% if field.serde_rename %}
+                        #[serde(rename = "{{ field.serde_rename }}")]
+                    {% endif %}
+                    {% if field.optional %}
+                        #[serde(default)]
+                    {% endif %}
+                    {{ field.name }}: {{ field.ty }},
+                {% endfor %}
+            }
+
+            impl From<{{ item.public_path }}> for {{ item.transport_ident }} {
+                fn from(value: {{ item.public_path }}) -> Self {
+                    Self {
+                        {% for field in item.fields %}
+                            {{ field.name }}: {{ field.encode_expr }},
+                        {% endfor %}
+                    }
+                }
+            }
+
+            impl From<{{ item.transport_ident }}> for {{ item.public_path }} {
+                fn from(value: {{ item.transport_ident }}) -> Self {
+                    Self {
+                        {% for field in item.fields %}
+                            {{ field.name }}: {{ field.decode_expr }},
+                        {% endfor %}
+                    }
+                }
+            }
+        {% else %}
+            pub(super) enum {{ item.transport_ident }} {
+                {% for variant in item.variants %}
+                    {{ variant }},
+                {% endfor %}
+            }
+
+            impl From<{{ item.public_path }}> for {{ item.transport_ident }} {
+                fn from(value: {{ item.public_path }}) -> Self {
+                    match value {
+                        {% for variant in item.variants %}
+                            {{ item.public_path }}::{{ variant }} => Self::{{ variant }},
+                        {% endfor %}
+                    }
+                }
+            }
+
+            impl From<{{ item.transport_ident }}> for {{ item.public_path }} {
+                fn from(value: {{ item.transport_ident }}) -> Self {
+                    match value {
+                        {% for variant in item.variants %}
+                            {{ item.transport_ident }}::{{ variant }} => Self::{{ variant }},
+                        {% endfor %}
+                    }
+                }
+            }
+        {% endif %}
+
+    {% endfor %}
+}
