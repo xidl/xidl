@@ -4,7 +4,8 @@ use serde::Serialize;
 use xidl_parser::hir;
 use xidl_parser::http_hir::HttpHirDocument;
 
-use super::interface::{TsHttpBlocks, render_interface};
+use super::interface::render_interface;
+use super::model::TsHttpBlocks;
 
 #[derive(Serialize)]
 struct TypesFileContext {
@@ -13,6 +14,13 @@ struct TypesFileContext {
 
 #[derive(Serialize)]
 struct ClientFileContext {
+    file_stem: String,
+    helpers: String,
+    blocks: Vec<String>,
+}
+
+#[derive(Serialize)]
+struct ServerFileContext {
     file_stem: String,
     helpers: String,
     blocks: Vec<String>,
@@ -28,6 +36,7 @@ pub(crate) struct TsHttpOutput {
     pub(crate) types: String,
     pub(crate) zod: String,
     pub(crate) client: String,
+    pub(crate) server: String,
 }
 
 pub(crate) fn render_spec(
@@ -52,6 +61,14 @@ pub(crate) fn render_spec(
                 file_stem: file_stem.to_string(),
                 helpers: renderer.render_template("http/client_helpers.ts.j2", &())?,
                 blocks: blocks.client,
+            },
+        )?,
+        server: renderer.render_template(
+            "http/server.ts.j2",
+            &ServerFileContext {
+                file_stem: file_stem.to_string(),
+                helpers: renderer.render_template("http/server_helpers.ts.j2", &())?,
+                blocks: blocks.server,
             },
         )?,
     })
@@ -79,6 +96,8 @@ fn render_defs(
                         .push(render_module(renderer, &ident, &body.zod.join("\n"))?);
                     out.client
                         .push(render_module(renderer, &ident, &body.client.join("\n"))?);
+                    out.server
+                        .push(render_module(renderer, &ident, &body.server.join("\n"))?);
                 }
             }
             hir::Definition::InterfaceDcl(interface) => {

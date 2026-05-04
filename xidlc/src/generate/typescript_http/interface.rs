@@ -1,3 +1,8 @@
+use super::model::{
+    ClientClassContext, MethodModel, PathParamContext, RequestPayloadEntry, SecurityContext,
+    TsHttpBlocks, ValueParamContext,
+};
+use super::server::render_server_block;
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::typescript::TypescriptRenderer;
 use crate::generate::typescript::definition::TypeRefTarget;
@@ -8,95 +13,11 @@ use crate::generate::typescript::definition::names::{method_struct_prefix, scope
 use crate::generate::typescript::definition::type_expr::{
     ts_type_for_type_spec, zod_schema_for_type_spec,
 };
-use serde::Serialize;
 use xidl_parser::hir;
 use xidl_parser::http_hir::{
     HttpHirDocument, HttpOperation, HttpParam, HttpParamKind,
     semantics::{HttpSecurityRequirement, HttpStreamCodec, HttpStreamKind},
 };
-
-#[derive(Default)]
-pub(crate) struct TsHttpBlocks {
-    pub(crate) types: Vec<String>,
-    pub(crate) zod: Vec<String>,
-    pub(crate) client: Vec<String>,
-}
-
-impl TsHttpBlocks {
-    pub(crate) fn extend(&mut self, other: Self) {
-        self.types.extend(other.types);
-        self.zod.extend(other.zod);
-        self.client.extend(other.client);
-    }
-
-    pub(crate) fn is_empty(&self) -> bool {
-        self.types.is_empty() && self.zod.is_empty() && self.client.is_empty()
-    }
-}
-
-#[derive(Serialize)]
-struct ClientClassContext {
-    client_name: String,
-    methods: Vec<ClientMethodContext>,
-}
-
-#[derive(Serialize)]
-struct ClientMethodContext {
-    name: String,
-    params: Vec<ClientParamContext>,
-    return_ty: String,
-    request_schema_ref: Option<String>,
-    request_payload: Vec<RequestPayloadEntry>,
-    path: String,
-    http_method: String,
-    request_content_type: String,
-    response_content_type: String,
-    path_params: Vec<PathParamContext>,
-    query_params: Vec<ValueParamContext>,
-    header_params: Vec<ValueParamContext>,
-    cookie_params: Vec<ValueParamContext>,
-    response_header_params: Vec<ValueParamContext>,
-    response_cookie_params: Vec<ValueParamContext>,
-    body_entries: Vec<RequestPayloadEntry>,
-    body_single: Option<String>,
-    response_schema_ref: Option<String>,
-    response_body_mode: String,
-    is_server_stream: bool,
-    is_client_stream: bool,
-    stream_item_ty: Option<String>,
-    client_stream_item_ty: Option<String>,
-    security: Vec<SecurityContext>,
-}
-
-#[derive(Clone, Serialize)]
-struct RequestPayloadEntry {
-    raw_name: String,
-    access: String,
-}
-
-#[derive(Clone, Serialize)]
-struct PathParamContext {
-    template_name: String,
-    access: String,
-    catch_all: bool,
-}
-
-#[derive(Clone, Serialize)]
-struct ValueParamContext {
-    raw_name: String,
-    access: String,
-    optional: bool,
-    is_multi: bool,
-}
-
-#[derive(Clone, Serialize)]
-struct SecurityContext {
-    kind: String,
-    location: Option<String>,
-    name: Option<String>,
-    realm: Option<String>,
-    scopes: Vec<String>,
-}
 
 pub(crate) fn render_interface(
     interface: &hir::InterfaceDcl,
@@ -126,75 +47,50 @@ pub(crate) fn render_interface(
             &ClientClassContext {
                 client_name: format!("{}Client", ts_ident(&def.header.ident)),
                 methods: methods
-                    .into_iter()
+                    .iter()
+                    .map(|method| MethodModel {
+                        name: method.name.clone(),
+                        params: method.params.clone(),
+                        request_name: method.request_name.clone(),
+                        request_schema_ref: method.request_schema_ref.clone(),
+                        request_payload: method.request_payload.clone(),
+                        response_name: method.response_name.clone(),
+                        response_schema_ref: method.response_schema_ref.clone(),
+                        request_content_type: method.request_content_type.clone(),
+                        response_content_type: method.response_content_type.clone(),
+                        path: method.path.clone(),
+                        http_method: method.http_method.clone(),
+                        path_params: method.path_params.clone(),
+                        query_params: method.query_params.clone(),
+                        header_params: method.header_params.clone(),
+                        cookie_params: method.cookie_params.clone(),
+                        response_header_params: method.response_header_params.clone(),
+                        response_cookie_params: method.response_cookie_params.clone(),
+                        body_entries: method.body_entries.clone(),
+                        body_single: method.body_single.clone(),
+                        return_ty: method.return_ty.clone(),
+                        response_body_mode: method.response_body_mode.clone(),
+                        response_body_entries: method.response_body_entries.clone(),
+                        stream_item_ty: method.stream_item_ty.clone(),
+                        client_stream_item_ty: method.client_stream_item_ty.clone(),
+                        is_server_stream: method.is_server_stream,
+                        is_client_stream: method.is_client_stream,
+                        security: method.security.clone(),
+                        request_fields: method.request_fields.clone(),
+                        response_fields: method.response_fields.clone(),
+                    })
                     .map(MethodModel::into_client_context)
                     .collect(),
             },
         )?,
     );
+    out.server.push(render_server_block(
+        &def.header.ident,
+        module_path,
+        methods,
+        renderer,
+    )?);
     Ok(out)
-}
-
-struct MethodModel {
-    name: String,
-    params: Vec<ClientParamContext>,
-    request_name: Option<String>,
-    request_schema_ref: Option<String>,
-    request_payload: Vec<RequestPayloadEntry>,
-    response_name: Option<String>,
-    response_schema_ref: Option<String>,
-    request_content_type: String,
-    response_content_type: String,
-    path: String,
-    http_method: String,
-    path_params: Vec<PathParamContext>,
-    query_params: Vec<ValueParamContext>,
-    header_params: Vec<ValueParamContext>,
-    cookie_params: Vec<ValueParamContext>,
-    response_header_params: Vec<ValueParamContext>,
-    response_cookie_params: Vec<ValueParamContext>,
-    body_entries: Vec<RequestPayloadEntry>,
-    body_single: Option<String>,
-    return_ty: String,
-    response_body_mode: String,
-    stream_item_ty: Option<String>,
-    client_stream_item_ty: Option<String>,
-    is_server_stream: bool,
-    is_client_stream: bool,
-    security: Vec<SecurityContext>,
-    request_fields: Vec<ParamDeclContext>,
-    response_fields: Vec<ParamDeclContext>,
-}
-
-impl MethodModel {
-    fn into_client_context(self) -> ClientMethodContext {
-        ClientMethodContext {
-            name: self.name,
-            params: self.params,
-            return_ty: self.return_ty,
-            request_schema_ref: self.request_schema_ref,
-            request_payload: self.request_payload,
-            path: self.path,
-            http_method: self.http_method,
-            request_content_type: self.request_content_type,
-            response_content_type: self.response_content_type,
-            path_params: self.path_params,
-            query_params: self.query_params,
-            header_params: self.header_params,
-            cookie_params: self.cookie_params,
-            response_header_params: self.response_header_params,
-            response_cookie_params: self.response_cookie_params,
-            body_entries: self.body_entries,
-            body_single: self.body_single,
-            response_schema_ref: self.response_schema_ref,
-            response_body_mode: self.response_body_mode,
-            is_server_stream: self.is_server_stream,
-            is_client_stream: self.is_client_stream,
-            stream_item_ty: self.stream_item_ty,
-            client_stream_item_ty: self.client_stream_item_ty,
-            security: self.security,
-        }
-    }
 }
 
 fn build_method_model(
@@ -261,6 +157,7 @@ fn build_method_model(
                 catch_all: path.contains(&format!("{{*{}}}", param.raw_name)),
                 template_name: param.raw_name,
                 access: param.access,
+                key_name: param.key_name,
             })
             .collect(),
         query_params: value_params(op, HttpParamKind::Query),
@@ -280,6 +177,7 @@ fn build_method_model(
         body_single: direct_body_access(&op.request_params),
         return_ty,
         response_body_mode: response_body_mode(op).to_string(),
+        response_body_entries: response_body_entries(op),
         stream_item_ty: server_stream_ty(op, module_path),
         client_stream_item_ty,
         is_server_stream: matches!(op.stream.kind, Some(HttpStreamKind::Server)),
@@ -456,6 +354,26 @@ fn response_fields(op: &HttpOperation, module_path: &[String]) -> Vec<ParamDeclC
     fields
 }
 
+fn response_body_entries(op: &HttpOperation) -> Vec<RequestPayloadEntry> {
+    let mut entries = Vec::new();
+    if op.return_type.is_some() {
+        entries.push(RequestPayloadEntry {
+            raw_name: "return".to_string(),
+            access: "return".to_string(),
+        });
+    }
+    entries.extend(
+        op.response_params
+            .iter()
+            .filter(|param| !matches!(param.kind, HttpParamKind::Header | HttpParamKind::Cookie))
+            .map(|param| RequestPayloadEntry {
+                raw_name: param.name.clone(),
+                access: ts_ident(&param.name),
+            }),
+    );
+    entries
+}
+
 fn value_params(op: &HttpOperation, kind: HttpParamKind) -> Vec<ValueParamContext> {
     op.request_params
         .iter()
@@ -463,6 +381,7 @@ fn value_params(op: &HttpOperation, kind: HttpParamKind) -> Vec<ValueParamContex
         .map(|param| ValueParamContext {
             raw_name: param.wire_name.clone(),
             access: ts_ident(&param.name),
+            key_name: param.name.clone(),
             optional: param.optional,
             is_multi: matches!(param.ty, hir::TypeSpec::SequenceType(_)),
         })
@@ -476,6 +395,7 @@ fn response_value_params(op: &HttpOperation, kind: HttpParamKind) -> Vec<ValuePa
         .map(|param| ValueParamContext {
             raw_name: param.wire_name.clone(),
             access: crate::generate::typescript::definition::names::ts_prop_name(&param.name),
+            key_name: param.name.clone(),
             optional: param.optional,
             is_multi: matches!(param.ty, hir::TypeSpec::SequenceType(_)),
         })

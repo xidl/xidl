@@ -1,0 +1,53 @@
+export interface {{ service_name }} {
+    {% for method in methods %}
+        {{ method.name }}({% if method.is_client_stream %}stream: {{ method.client_stream_item_ty }}{% elif method.request_ty %}req: ifaceTypes.{{ method.request_ty }}{% endif %}): {% if method.is_server_stream %}Awaitable<AsyncIterable<{{ method.stream_item_ty }}>>{% else %}Awaitable<{{ method.response_ty }}>{% endif %};
+    {% endfor %}
+}
+
+export function {{ handler_name }}(
+service: {{ service_name }},
+options: ServerOptions = {},
+): ServerHandler {
+    return createRouter(
+    [
+    {% for method in methods %}
+        {
+            method: "{{ method.http_method }}",
+            path: "{{ method.path }}",
+            handler: async (request, params) => {
+                const url = new URL(request.url);
+                await authorizeRequest(request, [{% for security in method.security %}{ kind: "{{ security.kind }}"{% if security.location %}, location: "{{ security.location }}"{% endif %}{% if security.name %}, name: "{{ security.name }}"{% endif %}{% if security.realm %}, realm: "{{ security.realm }}"{% endif %}, scopes: [{% for scope in security.scopes %}"{{ scope }}"{% if not loop.last %}, {% endif %}{% endfor %}] }{% if not loop.last %}, {% endif %}{% endfor %}], options);
+                {% if method.is_client_stream %}
+                    const result = await service.{{ method.name }}(ndjsonRequestStream(request));
+                {% else %}
+                    const rawPayload = {
+                        {% for param in method.path_params %}"{{ param.key_name }}": readPathParam(params, "{{ param.template_name }}"),
+                        {% endfor %}{% for param in method.query_params %}"{{ param.key_name }}": readQueryParam(url.searchParams, "{{ param.raw_name }}", {{ param.is_multi | lower }}),
+                        {% endfor %}{% for param in method.header_params %}"{{ param.key_name }}": readHeaderParam(request.headers, "{{ param.raw_name }}", {{ param.is_multi | lower }}),
+                        {% endfor %}{% for param in method.cookie_params %}"{{ param.key_name }}": readCookieParam(request.headers, "{{ param.raw_name }}", {{ param.is_multi | lower }}),
+                    {% endfor %}
+                };
+                {% if method.body_entries | length > 0 %}
+                    const requestBody = await decodeRequestBody(request, "{{ method.request_content_type }}", options.codecs ?? {});
+                    applyRequestBody(rawPayload, requestBody, {% if method.body_single_key %}"{{ method.body_single_key }}"{% else %}undefined{% endif %}, [{% for entry in method.body_entries %}"{{ entry.raw_name }}"{% if not loop.last %}, {% endif %}{% endfor %}]);
+                {% endif %}
+                {% if method.request_ty %}const payload = {% if method.request_schema_ref %}{{ method.request_schema_ref }}.parse(rawPayload){% else %}rawPayload{% endif %};
+                const result = await service.{{ method.name }}(payload as ifaceTypes.{{ method.request_ty }});
+                {% else %}const result = await service.{{ method.name }}();
+            {% endif %}{% endif %}
+            {% if method.is_server_stream %}
+                return sseResponse(result, options);
+            {% else %}
+                {% if method.response_schema_ref %}const parsed = {{ method.response_schema_ref }}.parse(result);
+                return encodeServerResponse(parsed, "{{ method.response_content_type }}", "{{ method.response_body_mode }}", [{% for entry in method.response_body_entries %}{ name: "{{ entry.raw_name }}", key: "{{ entry.access }}" }{% if not loop.last %}, {% endif %}{% endfor %}], [{% for param in method.response_header_params %}{ name: "{{ param.raw_name }}", key: "{{ param.key_name }}", isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}], [{% for param in method.response_cookie_params %}{ name: "{{ param.raw_name }}", key: "{{ param.key_name }}", isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}], options.codecs ?? {});
+                {% elif method.response_ty == "void" %}return new Response(null, { status: 204 });
+                {% else %}return encodeServerResponse(result, "{{ method.response_content_type }}", "return", [{ name: "return", key: "return" }], [], [], options.codecs ?? {});
+            {% endif %}
+            {% endif %}
+        },
+    },
+    {% endfor %}
+    ],
+    options,
+    );
+}
