@@ -1,0 +1,32 @@
+---
+title: "OpenAPI 元数据"
+description: "openapi 目标的最小生成方式，以及当前支持的 pragma 元数据。"
+---
+
+`openapi` 目标会为 HTTP 风格接口生成 `openapi.json`。
+
+## 最小生成命令
+
+```bash
+xidlc gen --out-dir generated openapi api.idl
+```
+
+## 当前会读取的 pragma
+
+```txt
+#pragma xidlc package "Smart City Public APIs"
+#pragma xidlc version "v2.0.0"
+```
+
+效果：
+
+- `package` -> `info.title`
+- `version` -> `info.version`
+
+如果不写，生成器会回退到默认元数据。
+
+## 相关页面
+
+- [HTTP](./http/)
+- [Pragma](./pragmas/)
+- [目标生成器](./targets/)

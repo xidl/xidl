@@ -1,0 +1,32 @@
+---
+title: "rust-jsonrpc 目标"
+description: "rust-jsonrpc 目标的最小工作流，以及它与 xidl-jsonrpc 的配套方式。"
+---
+
+`rust-jsonrpc` 会从 IDL 生成 Rust JSON-RPC 服务端 / 客户端绑定。
+
+## 最小命令
+
+```bash
+xidlc gen --out-dir out rust-jsonrpc your.idl
+```
+
+之后实现生成出的 trait，并通过 `xidl_jsonrpc::Server` 暴露服务。
+
+## 仓库内示例
+
+服务端：
+
+```bash
+cargo run -p xidlc-examples --example jsonrpc_hello_world_server
+```
+
+客户端：
+
+```bash
+cargo run -p xidlc-examples --example jsonrpc_hello_world_client -- --name World
+```
+
+## 运行时配套
+
+生成代码默认与 `xidl-jsonrpc` 配套使用。

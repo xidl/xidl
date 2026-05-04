@@ -1,0 +1,61 @@
+---
+title: "Install & Quickstart"
+description: "Install xidlc, verify the CLI, and generate your first output."
+---
+
+## Install `xidlc`
+
+### Release installer
+
+macOS and Linux:
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://xidl.github.io/xidl/public/install.sh | sh
+```
+
+Windows PowerShell:
+
+```powershell
+iwr -useb https://xidl.github.io/xidl/public/install.ps1 | iex
+```
+
+### Cargo
+
+```bash
+cargo install xidlc
+```
+
+### Cargo Binstall
+
+```bash
+cargo binstall xidlc
+```
+
+## Verify the install
+
+```bash
+xidlc --help
+```
+
+## Generate a first artifact
+
+```bash
+xidlc gen -o out rust your.idl
+```
+
+## Built-in targets
+
+- `rust`
+- `rust-axum`
+- `rust-jsonrpc`
+- `openapi`
+- `openrpc`
+- `typescript`
+- `go`
+- `python`
+
+## Next steps
+
+- Continue with [First HTTP API](./first-http-api/).
+- Read [Using xidlc](../docs/xidlc/).
+- Browse [Supported Targets](../docs/targets/).
