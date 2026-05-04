@@ -22,15 +22,11 @@ pub trait {{ ident }} {
     {% endfor %}
 }
 
-mod {{ inbound_transport_name }} {
-    use super::*;
-    {{ inbound_transport }}
-}
+{% set module = inbound_transport %}
+{% include 'interface/transport_module.rs.j2' %}
 
-mod {{ outbound_transport_name }} {
-    use super::*;
-    {{ outbound_transport }}
-}
+{% set module = outbound_transport %}
+{% include 'interface/transport_module.rs.j2' %}
 
 {% for method in methods %}
     {% if method.path_params | length > 0 and opt.enable_server %}
