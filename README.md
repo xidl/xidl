@@ -22,7 +22,7 @@ protocol mapping, code generation, and interactive tooling into one workflow.
 
 ## What XIDL Makes Possible
 
-![XIDL capabilities](docs/assets/xidl-capabilities.svg)
+![XIDL capabilities](website/public/assets/xidl-capabilities.svg)
 
 XIDL works well as the contract layer for API teams because interface intent is
 explicit, structured, and centralized. That makes the system easier for humans
@@ -49,7 +49,7 @@ lint, and keep in sync.
 
 ## What One IDL Produces
 
-![XIDL generated outputs](docs/assets/xidl-outputs.svg)
+![XIDL generated outputs](website/public/assets/xidl-outputs.svg)
 
 One XIDL contract can radiate into runtime surfaces, generated SDKs, machine
 readable specs, and implementation assets that stay aligned because they come
@@ -65,7 +65,7 @@ from the same source.
 
 ## How Teams Use XIDL
 
-![XIDL workflow](docs/assets/xidl-workflow.svg)
+![XIDL workflow](website/public/assets/xidl-workflow.svg)
 
 Teams author and review the contract once, then generate the artifacts they
 need to build servers, ship clients, publish specs, and keep examples and tests
@@ -115,14 +115,14 @@ xidlc gen --out-dir generated openapi api.idl
 
 ## Documentation
 
-- [Quickstart](docs/user/quickstart.md)
-- [Installation](docs/user/install.md)
-- [Using xidlc](docs/user/xidlc.md)
-- [HTTP Guide](docs/user/http.md)
-- [JSON-RPC Guide](docs/user/jsonrpc.md)
-- [Targets Reference](docs/reference/targets.md)
-- [HTTP RFC](docs/rfc/http.md)
-- [JSON-RPC RFC](docs/rfc/jsonrpc.md)
+- [Quickstart](website/src/content/docs/guide/quickstart.mdx)
+- [Installation](website/src/content/docs/guide/quickstart.mdx)
+- [Using xidlc](website/src/content/docs/docs/xidlc.mdx)
+- [HTTP Guide](website/src/content/docs/docs/http.mdx)
+- [JSON-RPC Guide](website/src/content/docs/docs/jsonrpc.mdx)
+- [Targets Reference](website/src/content/docs/docs/targets.mdx)
+- [HTTP RFC](website/src/content/docs/rfc/http.mdx)
+- [JSON-RPC RFC](website/src/content/docs/rfc/jsonrpc.mdx)
 
 ## Ecosystem
 
