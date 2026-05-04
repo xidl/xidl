@@ -1,0 +1,106 @@
+use crate::error::IdlcResult;
+use crate::generate::typescript::TypescriptRenderer;
+use serde::Serialize;
+use xidl_parser::hir;
+use xidl_parser::http_hir::HttpHirDocument;
+
+use super::interface::{TsHttpBlocks, render_interface};
+
+#[derive(Serialize)]
+struct TypesFileContext {
+    blocks: Vec<String>,
+}
+
+#[derive(Serialize)]
+struct ClientFileContext {
+    file_stem: String,
+    helpers: String,
+    blocks: Vec<String>,
+}
+
+#[derive(Serialize)]
+struct ModuleContext {
+    ident: String,
+    body: String,
+}
+
+pub(crate) struct TsHttpOutput {
+    pub(crate) types: String,
+    pub(crate) zod: String,
+    pub(crate) client: String,
+}
+
+pub(crate) fn render_spec(
+    spec: &hir::Specification,
+    file_stem: &str,
+    renderer: &TypescriptRenderer,
+    http_hir: &HttpHirDocument,
+) -> IdlcResult<TsHttpOutput> {
+    let blocks = render_defs(&spec.0, &[], renderer, http_hir)?;
+    Ok(TsHttpOutput {
+        types: renderer.render_template(
+            "http/types.d.ts.j2",
+            &TypesFileContext {
+                blocks: blocks.types,
+            },
+        )?,
+        zod: renderer
+            .render_template("http/zod.ts.j2", &TypesFileContext { blocks: blocks.zod })?,
+        client: renderer.render_template(
+            "http/client.ts.j2",
+            &ClientFileContext {
+                file_stem: file_stem.to_string(),
+                helpers: renderer.render_template("http/client_helpers.ts.j2", &())?,
+                blocks: blocks.client,
+            },
+        )?,
+    })
+}
+
+fn render_defs(
+    defs: &[hir::Definition],
+    module_path: &[String],
+    renderer: &TypescriptRenderer,
+    http_hir: &HttpHirDocument,
+) -> IdlcResult<TsHttpBlocks> {
+    let mut out = TsHttpBlocks::default();
+    for def in defs {
+        match def {
+            hir::Definition::ModuleDcl(module) => {
+                let mut next = module_path.to_vec();
+                next.push(module.ident.clone());
+                let body = render_defs(&module.definition, &next, renderer, http_hir)?;
+                if !body.is_empty() {
+                    let ident =
+                        crate::generate::typescript::definition::names::ts_ident(&module.ident);
+                    out.types
+                        .push(render_module(renderer, &ident, &body.types.join("\n"))?);
+                    out.zod
+                        .push(render_module(renderer, &ident, &body.zod.join("\n"))?);
+                    out.client
+                        .push(render_module(renderer, &ident, &body.client.join("\n"))?);
+                }
+            }
+            hir::Definition::InterfaceDcl(interface) => {
+                out.extend(render_interface(
+                    interface,
+                    module_path,
+                    renderer,
+                    http_hir,
+                )?);
+            }
+            _ => {}
+        }
+    }
+    Ok(out)
+}
+
+fn render_module(renderer: &TypescriptRenderer, ident: &str, body: &str) -> IdlcResult<String> {
+    renderer.render_template(
+        "http/module.ts.j2",
+        &ModuleContext {
+            ident: ident.to_string(),
+            body: crate::generate::typescript::definition::names::indent_block(body, 1),
+        },
+    )
+}

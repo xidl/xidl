@@ -49,7 +49,7 @@ fn rejects_invalid_stream_codecs_for_http_targets() {
     for lang in [
         "http-hir",
         "axum",
-        "ts",
+        "ts-http",
         "go-http",
         "python-http",
         "openapi",
@@ -67,7 +67,7 @@ fn rejects_invalid_server_stream_methods_for_http_targets() {
     for lang in [
         "http-hir",
         "axum",
-        "ts",
+        "ts-http",
         "go-http",
         "python-http",
         "openapi",
@@ -80,13 +80,13 @@ fn rejects_invalid_server_stream_methods_for_http_targets() {
 
 #[test]
 fn rejects_typescript_bidi_stream_fixture() {
-    let err = generate_error("ts", "http_stream_bidi_typescript.idl");
+    let err = generate_error("ts-http", "http_stream_bidi_typescript.idl");
     assert!(err.contains("does not support @bidi_stream"), "{err}");
 }
 
 #[test]
 fn rejects_non_body_client_stream_inputs_for_axum_and_typescript() {
-    for lang in ["http-hir", "axum", "ts", "go-http", "python-http"] {
+    for lang in ["http-hir", "axum", "ts-http", "go-http", "python-http"] {
         let err = generate_error(lang, "http_client_stream_path_param.idl");
         assert!(
             err.contains("body parameters only") || err.contains("@client_stream"),
@@ -119,7 +119,7 @@ fn rejects_conflicting_no_security_annotations() {
 
 #[test]
 fn rejects_unary_conflicting_param_sources() {
-    for lang in ["http-hir", "axum", "ts", "go-http", "openapi"] {
+    for lang in ["http-hir", "axum", "ts-http", "go-http", "openapi"] {
         let err = generate_error(lang, "http_unary_conflicting_param_source.idl");
         assert!(
             err.contains("conflicting source annotations"),
@@ -130,7 +130,7 @@ fn rejects_unary_conflicting_param_sources() {
 
 #[test]
 fn rejects_missing_query_template_bindings() {
-    for lang in ["http-hir", "axum", "ts", "go-http", "openapi"] {
+    for lang in ["http-hir", "axum", "ts-http", "go-http", "openapi"] {
         let err = generate_error(lang, "http_unary_query_template_missing_binding.idl");
         assert!(
             err.contains(
@@ -180,7 +180,7 @@ fn rejects_additional_invalid_stream_shapes() {
     for lang in [
         "http-hir",
         "axum",
-        "ts",
+        "ts-http",
         "go-http",
         "python-http",
         "openapi",
@@ -192,7 +192,7 @@ fn rejects_additional_invalid_stream_shapes() {
     for lang in [
         "http-hir",
         "axum",
-        "ts",
+        "ts-http",
         "go-http",
         "python-http",
         "openapi",

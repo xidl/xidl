@@ -27,6 +27,13 @@ pub enum Plugin {
     Axum,
     #[serde(alias = "ts", alias = "typescript")]
     Typescript,
+    #[serde(
+        alias = "ts_http",
+        alias = "ts-http",
+        alias = "typescript_http",
+        alias = "typescript-http"
+    )]
+    TypescriptHttp,
     #[serde(alias = "go", alias = "golang")]
     Go,
     #[serde(alias = "go_http", alias = "go-http")]
@@ -77,6 +84,10 @@ mod tests {
             ("rs-axum", Plugin::Axum),
             ("ts", Plugin::Typescript),
             ("typescript", Plugin::Typescript),
+            ("ts_http", Plugin::TypescriptHttp),
+            ("ts-http", Plugin::TypescriptHttp),
+            ("typescript_http", Plugin::TypescriptHttp),
+            ("typescript-http", Plugin::TypescriptHttp),
             ("go", Plugin::Go),
             ("golang", Plugin::Go),
             ("go_http", Plugin::GoHttp),

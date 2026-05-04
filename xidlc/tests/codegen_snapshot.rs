@@ -6,6 +6,7 @@ fn lang_and_codegen(folder: &str) -> Option<&'static str> {
     match folder {
         "rust" => Some("rs"),
         "ts" => Some("ts"),
+        "ts-http" => Some("typescript-http"),
         "golang" => Some("go"),
         "golang-http" => Some("go-http"),
         "python" => Some("python"),
@@ -37,6 +38,14 @@ fn collect_idl_cases(root: &Path) -> Vec<(String, PathBuf)> {
             if case_path.extension().and_then(|ext| ext.to_str()) != Some("idl") {
                 continue;
             }
+            if lang == "ts"
+                && case_path
+                    .file_stem()
+                    .and_then(|value| value.to_str())
+                    .is_some_and(|value| value.starts_with("http_"))
+            {
+                continue;
+            }
             cases.push((lang.clone(), case_path));
         }
     }
@@ -61,6 +70,7 @@ fn render_output(files: Vec<xidlc::driver::File>) -> String {
     out
 }
 
+#[cfg(feature = "cli")]
 fn render_single_output(path: &str, content: &str) -> String {
     let mut out = String::new();
     out.push_str("===============\n");
@@ -84,6 +94,7 @@ fn case_props(folder: &str, case_name: &str) -> HashMap<String, serde_json::Valu
     props
 }
 
+#[cfg(feature = "cli")]
 async fn generate_case_output(
     folder: &str,
     case_name: &str,

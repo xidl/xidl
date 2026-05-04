@@ -1,0 +1,61 @@
+export class {{ client_name }} {
+    private readonly baseUrl: string;
+    private readonly fetchImpl: FetchLike;
+    private readonly defaultHeaders: Record<string, string>;
+    private readonly auth?: ClientAuth;
+    private readonly codecs: Record<string, HttpCodec>;
+
+    constructor(baseUrl: string, options: ClientOptions = {}) {
+        this.baseUrl = baseUrl;
+        this.fetchImpl = resolveFetch(options.fetch);
+        this.defaultHeaders = options.headers ?? {};
+        this.auth = options.auth;
+        this.codecs = options.codecs ?? {};
+    }
+    {% for method in methods %}
+        {% if method.is_server_stream %}{{ method.name }}{% else %}async {{ method.name }}{% endif %}({% for param in method.params %}{{ param.name }}: {{ param.ty }}{% if not loop.last %}, {% endif %}{% endfor %}): {% if method.is_server_stream %}{{ method.return_ty }}{% else %}Promise<{{ method.return_ty }}>{% endif %} {
+            {% if method.request_schema_ref %}const parsed = {{ method.request_schema_ref }}.parse({ {% for entry in method.request_payload %}"{{ entry.raw_name }}": {{ entry.access }}{% if not loop.last %}, {% endif %}{% endfor %} });
+            {% endif %}let path = "{{ method.path }}";
+            {% for param in method.path_params %}path = path.replace("{" + "{% if param.catch_all %}*{% endif %}{{ param.template_name }}" + "}", {% if param.catch_all %}encodePathCatchAll{% else %}encodePathSegment{% endif %}({{ param.access }}));
+            {% endfor %}const query = new URLSearchParams();
+            {% for param in method.query_params %}appendParam(query, "{{ param.raw_name }}", {{ param.access }}, {{ param.optional | lower }}, {{ param.is_multi | lower }});
+            {% endfor %}const headers = new Headers(this.defaultHeaders);
+            {% for param in method.header_params %}appendHeader(headers, "{{ param.raw_name }}", {{ param.access }}, {{ param.optional | lower }}, {{ param.is_multi | lower }});
+            {% endfor %}const cookies: string[] = [];
+            {% for param in method.cookie_params %}appendCookie(cookies, "{{ param.raw_name }}", {{ param.access }}, {{ param.optional | lower }}, {{ param.is_multi | lower }});
+            {% endfor %}applyCookies(headers, cookies);
+            applyClientAuth(path, query, headers, this.auth, [{% for security in method.security %}{ kind: "{{ security.kind }}"{% if security.location %}, location: "{{ security.location }}"{% endif %}{% if security.name %}, name: "{{ security.name }}"{% endif %}{% if security.realm %}, realm: "{{ security.realm }}"{% endif %}, scopes: [{% for scope in security.scopes %}"{{ scope }}"{% if not loop.last %}, {% endif %}{% endfor %}] }{% if not loop.last %}, {% endif %}{% endfor %}]);
+            const queryString = query.toString();
+            if (queryString.length > 0) {
+                path = `${path}?${queryString}`;
+            }
+            const url = joinUrl(this.baseUrl, path);
+            {% if method.is_server_stream %}return sseJsonStream<{{ method.stream_item_ty }}>(this.fetchImpl, url, { method: "{{ method.http_method }}", headers });
+            {% elif method.is_client_stream %}headers.set("Content-Type", "{{ method.request_content_type }}");
+            headers.set("Accept", "{{ method.response_content_type }}");
+            const resp = await this.fetchImpl(url, { method: "{{ method.http_method }}", headers, body: ndjsonBody(stream) });
+            if (!resp.ok) {
+                throw await parseXidlError(resp);
+            }
+            {% if method.response_schema_ref %}const responseBody = await decodeOptionalResponseBody(resp, "{{ method.response_content_type }}", this.codecs);
+            const responsePayload = buildResponsePayload(responseBody, resp, "{{ method.response_body_mode }}", [{% for param in method.response_header_params %}{ name: "{{ param.raw_name }}", key: {{ param.access }}, optional: {{ param.optional | lower }}, isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}], [{% for param in method.response_cookie_params %}{ name: "{{ param.raw_name }}", key: {{ param.access }}, optional: {{ param.optional | lower }}, isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}]);
+            return {{ method.response_schema_ref }}.parse(responsePayload);
+            {% elif method.return_ty == "void" %}return;
+            {% else %}return await decodeResponseBody<{{ method.return_ty }}>(resp, "{{ method.response_content_type }}", this.codecs);
+        {% endif %}
+        {% else %}{% if method.body_single %}const body = {% if method.request_schema_ref %}parsed{% else %}{{ method.body_single }}{% endif %};
+        {% elif method.body_entries | length > 0 %}const body = { {% for entry in method.body_entries %}"{{ entry.raw_name }}": {% if method.request_schema_ref %}parsed["{{ entry.raw_name }}"]{% else %}{{ entry.access }}{% endif %}{% if not loop.last %}, {% endif %}{% endfor %} };
+        {% endif %}{% if method.body_single or method.body_entries | length > 0 %}headers.set("Content-Type", "{{ method.request_content_type }}");
+        {% endif %}headers.set("Accept", "{{ method.response_content_type }}");
+        const resp = await this.fetchImpl(url, { method: "{{ method.http_method }}", headers{% if method.body_single or method.body_entries | length > 0 %}, body: encodeRequestBody(body, "{{ method.request_content_type }}", this.codecs){% endif %} });
+        if (!resp.ok) {
+            throw await parseXidlError(resp);
+        }
+        {% if method.response_schema_ref %}const responseBody = await decodeOptionalResponseBody(resp, "{{ method.response_content_type }}", this.codecs);
+        const responsePayload = buildResponsePayload(responseBody, resp, "{{ method.response_body_mode }}", [{% for param in method.response_header_params %}{ name: "{{ param.raw_name }}", key: {{ param.access }}, optional: {{ param.optional | lower }}, isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}], [{% for param in method.response_cookie_params %}{ name: "{{ param.raw_name }}", key: {{ param.access }}, optional: {{ param.optional | lower }}, isMulti: {{ param.is_multi | lower }} }{% if not loop.last %}, {% endif %}{% endfor %}]);
+        return {{ method.response_schema_ref }}.parse(responsePayload);
+        {% elif method.return_ty == "void" %}return;
+        {% else %}return await decodeResponseBody<{{ method.return_ty }}>(resp, "{{ method.response_content_type }}", this.codecs);
+        {% endif %}{% endif %}
+    }
+    {% endfor %}}
