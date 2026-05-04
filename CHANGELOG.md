@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.53.0](https://github.com/xidl/xidl/compare/v0.52.0...v0.53.0) (2026-05-04)
+
+
+### Features
+
+* **xidlc:** add typescript http server generation ([1781c4a](https://github.com/xidl/xidl/commit/1781c4a751694d7190b52b541f0a62ca64b553cd))
+
+
+### Bug Fixes
+
+* **xidlc:** move rust-axum transport rendering into template context ([d31969c](https://github.com/xidl/xidl/commit/d31969c8adc568d1f4dce41aa3b6ca7aa0564304))
+
 ## [0.52.0](https://github.com/xidl/xidl/compare/v0.51.0...v0.52.0) (2026-05-04)
 
 
