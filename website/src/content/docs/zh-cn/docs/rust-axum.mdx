@@ -1,0 +1,35 @@
+---
+title: "rust-axum 目标"
+description: "rust-axum 生成器会输出什么，以及它与 xidl-rust-axum 的配套关系。"
+---
+
+`rust-axum` 会为基于 Axum 的服务和客户端生成 Rust HTTP 绑定。
+
+## 最小命令
+
+```bash
+xidlc gen --out-dir generated rust-axum hello_world.idl
+```
+
+如果还需要 Schema，通常会再一起生成：
+
+```bash
+xidlc gen --out-dir generated openapi hello_world.idl
+```
+
+## 常见生成结果
+
+- 业务逻辑 trait
+- 路由与请求解析的服务端包装器
+- 客户端包装器
+- 传输辅助类型
+
+## 运行时配套
+
+生成代码默认与 `xidl-rust-axum` 配套使用。
+
+## 建议连读
+
+- [HTTP](./http/)
+- [Rust 集成](./rust-integration/)
+- [HTTP RFC](../rfc/http/)

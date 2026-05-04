@@ -1,0 +1,38 @@
+---
+title: "AI 技能"
+description: "面向 Agent 和自动化流程的 XIDL 仓库操作摘要。"
+---
+
+这一节把仓库里最适合 Agent 使用的上下文收敛成一份操作指南。
+
+## 包含什么
+
+- 仓库术语
+- 支持的生成器和传输协议
+- 常用命令
+- source of truth 所在位置
+- 插件开发约定
+
+## 建议先看这些资料
+
+1. `docs/index.md`
+2. `docs/user/xidlc.md`
+3. `docs/user/idl.md`
+4. `docs/user/http.md` 或 `docs/user/jsonrpc.md`
+5. `docs/architecture.md`
+6. `docs/plugin.md`
+
+## 常用命令
+
+```bash
+xidlc gen --out-dir out rust api.idl
+xidlc gen --out-dir out rust-axum api.idl
+xidlc gen --out-dir out openapi api.idl
+```
+
+## 关键建议
+
+- 优先相信实现支撑的结论
+- 结合 `xidlc-examples/` 交叉验证
+- 传输语义不清楚时以 RFC 为准
+- 目标能力不明确时直接看生成器模块

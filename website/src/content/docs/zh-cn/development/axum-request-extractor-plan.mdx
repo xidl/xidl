@@ -1,0 +1,42 @@
+---
+title: "Axum 请求提取器方案"
+description: "把一元 rust-axum 请求数据展开为显式参数的设计说明。"
+---
+
+## 背景
+
+当前 `rust-axum` 生成器在一元 HTTP handler 上仍然会把请求数据包进
+`xidl_rust_axum::Request<T>`，但路径、查询、头、Cookie、Body 等来源
+其实已经在模型里被显式表达了。
+
+## 目标
+
+把一元 handler 的业务 trait 从：
+
+```rust
+async fn op(&self, req: xidl_rust_axum::Request<OpRequest>) -> Result<T>;
+```
+
+逐步改成更接近领域输入的形式：
+
+```rust
+async fn op(&self, a: A, b: B, c: C) -> Result<T>;
+```
+
+## 为什么要这么做
+
+- 业务 trait 应该暴露领域输入，而不是传输层包装器
+- `@header` 等参数现在已经是一等公民
+- 生成出的 API 更容易阅读、实现和测试
+
+## 推荐实现路径
+
+1. 保持 `http_hir` 的来源元数据不变
+2. 一元 trait 签名直接从展开后的参数渲染
+3. 只在适合提取器复用时保留局部 helper struct
+4. 让服务端 adapter 负责提取传输数据，再直接调用 `svc.method(...)`
+5. 暂不改响应建模
+
+## 范围
+
+第一阶段只处理一元 handler。流式方法后续再单独评估。

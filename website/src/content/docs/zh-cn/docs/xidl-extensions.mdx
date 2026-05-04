@@ -1,0 +1,26 @@
+---
+title: "XIDL 扩展"
+description: "XIDL 在 OMG IDL 之外增加的扩展语义。"
+---
+
+这一页记录 XIDL 使用的一些非 OMG IDL 原生扩展。
+
+## `@name`
+
+`@name("...")` 用来重命名字段的序列化名字。
+
+- 作用于 `struct` / `union` 成员
+- 生成 HTTP / JSON 映射时会把它当作 wire / property name
+- 生成 Rust 时通常映射为 `#[serde(rename = \"...\")]`
+
+示例：
+
+```txt
+module demo {
+  struct User {
+    uint32 id;
+    @name("full_name")
+    string name;
+  };
+};
+```

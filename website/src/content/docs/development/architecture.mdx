@@ -1,0 +1,36 @@
+---
+title: "Architecture"
+description: "How XIDL turns IDL input into HIR, generated files, and runtime pairings."
+---
+
+## High-level flow
+
+1. Parse IDL source into syntax trees.
+2. Lower syntax into typed AST and HIR.
+3. Select a built-in generator or external plugin.
+4. Render target artifacts.
+5. Pair generated code with runtime crates when needed.
+
+## Main crates
+
+- `xidlc`: CLI, driver, diagnostics, built-in generators
+- `xidl-parser`: parsing, semantic lowering, HIR
+- `xidl-build`: Rust `build.rs` integration
+- `xidl-rust-axum`: HTTP and stream runtime support
+- `xidl-jsonrpc`: JSON-RPC runtime support
+- `xidlc-examples`: runnable examples and snapshots
+
+## Generator model
+
+Built-in generators live under `xidlc/src/generate/`. External generators reuse
+the same parser and HIR pipeline, then receive generation requests over
+JSON-RPC.
+
+## Common tracing path
+
+When you need to debug behavior:
+
+1. start from the CLI or example that reproduces it
+2. inspect the target module under `xidlc/src/generate/`
+3. check the runtime crate if transport code is involved
+4. confirm semantics against the matching RFC page

@@ -1,0 +1,34 @@
+---
+title: "Axum 一元参数展开 TODO"
+description: "移除 rust-axum 服务端一元 Request<T> 包装的实施清单。"
+---
+
+## Phase 0
+
+- 确认第一阶段只覆盖一元 HTTP handler
+- 确认流式 handler 暂时保持现状
+- 确认鉴权信息在第一阶段以显式生成参数暴露
+
+## Phase 1
+
+- 审计 `xidlc/src/generate/rust_axum/interface.rs`
+- 分离 trait 签名需求与 adapter 传输 helper 需求
+- 确认 `MethodContext.params` 足以渲染一元签名
+
+## Phase 2
+
+- 更新 `interface.rs.j2` 中的一元 trait 生成逻辑
+- 保持流式方法不变
+- 在不再需要时移除公开的一元 `FooRequest`
+
+## Phase 3
+
+- 重写一元服务端 adapter，让其直接调用 `svc.method(arg1, arg2, ...)`
+- 保持 media type、path、query、header、cookie、body、auth 行为不变
+
+## 后续
+
+- 清理死分支和废弃上下文字段
+- 重生成快照
+- 补回归测试
+- 在生成器行为落地后同步更新用户文档

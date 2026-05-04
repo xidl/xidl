@@ -1,0 +1,33 @@
+---
+title: "架构"
+description: "XIDL 如何把 IDL 输入转成 HIR、生成文件以及运行时配套。"
+---
+
+## 总体流程
+
+1. 解析 IDL 源文件
+2. 降到 typed AST 与 HIR
+3. 选择内建生成器或外部插件
+4. 渲染目标产物
+5. 在需要时与运行时 crate 配套使用
+
+## 主要 crate
+
+- `xidlc`：CLI、driver、诊断、内建生成器
+- `xidl-parser`：解析、语义降级、HIR
+- `xidl-build`：Rust `build.rs` 集成
+- `xidl-rust-axum`：HTTP / Stream 运行时支持
+- `xidl-jsonrpc`：JSON-RPC 运行时支持
+- `xidlc-examples`：可运行示例与快照
+
+## 生成器模型
+
+内建生成器位于 `xidlc/src/generate/`。外部生成器复用相同的解析与 HIR
+链路，然后通过 JSON-RPC 接收生成请求。
+
+## 追踪问题时的建议路径
+
+1. 先从能复现问题的 CLI 命令或示例开始
+2. 再看目标模块在 `xidlc/src/generate/` 下的实现
+3. 如果涉及传输层，继续看对应运行时 crate
+4. 最后用匹配的 RFC 锁定精确语义

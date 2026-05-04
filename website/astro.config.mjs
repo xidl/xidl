@@ -29,10 +29,24 @@ export default defineConfig({
         {
           items: [
             {
+              label: 'Overview',
+              link: '/',
+              translations: {
+                'zh-CN': '总览',
+              },
+            },
+            {
               label: 'Quickstart',
               link: '/guide/',
               translations: {
                 'zh-CN': '快速开始',
+              },
+            },
+            {
+              label: 'Install',
+              link: '/guide/quickstart/',
+              translations: {
+                'zh-CN': '安装与上手',
               },
             },
             {
@@ -58,10 +72,27 @@ export default defineConfig({
         {
           autogenerate: { directory: 'docs' },
           label: 'Docs',
+          translations: {
+            'zh-CN': '详细文档',
+          },
         },
         {
           autogenerate: { directory: 'rfc' },
           label: 'RFC',
+        },
+        {
+          autogenerate: { directory: 'development' },
+          label: 'Development',
+          translations: {
+            'zh-CN': '开发文档',
+          },
+        },
+        {
+          autogenerate: { directory: 'ai' },
+          label: 'AI',
+          translations: {
+            'zh-CN': 'AI 技能',
+          },
         },
       ],
       social: [
