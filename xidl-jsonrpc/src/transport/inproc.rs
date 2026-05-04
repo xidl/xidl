@@ -128,6 +128,9 @@ pub fn connect_inproc(endpoint: &str) -> std::io::Result<InprocStream> {
     Ok(client)
 }
 
+#[cfg(test)]
+mod tests;
+
 #[async_trait::async_trait]
 impl Listener for InprocListener {
     async fn accept(

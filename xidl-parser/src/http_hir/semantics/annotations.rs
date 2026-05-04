@@ -5,6 +5,9 @@ use super::annotation_parse::{
     parse_raw_params, parse_string_array as parse_string_array_impl, render_const_expr, trim_quotes,
 };
 
+#[cfg(test)]
+mod tests;
+
 pub fn annotation_name(annotation: &hir::Annotation) -> Option<&str> {
     match annotation {
         hir::Annotation::Builtin { name, .. } => Some(name.as_str()),
