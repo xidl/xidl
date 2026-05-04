@@ -9,6 +9,9 @@ use super::validate::{
 };
 use super::{HttpHirResult, HttpParam, HttpParamKind};
 
+#[cfg(test)]
+mod tests;
+
 #[allow(clippy::type_complexity)]
 pub(super) fn project_params(
     op: &hir::OpDcl,

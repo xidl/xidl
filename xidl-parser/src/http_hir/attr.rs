@@ -7,6 +7,9 @@ use super::semantics::{
 };
 use super::{HttpMethod, HttpOperation, HttpOperationSource, HttpParam, HttpParamKind, HttpRoute};
 
+#[cfg(test)]
+mod tests;
+
 pub(super) fn project_attribute(
     interface_name: &str,
     module_path: &[String],

@@ -3,6 +3,9 @@ use std::net::SocketAddr;
 use super::tls_config::{TransportUrl, build_client_connector, build_server_acceptor, server_name};
 use super::{Listener, Stream};
 
+#[cfg(test)]
+mod tests;
+
 type DynStream = Box<dyn Stream + Unpin + Send + 'static>;
 
 pub struct TlsListener {

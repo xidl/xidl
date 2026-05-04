@@ -7,6 +7,9 @@ use super::semantics::{
 };
 use super::{HttpHirResult, HttpMethod, HttpParam, HttpParamKind, HttpRoute};
 
+#[cfg(test)]
+mod tests;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(super) enum HttpParamDirection {
     In,

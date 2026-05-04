@@ -10,6 +10,9 @@ use super::{
     JsonRpcMethodKind, JsonRpcMethodSource, JsonRpcResponseKind,
 };
 
+#[cfg(test)]
+mod tests;
+
 pub fn project(spec: &hir::Specification) -> ParserResult<JsonRpcHirDocument> {
     let mut interfaces = Vec::new();
     collect_interfaces(&spec.0, &mut Vec::new(), &mut interfaces)?;

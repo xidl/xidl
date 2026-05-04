@@ -2,6 +2,9 @@ use crate::error::{ParseError, ParserResult};
 use crate::hir;
 use serde::{Deserialize, Serialize};
 
+#[cfg(test)]
+mod tests;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum HttpMethod {
     Get,

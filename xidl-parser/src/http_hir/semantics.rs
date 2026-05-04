@@ -3,6 +3,9 @@ mod annotations;
 mod security;
 mod stream;
 
+#[cfg(test)]
+mod tests;
+
 use crate::hir;
 use jiff::{Timestamp, civil, tz::TimeZone};
 use serde::{Deserialize, Serialize};

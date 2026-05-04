@@ -2,6 +2,9 @@ use super::{
     Annotation, BinaryOperator, ConstExpr, IntegerLiteral, IntegerSign, Literal, UnaryOperator,
 };
 
+#[cfg(test)]
+mod tests;
+
 pub(super) fn from_builtin_annotation(
     value: crate::typed_ast::BuiltinAnnotation,
 ) -> Option<Annotation> {

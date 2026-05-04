@@ -9,6 +9,9 @@ use super::{
     JsonRpcResponseKind, JsonRpcWatchMethod,
 };
 
+#[cfg(test)]
+mod tests;
+
 pub(super) fn project_attr(
     attr: &hir::AttrDcl,
     interface_name: &str,

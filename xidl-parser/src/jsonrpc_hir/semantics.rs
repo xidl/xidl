@@ -5,6 +5,9 @@ use crate::hir;
 
 use super::JsonRpcMethodKind;
 
+#[cfg(test)]
+mod tests;
+
 pub(super) fn param_is_input(attr: Option<&hir::ParamAttribute>) -> bool {
     !matches!(attr.map(|value| value.0.as_str()), Some("out"))
 }
