@@ -16,14 +16,3 @@ pub(super) fn scoped_name(module_path: &[String], ident: &str) -> String {
         parts.join(".")
     }
 }
-
-pub(super) fn rpc_method_name(
-    module_path: &[String],
-    interface_name: &str,
-    method_name: &str,
-) -> String {
-    let mut parts = module_path.to_vec();
-    parts.push(interface_name.to_string());
-    parts.push(method_name.to_string());
-    parts.join(".")
-}

@@ -1,10 +1,10 @@
 use serde_json::Value;
-use std::collections::{BTreeMap, HashSet};
+use std::collections::BTreeMap;
 use xidl_parser::hir;
+use xidl_parser::jsonrpc_hir::{JsonRpcHirDocument, JsonRpcInterface};
 
 use super::annotations::doc_text;
-use super::methods::render_op;
-use super::methods_attr::render_attr;
+use super::methods::render_method;
 use super::names::{declarator_name, scoped_name};
 use super::schema::{
     apply_schema_description, schema_for_constr_type, schema_for_decl, schema_for_struct,
@@ -32,7 +32,14 @@ impl OpenRpcContext {
         }
     }
 
-    pub(super) fn collect_spec(&mut self, spec: &hir::Specification, module_path: &[String]) {
+    pub(super) fn collect_doc(&mut self, doc: &JsonRpcHirDocument) {
+        self.collect_spec(&doc.spec, &[]);
+        for interface in &doc.interfaces {
+            self.collect_interface(interface);
+        }
+    }
+
+    fn collect_spec(&mut self, spec: &hir::Specification, module_path: &[String]) {
         for def in &spec.0 {
             self.collect_def(def, module_path);
         }
@@ -46,9 +53,6 @@ impl OpenRpcContext {
             hir::Definition::ExceptDcl(except) => {
                 let name = scoped_name(module_path, &except.ident);
                 self.schemas.insert(name, schema_for_struct(&except.member));
-            }
-            hir::Definition::InterfaceDcl(interface) => {
-                self.collect_interface(interface, module_path);
             }
             hir::Definition::Pragma(pragma) => self.apply_pragma(pragma),
             _ => {}
@@ -92,39 +96,15 @@ impl OpenRpcContext {
         self.schemas.insert(name, schema);
     }
 
-    fn collect_interface(&mut self, interface: &hir::InterfaceDcl, module_path: &[String]) {
-        let hir::InterfaceDclInner::InterfaceDef(def) = &interface.decl else {
-            return;
-        };
-        let Some(body) = &def.interface_body else {
-            return;
-        };
-
-        let user_ops = body
-            .0
-            .iter()
-            .filter_map(|export| match export {
-                hir::Export::OpDcl(op) => Some(op.ident.clone()),
-                _ => None,
-            })
-            .collect::<HashSet<_>>();
-
-        for export in &body.0 {
-            match export {
-                hir::Export::OpDcl(op) => {
-                    self.methods
-                        .push(render_op(op, &def.header.ident, module_path));
-                }
-                hir::Export::AttrDcl(attr) => {
-                    self.methods.extend(render_attr(
-                        attr,
-                        &def.header.ident,
-                        module_path,
-                        &user_ops,
-                    ));
-                }
-                _ => {}
+    fn collect_interface(&mut self, interface: &JsonRpcInterface) {
+        for method in &interface.methods {
+            if matches!(
+                method.source,
+                xidl_parser::jsonrpc_hir::JsonRpcMethodSource::AttributeStreamSource
+            ) {
+                continue;
             }
+            self.methods.push(render_method(method));
         }
     }
 }

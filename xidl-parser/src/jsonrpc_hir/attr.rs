@@ -162,6 +162,8 @@ fn setter_method(
             name: field_name.to_string(),
             wire_name: field_name.to_string(),
             ty: ty.clone(),
+            annotations: annotations.to_vec(),
+            required: true,
             source: JsonRpcFieldSource::Param,
         }],
         response_fields: Vec::new(),
@@ -211,6 +213,8 @@ fn return_field(ty: &hir::TypeSpec) -> JsonRpcField {
         name: "return".to_string(),
         wire_name: "return".to_string(),
         ty: ty.clone(),
+        annotations: Vec::new(),
+        required: true,
         source: JsonRpcFieldSource::Return,
     }
 }

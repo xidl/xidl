@@ -57,6 +57,15 @@ pub(super) fn has_annotation(annotations: &[hir::Annotation], target: &str) -> b
     })
 }
 
+pub(super) fn has_optional_annotation(annotations: &[hir::Annotation]) -> bool {
+    annotations.iter().any(|annotation| {
+        matches!(annotation, hir::Annotation::Optional { .. })
+            || annotation_name(annotation)
+                .map(|name| name.eq_ignore_ascii_case("optional"))
+                .unwrap_or(false)
+    })
+}
+
 pub(super) fn validate_attr_collision(
     user_ops: &HashSet<&str>,
     attr_name: &str,

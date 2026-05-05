@@ -4,7 +4,7 @@ use crate::error::ParserResult;
 use crate::hir;
 
 use super::attr::project_attr;
-use super::semantics::{param_is_input, param_is_output, stream_kind};
+use super::semantics::{has_optional_annotation, param_is_input, param_is_output, stream_kind};
 use super::{
     JsonRpcField, JsonRpcFieldSource, JsonRpcHirDocument, JsonRpcInterface, JsonRpcMethod,
     JsonRpcMethodKind, JsonRpcMethodSource, JsonRpcResponseKind,
@@ -162,6 +162,8 @@ fn param_field(param: &hir::ParamDcl) -> JsonRpcField {
         name: name.clone(),
         wire_name: name,
         ty: param.ty.clone(),
+        annotations: param.annotations.clone(),
+        required: !has_optional_annotation(&param.annotations),
         source: JsonRpcFieldSource::Param,
     }
 }
@@ -171,6 +173,8 @@ fn return_field(ty: &hir::TypeSpec) -> JsonRpcField {
         name: "return".to_string(),
         wire_name: "return".to_string(),
         ty: ty.clone(),
+        annotations: Vec::new(),
+        required: true,
         source: JsonRpcFieldSource::Return,
     }
 }

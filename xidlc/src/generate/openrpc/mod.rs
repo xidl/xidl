@@ -4,15 +4,13 @@ mod tests;
 mod annotations;
 mod context;
 mod methods;
-mod methods_attr;
-mod methods_attr_support;
 mod names;
 mod schema;
 mod schema_types;
 
 use serde_json::{Value, json};
-use xidl_parser::hir;
 use xidl_parser::hir::ParserProperties;
+use xidl_parser::jsonrpc_hir::JsonRpcHirDocument;
 
 use crate::jsonrpc::{Artifact, ArtifactFile};
 use context::OpenRpcContext;
@@ -26,7 +24,10 @@ impl crate::jsonrpc::Codegen for OpenRpcCodegen {
     }
 
     async fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
-        Ok(std::collections::HashMap::new())
+        Ok(std::collections::HashMap::from([(
+            "hir_kind".to_string(),
+            serde_json::Value::String("jsonrpc".to_string()),
+        )]))
     }
 
     async fn generate(
@@ -35,7 +36,7 @@ impl crate::jsonrpc::Codegen for OpenRpcCodegen {
         _path: String,
         _props: ParserProperties,
     ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
-        let hir = input_hir.into_rpc_hir();
+        let hir = input_hir.into_jsonrpc_hir();
         let openrpc = render_openrpc(&hir);
         let content = serde_json::to_string_pretty(&openrpc)?;
         Ok(vec![Artifact::new_file(ArtifactFile {
@@ -45,9 +46,9 @@ impl crate::jsonrpc::Codegen for OpenRpcCodegen {
     }
 }
 
-pub fn render_openrpc(spec: &hir::Specification) -> Value {
+pub fn render_openrpc(doc: &JsonRpcHirDocument) -> Value {
     let mut ctx = OpenRpcContext::default();
-    ctx.collect_spec(spec, &[]);
+    ctx.collect_doc(doc);
     ctx.methods.sort_by(|left, right| {
         let left_name = left.get("name").and_then(Value::as_str).unwrap_or_default();
         let right_name = right
