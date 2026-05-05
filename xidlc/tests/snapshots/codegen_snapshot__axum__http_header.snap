@@ -654,12 +654,22 @@ pub mod test {
 http_header.rs
 ===============
 pub mod test {
+    #[allow(unused_imports)]
+    #[allow(non_upper_case_globals)]
+    #[allow(non_snake_case)]
+    #[allow(unused_variables)]
+    #[allow(unreachable_patterns)]
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
     pub enum Status {
         #[default]
         OK,
         FAILED,
     }
+    #[allow(unused_imports)]
+    #[allow(non_upper_case_globals)]
+    #[allow(non_snake_case)]
+    #[allow(unused_variables)]
+    #[allow(unreachable_patterns)]
     #[derive(Default)]
     pub struct User {
         pub id: u32,

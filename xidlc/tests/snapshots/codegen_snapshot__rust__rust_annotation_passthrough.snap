@@ -1,16 +1,15 @@
 ---
 source: xidlc/tests/codegen_snapshot.rs
-assertion_line: 105
 expression: output
 ---
 ===============
 rust_annotation_passthrough.rs
 ===============
-#![allow(unused_imports)]
-#![allow(non_upper_case_globals)]
-#![allow(non_snake_case)]
-#![allow(unused_variables)]
-#![allow(unreachable_patterns)]
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 #[serde(rename_all = "camelCase")]
 #[inline]
 #[derive(Default)]
@@ -19,6 +18,11 @@ pub struct User {
     pub user_id: String,
 }
 impl User {}
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 #[repr(u8)]
 #[non_exhaustive]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -28,17 +32,37 @@ pub enum Color {
     Red,
     Green,
 }
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 pub const Api_ping_Hash: i32 = 18846175;
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 #[derive(Default)]
 pub struct Api_ping_In {
     pub dummy: dds::rpc::UnusedMember,
 }
 impl Api_ping_In {}
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 #[derive(Default)]
 pub struct Api_ping_Out {
     pub dummy: dds::rpc::UnusedMember,
 }
 impl Api_ping_Out {}
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 pub struct Api_ping_Result {
     tag: i32,
     data: Api_ping_ResultData,
@@ -98,6 +122,11 @@ impl Default for Api_ping_Result {
         }
     }
 }
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 pub struct Api_Call {
     tag: i32,
     data: Api_CallData,
@@ -191,12 +220,22 @@ impl Default for Api_Call {
         }
     }
 }
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 #[derive(Default)]
 pub struct Api_Request {
     pub header: dds::rpc::RequestHeader,
     pub data: Api_Call,
 }
 impl Api_Request {}
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 pub struct Api_Return {
     tag: i32,
     data: Api_ReturnData,
@@ -290,12 +329,22 @@ impl Default for Api_Return {
         }
     }
 }
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 #[derive(Default)]
 pub struct Api_Reply {
     pub header: dds::rpc::ReplyHeader,
     pub data: Api_Return,
 }
 impl Api_Reply {}
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 #[allow(async_fn_in_trait)]
 pub trait Api {
     #[cfg(feature = "client")]

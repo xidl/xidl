@@ -6,14 +6,6 @@
         //! xidlc_timestamp: {{ opt.xidlc_timestamp | fmt_timestamp }}
     {% endif %}
 
-    {% if opt.enable_render_header %}
-        #![allow(unused_imports)]
-        #![allow(non_upper_case_globals)]
-        #![allow(non_snake_case)]
-        #![allow(unused_variables)]
-        #![allow(unreachable_patterns)]
-    {% endif %}
-
     {% for def in definitions %}
         {{ def }}
     {% endfor %}

@@ -5,17 +5,27 @@ expression: output
 ===============
 bitset_def.rs
 ===============
-#![allow(unused_imports)]
-#![allow(non_upper_case_globals)]
-#![allow(non_snake_case)]
-#![allow(unused_variables)]
-#![allow(unreachable_patterns)]
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 pub struct A {}
 impl A {}
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 pub struct A {
     pub base: B,
 }
 impl A {}
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 pub struct A {
     pub base: B,
     pub a: bool,
