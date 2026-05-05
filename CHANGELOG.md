@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.53.1](https://github.com/xidl/xidl/compare/v0.53.0...v0.53.1) (2026-05-05)
+
+
+### Bug Fixes
+
+* **xidlc:** add default impls for rust unions ([4b19bea](https://github.com/xidl/xidl/commit/4b19beaf343e7cd203431be8d36f671aaeb5b1ab))
+* **xidlc:** use item-level allow attrs in rust output ([906149e](https://github.com/xidl/xidl/commit/906149eb4c65d8e28dbdad4922e3831f0d7235e2))
+
 ## [0.53.0](https://github.com/xidl/xidl/compare/v0.52.0...v0.53.0) (2026-05-04)
 
 
