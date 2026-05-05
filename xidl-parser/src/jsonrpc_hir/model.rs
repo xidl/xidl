@@ -67,6 +67,8 @@ pub struct JsonRpcField {
     pub name: String,
     pub wire_name: String,
     pub ty: hir::TypeSpec,
+    pub annotations: Vec<hir::Annotation>,
+    pub required: bool,
     pub source: JsonRpcFieldSource,
 }
 
