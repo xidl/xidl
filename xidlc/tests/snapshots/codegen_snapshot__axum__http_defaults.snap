@@ -2062,6 +2062,11 @@ impl HttpDefaultsServiceClient {
 ===============
 http_defaults.rs
 ===============
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 #[derive(Debug, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct CreateUserRequest {

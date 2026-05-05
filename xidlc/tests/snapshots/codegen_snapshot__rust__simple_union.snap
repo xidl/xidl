@@ -1,22 +1,26 @@
 ---
 source: xidlc/tests/codegen_snapshot.rs
-assertion_line: 105
 expression: output
 ---
 ===============
 simple_union.rs
 ===============
-#![allow(unused_imports)]
-#![allow(non_upper_case_globals)]
-#![allow(non_snake_case)]
-#![allow(unused_variables)]
-#![allow(unreachable_patterns)]
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Tag {
     #[default]
     A,
     B,
 }
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 pub struct SimpleUnion {
     tag: Tag,
     data: SimpleUnionData,

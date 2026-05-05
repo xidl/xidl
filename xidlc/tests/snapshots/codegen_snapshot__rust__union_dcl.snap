@@ -1,16 +1,15 @@
 ---
 source: xidlc/tests/codegen_snapshot.rs
-assertion_line: 105
 expression: output
 ---
 ===============
 union_dcl.rs
 ===============
-#![allow(unused_imports)]
-#![allow(non_upper_case_globals)]
-#![allow(non_snake_case)]
-#![allow(unused_variables)]
-#![allow(unreachable_patterns)]
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 pub struct B {
     tag: i32,
     data: BData,
@@ -26,6 +25,11 @@ impl B {
         &self.tag
     }
 }
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 pub struct C {
     tag: i32,
     data: CData,

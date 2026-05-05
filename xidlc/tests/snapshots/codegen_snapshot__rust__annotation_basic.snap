@@ -5,23 +5,33 @@ expression: output
 ===============
 annotation_basic.rs
 ===============
-#![allow(unused_imports)]
-#![allow(non_upper_case_globals)]
-#![allow(non_snake_case)]
-#![allow(unused_variables)]
-#![allow(unreachable_patterns)]
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 #[derive(Default)]
 pub struct S {
     pub a: i32,
     pub b: Option<i16>,
 }
 impl S {}
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum E {
     #[default]
     A,
     B,
 }
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 pub struct BM {
     pub value: u32,
 }
@@ -29,6 +39,11 @@ impl BM {
     pub const A: u32 = 1u32 << 0;
     pub const B: u32 = 1u32 << 1;
 }
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 pub struct U {
     tag: i32,
     data: UData,
@@ -120,19 +135,49 @@ impl Default for U {
         }
     }
 }
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 pub const I_ping_Hash: i32 = 18846175;
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 pub const I_get_attribute_value_Hash: i32 = 3881857402;
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 pub const I_set_attribute_value_Hash: i32 = 1976821110;
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 #[derive(Default)]
 pub struct I_ping_In {
     pub dummy: dds::rpc::UnusedMember,
 }
 impl I_ping_In {}
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 #[derive(Default)]
 pub struct I_ping_Out {
     pub dummy: dds::rpc::UnusedMember,
 }
 impl I_ping_Out {}
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 pub struct I_ping_Result {
     tag: i32,
     data: I_ping_ResultData,
@@ -192,16 +237,31 @@ impl Default for I_ping_Result {
         }
     }
 }
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 #[derive(Default)]
 pub struct I_get_attribute_value_In {
     pub dummy: dds::rpc::UnusedMember,
 }
 impl I_get_attribute_value_In {}
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 #[derive(Default)]
 pub struct I_get_attribute_value_Out {
     pub return_: i32,
 }
 impl I_get_attribute_value_Out {}
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 pub struct I_get_attribute_value_Result {
     tag: i32,
     data: I_get_attribute_value_ResultData,
@@ -263,16 +323,31 @@ impl Default for I_get_attribute_value_Result {
         }
     }
 }
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 #[derive(Default)]
 pub struct I_set_attribute_value_In {
     pub value: i32,
 }
 impl I_set_attribute_value_In {}
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 #[derive(Default)]
 pub struct I_set_attribute_value_Out {
     pub dummy: dds::rpc::UnusedMember,
 }
 impl I_set_attribute_value_Out {}
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 pub struct I_set_attribute_value_Result {
     tag: i32,
     data: I_set_attribute_value_ResultData,
@@ -334,6 +409,11 @@ impl Default for I_set_attribute_value_Result {
         }
     }
 }
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 pub struct I_Call {
     tag: i32,
     data: I_CallData,
@@ -491,12 +571,22 @@ impl Default for I_Call {
         }
     }
 }
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 #[derive(Default)]
 pub struct I_Request {
     pub header: dds::rpc::RequestHeader,
     pub data: I_Call,
 }
 impl I_Request {}
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 pub struct I_Return {
     tag: i32,
     data: I_ReturnData,
@@ -654,12 +744,22 @@ impl Default for I_Return {
         }
     }
 }
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 #[derive(Default)]
 pub struct I_Reply {
     pub header: dds::rpc::ReplyHeader,
     pub data: I_Return,
 }
 impl I_Reply {}
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
 pub trait I {
     fn ping(&self) -> ();
     fn value(&self) -> i32;
