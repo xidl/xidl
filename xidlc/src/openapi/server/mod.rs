@@ -4,7 +4,6 @@
 
 mod server_object;
 #[cfg(test)]
-#[path = "../server_tests.rs"]
 mod tests;
 mod variable;
 

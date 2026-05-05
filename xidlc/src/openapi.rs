@@ -4,7 +4,6 @@ mod document;
 mod macros;
 mod shared;
 #[cfg(test)]
-#[path = "openapi_tests.rs"]
 mod tests;
 
 pub use self::{

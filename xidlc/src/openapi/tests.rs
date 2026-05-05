@@ -5,5 +5,5 @@ use crate::openapi::{
 };
 use insta::assert_json_snapshot;
 
-include!("openapi_tests_basic.inc.rs");
-include!("openapi_tests_merge.inc.rs");
+include!("../openapi_tests_basic.inc.rs");
+include!("../openapi_tests_merge.inc.rs");

@@ -1,21 +1,14 @@
 //! Implements OpenAPI security schema types.
 
-#[path = "security_core.rs"]
 mod security_core;
-#[path = "security_flow.rs"]
 mod security_flow;
-#[path = "security_http.rs"]
 mod security_http;
-#[path = "security_oauth.rs"]
 mod security_oauth;
-#[path = "security_scopes.rs"]
 mod security_scopes;
 #[cfg(test)]
-#[path = "security_tests.rs"]
-mod security_tests;
+mod tests;
 #[cfg(test)]
-#[path = "security_tests_oauth.rs"]
-mod security_tests_oauth;
+mod tests_oauth;
 
 pub use self::security_core::{ApiKey, ApiKeyValue, SecurityRequirement, SecurityScheme};
 pub use self::security_flow::{AuthorizationCode, ClientCredentials, Implicit, Password};

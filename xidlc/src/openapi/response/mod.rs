@@ -4,10 +4,8 @@
 
 mod ext;
 #[cfg(test)]
-#[path = "../response_openapi_extensions_tests.rs"]
 mod openapi_extensions_tests;
 #[cfg(test)]
-#[path = "../response_tests.rs"]
 mod tests;
 mod types;
 
