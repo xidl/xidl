@@ -1,0 +1,9 @@
+enum Tag {
+    A,
+    B,
+};
+
+union DefaultUnion switch (Tag) {
+    case A: int a;
+    default: string fallback;
+};

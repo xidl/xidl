@@ -87,6 +87,21 @@ impl {{ ident }} {
     }
 }
 
+{% if default_case %}
+    impl Default for {{ ident }} {
+        fn default() -> Self {
+            Self {
+                tag: {{ default_case.tag }},
+                data: {{ ident }}Data {
+                    {{ default_case.member }}: core::mem::ManuallyDrop::new(
+                    {{ default_case.type }}::default(),
+                    ),
+                },
+            }
+        }
+    }
+{% endif %}
+
 {% if has_serde_serialize %}
     impl serde::Serialize for {{ ident }} {
         fn serialize<__S>(&self, __serializer: __S) -> serde::__private228::Result<__S::Ok, __S::Error>

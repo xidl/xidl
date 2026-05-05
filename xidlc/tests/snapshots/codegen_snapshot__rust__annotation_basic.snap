@@ -110,6 +110,16 @@ impl U {
         &self.tag
     }
 }
+impl Default for U {
+    fn default() -> Self {
+        Self {
+            tag: i32::default(),
+            data: UData {
+                b: core::mem::ManuallyDrop::new(i32::default()),
+            },
+        }
+    }
+}
 pub const I_ping_Hash: i32 = 18846175;
 pub const I_get_attribute_value_Hash: i32 = 3881857402;
 pub const I_set_attribute_value_Hash: i32 = 1976821110;
@@ -172,6 +182,16 @@ impl I_ping_Result {
         &self.tag
     }
 }
+impl Default for I_ping_Result {
+    fn default() -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: I_ping_ResultData {
+                result: core::mem::ManuallyDrop::new(I_ping_Out::default()),
+            },
+        }
+    }
+}
 #[derive(Default)]
 pub struct I_get_attribute_value_In {
     pub dummy: dds::rpc::UnusedMember,
@@ -231,6 +251,18 @@ impl I_get_attribute_value_Result {
         &self.tag
     }
 }
+impl Default for I_get_attribute_value_Result {
+    fn default() -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: I_get_attribute_value_ResultData {
+                result: core::mem::ManuallyDrop::new(
+                    I_get_attribute_value_Out::default(),
+                ),
+            },
+        }
+    }
+}
 #[derive(Default)]
 pub struct I_set_attribute_value_In {
     pub value: i32,
@@ -288,6 +320,18 @@ impl I_set_attribute_value_Result {
     }
     pub fn tag(&self) -> &i32 {
         &self.tag
+    }
+}
+impl Default for I_set_attribute_value_Result {
+    fn default() -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: I_set_attribute_value_ResultData {
+                result: core::mem::ManuallyDrop::new(
+                    I_set_attribute_value_Out::default(),
+                ),
+            },
+        }
     }
 }
 pub struct I_Call {
@@ -433,6 +477,18 @@ impl I_Call {
     }
     pub fn tag(&self) -> &i32 {
         &self.tag
+    }
+}
+impl Default for I_Call {
+    fn default() -> Self {
+        Self {
+            tag: i32::default(),
+            data: I_CallData {
+                unknownOp: core::mem::ManuallyDrop::new(
+                    dds::rpc::UnknownOperation::default(),
+                ),
+            },
+        }
     }
 }
 #[derive(Default)]
@@ -584,6 +640,18 @@ impl I_Return {
     }
     pub fn tag(&self) -> &i32 {
         &self.tag
+    }
+}
+impl Default for I_Return {
+    fn default() -> Self {
+        Self {
+            tag: i32::default(),
+            data: I_ReturnData {
+                unknownOp: core::mem::ManuallyDrop::new(
+                    dds::rpc::UnknownOperation::default(),
+                ),
+            },
+        }
     }
 }
 #[derive(Default)]

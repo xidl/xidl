@@ -1,5 +1,6 @@
 ---
 source: xidlc/tests/codegen_snapshot.rs
+assertion_line: 105
 expression: output
 ---
 ===============
@@ -104,5 +105,15 @@ impl C {
     }
     pub fn tag(&self) -> &i32 {
         &self.tag
+    }
+}
+impl Default for C {
+    fn default() -> Self {
+        Self {
+            tag: 0,
+            data: CData {
+                a: core::mem::ManuallyDrop::new(i32::default()),
+            },
+        }
     }
 }
