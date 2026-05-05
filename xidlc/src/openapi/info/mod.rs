@@ -6,7 +6,6 @@ mod contact;
 mod info_object;
 mod license;
 #[cfg(test)]
-#[path = "../info_tests.rs"]
 mod tests;
 
 pub use self::{

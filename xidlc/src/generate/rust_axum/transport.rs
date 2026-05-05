@@ -446,5 +446,4 @@ fn render_public_scoped(value: &hir::ScopedName) -> String {
 }
 
 #[cfg(test)]
-#[path = "transport/tests.rs"]
 mod tests;

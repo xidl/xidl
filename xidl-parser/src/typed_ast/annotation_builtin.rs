@@ -1,7 +1,6 @@
 use super::*;
 use serde::{Deserialize, Serialize};
 
-#[path = "annotation_builtin_parse.rs"]
 mod parse;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
