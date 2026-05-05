@@ -1,10 +1,12 @@
 use crate::error::IdlcResult;
 use crate::generate::rust::util::{
     constr_type_scoped_name, declarator_name, render_const, rust_derive_info_with_extra,
-    rust_passthrough_attrs_from_annotations, rust_scoped_name, rust_switch_type, type_with_decl,
+    rust_ident, rust_passthrough_attrs_from_annotations, rust_scoped_name, rust_switch_type,
+    type_with_decl,
 };
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::doc_lines_from_annotations;
+use convert_case::{Case as ConvertCase, Casing};
 use itertools::Itertools;
 use serde_json::json;
 use std::collections::BTreeSet;
@@ -54,7 +56,8 @@ pub(crate) fn render_union_with_config(
     let cases = def
         .case
         .iter()
-        .map(|case| {
+        .enumerate()
+        .map(|(case_index, case)| {
             let labels = case
                 .label
                 .iter()
@@ -69,8 +72,8 @@ pub(crate) fn render_union_with_config(
             } else {
                 labels.join(" | ")
             };
-            let member =
-                crate::generate::rust::util::rust_ident(&declarator_name(&case.element.value));
+            let member = rust_ident(&declarator_name(&case.element.value));
+            let helper_variant = member.to_case(ConvertCase::Pascal);
             let field_id = case
                 .element
                 .field_id
@@ -82,12 +85,41 @@ pub(crate) fn render_union_with_config(
                     rust_scoped_name(&constr_type_scoped_name(constr))
                 }
             };
+            let serde_arms = if is_default {
+                vec![json!({
+                    "match_expr": "_",
+                    "tag": "default",
+                    "tag_expr": format!("{}::default()", rust_switch_type(&def.switch_type_spec)),
+                })]
+            } else {
+                labels
+                    .iter()
+                    .map(|label| {
+                        json!({
+                            "match_expr": label,
+                            "tag": serde_tag_string(label),
+                            "tag_expr": label,
+                        })
+                    })
+                    .collect::<Vec<_>>()
+            };
             json!({
+                "case_index": case_index,
+                "constructor_tag": if is_default {
+                    format!("{}::default()", rust_switch_type(&def.switch_type_spec))
+                } else {
+                    labels
+                        .first()
+                        .expect("union case label")
+                        .to_string()
+                },
                 "labels": labels,
+                "serde_arms": serde_arms,
                 "pattern": pattern,
                 "type": field_ty,
                 "is_default": is_default,
                 "member": member,
+                "helper_variant": helper_variant,
                 "field_id": field_id,
             })
         })
@@ -133,4 +165,8 @@ pub(crate) fn render_union_with_config(
         module_path,
     );
     renderer.render_source_template("union.rs.j2", &ctx)
+}
+
+fn serde_tag_string(label: &str) -> String {
+    label.rsplit("::").next().unwrap_or(label).to_string()
 }

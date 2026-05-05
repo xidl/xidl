@@ -25,5 +25,6 @@ pub mod city_jsonrpc_stream;
 pub mod http_media_types;
 pub mod http_server;
 pub mod hysteria2;
+pub mod union_serde;
 
 pub mod e2e_test;

@@ -1,0 +1,58 @@
+#pragma xidlc package UnionSerde
+#pragma xidlc version v1.0.0
+#pragma xidlc service http://127.0.0.1:8080 union serde
+
+@derive(Serialize, Deserialize)
+enum Tag {
+    V1,
+    V2,
+    V3,
+
+};
+
+@derive(Serialize, Deserialize)
+union UnionValue switch (Tag) {
+    case Tag::V1:
+        uint8 case1;
+    case Tag::V2:
+        sequence<string> case2;
+    case Tag::V3:
+        map<string, string> case3;
+};
+
+@derive(Serialize, Deserialize)
+union IntTagValue switch (long) {
+    case 1:
+        string one;
+    case 2:
+    case 3:
+        uint32 two_or_three;
+
+    default:
+        boolean fallback;
+};
+
+@derive(Serialize, Deserialize)
+union BoolTagValue switch (boolean) {
+    case TRUE:
+        string yes;
+    case FALSE:
+        string no;
+};
+
+@derive(Serialize, Deserialize)
+union CharTagValue switch (char) {
+    case 'x':
+        string ex;
+    case 'y':
+        string why;
+    default:
+        string other;
+};
+
+interface UnionSerdeService {
+    readonly attribute UnionValue sample;
+    readonly attribute IntTagValue int_sample;
+    readonly attribute BoolTagValue bool_sample;
+    readonly attribute CharTagValue char_sample;
+};

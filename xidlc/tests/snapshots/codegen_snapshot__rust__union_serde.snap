@@ -1,0 +1,975 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+union_serde.rs
+===============
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    ::serde::Serialize,
+    ::serde::Deserialize,
+    Default,
+)]
+pub enum Tag {
+    #[default]
+    V1,
+    V2,
+    V3,
+}
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
+pub struct UnionValue {
+    tag: Tag,
+    data: UnionValueData,
+}
+union UnionValueData {
+    case1: core::mem::ManuallyDrop<int>,
+    case2: core::mem::ManuallyDrop<Vec<String>>,
+    case3: core::mem::ManuallyDrop<::std::collections::BTreeMap<String, String>>,
+}
+impl Drop for UnionValue {
+    fn drop(&mut self) {
+        match self.tag {
+            Tag::V1 => {
+                unsafe {
+                    core::mem::ManuallyDrop::drop(&mut self.data.case1);
+                }
+            }
+            Tag::V2 => {
+                unsafe {
+                    core::mem::ManuallyDrop::drop(&mut self.data.case2);
+                }
+            }
+            Tag::V3 => {
+                unsafe {
+                    core::mem::ManuallyDrop::drop(&mut self.data.case3);
+                }
+            }
+        }
+    }
+}
+impl UnionValue {
+    pub fn new_case1(value: int) -> Self {
+        Self {
+            tag: Tag::V1,
+            data: UnionValueData {
+                case1: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+    pub fn is_case1(&self) -> bool {
+        matches!(self.tag, Tag::V1)
+    }
+    pub fn as_case1(&self) -> &int {
+        debug_assert!(self.is_case1());
+        unsafe { &self.data.case1 }
+    }
+    pub fn as_case1_mut(&mut self) -> &mut int {
+        debug_assert!(self.is_case1());
+        unsafe { &mut self.data.case1 }
+    }
+    pub fn into_case1(self) -> int {
+        debug_assert!(self.is_case1());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.case1)
+        }
+    }
+    pub fn new_case2(value: Vec<String>) -> Self {
+        Self {
+            tag: Tag::V2,
+            data: UnionValueData {
+                case2: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+    pub fn is_case2(&self) -> bool {
+        matches!(self.tag, Tag::V2)
+    }
+    pub fn as_case2(&self) -> &Vec<String> {
+        debug_assert!(self.is_case2());
+        unsafe { &self.data.case2 }
+    }
+    pub fn as_case2_mut(&mut self) -> &mut Vec<String> {
+        debug_assert!(self.is_case2());
+        unsafe { &mut self.data.case2 }
+    }
+    pub fn into_case2(self) -> Vec<String> {
+        debug_assert!(self.is_case2());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.case2)
+        }
+    }
+    pub fn new_case3(value: ::std::collections::BTreeMap<String, String>) -> Self {
+        Self {
+            tag: Tag::V3,
+            data: UnionValueData {
+                case3: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+    pub fn is_case3(&self) -> bool {
+        matches!(self.tag, Tag::V3)
+    }
+    pub fn as_case3(&self) -> &::std::collections::BTreeMap<String, String> {
+        debug_assert!(self.is_case3());
+        unsafe { &self.data.case3 }
+    }
+    pub fn as_case3_mut(&mut self) -> &mut ::std::collections::BTreeMap<String, String> {
+        debug_assert!(self.is_case3());
+        unsafe { &mut self.data.case3 }
+    }
+    pub fn into_case3(self) -> ::std::collections::BTreeMap<String, String> {
+        debug_assert!(self.is_case3());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.case3)
+        }
+    }
+    pub fn tag(&self) -> &Tag {
+        &self.tag
+    }
+}
+impl Default for UnionValue {
+    fn default() -> Self {
+        Self {
+            tag: Tag::V1,
+            data: UnionValueData {
+                case1: core::mem::ManuallyDrop::new(int::default()),
+            },
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct UnionValueSerdeRef<'__a> {
+    tag: &'__a str,
+    data: UnionValueSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum UnionValueSerdeRefData<'__a> {
+    Case0(&'__a int),
+    Case1(&'__a Vec<String>),
+    Case2(&'__a ::std::collections::BTreeMap<String, String>),
+}
+impl serde::Serialize for UnionValue {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = match self.tag {
+            Tag::V1 => {
+                let tag = match self.tag {
+                    Tag::V1 => "V1",
+                    _ => unreachable!("union UnionValue tag must match active case"),
+                };
+                UnionValueSerdeRef {
+                    tag,
+                    data: UnionValueSerdeRefData::Case0(self.as_case1()),
+                }
+            }
+            Tag::V2 => {
+                let tag = match self.tag {
+                    Tag::V2 => "V2",
+                    _ => unreachable!("union UnionValue tag must match active case"),
+                };
+                UnionValueSerdeRef {
+                    tag,
+                    data: UnionValueSerdeRefData::Case1(self.as_case2()),
+                }
+            }
+            Tag::V3 => {
+                let tag = match self.tag {
+                    Tag::V3 => "V3",
+                    _ => unreachable!("union UnionValue tag must match active case"),
+                };
+                UnionValueSerdeRef {
+                    tag,
+                    data: UnionValueSerdeRefData::Case2(self.as_case3()),
+                }
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct UnionValueSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for UnionValue {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = UnionValueSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "V1" => {
+                let value = ::serde_json::from_value::<int>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union UnionValue payload decode failed for tag `V1`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: Tag::V1,
+                    data: UnionValueData {
+                        case1: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "V2" => {
+                let value = ::serde_json::from_value::<Vec<String>>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union UnionValue payload decode failed for tag `V2`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: Tag::V2,
+                    data: UnionValueData {
+                        case2: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "V3" => {
+                let value = ::serde_json::from_value::<
+                    ::std::collections::BTreeMap<String, String>,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union UnionValue payload decode failed for tag `V3`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: Tag::V3,
+                    data: UnionValueData {
+                        case3: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union UnionValue tag/data mismatch for tag `{}`", helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
+pub struct IntTagValue {
+    tag: i32,
+    data: IntTagValueData,
+}
+union IntTagValueData {
+    one: core::mem::ManuallyDrop<String>,
+    two_or_three: core::mem::ManuallyDrop<int>,
+    fallback: core::mem::ManuallyDrop<bool>,
+}
+impl Drop for IntTagValue {
+    fn drop(&mut self) {
+        match self.tag {
+            1 => {
+                unsafe {
+                    core::mem::ManuallyDrop::drop(&mut self.data.one);
+                }
+            }
+            2 | 3 => {
+                unsafe {
+                    core::mem::ManuallyDrop::drop(&mut self.data.two_or_three);
+                }
+            }
+            _ => {
+                unsafe {
+                    core::mem::ManuallyDrop::drop(&mut self.data.fallback);
+                }
+            }
+        }
+    }
+}
+impl IntTagValue {
+    pub fn new_one(value: String) -> Self {
+        Self {
+            tag: 1,
+            data: IntTagValueData {
+                one: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+    pub fn is_one(&self) -> bool {
+        matches!(self.tag, 1)
+    }
+    pub fn as_one(&self) -> &String {
+        debug_assert!(self.is_one());
+        unsafe { &self.data.one }
+    }
+    pub fn as_one_mut(&mut self) -> &mut String {
+        debug_assert!(self.is_one());
+        unsafe { &mut self.data.one }
+    }
+    pub fn into_one(self) -> String {
+        debug_assert!(self.is_one());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.one)
+        }
+    }
+    pub fn new_two_or_three(value: int) -> Self {
+        Self {
+            tag: 2,
+            data: IntTagValueData {
+                two_or_three: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+    pub fn is_two_or_three(&self) -> bool {
+        matches!(self.tag, 2 | 3)
+    }
+    pub fn as_two_or_three(&self) -> &int {
+        debug_assert!(self.is_two_or_three());
+        unsafe { &self.data.two_or_three }
+    }
+    pub fn as_two_or_three_mut(&mut self) -> &mut int {
+        debug_assert!(self.is_two_or_three());
+        unsafe { &mut self.data.two_or_three }
+    }
+    pub fn into_two_or_three(self) -> int {
+        debug_assert!(self.is_two_or_three());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.two_or_three)
+        }
+    }
+    pub fn new_fallback(value: bool) -> Self {
+        Self {
+            tag: i32::default(),
+            data: IntTagValueData {
+                fallback: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+    pub fn is_fallback(&self) -> bool {
+        matches!(self.tag, _)
+    }
+    pub fn as_fallback(&self) -> &bool {
+        debug_assert!(self.is_fallback());
+        unsafe { &self.data.fallback }
+    }
+    pub fn as_fallback_mut(&mut self) -> &mut bool {
+        debug_assert!(self.is_fallback());
+        unsafe { &mut self.data.fallback }
+    }
+    pub fn into_fallback(self) -> bool {
+        debug_assert!(self.is_fallback());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.fallback)
+        }
+    }
+    pub fn tag(&self) -> &i32 {
+        &self.tag
+    }
+}
+impl Default for IntTagValue {
+    fn default() -> Self {
+        Self {
+            tag: i32::default(),
+            data: IntTagValueData {
+                fallback: core::mem::ManuallyDrop::new(bool::default()),
+            },
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct IntTagValueSerdeRef<'__a> {
+    tag: &'__a str,
+    data: IntTagValueSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum IntTagValueSerdeRefData<'__a> {
+    Case0(&'__a String),
+    Case1(&'__a int),
+    Case2(&'__a bool),
+}
+impl serde::Serialize for IntTagValue {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = match self.tag {
+            1 => {
+                let tag = match self.tag {
+                    1 => "1",
+                    _ => unreachable!("union IntTagValue tag must match active case"),
+                };
+                IntTagValueSerdeRef {
+                    tag,
+                    data: IntTagValueSerdeRefData::Case0(self.as_one()),
+                }
+            }
+            2 | 3 => {
+                let tag = match self.tag {
+                    2 => "2",
+                    3 => "3",
+                    _ => unreachable!("union IntTagValue tag must match active case"),
+                };
+                IntTagValueSerdeRef {
+                    tag,
+                    data: IntTagValueSerdeRefData::Case1(self.as_two_or_three()),
+                }
+            }
+            _ => {
+                let tag = match self.tag {
+                    _ => "default",
+                    _ => unreachable!("union IntTagValue tag must match active case"),
+                };
+                IntTagValueSerdeRef {
+                    tag,
+                    data: IntTagValueSerdeRefData::Case2(self.as_fallback()),
+                }
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct IntTagValueSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for IntTagValue {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = IntTagValueSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "1" => {
+                let value = ::serde_json::from_value::<String>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union IntTagValue payload decode failed for tag `1`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: 1,
+                    data: IntTagValueData {
+                        one: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "2" => {
+                let value = ::serde_json::from_value::<int>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union IntTagValue payload decode failed for tag `2`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: 2,
+                    data: IntTagValueData {
+                        two_or_three: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "3" => {
+                let value = ::serde_json::from_value::<int>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union IntTagValue payload decode failed for tag `3`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: 3,
+                    data: IntTagValueData {
+                        two_or_three: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "default" => {
+                let value = ::serde_json::from_value::<bool>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union IntTagValue payload decode failed for tag `default`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: i32::default(),
+                    data: IntTagValueData {
+                        fallback: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union IntTagValue tag/data mismatch for tag `{}`", helper
+                            .tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
+pub struct BoolTagValue {
+    tag: bool,
+    data: BoolTagValueData,
+}
+union BoolTagValueData {
+    yes: core::mem::ManuallyDrop<String>,
+    no: core::mem::ManuallyDrop<String>,
+}
+impl Drop for BoolTagValue {
+    fn drop(&mut self) {
+        match self.tag {
+            true => {
+                unsafe {
+                    core::mem::ManuallyDrop::drop(&mut self.data.yes);
+                }
+            }
+            false => {
+                unsafe {
+                    core::mem::ManuallyDrop::drop(&mut self.data.no);
+                }
+            }
+        }
+    }
+}
+impl BoolTagValue {
+    pub fn new_yes(value: String) -> Self {
+        Self {
+            tag: true,
+            data: BoolTagValueData {
+                yes: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+    pub fn is_yes(&self) -> bool {
+        matches!(self.tag, true)
+    }
+    pub fn as_yes(&self) -> &String {
+        debug_assert!(self.is_yes());
+        unsafe { &self.data.yes }
+    }
+    pub fn as_yes_mut(&mut self) -> &mut String {
+        debug_assert!(self.is_yes());
+        unsafe { &mut self.data.yes }
+    }
+    pub fn into_yes(self) -> String {
+        debug_assert!(self.is_yes());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.yes)
+        }
+    }
+    pub fn new_no(value: String) -> Self {
+        Self {
+            tag: false,
+            data: BoolTagValueData {
+                no: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+    pub fn is_no(&self) -> bool {
+        matches!(self.tag, false)
+    }
+    pub fn as_no(&self) -> &String {
+        debug_assert!(self.is_no());
+        unsafe { &self.data.no }
+    }
+    pub fn as_no_mut(&mut self) -> &mut String {
+        debug_assert!(self.is_no());
+        unsafe { &mut self.data.no }
+    }
+    pub fn into_no(self) -> String {
+        debug_assert!(self.is_no());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.no)
+        }
+    }
+    pub fn tag(&self) -> &bool {
+        &self.tag
+    }
+}
+impl Default for BoolTagValue {
+    fn default() -> Self {
+        Self {
+            tag: true,
+            data: BoolTagValueData {
+                yes: core::mem::ManuallyDrop::new(String::default()),
+            },
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct BoolTagValueSerdeRef<'__a> {
+    tag: &'__a str,
+    data: BoolTagValueSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum BoolTagValueSerdeRefData<'__a> {
+    Case0(&'__a String),
+    Case1(&'__a String),
+}
+impl serde::Serialize for BoolTagValue {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = match self.tag {
+            true => {
+                let tag = match self.tag {
+                    true => "true",
+                    _ => unreachable!("union BoolTagValue tag must match active case"),
+                };
+                BoolTagValueSerdeRef {
+                    tag,
+                    data: BoolTagValueSerdeRefData::Case0(self.as_yes()),
+                }
+            }
+            false => {
+                let tag = match self.tag {
+                    false => "false",
+                    _ => unreachable!("union BoolTagValue tag must match active case"),
+                };
+                BoolTagValueSerdeRef {
+                    tag,
+                    data: BoolTagValueSerdeRefData::Case1(self.as_no()),
+                }
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct BoolTagValueSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for BoolTagValue {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = BoolTagValueSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "true" => {
+                let value = ::serde_json::from_value::<String>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union BoolTagValue payload decode failed for tag `true`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: true,
+                    data: BoolTagValueData {
+                        yes: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "false" => {
+                let value = ::serde_json::from_value::<String>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union BoolTagValue payload decode failed for tag `false`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: false,
+                    data: BoolTagValueData {
+                        no: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union BoolTagValue tag/data mismatch for tag `{}`", helper
+                            .tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
+pub struct CharTagValue {
+    tag: char,
+    data: CharTagValueData,
+}
+union CharTagValueData {
+    ex: core::mem::ManuallyDrop<String>,
+    why: core::mem::ManuallyDrop<String>,
+    other: core::mem::ManuallyDrop<String>,
+}
+impl Drop for CharTagValue {
+    fn drop(&mut self) {
+        match self.tag {
+            'x' => {
+                unsafe {
+                    core::mem::ManuallyDrop::drop(&mut self.data.ex);
+                }
+            }
+            'y' => {
+                unsafe {
+                    core::mem::ManuallyDrop::drop(&mut self.data.why);
+                }
+            }
+            _ => {
+                unsafe {
+                    core::mem::ManuallyDrop::drop(&mut self.data.other);
+                }
+            }
+        }
+    }
+}
+impl CharTagValue {
+    pub fn new_ex(value: String) -> Self {
+        Self {
+            tag: 'x',
+            data: CharTagValueData {
+                ex: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+    pub fn is_ex(&self) -> bool {
+        matches!(self.tag, 'x')
+    }
+    pub fn as_ex(&self) -> &String {
+        debug_assert!(self.is_ex());
+        unsafe { &self.data.ex }
+    }
+    pub fn as_ex_mut(&mut self) -> &mut String {
+        debug_assert!(self.is_ex());
+        unsafe { &mut self.data.ex }
+    }
+    pub fn into_ex(self) -> String {
+        debug_assert!(self.is_ex());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.ex)
+        }
+    }
+    pub fn new_why(value: String) -> Self {
+        Self {
+            tag: 'y',
+            data: CharTagValueData {
+                why: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+    pub fn is_why(&self) -> bool {
+        matches!(self.tag, 'y')
+    }
+    pub fn as_why(&self) -> &String {
+        debug_assert!(self.is_why());
+        unsafe { &self.data.why }
+    }
+    pub fn as_why_mut(&mut self) -> &mut String {
+        debug_assert!(self.is_why());
+        unsafe { &mut self.data.why }
+    }
+    pub fn into_why(self) -> String {
+        debug_assert!(self.is_why());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.why)
+        }
+    }
+    pub fn new_other(value: String) -> Self {
+        Self {
+            tag: char::default(),
+            data: CharTagValueData {
+                other: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+    pub fn is_other(&self) -> bool {
+        matches!(self.tag, _)
+    }
+    pub fn as_other(&self) -> &String {
+        debug_assert!(self.is_other());
+        unsafe { &self.data.other }
+    }
+    pub fn as_other_mut(&mut self) -> &mut String {
+        debug_assert!(self.is_other());
+        unsafe { &mut self.data.other }
+    }
+    pub fn into_other(self) -> String {
+        debug_assert!(self.is_other());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.other)
+        }
+    }
+    pub fn tag(&self) -> &char {
+        &self.tag
+    }
+}
+impl Default for CharTagValue {
+    fn default() -> Self {
+        Self {
+            tag: char::default(),
+            data: CharTagValueData {
+                other: core::mem::ManuallyDrop::new(String::default()),
+            },
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct CharTagValueSerdeRef<'__a> {
+    tag: &'__a str,
+    data: CharTagValueSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum CharTagValueSerdeRefData<'__a> {
+    Case0(&'__a String),
+    Case1(&'__a String),
+    Case2(&'__a String),
+}
+impl serde::Serialize for CharTagValue {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = match self.tag {
+            'x' => {
+                let tag = match self.tag {
+                    'x' => "'x'",
+                    _ => unreachable!("union CharTagValue tag must match active case"),
+                };
+                CharTagValueSerdeRef {
+                    tag,
+                    data: CharTagValueSerdeRefData::Case0(self.as_ex()),
+                }
+            }
+            'y' => {
+                let tag = match self.tag {
+                    'y' => "'y'",
+                    _ => unreachable!("union CharTagValue tag must match active case"),
+                };
+                CharTagValueSerdeRef {
+                    tag,
+                    data: CharTagValueSerdeRefData::Case1(self.as_why()),
+                }
+            }
+            _ => {
+                let tag = match self.tag {
+                    _ => "default",
+                    _ => unreachable!("union CharTagValue tag must match active case"),
+                };
+                CharTagValueSerdeRef {
+                    tag,
+                    data: CharTagValueSerdeRefData::Case2(self.as_other()),
+                }
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct CharTagValueSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for CharTagValue {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = CharTagValueSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "'x'" => {
+                let value = ::serde_json::from_value::<String>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union CharTagValue payload decode failed for tag `'x'`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: 'x',
+                    data: CharTagValueData {
+                        ex: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "'y'" => {
+                let value = ::serde_json::from_value::<String>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union CharTagValue payload decode failed for tag `'y'`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: 'y',
+                    data: CharTagValueData {
+                        why: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "default" => {
+                let value = ::serde_json::from_value::<String>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union CharTagValue payload decode failed for tag `default`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: char::default(),
+                    data: CharTagValueData {
+                        other: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union CharTagValue tag/data mismatch for tag `{}`", helper
+                            .tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
