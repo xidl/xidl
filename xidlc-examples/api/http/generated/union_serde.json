@@ -1,0 +1,596 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "UnionSerde",
+    "version": "v1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8080",
+      "description": "union serde"
+    }
+  ],
+  "paths": {
+    "/attribute/bool_sample": {
+      "get": {
+        "operationId": "UnionSerdeService.get_attribute_bool_sample",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoolTagValue"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attribute/char_sample": {
+      "get": {
+        "operationId": "UnionSerdeService.get_attribute_char_sample",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharTagValue"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attribute/int_sample": {
+      "get": {
+        "operationId": "UnionSerdeService.get_attribute_int_sample",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntTagValue"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attribute/sample": {
+      "get": {
+        "operationId": "UnionSerdeService.get_attribute_sample",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnionValue"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BoolTagValue": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "yes"
+            ],
+            "properties": {
+              "yes": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "no"
+            ],
+            "properties": {
+              "no": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "CharTagValue": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "ex"
+            ],
+            "properties": {
+              "ex": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "why"
+            ],
+            "properties": {
+              "why": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "other"
+            ],
+            "properties": {
+              "other": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "Error": {
+        "type": "object",
+        "required": [
+          "code",
+          "msg"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "details": {
+            "type": "object"
+          },
+          "msg": {
+            "type": "string"
+          }
+        }
+      },
+      "IntTagValue": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "one"
+            ],
+            "properties": {
+              "one": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "two_or_three"
+            ],
+            "properties": {
+              "two_or_three": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "fallback"
+            ],
+            "properties": {
+              "fallback": {
+                "type": "boolean"
+              }
+            }
+          }
+        ]
+      },
+      "Tag": {
+        "type": "string",
+        "enum": [
+          "V1",
+          "V2",
+          "V3"
+        ]
+      },
+      "UnionSerdeService_Call": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_sample"
+            ],
+            "properties": {
+              "get_attribute_sample": {
+                "$ref": "#/components/schemas/UnionSerdeService_get_attribute_sample_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_int_sample"
+            ],
+            "properties": {
+              "get_attribute_int_sample": {
+                "$ref": "#/components/schemas/UnionSerdeService_get_attribute_int_sample_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_bool_sample"
+            ],
+            "properties": {
+              "get_attribute_bool_sample": {
+                "$ref": "#/components/schemas/UnionSerdeService_get_attribute_bool_sample_In"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_char_sample"
+            ],
+            "properties": {
+              "get_attribute_char_sample": {
+                "$ref": "#/components/schemas/UnionSerdeService_get_attribute_char_sample_In"
+              }
+            }
+          }
+        ]
+      },
+      "UnionSerdeService_Reply": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/UnionSerdeService_Return"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.ReplyHeader"
+          }
+        }
+      },
+      "UnionSerdeService_Request": {
+        "type": "object",
+        "required": [
+          "header",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/UnionSerdeService_Call"
+          },
+          "header": {
+            "$ref": "#/components/schemas/dds.rpc.RequestHeader"
+          }
+        }
+      },
+      "UnionSerdeService_Return": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "unknownOp"
+            ],
+            "properties": {
+              "unknownOp": {
+                "$ref": "#/components/schemas/dds.rpc.UnknownOperation"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_sample"
+            ],
+            "properties": {
+              "get_attribute_sample": {
+                "$ref": "#/components/schemas/UnionSerdeService_get_attribute_sample_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_int_sample"
+            ],
+            "properties": {
+              "get_attribute_int_sample": {
+                "$ref": "#/components/schemas/UnionSerdeService_get_attribute_int_sample_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_bool_sample"
+            ],
+            "properties": {
+              "get_attribute_bool_sample": {
+                "$ref": "#/components/schemas/UnionSerdeService_get_attribute_bool_sample_Result"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "get_attribute_char_sample"
+            ],
+            "properties": {
+              "get_attribute_char_sample": {
+                "$ref": "#/components/schemas/UnionSerdeService_get_attribute_char_sample_Result"
+              }
+            }
+          }
+        ]
+      },
+      "UnionSerdeService_get_attribute_bool_sample_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "UnionSerdeService_get_attribute_bool_sample_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "$ref": "#/components/schemas/BoolTagValue"
+          }
+        }
+      },
+      "UnionSerdeService_get_attribute_bool_sample_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/UnionSerdeService_get_attribute_bool_sample_Out"
+              }
+            }
+          }
+        ]
+      },
+      "UnionSerdeService_get_attribute_char_sample_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "UnionSerdeService_get_attribute_char_sample_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "$ref": "#/components/schemas/CharTagValue"
+          }
+        }
+      },
+      "UnionSerdeService_get_attribute_char_sample_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/UnionSerdeService_get_attribute_char_sample_Out"
+              }
+            }
+          }
+        ]
+      },
+      "UnionSerdeService_get_attribute_int_sample_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "UnionSerdeService_get_attribute_int_sample_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "$ref": "#/components/schemas/IntTagValue"
+          }
+        }
+      },
+      "UnionSerdeService_get_attribute_int_sample_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/UnionSerdeService_get_attribute_int_sample_Out"
+              }
+            }
+          }
+        ]
+      },
+      "UnionSerdeService_get_attribute_sample_In": {
+        "type": "object",
+        "required": [
+          "dummy"
+        ],
+        "properties": {
+          "dummy": {
+            "$ref": "#/components/schemas/dds.rpc.UnusedMember"
+          }
+        }
+      },
+      "UnionSerdeService_get_attribute_sample_Out": {
+        "type": "object",
+        "required": [
+          "return_"
+        ],
+        "properties": {
+          "return_": {
+            "$ref": "#/components/schemas/UnionValue"
+          }
+        }
+      },
+      "UnionSerdeService_get_attribute_sample_Result": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "result"
+            ],
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/UnionSerdeService_get_attribute_sample_Out"
+              }
+            }
+          }
+        ]
+      },
+      "UnionValue": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "case1"
+            ],
+            "properties": {
+              "case1": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "case2"
+            ],
+            "properties": {
+              "case2": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "case3"
+            ],
+            "properties": {
+              "case3": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
