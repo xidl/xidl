@@ -1,5 +1,6 @@
 ---
 source: xidlc/tests/codegen_snapshot.rs
+assertion_line: 105
 expression: output
 ---
 ===============
@@ -96,6 +97,16 @@ impl A_func1_Result {
         &self.tag
     }
 }
+impl Default for A_func1_Result {
+    fn default() -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_func1_ResultData {
+                result: core::mem::ManuallyDrop::new(A_func1_Out::default()),
+            },
+        }
+    }
+}
 #[derive(Default)]
 pub struct A_func1_In {
     pub dummy: dds::rpc::UnusedMember,
@@ -187,6 +198,16 @@ impl A_func1_Result {
         &self.tag
     }
 }
+impl Default for A_func1_Result {
+    fn default() -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_func1_ResultData {
+                result: core::mem::ManuallyDrop::new(A_func1_Out::default()),
+            },
+        }
+    }
+}
 #[derive(Default)]
 pub struct A_func1_In {
     pub dummy: dds::rpc::UnusedMember,
@@ -195,311 +216,6 @@ impl A_func1_In {}
 #[derive(Default)]
 pub struct A_func1_Out {
     pub dummy: dds::rpc::UnusedMember,
-}
-impl A_func1_Out {}
-pub struct A_func1_Result {
-    tag: i32,
-    data: A_func1_ResultData,
-}
-union A_func1_ResultData {
-    result: core::mem::ManuallyDrop<A_func1_Out>,
-    a_ex: core::mem::ManuallyDrop<A>,
-    b_ex: core::mem::ManuallyDrop<B>,
-    c_ex: core::mem::ManuallyDrop<C>,
-}
-impl Drop for A_func1_Result {
-    fn drop(&mut self) {
-        match self.tag {
-            dds::RETCODE_OK => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.result);
-                }
-            }
-            A_Ex_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.a_ex);
-                }
-            }
-            B_Ex_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.b_ex);
-                }
-            }
-            C_Ex_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.c_ex);
-                }
-            }
-        }
-    }
-}
-impl A_func1_Result {
-    pub fn new_result(value: A_func1_Out) -> Self {
-        Self {
-            tag: dds::RETCODE_OK,
-            data: A_func1_ResultData {
-                result: core::mem::ManuallyDrop::new(value),
-            },
-        }
-    }
-    pub fn is_result(&self) -> bool {
-        matches!(self.tag, dds::RETCODE_OK)
-    }
-    pub fn as_result(&self) -> &A_func1_Out {
-        debug_assert!(self.is_result());
-        unsafe { &self.data.result }
-    }
-    pub fn as_result_mut(&mut self) -> &mut A_func1_Out {
-        debug_assert!(self.is_result());
-        unsafe { &mut self.data.result }
-    }
-    pub fn into_result(self) -> A_func1_Out {
-        debug_assert!(self.is_result());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.result)
-        }
-    }
-    pub fn new_a_ex(value: A) -> Self {
-        Self {
-            tag: A_Ex_Hash,
-            data: A_func1_ResultData {
-                a_ex: core::mem::ManuallyDrop::new(value),
-            },
-        }
-    }
-    pub fn is_a_ex(&self) -> bool {
-        matches!(self.tag, A_Ex_Hash)
-    }
-    pub fn as_a_ex(&self) -> &A {
-        debug_assert!(self.is_a_ex());
-        unsafe { &self.data.a_ex }
-    }
-    pub fn as_a_ex_mut(&mut self) -> &mut A {
-        debug_assert!(self.is_a_ex());
-        unsafe { &mut self.data.a_ex }
-    }
-    pub fn into_a_ex(self) -> A {
-        debug_assert!(self.is_a_ex());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.a_ex)
-        }
-    }
-    pub fn new_b_ex(value: B) -> Self {
-        Self {
-            tag: B_Ex_Hash,
-            data: A_func1_ResultData {
-                b_ex: core::mem::ManuallyDrop::new(value),
-            },
-        }
-    }
-    pub fn is_b_ex(&self) -> bool {
-        matches!(self.tag, B_Ex_Hash)
-    }
-    pub fn as_b_ex(&self) -> &B {
-        debug_assert!(self.is_b_ex());
-        unsafe { &self.data.b_ex }
-    }
-    pub fn as_b_ex_mut(&mut self) -> &mut B {
-        debug_assert!(self.is_b_ex());
-        unsafe { &mut self.data.b_ex }
-    }
-    pub fn into_b_ex(self) -> B {
-        debug_assert!(self.is_b_ex());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.b_ex)
-        }
-    }
-    pub fn new_c_ex(value: C) -> Self {
-        Self {
-            tag: C_Ex_Hash,
-            data: A_func1_ResultData {
-                c_ex: core::mem::ManuallyDrop::new(value),
-            },
-        }
-    }
-    pub fn is_c_ex(&self) -> bool {
-        matches!(self.tag, C_Ex_Hash)
-    }
-    pub fn as_c_ex(&self) -> &C {
-        debug_assert!(self.is_c_ex());
-        unsafe { &self.data.c_ex }
-    }
-    pub fn as_c_ex_mut(&mut self) -> &mut C {
-        debug_assert!(self.is_c_ex());
-        unsafe { &mut self.data.c_ex }
-    }
-    pub fn into_c_ex(self) -> C {
-        debug_assert!(self.is_c_ex());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.c_ex)
-        }
-    }
-    pub fn tag(&self) -> &i32 {
-        &self.tag
-    }
-}
-#[derive(Default)]
-pub struct A_func1_In {
-    pub attr: u8,
-}
-impl A_func1_In {}
-#[derive(Default)]
-pub struct A_func1_Out {
-    pub attr: u16,
-}
-impl A_func1_Out {}
-pub struct A_func1_Result {
-    tag: i32,
-    data: A_func1_ResultData,
-}
-union A_func1_ResultData {
-    result: core::mem::ManuallyDrop<A_func1_Out>,
-}
-impl Drop for A_func1_Result {
-    fn drop(&mut self) {
-        match self.tag {
-            dds::RETCODE_OK => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.result);
-                }
-            }
-        }
-    }
-}
-impl A_func1_Result {
-    pub fn new_result(value: A_func1_Out) -> Self {
-        Self {
-            tag: dds::RETCODE_OK,
-            data: A_func1_ResultData {
-                result: core::mem::ManuallyDrop::new(value),
-            },
-        }
-    }
-    pub fn is_result(&self) -> bool {
-        matches!(self.tag, dds::RETCODE_OK)
-    }
-    pub fn as_result(&self) -> &A_func1_Out {
-        debug_assert!(self.is_result());
-        unsafe { &self.data.result }
-    }
-    pub fn as_result_mut(&mut self) -> &mut A_func1_Out {
-        debug_assert!(self.is_result());
-        unsafe { &mut self.data.result }
-    }
-    pub fn into_result(self) -> A_func1_Out {
-        debug_assert!(self.is_result());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.result)
-        }
-    }
-    pub fn tag(&self) -> &i32 {
-        &self.tag
-    }
-}
-#[derive(Default)]
-pub struct A_func1_In {
-    pub attr: u8,
-}
-impl A_func1_In {}
-#[derive(Default)]
-pub struct A_func1_Out {
-    pub attr: u16,
-}
-impl A_func1_Out {}
-pub struct A_func1_Result {
-    tag: i32,
-    data: A_func1_ResultData,
-}
-union A_func1_ResultData {
-    result: core::mem::ManuallyDrop<A_func1_Out>,
-    a_ex: core::mem::ManuallyDrop<A>,
-}
-impl Drop for A_func1_Result {
-    fn drop(&mut self) {
-        match self.tag {
-            dds::RETCODE_OK => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.result);
-                }
-            }
-            A_Ex_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.a_ex);
-                }
-            }
-        }
-    }
-}
-impl A_func1_Result {
-    pub fn new_result(value: A_func1_Out) -> Self {
-        Self {
-            tag: dds::RETCODE_OK,
-            data: A_func1_ResultData {
-                result: core::mem::ManuallyDrop::new(value),
-            },
-        }
-    }
-    pub fn is_result(&self) -> bool {
-        matches!(self.tag, dds::RETCODE_OK)
-    }
-    pub fn as_result(&self) -> &A_func1_Out {
-        debug_assert!(self.is_result());
-        unsafe { &self.data.result }
-    }
-    pub fn as_result_mut(&mut self) -> &mut A_func1_Out {
-        debug_assert!(self.is_result());
-        unsafe { &mut self.data.result }
-    }
-    pub fn into_result(self) -> A_func1_Out {
-        debug_assert!(self.is_result());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.result)
-        }
-    }
-    pub fn new_a_ex(value: A) -> Self {
-        Self {
-            tag: A_Ex_Hash,
-            data: A_func1_ResultData {
-                a_ex: core::mem::ManuallyDrop::new(value),
-            },
-        }
-    }
-    pub fn is_a_ex(&self) -> bool {
-        matches!(self.tag, A_Ex_Hash)
-    }
-    pub fn as_a_ex(&self) -> &A {
-        debug_assert!(self.is_a_ex());
-        unsafe { &self.data.a_ex }
-    }
-    pub fn as_a_ex_mut(&mut self) -> &mut A {
-        debug_assert!(self.is_a_ex());
-        unsafe { &mut self.data.a_ex }
-    }
-    pub fn into_a_ex(self) -> A {
-        debug_assert!(self.is_a_ex());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.a_ex)
-        }
-    }
-    pub fn tag(&self) -> &i32 {
-        &self.tag
-    }
-}
-#[derive(Default)]
-pub struct A_func1_In {
-    pub attr: u8,
-}
-impl A_func1_In {}
-#[derive(Default)]
-pub struct A_func1_Out {
-    pub attr: u16,
 }
 impl A_func1_Out {}
 pub struct A_func1_Result {
@@ -647,6 +363,351 @@ impl A_func1_Result {
         &self.tag
     }
 }
+impl Default for A_func1_Result {
+    fn default() -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_func1_ResultData {
+                result: core::mem::ManuallyDrop::new(A_func1_Out::default()),
+            },
+        }
+    }
+}
+#[derive(Default)]
+pub struct A_func1_In {
+    pub attr: u8,
+}
+impl A_func1_In {}
+#[derive(Default)]
+pub struct A_func1_Out {
+    pub attr: u16,
+}
+impl A_func1_Out {}
+pub struct A_func1_Result {
+    tag: i32,
+    data: A_func1_ResultData,
+}
+union A_func1_ResultData {
+    result: core::mem::ManuallyDrop<A_func1_Out>,
+}
+impl Drop for A_func1_Result {
+    fn drop(&mut self) {
+        match self.tag {
+            dds::RETCODE_OK => {
+                unsafe {
+                    core::mem::ManuallyDrop::drop(&mut self.data.result);
+                }
+            }
+        }
+    }
+}
+impl A_func1_Result {
+    pub fn new_result(value: A_func1_Out) -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_func1_ResultData {
+                result: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+    pub fn is_result(&self) -> bool {
+        matches!(self.tag, dds::RETCODE_OK)
+    }
+    pub fn as_result(&self) -> &A_func1_Out {
+        debug_assert!(self.is_result());
+        unsafe { &self.data.result }
+    }
+    pub fn as_result_mut(&mut self) -> &mut A_func1_Out {
+        debug_assert!(self.is_result());
+        unsafe { &mut self.data.result }
+    }
+    pub fn into_result(self) -> A_func1_Out {
+        debug_assert!(self.is_result());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.result)
+        }
+    }
+    pub fn tag(&self) -> &i32 {
+        &self.tag
+    }
+}
+impl Default for A_func1_Result {
+    fn default() -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_func1_ResultData {
+                result: core::mem::ManuallyDrop::new(A_func1_Out::default()),
+            },
+        }
+    }
+}
+#[derive(Default)]
+pub struct A_func1_In {
+    pub attr: u8,
+}
+impl A_func1_In {}
+#[derive(Default)]
+pub struct A_func1_Out {
+    pub attr: u16,
+}
+impl A_func1_Out {}
+pub struct A_func1_Result {
+    tag: i32,
+    data: A_func1_ResultData,
+}
+union A_func1_ResultData {
+    result: core::mem::ManuallyDrop<A_func1_Out>,
+    a_ex: core::mem::ManuallyDrop<A>,
+}
+impl Drop for A_func1_Result {
+    fn drop(&mut self) {
+        match self.tag {
+            dds::RETCODE_OK => {
+                unsafe {
+                    core::mem::ManuallyDrop::drop(&mut self.data.result);
+                }
+            }
+            A_Ex_Hash => {
+                unsafe {
+                    core::mem::ManuallyDrop::drop(&mut self.data.a_ex);
+                }
+            }
+        }
+    }
+}
+impl A_func1_Result {
+    pub fn new_result(value: A_func1_Out) -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_func1_ResultData {
+                result: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+    pub fn is_result(&self) -> bool {
+        matches!(self.tag, dds::RETCODE_OK)
+    }
+    pub fn as_result(&self) -> &A_func1_Out {
+        debug_assert!(self.is_result());
+        unsafe { &self.data.result }
+    }
+    pub fn as_result_mut(&mut self) -> &mut A_func1_Out {
+        debug_assert!(self.is_result());
+        unsafe { &mut self.data.result }
+    }
+    pub fn into_result(self) -> A_func1_Out {
+        debug_assert!(self.is_result());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.result)
+        }
+    }
+    pub fn new_a_ex(value: A) -> Self {
+        Self {
+            tag: A_Ex_Hash,
+            data: A_func1_ResultData {
+                a_ex: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+    pub fn is_a_ex(&self) -> bool {
+        matches!(self.tag, A_Ex_Hash)
+    }
+    pub fn as_a_ex(&self) -> &A {
+        debug_assert!(self.is_a_ex());
+        unsafe { &self.data.a_ex }
+    }
+    pub fn as_a_ex_mut(&mut self) -> &mut A {
+        debug_assert!(self.is_a_ex());
+        unsafe { &mut self.data.a_ex }
+    }
+    pub fn into_a_ex(self) -> A {
+        debug_assert!(self.is_a_ex());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.a_ex)
+        }
+    }
+    pub fn tag(&self) -> &i32 {
+        &self.tag
+    }
+}
+impl Default for A_func1_Result {
+    fn default() -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_func1_ResultData {
+                result: core::mem::ManuallyDrop::new(A_func1_Out::default()),
+            },
+        }
+    }
+}
+#[derive(Default)]
+pub struct A_func1_In {
+    pub attr: u8,
+}
+impl A_func1_In {}
+#[derive(Default)]
+pub struct A_func1_Out {
+    pub attr: u16,
+}
+impl A_func1_Out {}
+pub struct A_func1_Result {
+    tag: i32,
+    data: A_func1_ResultData,
+}
+union A_func1_ResultData {
+    result: core::mem::ManuallyDrop<A_func1_Out>,
+    a_ex: core::mem::ManuallyDrop<A>,
+    b_ex: core::mem::ManuallyDrop<B>,
+    c_ex: core::mem::ManuallyDrop<C>,
+}
+impl Drop for A_func1_Result {
+    fn drop(&mut self) {
+        match self.tag {
+            dds::RETCODE_OK => {
+                unsafe {
+                    core::mem::ManuallyDrop::drop(&mut self.data.result);
+                }
+            }
+            A_Ex_Hash => {
+                unsafe {
+                    core::mem::ManuallyDrop::drop(&mut self.data.a_ex);
+                }
+            }
+            B_Ex_Hash => {
+                unsafe {
+                    core::mem::ManuallyDrop::drop(&mut self.data.b_ex);
+                }
+            }
+            C_Ex_Hash => {
+                unsafe {
+                    core::mem::ManuallyDrop::drop(&mut self.data.c_ex);
+                }
+            }
+        }
+    }
+}
+impl A_func1_Result {
+    pub fn new_result(value: A_func1_Out) -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_func1_ResultData {
+                result: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+    pub fn is_result(&self) -> bool {
+        matches!(self.tag, dds::RETCODE_OK)
+    }
+    pub fn as_result(&self) -> &A_func1_Out {
+        debug_assert!(self.is_result());
+        unsafe { &self.data.result }
+    }
+    pub fn as_result_mut(&mut self) -> &mut A_func1_Out {
+        debug_assert!(self.is_result());
+        unsafe { &mut self.data.result }
+    }
+    pub fn into_result(self) -> A_func1_Out {
+        debug_assert!(self.is_result());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.result)
+        }
+    }
+    pub fn new_a_ex(value: A) -> Self {
+        Self {
+            tag: A_Ex_Hash,
+            data: A_func1_ResultData {
+                a_ex: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+    pub fn is_a_ex(&self) -> bool {
+        matches!(self.tag, A_Ex_Hash)
+    }
+    pub fn as_a_ex(&self) -> &A {
+        debug_assert!(self.is_a_ex());
+        unsafe { &self.data.a_ex }
+    }
+    pub fn as_a_ex_mut(&mut self) -> &mut A {
+        debug_assert!(self.is_a_ex());
+        unsafe { &mut self.data.a_ex }
+    }
+    pub fn into_a_ex(self) -> A {
+        debug_assert!(self.is_a_ex());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.a_ex)
+        }
+    }
+    pub fn new_b_ex(value: B) -> Self {
+        Self {
+            tag: B_Ex_Hash,
+            data: A_func1_ResultData {
+                b_ex: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+    pub fn is_b_ex(&self) -> bool {
+        matches!(self.tag, B_Ex_Hash)
+    }
+    pub fn as_b_ex(&self) -> &B {
+        debug_assert!(self.is_b_ex());
+        unsafe { &self.data.b_ex }
+    }
+    pub fn as_b_ex_mut(&mut self) -> &mut B {
+        debug_assert!(self.is_b_ex());
+        unsafe { &mut self.data.b_ex }
+    }
+    pub fn into_b_ex(self) -> B {
+        debug_assert!(self.is_b_ex());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.b_ex)
+        }
+    }
+    pub fn new_c_ex(value: C) -> Self {
+        Self {
+            tag: C_Ex_Hash,
+            data: A_func1_ResultData {
+                c_ex: core::mem::ManuallyDrop::new(value),
+            },
+        }
+    }
+    pub fn is_c_ex(&self) -> bool {
+        matches!(self.tag, C_Ex_Hash)
+    }
+    pub fn as_c_ex(&self) -> &C {
+        debug_assert!(self.is_c_ex());
+        unsafe { &self.data.c_ex }
+    }
+    pub fn as_c_ex_mut(&mut self) -> &mut C {
+        debug_assert!(self.is_c_ex());
+        unsafe { &mut self.data.c_ex }
+    }
+    pub fn into_c_ex(self) -> C {
+        debug_assert!(self.is_c_ex());
+        unsafe {
+            let mut forget = core::mem::ManuallyDrop::new(self);
+            core::mem::ManuallyDrop::take(&mut forget.data.c_ex)
+        }
+    }
+    pub fn tag(&self) -> &i32 {
+        &self.tag
+    }
+}
+impl Default for A_func1_Result {
+    fn default() -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_func1_ResultData {
+                result: core::mem::ManuallyDrop::new(A_func1_Out::default()),
+            },
+        }
+    }
+}
 #[derive(Default)]
 pub struct A_get_attribute_attr1_In {
     pub dummy: dds::rpc::UnusedMember,
@@ -706,6 +767,18 @@ impl A_get_attribute_attr1_Result {
         &self.tag
     }
 }
+impl Default for A_get_attribute_attr1_Result {
+    fn default() -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_get_attribute_attr1_ResultData {
+                result: core::mem::ManuallyDrop::new(
+                    A_get_attribute_attr1_Out::default(),
+                ),
+            },
+        }
+    }
+}
 #[derive(Default)]
 pub struct A_get_attribute_attr1_In {
     pub dummy: dds::rpc::UnusedMember,
@@ -765,6 +838,18 @@ impl A_get_attribute_attr1_Result {
         &self.tag
     }
 }
+impl Default for A_get_attribute_attr1_Result {
+    fn default() -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_get_attribute_attr1_ResultData {
+                result: core::mem::ManuallyDrop::new(
+                    A_get_attribute_attr1_Out::default(),
+                ),
+            },
+        }
+    }
+}
 #[derive(Default)]
 pub struct A_get_attribute_attr1_In {
     pub dummy: dds::rpc::UnusedMember,
@@ -824,6 +909,18 @@ impl A_get_attribute_attr1_Result {
         &self.tag
     }
 }
+impl Default for A_get_attribute_attr1_Result {
+    fn default() -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_get_attribute_attr1_ResultData {
+                result: core::mem::ManuallyDrop::new(
+                    A_get_attribute_attr1_Out::default(),
+                ),
+            },
+        }
+    }
+}
 #[derive(Default)]
 pub struct A_get_attribute_attr1_In {
     pub dummy: dds::rpc::UnusedMember,
@@ -881,6 +978,18 @@ impl A_get_attribute_attr1_Result {
     }
     pub fn tag(&self) -> &i32 {
         &self.tag
+    }
+}
+impl Default for A_get_attribute_attr1_Result {
+    fn default() -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_get_attribute_attr1_ResultData {
+                result: core::mem::ManuallyDrop::new(
+                    A_get_attribute_attr1_Out::default(),
+                ),
+            },
+        }
     }
 }
 #[derive(Default)]
@@ -940,6 +1049,18 @@ impl A_set_attribute_attr1_Result {
     }
     pub fn tag(&self) -> &i32 {
         &self.tag
+    }
+}
+impl Default for A_set_attribute_attr1_Result {
+    fn default() -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_set_attribute_attr1_ResultData {
+                result: core::mem::ManuallyDrop::new(
+                    A_set_attribute_attr1_Out::default(),
+                ),
+            },
+        }
     }
 }
 #[derive(Default)]
@@ -1001,6 +1122,18 @@ impl A_get_attribute_attr2_Result {
         &self.tag
     }
 }
+impl Default for A_get_attribute_attr2_Result {
+    fn default() -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_get_attribute_attr2_ResultData {
+                result: core::mem::ManuallyDrop::new(
+                    A_get_attribute_attr2_Out::default(),
+                ),
+            },
+        }
+    }
+}
 #[derive(Default)]
 pub struct A_set_attribute_attr2_In {
     pub attr2: u8,
@@ -1058,6 +1191,18 @@ impl A_set_attribute_attr2_Result {
     }
     pub fn tag(&self) -> &i32 {
         &self.tag
+    }
+}
+impl Default for A_set_attribute_attr2_Result {
+    fn default() -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_set_attribute_attr2_ResultData {
+                result: core::mem::ManuallyDrop::new(
+                    A_set_attribute_attr2_Out::default(),
+                ),
+            },
+        }
     }
 }
 #[derive(Default)]
@@ -1119,6 +1264,18 @@ impl A_get_attribute_attr3_Result {
         &self.tag
     }
 }
+impl Default for A_get_attribute_attr3_Result {
+    fn default() -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_get_attribute_attr3_ResultData {
+                result: core::mem::ManuallyDrop::new(
+                    A_get_attribute_attr3_Out::default(),
+                ),
+            },
+        }
+    }
+}
 #[derive(Default)]
 pub struct A_set_attribute_attr3_In {
     pub attr3: u8,
@@ -1176,6 +1333,18 @@ impl A_set_attribute_attr3_Result {
     }
     pub fn tag(&self) -> &i32 {
         &self.tag
+    }
+}
+impl Default for A_set_attribute_attr3_Result {
+    fn default() -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_set_attribute_attr3_ResultData {
+                result: core::mem::ManuallyDrop::new(
+                    A_set_attribute_attr3_Out::default(),
+                ),
+            },
+        }
     }
 }
 #[derive(Default)]
@@ -1269,6 +1438,18 @@ impl A_get_attribute_attr1_Result {
         &self.tag
     }
 }
+impl Default for A_get_attribute_attr1_Result {
+    fn default() -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_get_attribute_attr1_ResultData {
+                result: core::mem::ManuallyDrop::new(
+                    A_get_attribute_attr1_Out::default(),
+                ),
+            },
+        }
+    }
+}
 #[derive(Default)]
 pub struct A_set_attribute_attr1_In {
     pub attr1: u8,
@@ -1326,6 +1507,18 @@ impl A_set_attribute_attr1_Result {
     }
     pub fn tag(&self) -> &i32 {
         &self.tag
+    }
+}
+impl Default for A_set_attribute_attr1_Result {
+    fn default() -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_set_attribute_attr1_ResultData {
+                result: core::mem::ManuallyDrop::new(
+                    A_set_attribute_attr1_Out::default(),
+                ),
+            },
+        }
     }
 }
 #[derive(Default)]
@@ -1483,6 +1676,18 @@ impl A_get_attribute_attr1_Result {
         &self.tag
     }
 }
+impl Default for A_get_attribute_attr1_Result {
+    fn default() -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_get_attribute_attr1_ResultData {
+                result: core::mem::ManuallyDrop::new(
+                    A_get_attribute_attr1_Out::default(),
+                ),
+            },
+        }
+    }
+}
 #[derive(Default)]
 pub struct A_set_attribute_attr1_In {
     pub attr1: u8,
@@ -1572,6 +1777,18 @@ impl A_set_attribute_attr1_Result {
     }
     pub fn tag(&self) -> &i32 {
         &self.tag
+    }
+}
+impl Default for A_set_attribute_attr1_Result {
+    fn default() -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_set_attribute_attr1_ResultData {
+                result: core::mem::ManuallyDrop::new(
+                    A_set_attribute_attr1_Out::default(),
+                ),
+            },
+        }
     }
 }
 #[derive(Default)]
@@ -1633,6 +1850,18 @@ impl A_get_attribute_attr1_Result {
         &self.tag
     }
 }
+impl Default for A_get_attribute_attr1_Result {
+    fn default() -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_get_attribute_attr1_ResultData {
+                result: core::mem::ManuallyDrop::new(
+                    A_get_attribute_attr1_Out::default(),
+                ),
+            },
+        }
+    }
+}
 #[derive(Default)]
 pub struct A_set_attribute_attr1_In {
     pub attr1: u8,
@@ -1722,6 +1951,18 @@ impl A_set_attribute_attr1_Result {
     }
     pub fn tag(&self) -> &i32 {
         &self.tag
+    }
+}
+impl Default for A_set_attribute_attr1_Result {
+    fn default() -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_set_attribute_attr1_ResultData {
+                result: core::mem::ManuallyDrop::new(
+                    A_set_attribute_attr1_Out::default(),
+                ),
+            },
+        }
     }
 }
 pub struct A_Call {
@@ -2065,6 +2306,18 @@ impl A_Call {
     }
     pub fn tag(&self) -> &i32 {
         &self.tag
+    }
+}
+impl Default for A_Call {
+    fn default() -> Self {
+        Self {
+            tag: i32::default(),
+            data: A_CallData {
+                unknownOp: core::mem::ManuallyDrop::new(
+                    dds::rpc::UnknownOperation::default(),
+                ),
+            },
+        }
     }
 }
 #[derive(Default)]
@@ -2416,6 +2669,18 @@ impl A_Return {
         &self.tag
     }
 }
+impl Default for A_Return {
+    fn default() -> Self {
+        Self {
+            tag: i32::default(),
+            data: A_ReturnData {
+                unknownOp: core::mem::ManuallyDrop::new(
+                    dds::rpc::UnknownOperation::default(),
+                ),
+            },
+        }
+    }
+}
 #[derive(Default)]
 pub struct A_Reply {
     pub header: dds::rpc::ReplyHeader,
@@ -2505,6 +2770,16 @@ impl A_opA_Result {
         &self.tag
     }
 }
+impl Default for A_opA_Result {
+    fn default() -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: A_opA_ResultData {
+                result: core::mem::ManuallyDrop::new(A_opA_Out::default()),
+            },
+        }
+    }
+}
 pub struct A_Call {
     tag: i32,
     data: A_CallData,
@@ -2584,6 +2859,18 @@ impl A_Call {
     }
     pub fn tag(&self) -> &i32 {
         &self.tag
+    }
+}
+impl Default for A_Call {
+    fn default() -> Self {
+        Self {
+            tag: i32::default(),
+            data: A_CallData {
+                unknownOp: core::mem::ManuallyDrop::new(
+                    dds::rpc::UnknownOperation::default(),
+                ),
+            },
+        }
     }
 }
 #[derive(Default)]
@@ -2671,6 +2958,18 @@ impl A_Return {
     }
     pub fn tag(&self) -> &i32 {
         &self.tag
+    }
+}
+impl Default for A_Return {
+    fn default() -> Self {
+        Self {
+            tag: i32::default(),
+            data: A_ReturnData {
+                unknownOp: core::mem::ManuallyDrop::new(
+                    dds::rpc::UnknownOperation::default(),
+                ),
+            },
+        }
     }
 }
 #[derive(Default)]

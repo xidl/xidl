@@ -4,7 +4,7 @@ assertion_line: 105
 expression: output
 ---
 ===============
-simple_union.rs
+union_default_case.rs
 ===============
 #![allow(unused_imports)]
 #![allow(non_upper_case_globals)]
@@ -17,15 +17,15 @@ pub enum Tag {
     A,
     B,
 }
-pub struct SimpleUnion {
+pub struct DefaultUnion {
     tag: Tag,
-    data: SimpleUnionData,
+    data: DefaultUnionData,
 }
-union SimpleUnionData {
+union DefaultUnionData {
     a: core::mem::ManuallyDrop<int>,
-    b: core::mem::ManuallyDrop<int>,
+    fallback: core::mem::ManuallyDrop<String>,
 }
-impl Drop for SimpleUnion {
+impl Drop for DefaultUnion {
     fn drop(&mut self) {
         match self.tag {
             A => {
@@ -33,19 +33,19 @@ impl Drop for SimpleUnion {
                     core::mem::ManuallyDrop::drop(&mut self.data.a);
                 }
             }
-            B => {
+            _ => {
                 unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.b);
+                    core::mem::ManuallyDrop::drop(&mut self.data.fallback);
                 }
             }
         }
     }
 }
-impl SimpleUnion {
+impl DefaultUnion {
     pub fn new_a(value: int) -> Self {
         Self {
             tag: A,
-            data: SimpleUnionData {
+            data: DefaultUnionData {
                 a: core::mem::ManuallyDrop::new(value),
             },
         }
@@ -68,42 +68,42 @@ impl SimpleUnion {
             core::mem::ManuallyDrop::take(&mut forget.data.a)
         }
     }
-    pub fn new_b(value: int) -> Self {
+    pub fn new_fallback(value: String) -> Self {
         Self {
-            tag: B,
-            data: SimpleUnionData {
-                b: core::mem::ManuallyDrop::new(value),
+            tag: Tag::default(),
+            data: DefaultUnionData {
+                fallback: core::mem::ManuallyDrop::new(value),
             },
         }
     }
-    pub fn is_b(&self) -> bool {
-        matches!(self.tag, B)
+    pub fn is_fallback(&self) -> bool {
+        matches!(self.tag, _)
     }
-    pub fn as_b(&self) -> &int {
-        debug_assert!(self.is_b());
-        unsafe { &self.data.b }
+    pub fn as_fallback(&self) -> &String {
+        debug_assert!(self.is_fallback());
+        unsafe { &self.data.fallback }
     }
-    pub fn as_b_mut(&mut self) -> &mut int {
-        debug_assert!(self.is_b());
-        unsafe { &mut self.data.b }
+    pub fn as_fallback_mut(&mut self) -> &mut String {
+        debug_assert!(self.is_fallback());
+        unsafe { &mut self.data.fallback }
     }
-    pub fn into_b(self) -> int {
-        debug_assert!(self.is_b());
+    pub fn into_fallback(self) -> String {
+        debug_assert!(self.is_fallback());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.b)
+            core::mem::ManuallyDrop::take(&mut forget.data.fallback)
         }
     }
     pub fn tag(&self) -> &Tag {
         &self.tag
     }
 }
-impl Default for SimpleUnion {
+impl Default for DefaultUnion {
     fn default() -> Self {
         Self {
-            tag: A,
-            data: SimpleUnionData {
-                a: core::mem::ManuallyDrop::new(int::default()),
+            tag: Tag::default(),
+            data: DefaultUnionData {
+                fallback: core::mem::ManuallyDrop::new(String::default()),
             },
         }
     }

@@ -95,6 +95,25 @@ pub(crate) fn render_union_with_config(
     let has_default = cases
         .iter()
         .any(|case| case["is_default"].as_bool() == Some(true));
+    let default_case = cases
+        .iter()
+        .find(|case| case["is_default"].as_bool() == Some(true))
+        .or_else(|| cases.first())
+        .map(|case| {
+            let tag = if case["is_default"].as_bool() == Some(true) {
+                format!("{}::default()", rust_switch_type(&def.switch_type_spec))
+            } else {
+                case["labels"][0]
+                    .as_str()
+                    .expect("union case label")
+                    .to_string()
+            };
+            json!({
+                "member": case["member"].clone(),
+                "type": case["type"].clone(),
+                "tag": tag,
+            })
+        });
 
     let derive = rust_derive_info_with_extra(&def.annotations, &def.annotations);
     let ctx = renderer.enrich_scoped_ctx(
@@ -104,6 +123,7 @@ pub(crate) fn render_union_with_config(
             "members": members,
             "cases": cases,
             "has_default": has_default,
+            "default_case": default_case,
             "has_serde_serialize": derive.has_serde_serialize,
             "has_serde_deserialize": derive.has_serde_deserialize,
             "derive": derive.non_serde.into_iter().collect_vec(),

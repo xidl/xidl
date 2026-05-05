@@ -1,5 +1,6 @@
 ---
 source: xidlc/tests/codegen_snapshot.rs
+assertion_line: 105
 expression: output
 ---
 ===============
@@ -87,6 +88,16 @@ impl Api_ping_Result {
         &self.tag
     }
 }
+impl Default for Api_ping_Result {
+    fn default() -> Self {
+        Self {
+            tag: dds::RETCODE_OK,
+            data: Api_ping_ResultData {
+                result: core::mem::ManuallyDrop::new(Api_ping_Out::default()),
+            },
+        }
+    }
+}
 pub struct Api_Call {
     tag: i32,
     data: Api_CallData,
@@ -166,6 +177,18 @@ impl Api_Call {
     }
     pub fn tag(&self) -> &i32 {
         &self.tag
+    }
+}
+impl Default for Api_Call {
+    fn default() -> Self {
+        Self {
+            tag: i32::default(),
+            data: Api_CallData {
+                unknownOp: core::mem::ManuallyDrop::new(
+                    dds::rpc::UnknownOperation::default(),
+                ),
+            },
+        }
     }
 }
 #[derive(Default)]
@@ -253,6 +276,18 @@ impl Api_Return {
     }
     pub fn tag(&self) -> &i32 {
         &self.tag
+    }
+}
+impl Default for Api_Return {
+    fn default() -> Self {
+        Self {
+            tag: i32::default(),
+            data: Api_ReturnData {
+                unknownOp: core::mem::ManuallyDrop::new(
+                    dds::rpc::UnknownOperation::default(),
+                ),
+            },
+        }
     }
 }
 #[derive(Default)]
