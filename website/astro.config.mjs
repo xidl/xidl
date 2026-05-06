@@ -59,7 +59,14 @@ export default defineConfig({
           autogenerate: { directory: 'docs' },
           label: 'Docs',
           translations: {
-            'zh-CN': '详细文档',
+            'zh-CN': 'IDL 语言',
+          },
+        },
+        {
+          autogenerate: { directory: 'rest' },
+          label: 'xidl_for_rest',
+          translations: {
+            'zh-CN': 'XIDL REST 支持',
           },
         },
         {
