@@ -29,24 +29,10 @@ export default defineConfig({
         {
           items: [
             {
-              label: 'Overview',
-              link: '/',
-              translations: {
-                'zh-CN': '总览',
-              },
-            },
-            {
-              label: 'Quickstart',
+              label: 'Install',
               link: '/guide/',
               translations: {
-                'zh-CN': '快速开始',
-              },
-            },
-            {
-              label: 'Install',
-              link: '/guide/quickstart/',
-              translations: {
-                'zh-CN': '安装与上手',
+                'zh-CN': '安装',
               },
             },
             {
