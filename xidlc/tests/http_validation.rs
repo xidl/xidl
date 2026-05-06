@@ -47,11 +47,11 @@ fn generate_error(lang: &str, fixture: &str) -> String {
 #[test]
 fn rejects_invalid_stream_codecs_for_http_targets() {
     for lang in [
-        "http-hir",
+        "rest-hir",
         "axum",
-        "ts-http",
-        "go-http",
-        "python-http",
+        "ts-rest",
+        "go-rest",
+        "python-rest",
         "openapi",
     ] {
         let err = generate_error(lang, "http_stream_invalid_codec.idl");
@@ -65,11 +65,11 @@ fn rejects_invalid_stream_codecs_for_http_targets() {
 #[test]
 fn rejects_invalid_server_stream_methods_for_http_targets() {
     for lang in [
-        "http-hir",
+        "rest-hir",
         "axum",
-        "ts-http",
-        "go-http",
-        "python-http",
+        "ts-rest",
+        "go-rest",
+        "python-rest",
         "openapi",
     ] {
         let err = generate_error(lang, "http_stream_invalid_server_method.idl");
@@ -80,13 +80,13 @@ fn rejects_invalid_server_stream_methods_for_http_targets() {
 
 #[test]
 fn rejects_typescript_bidi_stream_fixture() {
-    let err = generate_error("ts-http", "http_stream_bidi_typescript.idl");
+    let err = generate_error("ts-rest", "http_stream_bidi_typescript.idl");
     assert!(err.contains("does not support @bidi_stream"), "{err}");
 }
 
 #[test]
 fn rejects_non_body_client_stream_inputs_for_axum_and_typescript() {
-    for lang in ["http-hir", "axum", "ts-http", "go-http", "python-http"] {
+    for lang in ["rest-hir", "axum", "ts-rest", "go-rest", "python-rest"] {
         let err = generate_error(lang, "http_client_stream_path_param.idl");
         assert!(
             err.contains("body parameters only") || err.contains("@client_stream"),
@@ -97,7 +97,7 @@ fn rejects_non_body_client_stream_inputs_for_axum_and_typescript() {
 
 #[test]
 fn rejects_duplicate_security_annotations() {
-    for lang in ["http-hir", "axum", "go-http", "python-http", "openapi"] {
+    for lang in ["rest-hir", "axum", "go-rest", "python-rest", "openapi"] {
         let err = generate_error(lang, "http_security_duplicate_basic.idl");
         assert!(
             err.contains("duplicate @http_basic annotation"),
@@ -108,7 +108,7 @@ fn rejects_duplicate_security_annotations() {
 
 #[test]
 fn rejects_conflicting_no_security_annotations() {
-    for lang in ["http-hir", "axum", "go-http", "python-http", "openapi"] {
+    for lang in ["rest-hir", "axum", "go-rest", "python-rest", "openapi"] {
         let err = generate_error(lang, "http_security_conflict_no_security.idl");
         assert!(
             err.contains("@no_security cannot be combined with other security annotations"),
@@ -119,7 +119,7 @@ fn rejects_conflicting_no_security_annotations() {
 
 #[test]
 fn rejects_unary_conflicting_param_sources() {
-    for lang in ["http-hir", "axum", "ts-http", "go-http", "openapi"] {
+    for lang in ["rest-hir", "axum", "ts-rest", "go-rest", "openapi"] {
         let err = generate_error(lang, "http_unary_conflicting_param_source.idl");
         assert!(
             err.contains("conflicting source annotations"),
@@ -130,7 +130,7 @@ fn rejects_unary_conflicting_param_sources() {
 
 #[test]
 fn rejects_missing_query_template_bindings() {
-    for lang in ["http-hir", "axum", "ts-http", "go-http", "openapi"] {
+    for lang in ["rest-hir", "axum", "ts-rest", "go-rest", "openapi"] {
         let err = generate_error(lang, "http_unary_query_template_missing_binding.idl");
         assert!(
             err.contains(
@@ -143,7 +143,7 @@ fn rejects_missing_query_template_bindings() {
 
 #[test]
 fn rejects_duplicate_route_bindings_for_axum() {
-    for lang in ["axum", "go-http"] {
+    for lang in ["axum", "go-rest"] {
         let err = generate_error(lang, "http_unary_duplicate_route_binding.idl");
         assert!(
             err.contains("duplicate HTTP route binding"),
@@ -154,7 +154,7 @@ fn rejects_duplicate_route_bindings_for_axum() {
 
 #[test]
 fn rejects_additional_invalid_security_annotations() {
-    for lang in ["http-hir", "axum", "go-http", "python-http", "openapi"] {
+    for lang in ["rest-hir", "axum", "go-rest", "python-rest", "openapi"] {
         let duplicate_bearer = generate_error(lang, "http_security_duplicate_bearer.idl");
         assert!(
             duplicate_bearer.contains("duplicate @http_bearer annotation"),
@@ -178,11 +178,11 @@ fn rejects_additional_invalid_security_annotations() {
 #[test]
 fn rejects_additional_invalid_stream_shapes() {
     for lang in [
-        "http-hir",
+        "rest-hir",
         "axum",
-        "ts-http",
-        "go-http",
-        "python-http",
+        "ts-rest",
+        "go-rest",
+        "python-rest",
         "openapi",
     ] {
         let err = generate_error(lang, "http_stream_mutually_exclusive.idl");
@@ -190,11 +190,11 @@ fn rejects_additional_invalid_stream_shapes() {
     }
 
     for lang in [
-        "http-hir",
+        "rest-hir",
         "axum",
-        "ts-http",
-        "go-http",
-        "python-http",
+        "ts-rest",
+        "go-rest",
+        "python-rest",
         "openapi",
     ] {
         let err = generate_error(lang, "http_stream_client_sse.idl");

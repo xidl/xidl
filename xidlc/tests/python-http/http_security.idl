@@ -1,4 +1,4 @@
-#pragma xidlc package xidlc
+#pragma xidlc package http_security
 #pragma xidlc version v1.0.0
 
 interface HttpSecurityService {

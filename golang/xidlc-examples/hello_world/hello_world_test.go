@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-http"
+	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-rest"
 )
 
 type testHelloWorldService struct{}

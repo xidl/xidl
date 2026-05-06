@@ -3,13 +3,13 @@ use xidl_build::Builder;
 fn build_openapi(file_name: &str) {
     Builder::new()
         .with_lang("rust-axum")
-        .compile(&[format!("./api/http/{file_name}.idl")])
+        .compile(&[format!("./api/rest/{file_name}.idl")])
         .expect("failed to compile city http idl for rust-axum example");
     Builder::new()
         .with_lang("openapi")
-        .with_out_dir("./api/http/generated/")
+        .with_out_dir("./api/rest/generated/")
         .with_output_filename(format!("{file_name}.json"))
-        .compile(&[format!("./api/http/{file_name}.idl")])
+        .compile(&[format!("./api/rest/{file_name}.idl")])
         .expect("failed to compile city http stream openapi");
 }
 
@@ -31,7 +31,7 @@ fn main() {
     println!("cargo:rerun-if-changed=./api");
     println!("cargo:rerun-if-changed=build.rs");
 
-    for file in glob::glob("./api/http/*.idl").expect("failed to read glob pattern") {
+    for file in glob::glob("./api/rest/*.idl").expect("failed to read glob pattern") {
         let path = file.expect("failed to read path from glob");
         let file_name = path
             .file_stem()

@@ -85,16 +85,16 @@ impl CodegenSession {
         #[allow(unreachable_patterns)]
         match lang {
             Plugin::Hir => run_server!(crate::generate::hir_gen::HirGen),
-            Plugin::HttpHir => run_server!(crate::generate::http_hir_gen::HttpHirCodegen),
+            Plugin::RestHir => run_server!(crate::generate::rest_hir_gen::RestHirCodegen),
             Plugin::TypedAst => run_server!(crate::generate::typed_ast_gen::TypedAstGen),
             #[cfg(feature = "gen-go")]
             Plugin::Go => run_server!(crate::generate::go::GoCodegen),
-            #[cfg(feature = "gen-go-http")]
-            Plugin::GoHttp => run_server!(crate::generate::go_http::GoHttpCodegen),
+            #[cfg(feature = "gen-go-rest")]
+            Plugin::GoRest => run_server!(crate::generate::go_rest::GoRestCodegen),
             #[cfg(feature = "gen-python")]
             Plugin::Python => run_server!(crate::generate::python::PythonCodegen),
-            #[cfg(feature = "gen-python-http")]
-            Plugin::PythonHttp => run_server!(crate::generate::python_http::PythonHttpCodegen),
+            #[cfg(feature = "gen-python-rest")]
+            Plugin::PythonRest => run_server!(crate::generate::python_rest::PythonRestCodegen),
             #[cfg(feature = "gen-rust")]
             Plugin::Rust => run_server!(crate::generate::rust::RustCodegen),
             #[cfg(feature = "gen-rust-jsonrpc")]
@@ -107,9 +107,9 @@ impl CodegenSession {
             Plugin::Openrpc => run_server!(crate::generate::openrpc::OpenRpcCodegen),
             #[cfg(feature = "gen-typescript")]
             Plugin::Typescript => run_server!(crate::generate::typescript::TypescriptCodegen),
-            #[cfg(feature = "gen-typescript-http")]
-            Plugin::TypescriptHttp => {
-                run_server!(crate::generate::typescript_http::TypescriptHttpCodegen)
+            #[cfg(feature = "gen-typescript-rest")]
+            Plugin::TypescriptRest => {
+                run_server!(crate::generate::typescript_rest::TypescriptRestCodegen)
             }
             Plugin::Custom(_) => unreachable!("custom plugins use spawn_custom_codegen_server"),
             var => panic!("does not support {var:?}"),

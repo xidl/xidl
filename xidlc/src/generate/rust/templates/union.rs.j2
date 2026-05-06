@@ -56,7 +56,15 @@ impl {{ ident }} {
         }
 
         pub fn is_{{ member.name }}(&self) -> bool {
-            matches!(self.tag, {{ cases[loop.index - 1].pattern }})
+            {% if switch_ty == "bool" %}
+                {% if cases[loop.index - 1].pattern == "true" %}
+                    self.tag
+                {% else %}
+                    !self.tag
+                {% endif %}
+            {% else %}
+                matches!(self.tag, {{ cases[loop.index - 1].pattern }})
+            {% endif %}
         }
 
         pub fn as_{{ member.name }}(&self) -> &{{ member.ty }} {

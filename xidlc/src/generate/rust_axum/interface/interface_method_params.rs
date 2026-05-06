@@ -17,7 +17,7 @@ use crate::generate::rust_axum::transport::{
     TransportDirection, TransportTracker, decode_expr, encode_expr,
 };
 use xidl_parser::hir;
-use xidl_parser::http_hir::{HttpOperation, semantics::has_optional_annotation};
+use xidl_parser::rest_hir::{HttpOperation, semantics::has_optional_annotation};
 
 #[derive(Default)]
 pub(crate) struct MethodParams {

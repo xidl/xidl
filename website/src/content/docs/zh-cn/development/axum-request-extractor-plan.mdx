@@ -31,7 +31,7 @@ async fn op(&self, a: A, b: B, c: C) -> Result<T>;
 
 ## 推荐实现路径
 
-1. 保持 `http_hir` 的来源元数据不变
+1. 保持 `rest_hir` 的来源元数据不变
 2. 一元 trait 签名直接从展开后的参数渲染
 3. 只在适合提取器复用时保留局部 helper struct
 4. 让服务端 adapter 负责提取传输数据，再直接调用 `svc.method(...)`

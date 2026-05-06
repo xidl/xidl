@@ -13,7 +13,7 @@ use crate::openapi::server::Server;
 use std::collections::{BTreeMap, HashMap};
 use std::mem;
 use xidl_parser::hir;
-use xidl_parser::http_hir::HttpHirDocument;
+use xidl_parser::rest_hir::RestHirDocument;
 
 #[derive(Default)]
 pub(crate) struct OpenApiContext {
@@ -27,11 +27,11 @@ pub(crate) struct OpenApiContext {
 }
 
 impl OpenApiContext {
-    pub(crate) fn new(http_hir: &HttpHirDocument) -> Self {
+    pub(crate) fn new(rest_hir: &RestHirDocument) -> Self {
         Self {
-            info_title: http_hir.document.package.clone(),
-            info_version: http_hir.document.version.clone(),
-            servers: http_hir
+            info_title: rest_hir.document.package.clone(),
+            info_version: rest_hir.document.version.clone(),
+            servers: rest_hir
                 .document
                 .servers
                 .iter()
@@ -49,10 +49,10 @@ impl OpenApiContext {
         mut self,
         spec: &hir::Specification,
         module_path: &[String],
-        http_hir: &HttpHirDocument,
+        rest_hir: &RestHirDocument,
     ) -> Self {
         for def in &spec.0 {
-            self.collect_def(def, module_path, http_hir);
+            self.collect_def(def, module_path, rest_hir);
         }
         self
     }
@@ -61,21 +61,21 @@ impl OpenApiContext {
         &mut self,
         def: &hir::Definition,
         module_path: &[String],
-        http_hir: &HttpHirDocument,
+        rest_hir: &RestHirDocument,
     ) {
         match def {
             hir::Definition::ModuleDcl(module) => {
                 let mut next_path = module_path.to_vec();
                 next_path.push(module.ident.clone());
                 for def in &module.definition {
-                    self.collect_def(def, &next_path, http_hir);
+                    self.collect_def(def, &next_path, rest_hir);
                 }
             }
             hir::Definition::TypeDcl(type_dcl) => self.collect_type_dcl(type_dcl, module_path),
             hir::Definition::ConstrTypeDcl(constr) => self.collect_constr_type(constr, module_path),
             hir::Definition::ExceptDcl(except) => self.collect_exception(except, module_path),
             hir::Definition::InterfaceDcl(interface) => {
-                self.collect_interface(interface, module_path, http_hir)
+                self.collect_interface(interface, module_path, rest_hir)
             }
             hir::Definition::Pragma(_) => {}
             _ => {}
@@ -171,13 +171,13 @@ impl OpenApiContext {
         &mut self,
         interface: &hir::InterfaceDcl,
         module_path: &[String],
-        http_hir: &HttpHirDocument,
+        rest_hir: &RestHirDocument,
     ) {
         let def = match &interface.decl {
             hir::InterfaceDclInner::InterfaceDef(def) => def,
             _ => return,
         };
-        let Some(http_interface) = http_hir.find_interface(module_path, &def.header.ident) else {
+        let Some(http_interface) = rest_hir.find_interface(module_path, &def.header.ident) else {
             return;
         };
         let mut route_bindings = HashMap::new();

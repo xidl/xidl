@@ -11,8 +11,8 @@ fn parse_spec(source: &str) -> hir::Specification {
 fn render_openapi_json_from_spec(
     spec: &hir::Specification,
 ) -> Result<serde_json::Value, serde_json::Error> {
-    let http_hir = xidl_parser::http_hir::project(spec).expect("project http hir");
-    render_openapi_json(spec, &http_hir)
+    let rest_hir = xidl_parser::rest_hir::project(spec).expect("project http hir");
+    render_openapi_json(spec, &rest_hir)
 }
 
 fn panic_message(payload: Box<dyn std::any::Any + Send>) -> String {

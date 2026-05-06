@@ -194,7 +194,7 @@
 * first commit ([c37354d](https://github.com/xidl/xidl/commit/c37354d2444e16807695ed586b818b5a8b8a0975))
 * **fmt:** donot allow format error when test ([6e71122](https://github.com/xidl/xidl/commit/6e7112272b432467cb16e5a20116df843daaebf2))
 * **git:** add Cargo.lock ([87b3497](https://github.com/xidl/xidl/commit/87b3497fed31d92f57b0b1b603f75f87333392bd))
-* **go-http:** complete HTTP RFC support ([f9f7896](https://github.com/xidl/xidl/commit/f9f7896f63ae92d4cbfb6f0da96cec8f9c0f2aec))
+* **go-rest:** complete HTTP RFC support ([f9f7896](https://github.com/xidl/xidl/commit/f9f7896f63ae92d4cbfb6f0da96cec8f9c0f2aec))
 * **hir:** add const and interface mappings ([3a026c7](https://github.com/xidl/xidl/commit/3a026c731a4405ccf79cbc13c71f06d9121e23dc))
 * **hir:** add field_id ([2873091](https://github.com/xidl/xidl/commit/28730911be8a0341fc0aa8813632fff95b7c68c3))
 * **hir:** add more implement ([8018bd2](https://github.com/xidl/xidl/commit/8018bd26483fc385974adddd3fe8577e3f0e5684))
@@ -291,7 +291,7 @@
 * **xidlc:** add file header ([19cf730](https://github.com/xidl/xidl/commit/19cf730a9852bd2b9e322a8f8e145c5b70f4b6b0))
 * **xidlc:** add format ([28d55e4](https://github.com/xidl/xidl/commit/28d55e4744cb25cc5cba22d230c614b001ee2ca4))
 * **xidlc:** add get_engine_version method ([567986d](https://github.com/xidl/xidl/commit/567986d7ca0e20a4259fec1ca6405b86fea6ed2c))
-* **xidlc:** add go and go-http targets ([2c4d4c4](https://github.com/xidl/xidl/commit/2c4d4c4a28076127334da203d5d62ccd14553e64))
+* **xidlc:** add go and go-rest targets ([2c4d4c4](https://github.com/xidl/xidl/commit/2c4d4c4a28076127334da203d5d62ccd14553e64))
 * **xidlc:** add inplace for format ([9b08504](https://github.com/xidl/xidl/commit/9b0850496a03dcf7e52491ca647676f9357b454c))
 * **xidlc:** add interface support ([7899205](https://github.com/xidl/xidl/commit/789920562b0e1e5f2a7e6eecb33cfd4073f7f089))
 * **xidlc:** add is_optional to member ([bbc7ed2](https://github.com/xidl/xidl/commit/bbc7ed2cd7ed71a459bdcf0fd6d10edd08a55d91))
@@ -367,7 +367,7 @@
 * fix warning ([f29196c](https://github.com/xidl/xidl/commit/f29196c9eecce22b1c4019e64f25a8e16740e994))
 * **fmt:** fix formate problem ([cdaaa6a](https://github.com/xidl/xidl/commit/cdaaa6a42651410f0a02839380cdaeae597ac354))
 * **formula:** update xidlc.rb SHA256 checksum for v0.32.0 ([3b3c71c](https://github.com/xidl/xidl/commit/3b3c71c05a53b1875b03f0f115a5baebf4cda0df))
-* **go-http:** correct path parameter pattern replacement logic ([a27084c](https://github.com/xidl/xidl/commit/a27084ca0a162af4813fb1a5b85987869b172f75))
+* **go-rest:** correct path parameter pattern replacement logic ([a27084c](https://github.com/xidl/xidl/commit/a27084ca0a162af4813fb1a5b85987869b172f75))
 * **go:** add delegated go test targets and ci coverage ([38acb67](https://github.com/xidl/xidl/commit/38acb671537301330bb3199eb6dfed22fc180305))
 * **http:** wrap void out responses as objects ([b5ef38d](https://github.com/xidl/xidl/commit/b5ef38d454d941c18c98453bf5be492459c77922))
 * **idlc:** fix rust gen ([c908ce8](https://github.com/xidl/xidl/commit/c908ce8ab0de5c448bb25c7e02b225f70d78ff7f))
@@ -488,7 +488,7 @@
 ### Bug Fixes
 
 * **formula:** update xidlc.rb SHA256 checksum for v0.32.0 ([3b3c71c](https://github.com/xidl/xidl/commit/3b3c71c05a53b1875b03f0f115a5baebf4cda0df))
-* **go-http:** correct path parameter pattern replacement logic ([a27084c](https://github.com/xidl/xidl/commit/a27084ca0a162af4813fb1a5b85987869b172f75))
+* **go-rest:** correct path parameter pattern replacement logic ([a27084c](https://github.com/xidl/xidl/commit/a27084ca0a162af4813fb1a5b85987869b172f75))
 * **workflow:** enhance release metadata resolution with version parsing ([3b3c71c](https://github.com/xidl/xidl/commit/3b3c71c05a53b1875b03f0f115a5baebf4cda0df))
 
 ## [0.32.0](https://github.com/xidl/xidl/compare/v0.31.0...v0.32.0) (2026-04-03)
@@ -496,9 +496,9 @@
 
 ### Features
 
-* **go-http:** complete HTTP RFC support ([f9f7896](https://github.com/xidl/xidl/commit/f9f7896f63ae92d4cbfb6f0da96cec8f9c0f2aec))
+* **go-rest:** complete HTTP RFC support ([f9f7896](https://github.com/xidl/xidl/commit/f9f7896f63ae92d4cbfb6f0da96cec8f9c0f2aec))
 * **pre-commit:** support pre-commit ([a82ca67](https://github.com/xidl/xidl/commit/a82ca6700b7b338133e126869629f12c033f5ae3))
-* **xidlc:** add go and go-http targets ([2c4d4c4](https://github.com/xidl/xidl/commit/2c4d4c4a28076127334da203d5d62ccd14553e64))
+* **xidlc:** add go and go-rest targets ([2c4d4c4](https://github.com/xidl/xidl/commit/2c4d4c4a28076127334da203d5d62ccd14553e64))
 
 
 ### Bug Fixes

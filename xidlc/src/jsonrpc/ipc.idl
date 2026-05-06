@@ -6,9 +6,9 @@ struct ArtifactHir {
 };
 
 @derive(Debug, Serialize, Deserialize)
-struct ArtifactHttpHir {
+struct ArtifactRestHir {
     string lang;
-    ::xidl_parser::http_hir::HttpHirDocument http_hir;
+    ::xidl_parser::rest_hir::RestHirDocument rest_hir;
     ::xidl_parser::hir::ParserProperties props;
 };
 
@@ -22,7 +22,7 @@ struct ArtifactJsonRpcHir {
 @derive(Debug, Serialize, Deserialize)
 enum CodegenInputKind {
     RpcHir,
-    HttpHir,
+    RestHir,
     JsonRpcHir
 };
 
@@ -30,8 +30,8 @@ enum CodegenInputKind {
 union CodegenInput switch (CodegenInputKind) {
     case CodegenInputKind::RpcHir:
         ::xidl_parser::hir::Specification rpc_hir;
-    case CodegenInputKind::HttpHir:
-        ::xidl_parser::http_hir::HttpHirDocument http_hir;
+    case CodegenInputKind::RestHir:
+        ::xidl_parser::rest_hir::RestHirDocument rest_hir;
     case CodegenInputKind::JsonRpcHir:
         ::xidl_parser::jsonrpc_hir::JsonRpcHirDocument jsonrpc_hir;
 };
@@ -45,7 +45,7 @@ struct ArtifactFile {
 @derive(Debug, Serialize, Deserialize)
 enum ArtifactKind {
     Hir,
-    HttpHir,
+    RestHir,
     JsonRpcHir,
     File
 };
@@ -54,8 +54,8 @@ enum ArtifactKind {
 union Artifact switch (ArtifactKind) {
     case ArtifactKind::Hir:
         ArtifactHir hir;
-    case ArtifactKind::HttpHir:
-        ArtifactHttpHir http_hir;
+    case ArtifactKind::RestHir:
+        ArtifactRestHir rest_hir;
     case ArtifactKind::JsonRpcHir:
         ArtifactJsonRpcHir jsonrpc_hir;
     case ArtifactKind::File:

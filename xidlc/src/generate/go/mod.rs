@@ -3,8 +3,8 @@ mod render;
 mod spec;
 
 use crate::error::IdlcResult;
+use crate::generate::utils::go_package_name;
 use crate::jsonrpc::{Artifact, ArtifactFile};
-use convert_case::{Case, Casing};
 pub use render::GoRenderer;
 use serde::Serialize;
 use std::path::Path;
@@ -20,9 +20,13 @@ pub fn generate_with_properties(
         .file_stem()
         .and_then(|value| value.to_str())
         .unwrap_or("output");
-    let base = go_package_name(stem);
-    let filename = format!("{base}.go");
-    let source = spec::render_spec(spec, &base, properties)?;
+    let package = properties
+        .get("package")
+        .and_then(|v| v.as_str())
+        .map(go_package_name)
+        .unwrap_or_else(|| go_package_name(stem));
+    let filename = format!("{}.go", package);
+    let source = spec::render_spec(spec, &package, properties)?;
     Ok(vec![Artifact::new_file(ArtifactFile {
         path: filename,
         content: source,
@@ -102,20 +106,8 @@ pub struct GoRenderOutput {
     uses_context: bool,
     blocks: Vec<String>,
 }
-
-#[derive(Clone, Copy, PartialEq, Eq)]
 pub(crate) enum ParamDirection {
     In,
     Out,
     InOut,
-}
-
-pub(crate) fn go_package_name(value: &str) -> String {
-    let mut out = value.to_case(Case::Snake);
-    out = out.replace('-', "_");
-    if out.is_empty() {
-        "xidl".to_string()
-    } else {
-        out
-    }
 }

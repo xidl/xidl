@@ -4,8 +4,8 @@ use serde::Deserialize;
 pub enum Plugin {
     #[serde(alias = "hir")]
     Hir,
-    #[serde(alias = "http_hir", alias = "http-hir")]
-    HttpHir,
+    #[serde(alias = "rest_hir", alias = "rest-hir")]
+    RestHir,
     #[serde(alias = "typed_ast", alias = "typed-ast")]
     TypedAst,
     #[serde(alias = "rs", alias = "rust")]
@@ -28,25 +28,25 @@ pub enum Plugin {
     #[serde(alias = "ts", alias = "typescript")]
     Typescript,
     #[serde(
-        alias = "ts_http",
-        alias = "ts-http",
-        alias = "typescript_http",
-        alias = "typescript-http"
+        alias = "ts_rest",
+        alias = "ts-rest",
+        alias = "typescript_rest",
+        alias = "typescript-rest"
     )]
-    TypescriptHttp,
+    TypescriptRest,
     #[serde(alias = "go", alias = "golang")]
     Go,
-    #[serde(alias = "go_http", alias = "go-http")]
-    GoHttp,
+    #[serde(alias = "go_rest", alias = "go-rest")]
+    GoRest,
     #[serde(alias = "py", alias = "python")]
     Python,
     #[serde(
-        alias = "py_http",
-        alias = "py-http",
-        alias = "python_http",
-        alias = "python-http"
+        alias = "py_rest",
+        alias = "py-rest",
+        alias = "python_rest",
+        alias = "python-rest"
     )]
-    PythonHttp,
+    PythonRest,
     #[serde(alias = "openapi")]
     Openapi,
     #[serde(alias = "openrpc", alias = "open-rpc")]
@@ -68,8 +68,8 @@ mod tests {
     fn test_plugin_from_str() {
         let cases = [
             ("hir", Plugin::Hir),
-            ("http_hir", Plugin::HttpHir),
-            ("http-hir", Plugin::HttpHir),
+            ("rest_hir", Plugin::RestHir),
+            ("rest-hir", Plugin::RestHir),
             ("typed_ast", Plugin::TypedAst),
             ("typed-ast", Plugin::TypedAst),
             ("rs", Plugin::Rust),
@@ -84,20 +84,20 @@ mod tests {
             ("rs-axum", Plugin::Axum),
             ("ts", Plugin::Typescript),
             ("typescript", Plugin::Typescript),
-            ("ts_http", Plugin::TypescriptHttp),
-            ("ts-http", Plugin::TypescriptHttp),
-            ("typescript_http", Plugin::TypescriptHttp),
-            ("typescript-http", Plugin::TypescriptHttp),
+            ("ts_rest", Plugin::TypescriptRest),
+            ("ts-rest", Plugin::TypescriptRest),
+            ("typescript_rest", Plugin::TypescriptRest),
+            ("typescript-rest", Plugin::TypescriptRest),
             ("go", Plugin::Go),
             ("golang", Plugin::Go),
-            ("go_http", Plugin::GoHttp),
-            ("go-http", Plugin::GoHttp),
+            ("go_rest", Plugin::GoRest),
+            ("go-rest", Plugin::GoRest),
             ("py", Plugin::Python),
             ("python", Plugin::Python),
-            ("py_http", Plugin::PythonHttp),
-            ("py-http", Plugin::PythonHttp),
-            ("python_http", Plugin::PythonHttp),
-            ("python-http", Plugin::PythonHttp),
+            ("py_rest", Plugin::PythonRest),
+            ("py-rest", Plugin::PythonRest),
+            ("python_rest", Plugin::PythonRest),
+            ("python-rest", Plugin::PythonRest),
             ("openapi", Plugin::Openapi),
             ("openrpc", Plugin::Openrpc),
             ("open-rpc", Plugin::Openrpc),

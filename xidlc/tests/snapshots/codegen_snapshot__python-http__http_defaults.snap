@@ -20,7 +20,7 @@ class CreateUserRequest:
     age: int = 0
 
 ===============
-http_defaults_http.py
+http_defaults_rest.py
 ===============
 from __future__ import annotations
 

@@ -36,8 +36,8 @@ struct ArgsGen {
 enum GenLang {
     #[command(name = "hir", hide = true)]
     Hir(FilesArgs),
-    #[command(name = "http-hir", alias = "http_hir", hide = true)]
-    HttpHir(FilesArgs),
+    #[command(name = "rest-hir", alias = "rest_hir", hide = true)]
+    RestHir(FilesArgs),
     #[command(name = "jsonrpc-hir", alias = "jsonrpc_hir", hide = true)]
     JsonRpcHir(FilesArgs),
     #[command(name = "typed-ast", alias = "typed_ast", hide = true)]
@@ -62,25 +62,25 @@ enum GenLang {
     #[command(name = "typescript", alias = "ts")]
     Typescript(ClientServerArgs),
     #[command(
-        name = "typescript-http",
-        alias = "typescript_http",
-        alias = "ts-http",
-        alias = "ts_http"
+        name = "typescript-rest",
+        alias = "typescript_rest",
+        alias = "ts-rest",
+        alias = "ts_rest"
     )]
-    TypescriptHttp(ClientOnlyArgs),
+    TypescriptRest(ClientOnlyArgs),
     #[command(name = "go", alias = "golang")]
     Go(ClientServerArgs),
-    #[command(name = "go-http", alias = "go_http")]
-    GoHttp(ClientServerArgs),
+    #[command(name = "go-rest", alias = "go_rest")]
+    GoRest(ClientServerArgs),
     #[command(name = "python", alias = "py")]
     Python(ClientServerArgs),
     #[command(
-        name = "python-http",
-        alias = "python_http",
-        alias = "py-http",
-        alias = "py_http"
+        name = "python-rest",
+        alias = "python_rest",
+        alias = "py-rest",
+        alias = "py_rest"
     )]
-    PythonHttp(ClientServerArgs),
+    PythonRest(ClientServerArgs),
     #[command(name = "openapi")]
     Openapi(FilesArgs),
     #[command(name = "openrpc", alias = "open-rpc")]
@@ -131,18 +131,18 @@ impl GenLang {
     fn into_driver_args(self, shared: SharedGenArgs) -> IdlcResult<ArgsGenerate> {
         match self {
             Self::Hir(args) => Ok(shared.into_plain("hir", args.files)),
-            Self::HttpHir(args) => Ok(shared.into_plain("http-hir", args.files)),
+            Self::RestHir(args) => Ok(shared.into_plain("rest-hir", args.files)),
             Self::JsonRpcHir(args) => Ok(shared.into_plain("jsonrpc-hir", args.files)),
             Self::TypedAst(args) => Ok(shared.into_plain("typed-ast", args.files)),
             Self::Rust(args) => Ok(shared.into_client_server("rust", args)),
             Self::RustJsonRpc(args) => Ok(shared.into_client_server("rust-jsonrpc", args)),
             Self::RustAxum(args) => Ok(shared.into_client_server("rust-axum", args)),
             Self::Typescript(args) => Ok(shared.into_client_server("typescript", args)),
-            Self::TypescriptHttp(args) => Ok(shared.into_client_only("typescript-http", args)),
+            Self::TypescriptRest(args) => Ok(shared.into_client_only("typescript-rest", args)),
             Self::Go(args) => Ok(shared.into_client_server("go", args)),
-            Self::GoHttp(args) => Ok(shared.into_client_server("go-http", args)),
+            Self::GoRest(args) => Ok(shared.into_client_server("go-rest", args)),
             Self::Python(args) => Ok(shared.into_client_server("python", args)),
-            Self::PythonHttp(args) => Ok(shared.into_client_server("python-http", args)),
+            Self::PythonRest(args) => Ok(shared.into_client_server("python-rest", args)),
             Self::Openapi(args) => Ok(shared.into_plain("openapi", args.files)),
             Self::Openrpc(args) => Ok(shared.into_plain("openrpc", args.files)),
             Self::External(values) => parse_external(shared, values),
@@ -157,18 +157,18 @@ impl GenLang {
         };
         let subcommand = match self {
             Self::Hir(_) => gen_cmd.find_subcommand_mut("hir"),
-            Self::HttpHir(_) => gen_cmd.find_subcommand_mut("http-hir"),
+            Self::RestHir(_) => gen_cmd.find_subcommand_mut("rest-hir"),
             Self::JsonRpcHir(_) => gen_cmd.find_subcommand_mut("jsonrpc-hir"),
             Self::TypedAst(_) => gen_cmd.find_subcommand_mut("typed-ast"),
             Self::Rust(_) => gen_cmd.find_subcommand_mut("rust"),
             Self::RustJsonRpc(_) => gen_cmd.find_subcommand_mut("rust-jsonrpc"),
             Self::RustAxum(_) => gen_cmd.find_subcommand_mut("rust-axum"),
             Self::Typescript(_) => gen_cmd.find_subcommand_mut("typescript"),
-            Self::TypescriptHttp(_) => gen_cmd.find_subcommand_mut("typescript-http"),
+            Self::TypescriptRest(_) => gen_cmd.find_subcommand_mut("typescript-rest"),
             Self::Go(_) => gen_cmd.find_subcommand_mut("go"),
-            Self::GoHttp(_) => gen_cmd.find_subcommand_mut("go-http"),
+            Self::GoRest(_) => gen_cmd.find_subcommand_mut("go-rest"),
             Self::Python(_) => gen_cmd.find_subcommand_mut("python"),
-            Self::PythonHttp(_) => gen_cmd.find_subcommand_mut("python-http"),
+            Self::PythonRest(_) => gen_cmd.find_subcommand_mut("python-rest"),
             Self::Openapi(_) => gen_cmd.find_subcommand_mut("openapi"),
             Self::Openrpc(_) => gen_cmd.find_subcommand_mut("openrpc"),
             Self::External(_) => None,
@@ -183,18 +183,18 @@ impl GenLang {
     fn usage(&self) -> &'static str {
         match self {
             Self::Hir(_) => "xidlc gen hir [FILES]...",
-            Self::HttpHir(_) => "xidlc gen http-hir [FILES]...",
+            Self::RestHir(_) => "xidlc gen rest-hir [FILES]...",
             Self::JsonRpcHir(_) => "xidlc gen jsonrpc-hir [FILES]...",
             Self::TypedAst(_) => "xidlc gen typed-ast [FILES]...",
             Self::Rust(_) => "xidlc gen rust [OPTIONS] [FILES]...",
             Self::RustJsonRpc(_) => "xidlc gen rust-jsonrpc [OPTIONS] [FILES]...",
             Self::RustAxum(_) => "xidlc gen rust-axum [OPTIONS] [FILES]...",
             Self::Typescript(_) => "xidlc gen typescript [OPTIONS] [FILES]...",
-            Self::TypescriptHttp(_) => "xidlc gen typescript-http [OPTIONS] [FILES]...",
+            Self::TypescriptRest(_) => "xidlc gen typescript-rest [OPTIONS] [FILES]...",
             Self::Go(_) => "xidlc gen go [OPTIONS] [FILES]...",
-            Self::GoHttp(_) => "xidlc gen go-http [OPTIONS] [FILES]...",
+            Self::GoRest(_) => "xidlc gen go-rest [OPTIONS] [FILES]...",
             Self::Python(_) => "xidlc gen python [OPTIONS] [FILES]...",
-            Self::PythonHttp(_) => "xidlc gen python-http [OPTIONS] [FILES]...",
+            Self::PythonRest(_) => "xidlc gen python-rest [OPTIONS] [FILES]...",
             Self::Openapi(_) => "xidlc gen openapi [FILES]...",
             Self::Openrpc(_) => "xidlc gen openrpc [FILES]...",
             Self::External(_) => "xidlc gen <lang> [FILES]...",

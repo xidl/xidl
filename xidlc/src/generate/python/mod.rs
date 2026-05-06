@@ -19,7 +19,11 @@ pub fn generate_with_properties(
         .file_stem()
         .and_then(|value| value.to_str())
         .unwrap_or("output");
-    let module_name = stem.to_case(Case::Snake).replace('-', "_");
+    let module_name = properties
+        .get("package")
+        .and_then(|v| v.as_str())
+        .map(|v| v.to_string())
+        .unwrap_or_else(|| stem.to_case(Case::Snake).replace('-', "_"));
     let filename = format!("{module_name}.py");
     let source = spec::render_spec(spec, &module_name, properties)?;
     Ok(vec![Artifact::new_file(ArtifactFile {

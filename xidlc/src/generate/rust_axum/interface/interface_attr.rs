@@ -10,8 +10,8 @@ use crate::generate::rust_axum::transport::{
     TransportDirection, TransportTracker, decode_expr, encode_expr,
 };
 use xidl_parser::hir;
-use xidl_parser::http_hir::{
-    HttpOperation, HttpParamKind as HttpHirParamKind, semantics::HttpStreamKind,
+use xidl_parser::rest_hir::{
+    HttpOperation, HttpParamKind as RestHirParamKind, semantics::HttpStreamKind,
 };
 
 pub(crate) fn render_attr_operation_from_http(
@@ -46,7 +46,7 @@ pub(crate) fn render_attr_operation_from_http(
     if let Some(param) = http_op
         .request_params
         .iter()
-        .find(|param| matches!(param.kind, HttpHirParamKind::Body))
+        .find(|param| matches!(param.kind, RestHirParamKind::Body))
     {
         let param_name = rust_ident(&param.name);
         let ty = axum_type(&param.ty);

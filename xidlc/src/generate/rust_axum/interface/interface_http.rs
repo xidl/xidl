@@ -2,40 +2,40 @@ use crate::generate::rust_axum::interface::{
     ApiKeyContext, DeprecatedContext, HttpMethod, ParamSource,
 };
 use xidl_parser::hir;
-use xidl_parser::http_hir::{
-    HttpMethod as HttpHirMethod, HttpOperation, HttpParam as HttpHirParam,
-    HttpParamKind as HttpHirParamKind,
+use xidl_parser::rest_hir::{
+    HttpMethod as RestHirMethod, HttpOperation, HttpParam as RestHirParam,
+    HttpParamKind as RestHirParamKind,
     semantics::{
         HttpApiKeyLocation, HttpSecurityOrigin, HttpSecurityProfile, HttpSecurityRequirement,
     },
 };
 
 pub(crate) fn find_http_param<'a>(
-    params: &'a [HttpHirParam],
+    params: &'a [RestHirParam],
     name: &str,
-) -> Option<&'a HttpHirParam> {
+) -> Option<&'a RestHirParam> {
     params.iter().find(|param| param.name == name)
 }
 
-pub(crate) fn http_param_kind(source: HttpHirParamKind) -> ParamSource {
+pub(crate) fn http_param_kind(source: RestHirParamKind) -> ParamSource {
     match source {
-        HttpHirParamKind::Path => ParamSource::Path,
-        HttpHirParamKind::Query => ParamSource::Query,
-        HttpHirParamKind::Header => ParamSource::Header,
-        HttpHirParamKind::Cookie => ParamSource::Cookie,
-        HttpHirParamKind::Body => ParamSource::Body,
+        RestHirParamKind::Path => ParamSource::Path,
+        RestHirParamKind::Query => ParamSource::Query,
+        RestHirParamKind::Header => ParamSource::Header,
+        RestHirParamKind::Cookie => ParamSource::Cookie,
+        RestHirParamKind::Body => ParamSource::Body,
     }
 }
 
-pub(crate) fn http_method_from_hir(method: HttpHirMethod) -> HttpMethod {
+pub(crate) fn http_method_from_hir(method: RestHirMethod) -> HttpMethod {
     match method {
-        HttpHirMethod::Get => HttpMethod::Get,
-        HttpHirMethod::Post => HttpMethod::Post,
-        HttpHirMethod::Put => HttpMethod::Put,
-        HttpHirMethod::Patch => HttpMethod::Patch,
-        HttpHirMethod::Delete => HttpMethod::Delete,
-        HttpHirMethod::Head => HttpMethod::Head,
-        HttpHirMethod::Options => HttpMethod::Options,
+        RestHirMethod::Get => HttpMethod::Get,
+        RestHirMethod::Post => HttpMethod::Post,
+        RestHirMethod::Put => HttpMethod::Put,
+        RestHirMethod::Patch => HttpMethod::Patch,
+        RestHirMethod::Delete => HttpMethod::Delete,
+        RestHirMethod::Head => HttpMethod::Head,
+        RestHirMethod::Options => HttpMethod::Options,
     }
 }
 

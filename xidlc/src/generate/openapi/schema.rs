@@ -7,7 +7,7 @@ use crate::openapi::schema::{
 };
 use crate::openapi::{Content, Ref, RefOr, Required};
 use xidl_parser::hir;
-use xidl_parser::http_hir::semantics::DeprecatedInfo;
+use xidl_parser::rest_hir::semantics::DeprecatedInfo;
 
 pub(crate) fn body_payload_schema(
     props: Vec<(String, RefOr<Schema>)>,

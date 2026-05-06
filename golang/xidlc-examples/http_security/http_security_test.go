@@ -6,7 +6,7 @@ import (
 
 	"net/http/httptest"
 
-	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-http"
+	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-rest"
 )
 
 type testHttpSecurityService struct{}
