@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.54.0](https://github.com/xidl/xidl/compare/v0.53.1...v0.54.0) (2026-05-06)
+
+
+### Features
+
+* **docs:** update docs ([e954096](https://github.com/xidl/xidl/commit/e9540961b653c18fe56de3fd2a359337c8f52e3c))
+* rename *http to *rest ([a9fe5dd](https://github.com/xidl/xidl/commit/a9fe5dd13e426183ee5f8f061d2bb958b18fe91f))
+* **website:** support highlight idl ([9d3667e](https://github.com/xidl/xidl/commit/9d3667e9709330c429f72417492cff000a517ff3))
+* **website:** update docs ([0400c26](https://github.com/xidl/xidl/commit/0400c267ca1ec9891cdc99a89b603a76bd6d97e0))
+
+
+### Bug Fixes
+
+* **website:** fix twcss support ([7aff46d](https://github.com/xidl/xidl/commit/7aff46d137adb5f24bf1f3202e419c682c4c45b4))
+* **xidlc:** serialize rust unions with real string tags ([a6cb9e9](https://github.com/xidl/xidl/commit/a6cb9e9fd57c19d8508d0ea9a5d417ee450bc182))
+
 ## [0.53.1](https://github.com/xidl/xidl/compare/v0.53.0...v0.53.1) (2026-05-05)
 
 
