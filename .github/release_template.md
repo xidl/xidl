@@ -10,11 +10,8 @@
         <tr>
             <td>Linux</td>
             <td>
-                <a href="https://github.com/REPOSITORY/releases/download/RELEASE_TAG/xidlc-x86_64-unknown-linux-gnu.tar.gz"><img src="https://img.shields.io/badge/x86_64--unknown--linux--gnu-x86_64-f84e29.svg?logo=linux"></a><br>
-                <a href="https://github.com/REPOSITORY/releases/download/RELEASE_TAG/xidlc-aarch64-unknown-linux-gnu.tar.gz"><img src="https://img.shields.io/badge/aarch64--unknown--linux--gnu-aarch64-45bf55.svg?logo=linux"></a><br>
                 <a href="https://github.com/REPOSITORY/releases/download/RELEASE_TAG/xidlc-x86_64-unknown-linux-musl.tar.gz"><img src="https://img.shields.io/badge/x86_64--unknown--linux--musl-x86_64-f84e29.svg?logo=linux"></a><br>
                 <a href="https://github.com/REPOSITORY/releases/download/RELEASE_TAG/xidlc-aarch64-unknown-linux-musl.tar.gz"><img src="https://img.shields.io/badge/aarch64--unknown--linux--musl-aarch64-45bf55.svg?logo=linux"></a><br>
-                <a href="https://github.com/REPOSITORY/releases/download/RELEASE_TAG/xidlc-riscv64gc-unknown-linux-musl.tar.gz"><img src="https://img.shields.io/badge/riscv64gc--unknown--linux--musl-riscv64gc-8c6b4f.svg?logo=linux"></a>
             </td>
         </tr>
         <tr>
