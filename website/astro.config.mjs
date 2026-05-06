@@ -79,6 +79,13 @@ export default defineConfig({
           },
         },
         {
+          autogenerate: { directory: 'jsonrpc' },
+          label: 'xidl_for_jsonrpc',
+          translations: {
+            'zh-CN': 'XIDL JSON-RPC 支持',
+          },
+        },
+        {
           autogenerate: { directory: 'rfc' },
           label: 'RFC',
         },

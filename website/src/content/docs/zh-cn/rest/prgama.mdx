@@ -1,0 +1,23 @@
+---
+title: "编译器指令"
+description: "xidlc 扩展的 pragma 指令、作用域和覆盖规则。"
+---
+
+xidlc 为 IDL 添加了下面的编译器指令：
+
+```idl
+#pragma xidlc package <package-name>
+#pragma xidlc version <package-version>
+#pragma xidlc service <api-endpoint> <api-name>
+```
+
+这三个指令用于定义包名、包版本和 API 端点。例如：
+
+```idl
+#pragma xidlc package E2E HTTP Stream Test
+#pragma xidlc version v1.0.0
+#pragma xidlc service http://127.0.0.1:8080 dev server
+#pragma xidlc service http://127.0.0.1:8081 product
+```
+
+定义了一个一个命令为 `E2E HTTP Stream Test` 的包，版本为 `v1.0.0`，包含两个服务：`dev` 和 `product`。

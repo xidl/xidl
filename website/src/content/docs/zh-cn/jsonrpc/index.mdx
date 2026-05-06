@@ -1,6 +1,8 @@
 ---
-title: "JSON-RPC"
-description: "XIDL 的 JSON-RPC 使用方式、常见映射和相关输出。"
+title: "JSON-RPC 接口"
+description: "XIDL JSON-RPC 接口"
+sidebar:
+  badge: PREVIEW
 ---
 
 # JSON-RPC
@@ -20,7 +22,7 @@ XIDL 的 JSON-RPC 家族覆盖：
 
 JSON-RPC 方法名由模块、接口和操作名组合而来。
 
-```txt
+```idl
 module math {
     interface Calc {
         long add(in long a, in long b);
@@ -44,7 +46,7 @@ math.Calc.add
 
 示例：
 
-```txt
+```idl
 interface SmartCityRpcApi {
     string quoteTrip(
         in string rider_id,

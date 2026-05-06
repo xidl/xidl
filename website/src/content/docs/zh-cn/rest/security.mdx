@@ -1,0 +1,50 @@
+---
+title: "RESTful 身份认证"
+description: "XIDL RESTful 身份认证"
+sidebar:
+  badge: PREVIEW
+---
+
+安全模型把认证声明附着在接口或方法上，而不是塞进业务参数列表。
+
+常见注解：
+
+- `@no_security`
+- `@http_basic`
+- `@http_bearer`
+- `@api_key(...)`
+- `@oauth2(...)`
+
+通常规则：
+
+- 接口级声明是默认值
+- 方法级声明会替换继承来的默认值
+- `@no_security` 会显式清空继承的安全要求
+
+一个常见组合：
+
+```idl
+@http_basic(realm = "admin")
+@api_key(in = "query", name = "org_key")
+interface AdminApi {
+    @get(path = "/reports/{id}")
+    string getReport(@path("id") string id);
+
+    @http_bearer
+    @api_key(in = "cookie", name = "session_key")
+    @post(path = "/reports/search")
+    string searchReport(string keyword);
+
+    @no_security
+    @get(path = "/health")
+    string health();
+};
+```
+
+这里的含义是：
+
+- `getReport` 继承接口级安全要求
+- `searchReport` 用自己的方法级安全要求替换接口级默认值
+- `health` 显式公开访问
+
+如果你的 API 有“绝大多数私有，少数公开”的结构，接口级默认 + 方法级 `@no_security` 往往是最省事的写法。
