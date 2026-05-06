@@ -8,8 +8,8 @@ use crate::openapi::path::{HttpMethod as OpenApiHttpMethod, Parameter, Parameter
 use crate::openapi::request_body::RequestBody;
 use crate::openapi::schema::Schema;
 use crate::openapi::{RefOr, security::SecurityRequirement};
-use xidl_parser::http_hir::{
-    HttpMethod as HttpHirMethod, HttpOperation, HttpParamKind as HttpHirParamKind,
+use xidl_parser::rest_hir::{
+    HttpMethod as RestHirMethod, HttpOperation, HttpParamKind as RestHirParamKind,
     semantics::{HttpSecurityRequirement, HttpStreamCodec, HttpStreamKind},
 };
 
@@ -46,35 +46,35 @@ pub(crate) fn render_http_operation(
     for param in &op.request_params {
         let schema = schema_for_type(&param.ty);
         match param.kind {
-            HttpHirParamKind::Path => parameters.push(parameter_schema(
+            RestHirParamKind::Path => parameters.push(parameter_schema(
                 ParameterIn::Path,
                 &param.wire_name,
                 schema,
                 true,
                 None,
             )),
-            HttpHirParamKind::Query => parameters.push(parameter_schema(
+            RestHirParamKind::Query => parameters.push(parameter_schema(
                 ParameterIn::Query,
                 &param.wire_name,
                 schema,
                 false,
                 None,
             )),
-            HttpHirParamKind::Header => parameters.push(parameter_schema(
+            RestHirParamKind::Header => parameters.push(parameter_schema(
                 ParameterIn::Header,
                 &param.wire_name,
                 schema,
                 false,
                 None,
             )),
-            HttpHirParamKind::Cookie => parameters.push(parameter_schema(
+            RestHirParamKind::Cookie => parameters.push(parameter_schema(
                 ParameterIn::Cookie,
                 &param.wire_name,
                 schema,
                 false,
                 None,
             )),
-            HttpHirParamKind::Body => body_props.push((param.name.clone(), schema)),
+            RestHirParamKind::Body => body_props.push((param.name.clone(), schema)),
         }
     }
 
@@ -86,7 +86,7 @@ pub(crate) fn render_http_operation(
     let (response_status, mut response_schema) = response_shape(
         return_schema,
         output_fields,
-        matches!(op.method, HttpHirMethod::Head),
+        matches!(op.method, RestHirMethod::Head),
     );
     let mut request_schema = body_payload_schema(body_props, body_required);
     if matches!(op.stream.kind, Some(HttpStreamKind::Bidi)) {

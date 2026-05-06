@@ -3,7 +3,7 @@ source: xidlc/tests/codegen_snapshot.rs
 expression: output
 ---
 ===============
-http_hir_shared_semantics_http.py
+rest_hir_shared_semantics_http.py
 ===============
 from __future__ import annotations
 
@@ -32,7 +32,7 @@ require_content_type,
 require_security,
 )
 
-# generated http module: http_hir_shared_semantics
+# generated http module: rest_hir_shared_semantics
 
 @dataclass
 class ReportApiGetReportRequest:

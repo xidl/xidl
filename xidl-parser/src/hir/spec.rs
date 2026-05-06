@@ -2,8 +2,8 @@ use super::{
     Definition, InterfaceDcl, ModuleDcl, ParserProperties, Specification, TypeDcl,
     expand_annotations, include, interface_codegen, parse_xidlc_pragma,
 };
-use crate::http_hir::{self, HirProjectionKind, ProjectedHir};
 use crate::jsonrpc_hir;
+use crate::rest_hir::{self, HirProjectionKind, ProjectedHir};
 use serde_json::Value;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -46,7 +46,7 @@ impl Specification {
             spec_from_typed_ast_with_path(value, expand_interface(&properties), path.as_ref())?;
         match hir_projection_kind(&properties) {
             HirProjectionKind::Rpc => Ok(ProjectedHir::Rpc(spec)),
-            HirProjectionKind::Http => http_hir::project(&spec).map(ProjectedHir::Http),
+            HirProjectionKind::Http => rest_hir::project(&spec).map(ProjectedHir::Http),
             HirProjectionKind::JsonRpc => jsonrpc_hir::project(&spec).map(ProjectedHir::JsonRpc),
         }
     }

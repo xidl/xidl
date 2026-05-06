@@ -1,0 +1,105 @@
+mod render;
+mod spec;
+
+use crate::error::IdlcResult;
+use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactHir};
+use crate::macros::hashmap;
+use convert_case::{Case, Casing};
+use std::path::Path;
+use xidl_parser::hir;
+use xidl_parser::hir::ParserProperties;
+
+pub use render::PythonRestRenderer;
+
+pub fn generate(
+    rest_hir: xidl_parser::rest_hir::RestHirDocument,
+    input_path: &Path,
+    _props: ParserProperties,
+) -> IdlcResult<Vec<Artifact>> {
+    let spec = rest_hir.spec.clone();
+    let stem = input_path
+        .file_stem()
+        .and_then(|value| value.to_str())
+        .unwrap_or("output");
+    let filename = format!("{}_http.py", stem.replace('-', "_"));
+    let module_name = rest_hir
+        .document
+        .package
+        .clone()
+        .unwrap_or_else(|| stem.to_case(Case::Snake).replace('-', "_"));
+    let content = spec::render_spec(&spec, &module_name, &rest_hir)?;
+
+    let mut artifacts = vec![Artifact::new_file(ArtifactFile {
+        path: filename,
+        content,
+    })];
+
+    let non_interface = strip_interfaces(spec);
+    if !non_interface.0.is_empty() {
+        let props = hashmap! {
+            "enable_metadata" => serde_json::Value::from(false),
+            "package" => serde_json::Value::from(module_name)
+        };
+        artifacts.push(Artifact::new_hir(ArtifactHir {
+            lang: "python".into(),
+            hir: non_interface,
+            props,
+        }));
+    }
+
+    Ok(artifacts)
+}
+
+pub(crate) struct PythonRestCodegen;
+
+#[async_trait::async_trait]
+impl crate::jsonrpc::Codegen for PythonRestCodegen {
+    async fn get_engine_version(&self) -> Result<String, xidl_jsonrpc::Error> {
+        Ok("*".to_string())
+    }
+
+    async fn get_properties(&self) -> Result<ParserProperties, xidl_jsonrpc::Error> {
+        Ok(hashmap! {
+            "expand_interface" => false,
+            "hir_kind" => "http",
+            "enable_client" => true,
+            "enable_server" => true,
+            "enable_metadata" => true
+        })
+    }
+
+    async fn generate(
+        &self,
+        input_hir: crate::jsonrpc::CodegenInput,
+        input: String,
+        props: ::xidl_parser::hir::ParserProperties,
+    ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
+        let rest_hir = input_hir.into_rest_hir();
+        generate(rest_hir, Path::new(&input), props).map_err(|err| xidl_jsonrpc::Error::Rpc {
+            code: xidl_jsonrpc::ErrorCode::ServerError,
+            message: err.to_string(),
+            data: None,
+        })
+    }
+}
+
+fn strip_interfaces(spec: hir::Specification) -> hir::Specification {
+    fn strip_defs(defs: Vec<hir::Definition>) -> Vec<hir::Definition> {
+        let mut out = Vec::new();
+        for def in defs {
+            match def {
+                hir::Definition::InterfaceDcl(_) => {}
+                hir::Definition::ModuleDcl(mut module) => {
+                    module.definition = strip_defs(module.definition);
+                    if !module.definition.is_empty() {
+                        out.push(hir::Definition::ModuleDcl(module));
+                    }
+                }
+                other => out.push(other),
+            }
+        }
+        out
+    }
+
+    hir::Specification(strip_defs(spec.0))
+}

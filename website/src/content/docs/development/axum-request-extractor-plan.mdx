@@ -31,7 +31,7 @@ async fn op(&self, a: A, b: B, c: C) -> Result<T>;
 
 ## Proposed approach
 
-1. keep `http_hir` source metadata as-is
+1. keep `rest_hir` source metadata as-is
 2. render unary trait signatures from expanded parameters
 3. keep helper structs only for adapter extraction when still useful
 4. let the server adapter extract transport data, then call `svc.method(...)`

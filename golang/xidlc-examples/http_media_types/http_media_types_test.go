@@ -1,4 +1,4 @@
-package http_media_types
+package rest_media_types
 
 import (
 	"context"
@@ -6,38 +6,38 @@ import (
 	"strings"
 	"testing"
 
-	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-http"
+	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-rest"
 )
 
-type testHttpMediaTypesService struct{}
+type testRestMediaTypesService struct{}
 
-func (testHttpMediaTypesService) SubmitProfile(
+func (testRestMediaTypesService) SubmitProfile(
 	_ context.Context,
-	req *HttpMediaTypesApiSubmitProfileRequest,
-) (*HttpMediaTypesApiSubmitProfileResponse, error) {
-	return &HttpMediaTypesApiSubmitProfileResponse{
+	req *RestMediaTypesApiSubmitProfileRequest,
+) (*RestMediaTypesApiSubmitProfileResponse, error) {
+	return &RestMediaTypesApiSubmitProfileResponse{
 		Return:         req.Name + ":" + xidlgohttp.FormatUint32(req.Age),
 		NormalizedName: strings.ToUpper(req.Name),
 	}, nil
 }
 
-func (testHttpMediaTypesService) GetMsgpackUser(
+func (testRestMediaTypesService) GetMsgpackUser(
 	_ context.Context,
-	req *HttpMediaTypesApiGetMsgpackUserRequest,
-) (*HttpMediaTypesApiGetMsgpackUserResponse, error) {
-	return &HttpMediaTypesApiGetMsgpackUserResponse{
+	req *RestMediaTypesApiGetMsgpackUserRequest,
+) (*RestMediaTypesApiGetMsgpackUserResponse, error) {
+	return &RestMediaTypesApiGetMsgpackUserResponse{
 		Return: "user:" + req.UserId,
 		Score:  95,
 	}, nil
 }
 
-func TestHttpMediaTypes(t *testing.T) {
-	server := httptest.NewServer(NewHttpMediaTypesApiHandler(testHttpMediaTypesService{}))
+func TestRestMediaTypes(t *testing.T) {
+	server := httptest.NewServer(NewRestMediaTypesApiHandler(testRestMediaTypesService{}))
 	defer server.Close()
 
-	client := NewHttpMediaTypesApiClient(server.URL, server.Client(), xidlgohttp.ClientAuth{})
+	client := NewRestMediaTypesApiClient(server.URL, server.Client(), xidlgohttp.ClientAuth{})
 
-	submit, err := client.SubmitProfile(context.Background(), &HttpMediaTypesApiSubmitProfileRequest{
+	submit, err := client.SubmitProfile(context.Background(), &RestMediaTypesApiSubmitProfileRequest{
 		Name: "Taylor",
 		Age:  42,
 	})
@@ -51,7 +51,7 @@ func TestHttpMediaTypes(t *testing.T) {
 		t.Fatalf("unexpected normalized name: %q", submit.NormalizedName)
 	}
 
-	msgpack, err := client.GetMsgpackUser(context.Background(), &HttpMediaTypesApiGetMsgpackUserRequest{
+	msgpack, err := client.GetMsgpackUser(context.Background(), &RestMediaTypesApiGetMsgpackUserRequest{
 		UserId: "u100",
 	})
 	if err != nil {

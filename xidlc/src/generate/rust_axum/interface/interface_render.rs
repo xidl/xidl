@@ -9,7 +9,7 @@ use crate::generate::rust_axum::transport::TransportTracker;
 use serde_json::json;
 use std::collections::HashMap;
 use xidl_parser::hir;
-use xidl_parser::http_hir::HttpOperationSource;
+use xidl_parser::rest_hir::HttpOperationSource;
 
 pub(crate) fn render_interface_def(
     def: &hir::InterfaceDef,
@@ -19,8 +19,8 @@ pub(crate) fn render_interface_def(
     let mut out = RustAxumRenderOutput::default();
     let mut methods = Vec::new();
     let mut transport = TransportTracker::new(&def.header.ident);
-    let http_hir = env.renderer.http_hir()?;
-    let Some(http_interface) = http_hir.find_interface(env.module_path, &def.header.ident) else {
+    let rest_hir = env.renderer.rest_hir()?;
+    let Some(http_interface) = rest_hir.find_interface(env.module_path, &def.header.ident) else {
         return Ok(out);
     };
 
@@ -70,7 +70,7 @@ pub(crate) fn render_interface_def(
     ensure_unique_route_bindings(&methods)?;
     let transport_modules = transport.render_modules(env.registry, env.module_path)?;
     let ctx = json!({
-        "metadata": http_hir.document,
+        "metadata": rest_hir.document,
         "ident": rust_ident(&def.header.ident),
         "methods": methods,
         "rust_attrs": rust_passthrough_attrs_from_annotations(interface_annotations),

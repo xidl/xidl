@@ -1,6 +1,6 @@
 use xidl_jsonrpc::{Error, ErrorCode};
 use xidl_parser::hir::ParserProperties;
-use xidl_parser::http_hir::ProjectedHir;
+use xidl_parser::rest_hir::ProjectedHir;
 
 use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactHir, ArtifactJsonRpcHir};
 
@@ -60,17 +60,17 @@ impl crate::jsonrpc::Codegen for HirGen {
                     })])
                 }
             }
-            ProjectedHir::Http(http_hir) => {
-                if target_lang == "http-hir" {
+            ProjectedHir::Http(rest_hir) => {
+                if target_lang == "rest-hir" {
                     Ok(vec![Artifact::new_file(ArtifactFile {
-                        path: _input.replace(".idl", ".http_hir.json"),
-                        content: serde_json::to_string_pretty(&http_hir)?,
+                        path: _input.replace(".idl", ".rest_hir.json"),
+                        content: serde_json::to_string_pretty(&rest_hir)?,
                     })])
                 } else {
-                    Ok(vec![Artifact::new_http_hir(
-                        crate::jsonrpc::ArtifactHttpHir {
+                    Ok(vec![Artifact::new_rest_hir(
+                        crate::jsonrpc::ArtifactRestHir {
                             lang: target_lang,
-                            http_hir,
+                            rest_hir,
                             props,
                         },
                     )])

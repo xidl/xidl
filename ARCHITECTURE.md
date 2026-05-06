@@ -27,7 +27,7 @@ tree-sitter-idl -> typed_ast -> hir -> codegen
 For HTTP-oriented outputs, there is an additional protocol-semantic layer:
 
 ```text
-tree-sitter-idl -> typed_ast -> hir -> http_hir -> http generators
+tree-sitter-idl -> typed_ast -> hir -> rest_hir -> http generators
 ```
 
 This layered model is intentional. The project prefers explicit intermediate
@@ -56,13 +56,13 @@ The following statements should remain true over time.
 
 ### 3. Protocol semantics belong in shared protocol layers
 
-- HTTP-specific understanding belongs in `http_hir`.
+- HTTP-specific understanding belongs in `rest_hir`.
 - HTTP generators such as Axum, Go HTTP, Python HTTP, and OpenAPI should render
   from shared HTTP semantics instead of each generator interpreting RFC rules
   independently.
 - The generator's job is primarily rendering, not re-deciding protocol meaning.
 
-This is why `http_hir` exists: it centralizes interpretation of the HTTP RFCs
+This is why `rest_hir` exists: it centralizes interpretation of the HTTP RFCs
 and prevents language-specific divergence.
 
 ### 4. RFCs are the behavioral source of truth for XIDL extensions
@@ -131,7 +131,7 @@ The driver in `xidlc/src/driver/generate.rs` makes this explicit:
 
 - generation starts from IDL text
 - the initial semantic handoff is `hir`
-- returned artifacts can be `Hir`, `HttpHir`, or `File`
+- returned artifacts can be `Hir`, `RestHir`, or `File`
 - the driver recursively advances until only files remain
 
 That recursion is an architectural invariant: XIDL supports staged generation,
@@ -143,11 +143,11 @@ HTTP-related code generation has an additional semantic projection:
 
 1. Parse IDL.
 2. Lower to `hir`.
-3. Project `hir` into `http_hir`.
-4. Hand `hir + http_hir` to HTTP-aware generators.
+3. Project `hir` into `rest_hir`.
+4. Hand `hir + rest_hir` to HTTP-aware generators.
 5. Render target-specific files.
 
-`http_hir` exists so that:
+`rest_hir` exists so that:
 
 - RFC interpretation happens once
 - route, parameter, media type, stream, and security semantics are shared
@@ -161,14 +161,14 @@ This pattern is expected to generalize. There is no `jsonrpc_hir` today, but it
 would be architecturally consistent to add one in the future if JSON-RPC
 semantics become complex enough to justify a shared protocol layer.
 
-## Why `typed_ast`, `hir`, and `http_hir` Exist
+## Why `typed_ast`, `hir`, and `rest_hir` Exist
 
 These three layers exist because XIDL has to solve three different problems at
 three different levels of stability.
 
 - `typed_ast` answers: "Did we read the source correctly?"
 - `hir` answers: "What does this IDL mean in a stable, generator-friendly form?"
-- `http_hir` answers: "What does this contract mean after HTTP RFC semantics
+- `rest_hir` answers: "What does this contract mean after HTTP RFC semantics
   have been interpreted?"
 
 They are not redundant models. Each layer deliberately removes one class of
@@ -252,9 +252,9 @@ structures such as includes, raw pragma text, and syntax-specific variants. That
 would duplicate logic, increase drift, and make the plugin contract much less
 stable.
 
-### `http_hir`
+### `rest_hir`
 
-`http_hir` is a protocol-semantic projection from `hir`.
+`rest_hir` is a protocol-semantic projection from `hir`.
 
 It exists because HTTP generation needs more than generic IDL semantics. It
 needs an explicit, shared interpretation of the HTTP RFCs and XIDL's HTTP
@@ -287,7 +287,7 @@ Why it exists:
 - renderers should focus on target-specific output, not on protocol inference
 - HTTP bug fixes should land in one semantic layer instead of many renderers
 
-If `http_hir` did not exist, every HTTP-oriented backend would need to
+If `rest_hir` did not exist, every HTTP-oriented backend would need to
 re-implement route inference, parameter-source inference, stream rules, and
 security mapping. That would create inevitable behavioral drift across targets.
 
@@ -297,7 +297,7 @@ The three-layer split lets XIDL isolate three different kinds of change:
 
 - syntax changes belong in `typed_ast`
 - shared semantic changes belong in `hir`
-- HTTP protocol-mapping changes belong in `http_hir`
+- HTTP protocol-mapping changes belong in `rest_hir`
 
 That separation keeps the repository understandable and keeps regressions local.
 It also makes tests more meaningful, because each layer can be validated for its
@@ -341,7 +341,7 @@ Important subtrees:
 
 - `xidlc/src/driver/`: language resolution, generator orchestration, staging
 - `xidlc/src/generate/`: built-in generators and intermediate generator stages
-- `xidlc/src/generate/http_hir/`: shared HTTP semantic projection
+- `xidlc/src/generate/rest_hir/`: shared HTTP semantic projection
 - `xidlc/src/jsonrpc/ipc.idl`: generator IPC contract
 - `xidlc/tests/`: codegen snapshot tests
 
@@ -404,7 +404,7 @@ Use it when:
 - generator logic should reason about declarations and semantics instead of raw
   syntax shape
 
-### `http_hir`
+### `rest_hir`
 
 Responsibility:
 
@@ -430,7 +430,7 @@ disagree on the meaning of the contract.
 `xidlc`'s built-in generators follow one rendering pattern:
 
 - templates are written in Jinja and rendered with `minijinja`
-- Rust code is responsible for walking `hir` or `http_hir`
+- Rust code is responsible for walking `hir` or `rest_hir`
 - Rust code builds a render-friendly context before template execution
 - templates are responsible for presentation, file layout, and simple branching
 - semantic interpretation stays in Rust, not in templates
@@ -442,7 +442,7 @@ templates as a second implementation language for core semantics.
 
 The split keeps generator behavior predictable:
 
-- `hir` and `http_hir` stay the semantic source of truth
+- `hir` and `rest_hir` stay the semantic source of truth
 - normalization, protocol interpretation, and target-specific name resolution
   happen in Rust where they are typed and testable
 - templates stay small enough to review as output shape rather than business
@@ -452,7 +452,7 @@ The split keeps generator behavior predictable:
 
 In practice, a generator usually does three things:
 
-1. Traverse `hir` or `http_hir`.
+1. Traverse `hir` or `rest_hir`.
 2. Build a target-specific context object or JSON value.
 3. Call `renderer.render_template(...)` one or more times to emit files or
    fragments.
@@ -496,7 +496,7 @@ Stable properties of the plugin model:
 - external plugins are started as child processes
 - communication is done through the `Codegen` interface in
   `xidlc/src/jsonrpc/ipc.idl`
-- artifacts are passed forward as `Hir`, `HttpHir`, or `File`
+- artifacts are passed forward as `Hir`, `RestHir`, or `File`
 
 This means a plugin can:
 
@@ -536,7 +536,7 @@ That next step depends on the artifact kind:
 
 - `File`: generation for that branch is complete and the file is collected
 - `Hir`: the driver starts another generator using the returned `lang`
-- `HttpHir`: the driver stores `http_hir` into properties and starts the next
+- `RestHir`: the driver stores `rest_hir` into properties and starts the next
   generator using the returned `lang`
 
 So the call graph is not plugin-to-plugin. It is:
@@ -550,13 +550,13 @@ Stages exchange typed artifacts, but stage transitions are owned by the driver.
 
 ### Multi-stage generation
 
-Because generators can emit `Hir` or `HttpHir`, a backend can delegate part of
+Because generators can emit `Hir` or `RestHir`, a backend can delegate part of
 its work to another backend or to an intermediate semantic stage.
 
 Examples:
 
 - the initial `hir` stage parses and lowers the source before final generation
-- HTTP-capable targets are routed through `http-hir` before Axum, Go HTTP,
+- HTTP-capable targets are routed through `rest-hir` before Axum, Go HTTP,
   Python HTTP, or OpenAPI rendering
 - the TypeScript generator can emit files and also return a `Hir` artifact for
   Rust generation of the non-interface portion
@@ -571,11 +571,11 @@ properties forward.
 
 - each stage contributes default properties through `get_properties()`
 - the driver merges CLI/input metadata into those properties
-- a stage may return extra `props` together with `Hir` or `HttpHir`
+- a stage may return extra `props` together with `Hir` or `RestHir`
 - later stages read those properties, often exposing them to templates as `opt`
 
 This is how cross-stage metadata such as render options, timestamps, target
-settings, and `http_hir` data flow through the pipeline without breaking the
+settings, and `rest_hir` data flow through the pipeline without breaking the
 layered architecture.
 
 ## Documentation Architecture
@@ -632,7 +632,7 @@ Purpose:
 Layout invariant:
 
 - language folders such as `c/`, `cpp/`, `rust/`, `ts/`, `golang-http/`,
-  `python-http/`, `axum/`, `openapi/`, and `openrpc/` hold IDL inputs
+  `python-rest/`, `axum/`, `openapi/`, and `openrpc/` hold IDL inputs
 - `shared/` contains reusable includes
 - `snapshots/` stores approved output snapshots
 - `codegen_snapshot.rs` discovers cases automatically

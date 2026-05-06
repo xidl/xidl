@@ -225,12 +225,12 @@ pub struct ArtifactHir {
 }
 impl ArtifactHir {}
 #[derive(Debug, ::serde::Serialize, ::serde::Deserialize)]
-pub struct ArtifactHttpHir {
+pub struct ArtifactRestHir {
     pub lang: String,
-    pub http_hir: ::xidl_parser::http_hir::HttpHirDocument,
+    pub rest_hir: ::xidl_parser::rest_hir::RestHirDocument,
     pub props: ::xidl_parser::hir::ParserProperties,
 }
-impl ArtifactHttpHir {}
+impl ArtifactRestHir {}
 #[derive(Debug, ::serde::Serialize, ::serde::Deserialize)]
 pub struct ArtifactJsonRpcHir {
     pub lang: String,
@@ -251,7 +251,7 @@ impl ArtifactJsonRpcHir {}
 pub enum CodegenInputKind {
     #[default]
     RpcHir,
-    HttpHir,
+    RestHir,
     JsonRpcHir,
 }
 pub struct CodegenInput {
@@ -260,7 +260,7 @@ pub struct CodegenInput {
 }
 union CodegenInputData {
     rpc_hir: core::mem::ManuallyDrop<::xidl_parser::hir::Specification>,
-    http_hir: core::mem::ManuallyDrop<::xidl_parser::http_hir::HttpHirDocument>,
+    rest_hir: core::mem::ManuallyDrop<::xidl_parser::rest_hir::RestHirDocument>,
     jsonrpc_hir: core::mem::ManuallyDrop<::xidl_parser::jsonrpc_hir::JsonRpcHirDocument>,
 }
 impl Drop for CodegenInput {
@@ -271,9 +271,9 @@ impl Drop for CodegenInput {
                     core::mem::ManuallyDrop::drop(&mut self.data.rpc_hir);
                 }
             }
-            CodegenInputKind::HttpHir => {
+            CodegenInputKind::RestHir => {
                 unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.http_hir);
+                    core::mem::ManuallyDrop::drop(&mut self.data.rest_hir);
                 }
             }
             CodegenInputKind::JsonRpcHir => {
@@ -311,30 +311,30 @@ impl CodegenInput {
             core::mem::ManuallyDrop::take(&mut forget.data.rpc_hir)
         }
     }
-    pub fn new_http_hir(value: ::xidl_parser::http_hir::HttpHirDocument) -> Self {
+    pub fn new_rest_hir(value: ::xidl_parser::rest_hir::RestHirDocument) -> Self {
         Self {
-            tag: CodegenInputKind::HttpHir,
+            tag: CodegenInputKind::RestHir,
             data: CodegenInputData {
-                http_hir: core::mem::ManuallyDrop::new(value),
+                rest_hir: core::mem::ManuallyDrop::new(value),
             },
         }
     }
-    pub fn is_http_hir(&self) -> bool {
-        matches!(self.tag, CodegenInputKind::HttpHir)
+    pub fn is_rest_hir(&self) -> bool {
+        matches!(self.tag, CodegenInputKind::RestHir)
     }
-    pub fn as_http_hir(&self) -> &::xidl_parser::http_hir::HttpHirDocument {
-        debug_assert!(self.is_http_hir());
-        unsafe { &self.data.http_hir }
+    pub fn as_rest_hir(&self) -> &::xidl_parser::rest_hir::RestHirDocument {
+        debug_assert!(self.is_rest_hir());
+        unsafe { &self.data.rest_hir }
     }
-    pub fn as_http_hir_mut(&mut self) -> &mut ::xidl_parser::http_hir::HttpHirDocument {
-        debug_assert!(self.is_http_hir());
-        unsafe { &mut self.data.http_hir }
+    pub fn as_rest_hir_mut(&mut self) -> &mut ::xidl_parser::rest_hir::RestHirDocument {
+        debug_assert!(self.is_rest_hir());
+        unsafe { &mut self.data.rest_hir }
     }
-    pub fn into_http_hir(self) -> ::xidl_parser::http_hir::HttpHirDocument {
-        debug_assert!(self.is_http_hir());
+    pub fn into_rest_hir(self) -> ::xidl_parser::rest_hir::RestHirDocument {
+        debug_assert!(self.is_rest_hir());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.http_hir)
+            core::mem::ManuallyDrop::take(&mut forget.data.rest_hir)
         }
     }
     pub fn new_jsonrpc_hir(
@@ -396,18 +396,18 @@ impl serde::Serialize for CodegenInput {
                 )?;
                 serde::ser::SerializeStructVariant::end(s)
             }
-            CodegenInputKind::HttpHir => {
+            CodegenInputKind::RestHir => {
                 let mut s = serde::Serializer::serialize_struct_variant(
                     __serializer,
                     "CodegenInput",
                     1,
-                    "CodegenInputKind::HttpHir",
-                    size_of::<::xidl_parser::http_hir::HttpHirDocument>(),
+                    "CodegenInputKind::RestHir",
+                    size_of::<::xidl_parser::rest_hir::RestHirDocument>(),
                 )?;
-                let x = unsafe { std::ops::Deref::deref(&self.data.http_hir) };
+                let x = unsafe { std::ops::Deref::deref(&self.data.rest_hir) };
                 serde::ser::SerializeStructVariant::serialize_field(
                     &mut s,
-                    "CodegenInputKind::HttpHir",
+                    "CodegenInputKind::RestHir",
                     x,
                 )?;
                 serde::ser::SerializeStructVariant::end(s)
@@ -438,7 +438,7 @@ impl<'de> serde::Deserialize<'de> for CodegenInput {
     {
         const VARIANTS: &[&str] = &[
             "CodegenInputKind::RpcHir",
-            "CodegenInputKind::HttpHir",
+            "CodegenInputKind::RestHir",
             "CodegenInputKind::JsonRpcHir",
         ];
         enum __Variant {
@@ -466,7 +466,7 @@ impl<'de> serde::Deserialize<'de> for CodegenInput {
                     {
                         match value {
                             "CodegenInputKind::RpcHir" => Ok(__Variant::__Case0),
-                            "CodegenInputKind::HttpHir" => Ok(__Variant::__Case1),
+                            "CodegenInputKind::RestHir" => Ok(__Variant::__Case1),
                             "CodegenInputKind::JsonRpcHir" => Ok(__Variant::__Case2),
                             _ => Err(E::unknown_variant(value, VARIANTS)),
                         }
@@ -545,13 +545,13 @@ impl<'de> serde::Deserialize<'de> for CodegenInput {
                     __Variant::__Case1 => {
                         struct __CaseVisitor;
                         impl<'de> serde::de::Visitor<'de> for __CaseVisitor {
-                            type Value = ::xidl_parser::http_hir::HttpHirDocument;
+                            type Value = ::xidl_parser::rest_hir::RestHirDocument;
                             fn expecting(
                                 &self,
                                 formatter: &mut core::fmt::Formatter,
                             ) -> core::fmt::Result {
                                 formatter
-                                    .write_str("struct variant CodegenInputKind::HttpHir")
+                                    .write_str("struct variant CodegenInputKind::RestHir")
                             }
                             fn visit_map<M>(
                                 self,
@@ -562,11 +562,11 @@ impl<'de> serde::Deserialize<'de> for CodegenInput {
                             {
                                 let mut value = None;
                                 while let Some(key) = map.next_key::<String>()? {
-                                    if key == "CodegenInputKind::HttpHir" {
+                                    if key == "CodegenInputKind::RestHir" {
                                         if value.is_some() {
                                             return Err(
                                                 serde::de::Error::duplicate_field(
-                                                    "CodegenInputKind::HttpHir",
+                                                    "CodegenInputKind::RestHir",
                                                 ),
                                             );
                                         }
@@ -577,20 +577,20 @@ impl<'de> serde::Deserialize<'de> for CodegenInput {
                                 }
                                 value
                                     .ok_or_else(|| {
-                                        serde::de::Error::missing_field("CodegenInputKind::HttpHir")
+                                        serde::de::Error::missing_field("CodegenInputKind::RestHir")
                                     })
                             }
                         }
                         let value = serde::de::VariantAccess::struct_variant(
                             variant_access,
-                            &["CodegenInputKind::HttpHir"],
+                            &["CodegenInputKind::RestHir"],
                             __CaseVisitor,
                         )?;
-                        let tag = CodegenInputKind::HttpHir;
+                        let tag = CodegenInputKind::RestHir;
                         Ok(CodegenInput {
                             tag,
                             data: CodegenInputData {
-                                http_hir: core::mem::ManuallyDrop::new(value),
+                                rest_hir: core::mem::ManuallyDrop::new(value),
                             },
                         })
                     }
@@ -673,7 +673,7 @@ impl ArtifactFile {}
 pub enum ArtifactKind {
     #[default]
     Hir,
-    HttpHir,
+    RestHir,
     JsonRpcHir,
     File,
 }
@@ -683,7 +683,7 @@ pub struct Artifact {
 }
 union ArtifactData {
     hir: core::mem::ManuallyDrop<ArtifactHir>,
-    http_hir: core::mem::ManuallyDrop<ArtifactHttpHir>,
+    rest_hir: core::mem::ManuallyDrop<ArtifactRestHir>,
     jsonrpc_hir: core::mem::ManuallyDrop<ArtifactJsonRpcHir>,
     file: core::mem::ManuallyDrop<ArtifactFile>,
 }
@@ -695,9 +695,9 @@ impl Drop for Artifact {
                     core::mem::ManuallyDrop::drop(&mut self.data.hir);
                 }
             }
-            ArtifactKind::HttpHir => {
+            ArtifactKind::RestHir => {
                 unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.http_hir);
+                    core::mem::ManuallyDrop::drop(&mut self.data.rest_hir);
                 }
             }
             ArtifactKind::JsonRpcHir => {
@@ -740,30 +740,30 @@ impl Artifact {
             core::mem::ManuallyDrop::take(&mut forget.data.hir)
         }
     }
-    pub fn new_http_hir(value: ArtifactHttpHir) -> Self {
+    pub fn new_rest_hir(value: ArtifactRestHir) -> Self {
         Self {
-            tag: ArtifactKind::HttpHir,
+            tag: ArtifactKind::RestHir,
             data: ArtifactData {
-                http_hir: core::mem::ManuallyDrop::new(value),
+                rest_hir: core::mem::ManuallyDrop::new(value),
             },
         }
     }
-    pub fn is_http_hir(&self) -> bool {
-        matches!(self.tag, ArtifactKind::HttpHir)
+    pub fn is_rest_hir(&self) -> bool {
+        matches!(self.tag, ArtifactKind::RestHir)
     }
-    pub fn as_http_hir(&self) -> &ArtifactHttpHir {
-        debug_assert!(self.is_http_hir());
-        unsafe { &self.data.http_hir }
+    pub fn as_rest_hir(&self) -> &ArtifactRestHir {
+        debug_assert!(self.is_rest_hir());
+        unsafe { &self.data.rest_hir }
     }
-    pub fn as_http_hir_mut(&mut self) -> &mut ArtifactHttpHir {
-        debug_assert!(self.is_http_hir());
-        unsafe { &mut self.data.http_hir }
+    pub fn as_rest_hir_mut(&mut self) -> &mut ArtifactRestHir {
+        debug_assert!(self.is_rest_hir());
+        unsafe { &mut self.data.rest_hir }
     }
-    pub fn into_http_hir(self) -> ArtifactHttpHir {
-        debug_assert!(self.is_http_hir());
+    pub fn into_rest_hir(self) -> ArtifactRestHir {
+        debug_assert!(self.is_rest_hir());
         unsafe {
             let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.http_hir)
+            core::mem::ManuallyDrop::take(&mut forget.data.rest_hir)
         }
     }
     pub fn new_jsonrpc_hir(value: ArtifactJsonRpcHir) -> Self {
@@ -847,18 +847,18 @@ impl serde::Serialize for Artifact {
                 )?;
                 serde::ser::SerializeStructVariant::end(s)
             }
-            ArtifactKind::HttpHir => {
+            ArtifactKind::RestHir => {
                 let mut s = serde::Serializer::serialize_struct_variant(
                     __serializer,
                     "Artifact",
                     1,
-                    "ArtifactKind::HttpHir",
-                    size_of::<ArtifactHttpHir>(),
+                    "ArtifactKind::RestHir",
+                    size_of::<ArtifactRestHir>(),
                 )?;
-                let x = unsafe { std::ops::Deref::deref(&self.data.http_hir) };
+                let x = unsafe { std::ops::Deref::deref(&self.data.rest_hir) };
                 serde::ser::SerializeStructVariant::serialize_field(
                     &mut s,
-                    "ArtifactKind::HttpHir",
+                    "ArtifactKind::RestHir",
                     x,
                 )?;
                 serde::ser::SerializeStructVariant::end(s)
@@ -905,7 +905,7 @@ impl<'de> serde::Deserialize<'de> for Artifact {
     {
         const VARIANTS: &[&str] = &[
             "ArtifactKind::Hir",
-            "ArtifactKind::HttpHir",
+            "ArtifactKind::RestHir",
             "ArtifactKind::JsonRpcHir",
             "ArtifactKind::File",
         ];
@@ -935,7 +935,7 @@ impl<'de> serde::Deserialize<'de> for Artifact {
                     {
                         match value {
                             "ArtifactKind::Hir" => Ok(__Variant::__Case0),
-                            "ArtifactKind::HttpHir" => Ok(__Variant::__Case1),
+                            "ArtifactKind::RestHir" => Ok(__Variant::__Case1),
                             "ArtifactKind::JsonRpcHir" => Ok(__Variant::__Case2),
                             "ArtifactKind::File" => Ok(__Variant::__Case3),
                             _ => Err(E::unknown_variant(value, VARIANTS)),
@@ -1012,12 +1012,12 @@ impl<'de> serde::Deserialize<'de> for Artifact {
                     __Variant::__Case1 => {
                         struct __CaseVisitor;
                         impl<'de> serde::de::Visitor<'de> for __CaseVisitor {
-                            type Value = ArtifactHttpHir;
+                            type Value = ArtifactRestHir;
                             fn expecting(
                                 &self,
                                 formatter: &mut core::fmt::Formatter,
                             ) -> core::fmt::Result {
-                                formatter.write_str("struct variant ArtifactKind::HttpHir")
+                                formatter.write_str("struct variant ArtifactKind::RestHir")
                             }
                             fn visit_map<M>(
                                 self,
@@ -1028,10 +1028,10 @@ impl<'de> serde::Deserialize<'de> for Artifact {
                             {
                                 let mut value = None;
                                 while let Some(key) = map.next_key::<String>()? {
-                                    if key == "ArtifactKind::HttpHir" {
+                                    if key == "ArtifactKind::RestHir" {
                                         if value.is_some() {
                                             return Err(
-                                                serde::de::Error::duplicate_field("ArtifactKind::HttpHir"),
+                                                serde::de::Error::duplicate_field("ArtifactKind::RestHir"),
                                             );
                                         }
                                         value = Some(map.next_value()?);
@@ -1041,20 +1041,20 @@ impl<'de> serde::Deserialize<'de> for Artifact {
                                 }
                                 value
                                     .ok_or_else(|| {
-                                        serde::de::Error::missing_field("ArtifactKind::HttpHir")
+                                        serde::de::Error::missing_field("ArtifactKind::RestHir")
                                     })
                             }
                         }
                         let value = serde::de::VariantAccess::struct_variant(
                             variant_access,
-                            &["ArtifactKind::HttpHir"],
+                            &["ArtifactKind::RestHir"],
                             __CaseVisitor,
                         )?;
-                        let tag = ArtifactKind::HttpHir;
+                        let tag = ArtifactKind::RestHir;
                         Ok(Artifact {
                             tag,
                             data: ArtifactData {
-                                http_hir: core::mem::ManuallyDrop::new(value),
+                                rest_hir: core::mem::ManuallyDrop::new(value),
                             },
                         })
                     }

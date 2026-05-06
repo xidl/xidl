@@ -14,7 +14,7 @@ use crate::generate::rust_axum::interface::interface_method_support::{
 use crate::generate::rust_axum::interface::{MethodContext, RenderEnv};
 use crate::generate::rust_axum::transport::{TransportDirection, TransportTracker};
 use xidl_parser::hir;
-use xidl_parser::http_hir::{HttpOperation, semantics::HttpStreamKind};
+use xidl_parser::rest_hir::{HttpOperation, semantics::HttpStreamKind};
 
 pub(crate) fn render_op_from_http(
     op: &hir::OpDcl,

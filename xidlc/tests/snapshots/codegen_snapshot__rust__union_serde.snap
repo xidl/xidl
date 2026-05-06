@@ -575,7 +575,7 @@ impl BoolTagValue {
         }
     }
     pub fn is_yes(&self) -> bool {
-        matches!(self.tag, true)
+        self.tag
     }
     pub fn as_yes(&self) -> &String {
         debug_assert!(self.is_yes());
@@ -601,7 +601,7 @@ impl BoolTagValue {
         }
     }
     pub fn is_no(&self) -> bool {
-        matches!(self.tag, false)
+        !self.tag
     }
     pub fn as_no(&self) -> &String {
         debug_assert!(self.is_no());

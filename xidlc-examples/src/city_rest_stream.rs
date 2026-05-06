@@ -1,0 +1,84 @@
+include!(concat!(env!("OUT_DIR"), "/city_rest_stream.rs"));
+
+pub struct CityRestStreamService;
+
+#[async_trait::async_trait]
+impl CityRestStreamApi for CityRestStreamService {
+    async fn alerts(
+        &self,
+        req: xidl_rust_axum::Request<CityRestStreamApiAlertsRequest>,
+    ) -> Result<xidl_rust_axum::stream::SseStream<String>, xidl_rust_axum::Error> {
+        let district = req.data.district;
+        let lang = req.data.lang;
+        let stream = xidl_rust_axum::futures_util::stream::iter(vec![
+            Ok(format!("{district}:ALERT:1:{lang}")),
+            Ok(format!("{district}:ALERT:2:{lang}")),
+        ]);
+        Ok(xidl_rust_axum::stream::boxed_sse(stream))
+    }
+
+    async fn ticker(
+        &self,
+        _req: xidl_rust_axum::Request<()>,
+    ) -> Result<xidl_rust_axum::stream::SseStream<String>, xidl_rust_axum::Error> {
+        let stream = xidl_rust_axum::futures_util::stream::iter(vec![
+            Ok("tick-1".to_string()),
+            Ok("tick-2".to_string()),
+        ]);
+        Ok(xidl_rust_axum::stream::boxed_sse(stream))
+    }
+
+    async fn get_attribute_maintenance_mode(
+        &self,
+        _xidl_auth: xidl_rust_axum::auth::basic::BasicAuth,
+    ) -> Result<bool, xidl_rust_axum::Error> {
+        Ok(false)
+    }
+
+    async fn set_attribute_maintenance_mode(
+        &self,
+        _maintenance_mode: bool,
+        _xidl_auth: xidl_rust_axum::auth::basic::BasicAuth,
+    ) -> Result<(), xidl_rust_axum::Error> {
+        Ok(())
+    }
+
+    async fn upload_asset(
+        &self,
+        req: xidl_rust_axum::Request<CityRestStreamApiUploadAssetAuthRequest>,
+    ) -> Result<String, xidl_rust_axum::Error> {
+        let req = req.into_inner();
+        let _auth = req.xidl_auth;
+        let mut stream = req.data;
+        let mut asset_id = String::new();
+        let mut total = 0usize;
+        while let Some(item) = xidl_rust_axum::futures_util::StreamExt::next(&mut stream).await {
+            let item = item?;
+            if asset_id.is_empty() {
+                asset_id = item.asset_id;
+            }
+            total += item.chunk.len();
+        }
+        Ok(format!("uploaded:{asset_id}:{total}"))
+    }
+
+    async fn chat(
+        &self,
+        req: xidl_rust_axum::Request<CityRestStreamApiChatAuthRequest>,
+    ) -> Result<(), xidl_rust_axum::Error> {
+        let req = req.into_inner();
+        let _auth = req.xidl_auth;
+        let mut stream = req.data;
+        while let Some(item) = stream.read().await {
+            let item = item?;
+            stream
+                .write(CityRestStreamApiChatResponse {
+                    from: "server".to_string(),
+                    text: format!("echo:{}:{}", item.room, item.message),
+                })
+                .await?;
+        }
+        stream.close();
+        Ok(())
+    }
+}

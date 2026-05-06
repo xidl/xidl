@@ -51,8 +51,8 @@
     <text id="lang-1" x="375" y="0" class="oc-value cycle">go</text>
     <text id="lang-2" x="375" y="0" class="oc-value cycle">python</text>
     <text id="lang-3" x="375" y="0" class="oc-value cycle">rust-axum</text>
-    <text id="lang-4" x="375" y="0" class="oc-value cycle">go-http</text>
+    <text id="lang-4" x="375" y="0" class="oc-value cycle">go-rest</text>
     <text id="lang-5" x="375" y="0" class="oc-value cycle">openapi</text>
     <text id="lang-6" x="375" y="0" class="oc-value cycle">openrpc</text>
-    <text id="lang-7" x="375" y="0" class="oc-value cycle">python-http</text>  </g>
+    <text id="lang-7" x="375" y="0" class="oc-value cycle">python-rest</text>  </g>
 </svg>

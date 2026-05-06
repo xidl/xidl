@@ -32,7 +32,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-http"
+	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-rest"
 	"net/http"
 	"net/url"
 	"strings"

@@ -107,8 +107,8 @@ impl Generator {
     ) -> IdlcResult<Vec<File>> {
         match artifact.tag() {
             ArtifactKind::Hir => self.expand_hir_artifact(artifact, input, properties).await,
-            ArtifactKind::HttpHir => {
-                self.expand_http_hir_artifact(artifact, input, properties)
+            ArtifactKind::RestHir => {
+                self.expand_rest_hir_artifact(artifact, input, properties)
                     .await
             }
             ArtifactKind::JsonRpcHir => {
@@ -137,18 +137,18 @@ impl Generator {
         .await
     }
 
-    async fn expand_http_hir_artifact(
+    async fn expand_rest_hir_artifact(
         &mut self,
         artifact: Artifact,
         input: &Path,
         properties: &HashMap<String, serde_json::Value>,
     ) -> IdlcResult<Vec<File>> {
-        let data = artifact.into_http_hir();
+        let data = artifact.into_rest_hir();
         let mut props = properties.clone();
         props.extend(data.props);
         Box::pin(self.generate_for_lang(
             &data.lang,
-            CodegenInput::new_http_hir(data.http_hir),
+            CodegenInput::new_rest_hir(data.rest_hir),
             input,
             props,
         ))

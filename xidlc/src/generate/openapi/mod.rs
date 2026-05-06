@@ -15,7 +15,7 @@ use serde_json::Value;
 use std::collections::HashMap;
 use xidl_parser::hir;
 use xidl_parser::hir::ParserProperties;
-use xidl_parser::http_hir::HttpHirDocument;
+use xidl_parser::rest_hir::RestHirDocument;
 
 pub(crate) struct OpenApiCodegen;
 
@@ -38,8 +38,8 @@ impl crate::jsonrpc::Codegen for OpenApiCodegen {
         _path: String,
         _props: ParserProperties,
     ) -> Result<Vec<Artifact>, xidl_jsonrpc::Error> {
-        let http_hir = input_hir.into_http_hir();
-        let openapi = render_openapi_json(&http_hir.spec, &http_hir)?;
+        let rest_hir = input_hir.into_rest_hir();
+        let openapi = render_openapi_json(&rest_hir.spec, &rest_hir)?;
         let content = serde_json::to_string_pretty(&openapi)?;
         Ok(vec![Artifact::new_file(ArtifactFile {
             path: "openapi.json".to_string(),
@@ -50,9 +50,9 @@ impl crate::jsonrpc::Codegen for OpenApiCodegen {
 
 fn render_openapi_json(
     spec: &hir::Specification,
-    http_hir: &HttpHirDocument,
+    rest_hir: &RestHirDocument,
 ) -> Result<Value, serde_json::Error> {
-    let ctx = render_openapi(spec, http_hir);
+    let ctx = render_openapi(spec, rest_hir);
     let version = select_openapi_version(&ctx);
     let mut value = serde_json::to_value(ctx.document)?;
     if let Some(openapi) = value.get_mut("openapi") {
@@ -72,9 +72,9 @@ fn select_openapi_version(ctx: &RenderedOpenApi) -> &'static str {
     }
 }
 
-/// Renders an OpenAPI document from an XIDL specification and projected HTTP HIR.
-pub fn render_openapi(spec: &hir::Specification, http_hir: &HttpHirDocument) -> RenderedOpenApi {
-    let ctx = context::OpenApiContext::new(http_hir).collect(spec, &[], http_hir);
+/// Renders an OpenAPI document from an XIDL specification and projected REST HIR.
+pub fn render_openapi(spec: &hir::Specification, rest_hir: &RestHirDocument) -> RenderedOpenApi {
+    let ctx = context::OpenApiContext::new(rest_hir).collect(spec, &[], rest_hir);
     let mut components = crate::openapi::ComponentsBuilder::new();
     for (name, schema) in ctx.schemas {
         components = components.schema(name, schema);

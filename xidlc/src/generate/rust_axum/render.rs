@@ -4,7 +4,7 @@ use convert_case::Casing;
 use include_dir::{Dir, include_dir};
 use minijinja::{Environment, Error, ErrorKind};
 use serde::Serialize;
-use xidl_parser::http_hir::HttpHirDocument;
+use xidl_parser::rest_hir::RestHirDocument;
 
 static TEMPLATES: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/src/generate/rust_axum/templates");
 
@@ -19,7 +19,7 @@ pub trait RustAxumRender {
 
 pub struct RustAxumRenderer {
     env: Environment<'static>,
-    http_hir: Option<HttpHirDocument>,
+    rest_hir: Option<RestHirDocument>,
 }
 
 impl RustAxumRenderer {
@@ -31,7 +31,7 @@ impl RustAxumRenderer {
         env.add_filter("to_case", to_case);
         Ok(Self {
             env,
-            http_hir: None,
+            rest_hir: None,
         })
     }
 
@@ -46,17 +46,17 @@ impl RustAxumRenderer {
     pub fn extend(
         &mut self,
         props: &std::collections::HashMap<String, serde_json::Value>,
-        http_hir: HttpHirDocument,
+        rest_hir: RestHirDocument,
     ) {
-        self.http_hir = Some(http_hir);
+        self.rest_hir = Some(rest_hir);
         self.env
             .add_global("opt", minijinja::Value::from_serialize(props));
     }
 
-    pub fn http_hir(&self) -> IdlcResult<HttpHirDocument> {
-        self.http_hir
+    pub fn rest_hir(&self) -> IdlcResult<RestHirDocument> {
+        self.rest_hir
             .clone()
-            .ok_or_else(|| IdlcError::rpc("missing http_hir in rust axum renderer".to_string()))
+            .ok_or_else(|| IdlcError::rpc("missing rest_hir in rust axum renderer".to_string()))
     }
 }
 

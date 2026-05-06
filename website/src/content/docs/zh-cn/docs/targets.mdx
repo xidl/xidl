@@ -18,13 +18,13 @@ description: "XIDL 内建目标、别名、典型输出和常见搭配。"
 | `rust-axum` | `rust_axum`, `axum`, `rs_axum`, `rs-axum` | Rust HTTP / Stream 绑定 | `xidl-rust-axum` |
 | `typescript` | `ts` | TypeScript 声明和 Schema | 前端或工具链 |
 | `go` | `golang` | Go 类型或辅助代码 | Go 项目 |
-| `go-http` | `go_http` | Go HTTP 绑定 | Go HTTP 服务 |
+| `go-rest` | `go_rest` | Go HTTP 绑定 | Go HTTP 服务 |
 | `python` | `py` | Python 代码生成 | Python 项目 |
-| `python-http` | `py_http`, `python_http` | Python HTTP 绑定 | Python HTTP 服务 |
+| `python-rest` | `py_rest`, `python_rest` | Python HTTP 绑定 | Python HTTP 服务 |
 | `openapi` | 无 | `openapi.json` | 文档和下游消费 |
 | `openrpc` | `open-rpc` | `openrpc.json` | JSON-RPC 文档 |
 | `hir` | 无 | HIR 中间产物 | 调试和高级工具 |
-| `http-hir` | `http_hir` | HTTP HIR 中间产物 | HTTP 调试与工具 |
+| `rest-hir` | `rest_hir` | REST HIR 中间产物 | HTTP 调试与工具 |
 | `typed-ast` | `typed_ast` | 类型化 AST | 调试和高级工具 |
 
 ## `--client` 和 `--server`
@@ -39,11 +39,11 @@ description: "XIDL 内建目标、别名、典型输出和常见搭配。"
 ## 什么时候选哪个目标
 
 - 你只要数据结构：选 `rust`、`typescript`、`go`、`python`
-- 你要 HTTP 服务能力：选 `rust-axum`、`go-http`、`python-http`
+- 你要 HTTP 服务能力：选 `rust-axum`、`go-rest`、`python-rest`
 - 你要 JSON-RPC：选 `rust-jsonrpc`
 - 你要对外发布 HTTP 契约：选 `openapi`
 - 你要对外发布 JSON-RPC 契约：选 `openrpc`
-- 你在调试内部表示：选 `hir`、`http-hir`、`typed-ast`
+- 你在调试内部表示：选 `hir`、`rest-hir`、`typed-ast`
 
 ## Schema 单文件输出
 
