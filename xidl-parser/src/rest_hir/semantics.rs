@@ -78,10 +78,21 @@ fn validate_rest_media_types(target: &str, annotations: &[hir::Annotation]) -> R
         let Some(name) = annotation_name(annotation) else {
             continue;
         };
-        if !name.eq_ignore_ascii_case("Consumes") && !name.eq_ignore_ascii_case("Produces") {
+        let canonical = if annotations::media_type_annotation_aliases("Consumes")
+            .iter()
+            .any(|alias| name.eq_ignore_ascii_case(alias))
+        {
+            "Consumes"
+        } else if annotations::media_type_annotation_aliases("Produces")
+            .iter()
+            .any(|alias| name.eq_ignore_ascii_case(alias))
+        {
+            "Produces"
+        } else {
             continue;
-        }
-        let Some(value) = annotations::annotation_value(std::slice::from_ref(annotation), name)
+        };
+        let Some(value) =
+            annotations::annotation_value(std::slice::from_ref(annotation), canonical)
         else {
             continue;
         };

@@ -97,3 +97,57 @@ fn render_openapi_json_uses_32_and_item_schema_for_streams() {
     assert!(client_content.get("itemSchema").is_some());
     assert!(client_content.get("schema").is_none());
 }
+
+#[test]
+fn render_openapi_json_preserves_text_plain_content_types() {
+    let spec = parse_spec(
+        r#"
+        interface PlainTextApi {
+          @route(method="POST", path="/echo")
+          @Consumes("text/plain")
+          @Produces("text/plain")
+          string echo(in string body);
+        };
+        "#,
+    );
+    let doc = render_openapi_json_from_spec(&spec).expect("render openapi json");
+
+    let request_content = &doc["paths"]["/echo"]["post"]["requestBody"]["content"];
+    assert!(request_content.get("text/plain").is_some());
+    assert!(request_content.get("application/json").is_none());
+    assert_eq!(
+        request_content["text/plain"]["schema"]["type"],
+        serde_json::Value::String("string".to_string())
+    );
+
+    let response_content = &doc["paths"]["/echo"]["post"]["responses"]["200"]["content"];
+    assert!(response_content.get("text/plain").is_some());
+    assert!(response_content.get("application/json").is_none());
+    assert_eq!(
+        response_content["text/plain"]["schema"]["type"],
+        serde_json::Value::String("string".to_string())
+    );
+}
+
+#[test]
+fn render_openapi_json_uses_produce_alias_for_get_response_content_type() {
+    let spec = parse_spec(
+        r#"
+        interface HttpService {
+          @Consume("text/plain")
+          @Produce("text/plain")
+          @get(path = "/ip")
+          string get_ip();
+        };
+        "#,
+    );
+    let doc = render_openapi_json_from_spec(&spec).expect("render openapi json");
+
+    let response_content = &doc["paths"]["/ip"]["get"]["responses"]["200"]["content"];
+    assert!(response_content.get("text/plain").is_some());
+    assert!(response_content.get("application/json").is_none());
+    assert_eq!(
+        response_content["text/plain"]["schema"]["type"],
+        serde_json::Value::String("string".to_string())
+    );
+}
