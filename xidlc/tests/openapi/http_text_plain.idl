@@ -1,0 +1,9 @@
+#pragma xidlc package xidlc
+#pragma xidlc version v1.0.0
+
+interface HttpTextPlainService {
+    @route(method="POST", path="/echo")
+    @Consumes("text/plain")
+    @Produces("text/plain")
+    string echo(in string body);
+};

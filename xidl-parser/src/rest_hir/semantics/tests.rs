@@ -38,7 +38,10 @@ fn deprecated_info_normalizes_dates_and_validates_ranges() {
 fn validate_http_annotations_checks_security_and_media_type() {
     validate_http_annotations(
         "operation 'ok'",
-        &[builtin("Consumes", r#""application/json""#)],
+        &[
+            builtin("Consume", r#""application/json""#),
+            builtin("Produce", r#""text/plain""#),
+        ],
     )
     .expect("valid annotation set");
 

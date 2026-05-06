@@ -86,16 +86,41 @@ pub fn effective_media_type(
 pub(crate) fn annotation_value(annotations: &[hir::Annotation], target: &str) -> Option<String> {
     annotations.iter().find_map(|annotation| {
         let name = annotation_name(annotation)?;
-        if !name.eq_ignore_ascii_case(target) {
+        if !media_type_annotation_matches(name, target) {
             return None;
         }
         let params = annotation_params(annotation)?;
         let params = normalize_annotation_params(params);
-        params
-            .get("value")
-            .cloned()
-            .or_else(|| params.get(target).cloned())
+        params.get("value").cloned().or_else(|| {
+            media_type_annotation_param_keys(target)
+                .iter()
+                .find_map(|alias| params.get(&alias.to_ascii_lowercase()).cloned())
+        })
     })
+}
+
+pub(crate) fn media_type_annotation_aliases(target: &str) -> &'static [&'static str] {
+    if target.eq_ignore_ascii_case("Consumes") || target.eq_ignore_ascii_case("Consume") {
+        &["Consumes", "Consume"]
+    } else if target.eq_ignore_ascii_case("Produces") || target.eq_ignore_ascii_case("Produce") {
+        &["Produces", "Produce"]
+    } else {
+        &[]
+    }
+}
+
+fn media_type_annotation_matches(name: &str, target: &str) -> bool {
+    if target.eq_ignore_ascii_case("Consumes") || target.eq_ignore_ascii_case("Consume") {
+        name.eq_ignore_ascii_case("Consumes") || name.eq_ignore_ascii_case("Consume")
+    } else if target.eq_ignore_ascii_case("Produces") || target.eq_ignore_ascii_case("Produce") {
+        name.eq_ignore_ascii_case("Produces") || name.eq_ignore_ascii_case("Produce")
+    } else {
+        name.eq_ignore_ascii_case(target)
+    }
+}
+
+fn media_type_annotation_param_keys(target: &str) -> &'static [&'static str] {
+    media_type_annotation_aliases(target)
 }
 
 pub(crate) fn parse_string_array(raw: &str) -> Vec<String> {

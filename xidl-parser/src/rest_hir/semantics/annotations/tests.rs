@@ -55,7 +55,7 @@ fn normalize_annotation_params_handles_all_param_forms() {
 #[test]
 fn media_type_resolution_prefers_method_and_falls_back_to_default() {
     let interface = vec![builtin(
-        "Consumes",
+        "Consume",
         Some(AnnotationParams::Raw("\"application/msgpack\"".to_string())),
     )];
     let method = vec![builtin(
@@ -73,5 +73,16 @@ fn media_type_resolution_prefers_method_and_falls_back_to_default() {
     assert_eq!(
         annotation_value(&interface, "Consumes").as_deref(),
         Some("application/msgpack")
+    );
+    assert_eq!(
+        annotation_value(
+            &[builtin(
+                "Produce",
+                Some(AnnotationParams::Raw("\"text/plain\"".to_string()))
+            )],
+            "Produces"
+        )
+        .as_deref(),
+        Some("text/plain")
     );
 }
