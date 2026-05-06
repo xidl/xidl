@@ -2,6 +2,7 @@ import netlify from '@astrojs/netlify';
 import starlight from '@astrojs/starlight';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
+import idlLanguage from './src/shiki/idl.mjs';
 
 // https://astro.build/config
 export default defineConfig({
@@ -15,6 +16,14 @@ export default defineConfig({
       },
       customCss: ['./src/styles/global.css'],
       defaultLocale: 'root',
+      expressiveCode: {
+        shiki: {
+          langAlias: {
+            xidl: 'idl',
+          },
+          langs: [idlLanguage],
+        },
+      },
       locales: {
         root: {
           label: 'English',
