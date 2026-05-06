@@ -1,0 +1,22 @@
+---
+title: "RESTful 流式接口"
+description: "XIDL RESTful 流式接口"
+sidebar:
+  badge: PREVIEW
+---
+
+HTTP Stream 在普通 HTTP 映射上扩展长连接流式交互。
+
+当前常见注解：
+
+- `@server_stream`
+- `@client_stream`
+- `@bidi_stream`
+- `@stream_codec("ndjson" | "sse")`
+
+实践上：
+
+- 服务器推流最常见
+- `ndjson` 是默认流编码
+- `sse` 主要用于服务端流
+- 这部分能力存在，但比普通 HTTP 映射更偏实现驱动

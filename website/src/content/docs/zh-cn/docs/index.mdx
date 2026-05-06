@@ -1,33 +1,75 @@
 ---
-title: "详细文档"
-description: "XIDL 的详细说明、语法说明和参考资料。"
+title: "语言基础"
+description: "XIDL 的语言基础"
 ---
 
-# 详细文档
+## 枚举
 
-如果说[指南](../guide/)解决的是“怎么开始”，那么本节解决的是“怎么用清楚”。
+```idl
+enum Color {
+    Red,
+    Green,
+    Blue
+};
+```
 
-## 本节包含什么
+## 结构体
 
-- [使用 xidlc](./xidlc/)：CLI 的心智模型、常见工作流和常用参数
-- [IDL 语言](./idl/)：XIDL 支持的语言结构、类型、方向和基础规则
-- [HTTP](./http/)：HTTP 家族的实践说明
-- [JSON-RPC](./jsonrpc/)：JSON-RPC 家族的实践说明
-- [目标生成器](./targets/)：可选目标、别名、典型输出和配套运行时
-- [注解](./annotations/)：常用注解和适用范围
-- [Pragma](./pragmas/)：`#pragma xidlc ...` 指令
-- [Rust 集成](./rust-integration/)：Rust 项目中的接入方式
+```idl
+struct Point {
+    uint32 x;
+    uint32 y;
+};
+```
 
-## 怎么使用这一节
+## 接口
 
-- 你已经跑通 Quick Start：从 `xidlc`、`IDL`、`HTTP` 开始
-- 你在查一个具体语法或行为：直接跳到对应页面
-- 你需要精确规则：从这里跳转到相应 RFC
+```idl
+interface ILogger {
+    void log(string message);
+};
+```
 
-## 这一节不做什么
+## 注解
 
-- 不承担产品宣传入口
-- 不强行按新手路径组织
-- 不替代 RFC 的规范性角色
+```idl
+struct Point {
+    uint32 x;
+    @optional
+    uint32 y;
+};
+```
 
-简单说：指南负责带路，详细文档负责解释，RFC 负责定规则。
+## 容器
+
+```idl
+struct Container {
+    sequence<string> names;
+    map<string, uint32> name_to_id;
+};
+```
+
+## Union
+
+```idl
+enum Color {
+    Red,
+    Green,
+    Blue
+};
+
+union ColorPoint switch(Color) {
+    case Red:
+        uint32 red_x;
+        uint32 red_y;
+    case Green:
+        uint32 green_x;
+        uint32 green_y;
+    case Blue:
+        uint32 blue_x;
+        uint32 blue_y;
+    default:
+        uint32 default_x;
+        uint32 default_y;
+};
+```
