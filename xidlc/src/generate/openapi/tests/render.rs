@@ -33,6 +33,7 @@ fn schema_for_struct_applies_doc_to_fields() {
         ))],
         default: None,
         field_id: None,
+        recursive: false,
     };
     let schema = schema::schema_for_struct(&[member]);
     let RefOr::T(Schema::Object(object)) = schema else {

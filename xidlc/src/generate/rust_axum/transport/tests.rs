@@ -20,6 +20,7 @@ fn widget_struct() -> StructDcl {
                 ))],
                 default: None,
                 field_id: None,
+                recursive: false,
             },
             Member {
                 annotations: vec![],
@@ -29,6 +30,7 @@ fn widget_struct() -> StructDcl {
                 ))],
                 default: None,
                 field_id: None,
+                recursive: false,
             },
         ],
     }

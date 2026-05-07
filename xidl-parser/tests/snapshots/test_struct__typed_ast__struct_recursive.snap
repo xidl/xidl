@@ -1,0 +1,143 @@
+---
+source: xidl-parser/tests/test-struct.rs
+assertion_line: 52
+expression: ast
+---
+Specification(
+    [
+        TypeDcl(
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructForwardDcl(
+                            StructForwardDcl {
+                                ident: Identifier(
+                                    "Node",
+                                ),
+                            },
+                        ),
+                    ),
+                ),
+            },
+        ),
+        TypeDcl(
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    StructDcl(
+                        StructDef(
+                            StructDef {
+                                ident: Identifier(
+                                    "Node",
+                                ),
+                                parent: [],
+                                member: [
+                                    Member {
+                                        annotations: [],
+                                        ty: SimpleTypeSpec(
+                                            ScopedName(
+                                                ScopedName {
+                                                    scoped_name: None,
+                                                    identifier: Identifier(
+                                                        "Node",
+                                                    ),
+                                                    node_text: "Node",
+                                                },
+                                            ),
+                                        ),
+                                        ident: Declarators(
+                                            [
+                                                SimpleDeclarator(
+                                                    SimpleDeclarator(
+                                                        Identifier(
+                                                            "next",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ],
+                                        ),
+                                        default: None,
+                                    },
+                                    Member {
+                                        annotations: [
+                                            AnnotationAppl {
+                                                name: Builtin(
+                                                    "optional",
+                                                ),
+                                                params: None,
+                                                builtin: Some(
+                                                    Optional {
+                                                        value: None,
+                                                    },
+                                                ),
+                                                is_extend: false,
+                                                extra: [],
+                                            },
+                                        ],
+                                        ty: SimpleTypeSpec(
+                                            ScopedName(
+                                                ScopedName {
+                                                    scoped_name: None,
+                                                    identifier: Identifier(
+                                                        "Node",
+                                                    ),
+                                                    node_text: "Node",
+                                                },
+                                            ),
+                                        ),
+                                        ident: Declarators(
+                                            [
+                                                SimpleDeclarator(
+                                                    SimpleDeclarator(
+                                                        Identifier(
+                                                            "prev",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ],
+                                        ),
+                                        default: None,
+                                    },
+                                    Member {
+                                        annotations: [],
+                                        ty: TemplateTypeSpec(
+                                            SequenceType(
+                                                SequenceType {
+                                                    ty: SimpleTypeSpec(
+                                                        ScopedName(
+                                                            ScopedName {
+                                                                scoped_name: None,
+                                                                identifier: Identifier(
+                                                                    "Node",
+                                                                ),
+                                                                node_text: "Node",
+                                                            },
+                                                        ),
+                                                    ),
+                                                    len: None,
+                                                },
+                                            ),
+                                        ),
+                                        ident: Declarators(
+                                            [
+                                                SimpleDeclarator(
+                                                    SimpleDeclarator(
+                                                        Identifier(
+                                                            "children",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ],
+                                        ),
+                                        default: None,
+                                    },
+                                ],
+                            },
+                        ),
+                    ),
+                ),
+            },
+        ),
+    ],
+)

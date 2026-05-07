@@ -22,6 +22,7 @@ pub struct Member {
     pub ident: Vec<Declarator>,
     pub default: Option<Default>,
     pub field_id: Option<u32>,
+    pub recursive: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -72,6 +73,7 @@ impl From<crate::typed_ast::Member> for Member {
             ident: value.ident.0.into_iter().map(Into::into).collect(),
             default: value.default.map(Into::into),
             field_id,
+            recursive: false,
         }
     }
 }

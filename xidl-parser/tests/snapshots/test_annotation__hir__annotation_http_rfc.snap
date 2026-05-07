@@ -95,6 +95,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -132,6 +133,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -215,6 +217,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -247,6 +250,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -330,6 +334,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                             Member {
                                 annotations: [],
@@ -349,6 +354,7 @@ Specification(
                                 field_id: Some(
                                     2,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -381,6 +387,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -469,6 +476,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -501,6 +509,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -772,6 +781,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                             Member {
                                 annotations: [],
@@ -794,6 +804,7 @@ Specification(
                                 field_id: Some(
                                     2,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -1014,6 +1025,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                             Member {
                                 annotations: [],
@@ -1036,6 +1048,7 @@ Specification(
                                 field_id: Some(
                                     2,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
