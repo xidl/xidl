@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.56.0](https://github.com/xidl/xidl/compare/v0.55.0...v0.56.0) (2026-05-07)
+
+
+### Features
+
+* **xidl-parser:** add recursive type semantic analysis ([905dc4a](https://github.com/xidl/xidl/commit/905dc4a4ec90ae9dd008c8f34f8ee2665aee6219))
+
 ## [0.55.0](https://github.com/xidl/xidl/compare/v0.54.0...v0.55.0) (2026-05-07)
 
 
