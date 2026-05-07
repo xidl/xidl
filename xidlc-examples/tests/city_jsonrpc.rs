@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use xidlc_examples::city_jsonrpc::{
     SmartCityRpcApi, SmartCityRpcApiClient, SmartCityRpcApiServer, SmartCityRpcService,
 };
@@ -5,7 +7,9 @@ use xidlc_examples::city_jsonrpc::{
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn jsonrpc_client_calls_all_endpoints() {
     let server = xidl_jsonrpc::Server::builder()
-        .with_service(SmartCityRpcApiServer::new(SmartCityRpcService::default()))
+        .with_service(SmartCityRpcApiServer::from_arc(Arc::new(
+            SmartCityRpcService::default(),
+        )))
         .with_endpoint("tcp://127.0.0.1:0")
         .build()
         .await

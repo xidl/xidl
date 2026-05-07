@@ -8,19 +8,22 @@ struct ServerBinding {
     endpoint: Option<String>,
 }
 
+/// Builder for composing one or more JSON-RPC handlers into a server.
 pub struct ServerBuilder {
     listener: Option<Box<dyn Listener>>,
     endpoint: Option<String>,
-    services: Vec<Box<dyn crate::Handler>>,
+    services: Vec<Arc<dyn crate::Handler>>,
 }
 
+/// JSON-RPC server bound to a transport listener.
 pub struct Server {
     listener: Box<dyn Listener>,
     endpoint: Option<String>,
-    services: Vec<Box<dyn crate::Handler>>,
+    services: Vec<Arc<dyn crate::Handler>>,
 }
 
 impl Server {
+    /// Creates a new server builder.
     pub fn builder() -> ServerBuilder {
         ServerBuilder {
             listener: None,
@@ -29,10 +32,12 @@ impl Server {
         }
     }
 
+    /// Returns the bound endpoint, when available.
     pub fn endpoint(&self) -> Option<&str> {
         self.endpoint.as_deref()
     }
 
+    /// Serves incoming connections until the listener stops accepting streams.
     pub async fn serve(self) -> Result<(), Error> {
         let handler = Arc::new(MultiHandler::new(self.services));
         loop {
@@ -57,6 +62,7 @@ impl Server {
 }
 
 impl ServerBuilder {
+    /// Uses an existing listener for the server.
     pub fn with_listener<L>(mut self, listener: L) -> Self
     where
         L: Listener + 'static,
@@ -65,19 +71,22 @@ impl ServerBuilder {
         self
     }
 
+    /// Binds the server to an endpoint string handled by `xidl_jsonrpc`.
     pub fn with_endpoint(mut self, endpoint: impl Into<String>) -> Self {
         self.endpoint = Some(endpoint.into());
         self
     }
 
+    /// Adds a handler service to the server.
     pub fn with_service<S>(mut self, service: S) -> Self
     where
         S: crate::Handler + 'static,
     {
-        self.services.push(Box::new(service));
+        self.services.push(Arc::new(service));
         self
     }
 
+    /// Serves requests over an existing stream by wrapping it in a listener.
     pub fn with_stream<S>(self, stream: S) -> Self
     where
         S: Stream + Unpin + Send + 'static,
@@ -85,7 +94,7 @@ impl ServerBuilder {
         self.with_listener(IoListener::from_stream(stream))
     }
 
-    async fn resolve_binding(self) -> Result<(ServerBinding, Vec<Box<dyn crate::Handler>>), Error> {
+    async fn resolve_binding(self) -> Result<(ServerBinding, Vec<Arc<dyn crate::Handler>>), Error> {
         if self.listener.is_some() && self.endpoint.is_some() {
             return Err(Error::Protocol("listener already set"));
         }
@@ -108,6 +117,7 @@ impl ServerBuilder {
         Ok((binding, self.services))
     }
 
+    /// Builds a server from the configured listener or endpoint.
     pub async fn build(self) -> Result<Server, Error> {
         let (binding, services) = self.resolve_binding().await?;
 
@@ -118,6 +128,7 @@ impl ServerBuilder {
         })
     }
 
+    /// Binds and builds a server on the given endpoint.
     pub async fn build_on<S>(self, endpoint: S) -> Result<Server, Error>
     where
         S: AsRef<str>,
@@ -125,10 +136,12 @@ impl ServerBuilder {
         self.with_endpoint(endpoint.as_ref()).build().await
     }
 
+    /// Builds and immediately serves the configured server.
     pub async fn serve(self) -> Result<(), Error> {
         self.build().await?.serve().await
     }
 
+    /// Binds, builds, and immediately serves the server on the endpoint.
     pub async fn serve_on<S>(self, endpoint: S) -> Result<(), Error>
     where
         S: AsRef<str>,

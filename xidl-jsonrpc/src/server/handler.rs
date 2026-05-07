@@ -2,14 +2,18 @@ use crate::Error;
 use serde_json::Value;
 use std::sync::Arc;
 
+/// Trait implemented by JSON-RPC handler services.
 #[async_trait::async_trait]
 pub trait Handler: Send + Sync {
+    /// Handles a unary JSON-RPC request.
     async fn handle(&self, method: &str, params: Value) -> Result<Value, Error>;
 
+    /// Returns whether the handler accepts bidirectional streaming for `method`.
     fn accepts_bidi(&self, _method: &str) -> bool {
         false
     }
 
+    /// Handles a bidirectional JSON-RPC stream for `method`.
     async fn handle_bidi(
         &self,
         method: &str,
@@ -44,11 +48,11 @@ where
 }
 
 pub(crate) struct MultiHandler {
-    services: Vec<Box<dyn Handler>>,
+    services: Vec<Arc<dyn Handler>>,
 }
 
 impl MultiHandler {
-    pub(crate) fn new(services: Vec<Box<dyn Handler>>) -> Self {
+    pub(crate) fn new(services: Vec<Arc<dyn Handler>>) -> Self {
         Self { services }
     }
 

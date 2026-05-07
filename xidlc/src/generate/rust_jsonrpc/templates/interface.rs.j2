@@ -44,12 +44,19 @@ pub trait {{ ident }} {
     {% endif %}
 {% endfor %}
 
+#[derive(Clone)]
 pub struct {{ ident }}Server<T> {
-    inner: T,
+    inner: ::std::sync::Arc<T>,
 }
 
 impl<T> {{ ident }}Server<T> {
     pub fn new(inner: T) -> Self {
+        Self {
+            inner: ::std::sync::Arc::new(inner),
+        }
+    }
+
+    pub fn from_arc(inner: ::std::sync::Arc<T>) -> Self {
         Self { inner }
     }
 }
@@ -57,7 +64,7 @@ impl<T> {{ ident }}Server<T> {
 #[async_trait::async_trait]
 impl<T> xidl_jsonrpc::Handler for {{ ident }}Server<T>
 where
-T: {{ ident }} + Send + Sync,
+T: {{ ident }} + Send + Sync + 'static,
 {
     #[allow(clippy::match_single_binding)]
     async fn handle(&self, method: &str, params: ::serde_json::Value) -> Result<::serde_json::Value, xidl_jsonrpc::Error> {
