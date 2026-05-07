@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.55.0](https://github.com/xidl/xidl/compare/v0.54.0...v0.55.0) (2026-05-07)
+
+
+### Features
+
+* **xidl-build:** expose more option ([aeb035b](https://github.com/xidl/xidl/commit/aeb035b13d8fec565cd3ce6d3adf75f5df410439))
+
+
+### Bug Fixes
+
+* **jsonrpc:** generate arc-backed service servers ([0f1a2ca](https://github.com/xidl/xidl/commit/0f1a2ca65469aa944f9fd297d067e55644df0dd3))
+
 ## [0.54.0](https://github.com/xidl/xidl/compare/v0.53.1...v0.54.0) (2026-05-06)
 
 
