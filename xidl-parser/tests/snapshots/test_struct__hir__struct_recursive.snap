@@ -1,0 +1,110 @@
+---
+source: xidl-parser/tests/test-struct.rs
+assertion_line: 62
+expression: hir
+---
+Specification(
+    [
+        TypeDcl(
+            ConstrTypeDcl(
+                StructForwardDcl(
+                    StructForwardDcl {
+                        annotations: [],
+                        ident: "Node",
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "Node",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "Node",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "next",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                                recursive: true,
+                            },
+                            Member {
+                                annotations: [
+                                    Optional {
+                                        value: None,
+                                    },
+                                ],
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "Node",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "prev",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    2,
+                                ),
+                                recursive: true,
+                            },
+                            Member {
+                                annotations: [],
+                                ty: SequenceType(
+                                    SequenceType {
+                                        ty: ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "Node",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                        len: None,
+                                    },
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "children",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    3,
+                                ),
+                                recursive: false,
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+    ],
+)

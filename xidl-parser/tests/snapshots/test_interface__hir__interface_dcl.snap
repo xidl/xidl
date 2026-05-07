@@ -489,6 +489,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -526,6 +527,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -614,6 +616,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -651,513 +654,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
-                            },
-                        ],
-                    },
-                ),
-            ),
-        ),
-        TypeDcl(
-            ConstrTypeDcl(
-                UnionDef(
-                    UnionDef {
-                        annotations: [],
-                        ident: "A_func1_Result",
-                        switch_type_spec: IntegerType(
-                            I32,
-                        ),
-                        case: [
-                            Case {
-                                label: [
-                                    Value(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "dds",
-                                                    "RETCODE_OK",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                ],
-                                element: ElementSpec {
-                                    annotations: [],
-                                    ty: TypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_func1_Out",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    value: SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "result",
-                                        ),
-                                    ),
-                                    field_id: Some(
-                                        1,
-                                    ),
-                                },
-                            },
-                            Case {
-                                label: [
-                                    Value(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_Ex_Hash",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                ],
-                                element: ElementSpec {
-                                    annotations: [],
-                                    ty: TypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    value: SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "a_ex",
-                                        ),
-                                    ),
-                                    field_id: Some(
-                                        2,
-                                    ),
-                                },
-                            },
-                        ],
-                    },
-                ),
-            ),
-        ),
-        TypeDcl(
-            ConstrTypeDcl(
-                StructDcl(
-                    StructDcl {
-                        annotations: [],
-                        ident: "A_func1_In",
-                        parent: [],
-                        member: [
-                            Member {
-                                annotations: [],
-                                ty: ScopedName(
-                                    ScopedName {
-                                        name: [
-                                            "dds",
-                                            "rpc",
-                                            "UnusedMember",
-                                        ],
-                                        is_root: false,
-                                    },
-                                ),
-                                ident: [
-                                    SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "dummy",
-                                        ),
-                                    ),
-                                ],
-                                default: None,
-                                field_id: Some(
-                                    1,
-                                ),
-                            },
-                        ],
-                    },
-                ),
-            ),
-        ),
-        TypeDcl(
-            ConstrTypeDcl(
-                StructDcl(
-                    StructDcl {
-                        annotations: [],
-                        ident: "A_func1_Out",
-                        parent: [],
-                        member: [
-                            Member {
-                                annotations: [],
-                                ty: ScopedName(
-                                    ScopedName {
-                                        name: [
-                                            "dds",
-                                            "rpc",
-                                            "UnusedMember",
-                                        ],
-                                        is_root: false,
-                                    },
-                                ),
-                                ident: [
-                                    SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "dummy",
-                                        ),
-                                    ),
-                                ],
-                                default: None,
-                                field_id: Some(
-                                    1,
-                                ),
-                            },
-                        ],
-                    },
-                ),
-            ),
-        ),
-        TypeDcl(
-            ConstrTypeDcl(
-                UnionDef(
-                    UnionDef {
-                        annotations: [],
-                        ident: "A_func1_Result",
-                        switch_type_spec: IntegerType(
-                            I32,
-                        ),
-                        case: [
-                            Case {
-                                label: [
-                                    Value(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "dds",
-                                                    "RETCODE_OK",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                ],
-                                element: ElementSpec {
-                                    annotations: [],
-                                    ty: TypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_func1_Out",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    value: SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "result",
-                                        ),
-                                    ),
-                                    field_id: Some(
-                                        1,
-                                    ),
-                                },
-                            },
-                            Case {
-                                label: [
-                                    Value(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_Ex_Hash",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                ],
-                                element: ElementSpec {
-                                    annotations: [],
-                                    ty: TypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    value: SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "a_ex",
-                                        ),
-                                    ),
-                                    field_id: Some(
-                                        2,
-                                    ),
-                                },
-                            },
-                            Case {
-                                label: [
-                                    Value(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "B_Ex_Hash",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                ],
-                                element: ElementSpec {
-                                    annotations: [],
-                                    ty: TypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "B",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    value: SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "b_ex",
-                                        ),
-                                    ),
-                                    field_id: Some(
-                                        3,
-                                    ),
-                                },
-                            },
-                            Case {
-                                label: [
-                                    Value(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "C_Ex_Hash",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                ],
-                                element: ElementSpec {
-                                    annotations: [],
-                                    ty: TypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "C",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    value: SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "c_ex",
-                                        ),
-                                    ),
-                                    field_id: Some(
-                                        4,
-                                    ),
-                                },
-                            },
-                        ],
-                    },
-                ),
-            ),
-        ),
-        TypeDcl(
-            ConstrTypeDcl(
-                StructDcl(
-                    StructDcl {
-                        annotations: [],
-                        ident: "A_func1_In",
-                        parent: [],
-                        member: [
-                            Member {
-                                annotations: [],
-                                ty: ScopedName(
-                                    ScopedName {
-                                        name: [
-                                            "u8",
-                                        ],
-                                        is_root: false,
-                                    },
-                                ),
-                                ident: [
-                                    SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "attr",
-                                        ),
-                                    ),
-                                ],
-                                default: None,
-                                field_id: Some(
-                                    1,
-                                ),
-                            },
-                        ],
-                    },
-                ),
-            ),
-        ),
-        TypeDcl(
-            ConstrTypeDcl(
-                StructDcl(
-                    StructDcl {
-                        annotations: [],
-                        ident: "A_func1_Out",
-                        parent: [],
-                        member: [
-                            Member {
-                                annotations: [],
-                                ty: ScopedName(
-                                    ScopedName {
-                                        name: [
-                                            "u16",
-                                        ],
-                                        is_root: false,
-                                    },
-                                ),
-                                ident: [
-                                    SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "attr",
-                                        ),
-                                    ),
-                                ],
-                                default: None,
-                                field_id: Some(
-                                    1,
-                                ),
-                            },
-                        ],
-                    },
-                ),
-            ),
-        ),
-        TypeDcl(
-            ConstrTypeDcl(
-                UnionDef(
-                    UnionDef {
-                        annotations: [],
-                        ident: "A_func1_Result",
-                        switch_type_spec: IntegerType(
-                            I32,
-                        ),
-                        case: [
-                            Case {
-                                label: [
-                                    Value(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "dds",
-                                                    "RETCODE_OK",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                ],
-                                element: ElementSpec {
-                                    annotations: [],
-                                    ty: TypeSpec(
-                                        ScopedName(
-                                            ScopedName {
-                                                name: [
-                                                    "A_func1_Out",
-                                                ],
-                                                is_root: false,
-                                            },
-                                        ),
-                                    ),
-                                    value: SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "result",
-                                        ),
-                                    ),
-                                    field_id: Some(
-                                        1,
-                                    ),
-                                },
-                            },
-                        ],
-                    },
-                ),
-            ),
-        ),
-        TypeDcl(
-            ConstrTypeDcl(
-                StructDcl(
-                    StructDcl {
-                        annotations: [],
-                        ident: "A_func1_In",
-                        parent: [],
-                        member: [
-                            Member {
-                                annotations: [],
-                                ty: ScopedName(
-                                    ScopedName {
-                                        name: [
-                                            "u8",
-                                        ],
-                                        is_root: false,
-                                    },
-                                ),
-                                ident: [
-                                    SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "attr",
-                                        ),
-                                    ),
-                                ],
-                                default: None,
-                                field_id: Some(
-                                    1,
-                                ),
-                            },
-                        ],
-                    },
-                ),
-            ),
-        ),
-        TypeDcl(
-            ConstrTypeDcl(
-                StructDcl(
-                    StructDcl {
-                        annotations: [],
-                        ident: "A_func1_Out",
-                        parent: [],
-                        member: [
-                            Member {
-                                annotations: [],
-                                ty: ScopedName(
-                                    ScopedName {
-                                        name: [
-                                            "u16",
-                                        ],
-                                        is_root: false,
-                                    },
-                                ),
-                                ident: [
-                                    SimpleDeclarator(
-                                        SimpleDeclarator(
-                                            "attr",
-                                        ),
-                                    ),
-                                ],
-                                default: None,
-                                field_id: Some(
-                                    1,
-                                ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -1263,7 +760,9 @@ Specification(
                                 ty: ScopedName(
                                     ScopedName {
                                         name: [
-                                            "u8",
+                                            "dds",
+                                            "rpc",
+                                            "UnusedMember",
                                         ],
                                         is_root: false,
                                     },
@@ -1271,7 +770,7 @@ Specification(
                                 ident: [
                                     SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "attr",
+                                            "dummy",
                                         ),
                                     ),
                                 ],
@@ -1279,6 +778,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -1298,7 +798,9 @@ Specification(
                                 ty: ScopedName(
                                     ScopedName {
                                         name: [
-                                            "u16",
+                                            "dds",
+                                            "rpc",
+                                            "UnusedMember",
                                         ],
                                         is_root: false,
                                     },
@@ -1306,7 +808,7 @@ Specification(
                                 ident: [
                                     SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "attr",
+                                            "dummy",
                                         ),
                                     ),
                                 ],
@@ -1314,6 +816,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -1481,6 +984,515 @@ Specification(
                 StructDcl(
                     StructDcl {
                         annotations: [],
+                        ident: "A_func1_In",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "u8",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "attr",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                                recursive: false,
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "A_func1_Out",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "u16",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "attr",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                                recursive: false,
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                UnionDef(
+                    UnionDef {
+                        annotations: [],
+                        ident: "A_func1_Result",
+                        switch_type_spec: IntegerType(
+                            I32,
+                        ),
+                        case: [
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "RETCODE_OK",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_func1_Out",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "result",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "A_func1_In",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "u8",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "attr",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                                recursive: false,
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "A_func1_Out",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "u16",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "attr",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                                recursive: false,
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                UnionDef(
+                    UnionDef {
+                        annotations: [],
+                        ident: "A_func1_Result",
+                        switch_type_spec: IntegerType(
+                            I32,
+                        ),
+                        case: [
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "RETCODE_OK",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_func1_Out",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "result",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_Ex_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "a_ex",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        2,
+                                    ),
+                                },
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "A_func1_In",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "u8",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "attr",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                                recursive: false,
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
+                        ident: "A_func1_Out",
+                        parent: [],
+                        member: [
+                            Member {
+                                annotations: [],
+                                ty: ScopedName(
+                                    ScopedName {
+                                        name: [
+                                            "u16",
+                                        ],
+                                        is_root: false,
+                                    },
+                                ),
+                                ident: [
+                                    SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "attr",
+                                        ),
+                                    ),
+                                ],
+                                default: None,
+                                field_id: Some(
+                                    1,
+                                ),
+                                recursive: false,
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                UnionDef(
+                    UnionDef {
+                        annotations: [],
+                        ident: "A_func1_Result",
+                        switch_type_spec: IntegerType(
+                            I32,
+                        ),
+                        case: [
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "dds",
+                                                    "RETCODE_OK",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_func1_Out",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "result",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        1,
+                                    ),
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A_Ex_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "A",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "a_ex",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        2,
+                                    ),
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "B_Ex_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "B",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "b_ex",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        3,
+                                    ),
+                                },
+                            },
+                            Case {
+                                label: [
+                                    Value(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "C_Ex_Hash",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                                element: ElementSpec {
+                                    annotations: [],
+                                    ty: TypeSpec(
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "C",
+                                                ],
+                                                is_root: false,
+                                            },
+                                        ),
+                                    ),
+                                    value: SimpleDeclarator(
+                                        SimpleDeclarator(
+                                            "c_ex",
+                                        ),
+                                    ),
+                                    field_id: Some(
+                                        4,
+                                    ),
+                                },
+                            },
+                        ],
+                    },
+                ),
+            ),
+        ),
+        TypeDcl(
+            ConstrTypeDcl(
+                StructDcl(
+                    StructDcl {
+                        annotations: [],
                         ident: "A_get_attribute_attr1_In",
                         parent: [],
                         member: [
@@ -1507,6 +1519,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -1542,6 +1555,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -1630,6 +1644,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -1665,6 +1680,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -1753,6 +1769,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -1788,6 +1805,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -1876,6 +1894,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -1911,6 +1930,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -1997,6 +2017,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -2034,6 +2055,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -2122,6 +2144,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -2157,6 +2180,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -2243,6 +2267,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -2280,6 +2305,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -2368,6 +2394,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -2403,6 +2430,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -2489,6 +2517,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -2526,6 +2555,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -2614,6 +2644,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -2649,6 +2680,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -2770,6 +2802,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -2807,6 +2840,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -2895,6 +2929,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -2930,6 +2965,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -3121,6 +3157,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -3158,6 +3195,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -3281,6 +3319,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -3316,6 +3355,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -3402,6 +3442,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -3439,6 +3480,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -4340,6 +4382,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                             Member {
                                 annotations: [],
@@ -4362,6 +4405,7 @@ Specification(
                                 field_id: Some(
                                     2,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -5177,6 +5221,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                             Member {
                                 annotations: [],
@@ -5199,6 +5244,7 @@ Specification(
                                 field_id: Some(
                                     2,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -5783,6 +5829,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -5813,6 +5860,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -5979,6 +6027,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                             Member {
                                 annotations: [],
@@ -6001,6 +6050,7 @@ Specification(
                                 field_id: Some(
                                     2,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -6116,6 +6166,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                             Member {
                                 annotations: [],
@@ -6138,6 +6189,7 @@ Specification(
                                 field_id: Some(
                                     2,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -6218,6 +6270,7 @@ Specification(
                                                     ],
                                                     default: None,
                                                     field_id: None,
+                                                    recursive: false,
                                                 },
                                             ],
                                         },

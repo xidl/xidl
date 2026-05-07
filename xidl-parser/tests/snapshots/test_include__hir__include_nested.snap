@@ -28,6 +28,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -58,6 +59,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -88,6 +90,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },
@@ -118,6 +121,7 @@ Specification(
                                 field_id: Some(
                                     1,
                                 ),
+                                recursive: false,
                             },
                         ],
                     },

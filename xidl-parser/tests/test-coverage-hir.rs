@@ -169,12 +169,14 @@ fn hir_struct_and_type_dcl_cover_optional_and_inline_typedef_paths() {
             )),
         )),
         field_id: None,
+        recursive: false,
     };
     assert!(scoped_optional.is_optional());
     assert_eq!(
         xidl_parser::hir::const_expr_to_i64(&scoped_optional.default.unwrap().0),
         Some(7)
     );
+    assert!(!item.member[0].recursive);
 
     let typedef: xidl_parser::hir::TypedefDcl = xidl_parser::typed_ast::TypedefDcl {
         decl: xidl_parser::typed_ast::TypeDeclarator {
@@ -280,4 +282,51 @@ fn hir_struct_and_type_dcl_cover_optional_and_inline_typedef_paths() {
         panic!("expected native");
     };
     assert!(matches!(native_dcl, TypeDcl::NativeDcl(_)));
+}
+
+#[test]
+fn hir_marks_recursive_struct_members() {
+    let typed = parser_text(
+        r#"
+        struct Node;
+
+        struct Node {
+            Node next;
+            @optional Node prev;
+            sequence<Node> children;
+        };
+
+        struct Left;
+        struct Right;
+
+        struct Left {
+            Right right;
+        };
+
+        struct Right {
+            Left left;
+        };
+        "#,
+    )
+    .expect("parse should succeed");
+    let hir = Specification::from(typed);
+
+    let Definition::TypeDcl(TypeDcl::ConstrTypeDcl(ConstrTypeDcl::StructDcl(node))) = &hir.0[1]
+    else {
+        panic!("expected node struct");
+    };
+    assert!(node.member[0].recursive);
+    assert!(node.member[1].recursive);
+    assert!(!node.member[2].recursive);
+
+    let Definition::TypeDcl(TypeDcl::ConstrTypeDcl(ConstrTypeDcl::StructDcl(left))) = &hir.0[4]
+    else {
+        panic!("expected left struct");
+    };
+    let Definition::TypeDcl(TypeDcl::ConstrTypeDcl(ConstrTypeDcl::StructDcl(right))) = &hir.0[5]
+    else {
+        panic!("expected right struct");
+    };
+    assert!(left.member[0].recursive);
+    assert!(right.member[0].recursive);
 }

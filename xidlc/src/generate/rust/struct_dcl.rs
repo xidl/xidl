@@ -38,6 +38,9 @@ pub(crate) fn render_struct_with_config(
             member.ident.iter().map(move |decl| {
                 let name = crate::generate::rust::util::rust_ident(&declarator_name(decl));
                 let mut ty = type_with_decl(&member.ty, decl);
+                if member.recursive {
+                    ty = format!("Box<{ty}>");
+                }
                 if optional {
                     ty = format!("Option<{ty}>");
                 }

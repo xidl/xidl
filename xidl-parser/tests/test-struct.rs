@@ -2,6 +2,17 @@ const TEST_CASES: &[(&str, &str)] = &[
     ("struct_empty", ""),
     ("struct_simple", "struct A;"),
     (
+        "struct_recursive",
+        r#"
+            struct Node;
+            struct Node {
+                Node next;
+                @optional Node prev;
+                sequence<Node> children;
+            };
+        "#,
+    ),
+    (
         "struct_def",
         r#"
             struct A {};

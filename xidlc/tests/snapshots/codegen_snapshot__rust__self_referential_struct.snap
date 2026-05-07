@@ -1,0 +1,40 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+assertion_line: 105
+expression: output
+---
+===============
+self_referential_struct.rs
+===============
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
+#[derive(Default)]
+pub struct Node {
+    pub next: Box<Node>,
+    pub prev: Option<Box<Node>>,
+    pub children: Vec<Node>,
+}
+impl Node {}
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
+#[derive(Default)]
+pub struct Left {
+    pub right: Box<Right>,
+}
+impl Left {}
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
+#[derive(Default)]
+pub struct Right {
+    pub left: Box<Left>,
+}
+impl Right {}

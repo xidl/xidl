@@ -27,6 +27,7 @@ Specification(
                         ],
                         default: None,
                         field_id: None,
+                        recursive: false,
                     },
                     Member {
                         annotations: [],
@@ -58,6 +59,7 @@ Specification(
                         ],
                         default: None,
                         field_id: None,
+                        recursive: false,
                     },
                     Member {
                         annotations: [],
@@ -95,6 +97,7 @@ Specification(
                         ],
                         default: None,
                         field_id: None,
+                        recursive: false,
                     },
                     Member {
                         annotations: [],
@@ -120,6 +123,7 @@ Specification(
                         ],
                         default: None,
                         field_id: None,
+                        recursive: false,
                     },
                     Member {
                         annotations: [],
@@ -147,6 +151,7 @@ Specification(
                         ],
                         default: None,
                         field_id: None,
+                        recursive: false,
                     },
                     Member {
                         annotations: [],
@@ -174,6 +179,7 @@ Specification(
                         ],
                         default: None,
                         field_id: None,
+                        recursive: false,
                     },
                     Member {
                         annotations: [],
@@ -208,6 +214,7 @@ Specification(
                         ],
                         default: None,
                         field_id: None,
+                        recursive: false,
                     },
                 ],
             },

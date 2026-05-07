@@ -4,6 +4,7 @@ use super::{
 };
 use crate::jsonrpc_hir;
 use crate::rest_hir::{self, HirProjectionKind, ProjectedHir};
+use crate::semantic;
 use serde_json::Value;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -66,7 +67,9 @@ pub(crate) fn spec_from_typed_ast(
         None,
     )
     .expect("pathless HIR conversion should not fail");
-    Specification(definitions)
+    let mut spec = Specification(definitions);
+    semantic::analyze(&mut spec);
+    spec
 }
 
 fn spec_from_typed_ast_with_path(
@@ -85,7 +88,9 @@ fn spec_from_typed_ast_with_path(
         Some(root.as_path()),
         Some(&mut include_stack),
     )?;
-    Ok(Specification(definitions))
+    let mut spec = Specification(definitions);
+    semantic::analyze(&mut spec);
+    Ok(spec)
 }
 
 fn collect_defs_with_context(

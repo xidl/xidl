@@ -1,0 +1,18 @@
+struct Node;
+
+struct Node {
+    Node next;
+    @optional Node prev;
+    sequence<Node> children;
+};
+
+struct Left;
+struct Right;
+
+struct Left {
+    Right right;
+};
+
+struct Right {
+    Left left;
+};
