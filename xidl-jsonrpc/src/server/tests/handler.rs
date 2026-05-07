@@ -90,8 +90,8 @@ async fn arc_handler_delegates_all_methods() {
 #[tokio::test]
 async fn multi_handler_dispatches_and_bidi_routes() {
     let handler = super::super::handler::MultiHandler::new(vec![
-        Box::new(EchoHandler),
-        Box::new(FailingHandler),
+        Arc::new(EchoHandler),
+        Arc::new(FailingHandler),
     ]);
 
     assert_eq!(
@@ -102,7 +102,7 @@ async fn multi_handler_dispatches_and_bidi_routes() {
     let err = handler.handle("unknown", Value::Null).await.unwrap_err();
     assert!(matches!(err, Error::Protocol("stop")));
 
-    let handler = super::super::handler::MultiHandler::new(vec![Box::new(EchoHandler)]);
+    let handler = super::super::handler::MultiHandler::new(vec![Arc::new(EchoHandler)]);
     assert!(handler.accepts_bidi("bidi"));
     assert!(!handler.accepts_bidi("other"));
 
