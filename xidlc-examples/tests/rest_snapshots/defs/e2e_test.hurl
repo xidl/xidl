@@ -47,3 +47,61 @@ HTTP 200
 [Asserts]
 body == "\"user:u1,lang:None,trace:t1\""
 
+# E2eTypeServer - get_attribute_attr1
+GET {{base_url}}/attribute/attr1
+HTTP 200
+[Asserts]
+body == "\"attr1\""
+
+# E2eTypeServer - set_attribute_attr1
+POST {{base_url}}/attribute/attr1
+{
+    "attr_1": "new_attr1"
+}
+HTTP 204
+
+# E2eTypeServer - simple_op
+POST {{base_url}}/simple_op
+{}
+HTTP 204
+
+# E2eTypeServer - simple_op_with_return1
+POST {{base_url}}/simple_op_with_return1
+{}
+HTTP 200
+[Asserts]
+body == "\"simple_op_with_return1\""
+
+# E2eTypeServer - return_with_sequence1
+POST {{base_url}}/return_with_sequence1
+{}
+HTTP 200
+[Asserts]
+jsonpath "$[0]" == "s1"
+jsonpath "$[1]" == "s2"
+
+# E2eTypeServer - return_with_any
+POST {{base_url}}/return_with_any
+{}
+HTTP 200
+[Asserts]
+jsonpath "$.any" == "value"
+
+# E2eTypeServer - get_attribute_attr2
+GET {{base_url}}/attribute/attr2
+HTTP 200
+[Asserts]
+jsonpath "$[0]" == "attr2"
+
+# E2eTypeServer - parameter_op3
+POST {{base_url}}/parameter_op3
+{
+    "a": "input_a",
+    "c": [1, "two"]
+}
+HTTP 200
+[Asserts]
+jsonpath "$.b" == 3
+jsonpath "$.c" isCollection
+jsonpath "$.c" isEmpty
+
