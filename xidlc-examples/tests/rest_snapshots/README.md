@@ -1,23 +1,31 @@
-# HTTP Snapshot Tests
+# HTTP Integration Tests (Hurl)
 
-HTTP snapshot tests are defined in `tests/rest_snapshots/defs/*.http` using a
-Hurl-like format. Files are rendered with minijinja before execution.
+HTTP integration tests are defined in `tests/rest_snapshots/defs/*.hurl` using the
+[Hurl](https://hurl.dev/) format.
 
-Variables available to templates:
+Tests are executed within a Rust `#[tokio::test]` that:
+1. Starts a local instance of the `RestServer`.
+2. Injects the dynamic `base_url` into Hurl via variables.
+3. Invokes `pnpm hurl --test` to verify status codes, headers, and bodies.
 
-- `base_url`: injected by the test runner (defaults to the local server it
-  starts).
-- `basic_auth`: injected by the test runner.
-- `env`: environment variables map (`env.MY_VAR`).
+## Prerequisites
 
-Update snapshots:
+Dependencies are managed via `pnpm`:
 
 ```bash
-UPDATE_HTTP_SNAPSHOTS=1 RUSTC_WRAPPER= cargo test -p xidlc-examples rest_snapshot_tests
+pnpm install
 ```
 
-Run without updating:
+## Running Tests
+
+Run via cargo:
 
 ```bash
-RUSTC_WRAPPER= cargo test -p xidlc-examples rest_snapshot_tests
+cargo test -p xidlc-examples rest_snapshot_tests
+```
+
+Or run Hurl manually against a running server:
+
+```bash
+pnpm hurl --variable base_url=http://localhost:8080 --test tests/rest_snapshots/defs/rest_server.hurl
 ```

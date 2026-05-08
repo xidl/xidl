@@ -31,7 +31,4 @@ xidlc = { workspace = true }
 
 [dev-dependencies]
 anyhow = "1.0"
-minijinja.workspace = true
-regex = "1.12.3"
 reqwest.workspace = true
-similar = "2.7.0"

@@ -6,7 +6,7 @@ JINJA_TEMPLATES := $(shell find xidlc -type f -name '*.j2' | sort)
 
 test: test-rust test-go
 
-test-rust:
+test-rust: init
 	cargo test --all -F transport-all -F fmt
 
 test-go: test-go-codegen test-go-runtime
@@ -45,3 +45,6 @@ docs-dev:
 
 docs-build:
 	pnpm --dir docs build
+
+init:
+	cd ./xidlc-examples && pnpm install
