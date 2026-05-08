@@ -1,0 +1,137 @@
+---
+source: xidl-parser/tests/test-union.rs
+expression: ast
+---
+Specification(
+    [
+        TypeDcl(
+            TypeDcl {
+                annotations: [],
+                decl: ConstrTypeDcl(
+                    UnionDcl(
+                        UnionDef(
+                            UnionDef {
+                                ident: Identifier(
+                                    "Node",
+                                ),
+                                switch_type_spec: IntegerType(
+                                    SignedInt(
+                                        SignedLongInt(
+                                            SignedLongInt,
+                                        ),
+                                    ),
+                                ),
+                                case: [
+                                    Case {
+                                        label: [
+                                            Case(
+                                                ConstExpr(
+                                                    XorExpr(
+                                                        AndExpr(
+                                                            ShiftExpr(
+                                                                AddExpr(
+                                                                    MultExpr(
+                                                                        UnaryExpr(
+                                                                            PrimaryExpr(
+                                                                                Literal(
+                                                                                    IntegerLiteral(
+                                                                                        DecNumber(
+                                                                                            "0",
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ],
+                                        element: ElementSpec {
+                                            annotations: [],
+                                            ty: TypeSpec(
+                                                SimpleTypeSpec(
+                                                    BaseTypeSpec(
+                                                        IntegerType(
+                                                            SignedInt(
+                                                                SignedLongInt(
+                                                                    SignedLongInt,
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                            value: SimpleDeclarator(
+                                                SimpleDeclarator(
+                                                    Identifier(
+                                                        "value",
+                                                    ),
+                                                ),
+                                            ),
+                                        },
+                                    },
+                                    Case {
+                                        label: [
+                                            Case(
+                                                ConstExpr(
+                                                    XorExpr(
+                                                        AndExpr(
+                                                            ShiftExpr(
+                                                                AddExpr(
+                                                                    MultExpr(
+                                                                        UnaryExpr(
+                                                                            PrimaryExpr(
+                                                                                Literal(
+                                                                                    IntegerLiteral(
+                                                                                        DecNumber(
+                                                                                            "1",
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            ),
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ],
+                                        element: ElementSpec {
+                                            annotations: [],
+                                            ty: TypeSpec(
+                                                SimpleTypeSpec(
+                                                    ScopedName(
+                                                        ScopedName {
+                                                            scoped_name: None,
+                                                            identifier: Identifier(
+                                                                "Node",
+                                                            ),
+                                                            node_text: "Node",
+                                                        },
+                                                    ),
+                                                ),
+                                            ),
+                                            value: SimpleDeclarator(
+                                                SimpleDeclarator(
+                                                    Identifier(
+                                                        "next",
+                                                    ),
+                                                ),
+                                            ),
+                                        },
+                                    },
+                                ],
+                            },
+                        ),
+                    ),
+                ),
+            },
+        ),
+    ],
+)

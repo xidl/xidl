@@ -6,34 +6,10 @@ Specification(
     [
         TypeDcl(
             ConstrTypeDcl(
-                UnionForwardDcl(
-                    UnionForwardDcl {
-                        annotations: [],
-                        ident: "A",
-                    },
-                ),
-            ),
-        ),
-        TypeDcl(
-            ConstrTypeDcl(
                 UnionDef(
                     UnionDef {
                         annotations: [],
-                        ident: "B",
-                        switch_type_spec: IntegerType(
-                            I32,
-                        ),
-                        case: [],
-                    },
-                ),
-            ),
-        ),
-        TypeDcl(
-            ConstrTypeDcl(
-                UnionDef(
-                    UnionDef {
-                        annotations: [],
-                        ident: "C",
+                        ident: "Node",
                         switch_type_spec: IntegerType(
                             I32,
                         ),
@@ -59,7 +35,7 @@ Specification(
                                     ),
                                     value: SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "a",
+                                            "value",
                                         ),
                                     ),
                                     field_id: Some(
@@ -83,21 +59,24 @@ Specification(
                                 element: ElementSpec {
                                     annotations: [],
                                     ty: TypeSpec(
-                                        StringType(
-                                            StringType {
-                                                bound: None,
+                                        ScopedName(
+                                            ScopedName {
+                                                name: [
+                                                    "Node",
+                                                ],
+                                                is_root: false,
                                             },
                                         ),
                                     ),
                                     value: SimpleDeclarator(
                                         SimpleDeclarator(
-                                            "b",
+                                            "next",
                                         ),
                                     ),
                                     field_id: Some(
                                         2,
                                     ),
-                                    recursive: false,
+                                    recursive: true,
                                 },
                             },
                         ],

@@ -1,6 +1,7 @@
-const TEST_CASES: &[(&str, &str)] = &[(
-    "union_dcl",
-    r#"
+const TEST_CASES: &[(&str, &str)] = &[
+    (
+        "union_dcl",
+        r#"
         union A;
         union B switch (int32) {};
         union C switch (int32) {
@@ -10,7 +11,19 @@ const TEST_CASES: &[(&str, &str)] = &[(
                 string b;
         };
     "#,
-)];
+    ),
+    (
+        "union_recursive",
+        r#"
+            union Node switch (int32) {
+                case 0:
+                    int32 value;
+                case 1:
+                    Node next;
+            };
+        "#,
+    ),
+];
 
 #[test]
 fn test_typed_ast() {
