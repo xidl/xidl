@@ -5,24 +5,26 @@ from dataclasses import dataclass
 from typing import Optional
 
 from xidl.http import (
-    Request,
-    Route,
-    RouteMetadata,
-    SecurityRequirement,
-    ServerStreamResponse,
-    StreamMetadata,
-    cookie_value,
-    encode_json_response,
-    encode_stream_response,
-    header_value,
-    path_value,
-    query_value,
-    read_json_body,
-    read_json_field,
-    read_scalar,
-    require_accept,
-    require_content_type,
-    require_security,
+Request,
+Route,
+RouteMetadata,
+SecurityRequirement,
+ServerStreamResponse,
+StreamMetadata,
+cookie_value,
+encode_json_response,
+encode_response,
+encode_stream_response,
+header_value,
+path_value,
+query_value,
+read_body,
+read_json_body,
+read_json_field,
+read_scalar,
+require_accept,
+require_content_type,
+require_security,
 )
 
 # generated http module: http_stream
@@ -72,16 +74,16 @@ def _http_stream_api_alerts_route(service: HttpStreamApiService) -> Route:
     )
 
 async def _http_stream_api_upload_asset_endpoint(service: HttpStreamApiService, request: Request):
-    require_accept(request, "application/json")
+    require_accept(request, "text/plain")
     require_content_type(request, "application/x-ndjson")
     _security = require_security(request, [SecurityRequirement(kind="bearer")])
-    body = read_json_body(request)
+    body = read_body(request, "application/x-ndjson")
     request_value = HttpStreamApiUploadAssetRequest(
         asset_id=read_json_field(body, "asset_id", "str", optional=False),
         chunk=read_json_field(body, "chunk", "list[int]", optional=False),
     )
     response_value = await service.upload_asset(request_value)
-    return encode_json_response(response_value)
+    return encode_response(response_value.value, "text/plain")
 
 def _http_stream_api_upload_asset_route(service: HttpStreamApiService) -> Route:
     async def endpoint(request: Request):
@@ -93,7 +95,7 @@ def _http_stream_api_upload_asset_route(service: HttpStreamApiService) -> Route:
         handler=service.upload_asset,
         request_model=HttpStreamApiUploadAssetRequest,
         response_model=HttpStreamApiUploadAssetResponse,
-        metadata=RouteMetadata(request_content_type="application/x-ndjson", response_content_type="application/json", security=[SecurityRequirement(kind="bearer")], stream=StreamMetadata(kind="client", codec="ndjson")),
+        metadata=RouteMetadata(request_content_type="application/x-ndjson", response_content_type="text/plain", security=[SecurityRequirement(kind="bearer")], stream=StreamMetadata(kind="client", codec="ndjson")),
     )
 
 def http_stream_api_routes(service: HttpStreamApiService) -> list[Route]:

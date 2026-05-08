@@ -91,6 +91,26 @@ fn parse_api_key_validates_location_and_name() {
             .expect_err("missing name")
             .contains("non-empty name")
     );
+    assert_eq!(
+        parse_api_key(&bare("api_key")).expect_err("missing in"),
+        "@api_key requires in=... and name=..."
+    );
+}
+
+#[test]
+fn effective_security_none_inheritance() {
+    let interface_none = vec![bare("no_security")];
+    assert_eq!(
+        effective_security(&interface_none, &[]).expect("none inherited"),
+        Some(Vec::new())
+    );
+    assert_eq!(
+        effective_security_with_origin(&interface_none, &[]).expect("none origin"),
+        Some(HttpSecurityProfile {
+            origin: HttpSecurityOrigin::Interface,
+            requirements: Vec::new(),
+        })
+    );
 }
 
 #[test]

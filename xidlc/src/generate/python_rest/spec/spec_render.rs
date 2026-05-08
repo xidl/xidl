@@ -98,7 +98,12 @@ pub(super) fn render_endpoint_helper(
         .iter()
         .any(|param| matches!(param.source, ParamSource::Body))
     {
-        writeln!(out, "    body = read_json_body(request)").unwrap();
+        writeln!(
+            out,
+            "    body = read_body(request, {:?})",
+            method.request_content_type
+        )
+        .unwrap();
     }
     render_request_value(out, method);
     writeln!(
@@ -116,7 +121,31 @@ pub(super) fn render_endpoint_helper(
             )
             .unwrap();
         }
-        _ => writeln!(out, "    return encode_json_response(response_value)").unwrap(),
+        _ => {
+            if matches!(
+                method.response_body_shape,
+                xidl_parser::rest_hir::HttpBodyShape::Single
+            ) {
+                let field_name = if method.return_ty.is_some() {
+                    "value"
+                } else {
+                    &method.response_params[0].field_name
+                };
+                writeln!(
+                    out,
+                    "    return encode_response(response_value.{}, {:?})",
+                    field_name, method.response_content_type
+                )
+                .unwrap();
+            } else {
+                writeln!(
+                    out,
+                    "    return encode_response(response_value, {:?})",
+                    method.response_content_type
+                )
+                .unwrap();
+            }
+        }
     }
     writeln!(out).unwrap();
     Ok(())

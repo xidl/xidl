@@ -106,7 +106,7 @@ class AdapterTests(unittest.IsolatedAsyncioTestCase):
                 path="/users/7",
                 query={"locale": "zh-CN"},
                 headers={
-                    "accept": "application/json",
+                    "accept": "text/plain",
                     "authorization": basic_auth("demo", "secret"),
                     "x-api-key": "k1",
                     "x-trace-id": "trace-1",
@@ -115,8 +115,8 @@ class AdapterTests(unittest.IsolatedAsyncioTestCase):
             id="7",
         )
         self.assertEqual(200, response.status_code)
-        self.assertEqual({"value": "7"}, response.body)
-        self.assertEqual("application/json", response.headers["Content-Type"])
+        self.assertEqual("7", response.body)
+        self.assertEqual("text/plain", response.headers["Content-Type"])
 
     async def test_django_adapter_returns_unauthorized_response(self):
         adapter = DjangoAdapter()
@@ -127,7 +127,7 @@ class AdapterTests(unittest.IsolatedAsyncioTestCase):
                 method="GET",
                 path="/users/7",
                 headers={
-                    "accept": "application/json",
+                    "accept": "text/plain",
                     "x-trace-id": "trace-1",
                 },
             ),
@@ -177,7 +177,7 @@ class AdapterTests(unittest.IsolatedAsyncioTestCase):
                 method="POST",
                 path="/users/search",
                 headers={
-                    "accept": "application/json",
+                    "accept": "text/plain",
                     "authorization": "Bearer token-1",
                     "content-type": "application/json",
                 },
@@ -185,8 +185,8 @@ class AdapterTests(unittest.IsolatedAsyncioTestCase):
             )
         )
         self.assertEqual(200, response.status_code)
-        self.assertEqual({"value": "alice"}, response.body)
-        self.assertEqual("application/json", response.headers["Content-Type"])
+        self.assertEqual("alice", response.body)
+        self.assertEqual("text/plain", response.headers["Content-Type"])
 
     async def test_fastapi_registered_unary_endpoint_rejects_invalid_content_type(self):
         app = FakeFastAPIApp()
@@ -199,9 +199,9 @@ class AdapterTests(unittest.IsolatedAsyncioTestCase):
                 method="POST",
                 path="/users/search",
                 headers={
-                    "accept": "application/json",
+                    "accept": "text/plain",
                     "authorization": "Bearer token-1",
-                    "content-type": "text/plain",
+                    "content-type": "image/png",
                 },
                 body=b"keyword=alice",
             )

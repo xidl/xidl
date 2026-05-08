@@ -234,6 +234,12 @@ fn base_attribute_operation(args: AttributeOperationArgs<'_>) -> HttpOperation {
     } = args;
     let request_content_type = if matches!(stream.kind, Some(HttpStreamKind::Client)) {
         "application/x-ndjson".to_string()
+    } else if let Some(param) = request_params.first() {
+        if param.ty.is_composite() {
+            "application/json".to_string()
+        } else {
+            "text/plain".to_string()
+        }
     } else {
         "application/json".to_string()
     };
@@ -241,6 +247,12 @@ fn base_attribute_operation(args: AttributeOperationArgs<'_>) -> HttpOperation {
         && matches!(stream.codec, HttpStreamCodec::Sse)
     {
         "text/event-stream".to_string()
+    } else if let Some(ty) = &return_type {
+        if ty.is_composite() {
+            "application/json".to_string()
+        } else {
+            "text/plain".to_string()
+        }
     } else {
         "application/json".to_string()
     };
@@ -258,7 +270,7 @@ fn base_attribute_operation(args: AttributeOperationArgs<'_>) -> HttpOperation {
     let request_body_shape = if request_params.is_empty() {
         super::HttpBodyShape::None
     } else {
-        super::HttpBodyShape::Object
+        super::HttpBodyShape::Single
     };
     let response_body_shape = if return_type.is_some() {
         super::HttpBodyShape::Single

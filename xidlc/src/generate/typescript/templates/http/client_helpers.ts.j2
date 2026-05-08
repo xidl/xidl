@@ -202,6 +202,9 @@ codecs: Record<string, HttpCodec>,
     if (mime === "application/json" || mime.endsWith("+json")) {
         return JSON.stringify(value);
     }
+    if (mime === "text/plain") {
+        return String(value);
+    }
     if (mime === "application/x-www-form-urlencoded") {
         const query = new URLSearchParams();
         if (value && typeof value === "object") {

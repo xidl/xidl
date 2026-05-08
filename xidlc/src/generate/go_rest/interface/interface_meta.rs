@@ -55,10 +55,20 @@ pub(crate) fn build_method_meta(
     let request_struct = format!("{struct_prefix}Request");
     let response_struct = format!("{struct_prefix}Response");
     let (request_body_struct, request_body_direct_field, request_body_direct_ty) =
-        request_body_context(&body_params, &struct_prefix, op.stream.kind);
+        request_body_context(
+            &body_params,
+            &struct_prefix,
+            op.stream.kind,
+            op.request_body_shape,
+        );
     let return_ty = op.return_type.as_ref().map(definition::go_type);
     let (response_body_struct, response_body_direct_field, response_body_direct_ty) =
-        response_body_context(&response_body_params, &return_ty, &struct_prefix);
+        response_body_context(
+            &response_body_params,
+            &return_ty,
+            &struct_prefix,
+            op.response_body_shape,
+        );
 
     Ok(MethodMeta {
         method_name: op.name.to_case(Case::Pascal),

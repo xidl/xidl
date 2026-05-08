@@ -174,9 +174,12 @@ fn build_method_model(
                 access: ts_ident(&param.name),
             })
             .collect(),
-        body_single: matches!(op.request_body_shape, xidl_parser::rest_hir::HttpBodyShape::SingleFlattened)
-            .then(|| direct_body_access(&op.request_params))
-            .flatten(),
+        body_single: matches!(
+            op.request_body_shape,
+            xidl_parser::rest_hir::HttpBodyShape::SingleFlattened
+        )
+        .then(|| direct_body_access(&op.request_params))
+        .flatten(),
         return_ty,
         response_body_mode: response_body_mode(op).to_string(),
         response_body_entries: response_body_entries(op),

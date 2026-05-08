@@ -223,13 +223,25 @@ def read_scalar(
 
 
 def read_json_body(request: Request) -> Any:
+    return read_body(request, "application/json")
+
+
+def read_body(request: Request, content_type: str) -> Any:
     body = request.body or b""
-    if not body:
-        return {}
-    try:
-        return json.loads(body.decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise HttpError(400, "INVALID_ARGUMENT", "invalid JSON body") from exc
+    mime = content_type.split(";", 1)[0].strip().lower()
+    if mime == "application/json" or mime.endswith("+json"):
+        if not body:
+            return {}
+        try:
+            return json.loads(body.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise HttpError(400, "INVALID_ARGUMENT", "invalid JSON body") from exc
+    if mime.startswith("text/"):
+        try:
+            return body.decode("utf-8")
+        except UnicodeDecodeError as exc:
+            raise HttpError(400, "INVALID_ARGUMENT", "invalid text body") from exc
+    return body
 
 
 def read_json_field(
@@ -257,16 +269,34 @@ def read_json_value(body: Any, ty: str, *, optional: bool, wire_name: str) -> An
 
 
 def encode_json_response(value: Any, status_code: int = 200) -> Response:
+    return encode_response(value, "application/json", status_code)
+
+
+def encode_response(value: Any, content_type: str, status_code: int = 200) -> Response:
     if isinstance(value, Response):
-        return ensure_response_header(value, "Content-Type", "application/json")
+        return ensure_response_header(value, "Content-Type", content_type)
     if isinstance(value, ServerStreamResponse):
         raise HttpError(500, "INTERNAL", "stream response used in unary route")
     if value is None:
         return Response(status_code=204)
+
+    mime = content_type.split(";", 1)[0].strip().lower()
+    if mime == "application/json" or mime.endswith("+json"):
+        return Response(
+            status_code=status_code,
+            headers={"Content-Type": content_type},
+            body=to_body(value),
+        )
+    if mime.startswith("text/"):
+        return Response(
+            status_code=status_code,
+            headers={"Content-Type": content_type},
+            body=str(value),
+        )
     return Response(
         status_code=status_code,
-        headers={"Content-Type": "application/json"},
-        body=to_body(value),
+        headers={"Content-Type": content_type},
+        body=value,
     )
 
 

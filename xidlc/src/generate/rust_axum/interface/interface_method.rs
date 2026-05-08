@@ -99,11 +99,7 @@ pub(crate) fn render_op_from_http(
         &auth_wrapper_struct,
         is_client_stream,
         is_bidi_stream,
-        &response_ty(
-            &ret,
-            http_op.response_shape,
-            &struct_prefix,
-        ),
+        &response_ty(&ret, http_op.response_shape, &struct_prefix),
     );
 
     let mut auth_param = None;
@@ -124,15 +120,20 @@ pub(crate) fn render_op_from_http(
     }
 
     let response_include_return = !return_is_unit;
-    let request_body_flatten = matches!(http_op.request_body_shape, xidl_parser::rest_hir::HttpBodyShape::SingleFlattened);
-    let response_is_empty = matches!(http_op.response_body_shape, xidl_parser::rest_hir::HttpBodyShape::None);
-    let response_struct = matches!(http_op.response_shape, xidl_parser::rest_hir::HttpResponseShape::Object)
-        .then(|| format!("{struct_prefix}Response"));
-    let response_ty = response_ty(
-        &ret,
-        http_op.response_shape,
-        &struct_prefix,
+    let request_body_flatten = matches!(
+        http_op.request_body_shape,
+        xidl_parser::rest_hir::HttpBodyShape::SingleFlattened
     );
+    let response_is_empty = matches!(
+        http_op.response_body_shape,
+        xidl_parser::rest_hir::HttpBodyShape::None
+    );
+    let response_struct = matches!(
+        http_op.response_shape,
+        xidl_parser::rest_hir::HttpResponseShape::Object
+    )
+    .then(|| format!("{struct_prefix}Response"));
+    let response_ty = response_ty(&ret, http_op.response_shape, &struct_prefix);
     let request_item_ty = request_ty.clone();
 
     Ok(MethodContext {
@@ -163,8 +164,12 @@ pub(crate) fn render_op_from_http(
         body_params: params.body_params,
         request_ty: request_ty.clone(),
         request_payload_ty,
-        request_struct: (auth_in_request_struct || !matches!(http_op.request_shape, xidl_parser::rest_hir::HttpRequestShape::None))
-            .then(|| format!("{struct_prefix}Request")),
+        request_struct: (auth_in_request_struct
+            || !matches!(
+                http_op.request_shape,
+                xidl_parser::rest_hir::HttpRequestShape::None
+            ))
+        .then(|| format!("{struct_prefix}Request")),
         auth_wrapper_struct,
         auth_in_request_struct,
         has_basic_auth: security.has_basic_auth,
@@ -199,5 +204,7 @@ pub(crate) fn render_op_from_http(
         ret_out_expr,
         request_content_type: http_op.request_content_type.clone(),
         response_content_type: http_op.response_content_type.clone(),
+        request_body_shape: http_op.request_body_shape,
+        response_body_shape: http_op.response_body_shape,
     })
 }

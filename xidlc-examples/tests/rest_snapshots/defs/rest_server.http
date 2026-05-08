@@ -1,15 +1,13 @@
 ### get_attribute
 GET {{ base_url }}/attribute/host
-Accept: application/json
+Accept: text/plain
 
 ### set_attribute
 POST {{ base_url }}/attribute/host
 Accept: application/json
-Content-Type: application/json
+Content-Type: text/plain
 
-{
-    "host": "127.0.0.1"
-}
+"127.0.0.1"
 
 ### get user info
 GET {{ base_url }}/user/7523
@@ -60,5 +58,5 @@ Authorization: Bearer test_token
 
 ### is_logined
 POST {{ base_url }}/is_logined
-Accept: application/json
+Accept: text/plain
 Cookie: session_id=simple_session_id

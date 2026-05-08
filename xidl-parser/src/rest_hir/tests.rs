@@ -117,3 +117,70 @@ fn projects_stream_operations_with_http_stream_metadata() {
     assert_eq!(ops[1].request_content_type, "application/x-ndjson");
     assert_eq!(ops[1].request_shape, super::HttpRequestShape::Object);
 }
+
+#[test]
+fn projects_content_types_based_on_type_complexity() {
+    let spec = parse(
+        r#"
+            struct MyStruct { string a; };
+            interface TypeApi {
+              @post void op1(in string a);
+              @post void op2(in MyStruct a);
+              @get string op3();
+              @get MyStruct op4();
+            };
+            "#,
+    );
+    let doc = super::project(&spec).expect("http hir");
+    let ops = &doc.interfaces[0].operations;
+
+    // op1: string input -> text/plain
+    assert_eq!(ops[0].request_content_type, "text/plain");
+    // op2: struct input -> application/json
+    assert_eq!(ops[1].request_content_type, "application/json");
+    // op3: string return -> text/plain
+    assert_eq!(ops[2].response_content_type, "text/plain");
+    // op4: struct return -> application/json
+    assert_eq!(ops[3].response_content_type, "application/json");
+
+    let spec2 = parse(
+        r#"
+            interface TypeApi2 {
+              @post string op5(in string a, out string b);
+            };
+            "#,
+    );
+    let doc2 = super::project(&spec2).expect("http hir");
+    let ops2 = &doc2.interfaces[0].operations;
+    // op5: multiple body results -> application/json
+    assert_eq!(ops2[0].response_content_type, "application/json");
+
+    let spec3 = parse(
+        r#"
+            interface TypeApi3 {
+              @post void op6(@flatten in string a);
+              @post void op7(in string a, in string b);
+            };
+            "#,
+    );
+    let doc3 = super::project(&spec3).expect("http hir");
+    let ops3 = &doc3.interfaces[0].operations;
+    // op6: flatten -> SingleFlattened
+    assert_eq!(
+        ops3[0].request_body_shape,
+        super::HttpBodyShape::SingleFlattened
+    );
+    // op7: multiple -> Object
+    assert_eq!(ops3[1].request_body_shape, super::HttpBodyShape::Object);
+
+    let spec4 = parse(
+        r#"
+            #pragma xidlc openapi version "3.1.0"
+            interface Empty {};
+            local interface LocalOnly {};
+        "#,
+    );
+    let doc4 = super::project(&spec4).expect("http hir");
+    assert_eq!(doc4.interfaces.len(), 2);
+    assert_eq!(doc4.document.version.as_deref(), Some("3.1.0"));
+}

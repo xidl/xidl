@@ -63,11 +63,11 @@ fn media_type_resolution_prefers_method_and_falls_back_to_default() {
         Some(AnnotationParams::Raw("\"text/plain\"".to_string())),
     )];
     assert_eq!(
-        effective_media_type(&interface, &method, "Consumes"),
+        effective_media_type(&interface, &method, "Consumes", "application/json"),
         "text/plain"
     );
     assert_eq!(
-        effective_media_type(&[], &[], "Produces"),
+        effective_media_type(&[], &[], "Produces", "application/json"),
         "application/json"
     );
     assert_eq!(

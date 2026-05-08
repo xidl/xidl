@@ -46,7 +46,7 @@
         "operationId": "HelloWorld.sayHello",
         "requestBody": {
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
                 "type": "string"
               }

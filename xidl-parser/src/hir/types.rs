@@ -71,6 +71,22 @@ pub enum IntegerType {
     I64,
 }
 
+impl TypeSpec {
+    pub fn is_composite(&self) -> bool {
+        !matches!(
+            self,
+            TypeSpec::IntegerType(_)
+                | TypeSpec::FloatingPtType
+                | TypeSpec::CharType
+                | TypeSpec::WideCharType
+                | TypeSpec::Boolean
+                | TypeSpec::StringType(_)
+                | TypeSpec::WideStringType(_)
+                | TypeSpec::FixedPtType(_)
+        )
+    }
+}
+
 impl From<crate::typed_ast::TypeSpec> for TypeSpec {
     fn from(value: crate::typed_ast::TypeSpec) -> Self {
         match value {

@@ -1,23 +1,21 @@
 ### get_attribute
 > GET /attribute/host HTTP/1.1
 > User-Agent: xidlc-rest-snapshot
-> Accept: application/json
+> Accept: text/plain
 >
 < HTTP/1.1 200 OK
-< content-length: 11
-< content-type: application/json
+< content-length: 9
+< content-type: text/plain
 <
-"localhost"
+localhost
 ---
 ### set_attribute
 > POST /attribute/host HTTP/1.1
 > User-Agent: xidlc-rest-snapshot
 > Accept: application/json
-> Content-Type: application/json
+> Content-Type: text/plain
 >
-{
-    "host": "127.0.0.1"
-}
+"127.0.0.1"
 
 < HTTP/1.1 204 No Content
 <
@@ -142,11 +140,11 @@
 ### is_logined
 > POST /is_logined HTTP/1.1
 > User-Agent: xidlc-rest-snapshot
-> Accept: application/json
+> Accept: text/plain
 > Cookie: session_id=simple_session_id
 >
 < HTTP/1.1 200 OK
 < content-length: 4
-< content-type: application/json
+< content-type: text/plain
 <
 true

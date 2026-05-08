@@ -236,17 +236,38 @@ fn project_operation(
     )
     .map_err(parse_err)?;
 
+    let request_body_shape = body_shape(
+        &request_params
+            .iter()
+            .filter(|p| matches!(p.kind, super::HttpParamKind::Body))
+            .cloned()
+            .collect::<Vec<_>>(),
+    );
+    let response_body_params = response_params
+        .iter()
+        .filter(|p| matches!(p.kind, super::HttpParamKind::Body))
+        .cloned()
+        .collect::<Vec<_>>();
+    let response_body_shape = response_body_shape(&op.ty, &response_body_params);
+
     let request_content_type = request_content_type(
         interface_annotations,
         &op.annotations,
         stream.kind,
         &request_params,
+        request_body_shape,
     );
     let response_content_type = response_content_type(
         interface_annotations,
         &op.annotations,
         stream.kind,
         stream.codec,
+        response_body_shape,
+        &response_body_params,
+        match &op.ty {
+            hir::OpTypeSpec::Void => None,
+            hir::OpTypeSpec::TypeSpec(ty) => Some(ty),
+        },
     );
 
     Ok(HttpOperation {
@@ -260,21 +281,8 @@ fn project_operation(
         response_content_type,
         request_shape: request_shape(&request_params),
         response_shape: response_wrapper_shape(&op.ty, &response_params),
-        request_body_shape: body_shape(
-            &request_params
-                .iter()
-                .filter(|p| matches!(p.kind, super::HttpParamKind::Body))
-                .cloned()
-                .collect::<Vec<_>>(),
-        ),
-        response_body_shape: response_body_shape(
-            &op.ty,
-            &response_params
-                .iter()
-                .filter(|p| matches!(p.kind, super::HttpParamKind::Body))
-                .cloned()
-                .collect::<Vec<_>>(),
-        ),
+        request_body_shape,
+        response_body_shape,
         security: effective_security_with_origin(interface_annotations, &op.annotations)
             .map_err(ParseError::Message)?,
         basic_auth_realm: effective_basic_auth_realm(interface_annotations, &op.annotations),
@@ -294,6 +302,7 @@ fn request_content_type(
     method_annotations: &[hir::Annotation],
     stream_kind: Option<HttpStreamKind>,
     request_params: &[super::HttpParam],
+    body_shape: super::HttpBodyShape,
 ) -> String {
     if matches!(stream_kind, Some(HttpStreamKind::Client)) {
         return "application/x-ndjson".to_string();
@@ -302,10 +311,31 @@ fn request_content_type(
         .iter()
         .filter(|p| matches!(p.kind, super::HttpParamKind::Body))
         .collect::<Vec<_>>();
-    if body_params.is_empty() {
-        return "application/json".to_string();
-    }
-    effective_media_type(interface_annotations, method_annotations, "Consumes")
+
+    let default = if body_params.is_empty() {
+        "application/json"
+    } else {
+        match body_shape {
+            super::HttpBodyShape::Single => {
+                if body_params[0].ty.is_composite() {
+                    "application/json"
+                } else {
+                    "text/plain"
+                }
+            }
+            super::HttpBodyShape::SingleFlattened | super::HttpBodyShape::Object => {
+                "application/json"
+            }
+            super::HttpBodyShape::None => "application/json",
+        }
+    };
+
+    effective_media_type(
+        interface_annotations,
+        method_annotations,
+        "Consumes",
+        default,
+    )
 }
 
 fn response_content_type(
@@ -313,13 +343,41 @@ fn response_content_type(
     method_annotations: &[hir::Annotation],
     stream_kind: Option<HttpStreamKind>,
     stream_codec: super::semantics::HttpStreamCodec,
+    body_shape: super::HttpBodyShape,
+    response_body_params: &[super::HttpParam],
+    return_type: Option<&hir::TypeSpec>,
 ) -> String {
     if matches!(stream_kind, Some(HttpStreamKind::Server))
         && matches!(stream_codec, super::semantics::HttpStreamCodec::Sse)
     {
         return "text/event-stream".to_string();
     }
-    effective_media_type(interface_annotations, method_annotations, "Produces")
+
+    let default = match body_shape {
+        super::HttpBodyShape::Single => {
+            let is_composite = if let Some(ty) = return_type {
+                ty.is_composite()
+            } else if let Some(param) = response_body_params.first() {
+                param.ty.is_composite()
+            } else {
+                true
+            };
+            if is_composite {
+                "application/json"
+            } else {
+                "text/plain"
+            }
+        }
+        super::HttpBodyShape::SingleFlattened | super::HttpBodyShape::Object => "application/json",
+        _ => "application/json",
+    };
+
+    effective_media_type(
+        interface_annotations,
+        method_annotations,
+        "Produces",
+        default,
+    )
 }
 
 fn request_shape(request_params: &[super::HttpParam]) -> super::HttpRequestShape {

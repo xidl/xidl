@@ -66,7 +66,7 @@ pub trait {{ ident }} {
 
     {% endif %}
     {% if method.body_params | length > 0 %}
-        {% if method.request_body_flatten %}
+        {% if method.request_body_shape == "Single" or method.request_body_shape == "SingleFlattened" %}
             type {{ method.struct_prefix }}RequestOutBody = {{ method.body_params[0].out_ty }};
             type {{ method.struct_prefix }}RequestInBody = {{ method.body_params[0].in_ty }};
         {% else %}
@@ -255,7 +255,7 @@ pub trait {{ ident }} {
                             .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
                             let body: {{ method.struct_prefix }}RequestInBody = ::xidl_rust_axum::DeserializeFactory::new("{{ method.request_content_type }}")
                             .from_slice(&body_bytes)?;
-                            {% if method.request_body_flatten %}
+                            {% if method.request_body_shape == "Single" or method.request_body_shape == "SingleFlattened" %}
                                 let {{ method.body_params[0].name }} = body;
                             {% else %}
                                 let {{ method.struct_prefix }}RequestInBody {
@@ -284,31 +284,41 @@ pub trait {{ ident }} {
         {% endif %}
         {% set response_body_count = method.response_body_params | length + (0 if method.return_is_unit else 1) %}
         {% if method.response_struct and response_body_count > 0 %}
-            #[derive(::serde::Serialize)]
-            struct {{ method.struct_prefix }}ResponseOutBody {
+            {% if method.response_body_shape == "Single" or method.response_body_shape == "SingleFlattened" %}
                 {% if method.response_include_return %}
-                    r#return: {{ method.ret_out_ty }},
+                    type {{ method.struct_prefix }}ResponseOutBody = {{ method.ret_out_ty }};
+                    type {{ method.struct_prefix }}ResponseInBody = {{ method.ret_in_ty }};
+                {% else %}
+                    type {{ method.struct_prefix }}ResponseOutBody = {{ method.response_body_params[0].out_ty }};
+                    type {{ method.struct_prefix }}ResponseInBody = {{ method.response_body_params[0].in_ty }};
                 {% endif %}
-                {% for param in method.response_body_params %}
-                    {% if param.serde_rename is defined and param.serde_rename %}
-                        #[serde(rename = "{{ param.serde_rename }}")]
+            {% else %}
+                #[derive(::serde::Serialize)]
+                struct {{ method.struct_prefix }}ResponseOutBody {
+                    {% if method.response_include_return %}
+                        r#return: {{ method.ret_out_ty }},
                     {% endif %}
-                    {{ param.name }}: {{ param.out_ty }},
-                {% endfor %}
-            }
+                    {% for param in method.response_body_params %}
+                        {% if param.serde_rename is defined and param.serde_rename %}
+                            #[serde(rename = "{{ param.serde_rename }}")]
+                        {% endif %}
+                        {{ param.name }}: {{ param.out_ty }},
+                    {% endfor %}
+                }
 
-            #[derive(::serde::Deserialize)]
-            struct {{ method.struct_prefix }}ResponseInBody {
-                {% if method.response_include_return %}
-                    r#return: {{ method.ret_in_ty }},
-                {% endif %}
-                {% for param in method.response_body_params %}
-                    {% if param.serde_rename is defined and param.serde_rename %}
-                        #[serde(rename = "{{ param.serde_rename }}")]
+                #[derive(::serde::Deserialize)]
+                struct {{ method.struct_prefix }}ResponseInBody {
+                    {% if method.response_include_return %}
+                        r#return: {{ method.ret_in_ty }},
                     {% endif %}
-                    {{ param.name }}: {{ param.in_ty }},
-                {% endfor %}
-            }
+                    {% for param in method.response_body_params %}
+                        {% if param.serde_rename is defined and param.serde_rename %}
+                            #[serde(rename = "{{ param.serde_rename }}")]
+                        {% endif %}
+                        {{ param.name }}: {{ param.in_ty }},
+                    {% endfor %}
+                }
+            {% endif %}
 
         {% endif %}
         {% if method.response_struct is defined and method.response_struct %}
@@ -331,34 +341,58 @@ pub trait {{ ident }} {
                 #[allow(clippy::useless_conversion)]
                 impl From<{{ method.response_struct }}> for {{ method.struct_prefix }}ResponseOutBody {
                     fn from(value: {{ method.response_struct }}) -> Self {
-                        Self {
+                        {% if method.response_body_shape == "Single" or method.response_body_shape == "SingleFlattened" %}
                             {% if method.response_include_return %}
-                                r#return: {{ method.ret_out_expr | replace("resp_value", "value.r#return") }},
+                                {{ method.ret_out_expr | replace("resp_value", "value.r#return") }}
+                            {% else %}
+                                {{ method.response_body_params[0].out_expr | replace(method.response_body_params[0].name, "value." ~ method.response_body_params[0].name) }}
                             {% endif %}
-                            {% for param in method.response_body_params %}
-                                {{ param.name }}: {{ param.field_out_expr }},
-                            {% endfor %}
-                        }
+                        {% else %}
+                            Self {
+                                {% if method.response_include_return %}
+                                    r#return: {{ method.ret_out_expr | replace("resp_value", "value.r#return") }},
+                                {% endif %}
+                                {% for param in method.response_body_params %}
+                                    {{ param.name }}: {{ param.field_out_expr | replace("value.", "value." ~ "") }},
+                                {% endfor %}
+                            }
+                        {% endif %}
                     }
                 }
 
                 #[allow(clippy::useless_conversion)]
                 impl From<{{ method.struct_prefix }}ResponseInBody> for {{ method.response_struct }} {
                     fn from(value: {{ method.struct_prefix }}ResponseInBody) -> Self {
-                        Self {
-                            {% if method.response_include_return %}
-                                r#return: {{ method.ret_in_expr | replace("body", "value.r#return") }},
-                            {% endif %}
-                            {% for param in method.response_body_params %}
-                                {{ param.name }}: {{ param.field_in_expr }},
-                            {% endfor %}
-                            {% for param in method.response_header_params %}
-                                {{ param.name }}: ::core::default::Default::default(),
-                            {% endfor %}
-                            {% for param in method.response_cookie_params %}
-                                {{ param.name }}: ::core::default::Default::default(),
-                            {% endfor %}
-                        }
+                        {% if method.response_body_shape == "Single" or method.response_body_shape == "SingleFlattened" %}
+                            Self {
+                                {% if method.response_include_return %}
+                                    r#return: {{ method.ret_in_expr | replace("body", "value") }},
+                                {% else %}
+                                    {{ method.response_body_params[0].name }}: {{ method.response_body_params[0].in_expr | replace(method.response_body_params[0].name, "value") }},
+                                {% endif %}
+                                {% for param in method.response_header_params %}
+                                    {{ param.name }}: ::core::default::Default::default(),
+                                {% endfor %}
+                                {% for param in method.response_cookie_params %}
+                                    {{ param.name }}: ::core::default::Default::default(),
+                                {% endfor %}
+                            }
+                        {% else %}
+                            Self {
+                                {% if method.response_include_return %}
+                                    r#return: {{ method.ret_in_expr | replace("body", "value.r#return") }},
+                                {% endif %}
+                                {% for param in method.response_body_params %}
+                                    {{ param.name }}: {{ param.field_in_expr }},
+                                {% endfor %}
+                                {% for param in method.response_header_params %}
+                                    {{ param.name }}: ::core::default::Default::default(),
+                                {% endfor %}
+                                {% for param in method.response_cookie_params %}
+                                    {{ param.name }}: ::core::default::Default::default(),
+                                {% endfor %}
+                            }
+                        {% endif %}
                     }
                 }
             {% endif %}

@@ -980,5 +980,38 @@ Specification(
                 ),
             },
         ),
+        ConstDcl(
+            ConstDcl {
+                ty: OctetType(
+                    OctetType,
+                ),
+                ident: Identifier(
+                    "const_octet",
+                ),
+                value: ConstExpr(
+                    XorExpr(
+                        AndExpr(
+                            ShiftExpr(
+                                AddExpr(
+                                    MultExpr(
+                                        UnaryExpr(
+                                            PrimaryExpr(
+                                                Literal(
+                                                    IntegerLiteral(
+                                                        DecNumber(
+                                                            "1",
+                                                        ),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            },
+        ),
     ],
 )

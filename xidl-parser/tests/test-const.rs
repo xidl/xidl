@@ -36,6 +36,7 @@ const TEST_CASES: &[(&str, &str)] = &[
             const float const_float = 13.1;
             const double const_double = 84.1e;
             const long double const_longdouble = 46.1;
+            const octet const_octet = 1;
         "#,
     ),
 ];

@@ -120,6 +120,30 @@ fn hir_type_conversions_cover_simple_and_template_variants() {
         TypeSpec::IntegerType(xidl_parser::hir::IntegerType::I64)
     ));
 
+    // Coverage for AnyType, ObjectType, ValueBaseType
+    let any_type = TypedTypeSpec::SimpleTypeSpec(TypedSimpleTypeSpec::BaseTypeSpec(
+        BaseTypeSpec::AnyType(xidl_parser::typed_ast::AnyType),
+    ));
+    let object_type = TypedTypeSpec::SimpleTypeSpec(TypedSimpleTypeSpec::BaseTypeSpec(
+        BaseTypeSpec::ObjectType(xidl_parser::typed_ast::ObjectType),
+    ));
+    let value_base_type = TypedTypeSpec::SimpleTypeSpec(TypedSimpleTypeSpec::BaseTypeSpec(
+        BaseTypeSpec::ValueBaseType(xidl_parser::typed_ast::ValueBaseType),
+    ));
+    let octet_type = TypedTypeSpec::SimpleTypeSpec(TypedSimpleTypeSpec::BaseTypeSpec(
+        BaseTypeSpec::OctetType(xidl_parser::typed_ast::OctetType),
+    ));
+    assert!(matches!(TypeSpec::from(any_type), TypeSpec::AnyType));
+    assert!(matches!(TypeSpec::from(object_type), TypeSpec::ObjectType));
+    assert!(matches!(
+        TypeSpec::from(value_base_type),
+        TypeSpec::ValueBaseType
+    ));
+    assert!(matches!(
+        TypeSpec::from(octet_type),
+        TypeSpec::IntegerType(xidl_parser::hir::IntegerType::U8)
+    ));
+
     let nested = AnnotationAppl {
         name: AnnotationName::Builtin("outer".to_string()),
         params: None,

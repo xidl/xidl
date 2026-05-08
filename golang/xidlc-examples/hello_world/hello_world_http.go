@@ -30,18 +30,18 @@ func NewHelloWorldHandler(svc HelloWorldService) http.Handler {
 			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return
 		}
-		if err := xidlgohttp.RequireContentType(r, "application/json"); err != nil {
+		if err := xidlgohttp.RequireContentType(r, "text/plain"); err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusUnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE", err.Error())
 			return
 		}
 
 		req := &HelloWorldSayHelloRequest{}
-		body := HelloWorldSayHelloRequestBody{}
-		if err := xidlgohttp.DecodeBody(r, "application/json", &body); err != nil {
+		var body string
+		if err := xidlgohttp.DecodeBody(r, "text/plain", &body); err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusBadRequest, "BAD_REQUEST", err.Error())
 			return
 		}
-		req.Name = body.Name
+		req.Name = body
 		if _, err := svc.SayHello(r.Context(), req); err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "INTERNAL", err.Error())
 			return
@@ -66,18 +66,16 @@ func NewHelloWorldClient(baseURL string, httpClient *http.Client, auth xidlgohtt
 
 func (c *HelloWorldClient) SayHello(ctx context.Context, req *HelloWorldSayHelloRequest) (*HelloWorldSayHelloResponse, error) {
 	requestURL := c.baseURL + formatHelloWorldSayHelloPath(req)
-	body := HelloWorldSayHelloRequestBody{
-		Name: req.Name,
-	}
+	body := req.Name
 	var requestBody bytes.Buffer
-	if err := xidlgohttp.MustCodecForMime("application/json").Encode(&requestBody, body); err != nil {
+	if err := xidlgohttp.MustCodecForMime("text/plain").Encode(&requestBody, body); err != nil {
 		return nil, err
 	}
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", requestURL, &requestBody)
 	if err != nil {
 		return nil, err
 	}
-	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Content-Type", "text/plain")
 	httpReq.Header.Set("Accept", "application/json")
 	resp, err := c.httpClient.Do(httpReq)
 	if err != nil {
@@ -95,10 +93,6 @@ func (c *HelloWorldClient) SayHello(ctx context.Context, req *HelloWorldSayHello
 }
 
 type HelloWorldSayHelloRequest struct {
-	Name string `json:"name" form:"name"`
-}
-
-type HelloWorldSayHelloRequestBody struct {
 	Name string `json:"name" form:"name"`
 }
 

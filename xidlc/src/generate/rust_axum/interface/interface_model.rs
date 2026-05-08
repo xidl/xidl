@@ -89,6 +89,8 @@ pub(crate) struct MethodContext {
     pub(crate) ret_out_expr: String,
     pub(crate) request_content_type: String,
     pub(crate) response_content_type: String,
+    pub(crate) request_body_shape: xidl_parser::rest_hir::HttpBodyShape,
+    pub(crate) response_body_shape: xidl_parser::rest_hir::HttpBodyShape,
 }
 
 #[derive(Serialize, Clone)]

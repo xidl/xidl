@@ -425,5 +425,18 @@ Specification(
                 ),
             },
         ),
+        ConstDcl(
+            ConstDcl {
+                ty: OctetType,
+                ident: "const_octet",
+                value: Literal(
+                    IntegerLiteral(
+                        IntegerLiteral(
+                            "1",
+                        ),
+                    ),
+                ),
+            },
+        ),
     ],
 )

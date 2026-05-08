@@ -26,6 +26,8 @@ func MustCodecForMime(mime string) Codec {
 	switch strings.ToLower(strings.TrimSpace(mime)) {
 	case "", "application/json":
 		return jsonCodec{}
+	case "text/plain":
+		return plainCodec{}
 	case "application/x-www-form-urlencoded":
 		return formCodec{}
 	case "application/msgpack":
@@ -41,6 +43,44 @@ func (jsonCodec) Encode(w io.Writer, value any) error {
 }
 func (jsonCodec) Decode(r io.Reader, value any) error {
 	return json.NewDecoder(r).Decode(value)
+}
+
+type plainCodec struct{}
+
+func (plainCodec) ContentType() string { return "text/plain" }
+func (plainCodec) Encode(w io.Writer, value any) error {
+	rv := reflect.ValueOf(value)
+	if rv.Kind() == reflect.Pointer {
+		rv = rv.Elem()
+	}
+	var s string
+	switch rv.Kind() {
+	case reflect.String:
+		s = rv.String()
+	case reflect.Bool:
+		s = strconv.FormatBool(rv.Bool())
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		s = strconv.FormatInt(rv.Int(), 10)
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		s = strconv.FormatUint(rv.Uint(), 10)
+	case reflect.Float32, reflect.Float64:
+		s = strconv.FormatFloat(rv.Float(), 'f', -1, 64)
+	default:
+		return errors.New("unsupported plain text type: " + rv.Type().String())
+	}
+	_, err := io.WriteString(w, s)
+	return err
+}
+func (plainCodec) Decode(r io.Reader, value any) error {
+	payload, err := io.ReadAll(r)
+	if err != nil {
+		return err
+	}
+	rv := reflect.ValueOf(value)
+	if rv.Kind() != reflect.Pointer || rv.IsNil() {
+		return errors.New("plain decoding requires non-nil pointer")
+	}
+	return assignScalar(rv.Elem(), string(payload))
 }
 
 func (formCodec) ContentType() string { return "application/x-www-form-urlencoded" }

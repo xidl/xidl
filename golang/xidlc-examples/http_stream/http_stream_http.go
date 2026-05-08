@@ -54,7 +54,7 @@ func NewHttpStreamApiHandler(svc HttpStreamApiService) http.Handler {
 		_ = stream.Close()
 	})
 	mux.HandleFunc("POST /upload", func(w http.ResponseWriter, r *http.Request) {
-		if err := xidlgohttp.RequireAccept(r, "application/json"); err != nil {
+		if err := xidlgohttp.RequireAccept(r, "text/plain"); err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusNotAcceptable, "NOT_ACCEPTABLE", err.Error())
 			return
 		}
@@ -76,7 +76,7 @@ func NewHttpStreamApiHandler(svc HttpStreamApiService) http.Handler {
 			return
 		}
 
-		if err := xidlgohttp.EncodeBody(w, "application/json", resp.Return); err != nil {
+		if err := xidlgohttp.EncodeBody(w, "text/plain", resp.Return); err != nil {
 			xidlgohttp.WriteJSONError(w, http.StatusInternalServerError, "ENCODE", err.Error())
 		}
 	})
@@ -121,7 +121,7 @@ func (c *HttpStreamApiClient) UploadAsset(ctx context.Context) (*xidlgohttp.Clie
 	if err != nil {
 		return nil, err
 	}
-	httpReq.Header.Set("Accept", "application/json")
+	httpReq.Header.Set("Accept", "text/plain")
 	xidlgohttp.ApplyClientAuth(httpReq, c.auth, HttpStreamApiUploadAssetSecurityRequirements())
 	stream := xidlgohttp.NewClientStreamWriter[HttpStreamApiUploadAssetRequest, HttpStreamApiUploadAssetResponse](ctx, c.httpClient, httpReq, func(resp *http.Response) (HttpStreamApiUploadAssetResponse, error) {
 		if resp.StatusCode >= 400 {
@@ -198,7 +198,7 @@ func formatHttpStreamApiUploadAssetPath(req *HttpStreamApiUploadAssetRequest) st
 func decodeHttpStreamApiUploadAssetResponse(resp *http.Response) (HttpStreamApiUploadAssetResponse, error) {
 	out := HttpStreamApiUploadAssetResponse{}
 	var body string
-	if err := xidlgohttp.MustCodecForMime("application/json").Decode(resp.Body, &body); err != nil {
+	if err := xidlgohttp.MustCodecForMime("text/plain").Decode(resp.Body, &body); err != nil {
 		return out, err
 	}
 	out.Return = body

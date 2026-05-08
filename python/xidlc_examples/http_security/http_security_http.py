@@ -5,24 +5,26 @@ from dataclasses import dataclass
 from typing import Optional
 
 from xidl.http import (
-    Request,
-    Route,
-    RouteMetadata,
-    SecurityRequirement,
-    ServerStreamResponse,
-    StreamMetadata,
-    cookie_value,
-    encode_json_response,
-    encode_stream_response,
-    header_value,
-    path_value,
-    query_value,
-    read_json_body,
-    read_json_field,
-    read_scalar,
-    require_accept,
-    require_content_type,
-    require_security,
+Request,
+Route,
+RouteMetadata,
+SecurityRequirement,
+ServerStreamResponse,
+StreamMetadata,
+cookie_value,
+encode_json_response,
+encode_response,
+encode_stream_response,
+header_value,
+path_value,
+query_value,
+read_body,
+read_json_body,
+read_json_field,
+read_scalar,
+require_accept,
+require_content_type,
+require_security,
 )
 
 # generated http module: http_security
@@ -68,7 +70,7 @@ class HttpSecurityServiceService(abc.ABC):
         raise NotImplementedError
 
 async def _http_security_service_get_user_endpoint(service: HttpSecurityServiceService, request: Request):
-    require_accept(request, "application/json")
+    require_accept(request, "text/plain")
     _security = require_security(request, [SecurityRequirement(kind="basic"), SecurityRequirement(kind="api_key", name="X-API-Key", location="header")])
     request_value = HttpSecurityServiceGetUserRequest(
         id=read_scalar(path_value(request, "id"), "int", optional=False, default_on_missing=False, wire_name="id"),
@@ -76,7 +78,7 @@ async def _http_security_service_get_user_endpoint(service: HttpSecurityServiceS
         trace_id=read_scalar(header_value(request, "X-Trace-Id"), "str", optional=False, default_on_missing=False, wire_name="X-Trace-Id"),
     )
     response_value = await service.get_user(request_value)
-    return encode_json_response(response_value)
+    return encode_response(response_value.value, "text/plain")
 
 def _http_security_service_get_user_route(service: HttpSecurityServiceService) -> Route:
     async def endpoint(request: Request):
@@ -88,20 +90,20 @@ def _http_security_service_get_user_route(service: HttpSecurityServiceService) -
         handler=service.get_user,
         request_model=HttpSecurityServiceGetUserRequest,
         response_model=HttpSecurityServiceGetUserResponse,
-        metadata=RouteMetadata(request_content_type="application/json", response_content_type="application/json", security=[SecurityRequirement(kind="basic"), SecurityRequirement(kind="api_key", name="X-API-Key", location="header")], stream=None),
+        metadata=RouteMetadata(request_content_type="application/json", response_content_type="text/plain", security=[SecurityRequirement(kind="basic"), SecurityRequirement(kind="api_key", name="X-API-Key", location="header")], stream=None),
     )
 
 async def _http_security_service_search_user_endpoint(service: HttpSecurityServiceService, request: Request):
-    require_accept(request, "application/json")
+    require_accept(request, "text/plain")
     require_content_type(request, "application/json")
     _security = require_security(request, [SecurityRequirement(kind="oauth2", scopes=["write:users", "read:users"])])
-    body = read_json_body(request)
+    body = read_body(request, "application/json")
     request_value = HttpSecurityServiceSearchUserRequest(
         keyword=read_json_field(body, "keyword", "str", optional=False),
         page=read_json_field(body, "page", "int", optional=True),
     )
     response_value = await service.search_user(request_value)
-    return encode_json_response(response_value)
+    return encode_response(response_value.value, "text/plain")
 
 def _http_security_service_search_user_route(service: HttpSecurityServiceService) -> Route:
     async def endpoint(request: Request):
@@ -113,15 +115,15 @@ def _http_security_service_search_user_route(service: HttpSecurityServiceService
         handler=service.search_user,
         request_model=HttpSecurityServiceSearchUserRequest,
         response_model=HttpSecurityServiceSearchUserResponse,
-        metadata=RouteMetadata(request_content_type="application/json", response_content_type="application/json", security=[SecurityRequirement(kind="oauth2", scopes=["write:users", "read:users"])], stream=None),
+        metadata=RouteMetadata(request_content_type="application/json", response_content_type="text/plain", security=[SecurityRequirement(kind="oauth2", scopes=["write:users", "read:users"])], stream=None),
     )
 
 async def _http_security_service_health_endpoint(service: HttpSecurityServiceService, request: Request):
-    require_accept(request, "application/json")
+    require_accept(request, "text/plain")
     _security = require_security(request, [SecurityRequirement(kind="none")])
     request_value = HttpSecurityServiceHealthRequest()
     response_value = await service.health(request_value)
-    return encode_json_response(response_value)
+    return encode_response(response_value.value, "text/plain")
 
 def _http_security_service_health_route(service: HttpSecurityServiceService) -> Route:
     async def endpoint(request: Request):
@@ -133,7 +135,7 @@ def _http_security_service_health_route(service: HttpSecurityServiceService) -> 
         handler=service.health,
         request_model=HttpSecurityServiceHealthRequest,
         response_model=HttpSecurityServiceHealthResponse,
-        metadata=RouteMetadata(request_content_type="application/json", response_content_type="application/json", security=[SecurityRequirement(kind="none")], stream=None),
+        metadata=RouteMetadata(request_content_type="application/json", response_content_type="text/plain", security=[SecurityRequirement(kind="none")], stream=None),
     )
 
 def http_security_service_routes(service: HttpSecurityServiceService) -> list[Route]:

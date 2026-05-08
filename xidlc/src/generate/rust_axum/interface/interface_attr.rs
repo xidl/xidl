@@ -177,16 +177,10 @@ pub(crate) fn render_attr_operation_from_http(
         ret_out_ty,
         ret_in_expr,
         ret_out_expr,
-        request_content_type: if matches!(http_op.stream.kind, Some(HttpStreamKind::Client)) {
-            "application/x-ndjson".to_string()
-        } else {
-            http_op.request_content_type.clone()
-        },
-        response_content_type: if matches!(http_op.stream.kind, Some(HttpStreamKind::Server)) {
-            "text/event-stream".to_string()
-        } else {
-            http_op.response_content_type.clone()
-        },
+        request_content_type: http_op.request_content_type.clone(),
+        response_content_type: http_op.response_content_type.clone(),
+        request_body_shape: http_op.request_body_shape,
+        response_body_shape: http_op.response_body_shape,
     })
 }
 
