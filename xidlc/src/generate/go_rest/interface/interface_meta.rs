@@ -1,10 +1,7 @@
 use crate::error::IdlcResult;
 use crate::generate::go_rest::{MethodMeta, ParamSource, definition};
 use convert_case::{Case, Casing};
-use xidl_parser::rest_hir::{
-    HttpOperation,
-    semantics::{HttpStreamCodec, HttpStreamKind},
-};
+use xidl_parser::rest_hir::HttpOperation;
 
 use super::interface_meta_support::{
     deprecated_context, http_method, param_meta, request_body_context, response_body_context,
@@ -76,20 +73,8 @@ pub(crate) fn build_method_meta(
         response_body_struct,
         response_body_direct_field,
         response_body_direct_ty,
-        request_content_type: if matches!(op.stream.kind, Some(HttpStreamKind::Client)) {
-            "application/x-ndjson".to_string()
-        } else {
-            op.request_content_type.clone()
-        },
-        response_content_type: if matches!(op.stream.kind, Some(HttpStreamKind::Server))
-            && op.stream.codec == HttpStreamCodec::Sse
-        {
-            "text/event-stream".to_string()
-        } else if matches!(op.stream.kind, Some(HttpStreamKind::Client)) {
-            "application/json".to_string()
-        } else {
-            op.response_content_type.clone()
-        },
+        request_content_type: op.request_content_type.clone(),
+        response_content_type: op.response_content_type.clone(),
         request_params,
         path_params,
         query_params,

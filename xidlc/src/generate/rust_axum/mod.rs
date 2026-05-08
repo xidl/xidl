@@ -45,8 +45,8 @@ pub fn generate(
         let props = hashmap! {
             "enable_render_header" => false,
             "enable_metadata" => false,
-            "enable_serialize" => false,
-            "enable_deserialize" => false
+            "enable_serialize" => true,
+            "enable_deserialize" => true
         };
 
         artifacts.push(Artifact::new_hir(ArtifactHir {

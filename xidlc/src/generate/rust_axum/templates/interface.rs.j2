@@ -313,7 +313,7 @@ pub trait {{ ident }} {
         {% endif %}
         {% if method.response_struct is defined and method.response_struct %}
             {% if method.is_server_stream or method.is_client_stream or method.is_bidi_stream %}
-                #[derive({% if opt.enable_client %}::serde::Serialize{% if opt.enable_server %}, {% endif %}{% endif %}{% if opt.enable_server %}::serde::Deserialize{% endif %})]
+                #[derive(::serde::Serialize, ::serde::Deserialize)]
             {% endif %}
             pub struct {{ method.response_struct }} {
                 {% if method.response_include_return %}

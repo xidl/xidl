@@ -95,19 +95,13 @@ pub(crate) fn request_payload_ty(
 
 pub(crate) fn response_ty(
     ret: &str,
-    return_is_unit: bool,
-    response_params: &[ParamContext],
+    response_shape: xidl_parser::rest_hir::HttpResponseShape,
     struct_prefix: &str,
 ) -> String {
-    let response_value_count = usize::from(!return_is_unit) + response_params.len();
-    if response_value_count > 1 || (return_is_unit && response_value_count == 1) {
-        format!("{struct_prefix}Response")
-    } else if !return_is_unit {
-        ret.to_string()
-    } else if let Some(param) = response_params.first() {
-        param.ty.clone()
-    } else {
-        "()".to_string()
+    match response_shape {
+        xidl_parser::rest_hir::HttpResponseShape::None => "()".to_string(),
+        xidl_parser::rest_hir::HttpResponseShape::ReturnOnly => ret.to_string(),
+        xidl_parser::rest_hir::HttpResponseShape::Object => format!("{struct_prefix}Response"),
     }
 }
 

@@ -26,6 +26,33 @@ pub enum HttpParamKind {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum HttpBodyShape {
+    None,
+    /// Only one body parameter, and it's flattened (the body itself is the parameter).
+    SingleFlattened,
+    /// Only one body parameter, not flattened.
+    Single,
+    /// Multiple body parameters, wrapped in an object.
+    Object,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum HttpRequestShape {
+    None,
+    /// One or more parameters (body, query, etc) that require a wrapper struct/object.
+    Object,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum HttpResponseShape {
+    None,
+    /// Only the return value, no out parameters.
+    ReturnOnly,
+    /// Return value and out parameters, or multiple out parameters, or single out parameter with no return value.
+    Object,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum HttpOperationSource {
     Method,
     AttributeGet,
@@ -73,6 +100,10 @@ pub struct HttpOperation {
     pub stream: super::semantics::HttpStreamConfig,
     pub request_content_type: String,
     pub response_content_type: String,
+    pub request_shape: HttpRequestShape,
+    pub response_shape: HttpResponseShape,
+    pub request_body_shape: HttpBodyShape,
+    pub response_body_shape: HttpBodyShape,
     pub security: Option<super::semantics::HttpSecurityProfile>,
     pub basic_auth_realm: Option<String>,
     pub deprecated: Option<super::semantics::DeprecatedInfo>,

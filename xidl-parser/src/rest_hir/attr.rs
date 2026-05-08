@@ -232,6 +232,40 @@ fn base_attribute_operation(args: AttributeOperationArgs<'_>) -> HttpOperation {
         response_params,
         return_type,
     } = args;
+    let request_content_type = if matches!(stream.kind, Some(HttpStreamKind::Client)) {
+        "application/x-ndjson".to_string()
+    } else {
+        "application/json".to_string()
+    };
+    let response_content_type = if matches!(stream.kind, Some(HttpStreamKind::Server))
+        && matches!(stream.codec, HttpStreamCodec::Sse)
+    {
+        "text/event-stream".to_string()
+    } else {
+        "application/json".to_string()
+    };
+    let request_shape = if request_params.is_empty() {
+        super::HttpRequestShape::None
+    } else {
+        super::HttpRequestShape::Object
+    };
+    let response_shape = if return_type.is_some() {
+        super::HttpResponseShape::ReturnOnly
+    } else {
+        super::HttpResponseShape::None
+    };
+
+    let request_body_shape = if request_params.is_empty() {
+        super::HttpBodyShape::None
+    } else {
+        super::HttpBodyShape::Object
+    };
+    let response_body_shape = if return_type.is_some() {
+        super::HttpBodyShape::Single
+    } else {
+        super::HttpBodyShape::None
+    };
+
     HttpOperation {
         name: name.to_string(),
         operation_id: operation_id(module_path, interface_name, name),
@@ -239,8 +273,12 @@ fn base_attribute_operation(args: AttributeOperationArgs<'_>) -> HttpOperation {
         method,
         routes,
         stream,
-        request_content_type: "application/json".to_string(),
-        response_content_type: "application/json".to_string(),
+        request_content_type,
+        response_content_type,
+        request_shape,
+        response_shape,
+        request_body_shape,
+        response_body_shape,
         security,
         basic_auth_realm: None,
         deprecated,

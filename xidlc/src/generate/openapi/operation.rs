@@ -94,16 +94,6 @@ pub(crate) fn render_http_operation(
         response_schema = response_schema.map(array_schema);
     }
 
-    let request_content_type = if matches!(op.stream.kind, Some(HttpStreamKind::Client)) {
-        "application/x-ndjson".to_string()
-    } else {
-        op.request_content_type.clone()
-    };
-    let response_content_type = if matches!(op.stream.kind, Some(HttpStreamKind::Server)) {
-        "text/event-stream".to_string()
-    } else {
-        op.response_content_type.clone()
-    };
     let (security_requirements, security) = op
         .security
         .as_ref()
@@ -129,7 +119,7 @@ pub(crate) fn render_http_operation(
         parameters,
         request_body: request_schema
             .clone()
-            .map(|schema| request_body_schema(schema, &request_content_type)),
+            .map(|schema| request_body_schema(schema, &op.request_content_type)),
         request_stream_item_schema: matches!(op.stream.kind, Some(HttpStreamKind::Client))
             .then_some(request_schema)
             .flatten(),
@@ -147,7 +137,7 @@ pub(crate) fn render_http_operation(
             .unwrap_or(false),
         security_requirements,
         security,
-        response_content_type,
+        response_content_type: op.response_content_type.clone(),
     }
 }
 

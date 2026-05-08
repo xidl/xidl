@@ -147,8 +147,8 @@ fn build_method_model(
             .collect(),
         response_name,
         response_schema_ref,
-        request_content_type: request_content_type(op),
-        response_content_type: response_content_type(op),
+        request_content_type: op.request_content_type.clone(),
+        response_content_type: op.response_content_type.clone(),
         path: path.clone(),
         http_method: http_method_name(op.method).to_string(),
         path_params: value_params(op, HttpParamKind::Path)
@@ -174,7 +174,9 @@ fn build_method_model(
                 access: ts_ident(&param.name),
             })
             .collect(),
-        body_single: direct_body_access(&op.request_params),
+        body_single: matches!(op.request_body_shape, xidl_parser::rest_hir::HttpBodyShape::SingleFlattened)
+            .then(|| direct_body_access(&op.request_params))
+            .flatten(),
         return_ty,
         response_body_mode: response_body_mode(op).to_string(),
         response_body_entries: response_body_entries(op),
@@ -270,20 +272,6 @@ fn validate_stream_support(op: &HttpOperation) -> IdlcResult<()> {
 
 fn only_direct_return(op: &HttpOperation) -> bool {
     op.return_type.is_some() && op.response_params.is_empty()
-}
-
-fn request_content_type(op: &HttpOperation) -> String {
-    match op.stream.kind {
-        Some(HttpStreamKind::Client) => "application/x-ndjson".to_string(),
-        _ => op.request_content_type.clone(),
-    }
-}
-
-fn response_content_type(op: &HttpOperation) -> String {
-    match (op.stream.kind, op.stream.codec) {
-        (Some(HttpStreamKind::Server), HttpStreamCodec::Sse) => "text/event-stream".to_string(),
-        _ => op.response_content_type.clone(),
-    }
 }
 
 fn http_method_name(method: xidl_parser::rest_hir::HttpMethod) -> &'static str {
@@ -488,14 +476,10 @@ fn security_contexts(op: &HttpOperation) -> Vec<SecurityContext> {
 }
 
 fn response_body_mode(op: &HttpOperation) -> &'static str {
-    let response_body_count = op
-        .response_params
-        .iter()
-        .filter(|param| !matches!(param.kind, HttpParamKind::Header | HttpParamKind::Cookie))
-        .count();
-    match (op.return_type.is_some(), response_body_count) {
-        (false, 0) => "none",
-        (true, 0) => "return",
-        _ => "object",
+    match op.response_body_shape {
+        xidl_parser::rest_hir::HttpBodyShape::None => "none",
+        xidl_parser::rest_hir::HttpBodyShape::Single
+        | xidl_parser::rest_hir::HttpBodyShape::SingleFlattened => "return",
+        xidl_parser::rest_hir::HttpBodyShape::Object => "object",
     }
 }

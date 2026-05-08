@@ -35,20 +35,6 @@ pub(super) fn validate_stream_support(operation: &HttpOperation) -> IdlcResult<(
     Ok(())
 }
 
-pub(super) fn request_content_type(operation: &HttpOperation) -> String {
-    match operation.stream.kind {
-        Some(HttpStreamKind::Client) => "application/x-ndjson".to_string(),
-        _ => operation.request_content_type.clone(),
-    }
-}
-
-pub(super) fn response_content_type(operation: &HttpOperation) -> String {
-    match (operation.stream.kind, operation.stream.codec) {
-        (Some(HttpStreamKind::Server), HttpStreamCodec::Sse) => "text/event-stream".to_string(),
-        _ => operation.response_content_type.clone(),
-    }
-}
-
 pub(super) fn security_expr(value: Option<&HttpSecurityProfile>) -> String {
     let Some(value) = value else {
         return "[]".to_string();

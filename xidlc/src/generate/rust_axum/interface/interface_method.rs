@@ -101,8 +101,7 @@ pub(crate) fn render_op_from_http(
         is_bidi_stream,
         &response_ty(
             &ret,
-            return_is_unit,
-            &params.response_params,
+            http_op.response_shape,
             &struct_prefix,
         ),
     );
@@ -124,21 +123,14 @@ pub(crate) fn render_op_from_http(
         server_param_names.push(name);
     }
 
-    let response_value_count = usize::from(!return_is_unit) + params.response_params.len();
-    let response_body_count = usize::from(!return_is_unit) + params.response_body_params.len();
-    let request_body_flatten = params.body_params.len() == 1 && params.body_params[0].flatten;
-    let response_is_empty = response_body_count == 0;
     let response_include_return = !return_is_unit;
-    let response_struct =
-        if response_value_count > 1 || (return_is_unit && response_value_count == 1) {
-            Some(format!("{struct_prefix}Response"))
-        } else {
-            None
-        };
+    let request_body_flatten = matches!(http_op.request_body_shape, xidl_parser::rest_hir::HttpBodyShape::SingleFlattened);
+    let response_is_empty = matches!(http_op.response_body_shape, xidl_parser::rest_hir::HttpBodyShape::None);
+    let response_struct = matches!(http_op.response_shape, xidl_parser::rest_hir::HttpResponseShape::Object)
+        .then(|| format!("{struct_prefix}Response"));
     let response_ty = response_ty(
         &ret,
-        return_is_unit,
-        &params.response_params,
+        http_op.response_shape,
         &struct_prefix,
     );
     let request_item_ty = request_ty.clone();
@@ -163,7 +155,7 @@ pub(crate) fn render_op_from_http(
         reqwest_method: reqwest_method_code(method),
         path,
         paths,
-        struct_prefix,
+        struct_prefix: struct_prefix.clone(),
         path_params: params.path_params,
         query_params: params.query_params,
         header_params: params.header_params,
@@ -171,7 +163,8 @@ pub(crate) fn render_op_from_http(
         body_params: params.body_params,
         request_ty: request_ty.clone(),
         request_payload_ty,
-        request_struct,
+        request_struct: (auth_in_request_struct || !matches!(http_op.request_shape, xidl_parser::rest_hir::HttpRequestShape::None))
+            .then(|| format!("{struct_prefix}Request")),
         auth_wrapper_struct,
         auth_in_request_struct,
         has_basic_auth: security.has_basic_auth,
@@ -204,17 +197,7 @@ pub(crate) fn render_op_from_http(
         ret_out_ty,
         ret_in_expr,
         ret_out_expr,
-        request_content_type: if is_client_stream {
-            "application/x-ndjson".to_string()
-        } else {
-            http_op.request_content_type.clone()
-        },
-        response_content_type: if is_server_stream {
-            "text/event-stream".to_string()
-        } else if is_client_stream {
-            "application/json".to_string()
-        } else {
-            http_op.response_content_type.clone()
-        },
+        request_content_type: http_op.request_content_type.clone(),
+        response_content_type: http_op.response_content_type.clone(),
     })
 }

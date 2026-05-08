@@ -102,6 +102,8 @@ fn projects_stream_operations_with_http_stream_metadata() {
     );
     assert_eq!(ops[0].stream.codec, super::semantics::HttpStreamCodec::Sse);
     assert_eq!(ops[0].method, super::HttpMethod::Get);
+    assert_eq!(ops[0].response_content_type, "text/event-stream");
+    assert_eq!(ops[0].response_shape, super::HttpResponseShape::ReturnOnly);
 
     assert_eq!(
         ops[1].stream.kind,
@@ -112,4 +114,6 @@ fn projects_stream_operations_with_http_stream_metadata() {
         super::semantics::HttpStreamCodec::Ndjson
     );
     assert_eq!(ops[1].method, super::HttpMethod::Post);
+    assert_eq!(ops[1].request_content_type, "application/x-ndjson");
+    assert_eq!(ops[1].request_shape, super::HttpRequestShape::Object);
 }

@@ -5,8 +5,7 @@ use xidl_parser::rest_hir::{
 };
 
 use super::spec_meta::{
-    http_method_name, param_source, request_content_type, response_content_type, security_expr,
-    stream_expr, validate_stream_support,
+    http_method_name, param_source, security_expr, stream_expr, validate_stream_support,
 };
 use super::spec_types::{py_field_name, py_type, py_type_name};
 
@@ -86,13 +85,9 @@ pub(super) fn build_method(
             .collect(),
         request_type: format!("{}{}Request", interface_name, py_type_name(&operation.name)),
         response_type: response_type(interface_name, operation.name.as_str(), stream_kind),
-        request_content_type: request_content_type(operation),
-        response_content_type: response_content_type(operation),
-        requires_request_content_type: operation
-            .request_params
-            .iter()
-            .any(|param| matches!(param.kind, xidl_parser::rest_hir::HttpParamKind::Body))
-            || matches!(stream_kind, Some(HttpStreamKind::Client)),
+        request_content_type: operation.request_content_type.clone(),
+        response_content_type: operation.response_content_type.clone(),
+        requires_request_content_type: !matches!(operation.request_shape, xidl_parser::rest_hir::HttpRequestShape::None),
         security_expr: security_expr(operation.security.as_ref()),
         stream_expr: stream_expr(operation.stream),
         stream_kind,
