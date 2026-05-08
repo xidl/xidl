@@ -3,8 +3,8 @@ use std::process::Command;
 
 use xidlc_examples::city_rest::{SmartCityRestApiServer, SmartCityRestService};
 use xidlc_examples::e2e_test::{
-    E2eHttpRouteAndBodyServer, E2eHttpSecurityServer, E2ePathSeverServer, MockE2eHttpRouteAndBody,
-    MockE2eHttpSecurity, MockE2ePathSever,
+    E2eHttpRouteAndBodyServer, E2eHttpSecurityServer, E2ePathSeverServer, E2eTypeServerServer,
+    MockE2eHttpRouteAndBody, MockE2eHttpSecurity, MockE2ePathSever, MockE2eTypeServer,
 };
 use xidlc_examples::rest_media_types::{RestMediaTypesApiServer, RestMediaTypesService};
 use xidlc_examples::rest_server::{RestServerServer, SimpleRestServer};
@@ -30,6 +30,7 @@ async fn rest_snapshot_tests() {
             .with_service(E2ePathSeverServer::new(MockE2ePathSever))
             .with_service(E2eHttpRouteAndBodyServer::new(MockE2eHttpRouteAndBody))
             .with_service(E2eHttpSecurityServer::new(MockE2eHttpSecurity))
+            .with_service(E2eTypeServerServer::new(MockE2eTypeServer))
             .serve_with_listener(listener)
             .await
     });

@@ -177,3 +177,116 @@ impl E2eHttpSecurity for MockE2eHttpSecurity {
         Ok("ok".to_string())
     }
 }
+
+pub struct MockE2eTypeServer;
+
+#[async_trait::async_trait]
+impl E2eTypeServer for MockE2eTypeServer {
+    async fn get_attribute_attr1(&self) -> Result<String, xidl_rust_axum::Error> {
+        Ok("attr1".to_string())
+    }
+    async fn set_attribute_attr1(&self, _value: String) -> Result<(), xidl_rust_axum::Error> {
+        Ok(())
+    }
+    async fn get_attribute_attr2(&self) -> Result<Vec<String>, xidl_rust_axum::Error> {
+        Ok(vec!["attr2".to_string()])
+    }
+    async fn simple_op(&self) -> Result<(), xidl_rust_axum::Error> {
+        Ok(())
+    }
+    async fn simple_op_with_return1(&self) -> Result<String, xidl_rust_axum::Error> {
+        Ok("simple_op_with_return1".to_string())
+    }
+    async fn simple_op_with_return2(&self) -> Result<EnumEmpty, xidl_rust_axum::Error> {
+        unimplemented!()
+    }
+    async fn simple_op_with_return3(&self) -> Result<EnumSimple1, xidl_rust_axum::Error> {
+        Ok(EnumSimple1::V1)
+    }
+    async fn simple_op_with_return4(&self) -> Result<StructEmpty, xidl_rust_axum::Error> {
+        Ok(StructEmpty {})
+    }
+    async fn simple_op_with_return5(&self) -> Result<StructSimple, xidl_rust_axum::Error> {
+        unimplemented!()
+    }
+    async fn return_with_sequence1(&self) -> Result<Vec<String>, xidl_rust_axum::Error> {
+        Ok(vec!["s1".to_string(), "s2".to_string()])
+    }
+    async fn return_with_sequence2(&self) -> Result<Vec<EnumEmpty>, xidl_rust_axum::Error> {
+        Ok(vec![])
+    }
+    async fn return_with_sequence3(&self) -> Result<Vec<EnumSimple1>, xidl_rust_axum::Error> {
+        Ok(vec![EnumSimple1::V1, EnumSimple1::V2])
+    }
+    async fn return_with_sequence4(&self) -> Result<Vec<StructEmpty>, xidl_rust_axum::Error> {
+        Ok(vec![StructEmpty {}])
+    }
+    async fn return_with_sequence5(&self) -> Result<Vec<StructSimple>, xidl_rust_axum::Error> {
+        Ok(vec![])
+    }
+    async fn return_with_map(&self) -> Result<BTreeMap<String, u8>, xidl_rust_axum::Error> {
+        let mut m = BTreeMap::new();
+        m.insert("k1".to_string(), 1);
+        Ok(m)
+    }
+    async fn return_with_any(&self) -> Result<serde_json::Value, xidl_rust_axum::Error> {
+        Ok(serde_json::json!({"any": "value"}))
+    }
+    async fn return_with_any_sequence(
+        &self,
+    ) -> Result<Vec<serde_json::Value>, xidl_rust_axum::Error> {
+        Ok(vec![serde_json::json!(1), serde_json::json!("two")])
+    }
+    async fn return_with_any_map(
+        &self,
+    ) -> Result<BTreeMap<String, serde_json::Value>, xidl_rust_axum::Error> {
+        let mut m = BTreeMap::new();
+        m.insert("k1".to_string(), serde_json::json!(1));
+        Ok(m)
+    }
+    async fn parameter_op(&self, _a: String) -> Result<(), xidl_rust_axum::Error> {
+        Ok(())
+    }
+    async fn parameter_op2(&self, _a: String) -> Result<(), xidl_rust_axum::Error> {
+        Ok(())
+    }
+    async fn parameter_op3(
+        &self,
+        _a: String,
+        _c: Vec<serde_json::Value>,
+    ) -> Result<E2ETypeServerParameterOp3Response, xidl_rust_axum::Error> {
+        Ok(E2ETypeServerParameterOp3Response { b: 3, c: vec![] })
+    }
+    async fn parameter_op4(
+        &self,
+        _c: Vec<serde_json::Value>,
+    ) -> Result<E2ETypeServerParameterOp4Response, xidl_rust_axum::Error> {
+        Ok(E2ETypeServerParameterOp4Response {
+            a: "op4".to_string(),
+            b: 4,
+            c: vec![],
+        })
+    }
+    async fn parameter_op5(
+        &self,
+        _c: Vec<serde_json::Value>,
+    ) -> Result<E2ETypeServerParameterOp5Response, xidl_rust_axum::Error> {
+        Ok(E2ETypeServerParameterOp5Response {
+            r#return: vec![serde_json::json!("op5")],
+            a: "op5".to_string(),
+            b: 5,
+            c: vec![],
+        })
+    }
+    async fn parameter_op6(
+        &self,
+        _c: Vec<serde_json::Value>,
+    ) -> Result<E2ETypeServerParameterOp6Response, xidl_rust_axum::Error> {
+        Ok(E2ETypeServerParameterOp6Response {
+            r#return: BTreeMap::new(),
+            a: "op6".to_string(),
+            b: 6,
+            c: vec![],
+        })
+    }
+}
