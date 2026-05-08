@@ -42,7 +42,7 @@ async fn rest_snapshot_tests() {
         .expect("read defs dir")
         .filter_map(|e| e.ok())
         .map(|e| e.path())
-        .filter(|p| p.extension().map_or(false, |ext| ext == "hurl"))
+        .filter(|p| p.extension().is_some_and(|ext| ext == "hurl"))
         .collect();
     hurl_files.sort();
 
