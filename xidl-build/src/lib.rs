@@ -52,6 +52,7 @@ pub struct Builder {
     output_filename: Option<PathBuf>,
     client: bool,
     server: bool,
+    mock: bool,
 }
 
 impl Default for Builder {
@@ -62,6 +63,7 @@ impl Default for Builder {
             output_filename: None,
             client: true,
             server: true,
+            mock: false,
         }
     }
 }
@@ -74,6 +76,7 @@ impl Builder {
     /// - output directory: Cargo `OUT_DIR`
     /// - client generation: enabled
     /// - server generation: enabled
+    /// - mock generation: disabled
     pub fn new() -> Self {
         Self::default()
     }
@@ -93,6 +96,14 @@ impl Builder {
     /// environment variable.
     pub fn with_out_dir(mut self, out_dir: impl Into<PathBuf>) -> Self {
         self.out_dir = Some(out_dir.into());
+        self
+    }
+
+    /// Enables or disables mock generation.
+    ///
+    /// When enabled, generated traits will be annotated with `#[mockall::automock]`.
+    pub fn with_mock(mut self, mock: bool) -> Self {
+        self.mock = mock;
         self
     }
 
@@ -151,6 +162,7 @@ impl Builder {
             files: inputs.iter().map(|p| p.as_ref().to_path_buf()).collect(),
             client: self.client,
             server: self.server,
+            mock: self.mock,
             dry_run: false,
         };
 

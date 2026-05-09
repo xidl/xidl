@@ -3,10 +3,10 @@ include!(concat!(env!("OUT_DIR"), "/e2e_test.rs"));
 
 use std::collections::BTreeMap;
 
-pub struct MockE2ePathSever;
+pub struct LogicE2ePathSever;
 
 #[async_trait::async_trait]
-impl E2ePathSever for MockE2ePathSever {
+impl E2ePathSever for LogicE2ePathSever {
     async fn op_with_path(&self, param1: String) -> Result<Vec<String>, xidl_rust_axum::Error> {
         Ok(vec![param1])
     }
@@ -43,10 +43,10 @@ impl E2ePathSever for MockE2ePathSever {
     }
 }
 
-pub struct MockE2eHttpRouteAndBody;
+pub struct LogicE2eHttpRouteAndBody;
 
 #[async_trait::async_trait]
-impl E2eHttpRouteAndBody for MockE2eHttpRouteAndBody {
+impl E2eHttpRouteAndBody for LogicE2eHttpRouteAndBody {
     async fn get_resource(
         &self,
         resource_id: String,
@@ -148,10 +148,10 @@ impl E2eHttpRouteAndBody for MockE2eHttpRouteAndBody {
     }
 }
 
-pub struct MockE2eHttpSecurity;
+pub struct LogicE2eHttpSecurity;
 
 #[async_trait::async_trait]
-impl E2eHttpSecurity for MockE2eHttpSecurity {
+impl E2eHttpSecurity for LogicE2eHttpSecurity {
     async fn get_secure_user(
         &self,
         user_id: String,
@@ -178,10 +178,10 @@ impl E2eHttpSecurity for MockE2eHttpSecurity {
     }
 }
 
-pub struct MockE2eTypeServer;
+pub struct LogicE2eTypeServer;
 
 #[async_trait::async_trait]
-impl E2eTypeServer for MockE2eTypeServer {
+impl E2eTypeServer for LogicE2eTypeServer {
     async fn get_attribute_type_attr1(&self) -> Result<String, xidl_rust_axum::Error> {
         Ok("attr1".to_string())
     }
@@ -291,10 +291,10 @@ impl E2eTypeServer for MockE2eTypeServer {
     }
 }
 
-pub struct MockE2eAttribute;
+pub struct LogicE2eAttribute;
 
 #[async_trait::async_trait]
-impl E2eAttribute for MockE2eAttribute {
+impl E2eAttribute for LogicE2eAttribute {
     async fn get_attribute_attr1(&self) -> Result<String, xidl_rust_axum::Error> {
         Ok("attr1".to_string())
     }
@@ -419,10 +419,10 @@ impl E2eAttribute for MockE2eAttribute {
     }
 }
 
-pub struct MockE2eHttpForm;
+pub struct LogicE2eHttpForm;
 
 #[async_trait::async_trait]
-impl E2eHttpForm for MockE2eHttpForm {
+impl E2eHttpForm for LogicE2eHttpForm {
     async fn submit_profile(
         &self,
         name: String,
@@ -435,10 +435,10 @@ impl E2eHttpForm for MockE2eHttpForm {
     }
 }
 
-pub struct MockE2eHttpScopeMatrix;
+pub struct LogicE2eHttpScopeMatrix;
 
 #[async_trait::async_trait]
-impl E2eHttpScopeMatrix for MockE2eHttpScopeMatrix {
+impl E2eHttpScopeMatrix for LogicE2eHttpScopeMatrix {
     async fn get_attribute_scope_inherited_attr(&self) -> Result<String, xidl_rust_axum::Error> {
         Ok("inherited".to_string())
     }
@@ -507,10 +507,10 @@ impl E2eHttpScopeMatrix for MockE2eHttpScopeMatrix {
     }
 }
 
-pub struct MockE2eHttpDefaultsMatrix;
+pub struct LogicE2eHttpDefaultsMatrix;
 
 #[async_trait::async_trait]
-impl E2eHttpDefaultsMatrix for MockE2eHttpDefaultsMatrix {
+impl E2eHttpDefaultsMatrix for LogicE2eHttpDefaultsMatrix {
     async fn delete_resource_default_query(
         &self,
         id: String,
@@ -560,10 +560,10 @@ impl E2eHttpDefaultsMatrix for MockE2eHttpDefaultsMatrix {
     }
 }
 
-pub struct MockE2eHttpSecurityMatrix;
+pub struct LogicE2eHttpSecurityMatrix;
 
 #[async_trait::async_trait]
-impl E2eHttpSecurityMatrix for MockE2eHttpSecurityMatrix {
+impl E2eHttpSecurityMatrix for LogicE2eHttpSecurityMatrix {
     async fn inherited_security(
         &self,
         resource_id: String,

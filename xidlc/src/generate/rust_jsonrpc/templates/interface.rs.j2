@@ -1,7 +1,11 @@
-{% if rust_attrs and rust_attrs | length > 0 %}
-    {% for attr in rust_attrs %}
+{% if rust_attrs and rust_attrs | length > 0 -%}
+    {% for attr in rust_attrs -%}
         #[{{ attr }}]
-    {% endfor %}
+    {% endfor -%}
+{%- endif -%}
+{% if opt.mock -%}
+    #[allow(deprecated, useless_deprecated)]
+    #[mockall::automock]
 {%- endif %}
 #[async_trait::async_trait]
 pub trait {{ ident }} {

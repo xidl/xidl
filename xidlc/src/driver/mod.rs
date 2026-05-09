@@ -18,6 +18,7 @@ pub struct ArgsGenerate {
     pub client: bool,
     pub server: bool,
     pub dry_run: bool,
+    pub mock: bool,
     pub files: Vec<PathBuf>,
 }
 
@@ -26,6 +27,7 @@ impl ArgsGenerate {
         HashMap::from([
             ("enable_client".into(), self.client.into()),
             ("enable_server".into(), self.server.into()),
+            ("mock".into(), self.mock.into()),
         ])
     }
 }

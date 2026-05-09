@@ -4,6 +4,10 @@
 {% for attr in rust_attrs %}
     #[{{ attr }}]
 {% endfor %}
+{% if opt.mock -%}
+    #[allow(deprecated, useless_deprecated)]
+    #[mockall::automock]
+{%- endif %}
 pub trait {{ ident }} {
     {% for method in methods %}
         {%- for line in method.doc %}
