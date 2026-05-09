@@ -44,6 +44,7 @@ pub struct ElementSpec {
     pub ty: ElementSpecTy,
     pub value: Declarator,
     pub field_id: Option<u32>,
+    pub recursive: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -201,6 +202,7 @@ impl From<crate::typed_ast::ElementSpec> for ElementSpec {
             annotations,
             ty: value.ty.into(),
             value: value.value.into(),
+            recursive: false,
         }
     }
 }

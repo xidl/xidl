@@ -36,19 +36,29 @@ pub(crate) fn render_union_with_config(
         if seen.insert(name.clone()) {
             let doc = doc_lines_from_annotations(&case.element.annotations);
             let rust_attrs = rust_passthrough_attrs_from_annotations(&case.element.annotations);
-            fields.push((name, &case.element.ty, &case.element.value, doc, rust_attrs));
+            fields.push((
+                name,
+                &case.element.ty,
+                &case.element.value,
+                doc,
+                rust_attrs,
+                case.element.recursive,
+            ));
         }
     }
 
     let members = fields
         .into_iter()
-        .map(|(name, ty, decl, doc, rust_attrs)| {
-            let ty = match ty {
+        .map(|(name, ty, decl, doc, rust_attrs, recursive)| {
+            let mut ty = match ty {
                 hir::ElementSpecTy::TypeSpec(spec) => type_with_decl(spec, decl),
                 hir::ElementSpecTy::ConstrTypeDcl(constr) => {
                     rust_scoped_name(&constr_type_scoped_name(constr))
                 }
             };
+            if recursive {
+                ty = format!("Box<{ty}>");
+            }
             json!({ "name": name, "ty": ty, "doc": doc, "rust_attrs": rust_attrs })
         })
         .collect::<Vec<_>>();
@@ -79,12 +89,15 @@ pub(crate) fn render_union_with_config(
                 .field_id
                 .map(|value| format!("{value}u32"))
                 .unwrap_or_else(|| "1u32".to_string());
-            let field_ty = match &case.element.ty {
+            let mut field_ty = match &case.element.ty {
                 hir::ElementSpecTy::TypeSpec(spec) => type_with_decl(spec, &case.element.value),
                 hir::ElementSpecTy::ConstrTypeDcl(constr) => {
                     rust_scoped_name(&constr_type_scoped_name(constr))
                 }
             };
+            if case.element.recursive {
+                field_ty = format!("Box<{field_ty}>");
+            }
             let serde_arms = if is_default {
                 vec![json!({
                     "match_expr": "_",

@@ -184,6 +184,7 @@ Specification(
                                     field_id: Some(
                                         1,
                                     ),
+                                    recursive: false,
                                 },
                             },
                         ],
@@ -301,6 +302,7 @@ Specification(
                                     field_id: Some(
                                         1,
                                     ),
+                                    recursive: false,
                                 },
                             },
                         ],
@@ -438,6 +440,7 @@ Specification(
                                     field_id: Some(
                                         1,
                                     ),
+                                    recursive: false,
                                 },
                             },
                         ],
@@ -560,6 +563,7 @@ Specification(
                                     field_id: Some(
                                         1,
                                     ),
+                                    recursive: false,
                                 },
                             },
                         ],
@@ -603,6 +607,7 @@ Specification(
                                     field_id: Some(
                                         1,
                                     ),
+                                    recursive: false,
                                 },
                             },
                             Case {
@@ -638,6 +643,7 @@ Specification(
                                     field_id: Some(
                                         2,
                                     ),
+                                    recursive: false,
                                 },
                             },
                             Case {
@@ -673,6 +679,7 @@ Specification(
                                     field_id: Some(
                                         3,
                                     ),
+                                    recursive: false,
                                 },
                             },
                             Case {
@@ -708,6 +715,7 @@ Specification(
                                     field_id: Some(
                                         4,
                                     ),
+                                    recursive: false,
                                 },
                             },
                             Case {
@@ -743,6 +751,7 @@ Specification(
                                     field_id: Some(
                                         5,
                                     ),
+                                    recursive: false,
                                 },
                             },
                         ],
@@ -847,6 +856,7 @@ Specification(
                                     field_id: Some(
                                         1,
                                     ),
+                                    recursive: false,
                                 },
                             },
                             Case {
@@ -882,6 +892,7 @@ Specification(
                                     field_id: Some(
                                         2,
                                     ),
+                                    recursive: false,
                                 },
                             },
                             Case {
@@ -917,6 +928,7 @@ Specification(
                                     field_id: Some(
                                         3,
                                     ),
+                                    recursive: false,
                                 },
                             },
                             Case {
@@ -952,6 +964,7 @@ Specification(
                                     field_id: Some(
                                         4,
                                     ),
+                                    recursive: false,
                                 },
                             },
                             Case {
@@ -987,6 +1000,7 @@ Specification(
                                     field_id: Some(
                                         5,
                                     ),
+                                    recursive: false,
                                 },
                             },
                         ],
