@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.57.0](https://github.com/xidl/xidl/compare/v0.56.0...v0.57.0) (2026-05-09)
+
+
+### Features
+
+* **rust-gen:** add support for recursive union types ([cbd0148](https://github.com/xidl/xidl/commit/cbd01481511d380996069fa6a3f1abcb6345797b))
+
+
+### Bug Fixes
+
+* **xidlc-examples:** address clippy warning in rest_snapshots test ([07b40c5](https://github.com/xidl/xidl/commit/07b40c548d4217266a2d7de5d4df68356475e2ae))
+
 ## [0.56.0](https://github.com/xidl/xidl/compare/v0.55.0...v0.56.0) (2026-05-07)
 
 
