@@ -3,6 +3,7 @@ use xidl_build::Builder;
 fn build_openapi(file_name: &str) {
     Builder::new()
         .with_lang("rust-axum")
+        .with_mock(true)
         .compile(&[format!("./api/rest/{file_name}.idl")])
         .expect("failed to compile city http idl for rust-axum example");
     Builder::new()
@@ -16,6 +17,7 @@ fn build_openapi(file_name: &str) {
 fn build_jsonrpc(file_name: &str) {
     Builder::new()
         .with_lang("rust-jsonrpc")
+        .with_mock(true)
         .compile(&[format!("./api/jsonrpc/{file_name}.idl")])
         .expect("failed to compile city jsonrpc idl for rust-jsonrpc example");
     Builder::new()

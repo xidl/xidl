@@ -100,6 +100,8 @@ struct ClientServerArgs {
     client: bool,
     #[arg(long = "server", default_value_t = true)]
     server: bool,
+    #[arg(long = "mock", default_value_t = false)]
+    mock: bool,
     files: Vec<PathBuf>,
 }
 
@@ -107,6 +109,8 @@ struct ClientServerArgs {
 struct ClientOnlyArgs {
     #[arg(long = "client", default_value_t = true)]
     client: bool,
+    #[arg(long = "mock", default_value_t = false)]
+    mock: bool,
     files: Vec<PathBuf>,
 }
 
@@ -210,6 +214,7 @@ impl SharedGenArgs {
             client: false,
             server: true,
             dry_run: self.dry_run,
+            mock: false,
             files,
         }
     }
@@ -220,6 +225,7 @@ impl SharedGenArgs {
             out_dir: self.out_dir,
             client: args.client,
             server: args.server,
+            mock: args.mock,
             dry_run: self.dry_run,
             files: args.files,
         }
@@ -231,6 +237,7 @@ impl SharedGenArgs {
             out_dir: self.out_dir,
             client: args.client,
             server: false,
+            mock: args.mock,
             dry_run: self.dry_run,
             files: args.files,
         }

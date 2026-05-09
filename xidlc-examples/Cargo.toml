@@ -19,6 +19,7 @@ async-stream.workspace = true
 serde.workspace = true
 xidl-rust-axum = { workspace = true, features = ["msgpack"] }
 serde_json.workspace = true
+mockall.workspace = true
 xidl-jsonrpc = { workspace = true, features = ["transport-tcp"] }
 
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }

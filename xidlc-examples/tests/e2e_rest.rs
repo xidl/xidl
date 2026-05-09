@@ -5,9 +5,9 @@ use xidlc_examples::city_rest::{SmartCityRestApiServer, SmartCityRestService};
 use xidlc_examples::e2e_test::{
     E2eAttributeServer, E2eHttpDefaultsMatrixServer, E2eHttpFormServer, E2eHttpRouteAndBodyServer,
     E2eHttpScopeMatrixServer, E2eHttpSecurityMatrixServer, E2eHttpSecurityServer,
-    E2ePathSeverServer, E2eTypeServerServer, MockE2eAttribute, MockE2eHttpDefaultsMatrix,
-    MockE2eHttpForm, MockE2eHttpRouteAndBody, MockE2eHttpScopeMatrix, MockE2eHttpSecurity,
-    MockE2eHttpSecurityMatrix, MockE2ePathSever, MockE2eTypeServer,
+    E2ePathSeverServer, E2eTypeServerServer, LogicE2eAttribute, LogicE2eHttpDefaultsMatrix,
+    LogicE2eHttpForm, LogicE2eHttpRouteAndBody, LogicE2eHttpScopeMatrix, LogicE2eHttpSecurity,
+    LogicE2eHttpSecurityMatrix, LogicE2ePathSever, LogicE2eTypeServer,
 };
 use xidlc_examples::rest_media_types::{RestMediaTypesApiServer, RestMediaTypesService};
 use xidlc_examples::rest_server::{RestServerServer, SimpleRestServer};
@@ -30,15 +30,15 @@ async fn rest_snapshot_tests() {
             .with_service(RestServerServer::new(SimpleRestServer::new()))
             .with_service(SmartCityRestApiServer::new(SmartCityRestService))
             .with_service(RestMediaTypesApiServer::new(RestMediaTypesService))
-            .with_service(E2ePathSeverServer::new(MockE2ePathSever))
-            .with_service(E2eHttpRouteAndBodyServer::new(MockE2eHttpRouteAndBody))
-            .with_service(E2eHttpSecurityServer::new(MockE2eHttpSecurity))
-            .with_service(E2eTypeServerServer::new(MockE2eTypeServer))
-            .with_service(E2eAttributeServer::new(MockE2eAttribute))
-            .with_service(E2eHttpFormServer::new(MockE2eHttpForm))
-            .with_service(E2eHttpScopeMatrixServer::new(MockE2eHttpScopeMatrix))
-            .with_service(E2eHttpDefaultsMatrixServer::new(MockE2eHttpDefaultsMatrix))
-            .with_service(E2eHttpSecurityMatrixServer::new(MockE2eHttpSecurityMatrix))
+            .with_service(E2ePathSeverServer::new(LogicE2ePathSever))
+            .with_service(E2eHttpRouteAndBodyServer::new(LogicE2eHttpRouteAndBody))
+            .with_service(E2eHttpSecurityServer::new(LogicE2eHttpSecurity))
+            .with_service(E2eTypeServerServer::new(LogicE2eTypeServer))
+            .with_service(E2eAttributeServer::new(LogicE2eAttribute))
+            .with_service(E2eHttpFormServer::new(LogicE2eHttpForm))
+            .with_service(E2eHttpScopeMatrixServer::new(LogicE2eHttpScopeMatrix))
+            .with_service(E2eHttpDefaultsMatrixServer::new(LogicE2eHttpDefaultsMatrix))
+            .with_service(E2eHttpSecurityMatrixServer::new(LogicE2eHttpSecurityMatrix))
             .serve_with_listener(listener)
             .await
     });
