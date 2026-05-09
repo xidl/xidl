@@ -17,7 +17,7 @@
   "paths": {
     "/attribute/attr1": {
       "get": {
-        "operationId": "E2eTypeServer.get_attribute_attr1",
+        "operationId": "E2eAttribute.get_attribute_attr1",
         "responses": {
           "200": {
             "description": "OK",
@@ -42,7 +42,7 @@
         }
       },
       "post": {
-        "operationId": "E2eTypeServer.set_attribute_attr1",
+        "operationId": "E2eAttribute.set_attribute_attr1",
         "requestBody": {
           "content": {
             "application/json": {
@@ -458,7 +458,7 @@
     },
     "/attribute/attr2": {
       "get": {
-        "operationId": "E2eTypeServer.get_attribute_attr2",
+        "operationId": "E2eAttribute.get_attribute_attr2",
         "responses": {
           "200": {
             "description": "OK",
@@ -936,10 +936,10 @@
         }
       }
     },
-    "/attribute/bare_attr": {
+    "/attribute/scope_bare_attr": {
       "get": {
         "description": "Deprecated.",
-        "operationId": "E2eHttpScopeMatrix.get_attribute_bare_attr",
+        "operationId": "E2eHttpScopeMatrix.get_attribute_scope_bare_attr",
         "responses": {
           "200": {
             "description": "OK",
@@ -965,10 +965,10 @@
         "deprecated": true
       }
     },
-    "/attribute/inherited_attr": {
+    "/attribute/scope_inherited_attr": {
       "get": {
         "description": "Deprecated. Since 2026-01-15T00:00:00Z.",
-        "operationId": "E2eHttpScopeMatrix.get_attribute_inherited_attr",
+        "operationId": "E2eHttpScopeMatrix.get_attribute_scope_inherited_attr",
         "responses": {
           "200": {
             "description": "OK",
@@ -992,6 +992,90 @@
           }
         },
         "deprecated": true
+      }
+    },
+    "/attribute/type_attr1": {
+      "get": {
+        "operationId": "E2eTypeServer.get_attribute_type_attr1",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "E2eTypeServer.set_attribute_type_attr1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attribute/type_attr2": {
+      "get": {
+        "operationId": "E2eTypeServer.get_attribute_type_attr2",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/healthz": {
@@ -6860,22 +6944,22 @@
           {
             "type": "object",
             "required": [
-              "get_attribute_inherited_attr"
+              "get_attribute_scope_inherited_attr"
             ],
             "properties": {
-              "get_attribute_inherited_attr": {
-                "$ref": "#/components/schemas/E2eHttpScopeMatrix_get_attribute_inherited_attr_In"
+              "get_attribute_scope_inherited_attr": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_get_attribute_scope_inherited_attr_In"
               }
             }
           },
           {
             "type": "object",
             "required": [
-              "get_attribute_bare_attr"
+              "get_attribute_scope_bare_attr"
             ],
             "properties": {
-              "get_attribute_bare_attr": {
-                "$ref": "#/components/schemas/E2eHttpScopeMatrix_get_attribute_bare_attr_In"
+              "get_attribute_scope_bare_attr": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_get_attribute_scope_bare_attr_In"
               }
             }
           },
@@ -7004,22 +7088,22 @@
           {
             "type": "object",
             "required": [
-              "get_attribute_inherited_attr"
+              "get_attribute_scope_inherited_attr"
             ],
             "properties": {
-              "get_attribute_inherited_attr": {
-                "$ref": "#/components/schemas/E2eHttpScopeMatrix_get_attribute_inherited_attr_Result"
+              "get_attribute_scope_inherited_attr": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_get_attribute_scope_inherited_attr_Result"
               }
             }
           },
           {
             "type": "object",
             "required": [
-              "get_attribute_bare_attr"
+              "get_attribute_scope_bare_attr"
             ],
             "properties": {
-              "get_attribute_bare_attr": {
-                "$ref": "#/components/schemas/E2eHttpScopeMatrix_get_attribute_bare_attr_Result"
+              "get_attribute_scope_bare_attr": {
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_get_attribute_scope_bare_attr_Result"
               }
             }
           },
@@ -7250,7 +7334,7 @@
           }
         ]
       },
-      "E2eHttpScopeMatrix_get_attribute_bare_attr_In": {
+      "E2eHttpScopeMatrix_get_attribute_scope_bare_attr_In": {
         "type": "object",
         "required": [
           "dummy"
@@ -7261,7 +7345,7 @@
           }
         }
       },
-      "E2eHttpScopeMatrix_get_attribute_bare_attr_Out": {
+      "E2eHttpScopeMatrix_get_attribute_scope_bare_attr_Out": {
         "type": "object",
         "required": [
           "return_"
@@ -7272,7 +7356,7 @@
           }
         }
       },
-      "E2eHttpScopeMatrix_get_attribute_bare_attr_Result": {
+      "E2eHttpScopeMatrix_get_attribute_scope_bare_attr_Result": {
         "oneOf": [
           {
             "type": "object",
@@ -7281,13 +7365,13 @@
             ],
             "properties": {
               "result": {
-                "$ref": "#/components/schemas/E2eHttpScopeMatrix_get_attribute_bare_attr_Out"
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_get_attribute_scope_bare_attr_Out"
               }
             }
           }
         ]
       },
-      "E2eHttpScopeMatrix_get_attribute_inherited_attr_In": {
+      "E2eHttpScopeMatrix_get_attribute_scope_inherited_attr_In": {
         "type": "object",
         "required": [
           "dummy"
@@ -7298,7 +7382,7 @@
           }
         }
       },
-      "E2eHttpScopeMatrix_get_attribute_inherited_attr_Out": {
+      "E2eHttpScopeMatrix_get_attribute_scope_inherited_attr_Out": {
         "type": "object",
         "required": [
           "return_"
@@ -7309,7 +7393,7 @@
           }
         }
       },
-      "E2eHttpScopeMatrix_get_attribute_inherited_attr_Result": {
+      "E2eHttpScopeMatrix_get_attribute_scope_inherited_attr_Result": {
         "oneOf": [
           {
             "type": "object",
@@ -7318,7 +7402,7 @@
             ],
             "properties": {
               "result": {
-                "$ref": "#/components/schemas/E2eHttpScopeMatrix_get_attribute_inherited_attr_Out"
+                "$ref": "#/components/schemas/E2eHttpScopeMatrix_get_attribute_scope_inherited_attr_Out"
               }
             }
           }
@@ -8441,33 +8525,33 @@
           {
             "type": "object",
             "required": [
-              "get_attribute_attr1"
+              "get_attribute_type_attr1"
             ],
             "properties": {
-              "get_attribute_attr1": {
-                "$ref": "#/components/schemas/E2eTypeServer_get_attribute_attr1_In"
+              "get_attribute_type_attr1": {
+                "$ref": "#/components/schemas/E2eTypeServer_get_attribute_type_attr1_In"
               }
             }
           },
           {
             "type": "object",
             "required": [
-              "set_attribute_attr1"
+              "set_attribute_type_attr1"
             ],
             "properties": {
-              "set_attribute_attr1": {
-                "$ref": "#/components/schemas/E2eTypeServer_set_attribute_attr1_In"
+              "set_attribute_type_attr1": {
+                "$ref": "#/components/schemas/E2eTypeServer_set_attribute_type_attr1_In"
               }
             }
           },
           {
             "type": "object",
             "required": [
-              "get_attribute_attr2"
+              "get_attribute_type_attr2"
             ],
             "properties": {
-              "get_attribute_attr2": {
-                "$ref": "#/components/schemas/E2eTypeServer_get_attribute_attr2_In"
+              "get_attribute_type_attr2": {
+                "$ref": "#/components/schemas/E2eTypeServer_get_attribute_type_attr2_In"
               }
             }
           },
@@ -8750,33 +8834,33 @@
           {
             "type": "object",
             "required": [
-              "get_attribute_attr1"
+              "get_attribute_type_attr1"
             ],
             "properties": {
-              "get_attribute_attr1": {
-                "$ref": "#/components/schemas/E2eTypeServer_get_attribute_attr1_Result"
+              "get_attribute_type_attr1": {
+                "$ref": "#/components/schemas/E2eTypeServer_get_attribute_type_attr1_Result"
               }
             }
           },
           {
             "type": "object",
             "required": [
-              "set_attribute_attr1"
+              "set_attribute_type_attr1"
             ],
             "properties": {
-              "set_attribute_attr1": {
-                "$ref": "#/components/schemas/E2eTypeServer_set_attribute_attr1_Result"
+              "set_attribute_type_attr1": {
+                "$ref": "#/components/schemas/E2eTypeServer_set_attribute_type_attr1_Result"
               }
             }
           },
           {
             "type": "object",
             "required": [
-              "get_attribute_attr2"
+              "get_attribute_type_attr2"
             ],
             "properties": {
-              "get_attribute_attr2": {
-                "$ref": "#/components/schemas/E2eTypeServer_get_attribute_attr2_Result"
+              "get_attribute_type_attr2": {
+                "$ref": "#/components/schemas/E2eTypeServer_get_attribute_type_attr2_Result"
               }
             }
           },
@@ -9013,7 +9097,7 @@
           }
         ]
       },
-      "E2eTypeServer_get_attribute_attr1_In": {
+      "E2eTypeServer_get_attribute_type_attr1_In": {
         "type": "object",
         "required": [
           "dummy"
@@ -9024,7 +9108,7 @@
           }
         }
       },
-      "E2eTypeServer_get_attribute_attr1_Out": {
+      "E2eTypeServer_get_attribute_type_attr1_Out": {
         "type": "object",
         "required": [
           "return_"
@@ -9035,7 +9119,7 @@
           }
         }
       },
-      "E2eTypeServer_get_attribute_attr1_Result": {
+      "E2eTypeServer_get_attribute_type_attr1_Result": {
         "oneOf": [
           {
             "type": "object",
@@ -9044,13 +9128,13 @@
             ],
             "properties": {
               "result": {
-                "$ref": "#/components/schemas/E2eTypeServer_get_attribute_attr1_Out"
+                "$ref": "#/components/schemas/E2eTypeServer_get_attribute_type_attr1_Out"
               }
             }
           }
         ]
       },
-      "E2eTypeServer_get_attribute_attr2_In": {
+      "E2eTypeServer_get_attribute_type_attr2_In": {
         "type": "object",
         "required": [
           "dummy"
@@ -9061,7 +9145,7 @@
           }
         }
       },
-      "E2eTypeServer_get_attribute_attr2_Out": {
+      "E2eTypeServer_get_attribute_type_attr2_Out": {
         "type": "object",
         "required": [
           "return_"
@@ -9075,7 +9159,7 @@
           }
         }
       },
-      "E2eTypeServer_get_attribute_attr2_Result": {
+      "E2eTypeServer_get_attribute_type_attr2_Result": {
         "oneOf": [
           {
             "type": "object",
@@ -9084,7 +9168,7 @@
             ],
             "properties": {
               "result": {
-                "$ref": "#/components/schemas/E2eTypeServer_get_attribute_attr2_Out"
+                "$ref": "#/components/schemas/E2eTypeServer_get_attribute_type_attr2_Out"
               }
             }
           }
@@ -9749,18 +9833,18 @@
           }
         ]
       },
-      "E2eTypeServer_set_attribute_attr1_In": {
+      "E2eTypeServer_set_attribute_type_attr1_In": {
         "type": "object",
         "required": [
-          "attr1"
+          "type_attr1"
         ],
         "properties": {
-          "attr1": {
+          "type_attr1": {
             "type": "string"
           }
         }
       },
-      "E2eTypeServer_set_attribute_attr1_Out": {
+      "E2eTypeServer_set_attribute_type_attr1_Out": {
         "type": "object",
         "required": [
           "dummy"
@@ -9771,7 +9855,7 @@
           }
         }
       },
-      "E2eTypeServer_set_attribute_attr1_Result": {
+      "E2eTypeServer_set_attribute_type_attr1_Result": {
         "oneOf": [
           {
             "type": "object",
@@ -9780,7 +9864,7 @@
             ],
             "properties": {
               "result": {
-                "$ref": "#/components/schemas/E2eTypeServer_set_attribute_attr1_Out"
+                "$ref": "#/components/schemas/E2eTypeServer_set_attribute_type_attr1_Out"
               }
             }
           }

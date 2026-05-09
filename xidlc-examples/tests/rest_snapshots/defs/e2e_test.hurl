@@ -48,15 +48,16 @@ HTTP 200
 body == "\"user:u1,lang:None,trace:t1\""
 
 # E2eTypeServer - get_attribute_attr1
-GET {{base_url}}/attribute/attr1
+GET {{base_url}}/attribute/type_attr1
 HTTP 200
 [Asserts]
 body == "\"attr1\""
 
 # E2eTypeServer - set_attribute_attr1
-POST {{base_url}}/attribute/attr1
+POST {{base_url}}/attribute/type_attr1
+Content-Type: application/json
 {
-    "attr_1": "new_attr1"
+    "type_attr_1": "new_attr1"
 }
 HTTP 204
 
@@ -88,7 +89,7 @@ HTTP 200
 jsonpath "$.any" == "value"
 
 # E2eTypeServer - get_attribute_attr2
-GET {{base_url}}/attribute/attr2
+GET {{base_url}}/attribute/type_attr2
 HTTP 200
 [Asserts]
 jsonpath "$[0]" == "attr2"

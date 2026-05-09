@@ -182,13 +182,13 @@ pub struct MockE2eTypeServer;
 
 #[async_trait::async_trait]
 impl E2eTypeServer for MockE2eTypeServer {
-    async fn get_attribute_attr1(&self) -> Result<String, xidl_rust_axum::Error> {
+    async fn get_attribute_type_attr1(&self) -> Result<String, xidl_rust_axum::Error> {
         Ok("attr1".to_string())
     }
-    async fn set_attribute_attr1(&self, _value: String) -> Result<(), xidl_rust_axum::Error> {
+    async fn set_attribute_type_attr1(&self, _value: String) -> Result<(), xidl_rust_axum::Error> {
         Ok(())
     }
-    async fn get_attribute_attr2(&self) -> Result<Vec<String>, xidl_rust_axum::Error> {
+    async fn get_attribute_type_attr2(&self) -> Result<Vec<String>, xidl_rust_axum::Error> {
         Ok(vec!["attr2".to_string()])
     }
     async fn simple_op(&self) -> Result<(), xidl_rust_axum::Error> {
@@ -288,5 +288,271 @@ impl E2eTypeServer for MockE2eTypeServer {
             b: 6,
             c: vec![],
         })
+    }
+}
+
+pub struct MockE2eAttribute;
+
+#[async_trait::async_trait]
+impl E2eAttribute for MockE2eAttribute {
+    async fn get_attribute_attr1(&self) -> Result<String, xidl_rust_axum::Error> {
+        Ok("attr1".to_string())
+    }
+    async fn set_attribute_attr1(&self, _value: String) -> Result<(), xidl_rust_axum::Error> {
+        Ok(())
+    }
+    async fn get_attribute_attr2(&self) -> Result<Vec<String>, xidl_rust_axum::Error> {
+        Ok(vec!["attr2".to_string()])
+    }
+    async fn get_attribute_attr3(&self) -> Result<EnumEmpty, xidl_rust_axum::Error> {
+        unimplemented!()
+    }
+    async fn set_attribute_attr3(&self, _value: EnumEmpty) -> Result<(), xidl_rust_axum::Error> {
+        Ok(())
+    }
+    async fn get_attribute_attr4(&self) -> Result<EnumSimple1, xidl_rust_axum::Error> {
+        Ok(EnumSimple1::V1)
+    }
+    async fn set_attribute_attr4(&self, _value: EnumSimple1) -> Result<(), xidl_rust_axum::Error> {
+        Ok(())
+    }
+    async fn get_attribute_attr5(&self) -> Result<StructEmpty, xidl_rust_axum::Error> {
+        Ok(StructEmpty {})
+    }
+    async fn set_attribute_attr5(&self, _value: StructEmpty) -> Result<(), xidl_rust_axum::Error> {
+        Ok(())
+    }
+    async fn get_attribute_attr6(&self) -> Result<StructSimple, xidl_rust_axum::Error> {
+        unimplemented!()
+    }
+    async fn set_attribute_attr6(&self, _value: StructSimple) -> Result<(), xidl_rust_axum::Error> {
+        Ok(())
+    }
+    async fn get_attribute_attr61(&self) -> Result<UnionSimple, xidl_rust_axum::Error> {
+        Ok(UnionSimple::new_case1(1))
+    }
+    async fn set_attribute_attr61(&self, _value: UnionSimple) -> Result<(), xidl_rust_axum::Error> {
+        Ok(())
+    }
+    async fn get_attribute_attr7(&self) -> Result<Vec<String>, xidl_rust_axum::Error> {
+        Ok(vec!["attr7".to_string()])
+    }
+    async fn set_attribute_attr7(&self, _value: Vec<String>) -> Result<(), xidl_rust_axum::Error> {
+        Ok(())
+    }
+    async fn get_attribute_attr8(&self) -> Result<Vec<EnumEmpty>, xidl_rust_axum::Error> {
+        Ok(vec![])
+    }
+    async fn set_attribute_attr8(&self, _value: Vec<EnumEmpty>) -> Result<(), xidl_rust_axum::Error> {
+        Ok(())
+    }
+    async fn get_attribute_attr9(&self) -> Result<Vec<EnumSimple1>, xidl_rust_axum::Error> {
+        Ok(vec![EnumSimple1::V1])
+    }
+    async fn set_attribute_attr9(&self, _value: Vec<EnumSimple1>) -> Result<(), xidl_rust_axum::Error> {
+        Ok(())
+    }
+    async fn get_attribute_attr10(&self) -> Result<Vec<StructEmpty>, xidl_rust_axum::Error> {
+        Ok(vec![StructEmpty {}])
+    }
+    async fn set_attribute_attr10(&self, _value: Vec<StructEmpty>) -> Result<(), xidl_rust_axum::Error> {
+        Ok(())
+    }
+    async fn get_attribute_attr11(&self) -> Result<Vec<StructSimple>, xidl_rust_axum::Error> {
+        Ok(vec![])
+    }
+    async fn set_attribute_attr11(&self, _value: Vec<StructSimple>) -> Result<(), xidl_rust_axum::Error> {
+        Ok(())
+    }
+    async fn get_attribute_attr12(&self) -> Result<BTreeMap<String, u8>, xidl_rust_axum::Error> {
+        Ok(BTreeMap::new())
+    }
+    async fn set_attribute_attr12(&self, _value: BTreeMap<String, u8>) -> Result<(), xidl_rust_axum::Error> {
+        Ok(())
+    }
+    async fn get_attribute_attr13(&self) -> Result<serde_json::Value, xidl_rust_axum::Error> {
+        Ok(serde_json::json!({}))
+    }
+    async fn set_attribute_attr13(&self, _value: serde_json::Value) -> Result<(), xidl_rust_axum::Error> {
+        Ok(())
+    }
+    async fn get_attribute_attr14(&self) -> Result<Vec<serde_json::Value>, xidl_rust_axum::Error> {
+        Ok(vec![])
+    }
+    async fn set_attribute_attr14(&self, _value: Vec<serde_json::Value>) -> Result<(), xidl_rust_axum::Error> {
+        Ok(())
+    }
+    async fn get_attribute_attr15(&self) -> Result<BTreeMap<String, serde_json::Value>, xidl_rust_axum::Error> {
+        Ok(BTreeMap::new())
+    }
+    async fn set_attribute_attr15(&self, _value: BTreeMap<String, serde_json::Value>) -> Result<(), xidl_rust_axum::Error> {
+        Ok(())
+    }
+    async fn get_attribute_attr16(&self) -> Result<String, xidl_rust_axum::Error> {
+        Ok("attr16".to_string())
+    }
+}
+
+pub struct MockE2eHttpForm;
+
+#[async_trait::async_trait]
+impl E2eHttpForm for MockE2eHttpForm {
+    async fn submit_profile(
+        &self,
+        name: String,
+        age: Option<u32>,
+    ) -> Result<E2EHttpFormSubmitProfileResponse, xidl_rust_axum::Error> {
+        Ok(E2EHttpFormSubmitProfileResponse {
+            r#return: format!("name:{name},age:{age:?}"),
+            normalized_name: name.to_uppercase(),
+        })
+    }
+}
+
+pub struct MockE2eHttpScopeMatrix;
+
+#[async_trait::async_trait]
+impl E2eHttpScopeMatrix for MockE2eHttpScopeMatrix {
+    async fn get_attribute_scope_inherited_attr(&self) -> Result<String, xidl_rust_axum::Error> {
+        Ok("inherited".to_string())
+    }
+    async fn get_attribute_scope_bare_attr(&self) -> Result<String, xidl_rust_axum::Error> {
+        Ok("bare".to_string())
+    }
+    async fn default_scope(&self, request_body: StructHttpBody) -> Result<String, xidl_rust_axum::Error> {
+        Ok(request_body.name)
+    }
+    async fn override_consumes_only(
+        &self,
+        name: String,
+        age: Option<u32>,
+    ) -> Result<E2EHttpScopeMatrixOverrideConsumesOnlyResponse, xidl_rust_axum::Error> {
+        Ok(E2EHttpScopeMatrixOverrideConsumesOnlyResponse {
+            r#return: format!("name:{name},age:{age:?}"),
+            normalized_name: name.to_uppercase(),
+        })
+    }
+    async fn override_produces_only(
+        &self,
+        resource_id: String,
+    ) -> Result<E2EHttpScopeMatrixOverrideProducesOnlyResponse, xidl_rust_axum::Error> {
+        Ok(E2EHttpScopeMatrixOverrideProducesOnlyResponse {
+            r#return: StructHttpBody {
+                name: resource_id,
+                alias: None,
+                tags: vec![],
+                labels: BTreeMap::new(),
+            },
+            revision: 1,
+        })
+    }
+    async fn override_both_media(
+        &self,
+        name: String,
+        age: Option<u32>,
+    ) -> Result<E2EHttpScopeMatrixOverrideBothMediaResponse, xidl_rust_axum::Error> {
+        Ok(E2EHttpScopeMatrixOverrideBothMediaResponse {
+            r#return: StructHttpBody {
+                name: name,
+                alias: None,
+                tags: vec![format!("age:{age:?}")],
+                labels: BTreeMap::new(),
+            },
+            normalized_name: "OVERRIDDEN".to_string(),
+        })
+    }
+    async fn deprecated_plain(&self, resource_id: String) -> Result<String, xidl_rust_axum::Error> {
+        Ok(resource_id)
+    }
+    async fn deprecated_since_only(&self, resource_id: String) -> Result<String, xidl_rust_axum::Error> {
+        Ok(resource_id)
+    }
+    async fn deprecated_window(&self, resource_id: String) -> Result<String, xidl_rust_axum::Error> {
+        Ok(resource_id)
+    }
+}
+
+pub struct MockE2eHttpDefaultsMatrix;
+
+#[async_trait::async_trait]
+impl E2eHttpDefaultsMatrix for MockE2eHttpDefaultsMatrix {
+    async fn delete_resource_default_query(
+        &self,
+        id: String,
+        revision: u32,
+    ) -> Result<String, xidl_rust_axum::Error> {
+        Ok(format!("{id}:{revision}"))
+    }
+    async fn probe_resource_default_query(&self, _id: String, _revision: u32) -> Result<(), xidl_rust_axum::Error> {
+        Ok(())
+    }
+    async fn resource_options_default_query(&self, _id: String, _revision: u32) -> Result<(), xidl_rust_axum::Error> {
+        Ok(())
+    }
+    async fn replace_resource_default_body(
+        &self,
+        id: String,
+        name: String,
+        alias: Option<String>,
+    ) -> Result<StructHttpBody, xidl_rust_axum::Error> {
+        Ok(StructHttpBody {
+            name,
+            alias,
+            tags: vec![id],
+            labels: BTreeMap::new(),
+        })
+    }
+    async fn patch_resource_default_body(
+        &self,
+        id: String,
+        name: String,
+        alias: Option<String>,
+    ) -> Result<StructHttpBody, xidl_rust_axum::Error> {
+        Ok(StructHttpBody {
+            name,
+            alias,
+            tags: vec![id],
+            labels: BTreeMap::new(),
+        })
+    }
+}
+
+pub struct MockE2eHttpSecurityMatrix;
+
+#[async_trait::async_trait]
+impl E2eHttpSecurityMatrix for MockE2eHttpSecurityMatrix {
+    async fn inherited_security(
+        &self,
+        resource_id: String,
+        trace_id: String,
+        _xidl_auth: xidl_rust_axum::auth::basic::BasicAuth,
+    ) -> Result<String, xidl_rust_axum::Error> {
+        Ok(format!("{resource_id}:{trace_id}"))
+    }
+    async fn bearer_or_cookie_security(
+        &self,
+        action: String,
+        note: Option<String>,
+        _xidl_auth: xidl_rust_axum::auth::bearer::BearerAuth,
+    ) -> Result<String, xidl_rust_axum::Error> {
+        Ok(format!("{action}:{note:?}"))
+    }
+    async fn alternative_security(
+        &self,
+        resource_id: String,
+        locale: Option<String>,
+        _xidl_auth: xidl_rust_axum::auth::bearer::BearerAuth,
+    ) -> Result<String, xidl_rust_axum::Error> {
+        Ok(format!("{resource_id}:{locale:?}"))
+    }
+    async fn oauth_security(
+        &self,
+        keyword: String,
+        page: Option<u32>,
+    ) -> Result<String, xidl_rust_axum::Error> {
+        Ok(format!("{keyword}:{page:?}"))
+    }
+    async fn public_ping(&self) -> Result<String, xidl_rust_axum::Error> {
+        Ok("pong".to_string())
     }
 }

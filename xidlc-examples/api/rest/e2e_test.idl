@@ -62,8 +62,8 @@ bitmask BitMaskSimple {
 };
 // Interface
 interface E2eTypeServer {
-    attribute string attr1;
-    readonly attribute sequence<string> attr2;
+    attribute string type_attr1;
+    readonly attribute sequence<string> type_attr2;
     void simple_op();
 
     string simple_op_with_return1();
@@ -201,9 +201,9 @@ interface E2eHttpForm {
 @Consumes("application/json")
 @Produces("application/json")
 interface E2eHttpScopeMatrix {
-    readonly attribute string inherited_attr;
+    readonly attribute string scope_inherited_attr;
     @deprecated
-    readonly attribute string bare_attr;
+    readonly attribute string scope_bare_attr;
     @post(path = "/v2/scope/default")
     string default_scope(
         StructHttpBody request_body
