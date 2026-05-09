@@ -1,8 +1,8 @@
 use std::collections::HashSet;
 
 use crate::hir::{
-    ConstrTypeDcl, Definition, ModuleDcl, ScopedName, Specification, StructDcl, TypeDcl, TypeSpec,
-    TypedefType,
+    ConstrTypeDcl, Definition, ElementSpecTy, ModuleDcl, ScopedName, Specification, StructDcl,
+    TypeDcl, TypeSpec, TypedefType, UnionDef,
 };
 use crate::semantic::recursive_graph::collect_recursive_edges;
 
@@ -39,8 +39,14 @@ fn collect_constr_names(
     module_path: &[String],
     names: &mut HashSet<Vec<String>>,
 ) {
-    if let ConstrTypeDcl::StructDcl(def) = constr {
-        names.insert(struct_path(module_path, &def.ident));
+    match constr {
+        ConstrTypeDcl::StructDcl(def) => {
+            names.insert(struct_path(module_path, &def.ident));
+        }
+        ConstrTypeDcl::UnionDef(def) => {
+            names.insert(struct_path(module_path, &def.ident));
+        }
+        _ => {}
     }
 }
 
@@ -51,11 +57,15 @@ fn collect_type_dcl_names(
 ) {
     match type_dcl {
         TypeDcl::ConstrTypeDcl(constr) => collect_constr_names(constr, module_path, names),
-        TypeDcl::TypedefDcl(typedef) => {
-            if let TypedefType::ConstrTypeDcl(ConstrTypeDcl::StructDcl(def)) = &typedef.ty {
+        TypeDcl::TypedefDcl(typedef) => match &typedef.ty {
+            TypedefType::ConstrTypeDcl(ConstrTypeDcl::StructDcl(def)) => {
                 names.insert(struct_path(module_path, &def.ident));
             }
-        }
+            TypedefType::ConstrTypeDcl(ConstrTypeDcl::UnionDef(def)) => {
+                names.insert(struct_path(module_path, &def.ident));
+            }
+            _ => {}
+        },
         TypeDcl::NativeDcl(_) => {}
     }
 }
@@ -90,8 +100,14 @@ fn collect_constr_edges(
     names: &HashSet<Vec<String>>,
     edges: &mut Vec<(String, String)>,
 ) {
-    if let ConstrTypeDcl::StructDcl(def) = constr {
-        collect_struct_def_edges(def, module_path, names, edges);
+    match constr {
+        ConstrTypeDcl::StructDcl(def) => {
+            collect_struct_def_edges(def, module_path, names, edges);
+        }
+        ConstrTypeDcl::UnionDef(def) => {
+            collect_union_def_edges(def, module_path, names, edges);
+        }
+        _ => {}
     }
 }
 
@@ -103,11 +119,15 @@ fn collect_type_dcl_edges(
 ) {
     match type_dcl {
         TypeDcl::ConstrTypeDcl(constr) => collect_constr_edges(constr, module_path, names, edges),
-        TypeDcl::TypedefDcl(typedef) => {
-            if let TypedefType::ConstrTypeDcl(ConstrTypeDcl::StructDcl(def)) = &typedef.ty {
+        TypeDcl::TypedefDcl(typedef) => match &typedef.ty {
+            TypedefType::ConstrTypeDcl(ConstrTypeDcl::StructDcl(def)) => {
                 collect_struct_def_edges(def, module_path, names, edges);
             }
-        }
+            TypedefType::ConstrTypeDcl(ConstrTypeDcl::UnionDef(def)) => {
+                collect_union_def_edges(def, module_path, names, edges);
+            }
+            _ => {}
+        },
         TypeDcl::NativeDcl(_) => {}
     }
 }
@@ -124,6 +144,22 @@ fn collect_struct_def_edges(
             continue;
         };
         edges.push((owner.clone(), join_path(&target)));
+    }
+}
+
+fn collect_union_def_edges(
+    def: &UnionDef,
+    module_path: &[String],
+    names: &HashSet<Vec<String>>,
+    edges: &mut Vec<(String, String)>,
+) {
+    let owner = join_path(&struct_path(module_path, &def.ident));
+    for case in &def.case {
+        if let ElementSpecTy::TypeSpec(ty) = &case.element.ty {
+            if let Some(target) = direct_struct_target(module_path, ty, names) {
+                edges.push((owner.clone(), join_path(&target)));
+            }
+        }
     }
 }
 
@@ -159,8 +195,14 @@ fn apply_constr_recursive_flags(
     names: &HashSet<Vec<String>>,
     recursive_edges: &HashSet<(String, String)>,
 ) {
-    if let ConstrTypeDcl::StructDcl(def) = constr {
-        apply_struct_recursive_flags(def, module_path, names, recursive_edges);
+    match constr {
+        ConstrTypeDcl::StructDcl(def) => {
+            apply_struct_recursive_flags(def, module_path, names, recursive_edges);
+        }
+        ConstrTypeDcl::UnionDef(def) => {
+            apply_union_recursive_flags(def, module_path, names, recursive_edges);
+        }
+        _ => {}
     }
 }
 
@@ -174,11 +216,15 @@ fn apply_type_dcl_recursive_flags(
         TypeDcl::ConstrTypeDcl(constr) => {
             apply_constr_recursive_flags(constr, module_path, names, recursive_edges);
         }
-        TypeDcl::TypedefDcl(typedef) => {
-            if let TypedefType::ConstrTypeDcl(ConstrTypeDcl::StructDcl(def)) = &mut typedef.ty {
+        TypeDcl::TypedefDcl(typedef) => match &mut typedef.ty {
+            TypedefType::ConstrTypeDcl(ConstrTypeDcl::StructDcl(def)) => {
                 apply_struct_recursive_flags(def, module_path, names, recursive_edges);
             }
-        }
+            TypedefType::ConstrTypeDcl(ConstrTypeDcl::UnionDef(def)) => {
+                apply_union_recursive_flags(def, module_path, names, recursive_edges);
+            }
+            _ => {}
+        },
         TypeDcl::NativeDcl(_) => {}
     }
 }
@@ -194,6 +240,22 @@ fn apply_struct_recursive_flags(
         member.recursive = direct_struct_target(module_path, &member.ty, names)
             .map(|target| recursive_edges.contains(&(owner.clone(), join_path(&target))))
             .unwrap_or(false);
+    }
+}
+
+fn apply_union_recursive_flags(
+    def: &mut UnionDef,
+    module_path: &[String],
+    names: &HashSet<Vec<String>>,
+    recursive_edges: &HashSet<(String, String)>,
+) {
+    let owner = join_path(&struct_path(module_path, &def.ident));
+    for case in &mut def.case {
+        if let ElementSpecTy::TypeSpec(ty) = &case.element.ty {
+            case.element.recursive = direct_struct_target(module_path, ty, names)
+                .map(|target| recursive_edges.contains(&(owner.clone(), join_path(&target))))
+                .unwrap_or(false);
+        }
     }
 }
 
