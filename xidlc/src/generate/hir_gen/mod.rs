@@ -28,7 +28,12 @@ impl crate::jsonrpc::Codegen for HirGen {
         let target_lang: String =
             serde_json::from_value(props.get("target_lang").unwrap().clone()).unwrap();
 
-        let typed = xidl_parser::parser::parser_text(&source).map_err(|err| Error::Rpc {
+        let typed = xidl_parser::parser::parser_text_with_resolver(
+            &source,
+            Some(&_input),
+            &mut xidl_parser::hir::FsIncludeResolver,
+        )
+        .map_err(|err| Error::Rpc {
             code: ErrorCode::InternalError,
             message: err.to_string(),
             data: None,

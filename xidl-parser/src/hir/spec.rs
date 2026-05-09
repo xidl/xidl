@@ -1,13 +1,12 @@
 use super::{
     Definition, InterfaceDcl, ModuleDcl, ParserProperties, Specification, TypeDcl,
-    expand_annotations, include, interface_codegen, parse_xidlc_pragma,
+    expand_annotations, interface_codegen, parse_xidlc_pragma,
 };
 use crate::jsonrpc_hir;
 use crate::rest_hir::{self, HirProjectionKind, ProjectedHir};
 use crate::semantic;
 use serde_json::Value;
-use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 impl From<crate::typed_ast::Specification> for Specification {
     fn from(value: crate::typed_ast::Specification) -> Self {
@@ -63,10 +62,8 @@ pub(crate) fn spec_from_typed_ast(
         &mut Vec::new(),
         expand_interfaces,
         &mut definitions,
-        None,
-        None,
     )
-    .expect("pathless HIR conversion should not fail");
+    .expect("HIR conversion should not fail");
     let mut spec = Specification(definitions);
     semantic::analyze(&mut spec);
     spec
@@ -75,18 +72,14 @@ pub(crate) fn spec_from_typed_ast(
 fn spec_from_typed_ast_with_path(
     value: crate::typed_ast::Specification,
     expand_interfaces: bool,
-    path: &Path,
+    _path: &Path,
 ) -> crate::error::ParserResult<Specification> {
-    let root = include::normalize_path(path);
     let mut definitions = Vec::new();
-    let mut include_stack = vec![root.clone()];
     collect_defs_with_context(
         value.0,
         &mut Vec::new(),
         expand_interfaces,
         &mut definitions,
-        Some(root.as_path()),
-        Some(&mut include_stack),
     )?;
     let mut spec = Specification(definitions);
     semantic::analyze(&mut spec);
@@ -98,8 +91,6 @@ fn collect_defs_with_context(
     modules: &mut Vec<String>,
     expand_interfaces: bool,
     out: &mut Vec<Definition>,
-    current_file: Option<&Path>,
-    mut include_stack: Option<&mut Vec<PathBuf>>,
 ) -> crate::error::ParserResult<()> {
     for def in defs {
         match def {
@@ -113,8 +104,6 @@ fn collect_defs_with_context(
                     modules,
                     expand_interfaces,
                     &mut inner,
-                    current_file,
-                    include_stack.as_deref_mut(),
                 )?;
                 modules.pop();
                 out.push(Definition::ModuleDcl(ModuleDcl {
@@ -146,26 +135,9 @@ fn collect_defs_with_context(
                 }
                 out.push(Definition::InterfaceDcl(interface));
             }
-            crate::typed_ast::Definition::PreprocInclude(include_def) => {
-                let Some(current_file) = current_file else {
-                    continue;
-                };
-                let path = include::resolve_include_path(current_file, &include_def)?;
-                let typed = parse_included_specification(&path)?;
-                let stack = include_stack
-                    .as_deref_mut()
-                    .expect("include stack must exist when current file path is set");
-                guard_include_cycle(stack, &path)?;
-                stack.push(path.clone());
-                collect_defs_with_context(
-                    typed.0,
-                    modules,
-                    expand_interfaces,
-                    out,
-                    Some(path.as_path()),
-                    Some(stack),
-                )?;
-                stack.pop();
+            crate::typed_ast::Definition::PreprocInclude(_) => {
+                // Includes are now handled at the tree-sitter stage.
+                // If we see a PreprocInclude here, it means it was not expanded.
             }
             crate::typed_ast::Definition::TemplateModuleDcl(_)
             | crate::typed_ast::Definition::TemplateModuleInst(_)
@@ -193,36 +165,4 @@ fn hir_projection_kind(properties: &ParserProperties) -> HirProjectionKind {
         }
         _ => HirProjectionKind::Rpc,
     }
-}
-
-fn parse_included_specification(
-    path: &Path,
-) -> crate::error::ParserResult<crate::typed_ast::Specification> {
-    let source = fs::read_to_string(path).map_err(|err| {
-        crate::error::ParseError::Message(format!(
-            "failed to read include '{}': {err}",
-            path.display()
-        ))
-    })?;
-    crate::parser::parser_text(&source).map_err(|err| {
-        crate::error::ParseError::Message(format!(
-            "failed to parse include '{}': {err}",
-            path.display()
-        ))
-    })
-}
-
-fn guard_include_cycle(stack: &[PathBuf], path: &Path) -> crate::error::ParserResult<()> {
-    if stack.contains(&path.to_path_buf()) {
-        let chain = stack
-            .iter()
-            .chain(std::iter::once(&path.to_path_buf()))
-            .map(|path| path.display().to_string())
-            .collect::<Vec<_>>()
-            .join(" -> ");
-        return Err(crate::error::ParseError::Message(format!(
-            "cyclic include detected: {chain}"
-        )));
-    }
-    Ok(())
 }

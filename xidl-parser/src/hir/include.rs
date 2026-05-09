@@ -1,35 +1,35 @@
-use super::pragma::trim_pragma_value;
+use crate::parser::IncludeResolver;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-pub(crate) fn resolve_include_path(
-    current_file: &Path,
-    include: &crate::typed_ast::PreprocInclude,
-) -> crate::error::ParserResult<PathBuf> {
-    let raw = match &include.path {
-        crate::typed_ast::PreprocIncludePath::StringLiteral(value) => trim_pragma_value(value),
-        crate::typed_ast::PreprocIncludePath::SystemLibString(value) => {
-            return Err(crate::error::ParseError::Message(format!(
-                "unsupported include path syntax {value}; only string literal includes are supported"
-            )));
-        }
-        crate::typed_ast::PreprocIncludePath::Identifier(value) => {
-            return Err(crate::error::ParseError::Message(format!(
-                "unsupported include identifier '{}'; only string literal includes are supported",
-                value.0
-            )));
-        }
-    };
+pub struct FsIncludeResolver;
 
-    let base = current_file.parent().unwrap_or_else(|| Path::new("."));
-    let path = normalize_path(&base.join(raw));
-    if !path.is_file() {
-        return Err(crate::error::ParseError::Message(format!(
-            "include path '{}' does not exist",
-            path.display()
-        )));
+impl IncludeResolver for FsIncludeResolver {
+    fn resolve(
+        &mut self,
+        parent_path: Option<&str>,
+        path: &str,
+    ) -> crate::error::ParserResult<(String, String)> {
+        let parent = parent_path.map(Path::new).unwrap_or_else(|| Path::new("."));
+        let base = parent.parent().unwrap_or_else(|| Path::new("."));
+        let resolved_path = normalize_path(&base.join(path));
+
+        if !resolved_path.is_file() {
+            return Err(crate::error::ParseError::Message(format!(
+                "include path '{}' does not exist",
+                resolved_path.display()
+            )));
+        }
+
+        let content = fs::read_to_string(&resolved_path).map_err(|err| {
+            crate::error::ParseError::Message(format!(
+                "failed to read include '{}': {err}",
+                resolved_path.display()
+            ))
+        })?;
+
+        Ok((resolved_path.display().to_string(), content))
     }
-    Ok(path)
 }
 
 pub(crate) fn normalize_path(path: &Path) -> PathBuf {

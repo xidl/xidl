@@ -23,6 +23,7 @@ pub use declarator::*;
 pub use enum_dcl::*;
 pub use exception_dcl::*;
 pub use expr::*;
+pub use include::*;
 pub use interface::*;
 pub use pragma::*;
 pub use scoped_name::*;
