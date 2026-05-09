@@ -24,7 +24,11 @@ fn write_file(path: &Path, source: &str) {
 
 fn parse_hir(path: &Path) -> xidl_parser::error::ParserResult<xidl_parser::hir::Specification> {
     let source = fs::read_to_string(path).expect("read fixture");
-    let typed = xidl_parser::parser::parser_text(&source)?;
+    let typed = xidl_parser::parser::parser_text_with_resolver(
+        &source,
+        Some(path.to_str().unwrap()),
+        &mut xidl_parser::hir::FsIncludeResolver,
+    )?;
     xidl_parser::hir::Specification::from_typed_ast_with_path(typed, path)
 }
 
