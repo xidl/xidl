@@ -343,49 +343,75 @@ impl E2eAttribute for MockE2eAttribute {
     async fn get_attribute_attr8(&self) -> Result<Vec<EnumEmpty>, xidl_rust_axum::Error> {
         Ok(vec![])
     }
-    async fn set_attribute_attr8(&self, _value: Vec<EnumEmpty>) -> Result<(), xidl_rust_axum::Error> {
+    async fn set_attribute_attr8(
+        &self,
+        _value: Vec<EnumEmpty>,
+    ) -> Result<(), xidl_rust_axum::Error> {
         Ok(())
     }
     async fn get_attribute_attr9(&self) -> Result<Vec<EnumSimple1>, xidl_rust_axum::Error> {
         Ok(vec![EnumSimple1::V1])
     }
-    async fn set_attribute_attr9(&self, _value: Vec<EnumSimple1>) -> Result<(), xidl_rust_axum::Error> {
+    async fn set_attribute_attr9(
+        &self,
+        _value: Vec<EnumSimple1>,
+    ) -> Result<(), xidl_rust_axum::Error> {
         Ok(())
     }
     async fn get_attribute_attr10(&self) -> Result<Vec<StructEmpty>, xidl_rust_axum::Error> {
         Ok(vec![StructEmpty {}])
     }
-    async fn set_attribute_attr10(&self, _value: Vec<StructEmpty>) -> Result<(), xidl_rust_axum::Error> {
+    async fn set_attribute_attr10(
+        &self,
+        _value: Vec<StructEmpty>,
+    ) -> Result<(), xidl_rust_axum::Error> {
         Ok(())
     }
     async fn get_attribute_attr11(&self) -> Result<Vec<StructSimple>, xidl_rust_axum::Error> {
         Ok(vec![])
     }
-    async fn set_attribute_attr11(&self, _value: Vec<StructSimple>) -> Result<(), xidl_rust_axum::Error> {
+    async fn set_attribute_attr11(
+        &self,
+        _value: Vec<StructSimple>,
+    ) -> Result<(), xidl_rust_axum::Error> {
         Ok(())
     }
     async fn get_attribute_attr12(&self) -> Result<BTreeMap<String, u8>, xidl_rust_axum::Error> {
         Ok(BTreeMap::new())
     }
-    async fn set_attribute_attr12(&self, _value: BTreeMap<String, u8>) -> Result<(), xidl_rust_axum::Error> {
+    async fn set_attribute_attr12(
+        &self,
+        _value: BTreeMap<String, u8>,
+    ) -> Result<(), xidl_rust_axum::Error> {
         Ok(())
     }
     async fn get_attribute_attr13(&self) -> Result<serde_json::Value, xidl_rust_axum::Error> {
         Ok(serde_json::json!({}))
     }
-    async fn set_attribute_attr13(&self, _value: serde_json::Value) -> Result<(), xidl_rust_axum::Error> {
+    async fn set_attribute_attr13(
+        &self,
+        _value: serde_json::Value,
+    ) -> Result<(), xidl_rust_axum::Error> {
         Ok(())
     }
     async fn get_attribute_attr14(&self) -> Result<Vec<serde_json::Value>, xidl_rust_axum::Error> {
         Ok(vec![])
     }
-    async fn set_attribute_attr14(&self, _value: Vec<serde_json::Value>) -> Result<(), xidl_rust_axum::Error> {
+    async fn set_attribute_attr14(
+        &self,
+        _value: Vec<serde_json::Value>,
+    ) -> Result<(), xidl_rust_axum::Error> {
         Ok(())
     }
-    async fn get_attribute_attr15(&self) -> Result<BTreeMap<String, serde_json::Value>, xidl_rust_axum::Error> {
+    async fn get_attribute_attr15(
+        &self,
+    ) -> Result<BTreeMap<String, serde_json::Value>, xidl_rust_axum::Error> {
         Ok(BTreeMap::new())
     }
-    async fn set_attribute_attr15(&self, _value: BTreeMap<String, serde_json::Value>) -> Result<(), xidl_rust_axum::Error> {
+    async fn set_attribute_attr15(
+        &self,
+        _value: BTreeMap<String, serde_json::Value>,
+    ) -> Result<(), xidl_rust_axum::Error> {
         Ok(())
     }
     async fn get_attribute_attr16(&self) -> Result<String, xidl_rust_axum::Error> {
@@ -419,7 +445,10 @@ impl E2eHttpScopeMatrix for MockE2eHttpScopeMatrix {
     async fn get_attribute_scope_bare_attr(&self) -> Result<String, xidl_rust_axum::Error> {
         Ok("bare".to_string())
     }
-    async fn default_scope(&self, request_body: StructHttpBody) -> Result<String, xidl_rust_axum::Error> {
+    async fn default_scope(
+        &self,
+        request_body: StructHttpBody,
+    ) -> Result<String, xidl_rust_axum::Error> {
         Ok(request_body.name)
     }
     async fn override_consumes_only(
@@ -464,10 +493,16 @@ impl E2eHttpScopeMatrix for MockE2eHttpScopeMatrix {
     async fn deprecated_plain(&self, resource_id: String) -> Result<String, xidl_rust_axum::Error> {
         Ok(resource_id)
     }
-    async fn deprecated_since_only(&self, resource_id: String) -> Result<String, xidl_rust_axum::Error> {
+    async fn deprecated_since_only(
+        &self,
+        resource_id: String,
+    ) -> Result<String, xidl_rust_axum::Error> {
         Ok(resource_id)
     }
-    async fn deprecated_window(&self, resource_id: String) -> Result<String, xidl_rust_axum::Error> {
+    async fn deprecated_window(
+        &self,
+        resource_id: String,
+    ) -> Result<String, xidl_rust_axum::Error> {
         Ok(resource_id)
     }
 }
@@ -483,10 +518,18 @@ impl E2eHttpDefaultsMatrix for MockE2eHttpDefaultsMatrix {
     ) -> Result<String, xidl_rust_axum::Error> {
         Ok(format!("{id}:{revision}"))
     }
-    async fn probe_resource_default_query(&self, _id: String, _revision: u32) -> Result<(), xidl_rust_axum::Error> {
+    async fn probe_resource_default_query(
+        &self,
+        _id: String,
+        _revision: u32,
+    ) -> Result<(), xidl_rust_axum::Error> {
         Ok(())
     }
-    async fn resource_options_default_query(&self, _id: String, _revision: u32) -> Result<(), xidl_rust_axum::Error> {
+    async fn resource_options_default_query(
+        &self,
+        _id: String,
+        _revision: u32,
+    ) -> Result<(), xidl_rust_axum::Error> {
         Ok(())
     }
     async fn replace_resource_default_body(

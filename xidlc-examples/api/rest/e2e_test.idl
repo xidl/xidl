@@ -150,12 +150,12 @@ interface E2eAttribute {
 };
 // path
 interface E2ePathSever {
-    @get("/v1/op_with_path/{param1}")
+    @get(path = "/v1/op_with_path/{param1}")
     sequence<string> op_with_path(
         in string param1
     );
 
-    @get("/v1/op_with_query/{param1}{?q}")
+    @get(path = "/v1/op_with_query/{param1}{?q}")
     sequence<string> op_with_query(
         in string param1,
         string q
@@ -175,7 +175,7 @@ interface E2ePathSever {
     );
 
     @get
-    @path("/v1/op_with_query/{*all}{?word,q}")
+    @path("/v1/op_with_query_wildcard/{*all}{?word,q}")
     string op_with_query2(
         string all,
         @query
