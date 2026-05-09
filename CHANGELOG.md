@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.58.0](https://github.com/xidl/xidl/compare/v0.57.0...v0.58.0) (2026-05-09)
+
+
+### Features
+
+* **rust-gen:** add --mock flag to generate mockall traits ([bb04fea](https://github.com/xidl/xidl/commit/bb04feaf76858a42371ee52f333416894373d39e))
+
 ## [0.57.0](https://github.com/xidl/xidl/compare/v0.56.0...v0.57.0) (2026-05-09)
 
 
