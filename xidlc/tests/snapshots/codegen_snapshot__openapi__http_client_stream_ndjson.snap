@@ -169,20 +169,7 @@ openapi.json
           "content": {
             "application/x-ndjson": {
               "itemSchema": {
-                "properties": {
-                  "chunk": {
-                    "items": {
-                      "format": "int32",
-                      "minimum": 0,
-                      "type": "integer"
-                    },
-                    "type": "array"
-                  },
-                  "file_id": {
-                    "type": "string"
-                  }
-                },
-                "type": "object"
+                "type": "string"
               }
             }
           }

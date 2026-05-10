@@ -965,7 +965,7 @@ openapi.json
           {
             "in": "query",
             "name": "name",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -1012,7 +1012,7 @@ openapi.json
           {
             "in": "query",
             "name": "lang",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -1059,7 +1059,7 @@ openapi.json
           {
             "in": "query",
             "name": "page",
-            "required": false,
+            "required": true,
             "schema": {
               "format": "int32",
               "minimum": 0,
@@ -1069,7 +1069,7 @@ openapi.json
           {
             "in": "query",
             "name": "size",
-            "required": false,
+            "required": true,
             "schema": {
               "format": "int32",
               "minimum": 0,
@@ -1108,7 +1108,7 @@ openapi.json
           {
             "in": "query",
             "name": "id",
-            "required": false,
+            "required": true,
             "schema": {
               "format": "int32",
               "minimum": 0,
@@ -1118,7 +1118,7 @@ openapi.json
           {
             "in": "query",
             "name": "revision",
-            "required": false,
+            "required": true,
             "schema": {
               "format": "int32",
               "minimum": 0,
@@ -1227,7 +1227,7 @@ openapi.json
           {
             "in": "query",
             "name": "id",
-            "required": false,
+            "required": true,
             "schema": {
               "format": "int32",
               "minimum": 0,
@@ -1237,7 +1237,7 @@ openapi.json
           {
             "in": "query",
             "name": "revision",
-            "required": false,
+            "required": true,
             "schema": {
               "format": "int32",
               "minimum": 0,
@@ -1269,7 +1269,7 @@ openapi.json
           {
             "in": "query",
             "name": "id",
-            "required": false,
+            "required": true,
             "schema": {
               "format": "int32",
               "minimum": 0,
@@ -1279,7 +1279,7 @@ openapi.json
           {
             "in": "query",
             "name": "revision",
-            "required": false,
+            "required": true,
             "schema": {
               "format": "int32",
               "minimum": 0,
@@ -1357,6 +1357,10 @@ openapi.json
                     "type": "string"
                   }
                 },
+                "required": [
+                  "name",
+                  "age"
+                ],
                 "type": "object"
               }
             }
@@ -1415,6 +1419,10 @@ openapi.json
                     "type": "string"
                   }
                 },
+                "required": [
+                  "name",
+                  "age"
+                ],
                 "type": "object"
               }
             }
@@ -1471,6 +1479,10 @@ openapi.json
                     "type": "string"
                   }
                 },
+                "required": [
+                  "name",
+                  "age"
+                ],
                 "type": "object"
               }
             }
@@ -1517,7 +1529,7 @@ openapi.json
           {
             "in": "query",
             "name": "lang",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }

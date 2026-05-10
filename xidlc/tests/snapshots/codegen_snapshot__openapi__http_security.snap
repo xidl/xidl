@@ -357,6 +357,9 @@ openapi.json
                     "type": "integer"
                   }
                 },
+                "required": [
+                  "keyword"
+                ],
                 "type": "object"
               }
             }
@@ -421,7 +424,7 @@ openapi.json
           {
             "in": "header",
             "name": "X-Trace-Id",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }

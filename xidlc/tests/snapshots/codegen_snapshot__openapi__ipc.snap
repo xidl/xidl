@@ -367,6 +367,11 @@ openapi.json
                     "$ref": "#/components/schemas/xidl_parser.hir.ParserProperties"
                   }
                 },
+                "required": [
+                  "hir",
+                  "path",
+                  "props"
+                ],
                 "type": "object"
               }
             }

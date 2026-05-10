@@ -92,7 +92,7 @@
           {
             "name": "X-Trace-Id",
             "in": "header",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -134,20 +134,7 @@
           "content": {
             "application/x-ndjson": {
               "itemSchema": {
-                "type": "object",
-                "properties": {
-                  "chunk": {
-                    "type": "array",
-                    "items": {
-                      "type": "integer",
-                      "format": "int32",
-                      "minimum": 0
-                    }
-                  },
-                  "file_id": {
-                    "type": "string"
-                  }
-                }
+                "type": "string"
               }
             }
           }

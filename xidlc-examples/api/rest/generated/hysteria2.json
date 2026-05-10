@@ -12,7 +12,7 @@
           {
             "name": "Hysteria-Auth",
             "in": "header",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -20,7 +20,7 @@
           {
             "name": "Hysteria-CC-RX",
             "in": "header",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -30,40 +30,15 @@
           {
             "name": "Hysteria-Padding",
             "in": "header",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "Hysteria-UDP",
-                    "Hysteria-CC-RX",
-                    "Hysteria-Padding"
-                  ],
-                  "properties": {
-                    "Hysteria-CC-RX": {
-                      "type": "integer",
-                      "format": "int32",
-                      "minimum": 0
-                    },
-                    "Hysteria-Padding": {
-                      "type": "string"
-                    },
-                    "Hysteria-UDP": {
-                      "type": "boolean"
-                    }
-                  }
-                }
-              }
-            }
+          "204": {
+            "description": "OK"
           },
           "500": {
             "description": "Error",

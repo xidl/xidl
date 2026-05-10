@@ -20,7 +20,7 @@
           {
             "name": "lang",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -62,20 +62,7 @@
           "content": {
             "application/x-ndjson": {
               "itemSchema": {
-                "type": "object",
-                "properties": {
-                  "asset_id": {
-                    "type": "string"
-                  },
-                  "chunk": {
-                    "type": "array",
-                    "items": {
-                      "type": "integer",
-                      "format": "int32",
-                      "minimum": 0
-                    }
-                  }
-                }
+                "type": "string"
               }
             }
           }
@@ -178,19 +165,11 @@
         "operationId": "CityRestStreamApi.chat",
         "requestBody": {
           "content": {
-            "application/json": {
+            "application/x-ndjson": {
               "schema": {
                 "type": "array",
                 "items": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    },
-                    "room": {
-                      "type": "string"
-                    }
-                  }
+                  "type": "string"
                 }
               }
             }
@@ -200,23 +179,11 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
+              "application/x-ndjson": {
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "object",
-                    "required": [
-                      "from",
-                      "text"
-                    ],
-                    "properties": {
-                      "from": {
-                        "type": "string"
-                      },
-                      "text": {
-                        "type": "string"
-                      }
-                    }
+                    "type": "string"
                   }
                 }
               }

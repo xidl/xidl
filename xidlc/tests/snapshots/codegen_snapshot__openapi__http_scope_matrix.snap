@@ -1314,6 +1314,9 @@ openapi.json
                     "type": "string"
                   }
                 },
+                "required": [
+                  "name"
+                ],
                 "type": "object"
               }
             }
@@ -1374,6 +1377,9 @@ openapi.json
                     "type": "string"
                   }
                 },
+                "required": [
+                  "name"
+                ],
                 "type": "object"
               }
             }
@@ -1536,6 +1542,9 @@ openapi.json
                     "type": "string"
                   }
                 },
+                "required": [
+                  "action"
+                ],
                 "type": "object"
               }
             }
@@ -1588,7 +1597,7 @@ openapi.json
           {
             "in": "header",
             "name": "x_trace_id",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -1643,6 +1652,9 @@ openapi.json
                     "type": "integer"
                   }
                 },
+                "required": [
+                  "keyword"
+                ],
                 "type": "object"
               }
             }

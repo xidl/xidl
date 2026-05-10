@@ -169,11 +169,6 @@ func formatHttpStreamApiAlertsPath(req *HttpStreamApiAlertsRequest) string {
 }
 func decodeHttpStreamApiAlertsResponse(resp *http.Response) (HttpStreamApiAlertsResponse, error) {
 	out := HttpStreamApiAlertsResponse{}
-	var body string
-	if err := xidlgohttp.MustCodecForMime("text/event-stream").Decode(resp.Body, &body); err != nil {
-		return out, err
-	}
-	out.Return = body
 	return out, nil
 }
 

@@ -231,7 +231,7 @@ openapi.json
           {
             "in": "query",
             "name": "v",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }

@@ -1174,6 +1174,10 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "a",
+                  "c"
+                ],
                 "properties": {
                   "a": {
                     "type": "string"
@@ -1447,7 +1451,7 @@
           {
             "name": "X-Trace-Id",
             "in": "header",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -1500,7 +1504,7 @@
           {
             "name": "X-Trace-Id",
             "in": "header",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -1969,7 +1973,7 @@
           {
             "name": "q",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "array",
               "items": {
@@ -1980,7 +1984,7 @@
           {
             "name": "b",
             "in": "cookie",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "array",
               "items": {
@@ -2085,7 +2089,7 @@
           {
             "name": "q",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -2133,7 +2137,7 @@
           {
             "name": "word",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -2141,7 +2145,7 @@
           {
             "name": "q",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -2186,7 +2190,7 @@
           {
             "name": "x_trace_id",
             "in": "header",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -2223,7 +2227,7 @@
           {
             "name": "id",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -2231,7 +2235,7 @@
           {
             "name": "revision",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2270,7 +2274,7 @@
           {
             "name": "id",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -2278,7 +2282,7 @@
           {
             "name": "revision",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2310,7 +2314,7 @@
           {
             "name": "id",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -2318,7 +2322,7 @@
           {
             "name": "revision",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2361,6 +2365,9 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "name"
+                ],
                 "properties": {
                   "alias": {
                     "type": "string"
@@ -2413,6 +2420,9 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "name"
+                ],
                 "properties": {
                   "alias": {
                     "type": "string"
@@ -2464,7 +2474,7 @@
           {
             "name": "download",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "boolean"
             }
@@ -2510,6 +2520,9 @@
             "application/x-www-form-urlencoded": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "name"
+                ],
                 "properties": {
                   "age": {
                     "type": "integer",
@@ -2706,7 +2719,7 @@
           {
             "name": "X-Trace-Id",
             "in": "header",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -2749,7 +2762,7 @@
           {
             "name": "If-Match",
             "in": "header",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -2858,7 +2871,7 @@
           {
             "name": "If-None-Match",
             "in": "header",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -2894,7 +2907,7 @@
           {
             "name": "dry_run",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "boolean"
             }
@@ -2902,7 +2915,7 @@
           {
             "name": "sid",
             "in": "cookie",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -3111,6 +3124,9 @@
             "application/x-www-form-urlencoded": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "name"
+                ],
                 "properties": {
                   "age": {
                     "type": "integer",
@@ -3171,6 +3187,9 @@
             "application/x-www-form-urlencoded": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "name"
+                ],
                 "properties": {
                   "age": {
                     "type": "integer",
@@ -3283,6 +3302,9 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "keyword"
+                ],
                 "properties": {
                   "keyword": {
                     "type": "string"
@@ -3353,7 +3375,7 @@
           {
             "name": "X-Trace-Id",
             "in": "header",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -3453,6 +3475,9 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "action"
+                ],
                 "properties": {
                   "action": {
                     "type": "string"
@@ -3512,7 +3537,7 @@
           {
             "name": "X-Trace-Id",
             "in": "header",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -3558,6 +3583,9 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "keyword"
+                ],
                 "properties": {
                   "keyword": {
                     "type": "string"

@@ -426,6 +426,10 @@ openapi.json
                     "type": "integer"
                   }
                 },
+                "required": [
+                  "a",
+                  "b"
+                ],
                 "type": "object"
               }
             }

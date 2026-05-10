@@ -371,7 +371,7 @@ openapi.json
           {
             "in": "query",
             "name": "lang",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }

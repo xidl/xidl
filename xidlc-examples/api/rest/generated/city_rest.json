@@ -116,7 +116,7 @@
           {
             "name": "version",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -250,6 +250,10 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "display_name",
+                  "phone_number"
+                ],
                 "properties": {
                   "display_name": {
                     "type": "string"
@@ -304,9 +308,17 @@
             }
           },
           {
+            "name": "locale",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "X-Trace-Id",
             "in": "header",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -314,15 +326,7 @@
           {
             "name": "session",
             "in": "cookie",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "locale",
-            "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -388,7 +392,7 @@
           {
             "name": "trace_id",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -473,6 +477,10 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "plate_number",
+                  "minutes"
+                ],
                 "properties": {
                   "minutes": {
                     "type": "integer",
@@ -547,7 +555,7 @@
           {
             "name": "line",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -555,7 +563,7 @@
           {
             "name": "lang",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }

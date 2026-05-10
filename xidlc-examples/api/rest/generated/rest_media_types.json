@@ -13,6 +13,10 @@
             "application/x-www-form-urlencoded": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "name",
+                  "age"
+                ],
                 "properties": {
                   "age": {
                     "type": "integer",
