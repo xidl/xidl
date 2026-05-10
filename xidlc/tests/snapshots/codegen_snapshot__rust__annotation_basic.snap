@@ -54,16 +54,13 @@ union UData {
 }
 impl Drop for U {
     fn drop(&mut self) {
-        match self.tag {
-            0 => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.a);
-                }
+        if matches!(self.tag, 0) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.a);
             }
-            _ => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.b);
-                }
+        } else {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.b);
             }
         }
     }
@@ -426,26 +423,21 @@ union I_CallData {
 }
 impl Drop for I_Call {
     fn drop(&mut self) {
-        match self.tag {
-            _ => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
-                }
+        if matches!(self.tag, I_ping_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.ping);
             }
-            I_ping_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.ping);
-                }
+        } else if matches!(self.tag, I_get_attribute_value_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_value);
             }
-            I_get_attribute_value_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_value);
-                }
+        } else if matches!(self.tag, I_set_attribute_value_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_value);
             }
-            I_set_attribute_value_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_value);
-                }
+        } else {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
         }
     }
@@ -453,14 +445,14 @@ impl Drop for I_Call {
 impl I_Call {
     pub fn new_unknownOp(value: dds::rpc::UnknownOperation) -> Self {
         Self {
-            tag: i32::default(),
+            tag: I_ping_Hash,
             data: I_CallData {
                 unknownOp: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_unknownOp(&self) -> bool {
-        matches!(self.tag, _)
+        matches!(self.tag, I_ping_Hash)
     }
     pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
@@ -479,14 +471,14 @@ impl I_Call {
     }
     pub fn new_ping(value: I_ping_In) -> Self {
         Self {
-            tag: I_ping_Hash,
+            tag: I_get_attribute_value_Hash,
             data: I_CallData {
                 ping: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_ping(&self) -> bool {
-        matches!(self.tag, I_ping_Hash)
+        matches!(self.tag, I_get_attribute_value_Hash)
     }
     pub fn as_ping(&self) -> &I_ping_In {
         debug_assert!(self.is_ping());
@@ -505,14 +497,14 @@ impl I_Call {
     }
     pub fn new_get_attribute_value(value: I_get_attribute_value_In) -> Self {
         Self {
-            tag: I_get_attribute_value_Hash,
+            tag: I_set_attribute_value_Hash,
             data: I_CallData {
                 get_attribute_value: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_get_attribute_value(&self) -> bool {
-        matches!(self.tag, I_get_attribute_value_Hash)
+        matches!(self.tag, I_set_attribute_value_Hash)
     }
     pub fn as_get_attribute_value(&self) -> &I_get_attribute_value_In {
         debug_assert!(self.is_get_attribute_value());
@@ -531,14 +523,14 @@ impl I_Call {
     }
     pub fn new_set_attribute_value(value: I_set_attribute_value_In) -> Self {
         Self {
-            tag: I_set_attribute_value_Hash,
+            tag: i32::default(),
             data: I_CallData {
                 set_attribute_value: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_set_attribute_value(&self) -> bool {
-        matches!(self.tag, I_set_attribute_value_Hash)
+        matches!(self.tag, _)
     }
     pub fn as_set_attribute_value(&self) -> &I_set_attribute_value_In {
         debug_assert!(self.is_set_attribute_value());
@@ -599,26 +591,21 @@ union I_ReturnData {
 }
 impl Drop for I_Return {
     fn drop(&mut self) {
-        match self.tag {
-            _ => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
-                }
+        if matches!(self.tag, I_ping_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.ping);
             }
-            I_ping_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.ping);
-                }
+        } else if matches!(self.tag, I_get_attribute_value_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_value);
             }
-            I_get_attribute_value_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_value);
-                }
+        } else if matches!(self.tag, I_set_attribute_value_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_value);
             }
-            I_set_attribute_value_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_value);
-                }
+        } else {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
         }
     }
@@ -626,14 +613,14 @@ impl Drop for I_Return {
 impl I_Return {
     pub fn new_unknownOp(value: dds::rpc::UnknownOperation) -> Self {
         Self {
-            tag: i32::default(),
+            tag: I_ping_Hash,
             data: I_ReturnData {
                 unknownOp: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_unknownOp(&self) -> bool {
-        matches!(self.tag, _)
+        matches!(self.tag, I_ping_Hash)
     }
     pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
@@ -652,14 +639,14 @@ impl I_Return {
     }
     pub fn new_ping(value: I_ping_Result) -> Self {
         Self {
-            tag: I_ping_Hash,
+            tag: I_get_attribute_value_Hash,
             data: I_ReturnData {
                 ping: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_ping(&self) -> bool {
-        matches!(self.tag, I_ping_Hash)
+        matches!(self.tag, I_get_attribute_value_Hash)
     }
     pub fn as_ping(&self) -> &I_ping_Result {
         debug_assert!(self.is_ping());
@@ -678,14 +665,14 @@ impl I_Return {
     }
     pub fn new_get_attribute_value(value: I_get_attribute_value_Result) -> Self {
         Self {
-            tag: I_get_attribute_value_Hash,
+            tag: I_set_attribute_value_Hash,
             data: I_ReturnData {
                 get_attribute_value: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_get_attribute_value(&self) -> bool {
-        matches!(self.tag, I_get_attribute_value_Hash)
+        matches!(self.tag, I_set_attribute_value_Hash)
     }
     pub fn as_get_attribute_value(&self) -> &I_get_attribute_value_Result {
         debug_assert!(self.is_get_attribute_value());
@@ -704,14 +691,14 @@ impl I_Return {
     }
     pub fn new_set_attribute_value(value: I_set_attribute_value_Result) -> Self {
         Self {
-            tag: I_set_attribute_value_Hash,
+            tag: i32::default(),
             data: I_ReturnData {
                 set_attribute_value: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_set_attribute_value(&self) -> bool {
-        matches!(self.tag, I_set_attribute_value_Hash)
+        matches!(self.tag, _)
     }
     pub fn as_set_attribute_value(&self) -> &I_set_attribute_value_Result {
         debug_assert!(self.is_set_attribute_value());

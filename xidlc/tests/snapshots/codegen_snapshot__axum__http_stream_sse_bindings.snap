@@ -5,6 +5,14 @@ expression: output
 ===============
 http_stream_sse_bindings.rs
 ===============
+#[allow(
+    non_snake_case,
+    unused_attributes,
+    unused_variables,
+    unused_mut,
+    unreachable_code,
+    clippy::let_unit_value
+)]
 #[async_trait::async_trait]
 pub trait HttpStreamSseBindingsService {
     async fn watch_project(
@@ -12,13 +20,15 @@ pub trait HttpStreamSseBindingsService {
         req: ::xidl_rust_axum::Request<HttpStreamSseBindingsServiceWatchProjectRequest>,
     ) -> ::xidl_rust_axum::Result<xidl_rust_axum::stream::SseStream<ProjectEvent>>;
 }
-mod __xidl_in_HttpStreamSseBindingsService {
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_in_HttpStreamSseBindingsService {
     use super::*;
     #[derive(::serde::Serialize, ::serde::Deserialize)]
-    pub(super) struct ProjectEvent {
-        id: String,
-        payload: String,
+    pub struct ProjectEvent {
+        pub id: String,
+        pub payload: String,
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<super::ProjectEvent> for ProjectEvent {
         fn from(value: super::ProjectEvent) -> Self {
             Self {
@@ -27,6 +37,7 @@ mod __xidl_in_HttpStreamSseBindingsService {
             }
         }
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<ProjectEvent> for super::ProjectEvent {
         fn from(value: ProjectEvent) -> Self {
             Self {
@@ -36,13 +47,15 @@ mod __xidl_in_HttpStreamSseBindingsService {
         }
     }
 }
-mod __xidl_out_HttpStreamSseBindingsService {
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_out_HttpStreamSseBindingsService {
     use super::*;
     #[derive(::serde::Serialize, ::serde::Deserialize)]
-    pub(super) struct ProjectEvent {
-        id: String,
-        payload: String,
+    pub struct ProjectEvent {
+        pub id: String,
+        pub payload: String,
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<super::ProjectEvent> for ProjectEvent {
         fn from(value: super::ProjectEvent) -> Self {
             Self {
@@ -51,6 +64,7 @@ mod __xidl_out_HttpStreamSseBindingsService {
             }
         }
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<ProjectEvent> for super::ProjectEvent {
         fn from(value: ProjectEvent) -> Self {
             Self {
@@ -61,8 +75,8 @@ mod __xidl_out_HttpStreamSseBindingsService {
     }
 }
 #[derive(::serde::Deserialize)]
-struct HttpStreamSseBindingsServiceWatchProjectPath {
-    project_id: String,
+pub struct HttpStreamSseBindingsServiceWatchProjectPath {
+    pub project_id: String,
 }
 #[derive(::serde::Serialize, ::core::default::Default)]
 struct HttpStreamSseBindingsServiceWatchProjectRequestOutQuery {
@@ -83,6 +97,7 @@ pub struct HttpStreamSseBindingsServiceWatchProjectRequest {
 pub struct HttpStreamSseBindingsServiceServer<T> {
     inner: ::std::sync::Arc<T>,
 }
+#[allow(non_snake_case)]
 impl<T> HttpStreamSseBindingsServiceServer<T>
 where
     T: HttpStreamSseBindingsService + Send + Sync + 'static,
@@ -96,15 +111,23 @@ where
         Self { inner }
     }
     pub fn router(self) -> xidl_rust_axum::axum::Router {
-        let svc = self.inner;
+        let _svc = self.inner;
         xidl_rust_axum::axum::Router::new()
             .route(
                 "/projects/{project_id}/events",
                 xidl_rust_axum::axum::routing::get(Self::watch_project),
             )
-            .with_state(svc)
+            .with_state(_svc)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn watch_project(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -121,6 +144,7 @@ where
             HttpStreamSseBindingsServiceWatchProjectRequestInQuery,
         >,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "text/event-stream") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -169,6 +193,7 @@ where
 pub struct HttpStreamSseBindingsServiceClient {
     client: ::xidl_rust_axum::Client,
 }
+#[allow(non_snake_case)]
 impl HttpStreamSseBindingsServiceClient {
     pub fn new(base_url: impl Into<String>) -> Self {
         Self {
@@ -209,8 +234,9 @@ impl HttpStreamSseBindingsServiceClient {
         }
     }
 }
+#[allow(non_snake_case)]
 impl HttpStreamSseBindingsServiceClient {
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn watch_project(
         &self,
         project_id: String,
@@ -252,6 +278,7 @@ impl HttpStreamSseBindingsServiceClient {
             req.url_mut().set_query(Some(&query));
         }
         let auth_target = &self.client;
+        let _ = auth_target;
         xidl_rust_axum::stream::open_sse::<ProjectEvent>(self.client.http(), req).await
     }
 }

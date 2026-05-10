@@ -5,6 +5,14 @@ expression: output
 ===============
 http_security_stream.rs
 ===============
+#[allow(
+    non_snake_case,
+    unused_attributes,
+    unused_variables,
+    unused_mut,
+    unreachable_code,
+    clippy::let_unit_value
+)]
 #[async_trait::async_trait]
 pub trait HttpSecurityStreamService {
     async fn watch_channel(
@@ -16,15 +24,17 @@ pub trait HttpSecurityStreamService {
         req: ::xidl_rust_axum::Request<()>,
     ) -> ::xidl_rust_axum::Result<xidl_rust_axum::stream::SseStream<String>>;
 }
-mod __xidl_in_HttpSecurityStreamService {
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_in_HttpSecurityStreamService {
     use super::*;
 }
-mod __xidl_out_HttpSecurityStreamService {
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_out_HttpSecurityStreamService {
     use super::*;
 }
 #[derive(::serde::Deserialize)]
-struct HttpSecurityStreamServiceWatchChannelPath {
-    channel: String,
+pub struct HttpSecurityStreamServiceWatchChannelPath {
+    pub channel: String,
 }
 #[derive(::serde::Serialize, ::serde::Deserialize)]
 pub struct HttpSecurityStreamServiceWatchChannelRequest {
@@ -34,6 +44,7 @@ pub struct HttpSecurityStreamServiceWatchChannelRequest {
 pub struct HttpSecurityStreamServiceServer<T> {
     inner: ::std::sync::Arc<T>,
 }
+#[allow(non_snake_case)]
 impl<T> HttpSecurityStreamServiceServer<T>
 where
     T: HttpSecurityStreamService + Send + Sync + 'static,
@@ -47,7 +58,7 @@ where
         Self { inner }
     }
     pub fn router(self) -> xidl_rust_axum::axum::Router {
-        let svc = self.inner;
+        let _svc = self.inner;
         xidl_rust_axum::axum::Router::new()
             .route(
                 "/channels/{channel}/events",
@@ -57,9 +68,17 @@ where
                 "/channels/public/events",
                 xidl_rust_axum::axum::routing::get(Self::watch_public),
             )
-            .with_state(svc)
+            .with_state(_svc)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn watch_channel(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -76,6 +95,7 @@ where
             HttpSecurityStreamServiceWatchChannelPath,
         >,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "text/event-stream") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -104,13 +124,22 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn watch_public(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "text/event-stream") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -141,6 +170,7 @@ where
 pub struct HttpSecurityStreamServiceClient {
     client: ::xidl_rust_axum::Client,
 }
+#[allow(non_snake_case)]
 impl HttpSecurityStreamServiceClient {
     pub fn new(base_url: impl Into<String>) -> Self {
         Self {
@@ -181,8 +211,9 @@ impl HttpSecurityStreamServiceClient {
         }
     }
 }
+#[allow(non_snake_case)]
 impl HttpSecurityStreamServiceClient {
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn watch_channel(
         &self,
         channel: String,
@@ -204,10 +235,11 @@ impl HttpSecurityStreamServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
+        let _ = auth_target;
         auth_target.apply_auth(&mut req, xidl_rust_axum::ClientAuthRequirement::Bearer)?;
         xidl_rust_axum::stream::open_sse::<String>(self.client.http(), req).await
     }
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn watch_public(
         &self,
     ) -> Result<xidl_rust_axum::stream::Reader<String>, xidl_rust_axum::Error> {
@@ -227,6 +259,7 @@ impl HttpSecurityStreamServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
+        let _ = auth_target;
         xidl_rust_axum::stream::open_sse::<String>(self.client.http(), req).await
     }
 }

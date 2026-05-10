@@ -173,30 +173,21 @@ impl serde::Serialize for UnionValue {
     {
         let helper = match self.tag {
             Tag::V1 => {
-                let tag = match self.tag {
-                    Tag::V1 => "V1",
-                    _ => unreachable!("union UnionValue tag must match active case"),
-                };
+                let tag = "V1";
                 UnionValueSerdeRef {
                     tag,
                     data: UnionValueSerdeRefData::Case0(self.as_case1()),
                 }
             }
             Tag::V2 => {
-                let tag = match self.tag {
-                    Tag::V2 => "V2",
-                    _ => unreachable!("union UnionValue tag must match active case"),
-                };
+                let tag = "V2";
                 UnionValueSerdeRef {
                     tag,
                     data: UnionValueSerdeRefData::Case1(self.as_case2()),
                 }
             }
             Tag::V3 => {
-                let tag = match self.tag {
-                    Tag::V3 => "V3",
-                    _ => unreachable!("union UnionValue tag must match active case"),
-                };
+                let tag = "V3";
                 UnionValueSerdeRef {
                     tag,
                     data: UnionValueSerdeRefData::Case2(self.as_case3()),
@@ -290,21 +281,17 @@ union IntTagValueData {
 }
 impl Drop for IntTagValue {
     fn drop(&mut self) {
-        match self.tag {
-            1 => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.one);
-                }
+        if matches!(self.tag, 1) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.one);
             }
-            2 | 3 => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.two_or_three);
-                }
+        } else if matches!(self.tag, 2 | 3) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.two_or_three);
             }
-            _ => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.fallback);
-                }
+        } else {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.fallback);
             }
         }
     }
@@ -419,37 +406,26 @@ impl serde::Serialize for IntTagValue {
     where
         __S: serde::Serializer,
     {
-        let helper = match self.tag {
-            1 => {
-                let tag = match self.tag {
-                    1 => "1",
-                    _ => unreachable!("union IntTagValue tag must match active case"),
-                };
-                IntTagValueSerdeRef {
-                    tag,
-                    data: IntTagValueSerdeRefData::Case0(self.as_one()),
-                }
+        let helper = if matches!(self.tag, 1) {
+            let tag = "1";
+            IntTagValueSerdeRef {
+                tag,
+                data: IntTagValueSerdeRefData::Case0(self.as_one()),
             }
-            2 | 3 => {
-                let tag = match self.tag {
-                    2 => "2",
-                    3 => "3",
-                    _ => unreachable!("union IntTagValue tag must match active case"),
-                };
-                IntTagValueSerdeRef {
-                    tag,
-                    data: IntTagValueSerdeRefData::Case1(self.as_two_or_three()),
-                }
+        } else if matches!(self.tag, 2 | 3) {
+            let tag = match self.tag {
+                2 => "2",
+                _ => "3",
+            };
+            IntTagValueSerdeRef {
+                tag,
+                data: IntTagValueSerdeRefData::Case1(self.as_two_or_three()),
             }
-            _ => {
-                let tag = match self.tag {
-                    _ => "default",
-                    _ => unreachable!("union IntTagValue tag must match active case"),
-                };
-                IntTagValueSerdeRef {
-                    tag,
-                    data: IntTagValueSerdeRefData::Case2(self.as_fallback()),
-                }
+        } else {
+            let tag = "default";
+            IntTagValueSerdeRef {
+                tag,
+                data: IntTagValueSerdeRefData::Case2(self.as_fallback()),
             }
         };
         helper.serialize(__serializer)
@@ -650,20 +626,14 @@ impl serde::Serialize for BoolTagValue {
     {
         let helper = match self.tag {
             true => {
-                let tag = match self.tag {
-                    true => "true",
-                    _ => unreachable!("union BoolTagValue tag must match active case"),
-                };
+                let tag = "true";
                 BoolTagValueSerdeRef {
                     tag,
                     data: BoolTagValueSerdeRefData::Case0(self.as_yes()),
                 }
             }
             false => {
-                let tag = match self.tag {
-                    false => "false",
-                    _ => unreachable!("union BoolTagValue tag must match active case"),
-                };
+                let tag = "false";
                 BoolTagValueSerdeRef {
                     tag,
                     data: BoolTagValueSerdeRefData::Case1(self.as_no()),
@@ -742,21 +712,17 @@ union CharTagValueData {
 }
 impl Drop for CharTagValue {
     fn drop(&mut self) {
-        match self.tag {
-            'x' => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.ex);
-                }
+        if matches!(self.tag, 'x') {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.ex);
             }
-            'y' => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.why);
-                }
+        } else if matches!(self.tag, 'y') {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.why);
             }
-            _ => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.other);
-                }
+        } else {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.other);
             }
         }
     }
@@ -871,36 +837,23 @@ impl serde::Serialize for CharTagValue {
     where
         __S: serde::Serializer,
     {
-        let helper = match self.tag {
-            'x' => {
-                let tag = match self.tag {
-                    'x' => "'x'",
-                    _ => unreachable!("union CharTagValue tag must match active case"),
-                };
-                CharTagValueSerdeRef {
-                    tag,
-                    data: CharTagValueSerdeRefData::Case0(self.as_ex()),
-                }
+        let helper = if matches!(self.tag, 'x') {
+            let tag = "'x'";
+            CharTagValueSerdeRef {
+                tag,
+                data: CharTagValueSerdeRefData::Case0(self.as_ex()),
             }
-            'y' => {
-                let tag = match self.tag {
-                    'y' => "'y'",
-                    _ => unreachable!("union CharTagValue tag must match active case"),
-                };
-                CharTagValueSerdeRef {
-                    tag,
-                    data: CharTagValueSerdeRefData::Case1(self.as_why()),
-                }
+        } else if matches!(self.tag, 'y') {
+            let tag = "'y'";
+            CharTagValueSerdeRef {
+                tag,
+                data: CharTagValueSerdeRefData::Case1(self.as_why()),
             }
-            _ => {
-                let tag = match self.tag {
-                    _ => "default",
-                    _ => unreachable!("union CharTagValue tag must match active case"),
-                };
-                CharTagValueSerdeRef {
-                    tag,
-                    data: CharTagValueSerdeRefData::Case2(self.as_other()),
-                }
+        } else {
+            let tag = "default";
+            CharTagValueSerdeRef {
+                tag,
+                data: CharTagValueSerdeRefData::Case2(self.as_other()),
             }
         };
         helper.serialize(__serializer)

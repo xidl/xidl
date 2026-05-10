@@ -18,18 +18,18 @@ T: {{ ident }} + Send + Sync + 'static,
     }
 
     pub fn router(self) -> xidl_rust_axum::axum::Router {
-        let svc = self.inner;
+        let _svc = self.inner;
         xidl_rust_axum::axum::Router::new()
         {% for method in methods %}
             {% for path in method.paths %}
                 .route("{{ path }}", xidl_rust_axum::axum::routing::{{ method.http_method_fn }}(Self::{{ method.name }}))
             {% endfor %}
         {% endfor %}
-        .with_state(svc)
+        .with_state(_svc)
     }
 
     {% for method in methods %}
-        #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+        #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion, unused_mut, unreachable_code, clippy::let_unit_value, unused_variables)]
         async fn {{ method.name }}(
         ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap{% if method.has_bearer_auth %},
@@ -40,6 +40,7 @@ T: {{ ident }} + Send + Sync + 'static,
         body: ::xidl_rust_axum::axum::body::Body{% elif method.request_struct is defined and method.request_struct and not method.is_server_stream and not method.is_client_stream and not method.is_bidi_stream %},
         request: {{ method.request_struct }}{% endif %}
         ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+            let _ = &headers;
             if !xidl_rust_axum::http::accepts_media_type(&headers, "{{ method.response_content_type }}") {
                 return Err(xidl_rust_axum::Error::not_acceptable());
             }
@@ -318,7 +319,7 @@ T: {{ ident }} + Send + Sync + 'static,
                             xidl_rust_axum::stream::sse_response(resp_value)
                         {% elif method.response_is_empty %}
                             {
-                                resp_value;
+                                let _ = resp_value;
                                 ::xidl_rust_axum::axum::response::IntoResponse::into_response(::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT)
                             }
                         {% else %}
@@ -333,6 +334,7 @@ T: {{ ident }} + Send + Sync + 'static,
                                 {% else %}
                                     let body_value = resp_value;
                                 {% endif %}
+                                let _ = &body_value;
                                 let body = xidl_rust_axum::SerializeFactory::new("{{ method.response_content_type }}")
                                 .to_vec(&body_value)?;
                                 ::xidl_rust_axum::axum::response::Response::builder()
@@ -346,6 +348,7 @@ T: {{ ident }} + Send + Sync + 'static,
                             }
                             {% endif %};
                             {% if method.response_header_params | length > 0 %}
+
                                 {% for param in method.response_header_params %}
                                     let header_name = ::xidl_rust_axum::axum::http::HeaderName::from_bytes(
                                     "{{ param.wire_name }}".as_bytes(),

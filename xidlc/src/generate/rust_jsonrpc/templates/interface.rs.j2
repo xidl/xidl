@@ -72,7 +72,7 @@ impl<T> xidl_jsonrpc::Handler for {{ ident }}Server<T>
 where
 T: {{ ident }} + Send + Sync + 'static,
 {
-    #[allow(clippy::match_single_binding, non_snake_case)]
+    #[allow(clippy::match_single_binding, non_snake_case, unused_variables)]
     async fn handle(&self, method: &str, params: ::serde_json::Value) -> Result<::serde_json::Value, xidl_jsonrpc::Error> {
         match method {
             {% for method in methods %}
@@ -119,10 +119,10 @@ T: {{ ident }} + Send + Sync + 'static,
         }
     }
 
-    fn accepts_bidi(&self, method: &str) -> bool {
+    fn accepts_bidi(&self, _method: &str) -> bool {
         {% if bidi_method_names and bidi_method_names | length > 0 %}
             matches!(
-            method,
+            _method,
             {% for rpc_name in bidi_method_names %}
                 "{{ rpc_name }}"{% if not loop.last %} |{% endif %}
             {% endfor %}
@@ -132,7 +132,7 @@ T: {{ ident }} + Send + Sync + 'static,
         {% endif %}
     }
 
-    #[allow(clippy::match_single_binding)]
+    #[allow(clippy::match_single_binding, unused_variables, unused_mut)]
     async fn handle_bidi(
     &self,
     method: &str,
@@ -243,6 +243,10 @@ S: xidl_jsonrpc::Stream + Unpin + Send + 'static,
         Self::from_stream(stream, None)
     }
 
+    pub fn endpoint(&self) -> Option<&str> {
+        self.endpoint.as_deref()
+    }
+
     fn from_stream(stream: S, endpoint: Option<String>) -> Self {
         Self {
             client: std::sync::Arc::new(tokio::sync::Mutex::new(xidl_jsonrpc::Client::new(stream))),
@@ -251,7 +255,7 @@ S: xidl_jsonrpc::Stream + Unpin + Send + 'static,
     }
 }
 
-#[allow(non_snake_case)]
+#[allow(non_snake_case, unused_variables, unused_mut)]
 #[async_trait::async_trait]
 impl<S> {{ ident }} for {{ ident }}Client<S>
 where

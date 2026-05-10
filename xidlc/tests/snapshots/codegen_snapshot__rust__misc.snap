@@ -307,16 +307,13 @@ union A_CallData {
 }
 impl Drop for A_Call {
     fn drop(&mut self) {
-        match self.tag {
-            _ => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
-                }
+        if matches!(self.tag, A_make_it_so_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.make_it_so);
             }
-            A_make_it_so_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.make_it_so);
-                }
+        } else {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
         }
     }
@@ -324,14 +321,14 @@ impl Drop for A_Call {
 impl A_Call {
     pub fn new_unknownOp(value: dds::rpc::UnknownOperation) -> Self {
         Self {
-            tag: i32::default(),
+            tag: A_make_it_so_Hash,
             data: A_CallData {
                 unknownOp: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_unknownOp(&self) -> bool {
-        matches!(self.tag, _)
+        matches!(self.tag, A_make_it_so_Hash)
     }
     pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
@@ -350,14 +347,14 @@ impl A_Call {
     }
     pub fn new_make_it_so(value: A_make_it_so_In) -> Self {
         Self {
-            tag: A_make_it_so_Hash,
+            tag: i32::default(),
             data: A_CallData {
                 make_it_so: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_make_it_so(&self) -> bool {
-        matches!(self.tag, A_make_it_so_Hash)
+        matches!(self.tag, _)
     }
     pub fn as_make_it_so(&self) -> &A_make_it_so_In {
         debug_assert!(self.is_make_it_so());
@@ -416,16 +413,13 @@ union A_ReturnData {
 }
 impl Drop for A_Return {
     fn drop(&mut self) {
-        match self.tag {
-            _ => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
-                }
+        if matches!(self.tag, A_make_it_so_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.make_it_so);
             }
-            A_make_it_so_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.make_it_so);
-                }
+        } else {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
         }
     }
@@ -433,14 +427,14 @@ impl Drop for A_Return {
 impl A_Return {
     pub fn new_unknownOp(value: dds::rpc::UnknownOperation) -> Self {
         Self {
-            tag: i32::default(),
+            tag: A_make_it_so_Hash,
             data: A_ReturnData {
                 unknownOp: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_unknownOp(&self) -> bool {
-        matches!(self.tag, _)
+        matches!(self.tag, A_make_it_so_Hash)
     }
     pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
@@ -459,14 +453,14 @@ impl A_Return {
     }
     pub fn new_make_it_so(value: A_make_it_so_Result) -> Self {
         Self {
-            tag: A_make_it_so_Hash,
+            tag: i32::default(),
             data: A_ReturnData {
                 make_it_so: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_make_it_so(&self) -> bool {
-        matches!(self.tag, A_make_it_so_Hash)
+        matches!(self.tag, _)
     }
     pub fn as_make_it_so(&self) -> &A_make_it_so_Result {
         debug_assert!(self.is_make_it_so());
@@ -623,16 +617,13 @@ union B_CallData {
 }
 impl Drop for B_Call {
     fn drop(&mut self) {
-        match self.tag {
-            _ => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
-                }
+        if matches!(self.tag, B_make_it_so_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.make_it_so);
             }
-            B_make_it_so_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.make_it_so);
-                }
+        } else {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
         }
     }
@@ -640,14 +631,14 @@ impl Drop for B_Call {
 impl B_Call {
     pub fn new_unknownOp(value: dds::rpc::UnknownOperation) -> Self {
         Self {
-            tag: i32::default(),
+            tag: B_make_it_so_Hash,
             data: B_CallData {
                 unknownOp: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_unknownOp(&self) -> bool {
-        matches!(self.tag, _)
+        matches!(self.tag, B_make_it_so_Hash)
     }
     pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
@@ -666,14 +657,14 @@ impl B_Call {
     }
     pub fn new_make_it_so(value: B_make_it_so_In) -> Self {
         Self {
-            tag: B_make_it_so_Hash,
+            tag: i32::default(),
             data: B_CallData {
                 make_it_so: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_make_it_so(&self) -> bool {
-        matches!(self.tag, B_make_it_so_Hash)
+        matches!(self.tag, _)
     }
     pub fn as_make_it_so(&self) -> &B_make_it_so_In {
         debug_assert!(self.is_make_it_so());
@@ -732,16 +723,13 @@ union B_ReturnData {
 }
 impl Drop for B_Return {
     fn drop(&mut self) {
-        match self.tag {
-            _ => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
-                }
+        if matches!(self.tag, B_make_it_so_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.make_it_so);
             }
-            B_make_it_so_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.make_it_so);
-                }
+        } else {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
         }
     }
@@ -749,14 +737,14 @@ impl Drop for B_Return {
 impl B_Return {
     pub fn new_unknownOp(value: dds::rpc::UnknownOperation) -> Self {
         Self {
-            tag: i32::default(),
+            tag: B_make_it_so_Hash,
             data: B_ReturnData {
                 unknownOp: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_unknownOp(&self) -> bool {
-        matches!(self.tag, _)
+        matches!(self.tag, B_make_it_so_Hash)
     }
     pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
@@ -775,14 +763,14 @@ impl B_Return {
     }
     pub fn new_make_it_so(value: B_make_it_so_Result) -> Self {
         Self {
-            tag: B_make_it_so_Hash,
+            tag: i32::default(),
             data: B_ReturnData {
                 make_it_so: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_make_it_so(&self) -> bool {
-        matches!(self.tag, B_make_it_so_Hash)
+        matches!(self.tag, _)
     }
     pub fn as_make_it_so(&self) -> &B_make_it_so_Result {
         debug_assert!(self.is_make_it_so());
@@ -939,16 +927,13 @@ union A_CallData {
 }
 impl Drop for A_Call {
     fn drop(&mut self) {
-        match self.tag {
-            _ => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
-                }
+        if matches!(self.tag, A_opA_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.opA);
             }
-            A_opA_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.opA);
-                }
+        } else {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
         }
     }
@@ -956,14 +941,14 @@ impl Drop for A_Call {
 impl A_Call {
     pub fn new_unknownOp(value: dds::rpc::UnknownOperation) -> Self {
         Self {
-            tag: i32::default(),
+            tag: A_opA_Hash,
             data: A_CallData {
                 unknownOp: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_unknownOp(&self) -> bool {
-        matches!(self.tag, _)
+        matches!(self.tag, A_opA_Hash)
     }
     pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
@@ -982,14 +967,14 @@ impl A_Call {
     }
     pub fn new_opA(value: A_opA_In) -> Self {
         Self {
-            tag: A_opA_Hash,
+            tag: i32::default(),
             data: A_CallData {
                 opA: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_opA(&self) -> bool {
-        matches!(self.tag, A_opA_Hash)
+        matches!(self.tag, _)
     }
     pub fn as_opA(&self) -> &A_opA_In {
         debug_assert!(self.is_opA());
@@ -1048,16 +1033,13 @@ union A_ReturnData {
 }
 impl Drop for A_Return {
     fn drop(&mut self) {
-        match self.tag {
-            _ => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
-                }
+        if matches!(self.tag, A_opA_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.opA);
             }
-            A_opA_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.opA);
-                }
+        } else {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
         }
     }
@@ -1065,14 +1047,14 @@ impl Drop for A_Return {
 impl A_Return {
     pub fn new_unknownOp(value: dds::rpc::UnknownOperation) -> Self {
         Self {
-            tag: i32::default(),
+            tag: A_opA_Hash,
             data: A_ReturnData {
                 unknownOp: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_unknownOp(&self) -> bool {
-        matches!(self.tag, _)
+        matches!(self.tag, A_opA_Hash)
     }
     pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
@@ -1091,14 +1073,14 @@ impl A_Return {
     }
     pub fn new_opA(value: A_opA_Result) -> Self {
         Self {
-            tag: A_opA_Hash,
+            tag: i32::default(),
             data: A_ReturnData {
                 opA: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_opA(&self) -> bool {
-        matches!(self.tag, A_opA_Hash)
+        matches!(self.tag, _)
     }
     pub fn as_opA(&self) -> &A_opA_Result {
         debug_assert!(self.is_opA());
@@ -1261,16 +1243,13 @@ union B_CallData {
 }
 impl Drop for B_Call {
     fn drop(&mut self) {
-        match self.tag {
-            _ => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
-                }
+        if matches!(self.tag, B_opB_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.opB);
             }
-            B_opB_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.opB);
-                }
+        } else {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
         }
     }
@@ -1278,14 +1257,14 @@ impl Drop for B_Call {
 impl B_Call {
     pub fn new_unknownOp(value: dds::rpc::UnknownOperation) -> Self {
         Self {
-            tag: i32::default(),
+            tag: B_opB_Hash,
             data: B_CallData {
                 unknownOp: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_unknownOp(&self) -> bool {
-        matches!(self.tag, _)
+        matches!(self.tag, B_opB_Hash)
     }
     pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
@@ -1304,14 +1283,14 @@ impl B_Call {
     }
     pub fn new_opB(value: B_opB_In) -> Self {
         Self {
-            tag: B_opB_Hash,
+            tag: i32::default(),
             data: B_CallData {
                 opB: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_opB(&self) -> bool {
-        matches!(self.tag, B_opB_Hash)
+        matches!(self.tag, _)
     }
     pub fn as_opB(&self) -> &B_opB_In {
         debug_assert!(self.is_opB());
@@ -1370,16 +1349,13 @@ union B_ReturnData {
 }
 impl Drop for B_Return {
     fn drop(&mut self) {
-        match self.tag {
-            _ => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
-                }
+        if matches!(self.tag, B_opB_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.opB);
             }
-            B_opB_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.opB);
-                }
+        } else {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
         }
     }
@@ -1387,14 +1363,14 @@ impl Drop for B_Return {
 impl B_Return {
     pub fn new_unknownOp(value: dds::rpc::UnknownOperation) -> Self {
         Self {
-            tag: i32::default(),
+            tag: B_opB_Hash,
             data: B_ReturnData {
                 unknownOp: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_unknownOp(&self) -> bool {
-        matches!(self.tag, _)
+        matches!(self.tag, B_opB_Hash)
     }
     pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
@@ -1413,14 +1389,14 @@ impl B_Return {
     }
     pub fn new_opB(value: B_opB_Result) -> Self {
         Self {
-            tag: B_opB_Hash,
+            tag: i32::default(),
             data: B_ReturnData {
                 opB: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_opB(&self) -> bool {
-        matches!(self.tag, B_opB_Hash)
+        matches!(self.tag, _)
     }
     pub fn as_opB(&self) -> &B_opB_Result {
         debug_assert!(self.is_opB());
@@ -1583,16 +1559,13 @@ union C_CallData {
 }
 impl Drop for C_Call {
     fn drop(&mut self) {
-        match self.tag {
-            _ => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
-                }
+        if matches!(self.tag, C_opC_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.opC);
             }
-            C_opC_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.opC);
-                }
+        } else {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
         }
     }
@@ -1600,14 +1573,14 @@ impl Drop for C_Call {
 impl C_Call {
     pub fn new_unknownOp(value: dds::rpc::UnknownOperation) -> Self {
         Self {
-            tag: i32::default(),
+            tag: C_opC_Hash,
             data: C_CallData {
                 unknownOp: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_unknownOp(&self) -> bool {
-        matches!(self.tag, _)
+        matches!(self.tag, C_opC_Hash)
     }
     pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
@@ -1626,14 +1599,14 @@ impl C_Call {
     }
     pub fn new_opC(value: C_opC_In) -> Self {
         Self {
-            tag: C_opC_Hash,
+            tag: i32::default(),
             data: C_CallData {
                 opC: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_opC(&self) -> bool {
-        matches!(self.tag, C_opC_Hash)
+        matches!(self.tag, _)
     }
     pub fn as_opC(&self) -> &C_opC_In {
         debug_assert!(self.is_opC());
@@ -1692,16 +1665,13 @@ union C_ReturnData {
 }
 impl Drop for C_Return {
     fn drop(&mut self) {
-        match self.tag {
-            _ => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
-                }
+        if matches!(self.tag, C_opC_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.opC);
             }
-            C_opC_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.opC);
-                }
+        } else {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
         }
     }
@@ -1709,14 +1679,14 @@ impl Drop for C_Return {
 impl C_Return {
     pub fn new_unknownOp(value: dds::rpc::UnknownOperation) -> Self {
         Self {
-            tag: i32::default(),
+            tag: C_opC_Hash,
             data: C_ReturnData {
                 unknownOp: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_unknownOp(&self) -> bool {
-        matches!(self.tag, _)
+        matches!(self.tag, C_opC_Hash)
     }
     pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
@@ -1735,14 +1705,14 @@ impl C_Return {
     }
     pub fn new_opC(value: C_opC_Result) -> Self {
         Self {
-            tag: C_opC_Hash,
+            tag: i32::default(),
             data: C_ReturnData {
                 opC: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_opC(&self) -> bool {
-        matches!(self.tag, C_opC_Hash)
+        matches!(self.tag, _)
     }
     pub fn as_opC(&self) -> &C_opC_Result {
         debug_assert!(self.is_opC());
@@ -1917,16 +1887,13 @@ union A_CallData {
 }
 impl Drop for A_Call {
     fn drop(&mut self) {
-        match self.tag {
-            _ => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
-                }
+        if matches!(self.tag, A_f_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.f);
             }
-            A_f_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.f);
-                }
+        } else {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
         }
     }
@@ -1934,14 +1901,14 @@ impl Drop for A_Call {
 impl A_Call {
     pub fn new_unknownOp(value: dds::rpc::UnknownOperation) -> Self {
         Self {
-            tag: i32::default(),
+            tag: A_f_Hash,
             data: A_CallData {
                 unknownOp: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_unknownOp(&self) -> bool {
-        matches!(self.tag, _)
+        matches!(self.tag, A_f_Hash)
     }
     pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
@@ -1960,14 +1927,14 @@ impl A_Call {
     }
     pub fn new_f(value: A_f_In) -> Self {
         Self {
-            tag: A_f_Hash,
+            tag: i32::default(),
             data: A_CallData {
                 f: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_f(&self) -> bool {
-        matches!(self.tag, A_f_Hash)
+        matches!(self.tag, _)
     }
     pub fn as_f(&self) -> &A_f_In {
         debug_assert!(self.is_f());
@@ -2026,16 +1993,13 @@ union A_ReturnData {
 }
 impl Drop for A_Return {
     fn drop(&mut self) {
-        match self.tag {
-            _ => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
-                }
+        if matches!(self.tag, A_f_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.f);
             }
-            A_f_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.f);
-                }
+        } else {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
         }
     }
@@ -2043,14 +2007,14 @@ impl Drop for A_Return {
 impl A_Return {
     pub fn new_unknownOp(value: dds::rpc::UnknownOperation) -> Self {
         Self {
-            tag: i32::default(),
+            tag: A_f_Hash,
             data: A_ReturnData {
                 unknownOp: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_unknownOp(&self) -> bool {
-        matches!(self.tag, _)
+        matches!(self.tag, A_f_Hash)
     }
     pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
@@ -2069,14 +2033,14 @@ impl A_Return {
     }
     pub fn new_f(value: A_f_Result) -> Self {
         Self {
-            tag: A_f_Hash,
+            tag: i32::default(),
             data: A_ReturnData {
                 f: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_f(&self) -> bool {
-        matches!(self.tag, A_f_Hash)
+        matches!(self.tag, _)
     }
     pub fn as_f(&self) -> &A_f_Result {
         debug_assert!(self.is_f());
@@ -2740,41 +2704,33 @@ union C_CallData {
 }
 impl Drop for C_Call {
     fn drop(&mut self) {
-        match self.tag {
-            _ => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
-                }
+        if matches!(self.tag, C_get_attribute_Title_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_Title);
             }
-            C_get_attribute_Title_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_Title);
-                }
+        } else if matches!(self.tag, C_set_attribute_Title_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_Title);
             }
-            C_set_attribute_Title_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_Title);
-                }
+        } else if matches!(self.tag, C_get_attribute_Name_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_Name);
             }
-            C_get_attribute_Name_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_Name);
-                }
+        } else if matches!(self.tag, C_set_attribute_Name_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_Name);
             }
-            C_set_attribute_Name_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_Name);
-                }
+        } else if matches!(self.tag, C_get_attribute_City_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_City);
             }
-            C_get_attribute_City_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_City);
-                }
+        } else if matches!(self.tag, C_set_attribute_City_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_City);
             }
-            C_set_attribute_City_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_City);
-                }
+        } else {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
         }
     }
@@ -2782,14 +2738,14 @@ impl Drop for C_Call {
 impl C_Call {
     pub fn new_unknownOp(value: dds::rpc::UnknownOperation) -> Self {
         Self {
-            tag: i32::default(),
+            tag: C_get_attribute_Title_Hash,
             data: C_CallData {
                 unknownOp: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_unknownOp(&self) -> bool {
-        matches!(self.tag, _)
+        matches!(self.tag, C_get_attribute_Title_Hash)
     }
     pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
@@ -2808,14 +2764,14 @@ impl C_Call {
     }
     pub fn new_get_attribute_Title(value: C_get_attribute_Title_In) -> Self {
         Self {
-            tag: C_get_attribute_Title_Hash,
+            tag: C_set_attribute_Title_Hash,
             data: C_CallData {
                 get_attribute_Title: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_get_attribute_Title(&self) -> bool {
-        matches!(self.tag, C_get_attribute_Title_Hash)
+        matches!(self.tag, C_set_attribute_Title_Hash)
     }
     pub fn as_get_attribute_Title(&self) -> &C_get_attribute_Title_In {
         debug_assert!(self.is_get_attribute_Title());
@@ -2834,14 +2790,14 @@ impl C_Call {
     }
     pub fn new_set_attribute_Title(value: C_set_attribute_Title_In) -> Self {
         Self {
-            tag: C_set_attribute_Title_Hash,
+            tag: C_get_attribute_Name_Hash,
             data: C_CallData {
                 set_attribute_Title: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_set_attribute_Title(&self) -> bool {
-        matches!(self.tag, C_set_attribute_Title_Hash)
+        matches!(self.tag, C_get_attribute_Name_Hash)
     }
     pub fn as_set_attribute_Title(&self) -> &C_set_attribute_Title_In {
         debug_assert!(self.is_set_attribute_Title());
@@ -2860,14 +2816,14 @@ impl C_Call {
     }
     pub fn new_get_attribute_Name(value: C_get_attribute_Name_In) -> Self {
         Self {
-            tag: C_get_attribute_Name_Hash,
+            tag: C_set_attribute_Name_Hash,
             data: C_CallData {
                 get_attribute_Name: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_get_attribute_Name(&self) -> bool {
-        matches!(self.tag, C_get_attribute_Name_Hash)
+        matches!(self.tag, C_set_attribute_Name_Hash)
     }
     pub fn as_get_attribute_Name(&self) -> &C_get_attribute_Name_In {
         debug_assert!(self.is_get_attribute_Name());
@@ -2886,14 +2842,14 @@ impl C_Call {
     }
     pub fn new_set_attribute_Name(value: C_set_attribute_Name_In) -> Self {
         Self {
-            tag: C_set_attribute_Name_Hash,
+            tag: C_get_attribute_City_Hash,
             data: C_CallData {
                 set_attribute_Name: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_set_attribute_Name(&self) -> bool {
-        matches!(self.tag, C_set_attribute_Name_Hash)
+        matches!(self.tag, C_get_attribute_City_Hash)
     }
     pub fn as_set_attribute_Name(&self) -> &C_set_attribute_Name_In {
         debug_assert!(self.is_set_attribute_Name());
@@ -2912,14 +2868,14 @@ impl C_Call {
     }
     pub fn new_get_attribute_City(value: C_get_attribute_City_In) -> Self {
         Self {
-            tag: C_get_attribute_City_Hash,
+            tag: C_set_attribute_City_Hash,
             data: C_CallData {
                 get_attribute_City: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_get_attribute_City(&self) -> bool {
-        matches!(self.tag, C_get_attribute_City_Hash)
+        matches!(self.tag, C_set_attribute_City_Hash)
     }
     pub fn as_get_attribute_City(&self) -> &C_get_attribute_City_In {
         debug_assert!(self.is_get_attribute_City());
@@ -2938,14 +2894,14 @@ impl C_Call {
     }
     pub fn new_set_attribute_City(value: C_set_attribute_City_In) -> Self {
         Self {
-            tag: C_set_attribute_City_Hash,
+            tag: i32::default(),
             data: C_CallData {
                 set_attribute_City: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_set_attribute_City(&self) -> bool {
-        matches!(self.tag, C_set_attribute_City_Hash)
+        matches!(self.tag, _)
     }
     pub fn as_set_attribute_City(&self) -> &C_set_attribute_City_In {
         debug_assert!(self.is_set_attribute_City());
@@ -3009,41 +2965,33 @@ union C_ReturnData {
 }
 impl Drop for C_Return {
     fn drop(&mut self) {
-        match self.tag {
-            _ => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
-                }
+        if matches!(self.tag, C_get_attribute_Title_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_Title);
             }
-            C_get_attribute_Title_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_Title);
-                }
+        } else if matches!(self.tag, C_set_attribute_Title_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_Title);
             }
-            C_set_attribute_Title_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_Title);
-                }
+        } else if matches!(self.tag, C_get_attribute_Name_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_Name);
             }
-            C_get_attribute_Name_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_Name);
-                }
+        } else if matches!(self.tag, C_set_attribute_Name_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_Name);
             }
-            C_set_attribute_Name_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_Name);
-                }
+        } else if matches!(self.tag, C_get_attribute_City_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_City);
             }
-            C_get_attribute_City_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_City);
-                }
+        } else if matches!(self.tag, C_set_attribute_City_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_City);
             }
-            C_set_attribute_City_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_City);
-                }
+        } else {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
         }
     }
@@ -3051,14 +2999,14 @@ impl Drop for C_Return {
 impl C_Return {
     pub fn new_unknownOp(value: dds::rpc::UnknownOperation) -> Self {
         Self {
-            tag: i32::default(),
+            tag: C_get_attribute_Title_Hash,
             data: C_ReturnData {
                 unknownOp: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_unknownOp(&self) -> bool {
-        matches!(self.tag, _)
+        matches!(self.tag, C_get_attribute_Title_Hash)
     }
     pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
@@ -3077,14 +3025,14 @@ impl C_Return {
     }
     pub fn new_get_attribute_Title(value: C_get_attribute_Title_Result) -> Self {
         Self {
-            tag: C_get_attribute_Title_Hash,
+            tag: C_set_attribute_Title_Hash,
             data: C_ReturnData {
                 get_attribute_Title: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_get_attribute_Title(&self) -> bool {
-        matches!(self.tag, C_get_attribute_Title_Hash)
+        matches!(self.tag, C_set_attribute_Title_Hash)
     }
     pub fn as_get_attribute_Title(&self) -> &C_get_attribute_Title_Result {
         debug_assert!(self.is_get_attribute_Title());
@@ -3103,14 +3051,14 @@ impl C_Return {
     }
     pub fn new_set_attribute_Title(value: C_set_attribute_Title_Result) -> Self {
         Self {
-            tag: C_set_attribute_Title_Hash,
+            tag: C_get_attribute_Name_Hash,
             data: C_ReturnData {
                 set_attribute_Title: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_set_attribute_Title(&self) -> bool {
-        matches!(self.tag, C_set_attribute_Title_Hash)
+        matches!(self.tag, C_get_attribute_Name_Hash)
     }
     pub fn as_set_attribute_Title(&self) -> &C_set_attribute_Title_Result {
         debug_assert!(self.is_set_attribute_Title());
@@ -3129,14 +3077,14 @@ impl C_Return {
     }
     pub fn new_get_attribute_Name(value: C_get_attribute_Name_Result) -> Self {
         Self {
-            tag: C_get_attribute_Name_Hash,
+            tag: C_set_attribute_Name_Hash,
             data: C_ReturnData {
                 get_attribute_Name: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_get_attribute_Name(&self) -> bool {
-        matches!(self.tag, C_get_attribute_Name_Hash)
+        matches!(self.tag, C_set_attribute_Name_Hash)
     }
     pub fn as_get_attribute_Name(&self) -> &C_get_attribute_Name_Result {
         debug_assert!(self.is_get_attribute_Name());
@@ -3155,14 +3103,14 @@ impl C_Return {
     }
     pub fn new_set_attribute_Name(value: C_set_attribute_Name_Result) -> Self {
         Self {
-            tag: C_set_attribute_Name_Hash,
+            tag: C_get_attribute_City_Hash,
             data: C_ReturnData {
                 set_attribute_Name: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_set_attribute_Name(&self) -> bool {
-        matches!(self.tag, C_set_attribute_Name_Hash)
+        matches!(self.tag, C_get_attribute_City_Hash)
     }
     pub fn as_set_attribute_Name(&self) -> &C_set_attribute_Name_Result {
         debug_assert!(self.is_set_attribute_Name());
@@ -3181,14 +3129,14 @@ impl C_Return {
     }
     pub fn new_get_attribute_City(value: C_get_attribute_City_Result) -> Self {
         Self {
-            tag: C_get_attribute_City_Hash,
+            tag: C_set_attribute_City_Hash,
             data: C_ReturnData {
                 get_attribute_City: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_get_attribute_City(&self) -> bool {
-        matches!(self.tag, C_get_attribute_City_Hash)
+        matches!(self.tag, C_set_attribute_City_Hash)
     }
     pub fn as_get_attribute_City(&self) -> &C_get_attribute_City_Result {
         debug_assert!(self.is_get_attribute_City());
@@ -3207,14 +3155,14 @@ impl C_Return {
     }
     pub fn new_set_attribute_City(value: C_set_attribute_City_Result) -> Self {
         Self {
-            tag: C_set_attribute_City_Hash,
+            tag: i32::default(),
             data: C_ReturnData {
                 set_attribute_City: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_set_attribute_City(&self) -> bool {
-        matches!(self.tag, C_set_attribute_City_Hash)
+        matches!(self.tag, _)
     }
     pub fn as_set_attribute_City(&self) -> &C_set_attribute_City_Result {
         debug_assert!(self.is_set_attribute_City());

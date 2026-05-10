@@ -5,6 +5,14 @@ expression: output
 ===============
 http_client_stream_report.rs
 ===============
+#[allow(
+    non_snake_case,
+    unused_attributes,
+    unused_variables,
+    unused_mut,
+    unreachable_code,
+    clippy::let_unit_value
+)]
 #[async_trait::async_trait]
 pub trait HttpClientStreamReportService {
     async fn upload_parts(
@@ -16,34 +24,38 @@ pub trait HttpClientStreamReportService {
         >,
     ) -> ::xidl_rust_axum::Result<UploadSummary>;
 }
-mod __xidl_in_HttpClientStreamReportService {
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_in_HttpClientStreamReportService {
     use super::*;
     #[derive(::serde::Serialize, ::serde::Deserialize)]
-    pub(super) struct UploadChunk {
-        part_id: String,
-        bytes: Vec<u8>,
+    pub struct UploadChunk {
+        pub part_id: String,
+        pub bytes: Vec<u8>,
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<super::UploadChunk> for UploadChunk {
         fn from(value: super::UploadChunk) -> Self {
             Self {
                 part_id: value.part_id,
-                bytes: value.bytes.into_iter().map(|value| value).collect(),
+                bytes: value.bytes.into_iter().collect(),
             }
         }
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<UploadChunk> for super::UploadChunk {
         fn from(value: UploadChunk) -> Self {
             Self {
                 part_id: value.part_id,
-                bytes: value.bytes.into_iter().map(|value| value).collect(),
+                bytes: value.bytes.into_iter().collect(),
             }
         }
     }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
-    pub(super) struct UploadSummary {
-        upload_id: String,
-        accepted: u32,
+    pub struct UploadSummary {
+        pub upload_id: String,
+        pub accepted: u32,
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<super::UploadSummary> for UploadSummary {
         fn from(value: super::UploadSummary) -> Self {
             Self {
@@ -52,6 +64,7 @@ mod __xidl_in_HttpClientStreamReportService {
             }
         }
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<UploadSummary> for super::UploadSummary {
         fn from(value: UploadSummary) -> Self {
             Self {
@@ -61,34 +74,38 @@ mod __xidl_in_HttpClientStreamReportService {
         }
     }
 }
-mod __xidl_out_HttpClientStreamReportService {
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_out_HttpClientStreamReportService {
     use super::*;
     #[derive(::serde::Serialize, ::serde::Deserialize)]
-    pub(super) struct UploadChunk {
-        part_id: String,
-        bytes: Vec<u8>,
+    pub struct UploadChunk {
+        pub part_id: String,
+        pub bytes: Vec<u8>,
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<super::UploadChunk> for UploadChunk {
         fn from(value: super::UploadChunk) -> Self {
             Self {
                 part_id: value.part_id,
-                bytes: value.bytes.into_iter().map(|value| value).collect(),
+                bytes: value.bytes.into_iter().collect(),
             }
         }
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<UploadChunk> for super::UploadChunk {
         fn from(value: UploadChunk) -> Self {
             Self {
                 part_id: value.part_id,
-                bytes: value.bytes.into_iter().map(|value| value).collect(),
+                bytes: value.bytes.into_iter().collect(),
             }
         }
     }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
-    pub(super) struct UploadSummary {
-        upload_id: String,
-        accepted: u32,
+    pub struct UploadSummary {
+        pub upload_id: String,
+        pub accepted: u32,
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<super::UploadSummary> for UploadSummary {
         fn from(value: super::UploadSummary) -> Self {
             Self {
@@ -97,6 +114,7 @@ mod __xidl_out_HttpClientStreamReportService {
             }
         }
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<UploadSummary> for super::UploadSummary {
         fn from(value: UploadSummary) -> Self {
             Self {
@@ -107,13 +125,13 @@ mod __xidl_out_HttpClientStreamReportService {
     }
 }
 #[derive(::serde::Serialize)]
-struct HttpClientStreamReportServiceUploadPartsRequestOutBody {
+pub struct HttpClientStreamReportServiceUploadPartsRequestOutBody {
     #[serde(default)]
-    chunk: __xidl_out_HttpClientStreamReportService::UploadChunk,
+    pub chunk: __xidl_out_HttpClientStreamReportService::UploadChunk,
 }
 #[derive(::serde::Deserialize)]
-struct HttpClientStreamReportServiceUploadPartsRequestInBody {
-    chunk: __xidl_in_HttpClientStreamReportService::UploadChunk,
+pub struct HttpClientStreamReportServiceUploadPartsRequestInBody {
+    pub chunk: __xidl_in_HttpClientStreamReportService::UploadChunk,
 }
 #[derive(::serde::Serialize, ::serde::Deserialize)]
 pub struct HttpClientStreamReportServiceUploadPartsRequest {
@@ -122,6 +140,7 @@ pub struct HttpClientStreamReportServiceUploadPartsRequest {
 pub struct HttpClientStreamReportServiceServer<T> {
     inner: ::std::sync::Arc<T>,
 }
+#[allow(non_snake_case)]
 impl<T> HttpClientStreamReportServiceServer<T>
 where
     T: HttpClientStreamReportService + Send + Sync + 'static,
@@ -135,15 +154,23 @@ where
         Self { inner }
     }
     pub fn router(self) -> xidl_rust_axum::axum::Router {
-        let svc = self.inner;
+        let _svc = self.inner;
         xidl_rust_axum::axum::Router::new()
             .route(
                 "/uploads/parts",
                 xidl_rust_axum::axum::routing::post(Self::upload_parts),
             )
-            .with_state(svc)
+            .with_state(_svc)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn upload_parts(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -151,6 +178,7 @@ where
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
         body: ::xidl_rust_axum::axum::body::Body,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -166,6 +194,7 @@ where
                 let mut resp = {
                     let body_value: __xidl_out_HttpClientStreamReportService::UploadSummary = resp_value
                         .into();
+                    let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -203,6 +232,7 @@ where
 pub struct HttpClientStreamReportServiceClient {
     client: ::xidl_rust_axum::Client,
 }
+#[allow(non_snake_case)]
 impl HttpClientStreamReportServiceClient {
     pub fn new(base_url: impl Into<String>) -> Self {
         Self {
@@ -243,8 +273,9 @@ impl HttpClientStreamReportServiceClient {
         }
     }
 }
+#[allow(non_snake_case)]
 impl HttpClientStreamReportServiceClient {
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn upload_parts(
         &self,
         chunk: UploadChunk,
@@ -271,6 +302,7 @@ impl HttpClientStreamReportServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
+        let _ = auth_target;
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::CONTENT_TYPE,

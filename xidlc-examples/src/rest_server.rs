@@ -210,7 +210,7 @@ impl RestServer for SimpleRestServer {
     async fn get_timestamp(&self) -> ::xidl_rust_axum::Result<Timestamp> {
         todo!()
     }
-    async fn is_admin(&self, info: AdminInfo) -> ::xidl_rust_axum::Result<()> {
+    async fn is_admin(&self, _info: AdminInfo) -> ::xidl_rust_axum::Result<()> {
         todo!()
     }
 }

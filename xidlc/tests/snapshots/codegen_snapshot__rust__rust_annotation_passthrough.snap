@@ -137,16 +137,13 @@ union Api_CallData {
 }
 impl Drop for Api_Call {
     fn drop(&mut self) {
-        match self.tag {
-            _ => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
-                }
+        if matches!(self.tag, Api_ping_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.ping);
             }
-            Api_ping_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.ping);
-                }
+        } else {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
         }
     }
@@ -154,14 +151,14 @@ impl Drop for Api_Call {
 impl Api_Call {
     pub fn new_unknownOp(value: dds::rpc::UnknownOperation) -> Self {
         Self {
-            tag: i32::default(),
+            tag: Api_ping_Hash,
             data: Api_CallData {
                 unknownOp: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_unknownOp(&self) -> bool {
-        matches!(self.tag, _)
+        matches!(self.tag, Api_ping_Hash)
     }
     pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
@@ -180,14 +177,14 @@ impl Api_Call {
     }
     pub fn new_ping(value: Api_ping_In) -> Self {
         Self {
-            tag: Api_ping_Hash,
+            tag: i32::default(),
             data: Api_CallData {
                 ping: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_ping(&self) -> bool {
-        matches!(self.tag, Api_ping_Hash)
+        matches!(self.tag, _)
     }
     pub fn as_ping(&self) -> &Api_ping_In {
         debug_assert!(self.is_ping());
@@ -246,16 +243,13 @@ union Api_ReturnData {
 }
 impl Drop for Api_Return {
     fn drop(&mut self) {
-        match self.tag {
-            _ => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
-                }
+        if matches!(self.tag, Api_ping_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.ping);
             }
-            Api_ping_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.ping);
-                }
+        } else {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
         }
     }
@@ -263,14 +257,14 @@ impl Drop for Api_Return {
 impl Api_Return {
     pub fn new_unknownOp(value: dds::rpc::UnknownOperation) -> Self {
         Self {
-            tag: i32::default(),
+            tag: Api_ping_Hash,
             data: Api_ReturnData {
                 unknownOp: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_unknownOp(&self) -> bool {
-        matches!(self.tag, _)
+        matches!(self.tag, Api_ping_Hash)
     }
     pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
@@ -289,14 +283,14 @@ impl Api_Return {
     }
     pub fn new_ping(value: Api_ping_Result) -> Self {
         Self {
-            tag: Api_ping_Hash,
+            tag: i32::default(),
             data: Api_ReturnData {
                 ping: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_ping(&self) -> bool {
-        matches!(self.tag, Api_ping_Hash)
+        matches!(self.tag, _)
     }
     pub fn as_ping(&self) -> &Api_ping_Result {
         debug_assert!(self.is_ping());

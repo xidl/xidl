@@ -6,6 +6,14 @@ expression: output
 http_header.rs
 ===============
 pub mod test {
+    #[allow(
+        non_snake_case,
+        unused_attributes,
+        unused_variables,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value
+    )]
     #[async_trait::async_trait]
     pub trait HeaderService {
         async fn get_user(
@@ -24,15 +32,17 @@ pub mod test {
             name: String,
         ) -> ::xidl_rust_axum::Result<()>;
     }
-    mod __xidl_in_HeaderService {
+    #[allow(non_snake_case, unused_imports)]
+    pub(super) mod __xidl_in_HeaderService {
         use super::*;
     }
-    mod __xidl_out_HeaderService {
+    #[allow(non_snake_case, unused_imports)]
+    pub(super) mod __xidl_out_HeaderService {
         use super::*;
     }
     #[derive(::serde::Deserialize)]
-    struct HeaderServiceGetUserPath {
-        id: u32,
+    pub struct HeaderServiceGetUserPath {
+        pub id: u32,
     }
     #[derive(::serde::Deserialize)]
     struct HeaderServiceGetUserRequest {
@@ -43,7 +53,7 @@ pub mod test {
         session_id: String,
         prefs: Vec<String>,
     }
-    #[allow(clippy::manual_async_fn)]
+    #[allow(clippy::manual_async_fn, unused_mut)]
     impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
     for HeaderServiceGetUserRequest
     where
@@ -56,6 +66,8 @@ pub mod test {
         ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
             async move {
                 let (mut parts, body) = req.into_parts();
+                let _ = &body;
+                let _ = state;
                 let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
                     HeaderServiceGetUserPath,
                 > as ::xidl_rust_axum::axum::extract::FromRequestParts<
@@ -65,6 +77,7 @@ pub mod test {
                     .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
                 let HeaderServiceGetUserPath { id } = path;
                 let headers = &parts.headers;
+                let _ = headers;
                 let req_id: String = match headers.get("X-Req-Id") {
                     Some(header_value) => {
                         let header_str = header_value
@@ -163,13 +176,13 @@ pub mod test {
         }
     }
     #[derive(::serde::Serialize)]
-    struct HeaderServiceCreateUserRequestOutBody {
+    pub struct HeaderServiceCreateUserRequestOutBody {
         #[serde(default)]
-        name: String,
+        pub name: String,
     }
     #[derive(::serde::Deserialize)]
-    struct HeaderServiceCreateUserRequestInBody {
-        name: String,
+    pub struct HeaderServiceCreateUserRequestInBody {
+        pub name: String,
     }
     #[derive(::serde::Deserialize)]
     struct HeaderServiceCreateUserRequest {
@@ -177,7 +190,7 @@ pub mod test {
         session_id: String,
         name: String,
     }
-    #[allow(clippy::manual_async_fn)]
+    #[allow(clippy::manual_async_fn, unused_mut)]
     impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
     for HeaderServiceCreateUserRequest
     where
@@ -190,7 +203,10 @@ pub mod test {
         ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
             async move {
                 let (mut parts, body) = req.into_parts();
+                let _ = &body;
+                let _ = state;
                 let headers = &parts.headers;
+                let _ = headers;
                 let token: String = match headers.get("X-Token") {
                     Some(header_value) => {
                         let header_str = header_value
@@ -256,6 +272,7 @@ pub mod test {
     pub struct HeaderServiceServer<T> {
         inner: ::std::sync::Arc<T>,
     }
+    #[allow(non_snake_case)]
     impl<T> HeaderServiceServer<T>
     where
         T: HeaderService + Send + Sync + 'static,
@@ -269,7 +286,7 @@ pub mod test {
             Self { inner }
         }
         pub fn router(self) -> xidl_rust_axum::axum::Router {
-            let svc = self.inner;
+            let _svc = self.inner;
             xidl_rust_axum::axum::Router::new()
                 .route(
                     "/v1/headers/{id}",
@@ -279,12 +296,16 @@ pub mod test {
                     "/v1/headers",
                     xidl_rust_axum::axum::routing::post(Self::create_user),
                 )
-                .with_state(svc)
+                .with_state(_svc)
         }
         #[allow(
             clippy::let_and_return,
             clippy::needless_return,
-            clippy::useless_conversion
+            clippy::useless_conversion,
+            unused_mut,
+            unreachable_code,
+            clippy::let_unit_value,
+            unused_variables
         )]
         async fn get_user(
             ::xidl_rust_axum::axum::extract::State(
@@ -293,6 +314,7 @@ pub mod test {
             headers: ::xidl_rust_axum::axum::http::HeaderMap,
             request: HeaderServiceGetUserRequest,
         ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+            let _ = &headers;
             if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
                 return Err(xidl_rust_axum::Error::not_acceptable());
             }
@@ -306,10 +328,10 @@ pub mod test {
             } = request;
             let id: u32 = id;
             let req_id: String = req_id;
-            let flags: Vec<String> = flags.into_iter().map(|value| value).collect();
+            let flags: Vec<String> = flags.into_iter().collect();
             let age: u32 = age;
             let session_id: String = session_id;
-            let prefs: Vec<String> = prefs.into_iter().map(|value| value).collect();
+            let prefs: Vec<String> = prefs.into_iter().collect();
             let mut resp = match svc
                 .get_user(id, req_id, flags, age, session_id, prefs)
                 .await
@@ -317,6 +339,7 @@ pub mod test {
                 Ok(resp_value) => {
                     let mut resp = {
                         let body_value: User = resp_value;
+                        let _ = &body_value;
                         let body = xidl_rust_axum::SerializeFactory::new(
                                 "application/json",
                             )
@@ -347,7 +370,11 @@ pub mod test {
         #[allow(
             clippy::let_and_return,
             clippy::needless_return,
-            clippy::useless_conversion
+            clippy::useless_conversion,
+            unused_mut,
+            unreachable_code,
+            clippy::let_unit_value,
+            unused_variables
         )]
         async fn create_user(
             ::xidl_rust_axum::axum::extract::State(
@@ -356,6 +383,7 @@ pub mod test {
             headers: ::xidl_rust_axum::axum::http::HeaderMap,
             request: HeaderServiceCreateUserRequest,
         ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+            let _ = &headers;
             if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
                 return Err(xidl_rust_axum::Error::not_acceptable());
             }
@@ -366,7 +394,7 @@ pub mod test {
             let mut resp = match svc.create_user(token, session_id, name).await {
                 Ok(resp_value) => {
                     let mut resp = {
-                        resp_value;
+                        let _ = resp_value;
                         ::xidl_rust_axum::axum::response::IntoResponse::into_response(
                             ::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT,
                         )
@@ -391,6 +419,7 @@ pub mod test {
     pub struct HeaderServiceClient {
         client: ::xidl_rust_axum::Client,
     }
+    #[allow(non_snake_case)]
     impl HeaderServiceClient {
         pub fn new(base_url: impl Into<String>) -> Self {
             Self {
@@ -435,8 +464,14 @@ pub mod test {
             }
         }
     }
+    #[allow(non_snake_case)]
     impl HeaderServiceClient {
-        #[allow(clippy::useless_conversion)]
+        #[allow(
+            clippy::useless_conversion,
+            unused_mut,
+            unreachable_code,
+            unused_variables
+        )]
         pub async fn get_user(
             &self,
             id: u32,
@@ -532,6 +567,7 @@ pub mod test {
                 req.headers_mut().insert(cookie_name, header_value);
             }
             let auth_target = &self.client;
+            let _ = auth_target;
             let resp = self
                 .client
                 .http()
@@ -554,7 +590,12 @@ pub mod test {
                 Err(xidl_rust_axum::Error::from_http_response(status, body))
             }
         }
-        #[allow(clippy::useless_conversion)]
+        #[allow(
+            clippy::useless_conversion,
+            unused_mut,
+            unreachable_code,
+            unused_variables
+        )]
         pub async fn create_user(
             &self,
             token: String,
@@ -620,8 +661,9 @@ pub mod test {
                 req.headers_mut().insert(cookie_name, header_value);
             }
             let auth_target = &self.client;
+            let _ = auth_target;
             let body = HeaderServiceCreateUserRequestOutBody {
-                name: name,
+                name,
             };
             let body = xidl_rust_axum::SerializeFactory::new("application/json")
                 .to_vec(&body)?;

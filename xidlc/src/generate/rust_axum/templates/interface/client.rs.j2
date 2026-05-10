@@ -60,7 +60,7 @@ impl {{ ident }}Client {
 #[allow(non_snake_case)]
 impl {{ ident }}Client {
     {% for method in methods %}
-        #[allow(clippy::useless_conversion)]
+        #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
         pub async fn {{ method.name }}(&self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{% if method.is_client_stream %}xidl_rust_axum::stream::Writer<{{ method.request_item_ty }}, {{ method.response_ty }}>{% elif method.is_bidi_stream %}xidl_rust_axum::stream::ReaderWriter<{{ method.request_item_ty }}, {{ method.response_ty }}>{% elif method.is_server_stream %}xidl_rust_axum::stream::Reader<{{ method.response_ty }}>{% else %}{{ method.response_ty }}{% endif %}, xidl_rust_axum::Error> {
             let path = "{{ method.path }}".to_string();
             {% for param in method.path_params %}
@@ -163,6 +163,7 @@ impl {{ ident }}Client {
             {% else %}
                 let auth_target = &self.client;
             {% endif %}
+            let _ = auth_target;
             {% if method.auth_source_interface and (method.has_basic_auth or method.has_bearer_auth or method.api_key_requirements | length > 0) and not method.is_bidi_stream %}
                 {% if method.has_basic_auth %}
                     auth_target.apply_auth(&mut req, xidl_rust_axum::ClientAuthRequirement::Basic)?;

@@ -5,6 +5,14 @@ expression: output
 ===============
 http_scope_matrix.rs
 ===============
+#[allow(
+    non_snake_case,
+    unused_attributes,
+    unused_variables,
+    unused_mut,
+    unreachable_code,
+    clippy::let_unit_value
+)]
 #[async_trait::async_trait]
 pub trait HttpScopeMatrixService {
     #[deprecated(note = "Deprecated. Since 2026-01-15T00:00:00Z.")]
@@ -42,76 +50,82 @@ pub trait HttpScopeMatrixService {
     )]
     async fn deprecated_window(&self, id: String) -> ::xidl_rust_axum::Result<String>;
 }
-mod __xidl_in_HttpScopeMatrixService {
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_in_HttpScopeMatrixService {
     use super::*;
     #[derive(::serde::Serialize, ::serde::Deserialize)]
-    pub(super) struct MatrixBody {
-        name: String,
+    pub struct MatrixBody {
+        pub name: String,
         #[serde(default)]
-        alias: Option<String>,
-        tags: Vec<String>,
+        pub alias: Option<String>,
+        pub tags: Vec<String>,
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<super::MatrixBody> for MatrixBody {
         fn from(value: super::MatrixBody) -> Self {
             Self {
                 name: value.name,
                 alias: value.alias,
-                tags: value.tags.into_iter().map(|value| value).collect(),
+                tags: value.tags.into_iter().collect(),
             }
         }
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<MatrixBody> for super::MatrixBody {
         fn from(value: MatrixBody) -> Self {
             Self {
                 name: value.name,
                 alias: value.alias,
-                tags: value.tags.into_iter().map(|value| value).collect(),
+                tags: value.tags.into_iter().collect(),
             }
         }
     }
 }
-mod __xidl_out_HttpScopeMatrixService {
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_out_HttpScopeMatrixService {
     use super::*;
     #[derive(::serde::Serialize, ::serde::Deserialize)]
-    pub(super) struct MatrixBody {
-        name: String,
+    pub struct MatrixBody {
+        pub name: String,
         #[serde(default)]
-        alias: Option<String>,
-        tags: Vec<String>,
+        pub alias: Option<String>,
+        pub tags: Vec<String>,
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<super::MatrixBody> for MatrixBody {
         fn from(value: super::MatrixBody) -> Self {
             Self {
                 name: value.name,
                 alias: value.alias,
-                tags: value.tags.into_iter().map(|value| value).collect(),
+                tags: value.tags.into_iter().collect(),
             }
         }
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<MatrixBody> for super::MatrixBody {
         fn from(value: MatrixBody) -> Self {
             Self {
                 name: value.name,
                 alias: value.alias,
-                tags: value.tags.into_iter().map(|value| value).collect(),
+                tags: value.tags.into_iter().collect(),
             }
         }
     }
 }
 #[derive(::serde::Serialize)]
-struct HttpScopeMatrixServiceDefaultScopeRequestOutBody {
+pub struct HttpScopeMatrixServiceDefaultScopeRequestOutBody {
     #[serde(default)]
-    req: __xidl_out_HttpScopeMatrixService::MatrixBody,
+    pub req: __xidl_out_HttpScopeMatrixService::MatrixBody,
 }
 #[derive(::serde::Deserialize)]
-struct HttpScopeMatrixServiceDefaultScopeRequestInBody {
-    req: __xidl_in_HttpScopeMatrixService::MatrixBody,
+pub struct HttpScopeMatrixServiceDefaultScopeRequestInBody {
+    pub req: __xidl_in_HttpScopeMatrixService::MatrixBody,
 }
 #[derive(::serde::Deserialize)]
 struct HttpScopeMatrixServiceDefaultScopeRequest {
     req: __xidl_in_HttpScopeMatrixService::MatrixBody,
 }
-#[allow(clippy::manual_async_fn)]
+#[allow(clippy::manual_async_fn, unused_mut)]
 impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
 for HttpScopeMatrixServiceDefaultScopeRequest
 where
@@ -124,7 +138,10 @@ where
     ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
         async move {
             let (mut parts, body) = req.into_parts();
+            let _ = &body;
+            let _ = state;
             let headers = &parts.headers;
+            let _ = headers;
             if !::xidl_rust_axum::http::content_type_matches(
                 headers,
                 "application/json",
@@ -144,24 +161,24 @@ where
     }
 }
 #[derive(::serde::Serialize)]
-struct HttpScopeMatrixServiceOverrideConsumesOnlyRequestOutBody {
+pub struct HttpScopeMatrixServiceOverrideConsumesOnlyRequestOutBody {
     #[serde(default)]
-    name: String,
+    pub name: String,
     #[serde(default)]
-    age: Option<u32>,
+    pub age: Option<u32>,
 }
 #[derive(::serde::Deserialize)]
-struct HttpScopeMatrixServiceOverrideConsumesOnlyRequestInBody {
-    name: String,
+pub struct HttpScopeMatrixServiceOverrideConsumesOnlyRequestInBody {
+    pub name: String,
     #[serde(default)]
-    age: Option<u32>,
+    pub age: Option<u32>,
 }
 #[derive(::serde::Deserialize)]
 struct HttpScopeMatrixServiceOverrideConsumesOnlyRequest {
     name: String,
     age: Option<u32>,
 }
-#[allow(clippy::manual_async_fn)]
+#[allow(clippy::manual_async_fn, unused_mut)]
 impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
 for HttpScopeMatrixServiceOverrideConsumesOnlyRequest
 where
@@ -174,7 +191,10 @@ where
     ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
         async move {
             let (mut parts, body) = req.into_parts();
+            let _ = &body;
+            let _ = state;
             let headers = &parts.headers;
+            let _ = headers;
             if !::xidl_rust_axum::http::content_type_matches(
                 headers,
                 "application/x-www-form-urlencoded",
@@ -194,20 +214,20 @@ where
     }
 }
 #[derive(::serde::Serialize)]
-struct HttpScopeMatrixServiceOverrideConsumesOnlyResponseOutBody {
-    r#return: String,
-    normalized_name: String,
+pub struct HttpScopeMatrixServiceOverrideConsumesOnlyResponseOutBody {
+    pub r#return: String,
+    pub normalized_name: String,
 }
 #[derive(::serde::Deserialize)]
-struct HttpScopeMatrixServiceOverrideConsumesOnlyResponseInBody {
-    r#return: String,
-    normalized_name: String,
+pub struct HttpScopeMatrixServiceOverrideConsumesOnlyResponseInBody {
+    pub r#return: String,
+    pub normalized_name: String,
 }
 pub struct HttpScopeMatrixServiceOverrideConsumesOnlyResponse {
     pub r#return: String,
     pub normalized_name: String,
 }
-#[allow(clippy::useless_conversion)]
+#[allow(clippy::useless_conversion, unreachable_code, unused_variables)]
 impl From<HttpScopeMatrixServiceOverrideConsumesOnlyResponse>
 for HttpScopeMatrixServiceOverrideConsumesOnlyResponseOutBody {
     fn from(value: HttpScopeMatrixServiceOverrideConsumesOnlyResponse) -> Self {
@@ -217,7 +237,7 @@ for HttpScopeMatrixServiceOverrideConsumesOnlyResponseOutBody {
         }
     }
 }
-#[allow(clippy::useless_conversion)]
+#[allow(clippy::useless_conversion, unreachable_code, unused_variables)]
 impl From<HttpScopeMatrixServiceOverrideConsumesOnlyResponseInBody>
 for HttpScopeMatrixServiceOverrideConsumesOnlyResponse {
     fn from(value: HttpScopeMatrixServiceOverrideConsumesOnlyResponseInBody) -> Self {
@@ -228,14 +248,14 @@ for HttpScopeMatrixServiceOverrideConsumesOnlyResponse {
     }
 }
 #[derive(::serde::Deserialize)]
-struct HttpScopeMatrixServiceOverrideProducesOnlyPath {
-    id: String,
+pub struct HttpScopeMatrixServiceOverrideProducesOnlyPath {
+    pub id: String,
 }
 #[derive(::serde::Deserialize)]
 struct HttpScopeMatrixServiceOverrideProducesOnlyRequest {
     id: String,
 }
-#[allow(clippy::manual_async_fn)]
+#[allow(clippy::manual_async_fn, unused_mut)]
 impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
 for HttpScopeMatrixServiceOverrideProducesOnlyRequest
 where
@@ -248,6 +268,8 @@ where
     ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
         async move {
             let (mut parts, body) = req.into_parts();
+            let _ = &body;
+            let _ = state;
             let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
                 HttpScopeMatrixServiceOverrideProducesOnlyPath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
@@ -257,25 +279,26 @@ where
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
             let HttpScopeMatrixServiceOverrideProducesOnlyPath { id } = path;
             let headers = &parts.headers;
+            let _ = headers;
             Ok(Self { id })
         }
     }
 }
 #[derive(::serde::Serialize)]
-struct HttpScopeMatrixServiceOverrideProducesOnlyResponseOutBody {
-    r#return: __xidl_out_HttpScopeMatrixService::MatrixBody,
-    revision: u32,
+pub struct HttpScopeMatrixServiceOverrideProducesOnlyResponseOutBody {
+    pub r#return: __xidl_out_HttpScopeMatrixService::MatrixBody,
+    pub revision: u32,
 }
 #[derive(::serde::Deserialize)]
-struct HttpScopeMatrixServiceOverrideProducesOnlyResponseInBody {
-    r#return: __xidl_in_HttpScopeMatrixService::MatrixBody,
-    revision: u32,
+pub struct HttpScopeMatrixServiceOverrideProducesOnlyResponseInBody {
+    pub r#return: __xidl_in_HttpScopeMatrixService::MatrixBody,
+    pub revision: u32,
 }
 pub struct HttpScopeMatrixServiceOverrideProducesOnlyResponse {
     pub r#return: MatrixBody,
     pub revision: u32,
 }
-#[allow(clippy::useless_conversion)]
+#[allow(clippy::useless_conversion, unreachable_code, unused_variables)]
 impl From<HttpScopeMatrixServiceOverrideProducesOnlyResponse>
 for HttpScopeMatrixServiceOverrideProducesOnlyResponseOutBody {
     fn from(value: HttpScopeMatrixServiceOverrideProducesOnlyResponse) -> Self {
@@ -285,7 +308,7 @@ for HttpScopeMatrixServiceOverrideProducesOnlyResponseOutBody {
         }
     }
 }
-#[allow(clippy::useless_conversion)]
+#[allow(clippy::useless_conversion, unreachable_code, unused_variables)]
 impl From<HttpScopeMatrixServiceOverrideProducesOnlyResponseInBody>
 for HttpScopeMatrixServiceOverrideProducesOnlyResponse {
     fn from(value: HttpScopeMatrixServiceOverrideProducesOnlyResponseInBody) -> Self {
@@ -296,24 +319,24 @@ for HttpScopeMatrixServiceOverrideProducesOnlyResponse {
     }
 }
 #[derive(::serde::Serialize)]
-struct HttpScopeMatrixServiceOverrideBothMediaRequestOutBody {
+pub struct HttpScopeMatrixServiceOverrideBothMediaRequestOutBody {
     #[serde(default)]
-    name: String,
+    pub name: String,
     #[serde(default)]
-    age: Option<u32>,
+    pub age: Option<u32>,
 }
 #[derive(::serde::Deserialize)]
-struct HttpScopeMatrixServiceOverrideBothMediaRequestInBody {
-    name: String,
+pub struct HttpScopeMatrixServiceOverrideBothMediaRequestInBody {
+    pub name: String,
     #[serde(default)]
-    age: Option<u32>,
+    pub age: Option<u32>,
 }
 #[derive(::serde::Deserialize)]
 struct HttpScopeMatrixServiceOverrideBothMediaRequest {
     name: String,
     age: Option<u32>,
 }
-#[allow(clippy::manual_async_fn)]
+#[allow(clippy::manual_async_fn, unused_mut)]
 impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
 for HttpScopeMatrixServiceOverrideBothMediaRequest
 where
@@ -326,7 +349,10 @@ where
     ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
         async move {
             let (mut parts, body) = req.into_parts();
+            let _ = &body;
+            let _ = state;
             let headers = &parts.headers;
+            let _ = headers;
             if !::xidl_rust_axum::http::content_type_matches(
                 headers,
                 "application/x-www-form-urlencoded",
@@ -346,20 +372,20 @@ where
     }
 }
 #[derive(::serde::Serialize)]
-struct HttpScopeMatrixServiceOverrideBothMediaResponseOutBody {
-    r#return: __xidl_out_HttpScopeMatrixService::MatrixBody,
-    normalized_name: String,
+pub struct HttpScopeMatrixServiceOverrideBothMediaResponseOutBody {
+    pub r#return: __xidl_out_HttpScopeMatrixService::MatrixBody,
+    pub normalized_name: String,
 }
 #[derive(::serde::Deserialize)]
-struct HttpScopeMatrixServiceOverrideBothMediaResponseInBody {
-    r#return: __xidl_in_HttpScopeMatrixService::MatrixBody,
-    normalized_name: String,
+pub struct HttpScopeMatrixServiceOverrideBothMediaResponseInBody {
+    pub r#return: __xidl_in_HttpScopeMatrixService::MatrixBody,
+    pub normalized_name: String,
 }
 pub struct HttpScopeMatrixServiceOverrideBothMediaResponse {
     pub r#return: MatrixBody,
     pub normalized_name: String,
 }
-#[allow(clippy::useless_conversion)]
+#[allow(clippy::useless_conversion, unreachable_code, unused_variables)]
 impl From<HttpScopeMatrixServiceOverrideBothMediaResponse>
 for HttpScopeMatrixServiceOverrideBothMediaResponseOutBody {
     fn from(value: HttpScopeMatrixServiceOverrideBothMediaResponse) -> Self {
@@ -369,7 +395,7 @@ for HttpScopeMatrixServiceOverrideBothMediaResponseOutBody {
         }
     }
 }
-#[allow(clippy::useless_conversion)]
+#[allow(clippy::useless_conversion, unreachable_code, unused_variables)]
 impl From<HttpScopeMatrixServiceOverrideBothMediaResponseInBody>
 for HttpScopeMatrixServiceOverrideBothMediaResponse {
     fn from(value: HttpScopeMatrixServiceOverrideBothMediaResponseInBody) -> Self {
@@ -380,14 +406,14 @@ for HttpScopeMatrixServiceOverrideBothMediaResponse {
     }
 }
 #[derive(::serde::Deserialize)]
-struct HttpScopeMatrixServiceDeprecatedPlainPath {
-    id: String,
+pub struct HttpScopeMatrixServiceDeprecatedPlainPath {
+    pub id: String,
 }
 #[derive(::serde::Deserialize)]
 struct HttpScopeMatrixServiceDeprecatedPlainRequest {
     id: String,
 }
-#[allow(clippy::manual_async_fn)]
+#[allow(clippy::manual_async_fn, unused_mut)]
 impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
 for HttpScopeMatrixServiceDeprecatedPlainRequest
 where
@@ -400,6 +426,8 @@ where
     ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
         async move {
             let (mut parts, body) = req.into_parts();
+            let _ = &body;
+            let _ = state;
             let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
                 HttpScopeMatrixServiceDeprecatedPlainPath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
@@ -409,19 +437,20 @@ where
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
             let HttpScopeMatrixServiceDeprecatedPlainPath { id } = path;
             let headers = &parts.headers;
+            let _ = headers;
             Ok(Self { id })
         }
     }
 }
 #[derive(::serde::Deserialize)]
-struct HttpScopeMatrixServiceDeprecatedSinceOnlyPath {
-    id: String,
+pub struct HttpScopeMatrixServiceDeprecatedSinceOnlyPath {
+    pub id: String,
 }
 #[derive(::serde::Deserialize)]
 struct HttpScopeMatrixServiceDeprecatedSinceOnlyRequest {
     id: String,
 }
-#[allow(clippy::manual_async_fn)]
+#[allow(clippy::manual_async_fn, unused_mut)]
 impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
 for HttpScopeMatrixServiceDeprecatedSinceOnlyRequest
 where
@@ -434,6 +463,8 @@ where
     ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
         async move {
             let (mut parts, body) = req.into_parts();
+            let _ = &body;
+            let _ = state;
             let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
                 HttpScopeMatrixServiceDeprecatedSinceOnlyPath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
@@ -443,19 +474,20 @@ where
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
             let HttpScopeMatrixServiceDeprecatedSinceOnlyPath { id } = path;
             let headers = &parts.headers;
+            let _ = headers;
             Ok(Self { id })
         }
     }
 }
 #[derive(::serde::Deserialize)]
-struct HttpScopeMatrixServiceDeprecatedWindowPath {
-    id: String,
+pub struct HttpScopeMatrixServiceDeprecatedWindowPath {
+    pub id: String,
 }
 #[derive(::serde::Deserialize)]
 struct HttpScopeMatrixServiceDeprecatedWindowRequest {
     id: String,
 }
-#[allow(clippy::manual_async_fn)]
+#[allow(clippy::manual_async_fn, unused_mut)]
 impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
 for HttpScopeMatrixServiceDeprecatedWindowRequest
 where
@@ -468,6 +500,8 @@ where
     ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
         async move {
             let (mut parts, body) = req.into_parts();
+            let _ = &body;
+            let _ = state;
             let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
                 HttpScopeMatrixServiceDeprecatedWindowPath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
@@ -477,6 +511,7 @@ where
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
             let HttpScopeMatrixServiceDeprecatedWindowPath { id } = path;
             let headers = &parts.headers;
+            let _ = headers;
             Ok(Self { id })
         }
     }
@@ -484,6 +519,7 @@ where
 pub struct HttpScopeMatrixServiceServer<T> {
     inner: ::std::sync::Arc<T>,
 }
+#[allow(non_snake_case)]
 impl<T> HttpScopeMatrixServiceServer<T>
 where
     T: HttpScopeMatrixService + Send + Sync + 'static,
@@ -497,7 +533,7 @@ where
         Self { inner }
     }
     pub fn router(self) -> xidl_rust_axum::axum::Router {
-        let svc = self.inner;
+        let _svc = self.inner;
         xidl_rust_axum::axum::Router::new()
             .route(
                 "/attribute/inherited_attr",
@@ -535,15 +571,24 @@ where
                 "/v2/scope/deprecated/window/{id}",
                 xidl_rust_axum::axum::routing::get(Self::deprecated_window),
             )
-            .with_state(svc)
+            .with_state(_svc)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn get_attribute_inherited_attr(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -551,6 +596,7 @@ where
             Ok(resp_value) => {
                 let mut resp = {
                     let body_value: String = resp_value;
+                    let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -594,13 +640,22 @@ where
             );
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn get_attribute_bare_attr(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -608,6 +663,7 @@ where
             Ok(resp_value) => {
                 let mut resp = {
                     let body_value: String = resp_value;
+                    let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -640,7 +696,15 @@ where
             );
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn default_scope(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -648,6 +712,7 @@ where
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
         request: HttpScopeMatrixServiceDefaultScopeRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -657,6 +722,7 @@ where
             Ok(resp_value) => {
                 let mut resp = {
                     let body_value: String = resp_value;
+                    let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -700,7 +766,15 @@ where
             );
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn override_consumes_only(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -708,6 +782,7 @@ where
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
         request: HttpScopeMatrixServiceOverrideConsumesOnlyRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -719,6 +794,7 @@ where
                 let mut resp = {
                     let body_value: HttpScopeMatrixServiceOverrideConsumesOnlyResponseOutBody = resp_value
                         .into();
+                    let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -762,7 +838,15 @@ where
             );
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn override_produces_only(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -770,6 +854,7 @@ where
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
         request: HttpScopeMatrixServiceOverrideProducesOnlyRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/msgpack") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -780,6 +865,7 @@ where
                 let mut resp = {
                     let body_value: HttpScopeMatrixServiceOverrideProducesOnlyResponseOutBody = resp_value
                         .into();
+                    let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new(
                             "application/msgpack",
                         )
@@ -825,7 +911,15 @@ where
             );
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn override_both_media(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -833,6 +927,7 @@ where
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
         request: HttpScopeMatrixServiceOverrideBothMediaRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/msgpack") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -844,6 +939,7 @@ where
                 let mut resp = {
                     let body_value: HttpScopeMatrixServiceOverrideBothMediaResponseOutBody = resp_value
                         .into();
+                    let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new(
                             "application/msgpack",
                         )
@@ -889,7 +985,15 @@ where
             );
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn deprecated_plain(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -897,6 +1001,7 @@ where
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
         request: HttpScopeMatrixServiceDeprecatedPlainRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -906,6 +1011,7 @@ where
             Ok(resp_value) => {
                 let mut resp = {
                     let body_value: String = resp_value;
+                    let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -938,7 +1044,15 @@ where
             );
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn deprecated_since_only(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -946,6 +1060,7 @@ where
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
         request: HttpScopeMatrixServiceDeprecatedSinceOnlyRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -955,6 +1070,7 @@ where
             Ok(resp_value) => {
                 let mut resp = {
                     let body_value: String = resp_value;
+                    let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -998,7 +1114,15 @@ where
             );
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn deprecated_window(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -1006,6 +1130,7 @@ where
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
         request: HttpScopeMatrixServiceDeprecatedWindowRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -1015,6 +1140,7 @@ where
             Ok(resp_value) => {
                 let mut resp = {
                     let body_value: String = resp_value;
+                    let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -1081,6 +1207,7 @@ where
 pub struct HttpScopeMatrixServiceClient {
     client: ::xidl_rust_axum::Client,
 }
+#[allow(non_snake_case)]
 impl HttpScopeMatrixServiceClient {
     pub fn new(base_url: impl Into<String>) -> Self {
         Self {
@@ -1121,8 +1248,9 @@ impl HttpScopeMatrixServiceClient {
         }
     }
 }
+#[allow(non_snake_case)]
 impl HttpScopeMatrixServiceClient {
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn get_attribute_inherited_attr(
         &self,
     ) -> Result<String, xidl_rust_axum::Error> {
@@ -1142,6 +1270,7 @@ impl HttpScopeMatrixServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
+        let _ = auth_target;
         let resp = self
             .client
             .http()
@@ -1164,7 +1293,7 @@ impl HttpScopeMatrixServiceClient {
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn get_attribute_bare_attr(
         &self,
     ) -> Result<String, xidl_rust_axum::Error> {
@@ -1184,6 +1313,7 @@ impl HttpScopeMatrixServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
+        let _ = auth_target;
         let resp = self
             .client
             .http()
@@ -1206,7 +1336,7 @@ impl HttpScopeMatrixServiceClient {
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn default_scope(
         &self,
         req: MatrixBody,
@@ -1227,6 +1357,7 @@ impl HttpScopeMatrixServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
+        let _ = auth_target;
         let body = HttpScopeMatrixServiceDefaultScopeRequestOutBody {
             req: req.into(),
         };
@@ -1263,7 +1394,7 @@ impl HttpScopeMatrixServiceClient {
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn override_consumes_only(
         &self,
         name: String,
@@ -1288,9 +1419,10 @@ impl HttpScopeMatrixServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
+        let _ = auth_target;
         let body = HttpScopeMatrixServiceOverrideConsumesOnlyRequestOutBody {
-            name: name,
-            age: age,
+            name,
+            age,
         };
         let body = xidl_rust_axum::SerializeFactory::new(
                 "application/x-www-form-urlencoded",
@@ -1327,7 +1459,7 @@ impl HttpScopeMatrixServiceClient {
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn override_produces_only(
         &self,
         id: String,
@@ -1352,6 +1484,7 @@ impl HttpScopeMatrixServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
+        let _ = auth_target;
         let resp = self
             .client
             .http()
@@ -1374,7 +1507,7 @@ impl HttpScopeMatrixServiceClient {
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn override_both_media(
         &self,
         name: String,
@@ -1396,9 +1529,10 @@ impl HttpScopeMatrixServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
+        let _ = auth_target;
         let body = HttpScopeMatrixServiceOverrideBothMediaRequestOutBody {
-            name: name,
-            age: age,
+            name,
+            age,
         };
         let body = xidl_rust_axum::SerializeFactory::new(
                 "application/x-www-form-urlencoded",
@@ -1435,7 +1569,7 @@ impl HttpScopeMatrixServiceClient {
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn deprecated_plain(
         &self,
         id: String,
@@ -1457,6 +1591,7 @@ impl HttpScopeMatrixServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
+        let _ = auth_target;
         let resp = self
             .client
             .http()
@@ -1479,7 +1614,7 @@ impl HttpScopeMatrixServiceClient {
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn deprecated_since_only(
         &self,
         id: String,
@@ -1501,6 +1636,7 @@ impl HttpScopeMatrixServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
+        let _ = auth_target;
         let resp = self
             .client
             .http()
@@ -1523,7 +1659,7 @@ impl HttpScopeMatrixServiceClient {
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn deprecated_window(
         &self,
         id: String,
@@ -1545,6 +1681,7 @@ impl HttpScopeMatrixServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
+        let _ = auth_target;
         let resp = self
             .client
             .http()
@@ -1568,6 +1705,14 @@ impl HttpScopeMatrixServiceClient {
         }
     }
 }
+#[allow(
+    non_snake_case,
+    unused_attributes,
+    unused_variables,
+    unused_mut,
+    unreachable_code,
+    clippy::let_unit_value
+)]
 #[async_trait::async_trait]
 pub trait HttpSecurityMatrixService {
     async fn inherited_security(
@@ -1595,22 +1740,24 @@ pub trait HttpSecurityMatrixService {
     ) -> ::xidl_rust_axum::Result<String>;
     async fn public_ping(&self) -> ::xidl_rust_axum::Result<String>;
 }
-mod __xidl_in_HttpSecurityMatrixService {
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_in_HttpSecurityMatrixService {
     use super::*;
 }
-mod __xidl_out_HttpSecurityMatrixService {
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_out_HttpSecurityMatrixService {
     use super::*;
 }
 #[derive(::serde::Deserialize)]
-struct HttpSecurityMatrixServiceInheritedSecurityPath {
-    id: String,
+pub struct HttpSecurityMatrixServiceInheritedSecurityPath {
+    pub id: String,
 }
 #[derive(::serde::Deserialize)]
 struct HttpSecurityMatrixServiceInheritedSecurityRequest {
     id: String,
     x_trace_id: String,
 }
-#[allow(clippy::manual_async_fn)]
+#[allow(clippy::manual_async_fn, unused_mut)]
 impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
 for HttpSecurityMatrixServiceInheritedSecurityRequest
 where
@@ -1623,6 +1770,8 @@ where
     ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
         async move {
             let (mut parts, body) = req.into_parts();
+            let _ = &body;
+            let _ = state;
             let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
                 HttpSecurityMatrixServiceInheritedSecurityPath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
@@ -1632,6 +1781,7 @@ where
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
             let HttpSecurityMatrixServiceInheritedSecurityPath { id } = path;
             let headers = &parts.headers;
+            let _ = headers;
             let x_trace_id: String = match headers.get("x_trace_id") {
                 Some(header_value) => {
                     let header_str = header_value
@@ -1649,24 +1799,24 @@ where
     }
 }
 #[derive(::serde::Serialize)]
-struct HttpSecurityMatrixServiceBearerOrCookieSecurityRequestOutBody {
+pub struct HttpSecurityMatrixServiceBearerOrCookieSecurityRequestOutBody {
     #[serde(default)]
-    action: String,
+    pub action: String,
     #[serde(default)]
-    note: Option<String>,
+    pub note: Option<String>,
 }
 #[derive(::serde::Deserialize)]
-struct HttpSecurityMatrixServiceBearerOrCookieSecurityRequestInBody {
-    action: String,
+pub struct HttpSecurityMatrixServiceBearerOrCookieSecurityRequestInBody {
+    pub action: String,
     #[serde(default)]
-    note: Option<String>,
+    pub note: Option<String>,
 }
 #[derive(::serde::Deserialize)]
 struct HttpSecurityMatrixServiceBearerOrCookieSecurityRequest {
     action: String,
     note: Option<String>,
 }
-#[allow(clippy::manual_async_fn)]
+#[allow(clippy::manual_async_fn, unused_mut)]
 impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
 for HttpSecurityMatrixServiceBearerOrCookieSecurityRequest
 where
@@ -1679,7 +1829,10 @@ where
     ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
         async move {
             let (mut parts, body) = req.into_parts();
+            let _ = &body;
+            let _ = state;
             let headers = &parts.headers;
+            let _ = headers;
             if !::xidl_rust_axum::http::content_type_matches(
                 headers,
                 "application/json",
@@ -1702,8 +1855,8 @@ where
     }
 }
 #[derive(::serde::Deserialize)]
-struct HttpSecurityMatrixServiceAlternativeSecurityPath {
-    id: String,
+pub struct HttpSecurityMatrixServiceAlternativeSecurityPath {
+    pub id: String,
 }
 #[derive(::serde::Serialize, ::core::default::Default)]
 struct HttpSecurityMatrixServiceAlternativeSecurityRequestOutQuery {
@@ -1720,7 +1873,7 @@ struct HttpSecurityMatrixServiceAlternativeSecurityRequest {
     id: String,
     locale: Option<String>,
 }
-#[allow(clippy::manual_async_fn)]
+#[allow(clippy::manual_async_fn, unused_mut)]
 impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
 for HttpSecurityMatrixServiceAlternativeSecurityRequest
 where
@@ -1733,6 +1886,8 @@ where
     ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
         async move {
             let (mut parts, body) = req.into_parts();
+            let _ = &body;
+            let _ = state;
             let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
                 HttpSecurityMatrixServiceAlternativeSecurityPath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
@@ -1750,29 +1905,30 @@ where
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
             let HttpSecurityMatrixServiceAlternativeSecurityRequestInQuery { locale } = query;
             let headers = &parts.headers;
+            let _ = headers;
             Ok(Self { id, locale })
         }
     }
 }
 #[derive(::serde::Serialize)]
-struct HttpSecurityMatrixServiceOauthSecurityRequestOutBody {
+pub struct HttpSecurityMatrixServiceOauthSecurityRequestOutBody {
     #[serde(default)]
-    keyword: String,
+    pub keyword: String,
     #[serde(default)]
-    page: Option<u32>,
+    pub page: Option<u32>,
 }
 #[derive(::serde::Deserialize)]
-struct HttpSecurityMatrixServiceOauthSecurityRequestInBody {
-    keyword: String,
+pub struct HttpSecurityMatrixServiceOauthSecurityRequestInBody {
+    pub keyword: String,
     #[serde(default)]
-    page: Option<u32>,
+    pub page: Option<u32>,
 }
 #[derive(::serde::Deserialize)]
 struct HttpSecurityMatrixServiceOauthSecurityRequest {
     keyword: String,
     page: Option<u32>,
 }
-#[allow(clippy::manual_async_fn)]
+#[allow(clippy::manual_async_fn, unused_mut)]
 impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
 for HttpSecurityMatrixServiceOauthSecurityRequest
 where
@@ -1785,7 +1941,10 @@ where
     ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
         async move {
             let (mut parts, body) = req.into_parts();
+            let _ = &body;
+            let _ = state;
             let headers = &parts.headers;
+            let _ = headers;
             if !::xidl_rust_axum::http::content_type_matches(
                 headers,
                 "application/json",
@@ -1807,6 +1966,7 @@ where
 pub struct HttpSecurityMatrixServiceServer<T> {
     inner: ::std::sync::Arc<T>,
 }
+#[allow(non_snake_case)]
 impl<T> HttpSecurityMatrixServiceServer<T>
 where
     T: HttpSecurityMatrixService + Send + Sync + 'static,
@@ -1820,7 +1980,7 @@ where
         Self { inner }
     }
     pub fn router(self) -> xidl_rust_axum::axum::Router {
-        let svc = self.inner;
+        let _svc = self.inner;
         xidl_rust_axum::axum::Router::new()
             .route(
                 "/v2/security/inherited/{id}",
@@ -1842,9 +2002,17 @@ where
                 "/v2/security/public/ping",
                 xidl_rust_axum::axum::routing::get(Self::public_ping),
             )
-            .with_state(svc)
+            .with_state(_svc)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn inherited_security(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -1852,6 +2020,7 @@ where
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
         request: HttpSecurityMatrixServiceInheritedSecurityRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -1871,6 +2040,7 @@ where
             Ok(resp_value) => {
                 let mut resp = {
                     let body_value: String = resp_value;
+                    let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -1896,7 +2066,15 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn bearer_or_cookie_security(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -1909,6 +2087,7 @@ where
         >,
         request: HttpSecurityMatrixServiceBearerOrCookieSecurityRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -1926,6 +2105,7 @@ where
             Ok(resp_value) => {
                 let mut resp = {
                     let body_value: String = resp_value;
+                    let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -1951,7 +2131,15 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn alternative_security(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -1964,6 +2152,7 @@ where
         >,
         request: HttpSecurityMatrixServiceAlternativeSecurityRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -1980,6 +2169,7 @@ where
             Ok(resp_value) => {
                 let mut resp = {
                     let body_value: String = resp_value;
+                    let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -2005,7 +2195,15 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn oauth_security(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -2013,6 +2211,7 @@ where
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
         request: HttpSecurityMatrixServiceOauthSecurityRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -2023,6 +2222,7 @@ where
             Ok(resp_value) => {
                 let mut resp = {
                     let body_value: String = resp_value;
+                    let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -2048,13 +2248,22 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn public_ping(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -2062,6 +2271,7 @@ where
             Ok(resp_value) => {
                 let mut resp = {
                     let body_value: String = resp_value;
+                    let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -2099,6 +2309,7 @@ where
 pub struct HttpSecurityMatrixServiceClient {
     client: ::xidl_rust_axum::Client,
 }
+#[allow(non_snake_case)]
 impl HttpSecurityMatrixServiceClient {
     pub fn new(base_url: impl Into<String>) -> Self {
         Self {
@@ -2139,8 +2350,9 @@ impl HttpSecurityMatrixServiceClient {
         }
     }
 }
+#[allow(non_snake_case)]
 impl HttpSecurityMatrixServiceClient {
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn inherited_security(
         &self,
         id: String,
@@ -2173,6 +2385,7 @@ impl HttpSecurityMatrixServiceClient {
             .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
         req.headers_mut().insert(header_name, header_value);
         let auth_target = &self.client;
+        let _ = auth_target;
         auth_target.apply_auth(&mut req, xidl_rust_axum::ClientAuthRequirement::Basic)?;
         auth_target
             .apply_auth(
@@ -2204,7 +2417,7 @@ impl HttpSecurityMatrixServiceClient {
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn bearer_or_cookie_security(
         &self,
         action: String,
@@ -2233,6 +2446,7 @@ impl HttpSecurityMatrixServiceClient {
         };
         let auth_client = self.client.with_auth_override(Some(auth));
         let auth_target = &auth_client;
+        let _ = auth_target;
         auth_target.apply_auth(&mut req, xidl_rust_axum::ClientAuthRequirement::Bearer)?;
         auth_target
             .apply_auth(
@@ -2243,8 +2457,8 @@ impl HttpSecurityMatrixServiceClient {
                 },
             )?;
         let body = HttpSecurityMatrixServiceBearerOrCookieSecurityRequestOutBody {
-            action: action,
-            note: note,
+            action,
+            note,
         };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;
@@ -2279,7 +2493,7 @@ impl HttpSecurityMatrixServiceClient {
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn alternative_security(
         &self,
         id: String,
@@ -2317,6 +2531,7 @@ impl HttpSecurityMatrixServiceClient {
         };
         let auth_client = self.client.with_auth_override(Some(auth));
         let auth_target = &auth_client;
+        let _ = auth_target;
         auth_target.apply_auth(&mut req, xidl_rust_axum::ClientAuthRequirement::Bearer)?;
         auth_target
             .apply_auth(
@@ -2348,7 +2563,7 @@ impl HttpSecurityMatrixServiceClient {
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn oauth_security(
         &self,
         keyword: String,
@@ -2370,9 +2585,10 @@ impl HttpSecurityMatrixServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
+        let _ = auth_target;
         let body = HttpSecurityMatrixServiceOauthSecurityRequestOutBody {
-            keyword: keyword,
-            page: page,
+            keyword,
+            page,
         };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;
@@ -2407,7 +2623,7 @@ impl HttpSecurityMatrixServiceClient {
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn public_ping(&self) -> Result<String, xidl_rust_axum::Error> {
         let path = "/v2/security/public/ping".to_string();
         let mut req = self
@@ -2425,6 +2641,7 @@ impl HttpSecurityMatrixServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
+        let _ = auth_target;
         let resp = self
             .client
             .http()
