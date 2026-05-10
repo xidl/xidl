@@ -2,6 +2,7 @@ pub struct {{ ident }}Server<T> {
     inner: ::std::sync::Arc<T>,
 }
 
+#[allow(non_snake_case)]
 impl<T> {{ ident }}Server<T>
 where
 T: {{ ident }} + Send + Sync + 'static,

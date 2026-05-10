@@ -373,14 +373,22 @@ pub(crate) fn decode_expr(
 
 fn convert_expr(expr: &str, ty: &hir::TypeSpec, registry: &TypeRegistry) -> IdlcResult<String> {
     Ok(match ty {
-        hir::TypeSpec::SequenceType(seq) => format!(
-            "{expr}.into_iter().map(|value| {}).collect()",
-            convert_expr("value", &seq.ty, registry)?
-        ),
-        hir::TypeSpec::MapType(map) => format!(
-            "{expr}.into_iter().map(|(key, value)| (key, {})).collect()",
-            convert_expr("value", &map.value, registry)?
-        ),
+        hir::TypeSpec::SequenceType(seq) => {
+            let inner = convert_expr("value", &seq.ty, registry)?;
+            if inner == "value" {
+                format!("{expr}.into_iter().collect()")
+            } else {
+                format!("{expr}.into_iter().map(|value| {inner}).collect()")
+            }
+        }
+        hir::TypeSpec::MapType(map) => {
+            let inner = convert_expr("value", &map.value, registry)?;
+            if inner == "value" {
+                format!("{expr}.into_iter().collect()")
+            } else {
+                format!("{expr}.into_iter().map(|(key, value)| (key, {inner})).collect()")
+            }
+        }
         hir::TypeSpec::ScopedName(value) => {
             let name = scoped_key(value);
             match registry.get(&name) {

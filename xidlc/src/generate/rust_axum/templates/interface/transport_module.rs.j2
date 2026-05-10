@@ -1,3 +1,4 @@
+#[allow(non_snake_case)]
 mod {{ module.name }} {
     use super::*;
     {% for item in module.items %}
@@ -19,7 +20,7 @@ mod {{ module.name }} {
                 fn from(value: {{ item.public_path }}) -> Self {
                     Self {
                         {% for field in item.fields %}
-                            {{ field.name }}: {{ field.encode_expr }},
+                            {{ field.name }}{% if field.name != field.encode_expr %}: {{ field.encode_expr }}{% endif %},
                         {% endfor %}
                     }
                 }
@@ -29,7 +30,7 @@ mod {{ module.name }} {
                 fn from(value: {{ item.transport_ident }}) -> Self {
                     Self {
                         {% for field in item.fields %}
-                            {{ field.name }}: {{ field.decode_expr }},
+                            {{ field.name }}{% if field.name != field.decode_expr %}: {{ field.decode_expr }}{% endif %},
                         {% endfor %}
                     }
                 }

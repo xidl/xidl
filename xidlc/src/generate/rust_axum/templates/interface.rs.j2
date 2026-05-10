@@ -7,6 +7,7 @@
     #[allow(deprecated, useless_deprecated)]
     #[mockall::automock]
 {%- endif %}
+#[allow(non_snake_case)]
 #[async_trait::async_trait]
 pub trait {{ ident }} {
     {% for method in methods %}
@@ -337,10 +338,10 @@ pub trait {{ ident }} {
                     fn from(value: {{ method.response_struct }}) -> Self {
                         Self {
                             {% if method.response_include_return %}
-                                r#return: {{ method.ret_out_expr | replace("resp_value", "value.r#return") }},
+                                r#return{% if "r#return" != method.ret_out_expr | replace("resp_value", "value.r#return") %}: {{ method.ret_out_expr | replace("resp_value", "value.r#return") }}{% endif %},
                             {% endif %}
                             {% for param in method.response_body_params %}
-                                {{ param.name }}: {{ param.field_out_expr }},
+                                {{ param.name }}{% if param.name != param.field_out_expr %}: {{ param.field_out_expr }}{% endif %},
                             {% endfor %}
                         }
                     }
@@ -351,10 +352,10 @@ pub trait {{ ident }} {
                     fn from(value: {{ method.struct_prefix }}ResponseInBody) -> Self {
                         Self {
                             {% if method.response_include_return %}
-                                r#return: {{ method.ret_in_expr | replace("body", "value.r#return") }},
+                                r#return{% if "r#return" != method.ret_in_expr | replace("body", "value.r#return") %}: {{ method.ret_in_expr | replace("body", "value.r#return") }}{% endif %},
                             {% endif %}
                             {% for param in method.response_body_params %}
-                                {{ param.name }}: {{ param.field_in_expr }},
+                                {{ param.name }}{% if param.name != param.field_in_expr %}: {{ param.field_in_expr }}{% endif %},
                             {% endfor %}
                             {% for param in method.response_header_params %}
                                 {{ param.name }}: ::core::default::Default::default(),
