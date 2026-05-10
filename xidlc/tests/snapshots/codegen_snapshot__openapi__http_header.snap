@@ -285,7 +285,7 @@ openapi.json
           {
             "in": "header",
             "name": "X-Token",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -293,7 +293,7 @@ openapi.json
           {
             "in": "cookie",
             "name": "sid",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -342,7 +342,7 @@ openapi.json
           {
             "in": "header",
             "name": "X-Req-Id",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -350,7 +350,7 @@ openapi.json
           {
             "in": "header",
             "name": "X-Flags",
-            "required": false,
+            "required": true,
             "schema": {
               "items": {
                 "type": "string"
@@ -361,7 +361,7 @@ openapi.json
           {
             "in": "header",
             "name": "X-Age",
-            "required": false,
+            "required": true,
             "schema": {
               "format": "int32",
               "minimum": 0,
@@ -371,7 +371,7 @@ openapi.json
           {
             "in": "cookie",
             "name": "sid",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -379,7 +379,7 @@ openapi.json
           {
             "in": "cookie",
             "name": "pref",
-            "required": false,
+            "required": true,
             "schema": {
               "items": {
                 "type": "string"

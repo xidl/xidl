@@ -148,10 +148,5 @@ func formatHttpStreamSseBindingsServiceTailFilePath(req *HttpStreamSseBindingsSe
 }
 func decodeHttpStreamSseBindingsServiceTailFileResponse(resp *http.Response) (HttpStreamSseBindingsServiceTailFileResponse, error) {
 	out := HttpStreamSseBindingsServiceTailFileResponse{}
-	var body []string
-	if err := xidlgohttp.MustCodecForMime("text/event-stream").Decode(resp.Body, &body); err != nil {
-		return out, err
-	}
-	out.Return = body
 	return out, nil
 }

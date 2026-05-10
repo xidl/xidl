@@ -184,7 +184,7 @@
           {
             "name": "session_id",
             "in": "cookie",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -257,15 +257,8 @@
       "post": {
         "operationId": "RestServer.login",
         "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+          "204": {
+            "description": "OK"
           },
           "500": {
             "description": "Error",
@@ -314,15 +307,8 @@
       "post": {
         "operationId": "RestServer.login_realm",
         "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+          "204": {
+            "description": "OK"
           },
           "500": {
             "description": "Error",
@@ -753,6 +739,10 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "id",
+                  "info"
+                ],
                 "properties": {
                   "id": {
                     "type": "integer",
@@ -830,7 +820,7 @@
           {
             "name": "id",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "integer",
               "format": "int64",

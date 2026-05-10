@@ -104,7 +104,7 @@ where
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
         ws: ::xidl_rust_axum::axum::extract::ws::WebSocketUpgrade,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
-        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/x-ndjson") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let req_headers = headers.clone();
@@ -205,7 +205,7 @@ impl HttpBidiStreamServiceClient {
             .insert(
                 xidl_rust_axum::reqwest::header::ACCEPT,
                 xidl_rust_axum::reqwest::header::HeaderValue::from_str(
-                        "application/json",
+                        "application/x-ndjson",
                     )
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );

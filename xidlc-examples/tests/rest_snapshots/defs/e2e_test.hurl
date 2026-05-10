@@ -14,6 +14,7 @@ body == "\"id:res2,lang:None,trace:trace-456\""
 
 # E2E Http Route And Body - Flattened Body
 POST {{base_url}}/v2/resources
+Content-Type: application/json
 {
     "name": "resource1",
     "tags": ["tag1", "tag2"],

@@ -522,7 +522,10 @@ where
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
-                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .status(
+                            ::xidl_rust_axum::axum::http::StatusCode::from_u16(200)
+                                .unwrap(),
+                        )
                         .header(
                             ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
                             "application/json",
@@ -562,7 +565,10 @@ where
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
-                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .status(
+                            ::xidl_rust_axum::axum::http::StatusCode::from_u16(200)
+                                .unwrap(),
+                        )
                         .header(
                             ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
                             "application/json",
@@ -601,7 +607,10 @@ where
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
-                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .status(
+                            ::xidl_rust_axum::axum::http::StatusCode::from_u16(200)
+                                .unwrap(),
+                        )
                         .header(
                             ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
                             "application/json",
@@ -641,7 +650,10 @@ where
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
-                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .status(
+                            ::xidl_rust_axum::axum::http::StatusCode::from_u16(200)
+                                .unwrap(),
+                        )
                         .header(
                             ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
                             "application/json",
@@ -681,7 +693,10 @@ where
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
-                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .status(
+                            ::xidl_rust_axum::axum::http::StatusCode::from_u16(200)
+                                .unwrap(),
+                        )
                         .header(
                             ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
                             "application/json",
@@ -722,7 +737,10 @@ where
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
-                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .status(
+                            ::xidl_rust_axum::axum::http::StatusCode::from_u16(200)
+                                .unwrap(),
+                        )
                         .header(
                             ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
                             "application/json",
@@ -762,7 +780,10 @@ where
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
-                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .status(
+                            ::xidl_rust_axum::axum::http::StatusCode::from_u16(200)
+                                .unwrap(),
+                        )
                         .header(
                             ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
                             "application/json",
@@ -799,7 +820,10 @@ where
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
-                        .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                        .status(
+                            ::xidl_rust_axum::axum::http::StatusCode::from_u16(200)
+                                .unwrap(),
+                        )
                         .header(
                             ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
                             "application/json",

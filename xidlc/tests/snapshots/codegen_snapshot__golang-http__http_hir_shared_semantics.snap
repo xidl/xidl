@@ -231,10 +231,5 @@ func formatReportApiWatchReportPath(req *ReportApiWatchReportRequest) string {
 }
 func decodeReportApiWatchReportResponse(resp *http.Response) (ReportApiWatchReportResponse, error) {
 	out := ReportApiWatchReportResponse{}
-	var body string
-	if err := xidlgohttp.MustCodecForMime("text/event-stream").Decode(resp.Body, &body); err != nil {
-		return out, err
-	}
-	out.Return = body
 	return out, nil
 }
