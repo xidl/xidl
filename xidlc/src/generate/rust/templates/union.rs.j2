@@ -29,15 +29,25 @@ union {{ ident }}Data {
 
 impl Drop for {{ ident }} {
     fn drop(&mut self) {
-        match self.tag {
+        {% if has_default %}
             {% for case in cases %}
-                {{ case.pattern }} => {
+                {% if not loop.first %}else {% endif %}{% if not loop.last %}if matches!(self.tag, {{ case.pattern }}) {% endif %}{
                     unsafe {
                         core::mem::ManuallyDrop::drop(&mut self.data.{{ case.member }});
                     }
                 }
             {% endfor %}
-        }
+        {% else %}
+            match self.tag {
+                {% for case in cases %}
+                    {{ case.pattern }} => {
+                        unsafe {
+                            core::mem::ManuallyDrop::drop(&mut self.data.{{ case.member }});
+                        }
+                    }
+                {% endfor %}
+            }
+        {% endif %}
     }
 }
 
@@ -107,6 +117,26 @@ impl {{ ident }} {
 {% endif %}
 
 {% if has_serde_serialize %}
+    {% macro serialize_arm(case) -%}
+        {% if case.serde_arms | length == 1 %}
+            let tag = "{{ case.serde_arms[0].tag }}";
+        {% else %}
+            let tag = match self.tag {
+                {% for arm in case.serde_arms %}
+                    {% if loop.last %}
+                        _ => "{{ arm.tag }}",
+                    {% else %}
+                        {{ arm.match_expr }} => "{{ arm.tag }}",
+                    {% endif %}
+                {% endfor %}
+            };
+        {% endif %}
+        {{ ident }}SerdeRef {
+            tag,
+            data: {{ ident }}SerdeRefData::Case{{ case.case_index }}(self.as_{{ case.member }}()),
+        }
+    {%- endmacro %}
+
     #[derive(::serde::Serialize)]
     struct {{ ident }}SerdeRef<'__a> {
     tag: &'__a str,
@@ -126,22 +156,21 @@ impl {{ ident }} {
         where
         __S: serde::Serializer,
         {
-            let helper = match self.tag {
+            let helper = {% if has_default %}
+            {% for case in cases %}
+                {% if not loop.first %}else {% endif %}{% if not loop.last %}if matches!(self.tag, {{ case.pattern }}) {% endif %}{
+                    {{ serialize_arm(case) }}
+                }
+            {% endfor %}
+        {% else %}
+            match self.tag {
                 {% for case in cases %}
                     {{ case.pattern }} => {
-                        let tag = match self.tag {
-                            {% for arm in case.serde_arms %}
-                                {{ arm.match_expr }} => "{{ arm.tag }}",
-                            {% endfor %}
-                            _ => unreachable!("union {{ ident }} tag must match active case"),
-                        };
-                        {{ ident }}SerdeRef {
-                            tag,
-                            data: {{ ident }}SerdeRefData::Case{{ case.case_index }}(self.as_{{ case.member }}()),
-                        }
+                        {{ serialize_arm(case) }}
                     }
                 {% endfor %}
-            };
+            }
+            {% endif %};
             helper.serialize(__serializer)
         }
     }

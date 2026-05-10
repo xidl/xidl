@@ -482,7 +482,7 @@ impl E2eHttpScopeMatrix for LogicE2eHttpScopeMatrix {
     ) -> Result<E2EHttpScopeMatrixOverrideBothMediaResponse, xidl_rust_axum::Error> {
         Ok(E2EHttpScopeMatrixOverrideBothMediaResponse {
             r#return: StructHttpBody {
-                name: name,
+                name,
                 alias: None,
                 tags: vec![format!("age:{age:?}")],
                 labels: BTreeMap::new(),

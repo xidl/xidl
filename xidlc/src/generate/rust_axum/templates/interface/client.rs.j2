@@ -2,6 +2,7 @@ pub struct {{ ident }}Client {
     client: ::xidl_rust_axum::Client,
 }
 
+#[allow(non_snake_case)]
 impl {{ ident }}Client {
     {% for server in metadata.servers  %}
         {% if server.description %}
@@ -56,6 +57,7 @@ impl {{ ident }}Client {
     }
 }
 
+#[allow(non_snake_case)]
 impl {{ ident }}Client {
     {% for method in methods %}
         #[allow(clippy::useless_conversion)]
@@ -337,7 +339,7 @@ impl {{ ident }}Client {
                 {% else %}
                     let body = {{ method.struct_prefix }}RequestOutBody {
                         {% for param in method.body_params %}
-                            {{ param.name }}: {{ param.out_expr }},
+                            {{ param.name }}{% if param.name != param.out_expr %}: {{ param.out_expr }}{% endif %},
                         {% endfor %}
                     };
                 {% endif %}

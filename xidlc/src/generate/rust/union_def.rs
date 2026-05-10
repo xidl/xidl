@@ -63,7 +63,7 @@ pub(crate) fn render_union_with_config(
         })
         .collect::<Vec<_>>();
 
-    let cases = def
+    let mut cases = def
         .case
         .iter()
         .enumerate()
@@ -137,6 +137,15 @@ pub(crate) fn render_union_with_config(
             })
         })
         .collect::<Vec<_>>();
+
+    if let Some(pos) = cases
+        .iter()
+        .position(|c| c["is_default"].as_bool() == Some(true))
+    {
+        let default_case = cases.remove(pos);
+        cases.push(default_case);
+    }
+
     let has_default = cases
         .iter()
         .any(|case| case["is_default"].as_bool() == Some(true));
