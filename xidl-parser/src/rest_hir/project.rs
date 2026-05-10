@@ -3,6 +3,7 @@ use crate::hir;
 use std::collections::HashSet;
 
 use super::attr::project_attribute;
+use super::mapping;
 use super::project_params::project_params;
 use super::route::{
     auto_default_method_path, operation_id, parse_route_template, route_from_annotations,
@@ -16,8 +17,8 @@ use super::validate::{
     validate_request_shape, validate_route_bindings, validate_stream_method, validate_stream_shape,
 };
 use super::{
-    HttpDocumentMetadata, HttpDocumentServer, HttpInterface, HttpOperation, HttpOperationSource,
-    RestHirDocument,
+    HttpDocumentMetadata, HttpDocumentServer, HttpInterface, HttpOperation, HttpOperationMeta,
+    HttpOperationSource, RestHirDocument,
 };
 
 pub fn project(spec: &hir::Specification) -> ParserResult<RestHirDocument> {
@@ -236,33 +237,45 @@ fn project_operation(
     )
     .map_err(parse_err)?;
 
-    Ok(HttpOperation {
-        name: op.ident.clone(),
-        operation_id: operation_id(module_path, interface_name, &op.ident),
-        source: HttpOperationSource::Method,
+    let request_content_type =
+        effective_media_type(interface_annotations, &op.annotations, "Consumes");
+    let response_content_type =
+        effective_media_type(interface_annotations, &op.annotations, "Produces");
+    let security = effective_security_with_origin(interface_annotations, &op.annotations)
+        .map_err(ParseError::Message)?;
+    let basic_auth_realm = effective_basic_auth_realm(interface_annotations, &op.annotations);
+    let deprecated = effective_deprecated(interface_annotations, &op.annotations)
+        .map_err(ParseError::Message)?;
+
+    let return_type = match &op.ty {
+        hir::OpTypeSpec::Void => None,
+        hir::OpTypeSpec::TypeSpec(ty) => Some(ty.clone()),
+    };
+
+    let signature = mapping::build_operation_signature(op);
+    let http = mapping::build_http_mapping(
         method,
-        routes,
-        stream,
-        request_content_type: effective_media_type(
-            interface_annotations,
-            &op.annotations,
-            "Consumes",
-        ),
-        response_content_type: effective_media_type(
-            interface_annotations,
-            &op.annotations,
-            "Produces",
-        ),
-        security: effective_security_with_origin(interface_annotations, &op.annotations)
-            .map_err(ParseError::Message)?,
-        basic_auth_realm: effective_basic_auth_realm(interface_annotations, &op.annotations),
-        deprecated: effective_deprecated(interface_annotations, &op.annotations)
-            .map_err(ParseError::Message)?,
-        request_params,
-        response_params,
-        return_type: match &op.ty {
-            hir::OpTypeSpec::Void => None,
-            hir::OpTypeSpec::TypeSpec(ty) => Some(ty.clone()),
+        &stream,
+        &request_content_type,
+        &response_content_type,
+        &request_params,
+        &response_params,
+        &return_type,
+    );
+
+    Ok(HttpOperation {
+        meta: HttpOperationMeta {
+            name: op.ident.clone(),
+            operation_id: operation_id(module_path, interface_name, &op.ident),
+            source: HttpOperationSource::Method,
+            method,
+            routes,
+            stream,
+            security,
+            basic_auth_realm,
+            deprecated,
         },
+        signature,
+        http,
     })
 }

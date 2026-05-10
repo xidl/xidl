@@ -6,7 +6,7 @@ use serde_json::Value;
 pub(crate) struct OpenApiStreamPatch {
     pub(crate) path: String,
     pub(crate) method: &'static str,
-    pub(crate) response_status: Option<&'static str>,
+    pub(crate) response_status: Option<String>,
     pub(crate) content_type: String,
     pub(crate) item_schema: Value,
 }
@@ -39,7 +39,7 @@ pub(crate) fn patch_openapi_stream_content(doc: &mut Value, patch: &OpenApiStrea
         return;
     };
 
-    let target = if let Some(status) = patch.response_status {
+    let target = if let Some(status) = &patch.response_status {
         operation
             .get_mut("responses")
             .and_then(Value::as_object_mut)

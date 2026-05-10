@@ -172,7 +172,7 @@ fn validate_route_bindings(methods: &[spec_context::MethodContext]) -> IdlcResul
 
 fn skips_operation(operation: &HttpOperation) -> bool {
     matches!(
-        operation.source,
+        operation.meta.source,
         HttpOperationSource::AttributeGet
             | HttpOperationSource::AttributeSet
             | HttpOperationSource::AttributeWatch

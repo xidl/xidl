@@ -1,31 +1,11 @@
-use crate::generate::rust_axum::interface::{
-    ApiKeyContext, DeprecatedContext, HttpMethod, ParamSource,
-};
+use crate::generate::rust_axum::interface::{ApiKeyContext, DeprecatedContext, HttpMethod};
 use xidl_parser::hir;
 use xidl_parser::rest_hir::{
-    HttpMethod as RestHirMethod, HttpOperation, HttpParam as RestHirParam,
-    HttpParamKind as RestHirParamKind,
+    HttpMethod as RestHirMethod, HttpOperation,
     semantics::{
         HttpApiKeyLocation, HttpSecurityOrigin, HttpSecurityProfile, HttpSecurityRequirement,
     },
 };
-
-pub(crate) fn find_http_param<'a>(
-    params: &'a [RestHirParam],
-    name: &str,
-) -> Option<&'a RestHirParam> {
-    params.iter().find(|param| param.name == name)
-}
-
-pub(crate) fn http_param_kind(source: RestHirParamKind) -> ParamSource {
-    match source {
-        RestHirParamKind::Path => ParamSource::Path,
-        RestHirParamKind::Query => ParamSource::Query,
-        RestHirParamKind::Header => ParamSource::Header,
-        RestHirParamKind::Cookie => ParamSource::Cookie,
-        RestHirParamKind::Body => ParamSource::Body,
-    }
-}
 
 pub(crate) fn http_method_from_hir(method: RestHirMethod) -> HttpMethod {
     match method {
@@ -40,7 +20,7 @@ pub(crate) fn http_method_from_hir(method: RestHirMethod) -> HttpMethod {
 }
 
 pub(crate) fn deprecated_context_from_http(http_op: &HttpOperation) -> DeprecatedContext {
-    let info = http_op.deprecated.as_ref();
+    let info = http_op.meta.deprecated.as_ref();
     let deprecated = info.as_ref().map(|value| value.deprecated).unwrap_or(false);
     let since = info.as_ref().and_then(|value| value.since.clone());
     let after = info.as_ref().and_then(|value| value.after.clone());

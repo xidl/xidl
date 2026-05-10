@@ -5,24 +5,24 @@ from dataclasses import dataclass
 from typing import Optional
 
 from xidl.http import (
-    Request,
-    Route,
-    RouteMetadata,
-    SecurityRequirement,
-    ServerStreamResponse,
-    StreamMetadata,
-    cookie_value,
-    encode_json_response,
-    encode_stream_response,
-    header_value,
-    path_value,
-    query_value,
-    read_json_body,
-    read_json_field,
-    read_scalar,
-    require_accept,
-    require_content_type,
-    require_security,
+Request,
+Route,
+RouteMetadata,
+SecurityRequirement,
+ServerStreamResponse,
+StreamMetadata,
+cookie_value,
+encode_json_response,
+encode_stream_response,
+header_value,
+path_value,
+query_value,
+read_json_body,
+read_json_field,
+read_scalar,
+require_accept,
+require_content_type,
+require_security,
 )
 
 # generated http module: http_stream
@@ -51,7 +51,7 @@ class HttpStreamApiService(abc.ABC):
 
 async def _http_stream_api_alerts_endpoint(service: HttpStreamApiService, request: Request):
     require_accept(request, "text/event-stream")
-    _security = require_security(request, [SecurityRequirement(kind="basic")])
+    _security = require_security(request, [SecurityRequirement(kind="basic", realm=None), ])
     request_value = HttpStreamApiAlertsRequest(
         district=read_scalar(path_value(request, "district"), "str", optional=False, default_on_missing=False, wire_name="district"),
     )
@@ -68,13 +68,13 @@ def _http_stream_api_alerts_route(service: HttpStreamApiService) -> Route:
         handler=service.alerts,
         request_model=HttpStreamApiAlertsRequest,
         response_model=ServerStreamResponse,
-        metadata=RouteMetadata(request_content_type="application/json", response_content_type="text/event-stream", security=[SecurityRequirement(kind="basic")], stream=StreamMetadata(kind="server", codec="sse")),
+        metadata=RouteMetadata(request_content_type="application/json", response_content_type="text/event-stream", security=[SecurityRequirement(kind="basic", realm=None), ], stream=StreamMetadata(kind="server", codec="sse")),
     )
 
 async def _http_stream_api_upload_asset_endpoint(service: HttpStreamApiService, request: Request):
     require_accept(request, "application/json")
     require_content_type(request, "application/x-ndjson")
-    _security = require_security(request, [SecurityRequirement(kind="bearer")])
+    _security = require_security(request, [SecurityRequirement(kind="bearer"), ])
     body = read_json_body(request)
     request_value = HttpStreamApiUploadAssetRequest(
         asset_id=read_json_field(body, "asset_id", "str", optional=False),
@@ -93,7 +93,7 @@ def _http_stream_api_upload_asset_route(service: HttpStreamApiService) -> Route:
         handler=service.upload_asset,
         request_model=HttpStreamApiUploadAssetRequest,
         response_model=HttpStreamApiUploadAssetResponse,
-        metadata=RouteMetadata(request_content_type="application/x-ndjson", response_content_type="application/json", security=[SecurityRequirement(kind="bearer")], stream=StreamMetadata(kind="client", codec="ndjson")),
+        metadata=RouteMetadata(request_content_type="application/x-ndjson", response_content_type="application/json", security=[SecurityRequirement(kind="bearer"), ], stream=StreamMetadata(kind="client", codec="ndjson")),
     )
 
 def http_stream_api_routes(service: HttpStreamApiService) -> list[Route]:

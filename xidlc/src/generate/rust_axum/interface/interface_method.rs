@@ -9,12 +9,14 @@ use crate::generate::rust_axum::interface::interface_method_params::{
 };
 use crate::generate::rust_axum::interface::interface_method_support::{
     ensure_streaming_constraints, method_struct_prefix, op_decode_expr, op_encode_expr,
-    op_return_ty, request_payload_ty, request_struct_name, response_ty,
+    op_return_ty, request_payload_ty, response_ty,
 };
 use crate::generate::rust_axum::interface::{MethodContext, RenderEnv};
 use crate::generate::rust_axum::transport::{TransportDirection, TransportTracker};
 use xidl_parser::hir;
-use xidl_parser::rest_hir::{HttpOperation, semantics::HttpStreamKind};
+use xidl_parser::rest_hir::{
+    HttpOperation, HttpRequestBodyShape, HttpResponseBodyShape, semantics::HttpStreamKind,
+};
 
 pub(crate) fn render_op_from_http(
     op: &hir::OpDcl,
@@ -23,12 +25,12 @@ pub(crate) fn render_op_from_http(
     env: RenderEnv<'_>,
     transport: &mut TransportTracker,
 ) -> IdlcResult<MethodContext> {
-    let stream = http_op.stream;
+    let stream = http_op.meta.stream;
     let is_server_stream = matches!(stream.kind, Some(HttpStreamKind::Server));
     let is_client_stream = matches!(stream.kind, Some(HttpStreamKind::Client));
     let is_bidi_stream = matches!(stream.kind, Some(HttpStreamKind::Bidi));
     let deprecated = deprecated_context_from_http(http_op);
-    let security = security_context(&http_op.security);
+    let security = security_context(&http_op.meta.security);
     if security.has_basic_auth && security.has_bearer_auth {
         return Err(IdlcError::rpc(format!(
             "operation '{}' cannot combine @http_basic and @http_bearer",
@@ -54,6 +56,7 @@ pub(crate) fn render_op_from_http(
     let return_is_unit = matches!(&op.ty, hir::OpTypeSpec::Void);
 
     let paths = http_op
+        .meta
         .routes
         .iter()
         .map(|route| route.path.clone())
@@ -75,7 +78,7 @@ pub(crate) fn render_op_from_http(
         &params.cookie_params,
     )?;
 
-    let method = http_method_from_hir(http_op.method);
+    let method = http_method_from_hir(http_op.meta.method);
     let method_name = rust_ident(&op.ident);
     let has_auth = security.has_basic_auth || security.has_bearer_auth;
     let auth_in_request_struct = has_auth && !(is_client_stream || is_bidi_stream);
@@ -88,23 +91,27 @@ pub(crate) fn render_op_from_http(
             }
         })
         .flatten();
-    let request_struct = request_struct_name(
-        &struct_prefix,
-        auth_in_request_struct,
-        !params.request_params.is_empty(),
-    );
+
+    let has_inputs = !http_op.http.request.path.is_empty()
+        || !http_op.http.request.query.is_empty()
+        || !http_op.http.request.header.is_empty()
+        || !http_op.http.request.cookie.is_empty()
+        || !matches!(http_op.http.request.body.shape, HttpRequestBodyShape::Empty);
+
+    let request_struct = if auth_in_request_struct || has_inputs {
+        Some(format!("{struct_prefix}Request"))
+    } else {
+        None
+    };
+
     let request_ty = request_struct.clone().unwrap_or_else(|| "()".to_string());
+    let response_ty_str = response_ty(http_op, &struct_prefix, &ret);
     let request_payload_ty = request_payload_ty(
         &request_ty,
         &auth_wrapper_struct,
         is_client_stream,
         is_bidi_stream,
-        &response_ty(
-            &ret,
-            return_is_unit,
-            &params.response_params,
-            &struct_prefix,
-        ),
+        &response_ty_str,
     );
 
     let mut auth_param = None;
@@ -124,24 +131,36 @@ pub(crate) fn render_op_from_http(
         server_param_names.push(name);
     }
 
-    let response_value_count = usize::from(!return_is_unit) + params.response_params.len();
-    let response_body_count = usize::from(!return_is_unit) + params.response_body_params.len();
-    let request_body_flatten = params.body_params.len() == 1 && params.body_params[0].flatten;
-    let response_is_empty = response_body_count == 0;
-    let response_include_return = !return_is_unit;
-    let response_struct =
-        if response_value_count > 1 || (return_is_unit && response_value_count == 1) {
-            Some(format!("{struct_prefix}Response"))
-        } else {
-            None
-        };
-    let response_ty = response_ty(
-        &ret,
-        return_is_unit,
-        &params.response_params,
-        &struct_prefix,
+    let out_params_count = http_op
+        .signature
+        .params
+        .iter()
+        .filter(|p| {
+            matches!(
+                p.direction,
+                xidl_parser::rest_hir::HttpSignatureParamDirection::Out
+                    | xidl_parser::rest_hir::HttpSignatureParamDirection::InOut
+            )
+        })
+        .count();
+    let has_return = http_op.signature.return_type.is_some();
+    let total_outputs = out_params_count + usize::from(has_return);
+
+    let request_body_flatten = matches!(
+        http_op.http.request.body.shape,
+        HttpRequestBodyShape::SingleValue { flatten: true, .. }
     );
-    let request_item_ty = request_ty.clone();
+    let response_include_return = has_return;
+    let response_is_empty = matches!(
+        http_op.http.response.body.shape,
+        HttpResponseBodyShape::Empty
+    );
+    let response_struct = if total_outputs > 1 || (!has_return && out_params_count == 1) {
+        Some(format!("{struct_prefix}Response"))
+    } else {
+        None
+    };
+    let response_ty_str = response_ty(http_op, &struct_prefix, &ret);
 
     Ok(MethodContext {
         name: method_name.clone(),
@@ -156,7 +175,7 @@ pub(crate) fn render_op_from_http(
         server_params,
         server_param_names,
         ret,
-        response_ty,
+        response_ty: response_ty_str,
         request_body_flatten,
         http_method: http_method_code(method),
         http_method_fn: http_method_fn(method),
@@ -183,7 +202,7 @@ pub(crate) fn render_op_from_http(
         auth_param_ty,
         auth_ty: security.auth_ty,
         basic_auth_realm: if security.has_basic_auth {
-            http_op.basic_auth_realm.clone().unwrap_or(method_name)
+            http_op.meta.basic_auth_realm.clone().unwrap_or(method_name)
         } else {
             String::new()
         },
@@ -199,22 +218,25 @@ pub(crate) fn render_op_from_http(
         is_server_stream,
         is_client_stream,
         is_bidi_stream,
-        request_item_ty,
+        request_item_ty: request_ty,
         ret_in_ty,
         ret_out_ty,
         ret_in_expr,
         ret_out_expr,
-        request_content_type: if is_client_stream {
-            "application/x-ndjson".to_string()
-        } else {
-            http_op.request_content_type.clone()
-        },
-        response_content_type: if is_server_stream {
-            "text/event-stream".to_string()
-        } else if is_client_stream {
-            "application/json".to_string()
-        } else {
-            http_op.response_content_type.clone()
-        },
+        request_content_type: http_op
+            .http
+            .request
+            .body
+            .content_type
+            .clone()
+            .unwrap_or_else(|| "application/json".to_string()),
+        response_content_type: http_op
+            .http
+            .response
+            .body
+            .content_type
+            .clone()
+            .unwrap_or_else(|| "application/json".to_string()),
+        response_status: http_op.http.response.status.clone(),
     })
 }

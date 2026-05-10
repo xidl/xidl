@@ -1,11 +1,16 @@
 use crate::hir;
 use convert_case::{Case, Casing};
 
+use super::mapping;
 use super::route::{attribute_path, default_path, operation_id, readonly_attr_names};
 use super::semantics::{
     DeprecatedInfo, HttpSecurityProfile, HttpStreamCodec, HttpStreamConfig, HttpStreamKind,
 };
-use super::{HttpMethod, HttpOperation, HttpOperationSource, HttpParam, HttpParamKind, HttpRoute};
+use super::{
+    HttpMethod, HttpOperation, HttpOperationMeta, HttpOperationSignature, HttpOperationSource,
+    HttpParam, HttpParamKind, HttpRoute, HttpSignatureParam, HttpSignatureParamAnnotation,
+    HttpSignatureParamDirection,
+};
 
 #[cfg(test)]
 mod tests;
@@ -120,10 +125,15 @@ fn attribute_get_operation(
     security: Option<HttpSecurityProfile>,
     deprecated: Option<DeprecatedInfo>,
 ) -> HttpOperation {
+    let name = format!("get_attribute_{raw_name}");
+    let signature = HttpOperationSignature {
+        params: Vec::new(),
+        return_type: Some(ty.clone()),
+    };
     base_attribute_operation(AttributeOperationArgs {
         interface_name,
         module_path,
-        name: &format!("get_attribute_{raw_name}"),
+        name: &name,
         source: HttpOperationSource::AttributeGet,
         method: HttpMethod::Get,
         routes: vec![HttpRoute {
@@ -140,6 +150,7 @@ fn attribute_get_operation(
         request_params: Vec::new(),
         response_params: Vec::new(),
         return_type: Some(ty.clone()),
+        signature,
     })
 }
 
@@ -151,18 +162,31 @@ fn attribute_set_operation(
     security: Option<HttpSecurityProfile>,
     deprecated: Option<DeprecatedInfo>,
 ) -> HttpOperation {
+    let name = format!("set_attribute_{raw_name}");
+    let param_name = raw_name.to_case(Case::Snake);
     let value = HttpParam {
-        name: raw_name.to_case(Case::Snake),
+        name: param_name.clone(),
         wire_name: raw_name.to_string(),
         ty: ty.clone(),
         kind: HttpParamKind::Body,
         optional: false,
         flatten: false,
     };
+    let signature = HttpOperationSignature {
+        params: vec![HttpSignatureParam {
+            name: param_name,
+            ty: ty.clone(),
+            direction: HttpSignatureParamDirection::In,
+            is_optional: false,
+            is_flatten: false,
+            annotations: vec![HttpSignatureParamAnnotation::Body],
+        }],
+        return_type: None,
+    };
     base_attribute_operation(AttributeOperationArgs {
         interface_name,
         module_path,
-        name: &format!("set_attribute_{raw_name}"),
+        name: &name,
         source: HttpOperationSource::AttributeSet,
         method: HttpMethod::Post,
         routes: vec![HttpRoute {
@@ -179,6 +203,7 @@ fn attribute_set_operation(
         request_params: vec![value],
         response_params: Vec::new(),
         return_type: None,
+        signature,
     })
 }
 
@@ -190,18 +215,19 @@ fn attribute_watch_operation(
     security: Option<HttpSecurityProfile>,
     deprecated: Option<DeprecatedInfo>,
 ) -> HttpOperation {
+    let name = format!("watch_attribute_{raw_name}");
+    let signature = HttpOperationSignature {
+        params: Vec::new(),
+        return_type: Some(ty.clone()),
+    };
     base_attribute_operation(AttributeOperationArgs {
         interface_name,
         module_path,
-        name: &format!("watch_attribute_{raw_name}"),
+        name: &name,
         source: HttpOperationSource::AttributeWatch,
         method: HttpMethod::Get,
         routes: vec![HttpRoute {
-            path: default_path(
-                module_path,
-                interface_name,
-                &format!("watch_attribute_{raw_name}"),
-            ),
+            path: default_path(module_path, interface_name, &name),
             path_params: Vec::new(),
             query_params: Vec::new(),
         }],
@@ -214,6 +240,7 @@ fn attribute_watch_operation(
         request_params: Vec::new(),
         response_params: Vec::new(),
         return_type: Some(ty.clone()),
+        signature,
     })
 }
 
@@ -231,22 +258,36 @@ fn base_attribute_operation(args: AttributeOperationArgs<'_>) -> HttpOperation {
         request_params,
         response_params,
         return_type,
+        signature,
     } = args;
-    HttpOperation {
-        name: name.to_string(),
-        operation_id: operation_id(module_path, interface_name, name),
-        source,
+
+    let request_content_type = "application/json".to_string();
+    let response_content_type = "application/json".to_string();
+
+    let http = mapping::build_http_mapping(
         method,
-        routes,
-        stream,
-        request_content_type: "application/json".to_string(),
-        response_content_type: "application/json".to_string(),
-        security,
-        basic_auth_realm: None,
-        deprecated,
-        request_params,
-        response_params,
-        return_type,
+        &stream,
+        &request_content_type,
+        &response_content_type,
+        &request_params,
+        &response_params,
+        &return_type,
+    );
+
+    HttpOperation {
+        meta: HttpOperationMeta {
+            name: name.to_string(),
+            operation_id: operation_id(module_path, interface_name, name),
+            source,
+            method,
+            routes,
+            stream,
+            security,
+            basic_auth_realm: None,
+            deprecated,
+        },
+        signature,
+        http,
     }
 }
 
@@ -263,4 +304,5 @@ struct AttributeOperationArgs<'a> {
     request_params: Vec<HttpParam>,
     response_params: Vec<HttpParam>,
     return_type: Option<hir::TypeSpec>,
+    signature: HttpOperationSignature,
 }

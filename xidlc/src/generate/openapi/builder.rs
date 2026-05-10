@@ -13,7 +13,7 @@ pub(crate) fn build_operation(method: &MethodInfo) -> crate::openapi::path::Oper
             Content::new(Some::<RefOr<Schema>>(schema.clone())),
         );
     }
-    responses = responses.response(method.response_status, ok_response.build());
+    responses = responses.response(method.response_status.clone(), ok_response.build());
 
     let mut operation = crate::openapi::path::OperationBuilder::new()
         .operation_id(Some(method.operation_id.clone()))
