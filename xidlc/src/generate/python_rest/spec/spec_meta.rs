@@ -1,27 +1,25 @@
 use crate::error::{IdlcError, IdlcResult};
 use xidl_parser::rest_hir::{
-    HttpMethod, HttpOperation, HttpParamKind,
+    HttpMethod, HttpOperation,
     semantics::{
         HttpApiKeyLocation, HttpSecurityProfile, HttpSecurityRequirement, HttpStreamCodec,
-        HttpStreamConfig, HttpStreamKind,
+        HttpStreamKind,
     },
 };
 
-use super::spec_context::ParamSource;
-
 pub(super) fn validate_stream_support(operation: &HttpOperation) -> IdlcResult<()> {
-    let stream_kind = operation.stream.kind;
-    let stream_codec = operation.stream.codec;
+    let stream_kind = operation.meta.stream.kind;
+    let stream_codec = operation.meta.stream.codec;
     if matches!(stream_kind, Some(HttpStreamKind::Bidi)) {
         return Err(IdlcError::rpc(format!(
             "python-rest currently does not support @bidi_stream methods: '{}'",
-            operation.name
+            operation.meta.name
         )));
     }
     if matches!(stream_kind, Some(HttpStreamKind::Server)) && stream_codec != HttpStreamCodec::Sse {
         return Err(IdlcError::rpc(format!(
             "python-rest currently supports only SSE for @server_stream methods: '{}'",
-            operation.name
+            operation.meta.name
         )));
     }
     if matches!(stream_kind, Some(HttpStreamKind::Client))
@@ -29,67 +27,62 @@ pub(super) fn validate_stream_support(operation: &HttpOperation) -> IdlcResult<(
     {
         return Err(IdlcError::rpc(format!(
             "python-rest currently supports only NDJSON for @client_stream methods: '{}'",
-            operation.name
+            operation.meta.name
         )));
     }
     Ok(())
 }
 
-pub(super) fn request_content_type(operation: &HttpOperation) -> String {
-    match operation.stream.kind {
-        Some(HttpStreamKind::Client) => "application/x-ndjson".to_string(),
-        _ => operation.request_content_type.clone(),
-    }
-}
-
-pub(super) fn response_content_type(operation: &HttpOperation) -> String {
-    match (operation.stream.kind, operation.stream.codec) {
-        (Some(HttpStreamKind::Server), HttpStreamCodec::Sse) => "text/event-stream".to_string(),
-        _ => operation.response_content_type.clone(),
-    }
-}
-
-pub(super) fn security_expr(value: Option<&HttpSecurityProfile>) -> String {
+pub(super) fn security_expr(
+    value: Option<&HttpSecurityProfile>,
+    basic_auth_realm: Option<&String>,
+) -> String {
     let Some(value) = value else {
         return "[]".to_string();
     };
     if value.requirements.is_empty() {
-        return "[SecurityRequirement(kind=\"none\")]".to_string();
+        return "[]".to_string();
     }
-    let parts = value
-        .requirements
-        .iter()
-        .map(|requirement| match requirement {
-            HttpSecurityRequirement::HttpBasic => "SecurityRequirement(kind=\"basic\")".to_string(),
+    let mut expr = String::from("[");
+    for req in &value.requirements {
+        match req {
+            HttpSecurityRequirement::HttpBasic => {
+                expr.push_str(&format!(
+                    "SecurityRequirement(kind=\"basic\", realm={:?}), ",
+                    basic_auth_realm
+                ));
+            }
             HttpSecurityRequirement::HttpBearer => {
-                "SecurityRequirement(kind=\"bearer\")".to_string()
+                expr.push_str("SecurityRequirement(kind=\"bearer\"), ");
             }
-            HttpSecurityRequirement::ApiKey { location, name } => format!(
-                "SecurityRequirement(kind=\"api_key\", name={:?}, location={:?})",
-                name,
-                api_key_location(location)
-            ),
+            HttpSecurityRequirement::ApiKey { location, name } => {
+                expr.push_str(&format!(
+                    "SecurityRequirement(kind=\"api_key\", location={:?}, name={:?}), ",
+                    api_key_location(location),
+                    name
+                ));
+            }
             HttpSecurityRequirement::OAuth2 { scopes } => {
-                format!("SecurityRequirement(kind=\"oauth2\", scopes={:?})", scopes)
+                expr.push_str(&format!(
+                    "SecurityRequirement(kind=\"oauth2\", scopes={:?}), ",
+                    scopes
+                ));
             }
-        })
-        .collect::<Vec<_>>()
-        .join(", ");
-    format!("[{parts}]")
+        }
+    }
+    expr.push(']');
+    expr
 }
 
-pub(super) fn stream_expr(value: HttpStreamConfig) -> String {
-    match value.kind {
-        None => "None".to_string(),
-        Some(kind) => format!(
+pub(super) fn stream_expr(value: xidl_parser::rest_hir::semantics::HttpStreamConfig) -> String {
+    if let Some(kind) = value.kind {
+        format!(
             "StreamMetadata(kind={:?}, codec={:?})",
-            match kind {
-                HttpStreamKind::Server => "server",
-                HttpStreamKind::Client => "client",
-                HttpStreamKind::Bidi => "bidi",
-            },
+            format!("{kind:?}").to_lowercase(),
             stream_codec_name(value.codec)
-        ),
+        )
+    } else {
+        "None".to_string()
     }
 }
 
@@ -105,13 +98,11 @@ pub(super) fn http_method_name(method: HttpMethod) -> &'static str {
     }
 }
 
-pub(super) fn param_source(source: HttpParamKind) -> ParamSource {
-    match source {
-        HttpParamKind::Path => ParamSource::Path,
-        HttpParamKind::Query => ParamSource::Query,
-        HttpParamKind::Header => ParamSource::Header,
-        HttpParamKind::Cookie => ParamSource::Cookie,
-        HttpParamKind::Body => ParamSource::Body,
+fn api_key_location(value: &HttpApiKeyLocation) -> &'static str {
+    match value {
+        HttpApiKeyLocation::Header => "header",
+        HttpApiKeyLocation::Query => "query",
+        HttpApiKeyLocation::Cookie => "cookie",
     }
 }
 
@@ -119,13 +110,5 @@ fn stream_codec_name(value: HttpStreamCodec) -> &'static str {
     match value {
         HttpStreamCodec::Sse => "sse",
         HttpStreamCodec::Ndjson => "ndjson",
-    }
-}
-
-fn api_key_location(value: &HttpApiKeyLocation) -> &'static str {
-    match value {
-        HttpApiKeyLocation::Header => "header",
-        HttpApiKeyLocation::Query => "query",
-        HttpApiKeyLocation::Cookie => "cookie",
     }
 }

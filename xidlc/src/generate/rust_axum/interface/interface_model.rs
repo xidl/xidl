@@ -22,13 +22,6 @@ pub(crate) enum ParamSource {
     Body,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub(crate) enum ParamDirection {
-    In,
-    Out,
-    InOut,
-}
-
 #[derive(Serialize)]
 pub(crate) struct MethodContext {
     pub(crate) name: String,
@@ -89,6 +82,7 @@ pub(crate) struct MethodContext {
     pub(crate) ret_out_expr: String,
     pub(crate) request_content_type: String,
     pub(crate) response_content_type: String,
+    pub(crate) response_status: String,
 }
 
 #[derive(Serialize, Clone)]

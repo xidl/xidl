@@ -26,19 +26,19 @@ pub(crate) fn render_interface_def(
 
     if let Some(body) = &def.interface_body {
         for operation in &http_interface.operations {
-            let method = match operation.source {
+            let method = match operation.meta.source {
                 HttpOperationSource::Method => {
                     let op = body
                         .0
                         .iter()
                         .find_map(|export| match export {
-                            hir::Export::OpDcl(op) if op.ident == operation.name => Some(op),
+                            hir::Export::OpDcl(op) if op.ident == operation.meta.name => Some(op),
                             _ => None,
                         })
                         .ok_or_else(|| {
                             IdlcError::rpc(format!(
                                 "missing source operation '{}' for rust-axum rendering",
-                                operation.name
+                                operation.meta.name
                             ))
                         })?;
                     render_op_from_http(op, operation, &def.header.ident, env, &mut transport)?
@@ -48,7 +48,7 @@ pub(crate) fn render_interface_def(
                 | HttpOperationSource::AttributeWatch => {
                     let attr = body.0.iter().find_map(|export| match export {
                         hir::Export::AttrDcl(attr)
-                            if attr_operation_names(attr).contains(&operation.name) =>
+                            if attr_operation_names(attr).contains(&operation.meta.name) =>
                         {
                             Some(attr)
                         }

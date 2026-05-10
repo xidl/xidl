@@ -15,7 +15,8 @@ use crate::generate::typescript::definition::type_expr::{
 };
 use xidl_parser::hir;
 use xidl_parser::rest_hir::{
-    HttpOperation, HttpParam, HttpParamKind, RestHirDocument,
+    HttpInputBinding, HttpOperation, HttpOutputBinding, HttpOutputSource, HttpRequestBodyShape,
+    HttpResponseBodyShape, RestHirDocument,
     semantics::{HttpSecurityRequirement, HttpStreamCodec, HttpStreamKind},
 };
 
@@ -99,59 +100,183 @@ fn build_method_model(
     op: &HttpOperation,
 ) -> IdlcResult<MethodModel> {
     validate_stream_support(op)?;
-    let prefix = method_struct_prefix(interface_name, &op.name);
+    let prefix = method_struct_prefix(interface_name, &op.meta.name);
+
     let request_fields = op
-        .request_params
+        .signature
+        .params
         .iter()
-        .map(|param| param_decl(param, module_path))
+        .filter(|p| {
+            matches!(
+                p.direction,
+                xidl_parser::rest_hir::HttpSignatureParamDirection::In
+                    | xidl_parser::rest_hir::HttpSignatureParamDirection::InOut
+            )
+        })
+        .map(|p| ParamDeclContext {
+            prop: crate::generate::typescript::definition::names::ts_prop_name(&p.name),
+            ty: ts_type_for_type_spec(&p.ty, module_path, TypeRefTarget::Types),
+            schema: zod_schema_for_type_spec(&p.ty, module_path),
+            optional: p.annotations.iter().any(|a| {
+                matches!(
+                    a,
+                    xidl_parser::rest_hir::HttpSignatureParamAnnotation::Optional
+                )
+            }),
+            doc: Vec::new(),
+        })
         .collect::<Vec<_>>();
-    let response_fields = response_fields(op, module_path);
+
+    let response_fields = build_response_fields(op, module_path);
     let request_name = (!request_fields.is_empty()).then(|| format!("{prefix}Request"));
     let response_name = (!response_fields.is_empty() && !only_direct_return(op))
         .then(|| format!("{prefix}Response"));
     let request_schema_ref = request_name
         .as_ref()
-        .filter(|_| !matches!(op.stream.kind, Some(HttpStreamKind::Client)))
+        .filter(|_| !matches!(op.meta.stream.kind, Some(HttpStreamKind::Client)))
         .map(|name| format!("ifaceSchemas.{}Schema", scoped_name(module_path, name)));
     let response_schema_ref = response_name
         .as_ref()
         .map(|name| format!("ifaceSchemas.{}Schema", scoped_name(module_path, name)));
+
     let return_ty = response_name
         .as_ref()
         .map(|name| scoped_name(module_path, name))
         .or_else(|| {
-            op.return_type
+            op.signature
+                .return_type
                 .as_ref()
                 .map(|ty| ts_type_for_type_spec(ty, module_path, TypeRefTarget::Client))
         })
         .unwrap_or_else(|| "void".to_string());
-    let client_stream_item_ty = client_stream_ty(op, module_path, &request_name);
+
+    let client_stream_item_ty = build_client_stream_ty(op, module_path, &request_name);
     let path = op
+        .meta
         .routes
         .first()
         .map(|route| route.path.clone())
         .unwrap_or_else(|| "/".to_string());
 
-    Ok(MethodModel {
-        name: ts_ident(&op.name),
-        params: client_params(op, module_path, &request_name),
-        request_name,
-        request_schema_ref,
-        request_payload: op
-            .request_params
+    let request_payload = op
+        .signature
+        .params
+        .iter()
+        .filter(|p| {
+            matches!(
+                p.direction,
+                xidl_parser::rest_hir::HttpSignatureParamDirection::In
+                    | xidl_parser::rest_hir::HttpSignatureParamDirection::InOut
+            )
+        })
+        .map(|p| RequestPayloadEntry {
+            raw_name: p.name.clone(),
+            access: ts_ident(&p.name),
+        })
+        .collect();
+
+    let (body_entries, body_single) = match &op.http.request.body.shape {
+        HttpRequestBodyShape::Empty => (Vec::new(), None),
+        HttpRequestBodyShape::SingleValue {
+            source_param,
+            flatten,
+            ..
+        } => {
+            let entries = vec![RequestPayloadEntry {
+                raw_name: source_param.clone(),
+                access: ts_ident(source_param),
+            }];
+            let single = flatten.then(|| ts_ident(source_param));
+            (entries, single)
+        }
+        HttpRequestBodyShape::Object { fields } => {
+            let entries = fields
+                .iter()
+                .map(|f| RequestPayloadEntry {
+                    raw_name: f.source_param.clone(),
+                    access: ts_ident(&f.source_param),
+                })
+                .collect();
+            (entries, None)
+        }
+        HttpRequestBodyShape::Stream { source_param, .. } => {
+            let entries = vec![RequestPayloadEntry {
+                raw_name: source_param.clone(),
+                access: ts_ident(source_param),
+            }];
+            (entries, None)
+        }
+    };
+
+    let response_body_entries = match &op.http.response.body.shape {
+        HttpResponseBodyShape::Empty => Vec::new(),
+        HttpResponseBodyShape::ReturnOnly { .. } => vec![RequestPayloadEntry {
+            raw_name: "return".to_string(),
+            access: "return".to_string(),
+        }],
+        HttpResponseBodyShape::SingleValue { source, .. } => {
+            let name = match source {
+                HttpOutputSource::ReturnValue => "return".to_string(),
+                HttpOutputSource::Param { name } => name.clone(),
+            };
+            vec![RequestPayloadEntry {
+                raw_name: name.clone(),
+                access: ts_ident(&name),
+            }]
+        }
+        HttpResponseBodyShape::Object { fields } => fields
             .iter()
-            .map(|param| RequestPayloadEntry {
-                raw_name: param.name.clone(),
-                access: ts_ident(&param.name),
+            .map(|f| {
+                let name = match &f.source {
+                    HttpOutputSource::ReturnValue => "return".to_string(),
+                    HttpOutputSource::Param { name } => name.clone(),
+                };
+                RequestPayloadEntry {
+                    raw_name: name.clone(),
+                    access: ts_ident(&name),
+                }
             })
             .collect(),
+        HttpResponseBodyShape::Stream {
+            item_source: source,
+            ..
+        } => {
+            let name = match source {
+                HttpOutputSource::ReturnValue => "return".to_string(),
+                HttpOutputSource::Param { name } => name.clone(),
+            };
+            vec![RequestPayloadEntry {
+                raw_name: name.clone(),
+                access: ts_ident(&name),
+            }]
+        }
+    };
+
+    Ok(MethodModel {
+        name: ts_ident(&op.meta.name),
+        params: build_client_params(op, module_path, &request_name),
+        request_name,
+        request_schema_ref,
+        request_payload,
         response_name,
         response_schema_ref,
-        request_content_type: request_content_type(op),
-        response_content_type: response_content_type(op),
+        request_content_type: op
+            .http
+            .request
+            .body
+            .content_type
+            .clone()
+            .unwrap_or_else(|| "application/json".to_string()),
+        response_content_type: op
+            .http
+            .response
+            .body
+            .content_type
+            .clone()
+            .unwrap_or_else(|| "application/json".to_string()),
         path: path.clone(),
-        http_method: http_method_name(op.method).to_string(),
-        path_params: value_params(op, HttpParamKind::Path)
+        http_method: http_method_name(op.meta.method).to_string(),
+        path_params: build_value_params(&op.http.request.path)
             .into_iter()
             .map(|param| PathParamContext {
                 catch_all: path.contains(&format!("{{*{}}}", param.raw_name)),
@@ -160,28 +285,20 @@ fn build_method_model(
                 key_name: param.key_name,
             })
             .collect(),
-        query_params: value_params(op, HttpParamKind::Query),
-        header_params: value_params(op, HttpParamKind::Header),
-        cookie_params: value_params(op, HttpParamKind::Cookie),
-        response_header_params: response_value_params(op, HttpParamKind::Header),
-        response_cookie_params: response_value_params(op, HttpParamKind::Cookie),
-        body_entries: op
-            .request_params
-            .iter()
-            .filter(|param| matches!(param.kind, HttpParamKind::Body))
-            .map(|param| RequestPayloadEntry {
-                raw_name: param.name.clone(),
-                access: ts_ident(&param.name),
-            })
-            .collect(),
-        body_single: direct_body_access(&op.request_params),
+        query_params: build_value_params(&op.http.request.query),
+        header_params: build_value_params(&op.http.request.header),
+        cookie_params: build_value_params(&op.http.request.cookie),
+        response_header_params: build_response_value_params(&op.http.response.header),
+        response_cookie_params: build_response_value_params(&op.http.response.cookie),
+        body_entries,
+        body_single,
         return_ty,
-        response_body_mode: response_body_mode(op).to_string(),
-        response_body_entries: response_body_entries(op),
-        stream_item_ty: server_stream_ty(op, module_path),
+        response_body_mode: build_response_body_mode(op).to_string(),
+        response_body_entries,
+        stream_item_ty: build_server_stream_ty(op, module_path),
         client_stream_item_ty,
-        is_server_stream: matches!(op.stream.kind, Some(HttpStreamKind::Server)),
-        is_client_stream: matches!(op.stream.kind, Some(HttpStreamKind::Client)),
+        is_server_stream: matches!(op.meta.stream.kind, Some(HttpStreamKind::Server)),
+        is_client_stream: matches!(op.meta.stream.kind, Some(HttpStreamKind::Client)),
         security: security_contexts(op),
         request_fields,
         response_fields,
@@ -246,44 +363,212 @@ fn render_response_types(
     Ok(())
 }
 
+fn build_response_fields(op: &HttpOperation, module_path: &[String]) -> Vec<ParamDeclContext> {
+    let mut fields = Vec::new();
+    if let Some(ty) = &op.signature.return_type {
+        fields.push(ParamDeclContext {
+            prop: "return".to_string(),
+            ty: ts_type_for_type_spec(ty, module_path, TypeRefTarget::Types),
+            schema: zod_schema_for_type_spec(ty, module_path),
+            optional: false,
+            doc: Vec::new(),
+        });
+    }
+    for param in &op.signature.params {
+        if matches!(
+            param.direction,
+            xidl_parser::rest_hir::HttpSignatureParamDirection::Out
+                | xidl_parser::rest_hir::HttpSignatureParamDirection::InOut
+        ) {
+            fields.push(ParamDeclContext {
+                prop: crate::generate::typescript::definition::names::ts_prop_name(&param.name),
+                ty: ts_type_for_type_spec(&param.ty, module_path, TypeRefTarget::Types),
+                schema: zod_schema_for_type_spec(&param.ty, module_path),
+                optional: param.annotations.iter().any(|a| {
+                    matches!(
+                        a,
+                        xidl_parser::rest_hir::HttpSignatureParamAnnotation::Optional
+                    )
+                }),
+                doc: Vec::new(),
+            });
+        }
+    }
+    fields
+}
+
+fn build_client_params(
+    op: &HttpOperation,
+    module_path: &[String],
+    request_name: &Option<String>,
+) -> Vec<ClientParamContext> {
+    if matches!(op.meta.stream.kind, Some(HttpStreamKind::Client)) {
+        return vec![ClientParamContext {
+            name: "stream".to_string(),
+            ty: build_client_stream_ty(op, module_path, request_name)
+                .unwrap_or_else(|| "never".into()),
+        }];
+    }
+    op.signature
+        .params
+        .iter()
+        .filter(|p| {
+            matches!(
+                p.direction,
+                xidl_parser::rest_hir::HttpSignatureParamDirection::In
+                    | xidl_parser::rest_hir::HttpSignatureParamDirection::InOut
+            )
+        })
+        .map(|p| {
+            let base = ts_type_for_type_spec(&p.ty, module_path, TypeRefTarget::Client);
+            let optional = p.annotations.iter().any(|a| {
+                matches!(
+                    a,
+                    xidl_parser::rest_hir::HttpSignatureParamAnnotation::Optional
+                )
+            });
+            let ty = if optional {
+                format!("{base} | undefined")
+            } else {
+                base
+            };
+            ClientParamContext {
+                name: ts_ident(&p.name),
+                ty,
+            }
+        })
+        .collect()
+}
+
+fn build_value_params(bindings: &[HttpInputBinding]) -> Vec<ValueParamContext> {
+    bindings
+        .iter()
+        .map(|b| ValueParamContext {
+            raw_name: b.wire_name.clone(),
+            access: ts_ident(&b.source_param),
+            key_name: b.source_param.clone(),
+            optional: b.optional,
+            is_multi: matches!(b.ty, hir::TypeSpec::SequenceType(_)),
+        })
+        .collect()
+}
+
+fn build_response_value_params(bindings: &[HttpOutputBinding]) -> Vec<ValueParamContext> {
+    bindings
+        .iter()
+        .map(|b| {
+            let name = match &b.source {
+                HttpOutputSource::ReturnValue => "return".to_string(),
+                HttpOutputSource::Param { name } => name.clone(),
+            };
+            ValueParamContext {
+                raw_name: b.wire_name.clone(),
+                access: crate::generate::typescript::definition::names::ts_prop_name(&name),
+                key_name: name,
+                optional: false,
+                is_multi: matches!(b.ty, hir::TypeSpec::SequenceType(_)),
+            }
+        })
+        .collect()
+}
+
+fn build_server_stream_ty(op: &HttpOperation, module_path: &[String]) -> Option<String> {
+    if let HttpResponseBodyShape::Stream { item_ty, .. } = &op.http.response.body.shape {
+        Some(ts_type_for_type_spec(
+            item_ty,
+            module_path,
+            TypeRefTarget::Client,
+        ))
+    } else {
+        None
+    }
+}
+
+fn build_client_stream_ty(
+    op: &HttpOperation,
+    module_path: &[String],
+    request_name: &Option<String>,
+) -> Option<String> {
+    if let HttpRequestBodyShape::Stream {
+        item_ty,
+        source_param,
+        ..
+    } = &op.http.request.body.shape
+    {
+        // Try to find if this source_param was a flattened single param
+        let was_flattened = op.signature.params.iter().any(|p| {
+            p.name == *source_param
+                && p.annotations.iter().any(|a| {
+                    matches!(
+                        a,
+                        xidl_parser::rest_hir::HttpSignatureParamAnnotation::Flatten
+                    )
+                })
+        });
+
+        let item_ty_str = if was_flattened {
+            ts_type_for_type_spec(item_ty, module_path, TypeRefTarget::Client)
+        } else if let Some(name) = request_name {
+            scoped_name(module_path, name)
+        } else {
+            "void".to_string()
+        };
+        Some(format!("AsyncIterable<{item_ty_str}>"))
+    } else {
+        None
+    }
+}
+
+fn build_response_body_mode(op: &HttpOperation) -> &'static str {
+    match &op.http.response.body.shape {
+        HttpResponseBodyShape::Empty => "none",
+        HttpResponseBodyShape::ReturnOnly { .. } => "return",
+        HttpResponseBodyShape::SingleValue { source, .. } => {
+            if matches!(source, HttpOutputSource::ReturnValue) {
+                "return"
+            } else {
+                "object"
+            }
+        }
+        HttpResponseBodyShape::Object { .. } => "object",
+        HttpResponseBodyShape::Stream { .. } => "return", // Stream is handled specially but 'return' mode is closest for result handling
+    }
+}
+
 fn validate_stream_support(op: &HttpOperation) -> IdlcResult<()> {
-    match op.stream.kind {
-        Some(HttpStreamKind::Server) if op.stream.codec != HttpStreamCodec::Sse => {
+    match op.meta.stream.kind {
+        Some(HttpStreamKind::Server) if op.meta.stream.codec != HttpStreamCodec::Sse => {
             Err(IdlcError::rpc(format!(
                 "typescript-rest currently supports only SSE for @server_stream methods: '{}'",
-                op.name
+                op.meta.name
             )))
         }
-        Some(HttpStreamKind::Client) if op.stream.codec != HttpStreamCodec::Ndjson => {
+        Some(HttpStreamKind::Client) if op.meta.stream.codec != HttpStreamCodec::Ndjson => {
             Err(IdlcError::rpc(format!(
                 "typescript-rest currently supports only NDJSON for @client_stream methods: '{}'",
-                op.name
+                op.meta.name
             )))
         }
         Some(HttpStreamKind::Bidi) => Err(IdlcError::rpc(format!(
             "typescript-rest currently does not support @bidi_stream methods: '{}'",
-            op.name
+            op.meta.name
         ))),
         _ => Ok(()),
     }
 }
 
 fn only_direct_return(op: &HttpOperation) -> bool {
-    op.return_type.is_some() && op.response_params.is_empty()
-}
-
-fn request_content_type(op: &HttpOperation) -> String {
-    match op.stream.kind {
-        Some(HttpStreamKind::Client) => "application/x-ndjson".to_string(),
-        _ => op.request_content_type.clone(),
-    }
-}
-
-fn response_content_type(op: &HttpOperation) -> String {
-    match (op.stream.kind, op.stream.codec) {
-        (Some(HttpStreamKind::Server), HttpStreamCodec::Sse) => "text/event-stream".to_string(),
-        _ => op.response_content_type.clone(),
-    }
+    op.signature.return_type.is_some()
+        && op.http.response.header.is_empty()
+        && op.http.response.cookie.is_empty()
+        && matches!(
+            op.http.response.body.shape,
+            HttpResponseBodyShape::ReturnOnly { .. }
+                | HttpResponseBodyShape::Stream {
+                    item_source: HttpOutputSource::ReturnValue,
+                    ..
+                }
+        )
 }
 
 fn http_method_name(method: xidl_parser::rest_hir::HttpMethod) -> &'static str {
@@ -298,155 +583,9 @@ fn http_method_name(method: xidl_parser::rest_hir::HttpMethod) -> &'static str {
     }
 }
 
-fn client_params(
-    op: &HttpOperation,
-    module_path: &[String],
-    request_name: &Option<String>,
-) -> Vec<ClientParamContext> {
-    if matches!(op.stream.kind, Some(HttpStreamKind::Client)) {
-        return vec![ClientParamContext {
-            name: "stream".to_string(),
-            ty: client_stream_ty(op, module_path, request_name).unwrap_or_else(|| "never".into()),
-        }];
-    }
-    op.request_params
-        .iter()
-        .map(|param| ClientParamContext {
-            name: ts_ident(&param.name),
-            ty: client_param_ty(param, module_path),
-        })
-        .collect()
-}
-
-fn client_param_ty(param: &HttpParam, module_path: &[String]) -> String {
-    let base = ts_type_for_type_spec(&param.ty, module_path, TypeRefTarget::Client);
-    if param.optional {
-        format!("{base} | undefined")
-    } else {
-        base
-    }
-}
-
-fn param_decl(param: &HttpParam, module_path: &[String]) -> ParamDeclContext {
-    ParamDeclContext {
-        prop: crate::generate::typescript::definition::names::ts_prop_name(&param.name),
-        ty: ts_type_for_type_spec(&param.ty, module_path, TypeRefTarget::Types),
-        schema: zod_schema_for_type_spec(&param.ty, module_path),
-        optional: param.optional,
-        doc: Vec::new(),
-    }
-}
-
-fn response_fields(op: &HttpOperation, module_path: &[String]) -> Vec<ParamDeclContext> {
-    let mut fields = Vec::new();
-    if let Some(ty) = &op.return_type {
-        fields.push(ParamDeclContext {
-            prop: "return".to_string(),
-            ty: ts_type_for_type_spec(ty, module_path, TypeRefTarget::Types),
-            schema: zod_schema_for_type_spec(ty, module_path),
-            optional: false,
-            doc: Vec::new(),
-        });
-    }
-    for param in &op.response_params {
-        fields.push(param_decl(param, module_path));
-    }
-    fields
-}
-
-fn response_body_entries(op: &HttpOperation) -> Vec<RequestPayloadEntry> {
-    let mut entries = Vec::new();
-    if op.return_type.is_some() {
-        entries.push(RequestPayloadEntry {
-            raw_name: "return".to_string(),
-            access: "return".to_string(),
-        });
-    }
-    entries.extend(
-        op.response_params
-            .iter()
-            .filter(|param| !matches!(param.kind, HttpParamKind::Header | HttpParamKind::Cookie))
-            .map(|param| RequestPayloadEntry {
-                raw_name: param.name.clone(),
-                access: ts_ident(&param.name),
-            }),
-    );
-    entries
-}
-
-fn value_params(op: &HttpOperation, kind: HttpParamKind) -> Vec<ValueParamContext> {
-    op.request_params
-        .iter()
-        .filter(|param| param.kind == kind)
-        .map(|param| ValueParamContext {
-            raw_name: param.wire_name.clone(),
-            access: ts_ident(&param.name),
-            key_name: param.name.clone(),
-            optional: param.optional,
-            is_multi: matches!(param.ty, hir::TypeSpec::SequenceType(_)),
-        })
-        .collect()
-}
-
-fn response_value_params(op: &HttpOperation, kind: HttpParamKind) -> Vec<ValueParamContext> {
-    op.response_params
-        .iter()
-        .filter(|param| param.kind == kind)
-        .map(|param| ValueParamContext {
-            raw_name: param.wire_name.clone(),
-            access: crate::generate::typescript::definition::names::ts_prop_name(&param.name),
-            key_name: param.name.clone(),
-            optional: param.optional,
-            is_multi: matches!(param.ty, hir::TypeSpec::SequenceType(_)),
-        })
-        .collect()
-}
-
-fn direct_body_access(params: &[HttpParam]) -> Option<String> {
-    let body = params
-        .iter()
-        .filter(|param| matches!(param.kind, HttpParamKind::Body))
-        .collect::<Vec<_>>();
-    if body.len() == 1 && body[0].flatten {
-        Some(ts_ident(&body[0].name))
-    } else {
-        None
-    }
-}
-
-fn server_stream_ty(op: &HttpOperation, module_path: &[String]) -> Option<String> {
-    matches!(op.stream.kind, Some(HttpStreamKind::Server)).then(|| {
-        op.return_type
-            .as_ref()
-            .map(|ty| ts_type_for_type_spec(ty, module_path, TypeRefTarget::Client))
-            .unwrap_or_else(|| "unknown".to_string())
-    })
-}
-
-fn client_stream_ty(
-    op: &HttpOperation,
-    module_path: &[String],
-    request_name: &Option<String>,
-) -> Option<String> {
-    matches!(op.stream.kind, Some(HttpStreamKind::Client)).then(|| {
-        let body = op
-            .request_params
-            .iter()
-            .filter(|param| matches!(param.kind, HttpParamKind::Body))
-            .collect::<Vec<_>>();
-        let item_ty = if body.len() == 1 && body[0].flatten {
-            ts_type_for_type_spec(&body[0].ty, module_path, TypeRefTarget::Client)
-        } else if let Some(name) = request_name {
-            scoped_name(module_path, name)
-        } else {
-            "void".to_string()
-        };
-        format!("AsyncIterable<{item_ty}>")
-    })
-}
-
 fn security_contexts(op: &HttpOperation) -> Vec<SecurityContext> {
-    op.security
+    op.meta
+        .security
         .as_ref()
         .map(|profile| {
             profile
@@ -457,7 +596,7 @@ fn security_contexts(op: &HttpOperation) -> Vec<SecurityContext> {
                         kind: "basic".to_string(),
                         location: None,
                         name: None,
-                        realm: op.basic_auth_realm.clone(),
+                        realm: op.meta.basic_auth_realm.clone(),
                         scopes: Vec::new(),
                     },
                     HttpSecurityRequirement::HttpBearer => SecurityContext {
@@ -485,17 +624,4 @@ fn security_contexts(op: &HttpOperation) -> Vec<SecurityContext> {
                 .collect()
         })
         .unwrap_or_default()
-}
-
-fn response_body_mode(op: &HttpOperation) -> &'static str {
-    let response_body_count = op
-        .response_params
-        .iter()
-        .filter(|param| !matches!(param.kind, HttpParamKind::Header | HttpParamKind::Cookie))
-        .count();
-    match (op.return_type.is_some(), response_body_count) {
-        (false, 0) => "none",
-        (true, 0) => "return",
-        _ => "object",
-    }
 }

@@ -1,10 +1,11 @@
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::rust_axum::interface::{ParamContext, ParamDirection, ParamSource, RenderEnv};
+use crate::generate::rust_axum::interface::{ParamContext, ParamSource, RenderEnv};
 use crate::generate::rust_axum::transport::{
     TransportDirection, TransportTracker, decode_expr, encode_expr,
 };
 use convert_case::{Case, Casing};
 use xidl_parser::hir;
+use xidl_parser::rest_hir::HttpOperation;
 
 pub(crate) fn transport_param_type(
     ty: &hir::TypeSpec,
@@ -19,14 +20,6 @@ pub(crate) fn transport_param_type(
     } else {
         inner
     })
-}
-
-pub(crate) fn param_direction(attr: Option<&hir::ParamAttribute>) -> ParamDirection {
-    match attr.map(|value| value.0.as_str()) {
-        Some("out") => ParamDirection::Out,
-        Some("inout") => ParamDirection::InOut,
-        _ => ParamDirection::In,
-    }
 }
 
 pub(crate) fn method_struct_prefix(interface_name: &str, method_name: &str) -> String {
@@ -62,18 +55,6 @@ pub(crate) fn op_encode_expr(op_ty: &hir::OpTypeSpec, env: RenderEnv<'_>) -> Idl
     }
 }
 
-pub(crate) fn request_struct_name(
-    struct_prefix: &str,
-    auth_in_request_struct: bool,
-    has_request_params: bool,
-) -> Option<String> {
-    if auth_in_request_struct || has_request_params {
-        Some(format!("{struct_prefix}Request"))
-    } else {
-        None
-    }
-}
-
 pub(crate) fn request_payload_ty(
     request_ty: &str,
     auth_wrapper_struct: &Option<String>,
@@ -93,19 +74,28 @@ pub(crate) fn request_payload_ty(
     }
 }
 
-pub(crate) fn response_ty(
-    ret: &str,
-    return_is_unit: bool,
-    response_params: &[ParamContext],
-    struct_prefix: &str,
-) -> String {
-    let response_value_count = usize::from(!return_is_unit) + response_params.len();
-    if response_value_count > 1 || (return_is_unit && response_value_count == 1) {
+pub(crate) fn response_ty(http_op: &HttpOperation, struct_prefix: &str, ret_ty: &str) -> String {
+    let out_params_count = http_op
+        .signature
+        .params
+        .iter()
+        .filter(|p| {
+            matches!(
+                p.direction,
+                xidl_parser::rest_hir::HttpSignatureParamDirection::Out
+                    | xidl_parser::rest_hir::HttpSignatureParamDirection::InOut
+            )
+        })
+        .count();
+    let has_return = http_op.signature.return_type.is_some();
+
+    if (has_return && out_params_count > 0)
+        || out_params_count > 1
+        || (!has_return && out_params_count == 1)
+    {
         format!("{struct_prefix}Response")
-    } else if !return_is_unit {
-        ret.to_string()
-    } else if let Some(param) = response_params.first() {
-        param.ty.clone()
+    } else if has_return {
+        ret_ty.to_string()
     } else {
         "()".to_string()
     }

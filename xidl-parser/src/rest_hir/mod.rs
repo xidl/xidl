@@ -1,4 +1,5 @@
 mod attr;
+mod mapping;
 mod model;
 mod project;
 mod project_params;

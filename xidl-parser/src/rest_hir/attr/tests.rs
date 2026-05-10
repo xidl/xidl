@@ -21,10 +21,10 @@ fn projects_readonly_and_watch_attributes() {
     };
     let ops = project_attribute("DeviceApi", &["iot".to_string()], &attr, None, None, true);
     assert_eq!(ops.len(), 2);
-    assert_eq!(ops[0].source, HttpOperationSource::AttributeGet);
-    assert_eq!(ops[0].routes[0].path, "/attribute/statusFlag");
-    assert_eq!(ops[1].source, HttpOperationSource::AttributeWatch);
-    assert_eq!(ops[1].stream.kind, Some(HttpStreamKind::Server));
+    assert_eq!(ops[0].meta.source, HttpOperationSource::AttributeGet);
+    assert_eq!(ops[0].meta.routes[0].path, "/attribute/statusFlag");
+    assert_eq!(ops[1].meta.source, HttpOperationSource::AttributeWatch);
+    assert_eq!(ops[1].meta.stream.kind, Some(HttpStreamKind::Server));
 }
 
 #[test]
@@ -41,9 +41,12 @@ fn projects_readwrite_and_with_raises_attributes() {
     };
     let ops = project_attribute("SensorApi", &["api".to_string()], &attr, None, None, false);
     assert_eq!(ops.len(), 4);
-    assert_eq!(ops[1].source, HttpOperationSource::AttributeSet);
-    assert_eq!(ops[1].request_params[0].name, "temperature_celsius");
-    assert_eq!(ops[1].request_params[0].wire_name, "temperatureCelsius");
+    assert_eq!(ops[1].meta.source, HttpOperationSource::AttributeSet);
+    assert_eq!(ops[1].signature.params[0].name, "temperature_celsius");
+    assert_eq!(
+        ops[1].http.request.body.content_type.as_deref(),
+        Some("application/json")
+    );
 
     let with_raises = AttrDcl {
         annotations: Vec::new(),
@@ -59,6 +62,6 @@ fn projects_readwrite_and_with_raises_attributes() {
     };
     let ops = project_attribute("SensorApi", &[], &with_raises, None, None, true);
     assert_eq!(ops.len(), 3);
-    assert_eq!(ops[2].name, "watch_attribute_mode");
-    assert_eq!(ops[2].operation_id, "SensorApi.watch_attribute_mode");
+    assert_eq!(ops[2].meta.name, "watch_attribute_mode");
+    assert_eq!(ops[2].meta.operation_id, "SensorApi.watch_attribute_mode");
 }

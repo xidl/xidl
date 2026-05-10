@@ -9,26 +9,6 @@ use crate::openapi::{Content, Ref, RefOr, Required};
 use xidl_parser::hir;
 use xidl_parser::rest_hir::semantics::DeprecatedInfo;
 
-pub(crate) fn body_payload_schema(
-    props: Vec<(String, RefOr<Schema>)>,
-    required: Vec<String>,
-) -> Option<RefOr<Schema>> {
-    if props.is_empty() {
-        return None;
-    }
-    if props.len() == 1 {
-        return props.into_iter().next().map(|(_, schema)| schema);
-    }
-    let mut object = ObjectBuilder::new().schema_type(Type::Object);
-    for (name, schema) in props {
-        object = object.property(name.clone(), schema);
-    }
-    for name in required {
-        object = object.required(name);
-    }
-    Some(RefOr::T(Schema::from(object)))
-}
-
 pub(crate) fn request_body_schema(schema: RefOr<Schema>, content_type: &str) -> RequestBody {
     let mut request_body = RequestBody::new();
     request_body

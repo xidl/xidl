@@ -237,7 +237,7 @@ impl OpenApiContext {
             self.stream_patches.push(OpenApiStreamPatch {
                 path: path.to_string(),
                 method: openapi_method_name(&method.http_method),
-                response_status: Some(method.response_status),
+                response_status: Some(method.response_status.clone()),
                 content_type: method.response_content_type.clone(),
                 item_schema: stream_patch_item_schema(item_schema, "response"),
             });

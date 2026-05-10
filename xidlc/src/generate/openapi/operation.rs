@@ -1,15 +1,14 @@
 use super::naming::{method_to_openapi, openapi_path_template, operation_id};
 use super::schema::{
-    apply_deprecation_note, array_schema, body_payload_schema, parameter_schema,
-    request_body_schema, schema_for_type,
+    apply_deprecation_note, array_schema, parameter_schema, request_body_schema, schema_for_type,
 };
 use super::security::openapi_security_requirement;
 use crate::openapi::path::{HttpMethod as OpenApiHttpMethod, Parameter, ParameterIn};
 use crate::openapi::request_body::RequestBody;
-use crate::openapi::schema::Schema;
+use crate::openapi::schema::{ObjectBuilder, Schema, Type};
 use crate::openapi::{RefOr, security::SecurityRequirement};
 use xidl_parser::rest_hir::{
-    HttpMethod as RestHirMethod, HttpOperation, HttpParamKind as RestHirParamKind,
+    HttpOperation, HttpRequestBodyShape, HttpResponseBodyShape,
     semantics::{HttpSecurityRequirement, HttpStreamCodec, HttpStreamKind},
 };
 
@@ -20,7 +19,7 @@ pub(crate) struct MethodInfo {
     pub(crate) parameters: Vec<Parameter>,
     pub(crate) request_body: Option<RequestBody>,
     pub(crate) request_stream_item_schema: Option<RefOr<Schema>>,
-    pub(crate) response_status: &'static str,
+    pub(crate) response_status: String,
     pub(crate) response_schema: Option<RefOr<Schema>>,
     pub(crate) response_stream_item_schema: Option<RefOr<Schema>>,
     pub(crate) summary: Option<String>,
@@ -39,72 +38,84 @@ pub(crate) fn render_http_operation(
     validate_stream_contract(op);
 
     let mut parameters = Vec::new();
-    let mut body_props = Vec::new();
-    let body_required = Vec::new();
-    let mut output_fields = Vec::new();
 
-    for param in &op.request_params {
-        let schema = schema_for_type(&param.ty);
-        match param.kind {
-            RestHirParamKind::Path => parameters.push(parameter_schema(
-                ParameterIn::Path,
-                &param.wire_name,
-                schema,
-                true,
-                None,
-            )),
-            RestHirParamKind::Query => parameters.push(parameter_schema(
-                ParameterIn::Query,
-                &param.wire_name,
-                schema,
-                false,
-                None,
-            )),
-            RestHirParamKind::Header => parameters.push(parameter_schema(
-                ParameterIn::Header,
-                &param.wire_name,
-                schema,
-                false,
-                None,
-            )),
-            RestHirParamKind::Cookie => parameters.push(parameter_schema(
-                ParameterIn::Cookie,
-                &param.wire_name,
-                schema,
-                false,
-                None,
-            )),
-            RestHirParamKind::Body => body_props.push((param.name.clone(), schema)),
+    for binding in &op.http.request.path {
+        parameters.push(parameter_schema(
+            ParameterIn::Path,
+            &binding.wire_name,
+            schema_for_type(&binding.ty),
+            true,
+            None,
+        ));
+    }
+    for binding in &op.http.request.query {
+        parameters.push(parameter_schema(
+            ParameterIn::Query,
+            &binding.wire_name,
+            schema_for_type(&binding.ty),
+            !binding.optional,
+            None,
+        ));
+    }
+    for binding in &op.http.request.header {
+        parameters.push(parameter_schema(
+            ParameterIn::Header,
+            &binding.wire_name,
+            schema_for_type(&binding.ty),
+            !binding.optional,
+            None,
+        ));
+    }
+    for binding in &op.http.request.cookie {
+        parameters.push(parameter_schema(
+            ParameterIn::Cookie,
+            &binding.wire_name,
+            schema_for_type(&binding.ty),
+            !binding.optional,
+            None,
+        ));
+    }
+
+    let request_schema = match &op.http.request.body.shape {
+        HttpRequestBodyShape::Empty => None,
+        HttpRequestBodyShape::SingleValue { ty, .. } => Some(schema_for_type(ty)),
+        HttpRequestBodyShape::Object { fields } => {
+            let mut object = ObjectBuilder::new().schema_type(Type::Object);
+            for field in fields {
+                object = object.property(field.field_name.clone(), schema_for_type(&field.ty));
+                if !field.optional {
+                    object = object.required(&field.field_name);
+                }
+            }
+            Some(RefOr::T(Schema::from(object)))
         }
-    }
-
-    for param in &op.response_params {
-        output_fields.push((param.wire_name.clone(), schema_for_type(&param.ty)));
-    }
-
-    let return_schema = op.return_type.as_ref().map(schema_for_type);
-    let (response_status, mut response_schema) = response_shape(
-        return_schema,
-        output_fields,
-        matches!(op.method, RestHirMethod::Head),
-    );
-    let mut request_schema = body_payload_schema(body_props, body_required);
-    if matches!(op.stream.kind, Some(HttpStreamKind::Bidi)) {
-        request_schema = request_schema.map(array_schema);
-        response_schema = response_schema.map(array_schema);
-    }
-
-    let request_content_type = if matches!(op.stream.kind, Some(HttpStreamKind::Client)) {
-        "application/x-ndjson".to_string()
-    } else {
-        op.request_content_type.clone()
+        HttpRequestBodyShape::Stream { item_ty, .. } => Some(schema_for_type(item_ty)),
     };
-    let response_content_type = if matches!(op.stream.kind, Some(HttpStreamKind::Server)) {
-        "text/event-stream".to_string()
-    } else {
-        op.response_content_type.clone()
+
+    let response_schema = match &op.http.response.body.shape {
+        HttpResponseBodyShape::Empty => None,
+        HttpResponseBodyShape::ReturnOnly { ty } => Some(schema_for_type(ty)),
+        HttpResponseBodyShape::SingleValue { ty, .. } => Some(schema_for_type(ty)),
+        HttpResponseBodyShape::Object { fields } => {
+            let mut object = ObjectBuilder::new().schema_type(Type::Object);
+            for field in fields {
+                object = object.property(field.field_name.clone(), schema_for_type(&field.ty));
+                object = object.required(&field.field_name);
+            }
+            Some(RefOr::T(Schema::from(object)))
+        }
+        HttpResponseBodyShape::Stream { item_ty, .. } => Some(schema_for_type(item_ty)),
     };
+
+    let mut final_request_schema = request_schema.clone();
+    let mut final_response_schema = response_schema.clone();
+    if matches!(op.meta.stream.kind, Some(HttpStreamKind::Bidi)) {
+        final_request_schema = final_request_schema.map(array_schema);
+        final_response_schema = final_response_schema.map(array_schema);
+    }
+
     let (security_requirements, security) = op
+        .meta
         .security
         .as_ref()
         .map(|profile| {
@@ -118,29 +129,47 @@ pub(crate) fn render_http_operation(
         })
         .unwrap_or((None, None));
 
+    let request_content_type = op
+        .http
+        .request
+        .body
+        .content_type
+        .clone()
+        .unwrap_or_else(|| "application/json".to_string());
+    let response_content_type = op
+        .http
+        .response
+        .body
+        .content_type
+        .clone()
+        .unwrap_or_else(|| "application/json".to_string());
+
+    let response_status = op.http.response.status.clone();
+
     MethodInfo {
-        http_method: method_to_openapi(op.method),
+        http_method: method_to_openapi(op.meta.method),
         paths: op
+            .meta
             .routes
             .iter()
             .map(|route| openapi_path_template(&route.path))
             .collect(),
-        operation_id: operation_id(module_path, interface_name, &op.name),
+        operation_id: operation_id(module_path, interface_name, &op.meta.name),
         parameters,
-        request_body: request_schema
-            .clone()
+        request_body: final_request_schema
             .map(|schema| request_body_schema(schema, &request_content_type)),
-        request_stream_item_schema: matches!(op.stream.kind, Some(HttpStreamKind::Client))
+        request_stream_item_schema: matches!(op.meta.stream.kind, Some(HttpStreamKind::Client))
             .then_some(request_schema)
             .flatten(),
         response_status,
-        response_schema: response_schema.clone(),
-        response_stream_item_schema: matches!(op.stream.kind, Some(HttpStreamKind::Server))
+        response_schema: final_response_schema,
+        response_stream_item_schema: matches!(op.meta.stream.kind, Some(HttpStreamKind::Server))
             .then_some(response_schema)
             .flatten(),
         summary: None,
-        description: apply_deprecation_note(None, op.deprecated.as_ref()),
+        description: apply_deprecation_note(None, op.meta.deprecated.as_ref()),
         deprecated: op
+            .meta
             .deprecated
             .as_ref()
             .map(|value| value.deprecated)
@@ -152,50 +181,19 @@ pub(crate) fn render_http_operation(
 }
 
 fn validate_stream_contract(op: &HttpOperation) {
-    match op.stream.kind {
-        Some(HttpStreamKind::Server) if op.stream.codec != HttpStreamCodec::Sse => {
+    match op.meta.stream.kind {
+        Some(HttpStreamKind::Server) if op.meta.stream.codec != HttpStreamCodec::Sse => {
             panic!(
                 "openapi currently supports only SSE for @server_stream methods: '{}'",
-                op.name
+                op.meta.name
             );
         }
-        Some(HttpStreamKind::Client) if op.stream.codec != HttpStreamCodec::Ndjson => {
+        Some(HttpStreamKind::Client) if op.meta.stream.codec != HttpStreamCodec::Ndjson => {
             panic!(
                 "openapi currently supports only NDJSON for @client_stream methods: '{}'",
-                op.name
+                op.meta.name
             );
         }
         _ => {}
     }
-}
-
-fn response_shape(
-    return_schema: Option<RefOr<Schema>>,
-    output_fields: Vec<(String, RefOr<Schema>)>,
-    is_head: bool,
-) -> (&'static str, Option<RefOr<Schema>>) {
-    let output_count = usize::from(return_schema.is_some()) + output_fields.len();
-    if is_head || output_count == 0 {
-        return ("204", None);
-    }
-    if output_count == 1 {
-        if let Some(schema) = return_schema {
-            return ("200", Some(schema));
-        }
-        if let Some((_, schema)) = output_fields.first().cloned() {
-            return ("200", Some(schema));
-        }
-    }
-
-    let mut object = crate::openapi::schema::ObjectBuilder::new()
-        .schema_type(crate::openapi::schema::Type::Object);
-    if let Some(schema) = return_schema {
-        object = object.property("return", schema).required("return");
-    }
-    for (name, schema) in output_fields {
-        object = object
-            .property(name.as_str(), schema)
-            .required(name.as_str());
-    }
-    ("200", Some(RefOr::T(Schema::from(object))))
 }

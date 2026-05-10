@@ -335,7 +335,7 @@ T: {{ ident }} + Send + Sync + 'static,
                                 let body = xidl_rust_axum::SerializeFactory::new("{{ method.response_content_type }}")
                                 .to_vec(&body_value)?;
                                 ::xidl_rust_axum::axum::response::Response::builder()
-                                .status(::xidl_rust_axum::axum::http::StatusCode::OK)
+                                .status(::xidl_rust_axum::axum::http::StatusCode::from_u16({{ method.response_status }}).unwrap())
                                 .header(
                                 ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
                                 "{{ method.response_content_type }}",
