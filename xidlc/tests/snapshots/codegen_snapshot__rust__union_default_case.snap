@@ -31,16 +31,13 @@ union DefaultUnionData {
 }
 impl Drop for DefaultUnion {
     fn drop(&mut self) {
-        match self.tag {
-            A => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.a);
-                }
+        if matches!(self.tag, A) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.a);
             }
-            _ => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.fallback);
-                }
+        } else {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.fallback);
             }
         }
     }

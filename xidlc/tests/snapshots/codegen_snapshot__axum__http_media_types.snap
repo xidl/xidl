@@ -5,6 +5,14 @@ expression: output
 ===============
 http_media_types.rs
 ===============
+#[allow(
+    non_snake_case,
+    unused_attributes,
+    unused_variables,
+    unused_mut,
+    unreachable_code,
+    clippy::let_unit_value
+)]
 #[async_trait::async_trait]
 pub trait HttpMediaService {
     async fn submit_form(
@@ -14,30 +22,32 @@ pub trait HttpMediaService {
     ) -> ::xidl_rust_axum::Result<String>;
     async fn fetch_msgpack(&self, id: String) -> ::xidl_rust_axum::Result<String>;
 }
-mod __xidl_in_HttpMediaService {
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_in_HttpMediaService {
     use super::*;
 }
-mod __xidl_out_HttpMediaService {
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_out_HttpMediaService {
     use super::*;
 }
 #[derive(::serde::Serialize)]
-struct HttpMediaServiceSubmitFormRequestOutBody {
+pub struct HttpMediaServiceSubmitFormRequestOutBody {
     #[serde(default)]
-    name: String,
+    pub name: String,
     #[serde(default)]
-    age: u32,
+    pub age: u32,
 }
 #[derive(::serde::Deserialize)]
-struct HttpMediaServiceSubmitFormRequestInBody {
-    name: String,
-    age: u32,
+pub struct HttpMediaServiceSubmitFormRequestInBody {
+    pub name: String,
+    pub age: u32,
 }
 #[derive(::serde::Deserialize)]
 struct HttpMediaServiceSubmitFormRequest {
     name: String,
     age: u32,
 }
-#[allow(clippy::manual_async_fn)]
+#[allow(clippy::manual_async_fn, unused_mut)]
 impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
 for HttpMediaServiceSubmitFormRequest
 where
@@ -50,7 +60,10 @@ where
     ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
         async move {
             let (mut parts, body) = req.into_parts();
+            let _ = &body;
+            let _ = state;
             let headers = &parts.headers;
+            let _ = headers;
             if !::xidl_rust_axum::http::content_type_matches(
                 headers,
                 "application/x-www-form-urlencoded",
@@ -83,7 +96,7 @@ struct HttpMediaServiceFetchMsgpackRequestInQuery {
 struct HttpMediaServiceFetchMsgpackRequest {
     id: String,
 }
-#[allow(clippy::manual_async_fn)]
+#[allow(clippy::manual_async_fn, unused_mut)]
 impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
 for HttpMediaServiceFetchMsgpackRequest
 where
@@ -96,6 +109,8 @@ where
     ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
         async move {
             let (mut parts, body) = req.into_parts();
+            let _ = &body;
+            let _ = state;
             let ::xidl_rust_axum::axum::extract::Query(query) = <::xidl_rust_axum::axum::extract::Query<
                 HttpMediaServiceFetchMsgpackRequestInQuery,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
@@ -105,6 +120,7 @@ where
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
             let HttpMediaServiceFetchMsgpackRequestInQuery { id } = query;
             let headers = &parts.headers;
+            let _ = headers;
             Ok(Self { id })
         }
     }
@@ -112,6 +128,7 @@ where
 pub struct HttpMediaServiceServer<T> {
     inner: ::std::sync::Arc<T>,
 }
+#[allow(non_snake_case)]
 impl<T> HttpMediaServiceServer<T>
 where
     T: HttpMediaService + Send + Sync + 'static,
@@ -125,7 +142,7 @@ where
         Self { inner }
     }
     pub fn router(self) -> xidl_rust_axum::axum::Router {
-        let svc = self.inner;
+        let _svc = self.inner;
         xidl_rust_axum::axum::Router::new()
             .route(
                 "/submit_form",
@@ -135,9 +152,17 @@ where
                 "/fetch_msgpack",
                 xidl_rust_axum::axum::routing::post(Self::fetch_msgpack),
             )
-            .with_state(svc)
+            .with_state(_svc)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn submit_form(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -145,6 +170,7 @@ where
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
         request: HttpMediaServiceSubmitFormRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -155,6 +181,7 @@ where
             Ok(resp_value) => {
                 let mut resp = {
                     let body_value: String = resp_value;
+                    let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -180,7 +207,15 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn fetch_msgpack(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -188,6 +223,7 @@ where
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
         request: HttpMediaServiceFetchMsgpackRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/msgpack") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -197,6 +233,7 @@ where
             Ok(resp_value) => {
                 let mut resp = {
                     let body_value: String = resp_value;
+                    let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new(
                             "application/msgpack",
                         )
@@ -236,6 +273,7 @@ where
 pub struct HttpMediaServiceClient {
     client: ::xidl_rust_axum::Client,
 }
+#[allow(non_snake_case)]
 impl HttpMediaServiceClient {
     pub fn new(base_url: impl Into<String>) -> Self {
         Self {
@@ -276,8 +314,9 @@ impl HttpMediaServiceClient {
         }
     }
 }
+#[allow(non_snake_case)]
 impl HttpMediaServiceClient {
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn submit_form(
         &self,
         name: String,
@@ -299,9 +338,10 @@ impl HttpMediaServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
+        let _ = auth_target;
         let body = HttpMediaServiceSubmitFormRequestOutBody {
-            name: name,
-            age: age,
+            name,
+            age,
         };
         let body = xidl_rust_axum::SerializeFactory::new(
                 "application/x-www-form-urlencoded",
@@ -338,7 +378,7 @@ impl HttpMediaServiceClient {
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn fetch_msgpack(
         &self,
         id: String,
@@ -367,6 +407,7 @@ impl HttpMediaServiceClient {
             req.url_mut().set_query(Some(&query));
         }
         let auth_target = &self.client;
+        let _ = auth_target;
         let resp = self
             .client
             .http()

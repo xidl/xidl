@@ -5,6 +5,14 @@ expression: output
 ===============
 http_catch_all.rs
 ===============
+#[allow(
+    non_snake_case,
+    unused_attributes,
+    unused_variables,
+    unused_mut,
+    unreachable_code,
+    clippy::let_unit_value
+)]
 #[async_trait::async_trait]
 pub trait HttpCatchAllService {
     async fn read_file(&self, rel_path: String) -> ::xidl_rust_axum::Result<String>;
@@ -14,22 +22,24 @@ pub trait HttpCatchAllService {
         version: String,
     ) -> ::xidl_rust_axum::Result<String>;
 }
-mod __xidl_in_HttpCatchAllService {
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_in_HttpCatchAllService {
     use super::*;
 }
-mod __xidl_out_HttpCatchAllService {
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_out_HttpCatchAllService {
     use super::*;
 }
 #[derive(::serde::Deserialize)]
-struct HttpCatchAllServiceReadFilePath {
+pub struct HttpCatchAllServiceReadFilePath {
     #[serde(rename = "path")]
-    rel_path: String,
+    pub rel_path: String,
 }
 #[derive(::serde::Deserialize)]
 struct HttpCatchAllServiceReadFileRequest {
     rel_path: String,
 }
-#[allow(clippy::manual_async_fn)]
+#[allow(clippy::manual_async_fn, unused_mut)]
 impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
 for HttpCatchAllServiceReadFileRequest
 where
@@ -42,6 +52,8 @@ where
     ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
         async move {
             let (mut parts, body) = req.into_parts();
+            let _ = &body;
+            let _ = state;
             let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
                 HttpCatchAllServiceReadFilePath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
@@ -51,13 +63,14 @@ where
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
             let HttpCatchAllServiceReadFilePath { rel_path } = path;
             let headers = &parts.headers;
+            let _ = headers;
             Ok(Self { rel_path })
         }
     }
 }
 #[derive(::serde::Deserialize)]
-struct HttpCatchAllServiceReadAssetPath {
-    key: String,
+pub struct HttpCatchAllServiceReadAssetPath {
+    pub key: String,
 }
 #[derive(::serde::Serialize, ::core::default::Default)]
 struct HttpCatchAllServiceReadAssetRequestOutQuery {
@@ -76,7 +89,7 @@ struct HttpCatchAllServiceReadAssetRequest {
     key: String,
     version: String,
 }
-#[allow(clippy::manual_async_fn)]
+#[allow(clippy::manual_async_fn, unused_mut)]
 impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
 for HttpCatchAllServiceReadAssetRequest
 where
@@ -89,6 +102,8 @@ where
     ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
         async move {
             let (mut parts, body) = req.into_parts();
+            let _ = &body;
+            let _ = state;
             let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
                 HttpCatchAllServiceReadAssetPath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
@@ -106,6 +121,7 @@ where
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
             let HttpCatchAllServiceReadAssetRequestInQuery { version } = query;
             let headers = &parts.headers;
+            let _ = headers;
             Ok(Self { key, version })
         }
     }
@@ -113,6 +129,7 @@ where
 pub struct HttpCatchAllServiceServer<T> {
     inner: ::std::sync::Arc<T>,
 }
+#[allow(non_snake_case)]
 impl<T> HttpCatchAllServiceServer<T>
 where
     T: HttpCatchAllService + Send + Sync + 'static,
@@ -126,16 +143,24 @@ where
         Self { inner }
     }
     pub fn router(self) -> xidl_rust_axum::axum::Router {
-        let svc = self.inner;
+        let _svc = self.inner;
         xidl_rust_axum::axum::Router::new()
             .route("/files/{*path}", xidl_rust_axum::axum::routing::get(Self::read_file))
             .route(
                 "/assets/{*key}",
                 xidl_rust_axum::axum::routing::get(Self::read_asset),
             )
-            .with_state(svc)
+            .with_state(_svc)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn read_file(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -143,6 +168,7 @@ where
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
         request: HttpCatchAllServiceReadFileRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -152,6 +178,7 @@ where
             Ok(resp_value) => {
                 let mut resp = {
                     let body_value: String = resp_value;
+                    let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -177,7 +204,15 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn read_asset(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -185,6 +220,7 @@ where
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
         request: HttpCatchAllServiceReadAssetRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -195,6 +231,7 @@ where
             Ok(resp_value) => {
                 let mut resp = {
                     let body_value: String = resp_value;
+                    let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -232,6 +269,7 @@ where
 pub struct HttpCatchAllServiceClient {
     client: ::xidl_rust_axum::Client,
 }
+#[allow(non_snake_case)]
 impl HttpCatchAllServiceClient {
     pub fn new(base_url: impl Into<String>) -> Self {
         Self {
@@ -272,8 +310,9 @@ impl HttpCatchAllServiceClient {
         }
     }
 }
+#[allow(non_snake_case)]
 impl HttpCatchAllServiceClient {
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn read_file(
         &self,
         rel_path: String,
@@ -295,6 +334,7 @@ impl HttpCatchAllServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
+        let _ = auth_target;
         let resp = self
             .client
             .http()
@@ -317,7 +357,7 @@ impl HttpCatchAllServiceClient {
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn read_asset(
         &self,
         key: String,
@@ -348,6 +388,7 @@ impl HttpCatchAllServiceClient {
             req.url_mut().set_query(Some(&query));
         }
         let auth_target = &self.client;
+        let _ = auth_target;
         let resp = self
             .client
             .http()

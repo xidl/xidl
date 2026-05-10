@@ -1,4 +1,4 @@
-#![allow(unused)]
+#![allow(deprecated)]
 
 pub mod hello_world {
     include!(concat!(env!("OUT_DIR"), "/hello_world.rs"));

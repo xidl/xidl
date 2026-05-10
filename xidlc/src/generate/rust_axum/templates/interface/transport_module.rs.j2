@@ -1,10 +1,10 @@
-#[allow(non_snake_case)]
-mod {{ module.name }} {
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod {{ module.name }} {
     use super::*;
     {% for item in module.items %}
         #[derive(::serde::Serialize, ::serde::Deserialize)]
         {% if item.kind == "struct" %}
-            pub(super) struct {{ item.transport_ident }} {
+            pub struct {{ item.transport_ident }} {
                 {% for field in item.fields %}
                     {% if field.serde_rename %}
                         #[serde(rename = "{{ field.serde_rename }}")]
@@ -12,10 +12,11 @@ mod {{ module.name }} {
                     {% if field.optional %}
                         #[serde(default)]
                     {% endif %}
-                    {{ field.name }}: {{ field.ty }},
+                    pub {{ field.name }}: {{ field.ty }},
                 {% endfor %}
             }
 
+            #[allow(unused_variables, unreachable_code)]
             impl From<{{ item.public_path }}> for {{ item.transport_ident }} {
                 fn from(value: {{ item.public_path }}) -> Self {
                     Self {
@@ -26,6 +27,7 @@ mod {{ module.name }} {
                 }
             }
 
+            #[allow(unused_variables, unreachable_code)]
             impl From<{{ item.transport_ident }}> for {{ item.public_path }} {
                 fn from(value: {{ item.transport_ident }}) -> Self {
                     Self {
@@ -36,12 +38,13 @@ mod {{ module.name }} {
                 }
             }
         {% else %}
-            pub(super) enum {{ item.transport_ident }} {
+            pub enum {{ item.transport_ident }} {
                 {% for variant in item.variants %}
                     {{ variant }},
                 {% endfor %}
             }
 
+            #[allow(unused_variables, unreachable_code)]
             impl From<{{ item.public_path }}> for {{ item.transport_ident }} {
                 fn from(value: {{ item.public_path }}) -> Self {
                     match value {
@@ -52,6 +55,7 @@ mod {{ module.name }} {
                 }
             }
 
+            #[allow(unused_variables, unreachable_code)]
             impl From<{{ item.transport_ident }}> for {{ item.public_path }} {
                 fn from(value: {{ item.transport_ident }}) -> Self {
                     match value {

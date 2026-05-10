@@ -5,6 +5,14 @@ expression: output
 ===============
 http_bidi_stream.rs
 ===============
+#[allow(
+    non_snake_case,
+    unused_attributes,
+    unused_variables,
+    unused_mut,
+    unreachable_code,
+    clippy::let_unit_value
+)]
 #[async_trait::async_trait]
 pub trait HttpBidiStreamService {
     async fn chat(
@@ -17,23 +25,25 @@ pub trait HttpBidiStreamService {
         >,
     ) -> ::xidl_rust_axum::Result<()>;
 }
-mod __xidl_in_HttpBidiStreamService {
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_in_HttpBidiStreamService {
     use super::*;
 }
-mod __xidl_out_HttpBidiStreamService {
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_out_HttpBidiStreamService {
     use super::*;
 }
 #[derive(::serde::Serialize)]
-struct HttpBidiStreamServiceChatRequestOutBody {
+pub struct HttpBidiStreamServiceChatRequestOutBody {
     #[serde(default)]
-    room: String,
+    pub room: String,
     #[serde(default)]
-    text: String,
+    pub text: String,
 }
 #[derive(::serde::Deserialize)]
-struct HttpBidiStreamServiceChatRequestInBody {
-    room: String,
-    text: String,
+pub struct HttpBidiStreamServiceChatRequestInBody {
+    pub room: String,
+    pub text: String,
 }
 #[derive(::serde::Serialize, ::serde::Deserialize)]
 pub struct HttpBidiStreamServiceChatRequest {
@@ -41,21 +51,21 @@ pub struct HttpBidiStreamServiceChatRequest {
     pub text: String,
 }
 #[derive(::serde::Serialize)]
-struct HttpBidiStreamServiceChatResponseOutBody {
-    from: String,
-    reply: String,
+pub struct HttpBidiStreamServiceChatResponseOutBody {
+    pub from: String,
+    pub reply: String,
 }
 #[derive(::serde::Deserialize)]
-struct HttpBidiStreamServiceChatResponseInBody {
-    from: String,
-    reply: String,
+pub struct HttpBidiStreamServiceChatResponseInBody {
+    pub from: String,
+    pub reply: String,
 }
 #[derive(::serde::Serialize, ::serde::Deserialize)]
 pub struct HttpBidiStreamServiceChatResponse {
     pub from: String,
     pub reply: String,
 }
-#[allow(clippy::useless_conversion)]
+#[allow(clippy::useless_conversion, unreachable_code, unused_variables)]
 impl From<HttpBidiStreamServiceChatResponse>
 for HttpBidiStreamServiceChatResponseOutBody {
     fn from(value: HttpBidiStreamServiceChatResponse) -> Self {
@@ -65,7 +75,7 @@ for HttpBidiStreamServiceChatResponseOutBody {
         }
     }
 }
-#[allow(clippy::useless_conversion)]
+#[allow(clippy::useless_conversion, unreachable_code, unused_variables)]
 impl From<HttpBidiStreamServiceChatResponseInBody>
 for HttpBidiStreamServiceChatResponse {
     fn from(value: HttpBidiStreamServiceChatResponseInBody) -> Self {
@@ -78,6 +88,7 @@ for HttpBidiStreamServiceChatResponse {
 pub struct HttpBidiStreamServiceServer<T> {
     inner: ::std::sync::Arc<T>,
 }
+#[allow(non_snake_case)]
 impl<T> HttpBidiStreamServiceServer<T>
 where
     T: HttpBidiStreamService + Send + Sync + 'static,
@@ -91,12 +102,20 @@ where
         Self { inner }
     }
     pub fn router(self) -> xidl_rust_axum::axum::Router {
-        let svc = self.inner;
+        let _svc = self.inner;
         xidl_rust_axum::axum::Router::new()
             .route("/chat", xidl_rust_axum::axum::routing::get(Self::chat))
-            .with_state(svc)
+            .with_state(_svc)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn chat(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -104,6 +123,7 @@ where
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
         ws: ::xidl_rust_axum::axum::extract::ws::WebSocketUpgrade,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/x-ndjson") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -137,6 +157,7 @@ where
 pub struct HttpBidiStreamServiceClient {
     client: ::xidl_rust_axum::Client,
 }
+#[allow(non_snake_case)]
 impl HttpBidiStreamServiceClient {
     /// service: dev server
     pub fn new_dev_server() -> Self {
@@ -181,8 +202,9 @@ impl HttpBidiStreamServiceClient {
         }
     }
 }
+#[allow(non_snake_case)]
 impl HttpBidiStreamServiceClient {
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn chat(
         &self,
         room: String,
@@ -210,6 +232,7 @@ impl HttpBidiStreamServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
+        let _ = auth_target;
         let mut ws_url = self.client.ws_url(&path)?;
         return xidl_rust_axum::stream::open_bidi_client::<
             HttpBidiStreamServiceChatRequest,

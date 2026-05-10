@@ -5,6 +5,14 @@ expression: output
 ===============
 simple.rs
 ===============
+#[allow(
+    non_snake_case,
+    unused_attributes,
+    unused_variables,
+    unused_mut,
+    unreachable_code,
+    clippy::let_unit_value
+)]
 #[async_trait::async_trait]
 pub trait HttpService {
     async fn get_health(&self) -> ::xidl_rust_axum::Result<HealthResponse>;
@@ -22,28 +30,32 @@ pub trait HttpService {
     ) -> ::xidl_rust_axum::Result<CreateSimpleResponse>;
     async fn stop_simple(&self, id: u32) -> ::xidl_rust_axum::Result<()>;
 }
-mod __xidl_in_HttpService {
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_in_HttpService {
     use super::*;
     #[derive(::serde::Serialize, ::serde::Deserialize)]
-    pub(super) struct CreateSimpleResponse {
-        id: u32,
+    pub struct CreateSimpleResponse {
+        pub id: u32,
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<super::CreateSimpleResponse> for CreateSimpleResponse {
         fn from(value: super::CreateSimpleResponse) -> Self {
             Self { id: value.id }
         }
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<CreateSimpleResponse> for super::CreateSimpleResponse {
         fn from(value: CreateSimpleResponse) -> Self {
             Self { id: value.id }
         }
     }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
-    pub(super) struct HealthResponse {
-        healthy: bool,
-        rtt_ms: u64,
-        message: String,
+    pub struct HealthResponse {
+        pub healthy: bool,
+        pub rtt_ms: u64,
+        pub message: String,
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<super::HealthResponse> for HealthResponse {
         fn from(value: super::HealthResponse) -> Self {
             Self {
@@ -53,6 +65,7 @@ mod __xidl_in_HttpService {
             }
         }
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<HealthResponse> for super::HealthResponse {
         fn from(value: HealthResponse) -> Self {
             Self {
@@ -63,10 +76,11 @@ mod __xidl_in_HttpService {
         }
     }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
-    pub(super) struct MemoryResponse {
-        allocated: u64,
-        active: u64,
+    pub struct MemoryResponse {
+        pub allocated: u64,
+        pub active: u64,
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<super::MemoryResponse> for MemoryResponse {
         fn from(value: super::MemoryResponse) -> Self {
             Self {
@@ -75,6 +89,7 @@ mod __xidl_in_HttpService {
             }
         }
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<MemoryResponse> for super::MemoryResponse {
         fn from(value: MemoryResponse) -> Self {
             Self {
@@ -84,25 +99,28 @@ mod __xidl_in_HttpService {
         }
     }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
-    pub(super) struct UdpStatsResponse {
-        tx: u64,
-        rx: u64,
+    pub struct UdpStatsResponse {
+        pub tx: u64,
+        pub rx: u64,
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<super::UdpStatsResponse> for UdpStatsResponse {
         fn from(value: super::UdpStatsResponse) -> Self {
             Self { tx: value.tx, rx: value.rx }
         }
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<UdpStatsResponse> for super::UdpStatsResponse {
         fn from(value: UdpStatsResponse) -> Self {
             Self { tx: value.tx, rx: value.rx }
         }
     }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
-    pub(super) struct VersionResponse {
-        short: String,
-        long: String,
+    pub struct VersionResponse {
+        pub short: String,
+        pub long: String,
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<super::VersionResponse> for VersionResponse {
         fn from(value: super::VersionResponse) -> Self {
             Self {
@@ -111,6 +129,7 @@ mod __xidl_in_HttpService {
             }
         }
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<VersionResponse> for super::VersionResponse {
         fn from(value: VersionResponse) -> Self {
             Self {
@@ -120,28 +139,32 @@ mod __xidl_in_HttpService {
         }
     }
 }
-mod __xidl_out_HttpService {
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_out_HttpService {
     use super::*;
     #[derive(::serde::Serialize, ::serde::Deserialize)]
-    pub(super) struct CreateSimpleResponse {
-        id: u32,
+    pub struct CreateSimpleResponse {
+        pub id: u32,
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<super::CreateSimpleResponse> for CreateSimpleResponse {
         fn from(value: super::CreateSimpleResponse) -> Self {
             Self { id: value.id }
         }
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<CreateSimpleResponse> for super::CreateSimpleResponse {
         fn from(value: CreateSimpleResponse) -> Self {
             Self { id: value.id }
         }
     }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
-    pub(super) struct HealthResponse {
-        healthy: bool,
-        rtt_ms: u64,
-        message: String,
+    pub struct HealthResponse {
+        pub healthy: bool,
+        pub rtt_ms: u64,
+        pub message: String,
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<super::HealthResponse> for HealthResponse {
         fn from(value: super::HealthResponse) -> Self {
             Self {
@@ -151,6 +174,7 @@ mod __xidl_out_HttpService {
             }
         }
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<HealthResponse> for super::HealthResponse {
         fn from(value: HealthResponse) -> Self {
             Self {
@@ -161,10 +185,11 @@ mod __xidl_out_HttpService {
         }
     }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
-    pub(super) struct MemoryResponse {
-        allocated: u64,
-        active: u64,
+    pub struct MemoryResponse {
+        pub allocated: u64,
+        pub active: u64,
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<super::MemoryResponse> for MemoryResponse {
         fn from(value: super::MemoryResponse) -> Self {
             Self {
@@ -173,6 +198,7 @@ mod __xidl_out_HttpService {
             }
         }
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<MemoryResponse> for super::MemoryResponse {
         fn from(value: MemoryResponse) -> Self {
             Self {
@@ -182,25 +208,28 @@ mod __xidl_out_HttpService {
         }
     }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
-    pub(super) struct UdpStatsResponse {
-        tx: u64,
-        rx: u64,
+    pub struct UdpStatsResponse {
+        pub tx: u64,
+        pub rx: u64,
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<super::UdpStatsResponse> for UdpStatsResponse {
         fn from(value: super::UdpStatsResponse) -> Self {
             Self { tx: value.tx, rx: value.rx }
         }
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<UdpStatsResponse> for super::UdpStatsResponse {
         fn from(value: UdpStatsResponse) -> Self {
             Self { tx: value.tx, rx: value.rx }
         }
     }
     #[derive(::serde::Serialize, ::serde::Deserialize)]
-    pub(super) struct VersionResponse {
-        short: String,
-        long: String,
+    pub struct VersionResponse {
+        pub short: String,
+        pub long: String,
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<super::VersionResponse> for VersionResponse {
         fn from(value: super::VersionResponse) -> Self {
             Self {
@@ -209,6 +238,7 @@ mod __xidl_out_HttpService {
             }
         }
     }
+    #[allow(unused_variables, unreachable_code)]
     impl From<VersionResponse> for super::VersionResponse {
         fn from(value: VersionResponse) -> Self {
             Self {
@@ -219,23 +249,23 @@ mod __xidl_out_HttpService {
     }
 }
 #[derive(::serde::Serialize)]
-struct HttpServiceCreateSimpleRequestOutBody {
+pub struct HttpServiceCreateSimpleRequestOutBody {
     #[serde(default)]
-    local_addr: String,
+    pub local_addr: String,
     #[serde(default)]
-    remote_port: u16,
+    pub remote_port: u16,
 }
 #[derive(::serde::Deserialize)]
-struct HttpServiceCreateSimpleRequestInBody {
-    local_addr: String,
-    remote_port: u16,
+pub struct HttpServiceCreateSimpleRequestInBody {
+    pub local_addr: String,
+    pub remote_port: u16,
 }
 #[derive(::serde::Deserialize)]
 struct HttpServiceCreateSimpleRequest {
     local_addr: String,
     remote_port: u16,
 }
-#[allow(clippy::manual_async_fn)]
+#[allow(clippy::manual_async_fn, unused_mut)]
 impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
 for HttpServiceCreateSimpleRequest
 where
@@ -248,7 +278,10 @@ where
     ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
         async move {
             let (mut parts, body) = req.into_parts();
+            let _ = &body;
+            let _ = state;
             let headers = &parts.headers;
+            let _ = headers;
             if !::xidl_rust_axum::http::content_type_matches(
                 headers,
                 "application/json",
@@ -268,14 +301,14 @@ where
     }
 }
 #[derive(::serde::Deserialize)]
-struct HttpServiceStopSimplePath {
-    id: u32,
+pub struct HttpServiceStopSimplePath {
+    pub id: u32,
 }
 #[derive(::serde::Deserialize)]
 struct HttpServiceStopSimpleRequest {
     id: u32,
 }
-#[allow(clippy::manual_async_fn)]
+#[allow(clippy::manual_async_fn, unused_mut)]
 impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S> for HttpServiceStopSimpleRequest
 where
     S: Send + Sync,
@@ -287,6 +320,8 @@ where
     ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
         async move {
             let (mut parts, body) = req.into_parts();
+            let _ = &body;
+            let _ = state;
             let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
                 HttpServiceStopSimplePath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
@@ -296,6 +331,7 @@ where
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
             let HttpServiceStopSimplePath { id } = path;
             let headers = &parts.headers;
+            let _ = headers;
             Ok(Self { id })
         }
     }
@@ -303,6 +339,7 @@ where
 pub struct HttpServiceServer<T> {
     inner: ::std::sync::Arc<T>,
 }
+#[allow(non_snake_case)]
 impl<T> HttpServiceServer<T>
 where
     T: HttpService + Send + Sync + 'static,
@@ -316,7 +353,7 @@ where
         Self { inner }
     }
     pub fn router(self) -> xidl_rust_axum::axum::Router {
-        let svc = self.inner;
+        let _svc = self.inner;
         xidl_rust_axum::axum::Router::new()
             .route(
                 "/api/v1/health",
@@ -350,15 +387,24 @@ where
                 "/api/v1/simple/{id}",
                 xidl_rust_axum::axum::routing::delete(Self::stop_simple),
             )
-            .with_state(svc)
+            .with_state(_svc)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn get_health(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -367,6 +413,7 @@ where
                 let mut resp = {
                     let body_value: __xidl_out_HttpService::HealthResponse = resp_value
                         .into();
+                    let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -392,13 +439,22 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn get_version(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -407,6 +463,7 @@ where
                 let mut resp = {
                     let body_value: __xidl_out_HttpService::VersionResponse = resp_value
                         .into();
+                    let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -432,13 +489,22 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn get_memory_info(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -447,6 +513,7 @@ where
                 let mut resp = {
                     let body_value: __xidl_out_HttpService::MemoryResponse = resp_value
                         .into();
+                    let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -472,20 +539,29 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn restart(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
         let mut resp = match svc.restart().await {
             Ok(resp_value) => {
                 let mut resp = {
-                    resp_value;
+                    let _ = resp_value;
                     ::xidl_rust_axum::axum::response::IntoResponse::into_response(
                         ::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT,
                     )
@@ -498,13 +574,22 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn get_state(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -512,6 +597,7 @@ where
             Ok(resp_value) => {
                 let mut resp = {
                     let body_value: crate::api::state::StateResponse = resp_value;
+                    let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -537,13 +623,22 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn get_udp_stats(
         ::xidl_rust_axum::axum::extract::State(
             svc,
         ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -552,6 +647,7 @@ where
                 let mut resp = {
                     let body_value: __xidl_out_HttpService::UdpStatsResponse = resp_value
                         .into();
+                    let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -577,7 +673,15 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn create_simple(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -585,6 +689,7 @@ where
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
         request: HttpServiceCreateSimpleRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -596,6 +701,7 @@ where
                 let mut resp = {
                     let body_value: __xidl_out_HttpService::CreateSimpleResponse = resp_value
                         .into();
+                    let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -621,7 +727,15 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn stop_simple(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -629,6 +743,7 @@ where
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
         request: HttpServiceStopSimpleRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -637,7 +752,7 @@ where
         let mut resp = match svc.stop_simple(id).await {
             Ok(resp_value) => {
                 let mut resp = {
-                    resp_value;
+                    let _ = resp_value;
                     ::xidl_rust_axum::axum::response::IntoResponse::into_response(
                         ::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT,
                     )
@@ -662,6 +777,7 @@ where
 pub struct HttpServiceClient {
     client: ::xidl_rust_axum::Client,
 }
+#[allow(non_snake_case)]
 impl HttpServiceClient {
     pub fn new(base_url: impl Into<String>) -> Self {
         Self {
@@ -702,8 +818,9 @@ impl HttpServiceClient {
         }
     }
 }
+#[allow(non_snake_case)]
 impl HttpServiceClient {
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn get_health(&self) -> Result<HealthResponse, xidl_rust_axum::Error> {
         let path = "/api/v1/health".to_string();
         let mut req = self
@@ -721,6 +838,7 @@ impl HttpServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
+        let _ = auth_target;
         let resp = self
             .client
             .http()
@@ -743,7 +861,7 @@ impl HttpServiceClient {
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn get_version(&self) -> Result<VersionResponse, xidl_rust_axum::Error> {
         let path = "/api/v1/app/version".to_string();
         let mut req = self
@@ -761,6 +879,7 @@ impl HttpServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
+        let _ = auth_target;
         let resp = self
             .client
             .http()
@@ -783,7 +902,7 @@ impl HttpServiceClient {
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn get_memory_info(
         &self,
     ) -> Result<MemoryResponse, xidl_rust_axum::Error> {
@@ -803,6 +922,7 @@ impl HttpServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
+        let _ = auth_target;
         let resp = self
             .client
             .http()
@@ -825,7 +945,7 @@ impl HttpServiceClient {
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn restart(&self) -> Result<(), xidl_rust_axum::Error> {
         let path = "/api/v1/app/restart".to_string();
         let mut req = self
@@ -843,6 +963,7 @@ impl HttpServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
+        let _ = auth_target;
         let resp = self
             .client
             .http()
@@ -857,7 +978,7 @@ impl HttpServiceClient {
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn get_state(
         &self,
     ) -> Result<crate::api::state::StateResponse, xidl_rust_axum::Error> {
@@ -877,6 +998,7 @@ impl HttpServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
+        let _ = auth_target;
         let resp = self
             .client
             .http()
@@ -899,7 +1021,7 @@ impl HttpServiceClient {
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn get_udp_stats(
         &self,
     ) -> Result<UdpStatsResponse, xidl_rust_axum::Error> {
@@ -919,6 +1041,7 @@ impl HttpServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
+        let _ = auth_target;
         let resp = self
             .client
             .http()
@@ -941,7 +1064,7 @@ impl HttpServiceClient {
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn create_simple(
         &self,
         local_addr: String,
@@ -963,9 +1086,10 @@ impl HttpServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
+        let _ = auth_target;
         let body = HttpServiceCreateSimpleRequestOutBody {
-            local_addr: local_addr,
-            remote_port: remote_port,
+            local_addr,
+            remote_port,
         };
         let body = xidl_rust_axum::SerializeFactory::new("application/json")
             .to_vec(&body)?;
@@ -1000,7 +1124,7 @@ impl HttpServiceClient {
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn stop_simple(&self, id: u32) -> Result<(), xidl_rust_axum::Error> {
         let path = "/api/v1/simple/{id}".to_string();
         let path = path.replace("{id}", &id.to_string());
@@ -1019,6 +1143,7 @@ impl HttpServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
+        let _ = auth_target;
         let resp = self
             .client
             .http()

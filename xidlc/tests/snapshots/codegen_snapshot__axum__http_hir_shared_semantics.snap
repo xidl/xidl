@@ -5,6 +5,14 @@ expression: output
 ===============
 http_hir_shared_semantics.rs
 ===============
+#[allow(
+    non_snake_case,
+    unused_attributes,
+    unused_variables,
+    unused_mut,
+    unreachable_code,
+    clippy::let_unit_value
+)]
 #[async_trait::async_trait]
 pub trait ReportApi {
     async fn get_report(
@@ -19,15 +27,17 @@ pub trait ReportApi {
         req: ::xidl_rust_axum::Request<ReportApiWatchReportRequest>,
     ) -> ::xidl_rust_axum::Result<xidl_rust_axum::stream::SseStream<String>>;
 }
-mod __xidl_in_ReportApi {
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_in_ReportApi {
     use super::*;
 }
-mod __xidl_out_ReportApi {
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_out_ReportApi {
     use super::*;
 }
 #[derive(::serde::Deserialize)]
-struct ReportApiGetReportPath {
-    id: String,
+pub struct ReportApiGetReportPath {
+    pub id: String,
 }
 #[derive(::serde::Serialize, ::core::default::Default)]
 struct ReportApiGetReportRequestOutQuery {
@@ -45,7 +55,7 @@ struct ReportApiGetReportRequest {
     lang: Option<String>,
     trace_id: String,
 }
-#[allow(clippy::manual_async_fn)]
+#[allow(clippy::manual_async_fn, unused_mut)]
 impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S> for ReportApiGetReportRequest
 where
     S: Send + Sync,
@@ -57,6 +67,8 @@ where
     ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
         async move {
             let (mut parts, body) = req.into_parts();
+            let _ = &body;
+            let _ = state;
             let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
                 ReportApiGetReportPath,
             > as ::xidl_rust_axum::axum::extract::FromRequestParts<
@@ -74,6 +86,7 @@ where
                 .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
             let ReportApiGetReportRequestInQuery { lang } = query;
             let headers = &parts.headers;
+            let _ = headers;
             let trace_id: String = match headers.get("X-Trace-Id") {
                 Some(header_value) => {
                     let header_str = header_value
@@ -91,8 +104,8 @@ where
     }
 }
 #[derive(::serde::Deserialize)]
-struct ReportApiWatchReportPath {
-    id: String,
+pub struct ReportApiWatchReportPath {
+    pub id: String,
 }
 #[derive(::serde::Serialize, ::serde::Deserialize)]
 pub struct ReportApiWatchReportRequest {
@@ -102,6 +115,7 @@ pub struct ReportApiWatchReportRequest {
 pub struct ReportApiServer<T> {
     inner: ::std::sync::Arc<T>,
 }
+#[allow(non_snake_case)]
 impl<T> ReportApiServer<T>
 where
     T: ReportApi + Send + Sync + 'static,
@@ -115,16 +129,24 @@ where
         Self { inner }
     }
     pub fn router(self) -> xidl_rust_axum::axum::Router {
-        let svc = self.inner;
+        let _svc = self.inner;
         xidl_rust_axum::axum::Router::new()
             .route("/reports/{id}", xidl_rust_axum::axum::routing::get(Self::get_report))
             .route(
                 "/reports/{id}/events",
                 xidl_rust_axum::axum::routing::get(Self::watch_report),
             )
-            .with_state(svc)
+            .with_state(_svc)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn get_report(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -137,6 +159,7 @@ where
         >,
         request: ReportApiGetReportRequest,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -154,6 +177,7 @@ where
             Ok(resp_value) => {
                 let mut resp = {
                     let body_value: String = resp_value;
+                    let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -179,7 +203,15 @@ where
         };
         Ok(resp)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn watch_report(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -194,6 +226,7 @@ where
             path,
         ): ::xidl_rust_axum::axum::extract::Path<ReportApiWatchReportPath>,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "text/event-stream") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -234,6 +267,7 @@ where
 pub struct ReportApiClient {
     client: ::xidl_rust_axum::Client,
 }
+#[allow(non_snake_case)]
 impl ReportApiClient {
     pub fn new(base_url: impl Into<String>) -> Self {
         Self {
@@ -274,8 +308,9 @@ impl ReportApiClient {
         }
     }
 }
+#[allow(non_snake_case)]
 impl ReportApiClient {
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn get_report(
         &self,
         id: String,
@@ -317,6 +352,7 @@ impl ReportApiClient {
             req.url_mut().set_query(Some(&query));
         }
         let auth_target = &self.client;
+        let _ = auth_target;
         auth_target.apply_auth(&mut req, xidl_rust_axum::ClientAuthRequirement::Bearer)?;
         let resp = self
             .client
@@ -340,7 +376,7 @@ impl ReportApiClient {
             Err(xidl_rust_axum::Error::from_http_response(status, body))
         }
     }
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn watch_report(
         &self,
         id: String,
@@ -362,6 +398,7 @@ impl ReportApiClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
+        let _ = auth_target;
         auth_target.apply_auth(&mut req, xidl_rust_axum::ClientAuthRequirement::Bearer)?;
         xidl_rust_axum::stream::open_sse::<String>(self.client.http(), req).await
     }

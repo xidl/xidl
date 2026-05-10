@@ -5,6 +5,14 @@ expression: output
 ===============
 http_client_stream_ndjson.rs
 ===============
+#[allow(
+    non_snake_case,
+    unused_attributes,
+    unused_variables,
+    unused_mut,
+    unreachable_code,
+    clippy::let_unit_value
+)]
 #[async_trait::async_trait]
 pub trait HttpClientStreamService {
     async fn upload_chunk(
@@ -16,23 +24,25 @@ pub trait HttpClientStreamService {
         >,
     ) -> ::xidl_rust_axum::Result<String>;
 }
-mod __xidl_in_HttpClientStreamService {
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_in_HttpClientStreamService {
     use super::*;
 }
-mod __xidl_out_HttpClientStreamService {
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_out_HttpClientStreamService {
     use super::*;
 }
 #[derive(::serde::Serialize)]
-struct HttpClientStreamServiceUploadChunkRequestOutBody {
+pub struct HttpClientStreamServiceUploadChunkRequestOutBody {
     #[serde(default)]
-    file_id: String,
+    pub file_id: String,
     #[serde(default)]
-    chunk: Vec<u8>,
+    pub chunk: Vec<u8>,
 }
 #[derive(::serde::Deserialize)]
-struct HttpClientStreamServiceUploadChunkRequestInBody {
-    file_id: String,
-    chunk: Vec<u8>,
+pub struct HttpClientStreamServiceUploadChunkRequestInBody {
+    pub file_id: String,
+    pub chunk: Vec<u8>,
 }
 #[derive(::serde::Serialize, ::serde::Deserialize)]
 pub struct HttpClientStreamServiceUploadChunkRequest {
@@ -42,6 +52,7 @@ pub struct HttpClientStreamServiceUploadChunkRequest {
 pub struct HttpClientStreamServiceServer<T> {
     inner: ::std::sync::Arc<T>,
 }
+#[allow(non_snake_case)]
 impl<T> HttpClientStreamServiceServer<T>
 where
     T: HttpClientStreamService + Send + Sync + 'static,
@@ -55,15 +66,23 @@ where
         Self { inner }
     }
     pub fn router(self) -> xidl_rust_axum::axum::Router {
-        let svc = self.inner;
+        let _svc = self.inner;
         xidl_rust_axum::axum::Router::new()
             .route(
                 "/upload/chunks",
                 xidl_rust_axum::axum::routing::post(Self::upload_chunk),
             )
-            .with_state(svc)
+            .with_state(_svc)
     }
-    #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion)]
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
     async fn upload_chunk(
         ::xidl_rust_axum::axum::extract::State(
             svc,
@@ -71,6 +90,7 @@ where
         headers: ::xidl_rust_axum::axum::http::HeaderMap,
         body: ::xidl_rust_axum::axum::body::Body,
     ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
         if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
             return Err(xidl_rust_axum::Error::not_acceptable());
         }
@@ -85,6 +105,7 @@ where
             Ok(resp_value) => {
                 let mut resp = {
                     let body_value: String = resp_value;
+                    let _ = &body_value;
                     let body = xidl_rust_axum::SerializeFactory::new("application/json")
                         .to_vec(&body_value)?;
                     ::xidl_rust_axum::axum::response::Response::builder()
@@ -122,6 +143,7 @@ where
 pub struct HttpClientStreamServiceClient {
     client: ::xidl_rust_axum::Client,
 }
+#[allow(non_snake_case)]
 impl HttpClientStreamServiceClient {
     pub fn new(base_url: impl Into<String>) -> Self {
         Self {
@@ -162,8 +184,9 @@ impl HttpClientStreamServiceClient {
         }
     }
 }
+#[allow(non_snake_case)]
 impl HttpClientStreamServiceClient {
-    #[allow(clippy::useless_conversion)]
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
     pub async fn upload_chunk(
         &self,
         file_id: String,
@@ -191,6 +214,7 @@ impl HttpClientStreamServiceClient {
                     .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
             );
         let auth_target = &self.client;
+        let _ = auth_target;
         req.headers_mut()
             .insert(
                 xidl_rust_axum::reqwest::header::CONTENT_TYPE,

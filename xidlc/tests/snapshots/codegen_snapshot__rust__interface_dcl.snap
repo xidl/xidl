@@ -2430,116 +2430,93 @@ union A_CallData {
 }
 impl Drop for A_Call {
     fn drop(&mut self) {
-        match self.tag {
-            _ => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
-                }
+        if matches!(self.tag, A_func1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.func1);
             }
-            A_func1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.func1);
-                }
+        } else if matches!(self.tag, A_func1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.func1);
             }
-            A_func1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.func1);
-                }
+        } else if matches!(self.tag, A_func1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.func1);
             }
-            A_func1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.func1);
-                }
+        } else if matches!(self.tag, A_func1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.func1);
             }
-            A_func1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.func1);
-                }
+        } else if matches!(self.tag, A_func1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.func1);
             }
-            A_func1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.func1);
-                }
+        } else if matches!(self.tag, A_func1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.func1);
             }
-            A_func1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.func1);
-                }
+        } else if matches!(self.tag, A_get_attribute_attr1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
             }
-            A_get_attribute_attr1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
-                }
+        } else if matches!(self.tag, A_get_attribute_attr1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
             }
-            A_get_attribute_attr1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
-                }
+        } else if matches!(self.tag, A_get_attribute_attr1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
             }
-            A_get_attribute_attr1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
-                }
+        } else if matches!(self.tag, A_get_attribute_attr1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
             }
-            A_get_attribute_attr1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
-                }
+        } else if matches!(self.tag, A_set_attribute_attr1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_attr1);
             }
-            A_set_attribute_attr1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_attr1);
-                }
+        } else if matches!(self.tag, A_get_attribute_attr2_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr2);
             }
-            A_get_attribute_attr2_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr2);
-                }
+        } else if matches!(self.tag, A_set_attribute_attr2_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_attr2);
             }
-            A_set_attribute_attr2_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_attr2);
-                }
+        } else if matches!(self.tag, A_get_attribute_attr3_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr3);
             }
-            A_get_attribute_attr3_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr3);
-                }
+        } else if matches!(self.tag, A_set_attribute_attr3_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_attr3);
             }
-            A_set_attribute_attr3_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_attr3);
-                }
+        } else if matches!(self.tag, A_get_attribute_attr1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
             }
-            A_get_attribute_attr1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
-                }
+        } else if matches!(self.tag, A_set_attribute_attr1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_attr1);
             }
-            A_set_attribute_attr1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_attr1);
-                }
+        } else if matches!(self.tag, A_get_attribute_attr1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
             }
-            A_get_attribute_attr1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
-                }
+        } else if matches!(self.tag, A_set_attribute_attr1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_attr1);
             }
-            A_set_attribute_attr1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_attr1);
-                }
+        } else if matches!(self.tag, A_get_attribute_attr1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
             }
-            A_get_attribute_attr1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
-                }
+        } else if matches!(self.tag, A_set_attribute_attr1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_attr1);
             }
-            A_set_attribute_attr1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_attr1);
-                }
+        } else {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
         }
     }
@@ -2547,14 +2524,14 @@ impl Drop for A_Call {
 impl A_Call {
     pub fn new_unknownOp(value: dds::rpc::UnknownOperation) -> Self {
         Self {
-            tag: i32::default(),
+            tag: A_func1_Hash,
             data: A_CallData {
                 unknownOp: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_unknownOp(&self) -> bool {
-        matches!(self.tag, _)
+        matches!(self.tag, A_func1_Hash)
     }
     pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
@@ -2703,14 +2680,14 @@ impl A_Call {
     }
     pub fn new_get_attribute_attr3(value: A_get_attribute_attr3_In) -> Self {
         Self {
-            tag: A_func1_Hash,
+            tag: A_get_attribute_attr1_Hash,
             data: A_CallData {
                 get_attribute_attr3: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_get_attribute_attr3(&self) -> bool {
-        matches!(self.tag, A_func1_Hash)
+        matches!(self.tag, A_get_attribute_attr1_Hash)
     }
     pub fn as_get_attribute_attr3(&self) -> &A_get_attribute_attr3_In {
         debug_assert!(self.is_get_attribute_attr3());
@@ -2801,116 +2778,93 @@ union A_ReturnData {
 }
 impl Drop for A_Return {
     fn drop(&mut self) {
-        match self.tag {
-            _ => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
-                }
+        if matches!(self.tag, A_func1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.func1);
             }
-            A_func1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.func1);
-                }
+        } else if matches!(self.tag, A_func1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.func1);
             }
-            A_func1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.func1);
-                }
+        } else if matches!(self.tag, A_func1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.func1);
             }
-            A_func1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.func1);
-                }
+        } else if matches!(self.tag, A_func1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.func1);
             }
-            A_func1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.func1);
-                }
+        } else if matches!(self.tag, A_func1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.func1);
             }
-            A_func1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.func1);
-                }
+        } else if matches!(self.tag, A_func1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.func1);
             }
-            A_func1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.func1);
-                }
+        } else if matches!(self.tag, A_get_attribute_attr1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
             }
-            A_get_attribute_attr1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
-                }
+        } else if matches!(self.tag, A_get_attribute_attr1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
             }
-            A_get_attribute_attr1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
-                }
+        } else if matches!(self.tag, A_get_attribute_attr1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
             }
-            A_get_attribute_attr1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
-                }
+        } else if matches!(self.tag, A_get_attribute_attr1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
             }
-            A_get_attribute_attr1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
-                }
+        } else if matches!(self.tag, A_set_attribute_attr1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_attr1);
             }
-            A_set_attribute_attr1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_attr1);
-                }
+        } else if matches!(self.tag, A_get_attribute_attr2_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr2);
             }
-            A_get_attribute_attr2_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr2);
-                }
+        } else if matches!(self.tag, A_set_attribute_attr2_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_attr2);
             }
-            A_set_attribute_attr2_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_attr2);
-                }
+        } else if matches!(self.tag, A_get_attribute_attr3_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr3);
             }
-            A_get_attribute_attr3_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr3);
-                }
+        } else if matches!(self.tag, A_set_attribute_attr3_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_attr3);
             }
-            A_set_attribute_attr3_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_attr3);
-                }
+        } else if matches!(self.tag, A_get_attribute_attr1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
             }
-            A_get_attribute_attr1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
-                }
+        } else if matches!(self.tag, A_set_attribute_attr1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_attr1);
             }
-            A_set_attribute_attr1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_attr1);
-                }
+        } else if matches!(self.tag, A_get_attribute_attr1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
             }
-            A_get_attribute_attr1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
-                }
+        } else if matches!(self.tag, A_set_attribute_attr1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_attr1);
             }
-            A_set_attribute_attr1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_attr1);
-                }
+        } else if matches!(self.tag, A_get_attribute_attr1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
             }
-            A_get_attribute_attr1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.get_attribute_attr1);
-                }
+        } else if matches!(self.tag, A_set_attribute_attr1_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_attr1);
             }
-            A_set_attribute_attr1_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.set_attribute_attr1);
-                }
+        } else {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
         }
     }
@@ -2918,14 +2872,14 @@ impl Drop for A_Return {
 impl A_Return {
     pub fn new_unknownOp(value: dds::rpc::UnknownOperation) -> Self {
         Self {
-            tag: i32::default(),
+            tag: A_func1_Hash,
             data: A_ReturnData {
                 unknownOp: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_unknownOp(&self) -> bool {
-        matches!(self.tag, _)
+        matches!(self.tag, A_func1_Hash)
     }
     pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
@@ -3074,14 +3028,14 @@ impl A_Return {
     }
     pub fn new_get_attribute_attr3(value: A_get_attribute_attr3_Result) -> Self {
         Self {
-            tag: A_func1_Hash,
+            tag: A_get_attribute_attr1_Hash,
             data: A_ReturnData {
                 get_attribute_attr3: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_get_attribute_attr3(&self) -> bool {
-        matches!(self.tag, A_func1_Hash)
+        matches!(self.tag, A_get_attribute_attr1_Hash)
     }
     pub fn as_get_attribute_attr3(&self) -> &A_get_attribute_attr3_Result {
         debug_assert!(self.is_get_attribute_attr3());
@@ -3284,16 +3238,13 @@ union A_CallData {
 }
 impl Drop for A_Call {
     fn drop(&mut self) {
-        match self.tag {
-            _ => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
-                }
+        if matches!(self.tag, A_opA_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.opA);
             }
-            A_opA_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.opA);
-                }
+        } else {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
         }
     }
@@ -3301,14 +3252,14 @@ impl Drop for A_Call {
 impl A_Call {
     pub fn new_unknownOp(value: dds::rpc::UnknownOperation) -> Self {
         Self {
-            tag: i32::default(),
+            tag: A_opA_Hash,
             data: A_CallData {
                 unknownOp: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_unknownOp(&self) -> bool {
-        matches!(self.tag, _)
+        matches!(self.tag, A_opA_Hash)
     }
     pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
@@ -3327,14 +3278,14 @@ impl A_Call {
     }
     pub fn new_opA(value: A_opA_In) -> Self {
         Self {
-            tag: A_opA_Hash,
+            tag: i32::default(),
             data: A_CallData {
                 opA: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_opA(&self) -> bool {
-        matches!(self.tag, A_opA_Hash)
+        matches!(self.tag, _)
     }
     pub fn as_opA(&self) -> &A_opA_In {
         debug_assert!(self.is_opA());
@@ -3393,16 +3344,13 @@ union A_ReturnData {
 }
 impl Drop for A_Return {
     fn drop(&mut self) {
-        match self.tag {
-            _ => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
-                }
+        if matches!(self.tag, A_opA_Hash) {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.opA);
             }
-            A_opA_Hash => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.opA);
-                }
+        } else {
+            unsafe {
+                core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
         }
     }
@@ -3410,14 +3358,14 @@ impl Drop for A_Return {
 impl A_Return {
     pub fn new_unknownOp(value: dds::rpc::UnknownOperation) -> Self {
         Self {
-            tag: i32::default(),
+            tag: A_opA_Hash,
             data: A_ReturnData {
                 unknownOp: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_unknownOp(&self) -> bool {
-        matches!(self.tag, _)
+        matches!(self.tag, A_opA_Hash)
     }
     pub fn as_unknownOp(&self) -> &dds::rpc::UnknownOperation {
         debug_assert!(self.is_unknownOp());
@@ -3436,14 +3384,14 @@ impl A_Return {
     }
     pub fn new_opA(value: A_opA_Result) -> Self {
         Self {
-            tag: A_opA_Hash,
+            tag: i32::default(),
             data: A_ReturnData {
                 opA: core::mem::ManuallyDrop::new(value),
             },
         }
     }
     pub fn is_opA(&self) -> bool {
-        matches!(self.tag, A_opA_Hash)
+        matches!(self.tag, _)
     }
     pub fn as_opA(&self) -> &A_opA_Result {
         debug_assert!(self.is_opA());
