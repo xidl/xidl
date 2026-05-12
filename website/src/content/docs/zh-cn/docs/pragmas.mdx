@@ -1,12 +1,11 @@
 ---
-title: "Pragma"
-description: "xidlc 识别的 #pragma xidlc 指令。"
+title: "编译器指令"
+description: "XIDL 编译器指令"
 ---
 
-# Pragma
+# 编译器指令
 
-XIDL 在标准 IDL `#pragma` 基础上扩展了 `#pragma xidlc ...` 指令，
-用于给编译器和生成器提供额外配置。
+XIDL 支持 `#pragma xidlc ...` 指令，用于给编译器和生成器提供额外配置。
 
 ## 基本语法
 
@@ -39,20 +38,3 @@ XIDL 在标准 IDL `#pragma` 基础上扩展了 `#pragma xidlc ...` 指令，
 效果：
 
 - 设置 OpenAPI `info.version`
-
-## 作用范围和覆盖规则
-
-- pragma 按文件顺序生效
-- 同类配置后写覆盖前写
-- 引号和不带引号的值都能接受
-- `package` 和 `version` 目前主要影响 `openapi`
-
-## 什么时候会用到这些 pragma
-
-- 你要生成 OpenAPI，并希望给它设置明确的标题和版本
-- 你希望把生成器行为的一部分留在 IDL 文件内，而不是交给外部脚本
-
-## 继续阅读
-
-- [目标生成器](./targets/)
-- [HTTP](./http/)

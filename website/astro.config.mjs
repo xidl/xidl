@@ -58,6 +58,13 @@ export default defineConfig({
                 'zh-CN': '编辑器',
               },
             },
+            {
+              label: 'Rust Integration',
+              link: '/guide/rust-integration/',
+              translations: {
+                'zh-CN': 'Rust 集成',
+              },
+            },
           ],
           label: 'Guide',
           translations: {
@@ -90,17 +97,10 @@ export default defineConfig({
           label: 'RFC',
         },
         {
-          autogenerate: { directory: 'development' },
-          label: 'Development',
-          translations: {
-            'zh-CN': '开发文档',
-          },
-        },
-        {
           autogenerate: { directory: 'ai' },
           label: 'AI',
           translations: {
-            'zh-CN': 'AI 技能',
+            'zh-CN': 'AI',
           },
         },
       ],

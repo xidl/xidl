@@ -11,8 +11,6 @@ description: "XIDL 内建目标、别名、典型输出和常见搭配。"
 
 | 目标 | 常见别名 | 产物类型 | 典型搭配 |
 | --- | --- | --- | --- |
-| `c` | `cc` | C 源文件和头文件 | 原生 C 项目 |
-| `cpp` | `c++`, `cxx` | C++ 源文件和头文件 | 原生 C++ 项目 |
 | `rust` | `rs` | Rust 类型和模块 | Rust 库或应用 |
 | `rust-jsonrpc` | `rust_jsonrpc`, `rs_jsonrpc`, `rs-jsonrpc` | Rust JSON-RPC 绑定 | `xidl-jsonrpc` |
 | `rust-axum` | `rust_axum`, `axum`, `rs_axum`, `rs-axum` | Rust HTTP / Stream 绑定 | `xidl-rust-axum` |
@@ -23,9 +21,6 @@ description: "XIDL 内建目标、别名、典型输出和常见搭配。"
 | `python-rest` | `py_rest`, `python_rest` | Python HTTP 绑定 | Python HTTP 服务 |
 | `openapi` | 无 | `openapi.json` | 文档和下游消费 |
 | `openrpc` | `open-rpc` | `openrpc.json` | JSON-RPC 文档 |
-| `hir` | 无 | HIR 中间产物 | 调试和高级工具 |
-| `rest-hir` | `rest_hir` | REST HIR 中间产物 | HTTP 调试与工具 |
-| `typed-ast` | `typed_ast` | 类型化 AST | 调试和高级工具 |
 
 ## `--client` 和 `--server`
 
@@ -53,10 +48,3 @@ description: "XIDL 内建目标、别名、典型输出和常见搭配。"
 - `openrpc`
 
 因为这两个目标天然产出单文件 Schema。
-
-## 推荐阅读
-
-- [使用 xidlc](./xidlc/)
-- [HTTP](./http/)
-- [JSON-RPC](./jsonrpc/)
-- [Rust 集成](./rust-integration/)

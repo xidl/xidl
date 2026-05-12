@@ -1,0 +1,33 @@
+---
+title: "Rust 集成"
+description: "在 Rust 项目中使用 XIDL 的常见接入方式。"
+---
+
+# Rust 集成
+
+对于 Rust 开发者而言，XIDL 提供了 [xidl-build](https://crates.io/crates/xidl-build)
+用来在 build.rs 中自动生成代码而无需安装 xidlc：
+
+1. `Cargo.toml`：
+
+    ```toml
+    [build-dependencies]
+    xidl-build = "<version>"
+    ```
+
+2. 添加 `build.rs`：
+
+    ```rust
+    fn main() {
+        xidl_build::Builder::new()
+            .with_lang("rust")
+            .compile(&["api/example.idl"])
+            .expect("generate xidl artifacts");
+    }
+    ```
+
+3. 在源码中包含生成的代码：
+
+    ```rust
+    include!(concat!(env!("OUT_DIR"), "/api/example.rs"));
+    ```
