@@ -3,15 +3,31 @@ title: "语言基础"
 description: "XIDL 的语言基础"
 ---
 
-## 枚举
+## 基础类型
 
-```idl
-enum Color {
-    Red,
-    Green,
-    Blue
-};
-```
+基础类型有下面几种：
+
+| 类型名称 | 描述 |
+| --- | --- |
+| uint8 | 8 位无符号整数 |
+| uint16 | 16 位无符号整数 |
+| uint32 | 32 位无符号整数 |
+| uint64 | 64 位无符号整数 |
+| int8 | 8 位有符号整数 |
+| int16 | 16 位有符号整数 |
+| int32 | 32 位有符号整数 |
+| int64 | 64 位有符号整数 |
+| float32 | 32 位单精度浮点数 |
+| float64 | 64 位双精度浮点数 |
+| boolean | 布尔值 |
+| string | 字符串 |
+
+## 容器类型
+
+| 类型名称 | 描述 |
+| --- | --- |
+| sequence\<T> | 可变长度数组，元素类型为 T |
+| map\<K, V> | 键值对集合，键类型为 K，值类型为 V |
 
 ## 结构体
 
@@ -22,30 +38,21 @@ struct Point {
 };
 ```
 
+## 枚举
+
+```idl
+enum Color {
+    Red,
+    Green,
+    Blue
+};
+```
+
 ## 接口
 
 ```idl
 interface ILogger {
     void log(string message);
-};
-```
-
-## 注解
-
-```idl
-struct Point {
-    uint32 x;
-    @optional
-    uint32 y;
-};
-```
-
-## 容器
-
-```idl
-struct Container {
-    sequence<string> names;
-    map<string, uint32> name_to_id;
 };
 ```
 
@@ -71,5 +78,15 @@ union ColorPoint switch(Color) {
     default:
         uint32 default_x;
         uint32 default_y;
+};
+```
+
+## 注解
+
+```idl
+struct Point {
+    uint32 x;
+    @optional
+    uint32 y;
 };
 ```

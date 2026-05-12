@@ -5,13 +5,13 @@ description: "XIDL RESTful 基础"
 
 RESTful 由定义了 xidl RESTful 风格的代码生成。RESTful 由三个部分组成：
 
-1. 基础 RESTful 映射。
-2. HTTP Stream 映射。
-3. HTTP 安全映射。
+1. 基础 RESTful。
+2. HTTP Stream。
+3. HTTP Security。
 
 ## RESTful 基础
 
-当使用 RESTful 生成器时，XIDL 的接口和方法可以用一套注解直接映射成 HTTP API。
+当使用 RESTful 生成器时，xidlc 可以将 `.idl` 文件中的接口编译为 REST API。
 
 ```idl
 interface HelloWorld {
@@ -19,30 +19,52 @@ interface HelloWorld {
 };
 ```
 
-可以通过注解配置方法类型，比如：
+```bash
+$ xidlc gen -o out rust-axum api.idl
+```
+
+RESTful 可以通过注解配置 HTTP 方法、路径、参数来源、媒体类型、安全要求等细节。
+
+## 方法类型和路径
+
+使用 `@get` 注解可以指定方法类型，使用 `@path("/hello")` 可以指定路径，
+同时也支持在 `@get(path = "/hello")` 里直接指定路径：
 
 ```idl
 interface HelloWorld {
     @get(path = "/hello")
     void say_hello(string name);
-
-    @get
-    @path("/hello-again")
-    void say_hello_again(string name);
 };
 ```
 
+支持下面的方法类型：`@get`、`@post`、`@put`、`@delete`、`@patch`。
+
 ## 路由模板
 
-xidl 允许直接指定路径参数，例如：
+路径参数中可以使用路由模板，其格式如下：
+
+- 普通路径变量：`/users/{id}`
+- catch-all 路径：`/files/{*path}`
+- query template：`/users/{id}{?lang,region}`
+
+出现在路由模板中的参数默认情况下需要和方法参数同名，例如：
 
 ```idl
 interface UserApi {
     @get(path = "/users/{id}")
-    string getUser(string user_id);
+    string getUser(string id);
+};
+```
 
-    @get(path = "/users{?lang, id}")
-    string listUsers(string locale, string id);
+如果需要重命名路由参数，可以在方法参数上使用 `@path("...")` 注解，例如：
+
+```idl
+interface UserApi {
+    @get(path = "/users/{x-id}{?x-lang}")
+    string getUser(
+        @path("x-id") string user_id
+        @query("x-lang") @optional string lang
+    );
 };
 ```
 
@@ -63,50 +85,9 @@ interface UserApi {
 };
 ```
 
-如果需要对参数进行重命名，可以直接在注解里指定，例如：
-
-```idl
-interface UserApi {
-    @get(path = "/users/{id}{?lang}")
-    string getUser(
-        @path("id") string user_id,
-        @query("lang") string locale
-    );
-};
-```
-
-## route template 和多路由
-
-XIDL 的 HTTP route 不只是一个纯字符串。常用形式有：
-
-- 普通路径变量：`/users/{id}`
-- catch-all 路径：`/files/{*path}`
-- query template：`/users/{id}{?lang,region}`
-- 一个方法绑定多个路由：多个 `@path(...)` 或多个带 `path = ...` 的 HTTP 动词注解
-
-例如：
-
-```idl
-interface UserApi {
-    @get(path = "/v2/users/{id}")
-    @path("/users/{id}")
-    @path("/u/{id}")
-    string getUser(
-        @path("id") string user_id,
-        @query("lang") @optional string locale
-    );
-};
-```
-
-实践上建议：
-
-- 对外兼容旧路径时，用多路由而不是直接改原路径
-- 路径变量名和 `@path("...")` 名称保持一致
-- catch-all 场景尽量放在 route 末尾
-
 ## media type 继承和覆盖
 
-`@Consumes` 和 `@Produces` 都支持接口级默认值，以及方法级覆盖。
+使用 `@Consumes` 和 `@Produces` 注解可以指定请求和响应的媒体类型。它们都支持接口级默认值和方法级覆盖。
 
 ```idl
 @Consumes("application/json")
@@ -132,9 +113,9 @@ interface ScopeApi {
 
 如果你的接口大多数操作都用同一种请求/响应媒体类型，接口级默认值通常更干净。
 
-## deprecated 的三种常用写法
+## deprecated
 
-HTTP 映射里常见的废弃声明有：
+RESTful 可以将方法标记为已废弃，有三种写法：
 
 - `@deprecated`
 - `@deprecated("2026-01-01")`
@@ -154,30 +135,16 @@ HTTP 映射里常见的废弃声明有：
 
 接口级 `@deprecated` 会被其中的方法和 attribute 继承；方法级再声明时，以更具体的方法级为准。
 
-## `@optional` 在 HTTP 里的重要性
+## 可选参数
 
-HTTP 里“参数缺席”和“参数值为空”不是一回事。
+如果参数可为空，需要将其标记为 `@optional`：
 
-所以：
-
-- 可选查询参数可以完全省略
-- 可选请求体字段可以不出现
-- 路径参数不能是可选的
-
-如果你关心“调用方没有传”这个事实本身，而不只是零值，那就应该显式写 `@optional`。
-
-## 一组实用建议
-
-- 优先把复杂输入建模成 struct，而不是堆很多松散参数
-- 对外兼容旧路径时，用多 route 过渡
-- route、参数来源、media type、安全要求，尽量分层表达，不要把所有语义都挤进一个方法签名里
-- 想依赖默认规则时，先确认这个默认是否真的和 HTTP 方法匹配
-- 需要下游文档或网关时，尽早一起生成 `openapi`
-
-## 继续阅读
-
-- [目标生成器](./targets/)
-- [注解](./annotations/)
-- [HTTP RFC](../rfc/http/)
-- [HTTP Stream RFC](../rfc/http-stream/)
-- [HTTP 安全 RFC](../rfc/http-security/)
+```idl
+interface UserApi {
+    @get(path = "/users/{id}")
+    string getUser(
+        @path string user_id,
+        @query @optional string locale
+    );
+};
+```

@@ -1,48 +1,39 @@
 ---
-title: "第一个 HTTP API"
-description: "用一份最小 IDL 跑通 XIDL 的 HTTP 主线。"
+title: "第一个 REST API"
+description: "用一份最小 IDL 跑通 XIDL 的 REST 主线。"
 ---
 
-在安装了 XIDL 后，我们现在看看如何创建一个 HTTP 服务端和客户端代码：
+安装了 xidlc 后，我们可以使用它来生成服务端和客户端代码，在这个文章中，我们会：
 
-## 目标
+1. 定义一个 REST 服务。
+2. 生成 Rust 服务端接口，并创建服务。
+3. 生成 Rust 客户端。并使用客户端访问服务。
 
-我们要完成四件事：
-
-1. 写一个带 HTTP 注解的接口
-2. 生成 `rust-axum` 代码
-3. 生成 `openapi.json`
-
-## 1. 定义一个 HTTP 接口
+## 1. 定义一个 REST 接口
 
 创建 `hello_world.idl`：
 
 ```idl
 interface HelloWorld {
     @post(path = "/hello")
-    void sayHello(
+    void say_hello(
         in string name
     );
 };
 ```
 
-## 2. 生成 Axum 代码
+## 2. 生成 Rust 服务端代码
 
 ```bash
-xidlc gen rust-axum hello_world.idl
+xidlc gen --output-dir server rust-axum hello_world.idl
 ```
 
-现在 xidlc 会在 `out` 目录下生成服务端代码。
-如果你还需要客户端代码，使用：
-
-```bash
-xidlc gen rust-axum --client hello_world.idl
-```
+现在 xidlc 会在 server 路径下生成服务端代码。
 
 ## 3. 创建服务端
 
 ```rust
-mod hello_world;
+include!("./server/hello_world.rs");
 
 struct HelloWorldImpl;
 
@@ -68,21 +59,31 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-## 4. 使用客户端
+## 4. 生成客户端接口
+
+```bash
+xidlc gen --output-dir client rust-axum --client hello_world.idl
+```
+
+会在当前路径下生成客户端。
+
+## 5. 使用客户端
 
 ```rust
+include!("./client/hello_world.rs");
+
 #[tokio::main]
 async fn main() {
     let client = HelloWorldClient::new("http://127.0.0.1:8080");
-    let _ = client.sayHello("world".to_string()).await;
+    let _ = client.say_hello("world".to_string()).await;
 }
 
 ```
 
-## 5. 生成 OpenAPI 文档
+## 6. 生成 OpenAPI 文档
+
+此外，还可以生成 OpenAPI 文档
 
 ```bash
 xidlc gen openapi hello_world.idl
 ```
-
-这样同一份 IDL 会额外生成一个 `openapi.json`，可以继续用于：
