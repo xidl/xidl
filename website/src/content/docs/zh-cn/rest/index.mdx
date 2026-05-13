@@ -113,6 +113,34 @@ interface ScopeApi {
 
 如果你的接口大多数操作都用同一种请求/响应媒体类型，接口级默认值通常更干净。
 
+## `@cors`
+
+可以使用 `@cors` 注解添加对 cors 的支持,目前支持两种形式:
+
+- `@cors`：开启 CORS
+- `@cors("https://console.example.com", "https://admin.example.com")`：只允许这些来源
+
+例如：
+
+```idl
+@cors
+interface UserApi {
+    @get(path = "/users/{id}")
+    string getUser(@path("id") string id);
+
+    @cors("https://console.example.com", "https://admin.example.com")
+    @post(path = "/users")
+    void createUser(string name);
+};
+```
+
+| 注解                          | 作用范围   | 含义                                                   |
+| ----------------------------- | ---------- | ------------------------------------------------------ |
+| @cors                         | 接口       | 对接口中的所有方法启用 cors                            |
+| @cors("domain1", "domain2")   | 接口       | 对接口中的所有方法允许来自 domain1 和 domain2 的请求   |
+| @cors                         | 方法       | 启用 cors                                              |
+| @cors("domain1", "domain2")   | 方法       | 允许来自 domain1 和 domain2 的请求                     |
+
 ## deprecated
 
 RESTful 可以将方法标记为已废弃，有三种写法：
