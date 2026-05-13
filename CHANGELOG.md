@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.59.0](https://github.com/xidl/xidl/compare/v0.58.0...v0.59.0) (2026-05-13)
+
+
+### Features
+
+* **rest-hir:** implement enriched HIR mapping and migrate all generators ([1919bf5](https://github.com/xidl/xidl/commit/1919bf50d18ae23bd6ba72ce51b7d04f75beb2cc))
+* **xidlc:** clean rust axum warning ([4222f65](https://github.com/xidl/xidl/commit/4222f65e68277b7c097f85a326daac72ce078484))
+* **xidlc:** clean warning ([0da710a](https://github.com/xidl/xidl/commit/0da710a81317d923c8eb7fd4d006fd283c5b48bd))
+
 ## [0.58.0](https://github.com/xidl/xidl/compare/v0.57.0...v0.58.0) (2026-05-09)
 
 
