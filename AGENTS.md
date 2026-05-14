@@ -54,6 +54,11 @@
 - Each module file under `*/src/` MUST represent one responsibility.
 - Parsing, semantic modeling, code generation, runtime transport, and CLI
   presentation MUST stay in separate modules.
+- `typed_ast` MUST keep a one-to-one mapping with the concrete `tree-sitter-idl`
+  AST shape.
+- `typed_ast` MUST NOT invent synthetic nodes, collapse distinct parser nodes,
+  or recover information by reparsing raw annotation text when that would depart
+  from the actual `tree-sitter-idl` AST.
 - Public `lib.rs` files MUST declare crate entry points and re-exports.
 - Public `lib.rs` files MUST NOT contain feature logic, parsing logic, rendering
   logic, transport logic, or protocol flow logic.
