@@ -113,6 +113,7 @@ pub enum Annotation {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum AnnotationParams {
     ConstExpr(ConstExpr),
+    Positional(Vec<ConstExpr>),
     Params(Vec<AnnotationParam>),
     Raw(String),
 }
@@ -170,20 +171,33 @@ impl From<crate::typed_ast::AnnotationAppl> for Annotation {
 impl From<crate::typed_ast::AnnotationParams> for AnnotationParams {
     fn from(value: crate::typed_ast::AnnotationParams) -> Self {
         match value {
-            crate::typed_ast::AnnotationParams::ConstExpr(expr) => Self::ConstExpr(expr.into()),
             crate::typed_ast::AnnotationParams::Params(params) => {
-                Self::Params(params.into_iter().map(Into::into).collect())
+                let mut positional = Vec::new();
+                let mut named = Vec::new();
+                for param in params {
+                    match param {
+                        crate::typed_ast::AnnotationApplParam::Positional(expr) => {
+                            positional.push(expr.into());
+                        }
+                        crate::typed_ast::AnnotationApplParam::Named { ident, value } => {
+                            named.push(AnnotationParam {
+                                ident: ident.0,
+                                value: Some(value.into()),
+                            });
+                        }
+                    }
+                }
+                if !positional.is_empty() && named.is_empty() {
+                    if positional.len() == 1 {
+                        Self::ConstExpr(positional.remove(0))
+                    } else {
+                        Self::Positional(positional)
+                    }
+                } else {
+                    Self::Params(named)
+                }
             }
             crate::typed_ast::AnnotationParams::Raw(value) => Self::Raw(value),
-        }
-    }
-}
-
-impl From<crate::typed_ast::AnnotationApplParam> for AnnotationParam {
-    fn from(value: crate::typed_ast::AnnotationApplParam) -> Self {
-        Self {
-            ident: value.ident.0,
-            value: value.value.map(Into::into),
         }
     }
 }

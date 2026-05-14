@@ -29,11 +29,10 @@ fn effective_cors_inherits_and_overrides() {
         &[builtin("cors", None)],
         &[builtin(
             "cors",
-            Some(AnnotationParams::ConstExpr(ConstExpr::BinaryExpr(
-                BinaryOperator::Or,
-                Box::new(string("https://console.example.com")),
-                Box::new(string("https://admin.example.com")),
-            ))),
+            Some(AnnotationParams::Positional(vec![
+                string("https://console.example.com"),
+                string("https://admin.example.com"),
+            ])),
         )],
     )
     .expect("cors")
@@ -59,16 +58,24 @@ fn collect_cors_rejects_duplicates_and_named_params() {
         )),
     )])
     .expect_err("named params");
-    assert!(err.contains("only accepts string literals joined by '|'"));
+    assert!(err.contains("only accepts comma-separated string literals"));
 
-    let err = collect_cors(&[builtin(
+    let profile = collect_cors(&[builtin(
         "cors",
-        Some(AnnotationParams::Raw(
-            r#""https://app.example.com", "https://admin.example.com""#.to_string(),
-        )),
+        Some(AnnotationParams::Positional(vec![
+            string("https://app.example.com"),
+            string("https://admin.example.com"),
+        ])),
     )])
-    .expect_err("raw list");
-    assert!(err.contains("only accepts string literals joined by '|'"));
+    .expect("raw list")
+    .expect("present");
+    assert_eq!(
+        profile,
+        HttpCorsProfile::Origins(vec![
+            "https://app.example.com".to_string(),
+            "https://admin.example.com".to_string(),
+        ])
+    );
 
     let err = collect_cors(&[builtin(
         "cors",
@@ -78,7 +85,7 @@ fn collect_cors_rejects_duplicates_and_named_params() {
         }])),
     )])
     .expect_err("params");
-    assert!(err.contains("only accepts string literals joined by '|'"));
+    assert!(err.contains("only accepts comma-separated string literals"));
 }
 
 #[test]
@@ -92,7 +99,7 @@ fn collect_cors_rejects_invalid_const_expr_forms() {
         ))),
     )])
     .expect_err("operator");
-    assert!(err.contains("only accepts string literals joined by '|'"));
+    assert!(err.contains("only accepts comma-separated string literals"));
 
     let err = collect_cors(&[builtin(
         "cors",
@@ -101,7 +108,7 @@ fn collect_cors_rejects_invalid_const_expr_forms() {
         ))),
     )])
     .expect_err("unquoted");
-    assert!(err.contains("only accepts string literals joined by '|'"));
+    assert!(err.contains("only accepts comma-separated string literals"));
 }
 
 #[test]

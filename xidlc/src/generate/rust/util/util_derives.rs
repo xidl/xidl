@@ -36,6 +36,12 @@ pub fn rust_derives_from_annotations(annotations: &[hir::Annotation]) -> Vec<Str
                     push_derive(&mut out, &mut seen, item);
                 }
             }
+            hir::AnnotationParams::Positional(values) => {
+                for value in values {
+                    let rendered = render_annotation_const_expr(value);
+                    push_derive(&mut out, &mut seen, &rendered);
+                }
+            }
             hir::AnnotationParams::Params(values) => {
                 for value in values {
                     push_derive(&mut out, &mut seen, &value.ident);

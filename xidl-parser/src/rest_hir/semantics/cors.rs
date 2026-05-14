@@ -47,29 +47,32 @@ fn parse_cors(annotation: &hir::Annotation) -> Result<HttpCorsProfile, String> {
         hir::AnnotationParams::ConstExpr(expr) => {
             Ok(HttpCorsProfile::Origins(parse_const_expr_origins(expr)?))
         }
+        hir::AnnotationParams::Positional(values) => Ok(HttpCorsProfile::Origins(
+            values
+                .iter()
+                .map(parse_string_const_expr)
+                .collect::<Result<Vec<_>, _>>()?,
+        )),
         hir::AnnotationParams::Raw(_) | hir::AnnotationParams::Params(_) => {
-            Err("@cors only accepts string literals joined by '|'".to_string())
+            Err(cors_syntax_error())
         }
     }
 }
 
 fn parse_const_expr_origins(expr: &hir::ConstExpr) -> Result<Vec<String>, String> {
+    Ok(vec![parse_string_const_expr(expr)?])
+}
+
+fn parse_string_const_expr(expr: &hir::ConstExpr) -> Result<String, String> {
     match expr {
-        hir::ConstExpr::Literal(hir::Literal::StringLiteral(value)) => {
-            Ok(vec![parse_origin_literal(value)?])
-        }
-        hir::ConstExpr::BinaryExpr(hir::BinaryOperator::Or, left, right) => {
-            let mut origins = parse_const_expr_origins(left)?;
-            origins.extend(parse_const_expr_origins(right)?);
-            Ok(origins)
-        }
-        _ => Err("@cors only accepts string literals joined by '|'".to_string()),
+        hir::ConstExpr::Literal(hir::Literal::StringLiteral(value)) => parse_origin_literal(value),
+        _ => Err(cors_syntax_error()),
     }
 }
 
 fn parse_origin_literal(value: &str) -> Result<String, String> {
     let Some(value) = trim_string_literal(value) else {
-        return Err("@cors only accepts string literals joined by '|'".to_string());
+        return Err(cors_syntax_error());
     };
     if value.is_empty() {
         return Err("@cors origins must not be empty".to_string());
@@ -78,6 +81,10 @@ fn parse_origin_literal(value: &str) -> Result<String, String> {
         return Err(format!("invalid @cors origin '{value}'"));
     }
     Ok(value)
+}
+
+fn cors_syntax_error() -> String {
+    "@cors only accepts comma-separated string literals".to_string()
 }
 
 fn is_valid_origin(value: &str) -> bool {

@@ -69,6 +69,17 @@ pub fn normalize_annotation_params(params: &hir::AnnotationParams) -> HashMap<St
                 trim_quotes(&rendered).unwrap_or(rendered),
             );
         }
+        hir::AnnotationParams::Positional(values) => {
+            let rendered = values
+                .iter()
+                .map(render_const_expr)
+                .collect::<Vec<_>>()
+                .join(", ");
+            out.insert(
+                "value".to_string(),
+                trim_quotes(&rendered).unwrap_or(rendered),
+            );
+        }
     }
     out
 }

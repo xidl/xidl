@@ -35,23 +35,21 @@ Specification(
                         params: Some(
                             Params(
                                 [
-                                    AnnotationApplParam {
+                                    Named {
                                         ident: Identifier(
                                             "in",
                                         ),
-                                        value: Some(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            Literal(
-                                                                                StringLiteral(
-                                                                                    "\"header\"",
-                                                                                ),
+                                        value: ConstExpr(
+                                            XorExpr(
+                                                AndExpr(
+                                                    ShiftExpr(
+                                                        AddExpr(
+                                                            MultExpr(
+                                                                UnaryExpr(
+                                                                    PrimaryExpr(
+                                                                        Literal(
+                                                                            StringLiteral(
+                                                                                "\"header\"",
                                                                             ),
                                                                         ),
                                                                     ),
@@ -63,23 +61,21 @@ Specification(
                                             ),
                                         ),
                                     },
-                                    AnnotationApplParam {
+                                    Named {
                                         ident: Identifier(
                                             "name",
                                         ),
-                                        value: Some(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            Literal(
-                                                                                StringLiteral(
-                                                                                    "\"X-API-Key\"",
-                                                                                ),
+                                        value: ConstExpr(
+                                            XorExpr(
+                                                AndExpr(
+                                                    ShiftExpr(
+                                                        AddExpr(
+                                                            MultExpr(
+                                                                UnaryExpr(
+                                                                    PrimaryExpr(
+                                                                        Literal(
+                                                                            StringLiteral(
+                                                                                "\"X-API-Key\"",
                                                                             ),
                                                                         ),
                                                                     ),
@@ -152,18 +148,22 @@ Specification(
                                                         },
                                                     ),
                                                     params: Some(
-                                                        ConstExpr(
-                                                            ConstExpr(
-                                                                XorExpr(
-                                                                    AndExpr(
-                                                                        ShiftExpr(
-                                                                            AddExpr(
-                                                                                MultExpr(
-                                                                                    UnaryExpr(
-                                                                                        PrimaryExpr(
-                                                                                            Literal(
-                                                                                                StringLiteral(
-                                                                                                    "\"2026-03-13\"",
+                                                        Params(
+                                                            [
+                                                                Positional(
+                                                                    ConstExpr(
+                                                                        XorExpr(
+                                                                            AndExpr(
+                                                                                ShiftExpr(
+                                                                                    AddExpr(
+                                                                                        MultExpr(
+                                                                                            UnaryExpr(
+                                                                                                PrimaryExpr(
+                                                                                                    Literal(
+                                                                                                        StringLiteral(
+                                                                                                            "\"2026-03-13\"",
+                                                                                                        ),
+                                                                                                    ),
                                                                                                 ),
                                                                                             ),
                                                                                         ),
@@ -173,7 +173,7 @@ Specification(
                                                                         ),
                                                                     ),
                                                                 ),
-                                                            ),
+                                                            ],
                                                         ),
                                                     ),
                                                     builtin: None,
@@ -265,23 +265,21 @@ Specification(
                                                     params: Some(
                                                         Params(
                                                             [
-                                                                AnnotationApplParam {
+                                                                Named {
                                                                     ident: Identifier(
                                                                         "since",
                                                                     ),
-                                                                    value: Some(
-                                                                        ConstExpr(
-                                                                            XorExpr(
-                                                                                AndExpr(
-                                                                                    ShiftExpr(
-                                                                                        AddExpr(
-                                                                                            MultExpr(
-                                                                                                UnaryExpr(
-                                                                                                    PrimaryExpr(
-                                                                                                        Literal(
-                                                                                                            StringLiteral(
-                                                                                                                "\"2026-03-13\"",
-                                                                                                            ),
+                                                                    value: ConstExpr(
+                                                                        XorExpr(
+                                                                            AndExpr(
+                                                                                ShiftExpr(
+                                                                                    AddExpr(
+                                                                                        MultExpr(
+                                                                                            UnaryExpr(
+                                                                                                PrimaryExpr(
+                                                                                                    Literal(
+                                                                                                        StringLiteral(
+                                                                                                            "\"2026-03-13\"",
                                                                                                         ),
                                                                                                     ),
                                                                                                 ),
@@ -293,23 +291,21 @@ Specification(
                                                                         ),
                                                                     ),
                                                                 },
-                                                                AnnotationApplParam {
+                                                                Named {
                                                                     ident: Identifier(
                                                                         "after",
                                                                     ),
-                                                                    value: Some(
-                                                                        ConstExpr(
-                                                                            XorExpr(
-                                                                                AndExpr(
-                                                                                    ShiftExpr(
-                                                                                        AddExpr(
-                                                                                            MultExpr(
-                                                                                                UnaryExpr(
-                                                                                                    PrimaryExpr(
-                                                                                                        Literal(
-                                                                                                            StringLiteral(
-                                                                                                                "\"2026-03-14T12:00:00+08:00\"",
-                                                                                                            ),
+                                                                    value: ConstExpr(
+                                                                        XorExpr(
+                                                                            AndExpr(
+                                                                                ShiftExpr(
+                                                                                    AddExpr(
+                                                                                        MultExpr(
+                                                                                            UnaryExpr(
+                                                                                                PrimaryExpr(
+                                                                                                    Literal(
+                                                                                                        StringLiteral(
+                                                                                                            "\"2026-03-14T12:00:00+08:00\"",
                                                                                                         ),
                                                                                                     ),
                                                                                                 ),
@@ -370,18 +366,22 @@ Specification(
                                                                         },
                                                                     ),
                                                                     params: Some(
-                                                                        ConstExpr(
-                                                                            ConstExpr(
-                                                                                XorExpr(
-                                                                                    AndExpr(
-                                                                                        ShiftExpr(
-                                                                                            AddExpr(
-                                                                                                MultExpr(
-                                                                                                    UnaryExpr(
-                                                                                                        PrimaryExpr(
-                                                                                                            Literal(
-                                                                                                                StringLiteral(
-                                                                                                                    "\"X-Req-Id\"",
+                                                                        Params(
+                                                                            [
+                                                                                Positional(
+                                                                                    ConstExpr(
+                                                                                        XorExpr(
+                                                                                            AndExpr(
+                                                                                                ShiftExpr(
+                                                                                                    AddExpr(
+                                                                                                        MultExpr(
+                                                                                                            UnaryExpr(
+                                                                                                                PrimaryExpr(
+                                                                                                                    Literal(
+                                                                                                                        StringLiteral(
+                                                                                                                            "\"X-Req-Id\"",
+                                                                                                                        ),
+                                                                                                                    ),
                                                                                                                 ),
                                                                                                             ),
                                                                                                         ),
@@ -391,7 +391,7 @@ Specification(
                                                                                         ),
                                                                                     ),
                                                                                 ),
-                                                                            ),
+                                                                            ],
                                                                         ),
                                                                     ),
                                                                     builtin: None,

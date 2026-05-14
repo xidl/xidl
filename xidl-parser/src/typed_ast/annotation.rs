@@ -1,6 +1,5 @@
 use super::*;
 use serde::{Deserialize, Serialize};
-use xidl_parser_derive::Parser;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AnnotationAppl {
@@ -19,15 +18,14 @@ pub enum AnnotationName {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum AnnotationParams {
-    ConstExpr(ConstExpr),
     Params(Vec<AnnotationApplParam>),
     Raw(String),
 }
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
-pub struct AnnotationApplParam {
-    pub ident: Identifier,
-    pub value: Option<ConstExpr>,
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum AnnotationApplParam {
+    Positional(ConstExpr),
+    Named { ident: Identifier, value: ConstExpr },
 }
 
 impl<'a> crate::parser::FromTreeSitter<'a> for AnnotationAppl {
@@ -192,12 +190,13 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AnnotationParams {
             xidl_parser_derive::node_id!("annotation_appl_params")
         );
 
-        let mut const_expr = None;
         let mut params = vec![];
         for ch in node.children(&mut node.walk()) {
             match ch.kind_id() {
                 xidl_parser_derive::node_id!("const_expr") => {
-                    const_expr = Some(ConstExpr::from_node(ch, ctx)?);
+                    return Ok(Self::Params(vec![AnnotationApplParam::Positional(
+                        ConstExpr::from_node(ch, ctx)?,
+                    )]));
                 }
                 xidl_parser_derive::node_id!("annotation_appl_param") => {
                     params.push(AnnotationApplParam::from_node(ch, ctx)?);
@@ -206,9 +205,6 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AnnotationParams {
             }
         }
 
-        if let Some(const_expr) = const_expr {
-            return Ok(Self::ConstExpr(const_expr));
-        }
         if !params.is_empty() {
             return Ok(Self::Params(params));
         }
@@ -216,5 +212,39 @@ impl<'a> crate::parser::FromTreeSitter<'a> for AnnotationParams {
         Err(crate::error::ParseError::UnexpectedNode(
             "annotation_appl_params missing content".to_string(),
         ))
+    }
+}
+
+impl<'a> crate::parser::FromTreeSitter<'a> for AnnotationApplParam {
+    fn from_node(
+        node: tree_sitter::Node<'a>,
+        ctx: &mut crate::parser::ParseContext<'a>,
+    ) -> crate::error::ParserResult<Self> {
+        assert_eq!(
+            node.kind_id(),
+            xidl_parser_derive::node_id!("annotation_appl_param")
+        );
+
+        let mut ident = None;
+        let mut value = None;
+        for ch in node.children(&mut node.walk()) {
+            match ch.kind_id() {
+                xidl_parser_derive::node_id!("identifier") => {
+                    ident = Some(Identifier::from_node(ch, ctx)?);
+                }
+                xidl_parser_derive::node_id!("const_expr") => {
+                    value = Some(ConstExpr::from_node(ch, ctx)?);
+                }
+                _ => {}
+            }
+        }
+
+        match (ident, value) {
+            (None, Some(value)) => Ok(Self::Positional(value)),
+            (Some(ident), Some(value)) => Ok(Self::Named { ident, value }),
+            _ => Err(crate::error::ParseError::UnexpectedNode(
+                "annotation_appl_param missing const_expr".to_string(),
+            )),
+        }
     }
 }

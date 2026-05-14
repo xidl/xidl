@@ -186,24 +186,22 @@ Specification(
                         params: Some(
                             Params(
                                 [
-                                    AnnotationApplParam {
+                                    Named {
                                         ident: Identifier(
                                             "abc",
                                         ),
-                                        value: Some(
-                                            ConstExpr(
-                                                XorExpr(
-                                                    AndExpr(
-                                                        ShiftExpr(
-                                                            AddExpr(
-                                                                MultExpr(
-                                                                    UnaryExpr(
-                                                                        PrimaryExpr(
-                                                                            Literal(
-                                                                                IntegerLiteral(
-                                                                                    DecNumber(
-                                                                                        "1",
-                                                                                    ),
+                                        value: ConstExpr(
+                                            XorExpr(
+                                                AndExpr(
+                                                    ShiftExpr(
+                                                        AddExpr(
+                                                            MultExpr(
+                                                                UnaryExpr(
+                                                                    PrimaryExpr(
+                                                                        Literal(
+                                                                            IntegerLiteral(
+                                                                                DecNumber(
+                                                                                    "1",
                                                                                 ),
                                                                             ),
                                                                         ),

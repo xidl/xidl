@@ -2860,9 +2860,9 @@ dependencies = [
 
 [[package]]
 name = "tree-sitter-idl"
-version = "3.17.0"
+version = "3.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "14b4650feb4c8de0483a9bd98d3ca0d5be5ed5072bb46322f666f5a12bff16f8"
+checksum = "dea80964f7b042272d2f356515f3ce5a3c2658f979c57e9fb1b385484adaff8f"
 dependencies = [
  "cc",
  "tree-sitter",
