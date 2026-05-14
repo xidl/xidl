@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.60.1](https://github.com/xidl/xidl/compare/v0.60.0...v0.60.1) (2026-05-14)
+
+
+### Bug Fixes
+
+* **http:** support comma-separated cors annotation params ([c631952](https://github.com/xidl/xidl/commit/c63195210e62db505d4720b69f1d49778c217c5f))
+
 ## [0.60.0](https://github.com/xidl/xidl/compare/v0.59.0...v0.60.0) (2026-05-14)
 
 
