@@ -6,7 +6,7 @@ fn parses_raw_custom_and_doc_annotations() {
         r#"
         /// doc "quoted"
         @foo::bar(key=1)
-        @data-representation([XML])
+        @data_representation(XML)
         struct Item {
             /// field docs
             @id(7)
@@ -25,7 +25,7 @@ fn parses_raw_custom_and_doc_annotations() {
     assert!(debug.contains("doc"));
     assert!(debug.contains("quoted"));
     assert!(debug.contains("ScopedName"));
-    assert!(debug.contains("data-representation"));
+    assert!(debug.contains("DataRepresentation"));
     assert!(debug.contains("ready"));
 }
 

@@ -161,7 +161,7 @@ HTTP 映射中最常见的理解方式：
 建议支持两种基础写法：
 
 - `@cors`：无条件开启 CORS
-- `@cors("https://app.example.com"|"https://admin.example.com")`：只接受这些来源
+- `@cors("https://app.example.com", "https://admin.example.com")`：只接受这些来源
 
 例如：
 
@@ -171,7 +171,7 @@ interface UserApi {
     @get(path = "/users/{id}")
     string getUser(@path("id") string id);
 
-    @cors("https://admin.example.com"|"https://console.example.com")
+    @cors("https://admin.example.com", "https://console.example.com")
     @post(path = "/users")
     void createUser(string name);
 };
@@ -180,7 +180,7 @@ interface UserApi {
 其中：
 
 - `@cors` 表示该接口或方法接受任意来源的跨域访问
-- `@cors("..."|"..." )` 表示该接口或方法只接受列出的 Origin
+- `@cors("...", "...")` 表示该接口或方法只接受列出的 Origin
 - 多个字符串参数表示一个来源白名单
 
 继承和覆盖规则建议如下：
@@ -192,14 +192,14 @@ interface UserApi {
 上面的例子里：
 
 - `getUser` 继承接口级 `@cors`，因此无条件开启 CORS
-- `createUser` 使用自己的方法级 `@cors("..."|"...")`
+- `createUser` 使用自己的方法级 `@cors("...", "...")`
 - `createUser` 的最终策略应以方法声明为准，只接受列出的来源
 
 运行时语义建议如下：
 
 - 命中 `@cors` 的路由应返回对应的 `Access-Control-Allow-Origin`
 - 当浏览器发起 `OPTIONS` 预检请求时，应基于同一份策略计算响应
-- `@cors` 与 `@cors("..."|"...")` 的差别主要体现在允许的来源集合
+- `@cors` 与 `@cors("...", "...")` 的差别主要体现在允许的来源集合
 
 这类规则属于 HTTP 边界行为，不改变 XIDL 方法签名，也不参与业务参数绑定。
 

@@ -1,20 +1,20 @@
-@rust-serde(rename_all = "camelCase")
-@rust-inline
+@rust_serde(rename_all = "camelCase")
+@rust_inline
 struct User {
-    @rust-serde(rename = "userId")
+    @rust_serde(rename = "userId")
     string user_id;
 };
 
-@rust-repr(u8)
-@rust-non_exhaustive
+@rust_repr(u8)
+@rust_non_exhaustive
 enum Color {
-    @rust-deprecated(note = "primary red")
+    @rust_deprecated(note = "primary red")
     Red,
     Green
 };
 
-@rust-allow(async_fn_in_trait)
+@rust_allow(async_fn_in_trait)
 interface Api {
-    @rust-cfg(feature = "client")
+    @rust_cfg(feature = "client")
     void ping();
 };

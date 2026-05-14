@@ -76,11 +76,13 @@ pub(crate) fn annotation_name(annotation: &hir::Annotation) -> Option<&str> {
 fn rust_passthrough_attr_name(annotation: &hir::Annotation) -> Option<String> {
     let name = annotation_name(annotation)?;
     let lower = name.to_ascii_lowercase();
-    let prefix = "rust-";
-    if !lower.starts_with(prefix) {
+    let attr = if lower.starts_with("rust-") {
+        &name["rust-".len()..]
+    } else if lower.starts_with("rust_") {
+        &name["rust_".len()..]
+    } else {
         return None;
-    }
-    let attr = &name[prefix.len()..];
+    };
     if attr.is_empty() {
         None
     } else {
@@ -116,6 +118,17 @@ fn normalize_annotation_params(params: &hir::AnnotationParams) -> HashMap<String
                 trim_annotation_quotes(&rendered).unwrap_or(rendered),
             );
         }
+        hir::AnnotationParams::Positional(values) => {
+            let rendered = values
+                .iter()
+                .map(render_annotation_const_expr)
+                .collect::<Vec<_>>()
+                .join(", ");
+            out.insert(
+                "value".to_string(),
+                trim_annotation_quotes(&rendered).unwrap_or(rendered),
+            );
+        }
     }
     out
 }
@@ -126,6 +139,11 @@ fn render_rust_passthrough_params(params: &hir::AnnotationParams) -> String {
         hir::AnnotationParams::ConstExpr(expr) => {
             render_annotation_const_expr(expr).trim().to_string()
         }
+        hir::AnnotationParams::Positional(values) => values
+            .iter()
+            .map(|value| render_annotation_const_expr(value).trim().to_string())
+            .collect::<Vec<_>>()
+            .join(", "),
         hir::AnnotationParams::Params(values) => values
             .iter()
             .map(|value| {

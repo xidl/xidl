@@ -1,7 +1,8 @@
 use crate::parser::parser_text;
 use crate::typed_ast::{
-    AnnotationAppl, AnnotationName, AnnotationParams, BuiltinAnnotation, DataRepresentationKind,
-    Definition, TemplateTypeSpec, TopicPlatform, TypeDclInner, TypeDeclaratorInner, TypeSpec,
+    AnnotationAppl, AnnotationApplParam, AnnotationName, AnnotationParams, BuiltinAnnotation,
+    DataRepresentationKind, Definition, TemplateTypeSpec, TopicPlatform, TypeDclInner,
+    TypeDeclaratorInner, TypeSpec,
 };
 
 #[test]
@@ -129,6 +130,36 @@ fn parse_builtin_annotations_with_structured_args() {
         data_representation,
         BuiltinAnnotation::DataRepresentation { kinds }
             if kinds == &[DataRepresentationKind::Xml]
+    ));
+}
+
+#[test]
+fn parse_builtin_annotation_with_multiple_positional_literals_as_param_nodes() {
+    let typed = parser_text(
+        r#"
+        @cors("https://console.example.com", "https://admin.example.com")
+        interface UserApi {};
+        "#,
+    )
+    .expect("parse should succeed");
+
+    let Definition::InterfaceDcl(interface) = &typed.0[0] else {
+        panic!("expected interface declaration");
+    };
+    let [cors] = &interface.annotations[..] else {
+        panic!("expected one annotation");
+    };
+
+    let params = match &cors.params {
+        Some(AnnotationParams::Params(params)) => params,
+        other => panic!("expected param nodes, got {other:?}"),
+    };
+    assert!(matches!(
+        params.as_slice(),
+        [
+            AnnotationApplParam::Positional(_),
+            AnnotationApplParam::Positional(_)
+        ]
     ));
 }
 

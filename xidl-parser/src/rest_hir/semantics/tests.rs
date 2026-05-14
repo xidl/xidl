@@ -1,5 +1,5 @@
 use super::*;
-use crate::hir::{Annotation, AnnotationParams, BinaryOperator, ConstExpr, Literal};
+use crate::hir::{Annotation, AnnotationParams, ConstExpr, Literal};
 
 fn builtin(name: &str, raw: &str) -> Annotation {
     Annotation::Builtin {
@@ -8,10 +8,14 @@ fn builtin(name: &str, raw: &str) -> Annotation {
     }
 }
 
-fn builtin_expr(name: &str, expr: ConstExpr) -> Annotation {
+fn string(value: &str) -> ConstExpr {
+    ConstExpr::Literal(Literal::StringLiteral(format!("\"{value}\"")))
+}
+
+fn positional(name: &str, values: Vec<ConstExpr>) -> Annotation {
     Annotation::Builtin {
         name: name.to_string(),
-        params: Some(AnnotationParams::ConstExpr(expr)),
+        params: Some(AnnotationParams::Positional(values)),
     }
 }
 
@@ -52,17 +56,12 @@ fn validate_http_annotations_checks_security_and_media_type() {
     validate_http_annotations(
         "operation 'ok'",
         &[
-            builtin_expr(
+            positional(
                 "cors",
-                ConstExpr::BinaryExpr(
-                    BinaryOperator::Or,
-                    Box::new(ConstExpr::Literal(Literal::StringLiteral(
-                        "\"https://app.example.com\"".to_string(),
-                    ))),
-                    Box::new(ConstExpr::Literal(Literal::StringLiteral(
-                        "\"https://admin.example.com\"".to_string(),
-                    ))),
-                ),
+                vec![
+                    string("https://app.example.com"),
+                    string("https://admin.example.com"),
+                ],
             ),
             builtin("Consume", r#""application/json""#),
             builtin("Produce", r#""text/plain""#),
@@ -89,7 +88,7 @@ fn validate_http_annotations_checks_security_and_media_type() {
         &[builtin("cors", r#"origin="https://app.example.com""#)],
     )
     .expect_err("bad cors");
-    assert!(err.contains("@cors only accepts string literals joined by '|'"));
+    assert!(err.contains("@cors only accepts comma-separated string literals"));
 
     validate_http_annotations(
         "operation 'empty'",

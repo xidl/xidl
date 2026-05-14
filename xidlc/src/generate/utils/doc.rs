@@ -44,6 +44,7 @@ fn doc_text_from_params(params: &hir::AnnotationParams) -> Option<String> {
             value.value.as_ref().and_then(const_expr_string)
         }),
         hir::AnnotationParams::ConstExpr(expr) => const_expr_string(expr),
+        hir::AnnotationParams::Positional(values) => values.first().and_then(const_expr_string),
     }
 }
 
