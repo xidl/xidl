@@ -59,3 +59,5 @@ pub use tokio;
 /// Re-export of `tokio-tungstenite` for generated WebSocket clients.
 #[cfg(feature = "stream")]
 pub use tokio_tungstenite;
+/// Re-export of `tower-http` for generated middleware wiring.
+pub use tower_http;

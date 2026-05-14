@@ -1,0 +1,393 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+http_cors.rs
+===============
+#[allow(
+    non_snake_case,
+    unused_attributes,
+    unused_variables,
+    unused_mut,
+    unreachable_code,
+    clippy::let_unit_value
+)]
+#[async_trait::async_trait]
+pub trait HttpCorsService {
+    async fn get_user(&self, id: String) -> ::xidl_rust_axum::Result<String>;
+    async fn create_user(&self, name: String) -> ::xidl_rust_axum::Result<()>;
+}
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_in_HttpCorsService {
+    use super::*;
+}
+#[allow(non_snake_case, unused_imports)]
+pub(super) mod __xidl_out_HttpCorsService {
+    use super::*;
+}
+#[derive(::serde::Deserialize)]
+pub struct HttpCorsServiceGetUserPath {
+    pub id: String,
+}
+#[derive(::serde::Deserialize)]
+struct HttpCorsServiceGetUserRequest {
+    id: String,
+}
+#[allow(clippy::manual_async_fn, unused_mut)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S> for HttpCorsServiceGetUserRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let _ = &body;
+            let _ = state;
+            let ::xidl_rust_axum::axum::extract::Path(path) = <::xidl_rust_axum::axum::extract::Path<
+                HttpCorsServiceGetUserPath,
+            > as ::xidl_rust_axum::axum::extract::FromRequestParts<
+                S,
+            >>::from_request_parts(&mut parts, state)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, err.to_string()))?;
+            let HttpCorsServiceGetUserPath { id } = path;
+            let headers = &parts.headers;
+            let _ = headers;
+            Ok(Self { id })
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+pub struct HttpCorsServiceCreateUserRequestOutBody {
+    #[serde(default)]
+    pub name: String,
+}
+#[derive(::serde::Deserialize)]
+pub struct HttpCorsServiceCreateUserRequestInBody {
+    pub name: String,
+}
+#[derive(::serde::Deserialize)]
+struct HttpCorsServiceCreateUserRequest {
+    name: String,
+}
+#[allow(clippy::manual_async_fn, unused_mut)]
+impl<S> ::xidl_rust_axum::axum::extract::FromRequest<S>
+for HttpCorsServiceCreateUserRequest
+where
+    S: Send + Sync,
+{
+    type Rejection = ::xidl_rust_axum::Error;
+    fn from_request(
+        req: ::xidl_rust_axum::axum::extract::Request,
+        state: &S,
+    ) -> impl ::core::future::Future<Output = Result<Self, Self::Rejection>> + Send {
+        async move {
+            let (mut parts, body) = req.into_parts();
+            let _ = &body;
+            let _ = state;
+            let headers = &parts.headers;
+            let _ = headers;
+            if !::xidl_rust_axum::http::content_type_matches(
+                headers,
+                "application/json",
+            ) {
+                return Err(::xidl_rust_axum::Error::unsupported_media_type());
+            }
+            let body_bytes = ::xidl_rust_axum::axum::body::to_bytes(body, usize::MAX)
+                .await
+                .map_err(|err| ::xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+            let body: HttpCorsServiceCreateUserRequestInBody = ::xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body_bytes)?;
+            let HttpCorsServiceCreateUserRequestInBody { name } = body;
+            Ok(Self { name })
+        }
+    }
+}
+pub struct HttpCorsServiceServer<T> {
+    inner: ::std::sync::Arc<T>,
+}
+#[allow(non_snake_case)]
+impl<T> HttpCorsServiceServer<T>
+where
+    T: HttpCorsService + Send + Sync + 'static,
+{
+    pub fn new(inner: T) -> Self {
+        Self {
+            inner: ::std::sync::Arc::new(inner),
+        }
+    }
+    pub fn from_arc(inner: ::std::sync::Arc<T>) -> Self {
+        Self { inner }
+    }
+    pub fn router(self) -> xidl_rust_axum::axum::Router {
+        let _svc = self.inner;
+        xidl_rust_axum::axum::Router::new()
+            .route(
+                "/v1/users/{id}",
+                xidl_rust_axum::axum::routing::get(Self::get_user)
+                    .layer(
+                        ::xidl_rust_axum::tower_http::cors::CorsLayer::new()
+                            .allow_origin(::xidl_rust_axum::tower_http::cors::Any)
+                            .allow_methods([::xidl_rust_axum::axum::http::Method::GET]),
+                    ),
+            )
+            .route(
+                "/v1/users",
+                xidl_rust_axum::axum::routing::post(Self::create_user)
+                    .layer(
+                        ::xidl_rust_axum::tower_http::cors::CorsLayer::new()
+                            .allow_origin([
+                                ::xidl_rust_axum::axum::http::HeaderValue::from_static(
+                                    "https://console.example.com",
+                                ),
+                                ::xidl_rust_axum::axum::http::HeaderValue::from_static(
+                                    "https://admin.example.com",
+                                ),
+                            ])
+                            .allow_methods([::xidl_rust_axum::axum::http::Method::POST]),
+                    ),
+            )
+            .with_state(_svc)
+    }
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
+    async fn get_user(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        request: HttpCorsServiceGetUserRequest,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let HttpCorsServiceGetUserRequest { id } = request;
+        let id: String = id;
+        let mut resp = match svc.get_user(id).await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    let body_value: String = resp_value;
+                    let _ = &body_value;
+                    let body = xidl_rust_axum::SerializeFactory::new("application/json")
+                        .to_vec(&body_value)?;
+                    ::xidl_rust_axum::axum::response::Response::builder()
+                        .status(
+                            ::xidl_rust_axum::axum::http::StatusCode::from_u16(200)
+                                .unwrap(),
+                        )
+                        .header(
+                            ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                            "application/json",
+                        )
+                        .body(::xidl_rust_axum::axum::body::Body::from(body))
+                        .map_err(|err| xidl_rust_axum::Error::new(
+                            500,
+                            format!("{err:?}"),
+                        ))?
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        Ok(resp)
+    }
+    #[allow(
+        clippy::let_and_return,
+        clippy::needless_return,
+        clippy::useless_conversion,
+        unused_mut,
+        unreachable_code,
+        clippy::let_unit_value,
+        unused_variables
+    )]
+    async fn create_user(
+        ::xidl_rust_axum::axum::extract::State(
+            svc,
+        ): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        request: HttpCorsServiceCreateUserRequest,
+    ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+        let _ = &headers;
+        if !xidl_rust_axum::http::accepts_media_type(&headers, "application/json") {
+            return Err(xidl_rust_axum::Error::not_acceptable());
+        }
+        let HttpCorsServiceCreateUserRequest { name } = request;
+        let name: String = name;
+        let mut resp = match svc.create_user(name).await {
+            Ok(resp_value) => {
+                let mut resp = {
+                    let _ = resp_value;
+                    ::xidl_rust_axum::axum::response::IntoResponse::into_response(
+                        ::xidl_rust_axum::axum::http::StatusCode::NO_CONTENT,
+                    )
+                };
+                resp
+            }
+            Err(err) => {
+                ::xidl_rust_axum::axum::response::IntoResponse::into_response(err)
+            }
+        };
+        Ok(resp)
+    }
+}
+impl<T> xidl_rust_axum::Service for HttpCorsServiceServer<T>
+where
+    T: HttpCorsService + Send + Sync + 'static,
+{
+    fn into_router(self) -> xidl_rust_axum::axum::Router {
+        self.router()
+    }
+}
+pub struct HttpCorsServiceClient {
+    client: ::xidl_rust_axum::Client,
+}
+#[allow(non_snake_case)]
+impl HttpCorsServiceClient {
+    pub fn new(base_url: impl Into<String>) -> Self {
+        Self {
+            client: ::xidl_rust_axum::Client::new(base_url),
+        }
+    }
+    pub fn with_auth(
+        base_url: impl Into<String>,
+        auth: ::xidl_rust_axum::ClientAuth,
+    ) -> Self {
+        Self {
+            client: ::xidl_rust_axum::Client::with_auth(base_url, auth),
+        }
+    }
+    pub fn with_http(
+        base_url: impl Into<String>,
+        http: ::xidl_rust_axum::reqwest::Client,
+    ) -> Self {
+        Self {
+            client: ::xidl_rust_axum::Client::with_http(base_url, http),
+        }
+    }
+    pub fn with_http_and_auth(
+        base_url: impl Into<String>,
+        http: ::xidl_rust_axum::reqwest::Client,
+        auth: ::xidl_rust_axum::ClientAuth,
+    ) -> Self {
+        Self {
+            client: ::xidl_rust_axum::Client::with_http_and_auth(base_url, http, auth),
+        }
+    }
+    pub fn with_auth_override(
+        &self,
+        auth: Option<::xidl_rust_axum::ClientAuth>,
+    ) -> Self {
+        Self {
+            client: self.client.with_auth_override(auth),
+        }
+    }
+}
+#[allow(non_snake_case)]
+impl HttpCorsServiceClient {
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
+    pub async fn get_user(&self, id: String) -> Result<String, xidl_rust_axum::Error> {
+        let path = "/v1/users/{id}".to_string();
+        let path = path.replace("{id}", &id.to_string());
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::GET, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let auth_target = &self.client;
+        let _ = auth_target;
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            let body: String = xidl_rust_axum::DeserializeFactory::new(
+                    "application/json",
+                )
+                .from_slice(&body)?;
+            Ok(body)
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+    #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables)]
+    pub async fn create_user(&self, name: String) -> Result<(), xidl_rust_axum::Error> {
+        let path = "/v1/users".to_string();
+        let mut req = self
+            .client
+            .http()
+            .request(xidl_rust_axum::reqwest::Method::POST, self.client.url(&path))
+            .build()
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        let auth_target = &self.client;
+        let _ = auth_target;
+        let body = HttpCorsServiceCreateUserRequestOutBody {
+            name,
+        };
+        let body = xidl_rust_axum::SerializeFactory::new("application/json")
+            .to_vec(&body)?;
+        req.headers_mut()
+            .insert(
+                xidl_rust_axum::reqwest::header::CONTENT_TYPE,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                        "application/json",
+                    )
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+        *req.body_mut() = Some(xidl_rust_axum::reqwest::Body::from(body));
+        let resp = self
+            .client
+            .http()
+            .execute(req)
+            .await
+            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+        if resp.status().is_success() {
+            Ok(())
+        } else {
+            let status = resp.status();
+            let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+            Err(xidl_rust_axum::Error::from_http_response(status, body))
+        }
+    }
+}

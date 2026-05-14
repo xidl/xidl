@@ -1,8 +1,8 @@
 use crate::error::IdlcResult;
 use crate::generate::rust::util::{rust_ident, rust_passthrough_attrs_from_annotations};
 use crate::generate::rust_axum::interface::interface_http::{
-    deprecated_context_from_http, http_method_code, http_method_fn, http_method_from_hir,
-    reqwest_method_code, security_context,
+    cors_layer, deprecated_context_from_http, http_method_code, http_method_fn,
+    http_method_from_hir, reqwest_method_code, security_context,
 };
 use crate::generate::rust_axum::interface::interface_method_params::find_input_binding;
 use crate::generate::rust_axum::interface::interface_types::axum_type;
@@ -154,6 +154,7 @@ pub(crate) fn render_attr_operation_from_http(
             .first()
             .map(|route| route.path.clone())
             .unwrap_or_default(),
+        cors_layer: cors_layer(http_op),
         struct_prefix: method_struct_prefix(interface_name, &http_op.meta.name),
         path_params: Vec::new(),
         query_params: Vec::new(),
