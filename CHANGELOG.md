@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.60.0](https://github.com/xidl/xidl/compare/v0.59.0...v0.60.0) (2026-05-14)
+
+
+### Features
+
+* **xidlc:** impl cors annotation ([7f6ed42](https://github.com/xidl/xidl/commit/7f6ed42a4b6e0577120c23b9d9f85aac0ddc7287))
+
 ## [0.59.0](https://github.com/xidl/xidl/compare/v0.58.0...v0.59.0) (2026-05-13)
 
 
