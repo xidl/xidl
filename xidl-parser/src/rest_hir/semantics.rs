@@ -1,5 +1,6 @@
 mod annotation_parse;
 mod annotations;
+mod cors;
 mod security;
 mod stream;
 
@@ -14,6 +15,7 @@ pub use self::annotations::{
     annotation_name, annotation_params, effective_media_type, has_annotation,
     has_optional_annotation, normalize_annotation_params,
 };
+pub use self::cors::{HttpCorsProfile, effective_cors};
 pub use self::security::{
     HttpApiKeyLocation, HttpSecurityOrigin, HttpSecurityProfile, HttpSecurityRequirement,
     effective_security, effective_security_with_origin,
@@ -67,6 +69,7 @@ pub fn validate_http_annotations(
     target: &str,
     annotations: &[hir::Annotation],
 ) -> Result<(), String> {
+    let _ = cors::collect_cors(annotations).map_err(|err| format!("{target}: {err}"))?;
     let _ = deprecated_info(annotations).map_err(|err| format!("{target}: {err}"))?;
     let _ = security::collect_security(annotations).map_err(|err| format!("{target}: {err}"))?;
     validate_rest_media_types(target, annotations)?;

@@ -9,8 +9,8 @@ use super::route::{
     auto_default_method_path, operation_id, parse_route_template, route_from_annotations,
 };
 use super::semantics::{
-    HttpStreamKind, effective_media_type, effective_security_with_origin, has_annotation,
-    http_stream_config, validate_http_annotations,
+    HttpStreamKind, effective_cors, effective_media_type, effective_security_with_origin,
+    has_annotation, http_stream_config, validate_http_annotations,
 };
 use super::validate::{
     effective_basic_auth_realm, effective_deprecated, validate_head_constraints,
@@ -157,18 +157,28 @@ fn project_attribute_group(
         &attr.annotations,
     )
     .map_err(ParseError::Message)?;
+    if has_annotation(&attr.annotations, "cors") {
+        return Err(ParseError::Message(format!(
+            "attribute in interface '{interface_name}': @cors is only supported on interfaces and methods"
+        )));
+    }
+    let cors = effective_cors(interface_annotations, &[]).map_err(ParseError::Message)?;
     let deprecated = effective_deprecated(interface_annotations, &attr.annotations)
         .map_err(ParseError::Message)?;
     let security = effective_security_with_origin(interface_annotations, &attr.annotations)
         .map_err(ParseError::Message)?;
-    Ok(project_attribute(
+    let mut operations = project_attribute(
         interface_name,
         module_path,
         attr,
         security,
         deprecated,
         has_annotation(&attr.annotations, "server_stream"),
-    ))
+    );
+    for operation in &mut operations {
+        operation.meta.cors = cors.clone();
+    }
+    Ok(operations)
 }
 
 fn project_operation(
@@ -241,6 +251,8 @@ fn project_operation(
         effective_media_type(interface_annotations, &op.annotations, "Consumes");
     let response_content_type =
         effective_media_type(interface_annotations, &op.annotations, "Produces");
+    let cors =
+        effective_cors(interface_annotations, &op.annotations).map_err(ParseError::Message)?;
     let security = effective_security_with_origin(interface_annotations, &op.annotations)
         .map_err(ParseError::Message)?;
     let basic_auth_realm = effective_basic_auth_realm(interface_annotations, &op.annotations);
@@ -271,6 +283,7 @@ fn project_operation(
             method,
             routes,
             stream,
+            cors,
             security,
             basic_auth_realm,
             deprecated,

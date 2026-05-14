@@ -22,7 +22,7 @@ T: {{ ident }} + Send + Sync + 'static,
         xidl_rust_axum::axum::Router::new()
         {% for method in methods %}
             {% for path in method.paths %}
-                .route("{{ path }}", xidl_rust_axum::axum::routing::{{ method.http_method_fn }}(Self::{{ method.name }}))
+                .route("{{ path }}", xidl_rust_axum::axum::routing::{{ method.http_method_fn }}(Self::{{ method.name }}){% if method.cors_layer %}{{ method.cors_layer }}{% endif %})
             {% endfor %}
         {% endfor %}
         .with_state(_svc)

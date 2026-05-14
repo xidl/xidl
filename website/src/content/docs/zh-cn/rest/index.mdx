@@ -118,7 +118,7 @@ interface ScopeApi {
 可以使用 `@cors` 注解添加对 cors 的支持,目前支持两种形式:
 
 - `@cors`：开启 CORS
-- `@cors("https://console.example.com", "https://admin.example.com")`：只允许这些来源
+- `@cors("https://console.example.com"|"https://admin.example.com")`：只允许这些来源
 
 例如：
 
@@ -128,7 +128,7 @@ interface UserApi {
     @get(path = "/users/{id}")
     string getUser(@path("id") string id);
 
-    @cors("https://console.example.com", "https://admin.example.com")
+    @cors("https://console.example.com"|"https://admin.example.com")
     @post(path = "/users")
     void createUser(string name);
 };
@@ -137,9 +137,9 @@ interface UserApi {
 | 注解                          | 作用范围   | 含义                                                   |
 | ----------------------------- | ---------- | ------------------------------------------------------ |
 | @cors                         | 接口       | 对接口中的所有方法启用 cors                            |
-| @cors("domain1", "domain2")   | 接口       | 对接口中的所有方法允许来自 domain1 和 domain2 的请求   |
+| @cors("domain1"\|"domain2")  | 接口       | 对接口中的所有方法允许来自 domain1 和 domain2 的请求   |
 | @cors                         | 方法       | 启用 cors                                              |
-| @cors("domain1", "domain2")   | 方法       | 允许来自 domain1 和 domain2 的请求                     |
+| @cors("domain1"\|"domain2")  | 方法       | 允许来自 domain1 和 domain2 的请求                     |
 
 ## deprecated
 

@@ -43,6 +43,7 @@ pub(crate) struct MethodContext {
     pub(crate) reqwest_method: String,
     pub(crate) path: String,
     pub(crate) paths: Vec<String>,
+    pub(crate) cors_layer: Option<String>,
     pub(crate) struct_prefix: String,
     pub(crate) path_params: Vec<ParamContext>,
     pub(crate) query_params: Vec<ParamContext>,

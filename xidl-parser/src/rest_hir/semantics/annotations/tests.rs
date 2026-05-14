@@ -25,6 +25,7 @@ fn annotation_helpers_cover_names_presence_and_values() {
     let annotations = vec![builtin("Optional", None), builtin("Consumes", None)];
     assert!(has_annotation(&annotations, "consumes"));
     assert!(has_optional_annotation(&annotations));
+    assert!(annotation_params(&Annotation::Final).is_none());
 }
 
 #[test]
@@ -84,5 +85,18 @@ fn media_type_resolution_prefers_method_and_falls_back_to_default() {
         )
         .as_deref(),
         Some("text/plain")
+    );
+    assert!(media_type_annotation_aliases("Other").is_empty());
+    assert!(media_type_annotation_matches("X-Codec", "x-codec"));
+    assert_eq!(
+        annotation_value(
+            &[builtin(
+                "X-Codec",
+                Some(AnnotationParams::Raw("\"application/custom\"".to_string()))
+            )],
+            "x-codec"
+        )
+        .as_deref(),
+        Some("application/custom")
     );
 }

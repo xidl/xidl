@@ -78,6 +78,7 @@ pub struct HttpOperationMeta {
     pub method: HttpMethod,
     pub routes: Vec<HttpRoute>,
     pub stream: super::semantics::HttpStreamConfig,
+    pub cors: Option<super::semantics::HttpCorsProfile>,
     pub security: Option<super::semantics::HttpSecurityProfile>,
     pub basic_auth_realm: Option<String>,
     pub deprecated: Option<super::semantics::DeprecatedInfo>,

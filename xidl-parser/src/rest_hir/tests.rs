@@ -85,6 +85,16 @@ fn projects_attribute_operations_and_document_metadata() {
         ops[1].meta.stream.kind,
         Some(super::semantics::HttpStreamKind::Server)
     );
+    let empty = parse(
+        r#"
+            #pragma xidlc package ""
+            interface EmptyApi {
+              string ping();
+            };
+            "#,
+    );
+    let empty_doc = super::project(&empty).expect("empty package");
+    assert_eq!(empty_doc.document.package, None);
 }
 
 #[test]
@@ -124,4 +134,60 @@ fn projects_stream_operations_with_http_stream_metadata() {
         super::semantics::HttpStreamCodec::Ndjson
     );
     assert_eq!(ops[1].meta.method, super::HttpMethod::Post);
+}
+
+#[test]
+fn projects_default_routes_skips_forward_decls_and_reads_version_pragma() {
+    let spec = parse(
+        r#"
+            #pragma xidlc openapi version = "2026.04"
+            interface FutureApi;
+            module api {
+              interface PingApi {
+                string ping();
+              };
+            };
+            "#,
+    );
+    let doc = super::project(&spec).expect("http hir");
+    assert_eq!(doc.document.version.as_deref(), Some("2026.04"));
+    assert_eq!(doc.interfaces.len(), 1);
+    assert_eq!(doc.interfaces[0].name, "PingApi");
+    assert_eq!(doc.interfaces[0].module_path, vec!["api".to_string()]);
+    assert_eq!(
+        doc.interfaces[0].operations[0].meta.method,
+        super::HttpMethod::Post
+    );
+    assert_eq!(doc.interfaces[0].operations[0].meta.routes[0].path, "/ping");
+}
+
+#[test]
+fn rejects_cors_on_attributes() {
+    let spec = parse(
+        r#"
+            interface DeviceApi {
+              @cors("https://app.example.com")
+              readonly attribute string status;
+            };
+            "#,
+    );
+    let err = super::project(&spec).expect_err("attribute cors should fail");
+    assert!(
+        err.to_string()
+            .contains("@cors is only supported on interfaces and methods")
+    );
+}
+
+#[test]
+fn surfaces_route_parse_errors_from_projection() {
+    let spec = parse(
+        r#"
+            interface BrokenApi {
+              @get(path="/broken/{id")
+              string broken(in string id);
+            };
+            "#,
+    );
+    let err = super::project(&spec).expect_err("invalid route should fail");
+    assert!(err.to_string().contains("unmatched '{'"));
 }

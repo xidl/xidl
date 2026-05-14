@@ -282,6 +282,7 @@ fn base_attribute_operation(args: AttributeOperationArgs<'_>) -> HttpOperation {
             method,
             routes,
             stream,
+            cors: None,
             security,
             basic_auth_realm: None,
             deprecated,

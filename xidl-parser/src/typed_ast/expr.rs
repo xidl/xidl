@@ -3,13 +3,54 @@ use xidl_parser_derive::Parser;
 
 use crate::typed_ast::Identifier;
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ConstExpr(pub OrExpr);
 
-#[derive(Debug, Clone, Parser, Serialize, Deserialize)]
+impl<'a> crate::parser::FromTreeSitter<'a> for ConstExpr {
+    fn from_node(
+        node: tree_sitter::Node<'a>,
+        ctx: &mut crate::parser::ParseContext<'a>,
+    ) -> crate::error::ParserResult<Self> {
+        assert_eq!(node.kind_id(), xidl_parser_derive::node_id!("const_expr"));
+        let value = node
+            .named_children(&mut node.walk())
+            .find(|child| child.kind_id() == xidl_parser_derive::node_id!("or_expr"))
+            .ok_or_else(|| {
+                crate::error::ParseError::UnexpectedNode("const_expr missing or_expr".to_string())
+            })?;
+        Ok(Self(OrExpr::from_node(value, ctx)?))
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum OrExpr {
     XorExpr(XorExpr),
     OrExpr(Box<OrExpr>, XorExpr),
+}
+
+impl<'a> crate::parser::FromTreeSitter<'a> for OrExpr {
+    fn from_node(
+        node: tree_sitter::Node<'a>,
+        ctx: &mut crate::parser::ParseContext<'a>,
+    ) -> crate::error::ParserResult<Self> {
+        assert_eq!(node.kind_id(), xidl_parser_derive::node_id!("or_expr"));
+        let mut values = node
+            .named_children(&mut node.walk())
+            .filter(|child| child.is_named())
+            .collect::<Vec<_>>();
+        match values.len() {
+            1 => Ok(Self::XorExpr(XorExpr::from_node(values.remove(0), ctx)?)),
+            2 => Ok(Self::OrExpr(
+                Box::new(OrExpr::from_node(values.remove(0), ctx)?),
+                XorExpr::from_node(values.remove(0), ctx)?,
+            )),
+            _ => Err(crate::error::ParseError::UnexpectedNode(format!(
+                "parent: {}, got: {}",
+                node.kind(),
+                ctx.node_text(&node)?
+            ))),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Parser, Serialize, Deserialize)]

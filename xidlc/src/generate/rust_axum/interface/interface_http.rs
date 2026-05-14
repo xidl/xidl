@@ -3,7 +3,8 @@ use xidl_parser::hir;
 use xidl_parser::rest_hir::{
     HttpMethod as RestHirMethod, HttpOperation,
     semantics::{
-        HttpApiKeyLocation, HttpSecurityOrigin, HttpSecurityProfile, HttpSecurityRequirement,
+        HttpApiKeyLocation, HttpCorsProfile, HttpSecurityOrigin, HttpSecurityProfile,
+        HttpSecurityRequirement,
     },
 };
 
@@ -40,6 +41,15 @@ pub(crate) fn deprecated_context_from_http(http_op: &HttpOperation) -> Deprecate
         after,
         note,
     }
+}
+
+pub(crate) fn cors_layer(http_op: &HttpOperation) -> Option<String> {
+    let cors = http_op.meta.cors.as_ref()?;
+    Some(format!(
+        ".layer(::xidl_rust_axum::tower_http::cors::CorsLayer::new().allow_origin({}).allow_methods([::xidl_rust_axum::axum::http::Method::{}]))",
+        cors_origin_value(cors),
+        reqwest_method_code(http_method_from_hir(http_op.meta.method))
+    ))
 }
 
 pub(crate) fn attr_operation_names(attr: &hir::AttrDcl) -> Vec<String> {
@@ -179,5 +189,21 @@ pub(crate) fn reqwest_method_code(method: HttpMethod) -> String {
         HttpMethod::Delete => "DELETE".to_string(),
         HttpMethod::Head => "HEAD".to_string(),
         HttpMethod::Options => "OPTIONS".to_string(),
+    }
+}
+
+fn cors_origin_value(cors: &HttpCorsProfile) -> String {
+    match cors {
+        HttpCorsProfile::Any => "::xidl_rust_axum::tower_http::cors::Any".to_string(),
+        HttpCorsProfile::Origins(origins) => format!(
+            "[{}]",
+            origins
+                .iter()
+                .map(|origin| format!(
+                    "::xidl_rust_axum::axum::http::HeaderValue::from_static({origin:?})"
+                ))
+                .collect::<Vec<_>>()
+                .join(", ")
+        ),
     }
 }

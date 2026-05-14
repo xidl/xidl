@@ -91,6 +91,11 @@ fn parse_api_key_validates_location_and_name() {
             .expect_err("missing name")
             .contains("non-empty name")
     );
+    assert!(
+        parse_api_key(&bare("api_key"))
+            .expect_err("missing in")
+            .contains("requires in=... and name=...")
+    );
 }
 
 #[test]
