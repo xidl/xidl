@@ -1,0 +1,60 @@
+// method
+@annotation get {
+    string path default "";
+};
+
+@annotation post {
+    string path default "";
+};
+
+@annotation put {
+    string path default "";
+};
+
+@annotation delete {
+    string path default "";
+};
+
+@annotation patch {
+    string path default "";
+};
+
+// op params
+@annotation path {
+    string name default "";
+};
+
+@annotation query {
+    string name default "";
+};
+
+@annotation header {
+    string name default "";
+};
+
+@annotation cookie {
+    string name default "";
+};
+
+@annotation body {
+    string name default "";
+};
+
+// interface, op
+@annotation cors {
+    sequence<string> site;
+};
+
+// interface, op
+@annotation deprecated {
+    string since default "";
+    string after default ""; // optional
+};
+
+@annotation Consumes {
+    string mime_type;
+};
+
+@annotation Produces {
+    string mime_type;
+};
