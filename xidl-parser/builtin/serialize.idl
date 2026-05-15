@@ -1,0 +1,51 @@
+// @name("name")
+@annotation rename {
+    attribute string name;
+};
+
+// @serialize_name("name")
+@annotation serialize_name {
+    attribute string serialize;
+};
+
+// @deserialize_name("name2")
+@annotation deserialize_name {
+    //TODO: attribute sequence<string> deserialize;
+    attribute string deserialize;
+};
+
+@annotation rename_all {
+    enum RenameRule {
+        /// Don't apply a default rename rule.
+        None,
+        /// Rename direct children to "lowercase" style.
+        @rename("lowercase")
+        LowerCase,
+        /// Rename direct children to "UPPERCASE" style.
+        @rename("UPPERCASE")
+        UpperCase,
+        /// Rename direct children to "PascalCase" style, as typically used for
+        /// enum variants.
+        @rename("PascalCase")
+        PascalCase,
+        /// Rename direct children to "camelCase" style.
+        @rename("camelCase")
+        CamelCase,
+        /// Rename direct children to "snake_case" style, as commonly used for
+        /// fields.
+        @rename("snake_case")
+        SnakeCase,
+        /// Rename direct children to "SCREAMING_SNAKE_CASE" style, as commonly
+        /// used for constants.
+        @rename("SCREAMINGSNAKECASE")
+        ScreamingSnakeCase,
+        /// Rename direct children to "kebab-case" style.
+        @rename("kebab-case")
+        KebabCase,
+        /// Rename direct children to "SCREAMING-KEBAB-CASE" style.
+        @rename("SCREAMING-KEBAB-CASE")
+        ScreamingKebabCase,
+    };
+
+    RenameRule rule default None;
+};
