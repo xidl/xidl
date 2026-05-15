@@ -1,6 +1,5 @@
 use xidl_parser::hir;
 
-use super::annotations::field_rename;
 use super::method::TypeRefTarget;
 use super::names::{
     declarator_name, integer_schema, ts_ident, ts_prop_name, ts_scoped_name, zod_schema_ref,
@@ -39,12 +38,13 @@ pub(crate) fn ts_type_for_constr_inline(
         hir::ConstrTypeDcl::StructDcl(def) => {
             let mut fields = Vec::new();
             for member in &def.member {
-                let rename = field_rename(&member.annotations);
                 let optional = member.is_optional();
                 for decl in &member.ident {
-                    let name = rename
-                        .clone()
-                        .unwrap_or_else(|| declarator_name(decl).to_string());
+                    let name = hir::effective_wire_name(
+                        &declarator_name(decl),
+                        &member.annotations,
+                        &def.annotations,
+                    );
                     let ty = ts_type_for_decl(&member.ty, decl, module_path, target);
                     fields.push(if optional {
                         format!("{}?: {ty}", ts_prop_name(&name))
@@ -59,7 +59,8 @@ pub(crate) fn ts_type_for_constr_inline(
             .member
             .iter()
             .map(|value| {
-                let raw = field_rename(&value.annotations).unwrap_or_else(|| value.ident.clone());
+                let raw =
+                    hir::effective_wire_name(&value.ident, &value.annotations, &def.annotations);
                 format!("\"{raw}\"")
             })
             .collect::<Vec<_>>()
@@ -120,12 +121,13 @@ pub(crate) fn zod_schema_for_constr_inline(
         hir::ConstrTypeDcl::StructDcl(def) => {
             let mut fields = Vec::new();
             for member in &def.member {
-                let rename = field_rename(&member.annotations);
                 let optional = member.is_optional();
                 for decl in &member.ident {
-                    let name = rename
-                        .clone()
-                        .unwrap_or_else(|| declarator_name(decl).to_string());
+                    let name = hir::effective_wire_name(
+                        &declarator_name(decl),
+                        &member.annotations,
+                        &def.annotations,
+                    );
                     let schema = zod_schema_for_decl(&member.ty, decl, module_path);
                     fields.push(if optional {
                         format!("{}: {schema}.optional()", ts_prop_name(&name))
@@ -152,7 +154,8 @@ fn inline_enum_zod(def: &hir::EnumDcl) -> String {
         .member
         .iter()
         .map(|value| {
-            let raw = field_rename(&value.annotations).unwrap_or_else(|| value.ident.clone());
+            let raw =
+                hir::effective_wire_name(&value.ident, &value.annotations, &def.annotations);
             format!("\"{raw}\"")
         })
         .collect::<Vec<_>>();

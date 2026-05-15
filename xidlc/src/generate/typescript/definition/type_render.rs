@@ -3,7 +3,6 @@ use crate::generate::typescript::TypescriptRenderer;
 use crate::generate::utils::doc_lines_from_annotations;
 use xidl_parser::hir;
 
-use super::annotations::field_rename;
 use super::contexts::{
     EnumTypeContext, EnumZodContext, FieldTypeContext, FieldZodContext, StructTypeContext,
     StructZodContext, TypedefTypeContext, TypedefZodContext, UnionTypeContext, UnionZodContext,
@@ -130,7 +129,7 @@ fn render_struct(
             .collect::<Vec<_>>();
         (!parents.is_empty()).then(|| parents.join(", "))
     };
-    let fields = struct_fields(&def.member, module_path);
+    let fields = struct_fields(&def.member, &def.annotations, module_path);
     let types = renderer.render_template(
         "struct.d.ts.j2",
         &StructTypeContext {
@@ -178,7 +177,7 @@ fn render_enum(def: &hir::EnumDcl, renderer: &TypescriptRenderer) -> IdlcResult<
         .map(|value| {
             format!(
                 "\"{}\"",
-                field_rename(&value.annotations).unwrap_or_else(|| value.ident.clone())
+                hir::effective_wire_name(&value.ident, &value.annotations, &def.annotations)
             )
         })
         .collect::<Vec<_>>();

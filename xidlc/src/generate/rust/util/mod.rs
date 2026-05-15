@@ -6,7 +6,15 @@ mod util_types;
 
 #[allow(unused_imports)]
 pub use self::util_annotations::{
-    rust_passthrough_attrs_from_annotations, serde_rename_from_annotations,
+    rust_passthrough_attrs_from_annotations,
+};
+#[allow(unused_imports)]
+pub use xidl_parser::hir::{
+    deserialize_aliases as serde_aliases_from_annotations,
+    deserialize_name as serde_deserialize_rename_from_annotations,
+    field_rename as serde_rename_from_annotations,
+    rename_all as serde_rename_all_from_annotations,
+    serialize_name as serde_serialize_rename_from_annotations,
 };
 #[allow(unused_imports)]
 pub use self::util_declarators::{
