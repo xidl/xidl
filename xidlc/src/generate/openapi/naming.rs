@@ -1,9 +1,6 @@
 use crate::openapi::path::HttpMethod as OpenApiHttpMethod;
 use xidl_parser::hir;
 use xidl_parser::rest_hir::HttpMethod;
-use xidl_parser::rest_hir::semantics::{
-    annotation_name, annotation_params, normalize_annotation_params,
-};
 
 pub(crate) fn declarator_name(decl: &hir::Declarator) -> String {
     match decl {
@@ -31,29 +28,6 @@ pub(crate) fn operation_id(
     parts.push(interface_name.to_string());
     parts.push(method_name.to_string());
     parts.join(".")
-}
-
-pub(crate) fn field_rename(annotations: &[hir::Annotation]) -> Option<String> {
-    for annotation in annotations {
-        let Some(name) = annotation_name(annotation) else {
-            continue;
-        };
-        if !name.eq_ignore_ascii_case("name") {
-            continue;
-        }
-        let value = annotation_params(annotation)
-            .map(normalize_annotation_params)
-            .and_then(|params| {
-                params
-                    .get("value")
-                    .cloned()
-                    .or_else(|| params.get("name").cloned())
-            });
-        if value.is_some() {
-            return value;
-        }
-    }
-    None
 }
 
 pub(crate) fn openapi_path_template(path: &str) -> String {

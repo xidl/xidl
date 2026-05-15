@@ -16,11 +16,11 @@ rust_annotation_passthrough.rs
 )]
 #[async_trait::async_trait]
 pub trait RustHttp {
-    #[cfg(feature = "server")]
+    #[cfg(feature = server)]
     async fn get_user(&self, user_id: u32) -> ::xidl_rust_axum::Result<String>;
-    #[cfg(feature = "server")]
+    #[cfg(feature = server)]
     async fn get_attribute_display_name(&self) -> ::xidl_rust_axum::Result<String>;
-    #[cfg(feature = "server")]
+    #[cfg(feature = server)]
     async fn set_attribute_display_name(
         &self,
         display_name: String,

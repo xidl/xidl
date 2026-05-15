@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use crate::error::{IdlcError, IdlcResult};
 use xidl_parser::hir;
 
-use super::annotations::{annotation_name, annotation_params, normalize_params};
+use super::annotations::{annotation_name, annotation_params};
 use super::method::{HttpMethod, ParamDirection, ParamSource};
 
 pub(crate) struct SourceBinding {
@@ -31,7 +31,7 @@ pub(crate) fn route_from_annotations(
             }
             method = Some(current);
             if let Some(path) = annotation_params(annotation)
-                .map(normalize_params)
+                .map(hir::normalize_annotation_params)
                 .and_then(|params| params.get("path").cloned())
             {
                 paths.push(normalize_path(&path));
@@ -40,7 +40,7 @@ pub(crate) fn route_from_annotations(
         }
         if name.eq_ignore_ascii_case("path")
             && let Some(path) = annotation_params(annotation)
-                .map(normalize_params)
+                .map(hir::normalize_annotation_params)
                 .and_then(|params| {
                     params
                         .get("value")
@@ -84,7 +84,7 @@ pub(crate) fn explicit_param_binding(param: &hir::ParamDcl) -> IdlcResult<Option
         };
         let Some(current) = current else { continue };
         let bound_name = annotation_params(annotation)
-            .map(normalize_params)
+            .map(hir::normalize_annotation_params)
             .and_then(|params| params.get("value").cloned())
             .unwrap_or_else(|| param.declarator.0.clone());
         if matches!(current, ParamSource::Header) {

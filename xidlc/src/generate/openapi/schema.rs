@@ -1,4 +1,4 @@
-use crate::generate::openapi::naming::{declarator_name, field_rename};
+use crate::generate::openapi::naming::declarator_name;
 use crate::generate::utils::doc_lines_from_annotations;
 use crate::openapi::path::{Parameter, ParameterBuilder, ParameterIn};
 use crate::openapi::request_body::RequestBody;
@@ -44,13 +44,20 @@ pub(crate) fn parameter_schema(
 }
 
 pub(crate) fn schema_for_struct(members: &[hir::Member]) -> RefOr<Schema> {
+    schema_for_struct_with_annotations(members, &[])
+}
+
+pub(crate) fn schema_for_struct_with_annotations(
+    members: &[hir::Member],
+    container_annotations: &[hir::Annotation],
+) -> RefOr<Schema> {
     let mut object = ObjectBuilder::new().schema_type(Type::Object);
     for member in members {
-        let rename = field_rename(&member.annotations);
         let optional = member.is_optional();
         let doc = doc_text(&member.annotations);
         for decl in &member.ident {
-            let name = rename.clone().unwrap_or_else(|| declarator_name(decl));
+            let name =
+                hir::effective_wire_name(&declarator_name(decl), &member.annotations, container_annotations);
             let schema =
                 apply_schema_description(schema_for_decl(&member.ty, decl), doc.as_deref());
             object = object.property(name.clone(), schema);

@@ -7,6 +7,9 @@
 {%- if derive and derive | length > 0 %}
     #[derive({{ derive | join(", ") }})]
 {%- endif %}
+{% if enable_serde_attrs and serde_rename_all %}
+    #[serde(rename_all = "{{ serde_rename_all }}")]
+{% endif %}
 {% if opt.enable_default_derive is undefined or opt.enable_default_derive %}
     #[derive(Default)]
 {% endif %}
@@ -21,8 +24,21 @@ pub struct {{ ident }} {
         {% for attr in member.rust_attrs %}
             #[{{ attr }}]
         {% endfor %}
-        {% if opt.enable_serialize and opt.enable_deserialize and enable_serde_attrs and member.serde_rename is defined and member.serde_rename %}
-            #[serde(rename = "{{ member.serde_rename }}")]
+        {% if enable_serde_attrs %}
+            {% if member.serde_rename is defined and member.serde_rename %}
+                #[serde(rename = "{{ member.serde_rename }}")]
+            {% endif %}
+            {% if member.serde_rename_serialize is defined and member.serde_rename_serialize %}
+                #[serde(rename(serialize = "{{ member.serde_rename_serialize }}"))]
+            {% endif %}
+            {% if member.serde_rename_deserialize is defined and member.serde_rename_deserialize %}
+                #[serde(rename(deserialize = "{{ member.serde_rename_deserialize }}"))]
+            {% endif %}
+            {% if member.serde_aliases is defined and member.serde_aliases %}
+                {% for alias in member.serde_aliases %}
+                    #[serde(alias = "{{ alias }}")]
+                {% endfor %}
+            {% endif %}
         {% endif %}
         pub {{ member.name }}: {{ member.ty }},
     {%- endfor %}

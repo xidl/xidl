@@ -1,8 +1,9 @@
 use super::builder::{build_error_schema, build_operation};
-use super::naming::{declarator_name, field_rename, openapi_method_name, scoped_name};
+use super::naming::{declarator_name, openapi_method_name, scoped_name};
 use super::operation::{MethodInfo, render_http_operation};
 use super::schema::{
-    apply_schema_description, doc_text, schema_for_constr_type, schema_for_struct, schema_for_union,
+    apply_schema_description, doc_text, schema_for_constr_type, schema_for_struct_with_annotations,
+    schema_for_union,
 };
 use super::security::register_security_schemes;
 use super::stream::{OpenApiStreamPatch, request_stream_content_type, stream_patch_item_schema};
@@ -107,7 +108,7 @@ impl OpenApiContext {
             hir::ConstrTypeDcl::StructDcl(def) => {
                 let name = scoped_name(module_path, &def.ident);
                 let schema = apply_schema_description(
-                    schema_for_struct(&def.member),
+                    schema_for_struct_with_annotations(&def.member, &def.annotations),
                     doc_text(&def.annotations).as_deref(),
                 );
                 self.schemas.insert(name, schema);
@@ -119,7 +120,7 @@ impl OpenApiContext {
                     .iter()
                     .map(|v| {
                         serde_json::Value::String(
-                            field_rename(&v.annotations).unwrap_or_else(|| v.ident.clone()),
+                            hir::effective_wire_name(&v.ident, &v.annotations, &def.annotations),
                         )
                     })
                     .collect::<Vec<_>>();
@@ -164,7 +165,8 @@ impl OpenApiContext {
 
     fn collect_exception(&mut self, except: &hir::ExceptDcl, module_path: &[String]) {
         let name = scoped_name(module_path, &except.ident);
-        self.schemas.insert(name, schema_for_struct(&except.member));
+        self.schemas
+            .insert(name, schema_for_struct_with_annotations(&except.member, &[]));
     }
 
     fn collect_interface(

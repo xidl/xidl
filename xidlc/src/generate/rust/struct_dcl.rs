@@ -1,7 +1,9 @@
 use crate::error::IdlcResult;
 use crate::generate::rust::util::{
     declarator_name, rust_derive_info_with_extra, rust_passthrough_attrs_from_annotations,
-    rust_scoped_name, serde_rename_from_annotations, type_with_decl,
+    rust_scoped_name, serde_aliases_from_annotations,
+    serde_deserialize_rename_from_annotations, serde_rename_all_from_annotations,
+    serde_rename_from_annotations, serde_serialize_rename_from_annotations, type_with_decl,
 };
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::doc_lines_from_annotations;
@@ -33,6 +35,9 @@ pub(crate) fn render_struct_with_config(
             let field_id = member.field_id.map(|value| format!("{value}u32"));
             let optional = member.is_optional();
             let rename = serde_rename_from_annotations(&member.annotations);
+            let rename_serialize = serde_serialize_rename_from_annotations(&member.annotations);
+            let rename_deserialize = serde_deserialize_rename_from_annotations(&member.annotations);
+            let aliases = serde_aliases_from_annotations(&member.annotations);
             let doc = doc_lines_from_annotations(&member.annotations);
             let rust_attrs = rust_passthrough_attrs_from_annotations(&member.annotations);
             member.ident.iter().map(move |decl| {
@@ -48,6 +53,9 @@ pub(crate) fn render_struct_with_config(
                     "ty": ty,
                     "name": name,
                     "serde_rename": rename,
+                    "serde_rename_serialize": rename_serialize,
+                    "serde_rename_deserialize": rename_deserialize,
+                    "serde_aliases": aliases,
                     "field_id": field_id.clone(),
                     "optional": optional,
                     "doc": doc,
@@ -64,6 +72,7 @@ pub(crate) fn render_struct_with_config(
             "members": members,
             "derive": derive.all,
             "enable_serde_attrs": derive.enable_serde_attrs(),
+            "serde_rename_all": serde_rename_all_from_annotations(&def.annotations),
             "rust_attrs": rust_passthrough_attrs_from_annotations(&def.annotations),
         }),
         &doc_lines_from_annotations(&def.annotations),

@@ -20,6 +20,9 @@ Eq,
     Default,
 {% endif %}
 )]
+{% if (has_serde_serialize or has_serde_deserialize) and serde_rename_all %}
+#[serde(rename_all = "{{ serde_rename_all }}")]
+{% endif %}
 pub enum {{ ident }} {
     {% for member in members %}
         {%- for line in member.doc %}
@@ -28,8 +31,21 @@ pub enum {{ ident }} {
         {% for attr in member.rust_attrs %}
             #[{{ attr }}]
         {% endfor %}
-        {% if (has_serde_serialize or has_serde_deserialize) and member.serde_rename is defined and member.serde_rename %}
-            #[serde(rename = "{{ member.serde_rename }}")]
+        {% if (has_serde_serialize or has_serde_deserialize) %}
+            {% if member.serde_rename is defined and member.serde_rename %}
+                #[serde(rename = "{{ member.serde_rename }}")]
+            {% endif %}
+            {% if member.serde_rename_serialize is defined and member.serde_rename_serialize %}
+                #[serde(rename(serialize = "{{ member.serde_rename_serialize }}"))]
+            {% endif %}
+            {% if member.serde_rename_deserialize is defined and member.serde_rename_deserialize %}
+                #[serde(rename(deserialize = "{{ member.serde_rename_deserialize }}"))]
+            {% endif %}
+            {% if member.serde_aliases is defined and member.serde_aliases %}
+                {% for alias in member.serde_aliases %}
+                    #[serde(alias = "{{ alias }}")]
+                {% endfor %}
+            {% endif %}
         {% endif %}
         {% if member.is_default %}
             #[default]
