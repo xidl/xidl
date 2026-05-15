@@ -1,0 +1,14 @@
+@annotation http_basic {
+    string realm default "";
+};
+
+@annotation api_key {
+    string in;
+    string name;
+};
+
+@annotation http_bearer {
+};
+
+@annotation no_security {
+};

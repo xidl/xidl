@@ -1,0 +1,12 @@
+@annotation server_stream {
+};
+
+@annotation client_stream {
+};
+
+@annotation bidi_stream {
+};
+
+@annotation stream_codec {
+    string encoded;
+};
