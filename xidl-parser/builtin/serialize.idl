@@ -49,3 +49,5 @@
 
     RenameRule rule default None;
 };
+
+@annotation skip {};

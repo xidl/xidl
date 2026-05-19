@@ -96,10 +96,15 @@ pub(super) fn render_type_decl(out: &mut String, type_dcl: &hir::TypeDcl) {
 pub(super) fn render_struct(out: &mut String, value: &hir::StructDcl) {
     writeln!(out, "@dataclass").unwrap();
     writeln!(out, "class {}:", py_type_name(&value.ident)).unwrap();
-    if value.member.is_empty() {
+    let members: Vec<_> = value
+        .member
+        .iter()
+        .filter(|m| !hir::is_skipped(&m.annotations))
+        .collect();
+    if members.is_empty() {
         writeln!(out, "    pass").unwrap();
     } else {
-        for member in &value.member {
+        for member in members {
             let member_ty = py_type(&member.ty);
             for declarator in &member.ident {
                 match declarator {
@@ -166,10 +171,15 @@ pub(super) fn render_const(out: &mut String, value: &hir::ConstDcl) {
 pub(super) fn render_exception(out: &mut String, value: &hir::ExceptDcl) {
     writeln!(out, "@dataclass").unwrap();
     writeln!(out, "class {}(Exception):", py_type_name(&value.ident)).unwrap();
-    if value.member.is_empty() {
+    let members: Vec<_> = value
+        .member
+        .iter()
+        .filter(|m| !hir::is_skipped(&m.annotations))
+        .collect();
+    if members.is_empty() {
         writeln!(out, "    message: str = \"\"").unwrap();
     } else {
-        for member in &value.member {
+        for member in members {
             let member_ty = py_type(&member.ty);
             for declarator in &member.ident {
                 match declarator {

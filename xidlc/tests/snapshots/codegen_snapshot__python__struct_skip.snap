@@ -1,0 +1,20 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+struct_skip.py
+===============
+from __future__ import annotations
+
+import abc
+import enum
+from dataclasses import dataclass, field
+from typing import Any, Optional
+
+# generated module: struct_skip
+
+@dataclass
+class SkipStruct:
+    a: int = 0
+    c: int = 0

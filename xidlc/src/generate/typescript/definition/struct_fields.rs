@@ -12,6 +12,9 @@ pub(crate) fn struct_fields(
 ) -> Vec<FieldDecl> {
     let mut fields = Vec::new();
     for member in members {
+        if hir::is_skipped(&member.annotations) {
+            continue;
+        }
         let doc = doc_lines_from_annotations(&member.annotations);
         for decl in &member.ident {
             let name = hir::effective_wire_name(

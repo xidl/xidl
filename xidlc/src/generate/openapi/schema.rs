@@ -54,6 +54,9 @@ pub(crate) fn schema_for_struct_with_annotations(
 ) -> RefOr<Schema> {
     let mut object = ObjectBuilder::new().schema_type(Type::Object);
     for member in members {
+        if hir::is_skipped(&member.annotations) {
+            continue;
+        }
         let optional = member.is_optional();
         let doc = doc_text(&member.annotations);
         for decl in &member.ident {

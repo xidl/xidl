@@ -161,6 +161,7 @@ fn render_field_struct(
     writeln!(&mut ctx.body, "type {name} struct {{").unwrap();
     for member in members {
         let is_optional = member.is_optional();
+        let is_skipped = hir::is_skipped(&member.annotations);
         for decl in &member.ident {
             let raw_name = declarator_name(decl);
             let field = go_field_name(raw_name);
@@ -168,8 +169,11 @@ fn render_field_struct(
             if is_optional {
                 ty = pointer_type(&ty);
             }
-            let wire_name =
-                effective_wire_name(raw_name, &member.annotations, container_annotations);
+            let wire_name = if is_skipped {
+                "-".to_string()
+            } else {
+                effective_wire_name(raw_name, &member.annotations, container_annotations)
+            };
             writeln!(&mut ctx.body, "\t{field} {ty} `json:\"{wire_name}\"`").unwrap();
         }
     }

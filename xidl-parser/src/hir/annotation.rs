@@ -125,6 +125,7 @@ pub enum Annotation {
     RenameAll {
         rule: RenameRule,
     },
+    Skip,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -251,6 +252,10 @@ pub fn normalize_annotation_params(params: &AnnotationParams) -> HashMap<String,
         }
     }
     out
+}
+
+pub fn is_skipped(annotations: &[Annotation]) -> bool {
+    annotations.iter().any(|a| matches!(a, Annotation::Skip))
 }
 
 pub fn field_rename(annotations: &[Annotation]) -> Option<String> {
@@ -399,6 +404,7 @@ impl From<crate::typed_ast::AnnotationAppl> for Annotation {
                         }
                     }
                 }
+                "skip" => return Self::Skip,
                 _ => {}
             }
         }
