@@ -47,12 +47,12 @@ fn rust_passthrough_attr_name(annotation: &hir::Annotation) -> Option<String> {
 fn render_rust_passthrough_params(params: &hir::AnnotationParams) -> String {
     match params {
         hir::AnnotationParams::Raw(value) => value.trim().to_string(),
-        hir::AnnotationParams::ConstExpr(expr) => hir::normalize_annotation_params(
-            &hir::AnnotationParams::ConstExpr(expr.clone()),
-        )
-        .get("value")
-        .cloned()
-        .unwrap_or_default(),
+        hir::AnnotationParams::ConstExpr(expr) => {
+            hir::normalize_annotation_params(&hir::AnnotationParams::ConstExpr(expr.clone()))
+                .get("value")
+                .cloned()
+                .unwrap_or_default()
+        }
         hir::AnnotationParams::Positional(values) => values
             .iter()
             .map(|value| {

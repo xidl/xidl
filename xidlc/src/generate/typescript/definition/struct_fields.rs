@@ -15,7 +15,7 @@ pub(crate) fn struct_fields(
         let doc = doc_lines_from_annotations(&member.annotations);
         for decl in &member.ident {
             let name = hir::effective_wire_name(
-                &declarator_name(decl),
+                declarator_name(decl),
                 &member.annotations,
                 container_annotations,
             );

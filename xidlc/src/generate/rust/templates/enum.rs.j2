@@ -21,7 +21,7 @@ Eq,
 {% endif %}
 )]
 {% if (has_serde_serialize or has_serde_deserialize) and serde_rename_all %}
-#[serde(rename_all = "{{ serde_rename_all }}")]
+    #[serde(rename_all = "{{ serde_rename_all }}")]
 {% endif %}
 pub enum {{ ident }} {
     {% for member in members %}

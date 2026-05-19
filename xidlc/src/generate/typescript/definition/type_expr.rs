@@ -41,7 +41,7 @@ pub(crate) fn ts_type_for_constr_inline(
                 let optional = member.is_optional();
                 for decl in &member.ident {
                     let name = hir::effective_wire_name(
-                        &declarator_name(decl),
+                        declarator_name(decl),
                         &member.annotations,
                         &def.annotations,
                     );
@@ -124,7 +124,7 @@ pub(crate) fn zod_schema_for_constr_inline(
                 let optional = member.is_optional();
                 for decl in &member.ident {
                     let name = hir::effective_wire_name(
-                        &declarator_name(decl),
+                        declarator_name(decl),
                         &member.annotations,
                         &def.annotations,
                     );
@@ -154,8 +154,7 @@ fn inline_enum_zod(def: &hir::EnumDcl) -> String {
         .member
         .iter()
         .map(|value| {
-            let raw =
-                hir::effective_wire_name(&value.ident, &value.annotations, &def.annotations);
+            let raw = hir::effective_wire_name(&value.ident, &value.annotations, &def.annotations);
             format!("\"{raw}\"")
         })
         .collect::<Vec<_>>();

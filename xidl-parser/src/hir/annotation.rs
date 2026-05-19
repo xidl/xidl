@@ -227,6 +227,8 @@ pub fn effective_wire_name(
     container_annotations: &[Annotation],
 ) -> String {
     field_rename(annotations)
+        .or_else(|| serialize_name(annotations))
+        .or_else(|| deserialize_name(annotations))
         .unwrap_or_else(|| apply_rename_rule(raw_name, rename_all(container_annotations)))
 }
 
@@ -361,9 +363,11 @@ fn parse_string_list(value: &str) -> Vec<String> {
                 .map(ToString::to_string)
                 .collect();
         }
-        return (!value.is_empty())
-            .then(|| vec![value.trim_matches('"').to_string()])
-            .unwrap_or_default();
+        if !value.is_empty() {
+            return vec![value.trim_matches('"').to_string()];
+        } else {
+            return vec![];
+        }
     }
     let inner = &value[1..value.len() - 1];
     inner
@@ -435,15 +439,15 @@ fn parse_raw_annotation_params(raw: &str) -> Vec<(String, String)> {
 
     parts
         .into_iter()
-        .filter_map(|part| {
+        .map(|part| {
             if let Some((key, value)) = part.split_once('=') {
-                let value =
-                    trim_annotation_quotes(value.trim()).unwrap_or_else(|| value.trim().to_string());
-                Some((key.trim().to_string(), unescape_param_value(&value)))
+                let value = trim_annotation_quotes(value.trim())
+                    .unwrap_or_else(|| value.trim().to_string());
+                (key.trim().to_string(), unescape_param_value(&value))
             } else {
-                let value = trim_annotation_quotes(part.trim())
-                    .unwrap_or_else(|| part.trim().to_string());
-                Some(("value".to_string(), unescape_param_value(&value)))
+                let value =
+                    trim_annotation_quotes(part.trim()).unwrap_or_else(|| part.trim().to_string());
+                ("value".to_string(), unescape_param_value(&value))
             }
         })
         .collect()

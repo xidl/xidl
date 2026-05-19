@@ -11,13 +11,13 @@ package http_header
 type TestStatus string
 
 const (
-	TestStatusOk TestStatus = "OK"
+	TestStatusOk TestStatus = "ok"
 	TestStatusFailed TestStatus = "FAILED"
 )
 
 type TestUser struct {
 	Id uint32 `json:"id"`
-	Name string `json:"name"`
+	Name string `json:"full_name"`
 	Status Status `json:"status"`
 }
 

@@ -1,0 +1,30 @@
+struct User {
+    @rename("userId")
+    string user_id;
+    @rename(name = "user_name")
+    string name;
+    @serialize_name("user_email")
+    string email;
+};
+
+@rename_all("camelCase")
+struct Settings {
+    string font_size;
+    boolean enable_notifications;
+};
+
+enum Color {
+    @rename("RED")
+    Red,
+    Green,
+    Blue,
+};
+
+@rename_all("camelCase")
+interface Api {
+    void do_something(
+        @rename("val")
+        string value,
+        string some_longer_name
+    );
+};

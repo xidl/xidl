@@ -28,6 +28,7 @@ pub(super) fn render_interface(
     def: &hir::InterfaceDcl,
     prefix: &[String],
 ) -> IdlcResult<()> {
+    let container_annotations = &def.annotations;
     let hir::InterfaceDclInner::InterfaceDef(def) = &def.decl else {
         return Ok(());
     };
@@ -39,7 +40,7 @@ pub(super) fn render_interface(
             match export {
                 hir::Export::OpDcl(op) => {
                     let (request_name, response_name) =
-                        render_operation_types(ctx, &interface_name, op)?;
+                        render_operation_types(ctx, &interface_name, op, container_annotations)?;
                     methods.push((go_field_name(&op.ident), request_name, response_name));
                 }
                 hir::Export::AttrDcl(attr) => {
@@ -68,6 +69,7 @@ fn render_operation_types(
     ctx: &mut GoRenderContext,
     interface_name: &str,
     op: &hir::OpDcl,
+    container_annotations: &[hir::Annotation],
 ) -> IdlcResult<(String, String)> {
     let request_name = format!(
         "{}{}Request",
@@ -84,12 +86,14 @@ fn render_operation_types(
         .iter()
         .filter(|param| !is_out_param(param.attr.as_ref()))
     {
-        let field = go_field_name(&param.declarator.0);
+        let raw_name = &param.declarator.0;
+        let field = go_field_name(raw_name);
+        let wire_name =
+            hir::effective_wire_name(raw_name, &param.annotations, container_annotations);
         writeln!(
             &mut ctx.body,
-            "\t{field} {} `json:\"{}\"`",
+            "\t{field} {} `json:\"{wire_name}\"`",
             go_type(&param.ty),
-            param.declarator.0
         )
         .unwrap();
     }
@@ -106,12 +110,14 @@ fn render_operation_types(
             ParamDirection::Out | ParamDirection::InOut
         )
     }) {
-        let field = go_field_name(&param.declarator.0);
+        let raw_name = &param.declarator.0;
+        let field = go_field_name(raw_name);
+        let wire_name =
+            hir::effective_wire_name(raw_name, &param.annotations, container_annotations);
         writeln!(
             &mut ctx.body,
-            "\t{field} {} `json:\"{}\"`",
+            "\t{field} {} `json:\"{wire_name}\"`",
             go_type(&param.ty),
-            param.declarator.0
         )
         .unwrap();
     }
