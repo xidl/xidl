@@ -81,8 +81,7 @@ mod tests {
     use super::RustRenderer;
     use super::generate_with_properties;
     use crate::generate::rust::util::{
-        serde_deserialize_rename_from_annotations, serde_rename_all_from_annotations,
-        serde_rename_from_annotations, serde_serialize_rename_from_annotations,
+        serde_rename_all_from_annotations, serde_rename_from_annotations,
     };
     use serde_json::json;
     use std::collections::HashMap;
@@ -109,12 +108,6 @@ mod tests {
             hir::Annotation::Rename {
                 name: "wireName".into(),
             },
-            hir::Annotation::SerializeName {
-                serialize: "writeOnly".into(),
-            },
-            hir::Annotation::DeserializeName {
-                deserialize: vec!["readOnly".into()],
-            },
             hir::Annotation::RenameAll {
                 rule: RenameRule::CamelCase,
             },
@@ -123,14 +116,6 @@ mod tests {
         assert_eq!(
             serde_rename_from_annotations(&annotations),
             Some("wireName".to_string())
-        );
-        assert_eq!(
-            serde_serialize_rename_from_annotations(&annotations),
-            Some("writeOnly".to_string())
-        );
-        assert_eq!(
-            serde_deserialize_rename_from_annotations(&annotations),
-            Some("readOnly".to_string())
         );
         assert_eq!(
             serde_rename_all_from_annotations(&annotations),
@@ -156,9 +141,7 @@ mod tests {
                         "doc": [],
                         "rust_attrs": [],
                         "serde_rename": "wireName",
-                        "serde_rename_serialize": "writeOnly",
-                        "serde_rename_deserialize": "readOnly",
-                        "serde_aliases": ["legacyName"],
+                        "serde_skip": false,
                         "name": "plain_name",
                         "ty": "String"
                     }]
@@ -168,9 +151,6 @@ mod tests {
 
         assert!(rendered.contains("#[serde(rename_all = \"camelCase\")]"));
         assert!(rendered.contains("#[serde(rename = \"wireName\")]"));
-        assert!(rendered.contains("#[serde(rename(serialize = \"writeOnly\"))]"));
-        assert!(rendered.contains("#[serde(rename(deserialize = \"readOnly\"))]"));
-        assert!(rendered.contains("#[serde(alias = \"legacyName\")]"));
     }
 
     #[test]
@@ -190,9 +170,6 @@ mod tests {
                         "doc": [],
                         "rust_attrs": [],
                         "serde_rename": "wire-value",
-                        "serde_rename_serialize": "WRITE-ONLY",
-                        "serde_rename_deserialize": "READ-ONLY",
-                        "serde_aliases": ["LEGACY-VALUE"],
                         "is_default": true,
                         "name": "LocalValue"
                     }]
@@ -202,8 +179,5 @@ mod tests {
 
         assert!(rendered.contains("#[serde(rename_all = \"SCREAMING-KEBAB-CASE\")]"));
         assert!(rendered.contains("#[serde(rename = \"wire-value\")]"));
-        assert!(rendered.contains("#[serde(rename(serialize = \"WRITE-ONLY\"))]"));
-        assert!(rendered.contains("#[serde(rename(deserialize = \"READ-ONLY\"))]"));
-        assert!(rendered.contains("#[serde(alias = \"LEGACY-VALUE\")]"));
     }
 }

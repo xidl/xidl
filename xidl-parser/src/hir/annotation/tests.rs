@@ -6,24 +6,12 @@ fn serialize_annotation_helpers_read_standard_param_forms() {
         Annotation::Rename {
             name: "wireName".to_string(),
         },
-        Annotation::SerializeName {
-            serialize: "writeOnly".to_string(),
-        },
-        Annotation::DeserializeName {
-            deserialize: vec!["readOnly".to_string(), "legacyName".to_string()],
-        },
         Annotation::RenameAll {
             rule: RenameRule::CamelCase,
         },
     ];
 
     assert_eq!(field_rename(&annotations), Some("wireName".to_string()));
-    assert_eq!(serialize_name(&annotations), Some("writeOnly".to_string()));
-    assert_eq!(deserialize_name(&annotations), Some("readOnly".to_string()));
-    assert_eq!(
-        deserialize_aliases(&annotations),
-        vec!["legacyName".to_string()]
-    );
     assert_eq!(rename_all(&annotations), Some(RenameRule::CamelCase));
 }
 

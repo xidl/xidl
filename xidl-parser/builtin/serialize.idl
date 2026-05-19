@@ -3,17 +3,6 @@
     attribute string name;
 };
 
-// @serialize_name("name")
-@annotation serialize_name {
-    attribute string serialize;
-};
-
-// @deserialize_name("name2")
-@annotation deserialize_name {
-    //TODO: attribute sequence<string> deserialize;
-    attribute string deserialize;
-};
-
 @annotation rename_all {
     enum RenameRule {
         /// Don't apply a default rename rule.

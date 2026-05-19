@@ -1,9 +1,7 @@
 use crate::error::IdlcResult;
 use crate::generate::rust::util::{
     rust_derive_info_with_extra, rust_passthrough_attrs_from_annotations,
-    serde_aliases_from_annotations, serde_deserialize_rename_from_annotations,
     serde_rename_all_from_annotations, serde_rename_from_annotations,
-    serde_serialize_rename_from_annotations,
 };
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::doc_lines_from_annotations;
@@ -19,10 +17,6 @@ impl RustRender for hir::EnumDcl {
             .map(|member| {
                 let rust_name = crate::generate::rust::util::rust_ident(&member.ident);
                 let rename = serde_rename_from_annotations(&member.annotations);
-                let rename_serialize = serde_serialize_rename_from_annotations(&member.annotations);
-                let rename_deserialize =
-                    serde_deserialize_rename_from_annotations(&member.annotations);
-                let aliases = serde_aliases_from_annotations(&member.annotations);
                 let doc = doc_lines_from_annotations(&member.annotations);
                 let rust_attrs = rust_passthrough_attrs_from_annotations(&member.annotations);
                 let is_default = member
@@ -35,9 +29,6 @@ impl RustRender for hir::EnumDcl {
                 json!({
                     "name": rust_name,
                     "serde_rename": rename,
-                    "serde_rename_serialize": rename_serialize,
-                    "serde_rename_deserialize": rename_deserialize,
-                    "serde_aliases": aliases,
                     "doc": doc,
                     "rust_attrs": rust_attrs,
                     "is_default": is_default
