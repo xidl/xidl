@@ -149,10 +149,11 @@ fn collect_defs_with_context(
 }
 
 fn expand_interface(properties: &ParserProperties) -> bool {
-    properties
-        .get("expand_interface")
-        .and_then(Value::as_bool)
-        .unwrap_or(true)
+    if let Some(expand) = properties.get("expand_interface").and_then(Value::as_bool) {
+        return expand;
+    }
+
+    matches!(hir_projection_kind(properties), HirProjectionKind::Rpc)
 }
 
 fn hir_projection_kind(properties: &ParserProperties) -> HirProjectionKind {
