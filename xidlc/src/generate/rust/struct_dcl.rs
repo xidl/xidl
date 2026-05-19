@@ -1,9 +1,9 @@
 use crate::error::IdlcResult;
 use crate::generate::rust::util::{
     declarator_name, rust_derive_info_with_extra, rust_passthrough_attrs_from_annotations,
-    rust_scoped_name, serde_aliases_from_annotations,
-    serde_deserialize_rename_from_annotations, serde_rename_all_from_annotations,
-    serde_rename_from_annotations, serde_serialize_rename_from_annotations, type_with_decl,
+    rust_scoped_name, serde_aliases_from_annotations, serde_deserialize_rename_from_annotations,
+    serde_rename_all_from_annotations, serde_rename_from_annotations,
+    serde_serialize_rename_from_annotations, type_with_decl,
 };
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::doc_lines_from_annotations;

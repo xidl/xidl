@@ -1,4 +1,6 @@
-use super::{Annotation, BinaryOperator, ConstExpr, IntegerLiteral, IntegerSign, Literal, UnaryOperator};
+use super::{
+    Annotation, BinaryOperator, ConstExpr, IntegerLiteral, IntegerSign, Literal, UnaryOperator,
+};
 
 #[cfg(test)]
 mod tests;

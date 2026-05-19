@@ -119,9 +119,11 @@ impl OpenApiContext {
                     .member
                     .iter()
                     .map(|v| {
-                        serde_json::Value::String(
-                            hir::effective_wire_name(&v.ident, &v.annotations, &def.annotations),
-                        )
+                        serde_json::Value::String(hir::effective_wire_name(
+                            &v.ident,
+                            &v.annotations,
+                            &def.annotations,
+                        ))
                     })
                     .collect::<Vec<_>>();
                 let schema = RefOr::T(Schema::from(
@@ -165,8 +167,10 @@ impl OpenApiContext {
 
     fn collect_exception(&mut self, except: &hir::ExceptDcl, module_path: &[String]) {
         let name = scoped_name(module_path, &except.ident);
-        self.schemas
-            .insert(name, schema_for_struct_with_annotations(&except.member, &[]));
+        self.schemas.insert(
+            name,
+            schema_for_struct_with_annotations(&except.member, &[]),
+        );
     }
 
     fn collect_interface(

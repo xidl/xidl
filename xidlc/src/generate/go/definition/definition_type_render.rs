@@ -2,7 +2,7 @@ use crate::error::IdlcResult;
 use crate::generate::go::GoRenderContext;
 use convert_case::{Case, Casing};
 use std::fmt::Write;
-use xidl_parser::hir;
+use xidl_parser::hir::{self, effective_wire_name};
 
 use super::definition_names::{go_export_name, go_field_name, pointer_type};
 use super::definition_support::declarator_name;
@@ -31,14 +31,7 @@ pub(super) fn render_exception(
     prefix: &[String],
 ) -> IdlcResult<()> {
     let name = go_export_name(prefix, &def.ident);
-    render_field_struct(
-        ctx,
-        &name,
-        &def.member,
-        |member| member.is_optional(),
-        |member| &member.ty,
-        |member| &member.ident,
-    );
+    render_field_struct(ctx, &name, &def.member, &[]);
     writeln!(&mut ctx.body, "func (e *{name}) Error() string {{").unwrap();
     writeln!(&mut ctx.body, "\treturn \"{name}\"").unwrap();
     writeln!(&mut ctx.body, "}}").unwrap();
@@ -125,9 +118,7 @@ fn render_struct(
         ctx,
         &go_export_name(prefix, &def.ident),
         &def.member,
-        |member| member.is_optional(),
-        |member| &member.ty,
-        |member| &member.ident,
+        &def.annotations,
     );
     Ok(())
 }
@@ -139,12 +130,8 @@ fn render_enum(ctx: &mut GoRenderContext, def: &hir::EnumDcl, prefix: &[String])
     writeln!(&mut ctx.body, "const (").unwrap();
     for member in &def.member {
         let value_name = format!("{}{}", name, member.ident.to_case(Case::Pascal));
-        writeln!(
-            &mut ctx.body,
-            "\t{value_name} {name} = \"{}\"",
-            member.ident
-        )
-        .unwrap();
+        let wire_name = effective_wire_name(&member.ident, &member.annotations, &def.annotations);
+        writeln!(&mut ctx.body, "\t{value_name} {name} = \"{wire_name}\"").unwrap();
     }
     writeln!(&mut ctx.body, ")").unwrap();
     writeln!(&mut ctx.body).unwrap();
@@ -165,28 +152,25 @@ fn render_simple_struct(
     Ok(())
 }
 
-fn render_field_struct<Member>(
+fn render_field_struct(
     ctx: &mut GoRenderContext,
     name: &str,
-    members: &[Member],
-    is_optional: impl Fn(&Member) -> bool,
-    member_ty: impl Fn(&Member) -> &hir::TypeSpec,
-    declarators: impl Fn(&Member) -> &[hir::Declarator],
+    members: &[hir::Member],
+    container_annotations: &[hir::Annotation],
 ) {
     writeln!(&mut ctx.body, "type {name} struct {{").unwrap();
     for member in members {
-        for decl in declarators(member) {
-            let field = go_field_name(declarator_name(decl));
-            let mut ty = type_with_decl(member_ty(member), decl);
-            if is_optional(member) {
+        let is_optional = member.is_optional();
+        for decl in &member.ident {
+            let raw_name = declarator_name(decl);
+            let field = go_field_name(raw_name);
+            let mut ty = type_with_decl(&member.ty, decl);
+            if is_optional {
                 ty = pointer_type(&ty);
             }
-            writeln!(
-                &mut ctx.body,
-                "\t{field} {ty} `json:\"{}\"`",
-                declarator_name(decl)
-            )
-            .unwrap();
+            let wire_name =
+                effective_wire_name(raw_name, &member.annotations, container_annotations);
+            writeln!(&mut ctx.body, "\t{field} {ty} `json:\"{wire_name}\"`").unwrap();
         }
     }
     writeln!(&mut ctx.body, "}}").unwrap();

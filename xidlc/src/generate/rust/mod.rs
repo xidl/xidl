@@ -78,8 +78,8 @@ fn map_codegen_error(err: crate::error::IdlcError) -> xidl_jsonrpc::Error {
 
 #[cfg(test)]
 mod tests {
-    use super::generate_with_properties;
     use super::RustRenderer;
+    use super::generate_with_properties;
     use crate::generate::rust::util::{
         serde_deserialize_rename_from_annotations, serde_rename_all_from_annotations,
         serde_rename_from_annotations, serde_serialize_rename_from_annotations,
@@ -110,7 +110,9 @@ mod tests {
                     name: vec!["rename".to_string()],
                     is_root: false,
                 },
-                params: Some(hir::AnnotationParams::ConstExpr(string_literal("\"wireName\""))),
+                params: Some(hir::AnnotationParams::ConstExpr(string_literal(
+                    "\"wireName\"",
+                ))),
             },
             hir::Annotation::ScopedName {
                 name: hir::ScopedName {

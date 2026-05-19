@@ -43,6 +43,7 @@ pub(crate) fn parameter_schema(
     builder.build()
 }
 
+#[cfg(test)]
 pub(crate) fn schema_for_struct(members: &[hir::Member]) -> RefOr<Schema> {
     schema_for_struct_with_annotations(members, &[])
 }
@@ -56,8 +57,11 @@ pub(crate) fn schema_for_struct_with_annotations(
         let optional = member.is_optional();
         let doc = doc_text(&member.annotations);
         for decl in &member.ident {
-            let name =
-                hir::effective_wire_name(&declarator_name(decl), &member.annotations, container_annotations);
+            let name = hir::effective_wire_name(
+                &declarator_name(decl),
+                &member.annotations,
+                container_annotations,
+            );
             let schema =
                 apply_schema_description(schema_for_decl(&member.ty, decl), doc.as_deref());
             object = object.property(name.clone(), schema);
