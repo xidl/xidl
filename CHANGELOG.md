@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.62.0](https://github.com/xidl/xidl/compare/v0.61.0...v0.62.0) (2026-05-19)
+
+
+### Features
+
+* add [@skip](https://github.com/skip) annotation to support skipping fields during serialization ([7cbf6c8](https://github.com/xidl/xidl/commit/7cbf6c80365acf4f9f50c89e6547d973f8c2a6c9))
+* **xidlc:** don't expand interface when generate openapi ([a52c87c](https://github.com/xidl/xidl/commit/a52c87ce2a8ef394ab52f30d075d2030e4102617))
+
 ## [0.61.0](https://github.com/xidl/xidl/compare/v0.60.1...v0.61.0) (2026-05-19)
 
 
