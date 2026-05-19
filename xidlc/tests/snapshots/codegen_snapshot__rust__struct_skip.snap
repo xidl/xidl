@@ -1,0 +1,21 @@
+---
+source: xidlc/tests/codegen_snapshot.rs
+expression: output
+---
+===============
+struct_skip.rs
+===============
+#[allow(unused_imports)]
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(unused_variables)]
+#[allow(unreachable_patterns)]
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+#[derive(Default)]
+pub struct SkipStruct {
+    pub a: i32,
+    #[serde(skip)]
+    pub b: i32,
+    pub c: i32,
+}
+impl SkipStruct {}

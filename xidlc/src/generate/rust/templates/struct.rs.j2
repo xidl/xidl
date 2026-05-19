@@ -34,6 +34,9 @@ pub struct {{ ident }} {
             {% if member.serde_rename_deserialize is defined and member.serde_rename_deserialize %}
                 #[serde(rename(deserialize = "{{ member.serde_rename_deserialize }}"))]
             {% endif %}
+            {% if member.serde_skip is defined and member.serde_skip %}
+                #[serde(skip)]
+            {% endif %}
             {% if member.serde_aliases is defined and member.serde_aliases %}
                 {% for alias in member.serde_aliases %}
                     #[serde(alias = "{{ alias }}")]

@@ -88,8 +88,11 @@ fn render_operation_types(
     {
         let raw_name = &param.declarator.0;
         let field = go_field_name(raw_name);
-        let wire_name =
-            hir::effective_wire_name(raw_name, &param.annotations, container_annotations);
+        let wire_name = if hir::is_skipped(&param.annotations) {
+            "-".to_string()
+        } else {
+            hir::effective_wire_name(raw_name, &param.annotations, container_annotations)
+        };
         writeln!(
             &mut ctx.body,
             "\t{field} {} `json:\"{wire_name}\"`",
@@ -112,8 +115,11 @@ fn render_operation_types(
     }) {
         let raw_name = &param.declarator.0;
         let field = go_field_name(raw_name);
-        let wire_name =
-            hir::effective_wire_name(raw_name, &param.annotations, container_annotations);
+        let wire_name = if hir::is_skipped(&param.annotations) {
+            "-".to_string()
+        } else {
+            hir::effective_wire_name(raw_name, &param.annotations, container_annotations)
+        };
         writeln!(
             &mut ctx.body,
             "\t{field} {} `json:\"{wire_name}\"`",
