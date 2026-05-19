@@ -103,18 +103,6 @@ pub enum BuiltinAnnotation {
     DdsReplyTopic {
         name: ConstExpr,
     },
-    Rename {
-        name: String,
-    },
-    SerializeName {
-        serialize: String,
-    },
-    DeserializeName {
-        deserialize: Vec<String>,
-    },
-    RenameAll {
-        rule: RenameRule,
-    },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -172,19 +160,6 @@ pub enum DataRepresentationKind {
 pub enum TopicPlatform {
     Dds,
     Any,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum RenameRule {
-    None,
-    LowerCase,
-    UpperCase,
-    PascalCase,
-    CamelCase,
-    SnakeCase,
-    ScreamingSnakeCase,
-    KebabCase,
-    ScreamingKebabCase,
 }
 
 impl AutoIdKind {

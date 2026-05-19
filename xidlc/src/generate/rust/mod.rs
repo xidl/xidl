@@ -88,6 +88,7 @@ mod tests {
     use std::collections::HashMap;
     use std::path::Path;
     use xidl_parser::hir;
+    use xidl_parser::hir::RenameRule;
 
     #[test]
     fn preserves_numeric_file_stem_in_output_path() {
@@ -105,41 +106,17 @@ mod tests {
     #[test]
     fn custom_annotation_helpers_read_standard_params() {
         let annotations = vec![
-            hir::Annotation::ScopedName {
-                name: hir::ScopedName {
-                    name: vec!["rename".to_string()],
-                    is_root: false,
-                },
-                params: Some(hir::AnnotationParams::ConstExpr(string_literal(
-                    "\"wireName\"",
-                ))),
+            hir::Annotation::Rename {
+                name: "wireName".into(),
             },
-            hir::Annotation::ScopedName {
-                name: hir::ScopedName {
-                    name: vec!["serialize_name".to_string()],
-                    is_root: false,
-                },
-                params: Some(hir::AnnotationParams::ConstExpr(string_literal(
-                    "\"writeOnly\"",
-                ))),
+            hir::Annotation::SerializeName {
+                serialize: "writeOnly".into(),
             },
-            hir::Annotation::ScopedName {
-                name: hir::ScopedName {
-                    name: vec!["deserialize_name".to_string()],
-                    is_root: false,
-                },
-                params: Some(hir::AnnotationParams::ConstExpr(string_literal(
-                    "\"readOnly\"",
-                ))),
+            hir::Annotation::DeserializeName {
+                deserialize: vec!["readOnly".into()],
             },
-            hir::Annotation::ScopedName {
-                name: hir::ScopedName {
-                    name: vec!["rename_all".to_string()],
-                    is_root: false,
-                },
-                params: Some(hir::AnnotationParams::ConstExpr(string_literal(
-                    "\"camelCase\"",
-                ))),
+            hir::Annotation::RenameAll {
+                rule: RenameRule::CamelCase,
             },
         ];
 
@@ -157,7 +134,7 @@ mod tests {
         );
         assert_eq!(
             serde_rename_all_from_annotations(&annotations),
-            Some("camelCase".to_string())
+            Some(RenameRule::CamelCase)
         );
     }
 
@@ -228,9 +205,5 @@ mod tests {
         assert!(rendered.contains("#[serde(rename(serialize = \"WRITE-ONLY\"))]"));
         assert!(rendered.contains("#[serde(rename(deserialize = \"READ-ONLY\"))]"));
         assert!(rendered.contains("#[serde(alias = \"LEGACY-VALUE\")]"));
-    }
-
-    fn string_literal(value: &str) -> hir::ConstExpr {
-        hir::ConstExpr::Literal(hir::Literal::StringLiteral(value.to_string()))
     }
 }
