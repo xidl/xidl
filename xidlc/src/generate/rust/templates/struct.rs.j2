@@ -28,19 +28,8 @@ pub struct {{ ident }} {
             {% if member.serde_rename is defined and member.serde_rename %}
                 #[serde(rename = "{{ member.serde_rename }}")]
             {% endif %}
-            {% if member.serde_rename_serialize is defined and member.serde_rename_serialize %}
-                #[serde(rename(serialize = "{{ member.serde_rename_serialize }}"))]
-            {% endif %}
-            {% if member.serde_rename_deserialize is defined and member.serde_rename_deserialize %}
-                #[serde(rename(deserialize = "{{ member.serde_rename_deserialize }}"))]
-            {% endif %}
             {% if member.serde_skip is defined and member.serde_skip %}
                 #[serde(skip)]
-            {% endif %}
-            {% if member.serde_aliases is defined and member.serde_aliases %}
-                {% for alias in member.serde_aliases %}
-                    #[serde(alias = "{{ alias }}")]
-                {% endfor %}
             {% endif %}
         {% endif %}
         pub {{ member.name }}: {{ member.ty }},

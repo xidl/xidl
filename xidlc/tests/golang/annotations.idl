@@ -3,7 +3,7 @@ struct User {
     string user_id;
     @rename(name = "user_name")
     string name;
-    @serialize_name("user_email")
+    @rename("user_email")
     string email;
 };
 

@@ -116,12 +116,6 @@ pub enum Annotation {
     Rename {
         name: String,
     },
-    SerializeName {
-        serialize: String,
-    },
-    DeserializeName {
-        deserialize: Vec<String>,
-    },
     RenameAll {
         rule: RenameRule,
     },
@@ -268,29 +262,6 @@ pub fn field_rename(annotations: &[Annotation]) -> Option<String> {
     })
 }
 
-pub fn serialize_name(annotations: &[Annotation]) -> Option<String> {
-    annotations.iter().find_map(|a| {
-        if let Annotation::SerializeName { serialize } = a {
-            Some(serialize.clone())
-        } else {
-            None
-        }
-    })
-}
-
-pub fn deserialize_name(annotations: &[Annotation]) -> Option<String> {
-    deserialize_names(annotations).into_iter().next()
-}
-
-pub fn deserialize_aliases(annotations: &[Annotation]) -> Vec<String> {
-    let mut names = deserialize_names(annotations);
-    if names.len() > 1 {
-        names.drain(1..).collect()
-    } else {
-        Vec::new()
-    }
-}
-
 pub fn rename_all(annotations: &[Annotation]) -> Option<RenameRule> {
     annotations.iter().find_map(|a| {
         if let Annotation::RenameAll { rule } = a {
@@ -306,16 +277,13 @@ pub fn effective_wire_name(
     annotations: &[Annotation],
     container_annotations: &[Annotation],
 ) -> String {
-    field_rename(annotations)
-        .or_else(|| serialize_name(annotations))
-        .or_else(|| deserialize_name(annotations))
-        .unwrap_or_else(|| {
-            if let Some(rule) = rename_all(container_annotations) {
-                apply_rename_rule(raw_name, rule)
-            } else {
-                raw_name.to_string()
-            }
-        })
+    field_rename(annotations).unwrap_or_else(|| {
+        if let Some(rule) = rename_all(container_annotations) {
+            apply_rename_rule(raw_name, rule)
+        } else {
+            raw_name.to_string()
+        }
+    })
 }
 
 pub fn annotation_id_value(annotations: &[Annotation]) -> Option<u32> {
@@ -363,32 +331,6 @@ impl From<crate::typed_ast::AnnotationAppl> for Annotation {
                             normalized.get("value").or_else(|| normalized.get("name"))
                         {
                             return Self::Rename { name: val.clone() };
-                        }
-                    }
-                }
-                "serialize_name" => {
-                    if let Some(p) = &params {
-                        let normalized = normalize_annotation_params(p);
-                        if let Some(val) = normalized
-                            .get("serialize")
-                            .or_else(|| normalized.get("value"))
-                        {
-                            return Self::SerializeName {
-                                serialize: val.clone(),
-                            };
-                        }
-                    }
-                }
-                "deserialize_name" => {
-                    if let Some(p) = &params {
-                        let normalized = normalize_annotation_params(p);
-                        if let Some(val) = normalized
-                            .get("deserialize")
-                            .or_else(|| normalized.get("value"))
-                        {
-                            return Self::DeserializeName {
-                                deserialize: parse_string_list(val),
-                            };
                         }
                     }
                 }
@@ -455,42 +397,6 @@ impl From<crate::typed_ast::AnnotationParams> for AnnotationParams {
             crate::typed_ast::AnnotationParams::Raw(value) => Self::Raw(value),
         }
     }
-}
-
-fn deserialize_names(annotations: &[Annotation]) -> Vec<String> {
-    let mut names = Vec::new();
-    for annotation in annotations {
-        if let Annotation::DeserializeName { deserialize } = annotation {
-            names.extend(deserialize.clone());
-        }
-    }
-    names
-}
-
-fn parse_string_list(value: &str) -> Vec<String> {
-    let value = value.trim();
-    if !(value.starts_with('[') && value.ends_with(']')) {
-        if value.contains(',') {
-            return value
-                .split(',')
-                .map(|part| part.trim().trim_matches('"'))
-                .filter(|part| !part.is_empty())
-                .map(ToString::to_string)
-                .collect();
-        }
-        if !value.is_empty() {
-            return vec![value.trim_matches('"').to_string()];
-        } else {
-            return vec![];
-        }
-    }
-    let inner = &value[1..value.len() - 1];
-    inner
-        .split(',')
-        .map(|part| part.trim().trim_matches('"'))
-        .filter(|part| !part.is_empty())
-        .map(ToString::to_string)
-        .collect()
 }
 
 fn apply_rename_rule(raw_name: &str, rule: RenameRule) -> String {
