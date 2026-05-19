@@ -1,7 +1,7 @@
 use super::*;
 use convert_case::{Case, Casing};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::{collections::HashMap, str::FromStr};
 
 #[cfg(test)]
 mod tests;
@@ -113,6 +113,64 @@ pub enum Annotation {
         params: Option<AnnotationParams>,
     },
     DefaultLiteral,
+    Rename {
+        name: String,
+    },
+    SerializeName {
+        serialize: String,
+    },
+    DeserializeName {
+        deserialize: Vec<String>,
+    },
+    RenameAll {
+        rule: RenameRule,
+    },
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum RenameRule {
+    None,
+    LowerCase,
+    UpperCase,
+    PascalCase,
+    CamelCase,
+    SnakeCase,
+    ScreamingSnakeCase,
+    KebabCase,
+    ScreamingKebabCase,
+}
+
+impl RenameRule {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::None => "None",
+            Self::LowerCase => "lowercase",
+            Self::UpperCase => "UPPERCASE",
+            Self::PascalCase => "PascalCase",
+            Self::CamelCase => "camelCase",
+            Self::SnakeCase => "snake_case",
+            Self::ScreamingSnakeCase => "SCREAMING_SNAKE_CASE",
+            Self::KebabCase => "kebab-case",
+            Self::ScreamingKebabCase => "SCREAMING-KEBAB-CASE",
+        }
+    }
+}
+impl FromStr for RenameRule {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "lowercase" => Ok(Self::LowerCase),
+            "UPPERCASE" => Ok(Self::UpperCase),
+            "PascalCase" => Ok(Self::PascalCase),
+            "camelCase" => Ok(Self::CamelCase),
+            "snake_case" => Ok(Self::SnakeCase),
+            "SCREAMING_SNAKE_CASE" | "SCREAMINGSNAKECASE" => Ok(Self::ScreamingSnakeCase),
+            "kebab-case" => Ok(Self::KebabCase),
+            "SCREAMING-KEBAB-CASE" => Ok(Self::ScreamingKebabCase),
+            _ => Ok(Self::None),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -196,12 +254,23 @@ pub fn normalize_annotation_params(params: &AnnotationParams) -> HashMap<String,
 }
 
 pub fn field_rename(annotations: &[Annotation]) -> Option<String> {
-    annotation_string_param(annotations, "rename", &["value", "name"])
-        .or_else(|| annotation_string_param(annotations, "name", &["value", "name"]))
+    annotations.iter().find_map(|a| {
+        if let Annotation::Rename { name } = a {
+            Some(name.clone())
+        } else {
+            None
+        }
+    })
 }
 
 pub fn serialize_name(annotations: &[Annotation]) -> Option<String> {
-    annotation_string_param(annotations, "serialize_name", &["serialize", "value"])
+    annotations.iter().find_map(|a| {
+        if let Annotation::SerializeName { serialize } = a {
+            Some(serialize.clone())
+        } else {
+            None
+        }
+    })
 }
 
 pub fn deserialize_name(annotations: &[Annotation]) -> Option<String> {
@@ -217,8 +286,14 @@ pub fn deserialize_aliases(annotations: &[Annotation]) -> Vec<String> {
     }
 }
 
-pub fn rename_all(annotations: &[Annotation]) -> Option<String> {
-    annotation_string_param(annotations, "rename_all", &["rule", "value"])
+pub fn rename_all(annotations: &[Annotation]) -> Option<RenameRule> {
+    annotations.iter().find_map(|a| {
+        if let Annotation::RenameAll { rule } = a {
+            Some(rule.clone())
+        } else {
+            None
+        }
+    })
 }
 
 pub fn effective_wire_name(
@@ -229,7 +304,13 @@ pub fn effective_wire_name(
     field_rename(annotations)
         .or_else(|| serialize_name(annotations))
         .or_else(|| deserialize_name(annotations))
-        .unwrap_or_else(|| apply_rename_rule(raw_name, rename_all(container_annotations)))
+        .unwrap_or_else(|| {
+            if let Some(rule) = rename_all(container_annotations) {
+                apply_rename_rule(raw_name, rule)
+            } else {
+                raw_name.to_string()
+            }
+        })
 }
 
 pub fn annotation_id_value(annotations: &[Annotation]) -> Option<u32> {
@@ -262,6 +343,66 @@ fn push_annotation(out: &mut Vec<Annotation>, mut value: crate::typed_ast::Annot
 impl From<crate::typed_ast::AnnotationAppl> for Annotation {
     fn from(value: crate::typed_ast::AnnotationAppl) -> Self {
         let params = value.params.map(Into::into);
+
+        let name_ref = match &value.name {
+            crate::typed_ast::AnnotationName::ScopedName(name) => Some(name.identifier.0.as_str()),
+            crate::typed_ast::AnnotationName::Builtin(name) => Some(name.as_str()),
+        };
+
+        if let Some(name) = name_ref {
+            match name.to_ascii_lowercase().as_str() {
+                "rename" | "name" => {
+                    if let Some(p) = &params {
+                        let normalized = normalize_annotation_params(p);
+                        if let Some(val) =
+                            normalized.get("value").or_else(|| normalized.get("name"))
+                        {
+                            return Self::Rename { name: val.clone() };
+                        }
+                    }
+                }
+                "serialize_name" => {
+                    if let Some(p) = &params {
+                        let normalized = normalize_annotation_params(p);
+                        if let Some(val) = normalized
+                            .get("serialize")
+                            .or_else(|| normalized.get("value"))
+                        {
+                            return Self::SerializeName {
+                                serialize: val.clone(),
+                            };
+                        }
+                    }
+                }
+                "deserialize_name" => {
+                    if let Some(p) = &params {
+                        let normalized = normalize_annotation_params(p);
+                        if let Some(val) = normalized
+                            .get("deserialize")
+                            .or_else(|| normalized.get("value"))
+                        {
+                            return Self::DeserializeName {
+                                deserialize: parse_string_list(val),
+                            };
+                        }
+                    }
+                }
+                "rename_all" => {
+                    if let Some(p) = &params {
+                        let normalized = normalize_annotation_params(p);
+                        if let Some(val) =
+                            normalized.get("rule").or_else(|| normalized.get("value"))
+                        {
+                            return Self::RenameAll {
+                                rule: val.parse().unwrap_or(RenameRule::None),
+                            };
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+
         match value.name {
             crate::typed_ast::AnnotationName::ScopedName(name) => Self::ScopedName {
                 name: name.into(),
@@ -313,43 +454,11 @@ impl From<crate::typed_ast::AnnotationParams> for AnnotationParams {
 fn deserialize_names(annotations: &[Annotation]) -> Vec<String> {
     let mut names = Vec::new();
     for annotation in annotations {
-        let Some(name) = annotation_name(annotation) else {
-            continue;
-        };
-        if !name.eq_ignore_ascii_case("deserialize_name") {
-            continue;
+        if let Annotation::DeserializeName { deserialize } = annotation {
+            names.extend(deserialize.clone());
         }
-        let Some(value) = annotation_params(annotation)
-            .map(normalize_annotation_params)
-            .and_then(|params| {
-                params
-                    .get("deserialize")
-                    .cloned()
-                    .or_else(|| params.get("value").cloned())
-            })
-        else {
-            continue;
-        };
-        names.extend(parse_string_list(&value));
     }
     names
-}
-
-fn annotation_string_param(
-    annotations: &[Annotation],
-    target: &str,
-    keys: &[&str],
-) -> Option<String> {
-    annotations.iter().find_map(|annotation| {
-        let name = annotation_name(annotation)?;
-        if !name.eq_ignore_ascii_case(target) {
-            return None;
-        }
-        let params = annotation_params(annotation)?;
-        let normalized = normalize_annotation_params(params);
-        keys.iter()
-            .find_map(|key| normalized.get(&key.to_ascii_lowercase()).cloned())
-    })
 }
 
 fn parse_string_list(value: &str) -> Vec<String> {
@@ -378,20 +487,17 @@ fn parse_string_list(value: &str) -> Vec<String> {
         .collect()
 }
 
-fn apply_rename_rule(raw_name: &str, rule: Option<String>) -> String {
-    match rule.as_deref() {
-        Some("None") | None => raw_name.to_string(),
-        Some("lowercase") => raw_name.to_case(Case::Flat),
-        Some("UPPERCASE") => raw_name.to_case(Case::UpperFlat),
-        Some("PascalCase") => raw_name.to_case(Case::Pascal),
-        Some("camelCase") => raw_name.to_case(Case::Camel),
-        Some("snake_case") => raw_name.to_case(Case::Snake),
-        Some("SCREAMING_SNAKE_CASE") | Some("SCREAMINGSNAKECASE") => {
-            raw_name.to_case(Case::UpperSnake)
-        }
-        Some("kebab-case") => raw_name.to_case(Case::Kebab),
-        Some("SCREAMING-KEBAB-CASE") => raw_name.to_case(Case::Cobol),
-        Some(_) => raw_name.to_string(),
+fn apply_rename_rule(raw_name: &str, rule: RenameRule) -> String {
+    match rule {
+        RenameRule::None => raw_name.to_string(),
+        RenameRule::LowerCase => raw_name.to_case(Case::Flat),
+        RenameRule::UpperCase => raw_name.to_case(Case::UpperFlat),
+        RenameRule::PascalCase => raw_name.to_case(Case::Pascal),
+        RenameRule::CamelCase => raw_name.to_case(Case::Camel),
+        RenameRule::SnakeCase => raw_name.to_case(Case::Snake),
+        RenameRule::ScreamingSnakeCase => raw_name.to_case(Case::UpperSnake),
+        RenameRule::KebabCase => raw_name.to_case(Case::Kebab),
+        RenameRule::ScreamingKebabCase => raw_name.to_case(Case::Cobol),
     }
 }
 

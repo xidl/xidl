@@ -116,10 +116,6 @@ pub(super) fn from_builtin_annotation(
         Builtin::DdsReplyTopic { name } => Annotation::DdsReplyTopic {
             name: const_expr(name),
         },
-        Builtin::Rename { .. }
-        | Builtin::SerializeName { .. }
-        | Builtin::DeserializeName { .. }
-        | Builtin::RenameAll { .. } => return None,
     })
 }
 
