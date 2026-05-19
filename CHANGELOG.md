@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.61.0](https://github.com/xidl/xidl/compare/v0.60.1...v0.61.0) (2026-05-19)
+
+
+### Features
+
+* **xidl-parser, xidlc:** add rename/serialize_name/deserialize_name/rename_all annotations ([5827409](https://github.com/xidl/xidl/commit/5827409a098831c0004841140c60a90b9bd7d8d3))
+* **xidlc:** implement rename/rename_all annotations for golang ([211a128](https://github.com/xidl/xidl/commit/211a1284c5497f016d1798d28040fd2173343dc9))
+
 ## [0.60.1](https://github.com/xidl/xidl/compare/v0.60.0...v0.60.1) (2026-05-14)
 
 
