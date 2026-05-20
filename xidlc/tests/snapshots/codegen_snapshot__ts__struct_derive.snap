@@ -9,7 +9,7 @@ struct_derive.d.ts
 export interface A{
 }
 
-export interface A{
+export interface B{
 }
 ===============
 struct_derive.zod.ts
@@ -23,10 +23,10 @@ export const ASchema = z.object(
 export type A = z.infer<
 typeof ASchema
 >;
-export const ASchema = z.object(
+export const BSchema = z.object(
 {
 }
 );
-export type A = z.infer<
-typeof ASchema
+export type B = z.infer<
+typeof BSchema
 >;

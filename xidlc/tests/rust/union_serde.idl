@@ -1,11 +1,11 @@
-@derive(Serialize, Deserialize)
+
 enum Tag {
     V1,
     V2,
     V3,
 };
 
-@derive(Serialize, Deserialize)
+
 union UnionValue switch (Tag) {
     case Tag::V1:
         int case1;
@@ -15,7 +15,7 @@ union UnionValue switch (Tag) {
         map<string, string> case3;
 };
 
-@derive(Serialize, Deserialize)
+
 union IntTagValue switch (long) {
     case 1:
         string one;
@@ -26,7 +26,7 @@ union IntTagValue switch (long) {
         boolean fallback;
 };
 
-@derive(Serialize, Deserialize)
+
 union BoolTagValue switch (boolean) {
     case TRUE:
         string yes;
@@ -34,7 +34,7 @@ union BoolTagValue switch (boolean) {
         string no;
 };
 
-@derive(Serialize, Deserialize)
+
 union CharTagValue switch (char) {
     case 'x':
         string ex;

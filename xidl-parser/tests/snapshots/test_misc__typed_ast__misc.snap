@@ -40,6 +40,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: ScopedName(
                     ScopedName {
                         scoped_name: None,
@@ -125,6 +126,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: ScopedName(
                     ScopedName {
                         scoped_name: Some(
@@ -182,6 +184,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: ScopedName(
                     ScopedName {
                         scoped_name: None,
@@ -223,6 +226,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: ScopedName(
                     ScopedName {
                         scoped_name: None,
@@ -1542,6 +1546,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     SignedInt(
                         SignedLongInt(
@@ -1714,6 +1719,7 @@ Specification(
                                 [
                                     ConstDcl(
                                         ConstDcl {
+                                            annotations: [],
                                             ty: IntegerType(
                                                 SignedInt(
                                                     SignedLongInt(

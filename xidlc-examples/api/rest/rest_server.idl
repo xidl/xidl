@@ -118,19 +118,16 @@ interface RestServer {
 
 };
 
-@derive(Debug, Clone, Serialize, Deserialize)
 struct UserInfo {
     string name;
     string email;
 };
 
-@derive(Debug, Clone, Serialize)
 struct Timestamp {
     uint64 seconds;
     uint32 nanos;
 };
 
-@derive(Debug, Clone, Deserialize)
 struct AdminInfo {
     string name;
     string email;

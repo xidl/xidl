@@ -161,13 +161,20 @@ type Matrix = [[i32; 2]; 3];
 - Field names are mapped using Rust identifier escaping.
 - Array declarators inside structs follow the same array mapping rules.
 - No inherent methods are generated for structs. Access is via public fields.
-- If `@derive(...)` annotations are present, the generated struct includes the
-  corresponding `#[derive(...)]` list.
-- If `@rust-xxx(...)` annotations are present on a Rust-emitting declaration or
-  member, the generated Rust includes the corresponding raw `#[xxx(...)]`
-  attribute lines in source order. When no parameters are provided, generation
-  emits `#[xxx]`.
-- Struct inheritance is represented as a `base: <Parent>` field.
+
+### Default Traits
+
+Generated Rust types (structs, enums, unions, exceptions, bitmasks, bitsets)
+include several traits by default:
+
+- `Debug`
+- `Clone`
+- `PartialEq`
+- `::serde::Serialize`
+- `::serde::Deserialize`
+- `Default`
+
+Optional `@derive(...)` annotations may add additional derived trait impls.
 
 ```idl
 @rust-serde(rename_all = "camelCase")
@@ -266,8 +273,9 @@ impl Example {
 ### Enums
 
 - IDL `enum` maps to a Rust `enum` with the same member names.
-- Enums always derive `Debug`, `Clone`, `Copy`, `PartialEq`, and `Eq`.
-- `@derive(...)` annotations are not currently applied to enums.
+- Enums derive standard traits by default (see
+  [Default Traits](#default-traits)).
+- `@derive(...)` annotations can be used to add more traits.
 
 ```idl
 enum Color {
@@ -391,40 +399,6 @@ interface Calc {
     readonly attribute long version;
     attribute string name;
 };
-```
-
-## Derive Annotations
-
-xidlc supports a builtin `@derive(...)` annotation to attach Rust
-`#[derive(...)]` attributes to generated types. This annotation is collected
-from the IDL element and applied to structs, unions, bitsets, and bitmasks (not
-enums).
-
-Examples:
-
-```idl
-@derive(Debug, Clone, PartialEq)
-struct Foo {
-    long value;
-};
-
-@derive(Serialize, Deserialize)
-union Payload switch (long) {
-    case 1: string text;
-    case 2: long number;
-};
-```
-
-```rust
-#[derive(Debug, Clone, PartialEq)]
-pub struct Foo {
-    pub value: i32,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct Payload {
-    // union layout and methods
-}
 ```
 
 ## Other Annotations

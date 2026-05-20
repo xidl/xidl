@@ -25,38 +25,38 @@ interface HttpService {
     );
 };
 
-@derive(Debug, Serialize, Deserialize)
+
 struct HealthResponse {
     boolean healthy;
     uint64 rtt_ms;
     string message;
 };
 
-@derive(Debug, Serialize, Deserialize)
+
 struct VersionResponse {
     string short;
     string long;
 };
 
-@derive(Debug, Serialize, Deserialize)
+
 struct MemoryResponse {
     uint64 allocated;
     uint64 active;
 };
 
-@derive(Debug, Serialize, Deserialize)
+
 struct UdpStatsResponse {
     uint64 tx;
     uint64 rx;
 };
 
-@derive(Debug, Serialize, Deserialize)
+
 struct CreateTcpReverseRequest {
     string local_addr;
     uint16 remote_port;
 };
 
-@derive(Debug, Serialize, Deserialize)
+
 struct CreateSimpleResponse {
     uint32 id;
 };

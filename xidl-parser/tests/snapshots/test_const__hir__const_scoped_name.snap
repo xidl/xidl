@@ -6,6 +6,7 @@ Specification(
     [
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: ScopedName(
                     ScopedName {
                         name: [
@@ -26,6 +27,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     U8,
                 ),
@@ -41,6 +43,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     U16,
                 ),
@@ -56,6 +59,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     U32,
                 ),
@@ -71,6 +75,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     U64,
                 ),
@@ -86,6 +91,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     I8,
                 ),
@@ -101,6 +107,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     I16,
                 ),
@@ -116,6 +123,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     I32,
                 ),
@@ -131,6 +139,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     I64,
                 ),
@@ -146,6 +155,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: ScopedName(
                     ScopedName {
                         name: [
@@ -166,6 +176,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: ScopedName(
                     ScopedName {
                         name: [
@@ -186,6 +197,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: CharType,
                 ident: "C1",
                 value: Literal(
@@ -197,6 +209,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: WideCharType,
                 ident: "C2",
                 value: Literal(
@@ -208,6 +221,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: StringType(
                     StringType {
                         bound: None,
@@ -223,6 +237,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: WideStringType(
                     WideStringType {
                         bound: None,
@@ -238,6 +253,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: ScopedName(
                     ScopedName {
                         name: [
@@ -259,6 +275,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: ScopedName(
                     ScopedName {
                         name: [
@@ -279,6 +296,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: ScopedName(
                     ScopedName {
                         name: [
@@ -300,6 +318,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: ScopedName(
                     ScopedName {
                         name: [
@@ -322,6 +341,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: ScopedName(
                     ScopedName {
                         name: [
@@ -347,6 +367,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: ScopedName(
                     ScopedName {
                         name: [
@@ -370,6 +391,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: FloatingPtType,
                 ident: "const_float",
                 value: Literal(
@@ -389,6 +411,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: FloatingPtType,
                 ident: "const_double",
                 value: Literal(
@@ -408,6 +431,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: FloatingPtType,
                 ident: "const_longdouble",
                 value: Literal(

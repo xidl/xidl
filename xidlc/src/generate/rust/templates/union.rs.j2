@@ -76,25 +76,25 @@ impl Drop for {{ ident }} {
 {% if manual_derives and "Debug" in manual_derives %}
     impl core::fmt::Debug for {{ ident }} {
         fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-            let mut d = f.debug_struct("{{ ident }}");
-            d.field("tag", &self.tag);
-            {% if has_default %}
+        let mut d = f.debug_struct("{{ ident }}");
+        d.field("tag", &self.tag);
+        {% if has_default %}
+            {% for case in cases %}
+                {% if not loop.first %}else {% endif %}{% if not loop.last %}if matches!(self.tag, {{ case.pattern }}) {% endif %}{
+                    d.field("{{ case.member }}", self.as_{{ case.member }}());
+                }
+            {% endfor %}
+        {% else %}
+            match self.tag {
                 {% for case in cases %}
-                    {% if not loop.first %}else {% endif %}{% if not loop.last %}if matches!(self.tag, {{ case.pattern }}) {% endif %}{
+                    {{ case.pattern }} => {
                         d.field("{{ case.member }}", self.as_{{ case.member }}());
                     }
                 {% endfor %}
-            {% else %}
-                match self.tag {
-                    {% for case in cases %}
-                        {{ case.pattern }} => {
-                            d.field("{{ case.member }}", self.as_{{ case.member }}());
-                        }
-                    {% endfor %}
-                }
-            {% endif %}
-            d.finish()
-        }
+            }
+        {% endif %}
+        d.finish()
+    }
     }
 {% endif %}
 

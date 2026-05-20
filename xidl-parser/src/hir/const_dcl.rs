@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ConstDcl {
+    pub annotations: Vec<Annotation>,
     pub ty: ConstType,
     pub ident: String,
     pub value: ConstExpr,
@@ -26,6 +27,7 @@ pub enum ConstType {
 impl From<crate::typed_ast::ConstDcl> for ConstDcl {
     fn from(value: crate::typed_ast::ConstDcl) -> Self {
         Self {
+            annotations: expand_annotations(value.annotations),
             ty: value.ty.into(),
             ident: value.ident.0,
             value: value.value.into(),

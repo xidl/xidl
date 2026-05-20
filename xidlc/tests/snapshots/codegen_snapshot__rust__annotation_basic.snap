@@ -43,6 +43,7 @@ pub enum E {
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Default)]
 pub struct BM {
     pub value: u32,
 }

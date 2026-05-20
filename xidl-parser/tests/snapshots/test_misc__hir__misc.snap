@@ -30,6 +30,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: ScopedName(
                     ScopedName {
                         name: [
@@ -83,6 +84,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: ScopedName(
                     ScopedName {
                         name: [
@@ -106,6 +108,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: ScopedName(
                     ScopedName {
                         name: [
@@ -127,6 +130,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: ScopedName(
                     ScopedName {
                         name: [
@@ -618,6 +622,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     I32,
                 ),
@@ -1071,6 +1076,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     I32,
                 ),
@@ -1632,6 +1638,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     I32,
                 ),
@@ -2123,6 +2130,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     I32,
                 ),
@@ -2614,6 +2622,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     I32,
                 ),
@@ -3168,6 +3177,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     I32,
                 ),
@@ -3183,6 +3193,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     I32,
                 ),
@@ -3698,6 +3709,7 @@ Specification(
                                 [
                                     ConstDcl(
                                         ConstDcl {
+                                            annotations: [],
                                             ty: IntegerType(
                                                 I32,
                                             ),
@@ -3855,6 +3867,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     I32,
                 ),
@@ -3870,6 +3883,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     I32,
                 ),
@@ -3885,6 +3899,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     I32,
                 ),
@@ -3900,6 +3915,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     I32,
                 ),
@@ -3915,6 +3931,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     I32,
                 ),
@@ -3930,6 +3947,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     I32,
                 ),
