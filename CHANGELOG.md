@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.63.0](https://github.com/xidl/xidl/compare/v0.62.0...v0.63.0) (2026-05-20)
+
+
+### Features
+
+* **docs:** translate REST and RFC documentation to English ([10b3187](https://github.com/xidl/xidl/commit/10b3187a8727c915d5fd31dfea19f672ed813267))
+
 ## [0.62.0](https://github.com/xidl/xidl/compare/v0.61.0...v0.62.0) (2026-05-19)
 
 
