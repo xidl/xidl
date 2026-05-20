@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.64.0](https://github.com/xidl/xidl/compare/v0.63.0...v0.64.0) (2026-05-20)
+
+
+### Features
+
+* add default Rust derives for struct and enum ([b25434b](https://github.com/xidl/xidl/commit/b25434bb9006bad056eabe917801506980521b3f))
+* standardize Default trait and improve annotation support for all Rust types ([491d57e](https://github.com/xidl/xidl/commit/491d57e6d99317a492fb2f786ad12847093f93b5))
+
 ## [0.63.0](https://github.com/xidl/xidl/compare/v0.62.0...v0.63.0) (2026-05-20)
 
 
