@@ -1,0 +1,121 @@
+---
+title: "HTTP Security RFC"
+description: "Security annotations and inheritance rules for XIDL HTTP mapping."
+---
+
+# XIDL HTTP Security Mapping Specification
+
+This page defines the security supplementary model for HTTP mapping, used to describe:
+
+- Interface-level and method-level security declarations.
+- Mapping for Basic / Bearer / API Key / OAuth2.
+- Inheritance and overriding rules for security requirements.
+
+## Goals
+
+This RFC focuses on "how to declare security requirements," rather than:
+
+- TLS negotiation.
+- Session management.
+- Complex authorization policy languages.
+- Transport layer details.
+
+## Supported Annotations
+
+- `@no_security`
+- `@http_basic`
+- `@http_bearer`
+- `@api_key(in = "header", name = "X-API-Key")`
+- `@api_key(in = "cookie", name = "sid")`
+- `@api_key(in = "query", name = "api_key")`
+- `@oauth2(scopes = ["scope1", "scope2"])`
+
+## Interface-level and Method-level Declarations
+
+Rules:
+
+- Interface-level security annotations define default requirements.
+- Method-level security annotations replace interface-level default requirements.
+- `@no_security` explicitly declares anonymous access and clears inherited security requirements.
+
+## Basic Auth
+
+```idl
+@http_basic
+```
+
+Semantics:
+
+- Uses `Authorization: Basic ...`.
+- Should return `401 Unauthorized` when unauthorized.
+- Implementations may include `WWW-Authenticate: Basic ...`.
+
+## Bearer Auth
+
+```idl
+@http_bearer
+```
+
+Semantics:
+
+- Uses `Authorization: Bearer <token>`.
+- The token content is interpreted by the runtime; this RFC does not prescribe a specific token format.
+
+## API Key
+
+```idl
+@api_key(in = "header", name = "X-API-Key")
+```
+
+Semantics:
+
+- `in` determines whether the credential is located in `header`, `cookie`, or `query`.
+- `name` determines the field name used.
+- The API Key is treated as an opaque string.
+
+## OAuth2
+
+```idl
+@oauth2(scopes = ["read:users"])
+```
+
+Semantics:
+
+- Used to express authorization requirements with scopes.
+- Defines scope semantics; does not define the full authorization flow.
+- Details such as token URL and authorization URL are typically supplemented by external documentation or generators.
+
+## Combining Multiple Security Requirements
+
+The default semantics are an "alternative set":
+
+- When multiple security annotations are declared on the same target, they are typically interpreted as a logical OR.
+- Multiple scopes within a single `@oauth2(scopes = [...])` are understood as a logical AND.
+
+## Relationship with Standard HTTP Mapping
+
+Security annotations do not change:
+
+- Route resolution.
+- Parameter source rules.
+- Request and response body shaping.
+
+They only add preconditions that must be met before a request is accepted.
+
+## Response Recommendations
+
+- Missing or invalid credentials -> `401 Unauthorized`.
+- Authenticated but insufficient permissions -> `403 Forbidden`.
+
+## Documentation Generation Recommendations
+
+When targeting documentation formats like OpenAPI, security information should be preserved as much as possible:
+
+- Security schemes map to `securitySchemes`.
+- Interface-level and method-level requirements map to `security`.
+
+## Implementation Recommendations
+
+- Security credentials should not be mixed into business parameter lists.
+- Authentication results are better passed via runtime context.
+- `@no_security` and other security annotations should not appear simultaneously.

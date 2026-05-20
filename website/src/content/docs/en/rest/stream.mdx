@@ -1,0 +1,22 @@
+---
+title: "RESTful Streaming"
+description: "XIDL RESTful Streaming"
+sidebar:
+  badge: PREVIEW
+---
+
+HTTP Stream extends normal HTTP mapping with long-connection streaming interactions.
+
+Common annotations:
+
+- `@server_stream`
+- `@client_stream`
+- `@bidi_stream`
+- `@stream_codec("ndjson" | "sse")`
+
+In practice:
+
+- Server push streaming is the most common.
+- `ndjson` is the default stream encoding.
+- `sse` is mainly used for server-side streaming.
+- These capabilities exist but are more implementation-driven than standard HTTP mapping.

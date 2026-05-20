@@ -1,0 +1,178 @@
+---
+title: "RESTful Basics"
+description: "XIDL RESTful Basics"
+---
+
+RESTful code generation is defined by xidl RESTful style. RESTful consists of three parts:
+
+1. Basic RESTful.
+2. HTTP Stream.
+3. HTTP Security.
+
+## RESTful Basics
+
+When using the RESTful generator, xidlc can compile interfaces in `.idl` files into REST APIs.
+
+```idl
+interface HelloWorld {
+    void say_hello(string name);
+};
+```
+
+```bash
+$ xidlc gen -o out rust-axum api.idl
+```
+
+RESTful can configure details such as HTTP methods, paths, parameter sources, media types, and security requirements through annotations.
+
+## Method Types and Paths
+
+Use the `@get` annotation to specify the method type, and `@path("/hello")` to specify the path.
+It also supports specifying the path directly in `@get(path = "/hello")`:
+
+```idl
+interface HelloWorld {
+    @get(path = "/hello")
+    void say_hello(string name);
+};
+```
+
+The following method types are supported: `@get`, `@post`, `@put`, `@delete`, and `@patch`.
+
+## Route Templates
+
+Route templates can be used in path parameters with the following format:
+
+- Normal path variable: `/users/{id}`
+- Catch-all path: `/files/{*path}`
+- Query template: `/users/{id}{?lang,region}`
+
+Parameters appearing in route templates must have the same name as the method parameters by default, for example:
+
+```idl
+interface UserApi {
+    @get(path = "/users/{id}")
+    string getUser(string id);
+};
+```
+
+If you need to rename route parameters, you can use the `@path @rename("...")` annotation on the method parameter, for example:
+
+```idl
+interface UserApi {
+    @get(path = "/users/{x-id}{?x-lang}")
+    string getUser(
+        @path @rename("x-id") string user_id
+        @query @rename("x-lang") @optional string lang
+    );
+};
+```
+
+## Parameter Sources
+
+RESTful supports parameters from multiple sources, which can be explicitly specified via annotations, for example:
+
+```idl
+interface UserApi {
+    @get(path = "/users/{id}")
+    string getUser(
+        @path string user_id,
+        @query string locale,
+        @header @rename("USER_NAME") string name,
+        @cookie string session_id,
+        @body string payload
+    );
+};
+```
+
+## Media Type Inheritance and Overriding
+
+Use the `@Consumes` and `@Produces` annotations to specify the request and response media types. Both support interface-level defaults and method-level overrides.
+
+```idl
+@Consumes("application/json")
+@Produces("application/json")
+interface ScopeApi {
+    @post(path = "/v1/default")
+    string defaultScope(string name);
+
+    @post(path = "/v1/form")
+    @Consumes("application/x-www-form-urlencoded")
+    string submitForm(string name, uint32 age);
+
+    @get(path = "/v1/msgpack/{id}")
+    @Produces("application/msgpack")
+    string getPacked(@path @rename("id") string id);
+};
+```
+
+It is recommended to understand it as:
+
+- Interface-level annotations are "default configurations"
+- Method-level annotations are "local overrides"
+
+If most operations in your interface use the same request/response media type, interface-level defaults are usually cleaner.
+
+## `@cors`
+
+You can use the `@cors` annotation to add support for CORS. Currently, two forms are supported:
+
+- `@cors`: Enable CORS
+- `@cors("https://console.example.com", "https://admin.example.com")`: Allow only these origins
+
+For example:
+
+```idl
+@cors
+interface UserApi {
+    @get(path = "/users/{id}")
+    string getUser(@path @rename("id") string id);
+
+    @cors("https://console.example.com", "https://admin.example.com")
+    @post(path = "/users")
+    void createUser(string name);
+};
+```
+
+| Annotation                    | Scope      | Meaning                                                   |
+| ----------------------------- | ---------- | --------------------------------------------------------- |
+| @cors                         | Interface  | Enable CORS for all methods in the interface              |
+| @cors("domain1", "domain2")  | Interface  | Allow requests from domain1 and domain2 for all methods   |
+| @cors                         | Method     | Enable CORS                                               |
+| @cors("domain1", "domain2")  | Method     | Allow requests from domain1 and domain2                   |
+
+## deprecated
+
+RESTful can mark methods as deprecated in three ways:
+
+- `@deprecated`
+- `@deprecated("2026-01-01")`
+- `@deprecated(since = "...", after = "...")`
+
+They can be placed on:
+
+- Interfaces
+- Methods
+- Attributes
+
+Practical recommendations:
+
+- To express "no longer recommended" without a specific date: use `@deprecated`
+- To express "deprecated starting from a certain date": use `@deprecated("...")`
+- To express both the deprecation time and the planned removal window: use `@deprecated(since = "...", after = "...")`
+
+Interface-level `@deprecated` will be inherited by its methods and attributes; when a method-level declaration is present, the more specific method-level one takes precedence.
+
+## Optional Parameters
+
+If a parameter can be null/empty, it needs to be marked as `@optional`:
+
+```idl
+interface UserApi {
+    @get(path = "/users/{id}")
+    string getUser(
+        @path string user_id,
+        @query @optional string locale
+    );
+};
+```

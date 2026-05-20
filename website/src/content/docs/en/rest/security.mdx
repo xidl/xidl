@@ -1,0 +1,50 @@
+---
+title: "RESTful Authentication"
+description: "XIDL RESTful Authentication"
+sidebar:
+  badge: PREVIEW
+---
+
+The security model attaches authentication declarations to interfaces or methods instead of stuffing them into business parameter lists.
+
+Common annotations:
+
+- `@no_security`
+- `@http_basic`
+- `@http_bearer`
+- `@api_key(...)`
+- `@oauth2(...)`
+
+General rules:
+
+- Interface-level declarations are defaults.
+- Method-level declarations replace inherited defaults.
+- `@no_security` explicitly clears inherited security requirements.
+
+A common combination:
+
+```idl
+@http_basic(realm = "admin")
+@api_key(in = "query", name = "org_key")
+interface AdminApi {
+    @get(path = "/reports/{id}")
+    string getReport(@path @rename("id") string id);
+
+    @http_bearer
+    @api_key(in = "cookie", name = "session_key")
+    @post(path = "/reports/search")
+    string searchReport(string keyword);
+
+    @no_security
+    @get(path = "/health")
+    string health();
+};
+```
+
+The meaning here is:
+
+- `getReport` inherits interface-level security requirements.
+- `searchReport` replaces interface-level defaults with its own method-level security requirements.
+- `health` is explicitly public access.
+
+If your API has a "mostly private, few public" structure, using interface-level defaults + method-level `@no_security` is often the easiest approach.

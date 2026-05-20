@@ -1,0 +1,23 @@
+---
+title: "Compiler Pragmas"
+description: "Pragma directives, scope, and override rules extended by xidlc."
+---
+
+xidlc adds the following compiler pragmas to IDL:
+
+```idl
+#pragma xidlc package <package-name>
+#pragma xidlc version <package-version>
+#pragma xidlc service <api-endpoint> <api-name>
+```
+
+These three directives are used to define the package name, package version, and API endpoints. For example:
+
+```idl
+#pragma xidlc package E2E HTTP Stream Test
+#pragma xidlc version v1.0.0
+#pragma xidlc service http://127.0.0.1:8080 dev server
+#pragma xidlc service http://127.0.0.1:8081 product
+```
+
+This defines a package named `E2E HTTP Stream Test` with version `v1.0.0`, containing two services: `dev` and `product`.
