@@ -55,6 +55,7 @@ impl Drop for SimpleUnion {
     }
 }
 impl Clone for SimpleUnion {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         match self.tag {
             A => Self::new_a(self.as_a().clone()),

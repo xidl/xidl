@@ -29,8 +29,7 @@ fn generated_union_rejects_mismatched_payload() {
         "tag": "V1",
         "data": ["not", "a", "u8"]
     }))
-    .err()
-    .expect("payload/tag mismatch should fail");
+    .expect_err("payload/tag mismatch should fail");
     assert!(err.to_string().contains("payload decode failed"));
 }
 
