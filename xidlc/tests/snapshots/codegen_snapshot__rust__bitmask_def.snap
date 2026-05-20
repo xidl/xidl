@@ -10,6 +10,7 @@ bitmask_def.rs
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 pub struct EmptyBitmask {
     pub value: u32,
 }
@@ -19,6 +20,7 @@ impl EmptyBitmask {}
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 pub struct SimpleBitmask {
     pub value: u32,
 }
@@ -32,6 +34,7 @@ impl SimpleBitmask {
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 pub struct PositionedBitmask {
     pub value: u32,
 }

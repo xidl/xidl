@@ -20,9 +20,69 @@ impl Drop for B {
         match self.tag {}
     }
 }
+impl Clone for B {
+    fn clone(&self) -> Self {
+        match self.tag {}
+    }
+}
+impl core::fmt::Debug for B {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("B");
+        d.field("tag", &self.tag);
+        match self.tag {}
+        d.finish()
+    }
+}
+impl PartialEq for B {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        match self.tag {}
+    }
+}
 impl B {
     pub fn tag(&self) -> &i32 {
         &self.tag
+    }
+}
+#[derive(::serde::Serialize)]
+struct BSerdeRef<'__a> {
+    tag: &'__a str,
+    data: BSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum BSerdeRefData<'__a> {}
+impl serde::Serialize for B {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = match self.tag {};
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct BSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for B {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = BSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!("union B tag/data mismatch for tag `{}`", helper.tag),
+                    ),
+                )
+            }
+        }
     }
 }
 #[allow(unused_imports)]
@@ -51,6 +111,40 @@ impl Drop for C {
                     core::mem::ManuallyDrop::drop(&mut self.data.b);
                 }
             }
+        }
+    }
+}
+impl Clone for C {
+    fn clone(&self) -> Self {
+        match self.tag {
+            0 => Self::new_a(self.as_a().clone()),
+            1 => Self::new_b(self.as_b().clone()),
+        }
+    }
+}
+impl core::fmt::Debug for C {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("C");
+        d.field("tag", &self.tag);
+        match self.tag {
+            0 => {
+                d.field("a", self.as_a());
+            }
+            1 => {
+                d.field("b", self.as_b());
+            }
+        }
+        d.finish()
+    }
+}
+impl PartialEq for C {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        match self.tag {
+            0 => self.as_a() == other.as_a(),
+            1 => self.as_b() == other.as_b(),
         }
     }
 }
@@ -118,6 +212,87 @@ impl Default for C {
             data: CData {
                 a: core::mem::ManuallyDrop::new(i32::default()),
             },
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct CSerdeRef<'__a> {
+    tag: &'__a str,
+    data: CSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum CSerdeRefData<'__a> {
+    Case0(&'__a i32),
+    Case1(&'__a String),
+}
+impl serde::Serialize for C {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = match self.tag {
+            0 => {
+                let tag = "0";
+                CSerdeRef {
+                    tag,
+                    data: CSerdeRefData::Case0(self.as_a()),
+                }
+            }
+            1 => {
+                let tag = "1";
+                CSerdeRef {
+                    tag,
+                    data: CSerdeRefData::Case1(self.as_b()),
+                }
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct CSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for C {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = CSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "0" => {
+                let value = ::serde_json::from_value::<i32>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!("union C payload decode failed for tag `0`: {err}"),
+                    ))?;
+                Ok(Self {
+                    tag: 0,
+                    data: CData {
+                        a: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "1" => {
+                let value = ::serde_json::from_value::<String>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!("union C payload decode failed for tag `1`: {err}"),
+                    ))?;
+                Ok(Self {
+                    tag: 1,
+                    data: CData {
+                        b: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!("union C tag/data mismatch for tag `{}`", helper.tag),
+                    ),
+                )
+            }
         }
     }
 }

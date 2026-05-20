@@ -10,7 +10,16 @@ misc.rs
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    ::serde::Serialize,
+    ::serde::Deserialize,
+    Copy,
+    Eq,
+    Default,
+)]
 pub enum Color {
     #[default]
     red,
@@ -64,6 +73,7 @@ pub type FooSeq = Vec<Foo>;
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct Foo {
     pub value: i32,
@@ -102,6 +112,40 @@ impl Drop for Bar {
                     core::mem::ManuallyDrop::drop(&mut self.data.s_mem);
                 }
             }
+        }
+    }
+}
+impl Clone for Bar {
+    fn clone(&self) -> Self {
+        match self.tag {
+            0 => Self::new_l_mem(self.as_l_mem().clone()),
+            1 => Self::new_s_mem(self.as_s_mem().clone()),
+        }
+    }
+}
+impl core::fmt::Debug for Bar {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("Bar");
+        d.field("tag", &self.tag);
+        match self.tag {
+            0 => {
+                d.field("l_mem", self.as_l_mem());
+            }
+            1 => {
+                d.field("s_mem", self.as_s_mem());
+            }
+        }
+        d.finish()
+    }
+}
+impl PartialEq for Bar {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        match self.tag {
+            0 => self.as_l_mem() == other.as_l_mem(),
+            1 => self.as_s_mem() == other.as_s_mem(),
         }
     }
 }
@@ -172,6 +216,87 @@ impl Default for Bar {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct BarSerdeRef<'__a> {
+    tag: &'__a str,
+    data: BarSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum BarSerdeRefData<'__a> {
+    Case0(&'__a i32),
+    Case1(&'__a Foo),
+}
+impl serde::Serialize for Bar {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = match self.tag {
+            0 => {
+                let tag = "0";
+                BarSerdeRef {
+                    tag,
+                    data: BarSerdeRefData::Case0(self.as_l_mem()),
+                }
+            }
+            1 => {
+                let tag = "1";
+                BarSerdeRef {
+                    tag,
+                    data: BarSerdeRefData::Case1(self.as_s_mem()),
+                }
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct BarSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for Bar {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = BarSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "0" => {
+                let value = ::serde_json::from_value::<i32>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!("union Bar payload decode failed for tag `0`: {err}"),
+                    ))?;
+                Ok(Self {
+                    tag: 0,
+                    data: BarData {
+                        l_mem: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "1" => {
+                let value = ::serde_json::from_value::<Foo>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!("union Bar payload decode failed for tag `1`: {err}"),
+                    ))?;
+                Ok(Self {
+                    tag: 1,
+                    data: BarData {
+                        s_mem: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!("union Bar tag/data mismatch for tag `{}`", helper.tag),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
@@ -213,6 +338,7 @@ pub const A_make_it_so_Hash: i32 = 4027367364;
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct A_make_it_so_In {
     pub dummy: dds::rpc::UnusedMember,
@@ -223,6 +349,7 @@ impl A_make_it_so_In {}
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct A_make_it_so_Out {
     pub dummy: dds::rpc::UnusedMember,
@@ -248,6 +375,35 @@ impl Drop for A_make_it_so_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+        }
+    }
+}
+impl Clone for A_make_it_so_Result {
+    fn clone(&self) -> Self {
+        match self.tag {
+            dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+        }
+    }
+}
+impl core::fmt::Debug for A_make_it_so_Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("A_make_it_so_Result");
+        d.field("tag", &self.tag);
+        match self.tag {
+            dds::RETCODE_OK => {
+                d.field("result", self.as_result());
+            }
+        }
+        d.finish()
+    }
+}
+impl PartialEq for A_make_it_so_Result {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        match self.tag {
+            dds::RETCODE_OK => self.as_result() == other.as_result(),
         }
     }
 }
@@ -292,6 +448,72 @@ impl Default for A_make_it_so_Result {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct A_make_it_so_ResultSerdeRef<'__a> {
+    tag: &'__a str,
+    data: A_make_it_so_ResultSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum A_make_it_so_ResultSerdeRefData<'__a> {
+    Case0(&'__a A_make_it_so_Out),
+}
+impl serde::Serialize for A_make_it_so_Result {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = match self.tag {
+            dds::RETCODE_OK => {
+                let tag = "RETCODE_OK";
+                A_make_it_so_ResultSerdeRef {
+                    tag,
+                    data: A_make_it_so_ResultSerdeRefData::Case0(self.as_result()),
+                }
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct A_make_it_so_ResultSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for A_make_it_so_Result {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = A_make_it_so_ResultSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "RETCODE_OK" => {
+                let value = ::serde_json::from_value::<A_make_it_so_Out>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union A_make_it_so_Result payload decode failed for tag `RETCODE_OK`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: dds::RETCODE_OK,
+                    data: A_make_it_so_ResultData {
+                        result: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union A_make_it_so_Result tag/data mismatch for tag `{}`",
+                            helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
@@ -315,6 +537,39 @@ impl Drop for A_Call {
             unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
+        }
+    }
+}
+impl Clone for A_Call {
+    fn clone(&self) -> Self {
+        if matches!(self.tag, A_make_it_so_Hash) {
+            Self::new_make_it_so(self.as_make_it_so().clone())
+        } else {
+            Self::new_unknownOp(self.as_unknownOp().clone())
+        }
+    }
+}
+impl core::fmt::Debug for A_Call {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("A_Call");
+        d.field("tag", &self.tag);
+        if matches!(self.tag, A_make_it_so_Hash) {
+            d.field("make_it_so", self.as_make_it_so());
+        } else {
+            d.field("unknownOp", self.as_unknownOp());
+        }
+        d.finish()
+    }
+}
+impl PartialEq for A_Call {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        if matches!(self.tag, A_make_it_so_Hash) {
+            self.as_make_it_so() == other.as_make_it_so()
+        } else {
+            self.as_unknownOp() == other.as_unknownOp()
         }
     }
 }
@@ -387,11 +642,98 @@ impl Default for A_Call {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct A_CallSerdeRef<'__a> {
+    tag: &'__a str,
+    data: A_CallSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum A_CallSerdeRefData<'__a> {
+    Case1(&'__a A_make_it_so_In),
+    Case0(&'__a dds::rpc::UnknownOperation),
+}
+impl serde::Serialize for A_Call {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = if matches!(self.tag, A_make_it_so_Hash) {
+            let tag = "A_make_it_so_Hash";
+            A_CallSerdeRef {
+                tag,
+                data: A_CallSerdeRefData::Case1(self.as_make_it_so()),
+            }
+        } else {
+            let tag = "default";
+            A_CallSerdeRef {
+                tag,
+                data: A_CallSerdeRefData::Case0(self.as_unknownOp()),
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct A_CallSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for A_Call {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = A_CallSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "A_make_it_so_Hash" => {
+                let value = ::serde_json::from_value::<A_make_it_so_In>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union A_Call payload decode failed for tag `A_make_it_so_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: A_make_it_so_Hash,
+                    data: A_CallData {
+                        make_it_so: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "default" => {
+                let value = ::serde_json::from_value::<
+                    dds::rpc::UnknownOperation,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union A_Call payload decode failed for tag `default`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: i32::default(),
+                    data: A_CallData {
+                        unknownOp: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union A_Call tag/data mismatch for tag `{}`", helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct A_Request {
     pub header: dds::rpc::RequestHeader,
@@ -421,6 +763,39 @@ impl Drop for A_Return {
             unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
+        }
+    }
+}
+impl Clone for A_Return {
+    fn clone(&self) -> Self {
+        if matches!(self.tag, A_make_it_so_Hash) {
+            Self::new_make_it_so(self.as_make_it_so().clone())
+        } else {
+            Self::new_unknownOp(self.as_unknownOp().clone())
+        }
+    }
+}
+impl core::fmt::Debug for A_Return {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("A_Return");
+        d.field("tag", &self.tag);
+        if matches!(self.tag, A_make_it_so_Hash) {
+            d.field("make_it_so", self.as_make_it_so());
+        } else {
+            d.field("unknownOp", self.as_unknownOp());
+        }
+        d.finish()
+    }
+}
+impl PartialEq for A_Return {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        if matches!(self.tag, A_make_it_so_Hash) {
+            self.as_make_it_so() == other.as_make_it_so()
+        } else {
+            self.as_unknownOp() == other.as_unknownOp()
         }
     }
 }
@@ -493,11 +868,98 @@ impl Default for A_Return {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct A_ReturnSerdeRef<'__a> {
+    tag: &'__a str,
+    data: A_ReturnSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum A_ReturnSerdeRefData<'__a> {
+    Case1(&'__a A_make_it_so_Result),
+    Case0(&'__a dds::rpc::UnknownOperation),
+}
+impl serde::Serialize for A_Return {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = if matches!(self.tag, A_make_it_so_Hash) {
+            let tag = "A_make_it_so_Hash";
+            A_ReturnSerdeRef {
+                tag,
+                data: A_ReturnSerdeRefData::Case1(self.as_make_it_so()),
+            }
+        } else {
+            let tag = "default";
+            A_ReturnSerdeRef {
+                tag,
+                data: A_ReturnSerdeRefData::Case0(self.as_unknownOp()),
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct A_ReturnSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for A_Return {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = A_ReturnSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "A_make_it_so_Hash" => {
+                let value = ::serde_json::from_value::<A_make_it_so_Result>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union A_Return payload decode failed for tag `A_make_it_so_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: A_make_it_so_Hash,
+                    data: A_ReturnData {
+                        make_it_so: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "default" => {
+                let value = ::serde_json::from_value::<
+                    dds::rpc::UnknownOperation,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union A_Return payload decode failed for tag `default`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: i32::default(),
+                    data: A_ReturnData {
+                        unknownOp: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union A_Return tag/data mismatch for tag `{}`", helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct A_Reply {
     pub header: dds::rpc::ReplyHeader,
@@ -523,6 +985,7 @@ pub const B_make_it_so_Hash: i32 = 4027367364;
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct B_make_it_so_In {
     pub times: i32,
@@ -533,6 +996,7 @@ impl B_make_it_so_In {}
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct B_make_it_so_Out {
     pub return_: i16,
@@ -558,6 +1022,35 @@ impl Drop for B_make_it_so_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+        }
+    }
+}
+impl Clone for B_make_it_so_Result {
+    fn clone(&self) -> Self {
+        match self.tag {
+            dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+        }
+    }
+}
+impl core::fmt::Debug for B_make_it_so_Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("B_make_it_so_Result");
+        d.field("tag", &self.tag);
+        match self.tag {
+            dds::RETCODE_OK => {
+                d.field("result", self.as_result());
+            }
+        }
+        d.finish()
+    }
+}
+impl PartialEq for B_make_it_so_Result {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        match self.tag {
+            dds::RETCODE_OK => self.as_result() == other.as_result(),
         }
     }
 }
@@ -602,6 +1095,72 @@ impl Default for B_make_it_so_Result {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct B_make_it_so_ResultSerdeRef<'__a> {
+    tag: &'__a str,
+    data: B_make_it_so_ResultSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum B_make_it_so_ResultSerdeRefData<'__a> {
+    Case0(&'__a B_make_it_so_Out),
+}
+impl serde::Serialize for B_make_it_so_Result {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = match self.tag {
+            dds::RETCODE_OK => {
+                let tag = "RETCODE_OK";
+                B_make_it_so_ResultSerdeRef {
+                    tag,
+                    data: B_make_it_so_ResultSerdeRefData::Case0(self.as_result()),
+                }
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct B_make_it_so_ResultSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for B_make_it_so_Result {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = B_make_it_so_ResultSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "RETCODE_OK" => {
+                let value = ::serde_json::from_value::<B_make_it_so_Out>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union B_make_it_so_Result payload decode failed for tag `RETCODE_OK`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: dds::RETCODE_OK,
+                    data: B_make_it_so_ResultData {
+                        result: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union B_make_it_so_Result tag/data mismatch for tag `{}`",
+                            helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
@@ -625,6 +1184,39 @@ impl Drop for B_Call {
             unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
+        }
+    }
+}
+impl Clone for B_Call {
+    fn clone(&self) -> Self {
+        if matches!(self.tag, B_make_it_so_Hash) {
+            Self::new_make_it_so(self.as_make_it_so().clone())
+        } else {
+            Self::new_unknownOp(self.as_unknownOp().clone())
+        }
+    }
+}
+impl core::fmt::Debug for B_Call {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("B_Call");
+        d.field("tag", &self.tag);
+        if matches!(self.tag, B_make_it_so_Hash) {
+            d.field("make_it_so", self.as_make_it_so());
+        } else {
+            d.field("unknownOp", self.as_unknownOp());
+        }
+        d.finish()
+    }
+}
+impl PartialEq for B_Call {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        if matches!(self.tag, B_make_it_so_Hash) {
+            self.as_make_it_so() == other.as_make_it_so()
+        } else {
+            self.as_unknownOp() == other.as_unknownOp()
         }
     }
 }
@@ -697,11 +1289,98 @@ impl Default for B_Call {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct B_CallSerdeRef<'__a> {
+    tag: &'__a str,
+    data: B_CallSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum B_CallSerdeRefData<'__a> {
+    Case1(&'__a B_make_it_so_In),
+    Case0(&'__a dds::rpc::UnknownOperation),
+}
+impl serde::Serialize for B_Call {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = if matches!(self.tag, B_make_it_so_Hash) {
+            let tag = "B_make_it_so_Hash";
+            B_CallSerdeRef {
+                tag,
+                data: B_CallSerdeRefData::Case1(self.as_make_it_so()),
+            }
+        } else {
+            let tag = "default";
+            B_CallSerdeRef {
+                tag,
+                data: B_CallSerdeRefData::Case0(self.as_unknownOp()),
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct B_CallSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for B_Call {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = B_CallSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "B_make_it_so_Hash" => {
+                let value = ::serde_json::from_value::<B_make_it_so_In>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union B_Call payload decode failed for tag `B_make_it_so_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: B_make_it_so_Hash,
+                    data: B_CallData {
+                        make_it_so: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "default" => {
+                let value = ::serde_json::from_value::<
+                    dds::rpc::UnknownOperation,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union B_Call payload decode failed for tag `default`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: i32::default(),
+                    data: B_CallData {
+                        unknownOp: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union B_Call tag/data mismatch for tag `{}`", helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct B_Request {
     pub header: dds::rpc::RequestHeader,
@@ -731,6 +1410,39 @@ impl Drop for B_Return {
             unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
+        }
+    }
+}
+impl Clone for B_Return {
+    fn clone(&self) -> Self {
+        if matches!(self.tag, B_make_it_so_Hash) {
+            Self::new_make_it_so(self.as_make_it_so().clone())
+        } else {
+            Self::new_unknownOp(self.as_unknownOp().clone())
+        }
+    }
+}
+impl core::fmt::Debug for B_Return {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("B_Return");
+        d.field("tag", &self.tag);
+        if matches!(self.tag, B_make_it_so_Hash) {
+            d.field("make_it_so", self.as_make_it_so());
+        } else {
+            d.field("unknownOp", self.as_unknownOp());
+        }
+        d.finish()
+    }
+}
+impl PartialEq for B_Return {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        if matches!(self.tag, B_make_it_so_Hash) {
+            self.as_make_it_so() == other.as_make_it_so()
+        } else {
+            self.as_unknownOp() == other.as_unknownOp()
         }
     }
 }
@@ -803,11 +1515,98 @@ impl Default for B_Return {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct B_ReturnSerdeRef<'__a> {
+    tag: &'__a str,
+    data: B_ReturnSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum B_ReturnSerdeRefData<'__a> {
+    Case1(&'__a B_make_it_so_Result),
+    Case0(&'__a dds::rpc::UnknownOperation),
+}
+impl serde::Serialize for B_Return {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = if matches!(self.tag, B_make_it_so_Hash) {
+            let tag = "B_make_it_so_Hash";
+            B_ReturnSerdeRef {
+                tag,
+                data: B_ReturnSerdeRefData::Case1(self.as_make_it_so()),
+            }
+        } else {
+            let tag = "default";
+            B_ReturnSerdeRef {
+                tag,
+                data: B_ReturnSerdeRefData::Case0(self.as_unknownOp()),
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct B_ReturnSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for B_Return {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = B_ReturnSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "B_make_it_so_Hash" => {
+                let value = ::serde_json::from_value::<B_make_it_so_Result>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union B_Return payload decode failed for tag `B_make_it_so_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: B_make_it_so_Hash,
+                    data: B_ReturnData {
+                        make_it_so: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "default" => {
+                let value = ::serde_json::from_value::<
+                    dds::rpc::UnknownOperation,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union B_Return payload decode failed for tag `default`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: i32::default(),
+                    data: B_ReturnData {
+                        unknownOp: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union B_Return tag/data mismatch for tag `{}`", helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct B_Reply {
     pub header: dds::rpc::ReplyHeader,
@@ -833,6 +1632,7 @@ pub const A_opA_Hash: i32 = 3927698569;
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct A_opA_In {
     pub l_1: L1,
@@ -843,6 +1643,7 @@ impl A_opA_In {}
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct A_opA_Out {
     pub return_: i16,
@@ -868,6 +1669,35 @@ impl Drop for A_opA_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+        }
+    }
+}
+impl Clone for A_opA_Result {
+    fn clone(&self) -> Self {
+        match self.tag {
+            dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+        }
+    }
+}
+impl core::fmt::Debug for A_opA_Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("A_opA_Result");
+        d.field("tag", &self.tag);
+        match self.tag {
+            dds::RETCODE_OK => {
+                d.field("result", self.as_result());
+            }
+        }
+        d.finish()
+    }
+}
+impl PartialEq for A_opA_Result {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        match self.tag {
+            dds::RETCODE_OK => self.as_result() == other.as_result(),
         }
     }
 }
@@ -912,6 +1742,72 @@ impl Default for A_opA_Result {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct A_opA_ResultSerdeRef<'__a> {
+    tag: &'__a str,
+    data: A_opA_ResultSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum A_opA_ResultSerdeRefData<'__a> {
+    Case0(&'__a A_opA_Out),
+}
+impl serde::Serialize for A_opA_Result {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = match self.tag {
+            dds::RETCODE_OK => {
+                let tag = "RETCODE_OK";
+                A_opA_ResultSerdeRef {
+                    tag,
+                    data: A_opA_ResultSerdeRefData::Case0(self.as_result()),
+                }
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct A_opA_ResultSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for A_opA_Result {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = A_opA_ResultSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "RETCODE_OK" => {
+                let value = ::serde_json::from_value::<A_opA_Out>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union A_opA_Result payload decode failed for tag `RETCODE_OK`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: dds::RETCODE_OK,
+                    data: A_opA_ResultData {
+                        result: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union A_opA_Result tag/data mismatch for tag `{}`", helper
+                            .tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
@@ -935,6 +1831,39 @@ impl Drop for A_Call {
             unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
+        }
+    }
+}
+impl Clone for A_Call {
+    fn clone(&self) -> Self {
+        if matches!(self.tag, A_opA_Hash) {
+            Self::new_opA(self.as_opA().clone())
+        } else {
+            Self::new_unknownOp(self.as_unknownOp().clone())
+        }
+    }
+}
+impl core::fmt::Debug for A_Call {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("A_Call");
+        d.field("tag", &self.tag);
+        if matches!(self.tag, A_opA_Hash) {
+            d.field("opA", self.as_opA());
+        } else {
+            d.field("unknownOp", self.as_unknownOp());
+        }
+        d.finish()
+    }
+}
+impl PartialEq for A_Call {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        if matches!(self.tag, A_opA_Hash) {
+            self.as_opA() == other.as_opA()
+        } else {
+            self.as_unknownOp() == other.as_unknownOp()
         }
     }
 }
@@ -1007,11 +1936,98 @@ impl Default for A_Call {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct A_CallSerdeRef<'__a> {
+    tag: &'__a str,
+    data: A_CallSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum A_CallSerdeRefData<'__a> {
+    Case1(&'__a A_opA_In),
+    Case0(&'__a dds::rpc::UnknownOperation),
+}
+impl serde::Serialize for A_Call {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = if matches!(self.tag, A_opA_Hash) {
+            let tag = "A_opA_Hash";
+            A_CallSerdeRef {
+                tag,
+                data: A_CallSerdeRefData::Case1(self.as_opA()),
+            }
+        } else {
+            let tag = "default";
+            A_CallSerdeRef {
+                tag,
+                data: A_CallSerdeRefData::Case0(self.as_unknownOp()),
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct A_CallSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for A_Call {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = A_CallSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "A_opA_Hash" => {
+                let value = ::serde_json::from_value::<A_opA_In>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union A_Call payload decode failed for tag `A_opA_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: A_opA_Hash,
+                    data: A_CallData {
+                        opA: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "default" => {
+                let value = ::serde_json::from_value::<
+                    dds::rpc::UnknownOperation,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union A_Call payload decode failed for tag `default`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: i32::default(),
+                    data: A_CallData {
+                        unknownOp: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union A_Call tag/data mismatch for tag `{}`", helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct A_Request {
     pub header: dds::rpc::RequestHeader,
@@ -1041,6 +2057,39 @@ impl Drop for A_Return {
             unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
+        }
+    }
+}
+impl Clone for A_Return {
+    fn clone(&self) -> Self {
+        if matches!(self.tag, A_opA_Hash) {
+            Self::new_opA(self.as_opA().clone())
+        } else {
+            Self::new_unknownOp(self.as_unknownOp().clone())
+        }
+    }
+}
+impl core::fmt::Debug for A_Return {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("A_Return");
+        d.field("tag", &self.tag);
+        if matches!(self.tag, A_opA_Hash) {
+            d.field("opA", self.as_opA());
+        } else {
+            d.field("unknownOp", self.as_unknownOp());
+        }
+        d.finish()
+    }
+}
+impl PartialEq for A_Return {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        if matches!(self.tag, A_opA_Hash) {
+            self.as_opA() == other.as_opA()
+        } else {
+            self.as_unknownOp() == other.as_unknownOp()
         }
     }
 }
@@ -1113,11 +2162,98 @@ impl Default for A_Return {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct A_ReturnSerdeRef<'__a> {
+    tag: &'__a str,
+    data: A_ReturnSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum A_ReturnSerdeRefData<'__a> {
+    Case1(&'__a A_opA_Result),
+    Case0(&'__a dds::rpc::UnknownOperation),
+}
+impl serde::Serialize for A_Return {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = if matches!(self.tag, A_opA_Hash) {
+            let tag = "A_opA_Hash";
+            A_ReturnSerdeRef {
+                tag,
+                data: A_ReturnSerdeRefData::Case1(self.as_opA()),
+            }
+        } else {
+            let tag = "default";
+            A_ReturnSerdeRef {
+                tag,
+                data: A_ReturnSerdeRefData::Case0(self.as_unknownOp()),
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct A_ReturnSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for A_Return {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = A_ReturnSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "A_opA_Hash" => {
+                let value = ::serde_json::from_value::<A_opA_Result>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union A_Return payload decode failed for tag `A_opA_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: A_opA_Hash,
+                    data: A_ReturnData {
+                        opA: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "default" => {
+                let value = ::serde_json::from_value::<
+                    dds::rpc::UnknownOperation,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union A_Return payload decode failed for tag `default`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: i32::default(),
+                    data: A_ReturnData {
+                        unknownOp: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union A_Return tag/data mismatch for tag `{}`", helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct A_Reply {
     pub header: dds::rpc::ReplyHeader,
@@ -1149,6 +2285,7 @@ pub const B_opB_Hash: i32 = 772252025;
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct B_opB_In {
     pub l: i32,
@@ -1159,6 +2296,7 @@ impl B_opB_In {}
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct B_opB_Out {
     pub return_: L1,
@@ -1184,6 +2322,35 @@ impl Drop for B_opB_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+        }
+    }
+}
+impl Clone for B_opB_Result {
+    fn clone(&self) -> Self {
+        match self.tag {
+            dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+        }
+    }
+}
+impl core::fmt::Debug for B_opB_Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("B_opB_Result");
+        d.field("tag", &self.tag);
+        match self.tag {
+            dds::RETCODE_OK => {
+                d.field("result", self.as_result());
+            }
+        }
+        d.finish()
+    }
+}
+impl PartialEq for B_opB_Result {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        match self.tag {
+            dds::RETCODE_OK => self.as_result() == other.as_result(),
         }
     }
 }
@@ -1228,6 +2395,72 @@ impl Default for B_opB_Result {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct B_opB_ResultSerdeRef<'__a> {
+    tag: &'__a str,
+    data: B_opB_ResultSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum B_opB_ResultSerdeRefData<'__a> {
+    Case0(&'__a B_opB_Out),
+}
+impl serde::Serialize for B_opB_Result {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = match self.tag {
+            dds::RETCODE_OK => {
+                let tag = "RETCODE_OK";
+                B_opB_ResultSerdeRef {
+                    tag,
+                    data: B_opB_ResultSerdeRefData::Case0(self.as_result()),
+                }
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct B_opB_ResultSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for B_opB_Result {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = B_opB_ResultSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "RETCODE_OK" => {
+                let value = ::serde_json::from_value::<B_opB_Out>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union B_opB_Result payload decode failed for tag `RETCODE_OK`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: dds::RETCODE_OK,
+                    data: B_opB_ResultData {
+                        result: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union B_opB_Result tag/data mismatch for tag `{}`", helper
+                            .tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
@@ -1251,6 +2484,39 @@ impl Drop for B_Call {
             unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
+        }
+    }
+}
+impl Clone for B_Call {
+    fn clone(&self) -> Self {
+        if matches!(self.tag, B_opB_Hash) {
+            Self::new_opB(self.as_opB().clone())
+        } else {
+            Self::new_unknownOp(self.as_unknownOp().clone())
+        }
+    }
+}
+impl core::fmt::Debug for B_Call {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("B_Call");
+        d.field("tag", &self.tag);
+        if matches!(self.tag, B_opB_Hash) {
+            d.field("opB", self.as_opB());
+        } else {
+            d.field("unknownOp", self.as_unknownOp());
+        }
+        d.finish()
+    }
+}
+impl PartialEq for B_Call {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        if matches!(self.tag, B_opB_Hash) {
+            self.as_opB() == other.as_opB()
+        } else {
+            self.as_unknownOp() == other.as_unknownOp()
         }
     }
 }
@@ -1323,11 +2589,98 @@ impl Default for B_Call {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct B_CallSerdeRef<'__a> {
+    tag: &'__a str,
+    data: B_CallSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum B_CallSerdeRefData<'__a> {
+    Case1(&'__a B_opB_In),
+    Case0(&'__a dds::rpc::UnknownOperation),
+}
+impl serde::Serialize for B_Call {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = if matches!(self.tag, B_opB_Hash) {
+            let tag = "B_opB_Hash";
+            B_CallSerdeRef {
+                tag,
+                data: B_CallSerdeRefData::Case1(self.as_opB()),
+            }
+        } else {
+            let tag = "default";
+            B_CallSerdeRef {
+                tag,
+                data: B_CallSerdeRefData::Case0(self.as_unknownOp()),
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct B_CallSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for B_Call {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = B_CallSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "B_opB_Hash" => {
+                let value = ::serde_json::from_value::<B_opB_In>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union B_Call payload decode failed for tag `B_opB_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: B_opB_Hash,
+                    data: B_CallData {
+                        opB: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "default" => {
+                let value = ::serde_json::from_value::<
+                    dds::rpc::UnknownOperation,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union B_Call payload decode failed for tag `default`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: i32::default(),
+                    data: B_CallData {
+                        unknownOp: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union B_Call tag/data mismatch for tag `{}`", helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct B_Request {
     pub header: dds::rpc::RequestHeader,
@@ -1357,6 +2710,39 @@ impl Drop for B_Return {
             unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
+        }
+    }
+}
+impl Clone for B_Return {
+    fn clone(&self) -> Self {
+        if matches!(self.tag, B_opB_Hash) {
+            Self::new_opB(self.as_opB().clone())
+        } else {
+            Self::new_unknownOp(self.as_unknownOp().clone())
+        }
+    }
+}
+impl core::fmt::Debug for B_Return {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("B_Return");
+        d.field("tag", &self.tag);
+        if matches!(self.tag, B_opB_Hash) {
+            d.field("opB", self.as_opB());
+        } else {
+            d.field("unknownOp", self.as_unknownOp());
+        }
+        d.finish()
+    }
+}
+impl PartialEq for B_Return {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        if matches!(self.tag, B_opB_Hash) {
+            self.as_opB() == other.as_opB()
+        } else {
+            self.as_unknownOp() == other.as_unknownOp()
         }
     }
 }
@@ -1429,11 +2815,98 @@ impl Default for B_Return {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct B_ReturnSerdeRef<'__a> {
+    tag: &'__a str,
+    data: B_ReturnSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum B_ReturnSerdeRefData<'__a> {
+    Case1(&'__a B_opB_Result),
+    Case0(&'__a dds::rpc::UnknownOperation),
+}
+impl serde::Serialize for B_Return {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = if matches!(self.tag, B_opB_Hash) {
+            let tag = "B_opB_Hash";
+            B_ReturnSerdeRef {
+                tag,
+                data: B_ReturnSerdeRefData::Case1(self.as_opB()),
+            }
+        } else {
+            let tag = "default";
+            B_ReturnSerdeRef {
+                tag,
+                data: B_ReturnSerdeRefData::Case0(self.as_unknownOp()),
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct B_ReturnSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for B_Return {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = B_ReturnSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "B_opB_Hash" => {
+                let value = ::serde_json::from_value::<B_opB_Result>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union B_Return payload decode failed for tag `B_opB_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: B_opB_Hash,
+                    data: B_ReturnData {
+                        opB: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "default" => {
+                let value = ::serde_json::from_value::<
+                    dds::rpc::UnknownOperation,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union B_Return payload decode failed for tag `default`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: i32::default(),
+                    data: B_ReturnData {
+                        unknownOp: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union B_Return tag/data mismatch for tag `{}`", helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct B_Reply {
     pub header: dds::rpc::ReplyHeader,
@@ -1465,6 +2938,7 @@ pub const C_opC_Hash: i32 = 1200187224;
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_opC_In {
     pub l_3: L3,
@@ -1475,6 +2949,7 @@ impl C_opC_In {}
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_opC_Out {
     pub return_: B::L1,
@@ -1500,6 +2975,35 @@ impl Drop for C_opC_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+        }
+    }
+}
+impl Clone for C_opC_Result {
+    fn clone(&self) -> Self {
+        match self.tag {
+            dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+        }
+    }
+}
+impl core::fmt::Debug for C_opC_Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("C_opC_Result");
+        d.field("tag", &self.tag);
+        match self.tag {
+            dds::RETCODE_OK => {
+                d.field("result", self.as_result());
+            }
+        }
+        d.finish()
+    }
+}
+impl PartialEq for C_opC_Result {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        match self.tag {
+            dds::RETCODE_OK => self.as_result() == other.as_result(),
         }
     }
 }
@@ -1544,6 +3048,72 @@ impl Default for C_opC_Result {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct C_opC_ResultSerdeRef<'__a> {
+    tag: &'__a str,
+    data: C_opC_ResultSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum C_opC_ResultSerdeRefData<'__a> {
+    Case0(&'__a C_opC_Out),
+}
+impl serde::Serialize for C_opC_Result {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = match self.tag {
+            dds::RETCODE_OK => {
+                let tag = "RETCODE_OK";
+                C_opC_ResultSerdeRef {
+                    tag,
+                    data: C_opC_ResultSerdeRefData::Case0(self.as_result()),
+                }
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct C_opC_ResultSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for C_opC_Result {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = C_opC_ResultSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "RETCODE_OK" => {
+                let value = ::serde_json::from_value::<C_opC_Out>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union C_opC_Result payload decode failed for tag `RETCODE_OK`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: dds::RETCODE_OK,
+                    data: C_opC_ResultData {
+                        result: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union C_opC_Result tag/data mismatch for tag `{}`", helper
+                            .tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
@@ -1567,6 +3137,39 @@ impl Drop for C_Call {
             unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
+        }
+    }
+}
+impl Clone for C_Call {
+    fn clone(&self) -> Self {
+        if matches!(self.tag, C_opC_Hash) {
+            Self::new_opC(self.as_opC().clone())
+        } else {
+            Self::new_unknownOp(self.as_unknownOp().clone())
+        }
+    }
+}
+impl core::fmt::Debug for C_Call {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("C_Call");
+        d.field("tag", &self.tag);
+        if matches!(self.tag, C_opC_Hash) {
+            d.field("opC", self.as_opC());
+        } else {
+            d.field("unknownOp", self.as_unknownOp());
+        }
+        d.finish()
+    }
+}
+impl PartialEq for C_Call {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        if matches!(self.tag, C_opC_Hash) {
+            self.as_opC() == other.as_opC()
+        } else {
+            self.as_unknownOp() == other.as_unknownOp()
         }
     }
 }
@@ -1639,11 +3242,98 @@ impl Default for C_Call {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct C_CallSerdeRef<'__a> {
+    tag: &'__a str,
+    data: C_CallSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum C_CallSerdeRefData<'__a> {
+    Case1(&'__a C_opC_In),
+    Case0(&'__a dds::rpc::UnknownOperation),
+}
+impl serde::Serialize for C_Call {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = if matches!(self.tag, C_opC_Hash) {
+            let tag = "C_opC_Hash";
+            C_CallSerdeRef {
+                tag,
+                data: C_CallSerdeRefData::Case1(self.as_opC()),
+            }
+        } else {
+            let tag = "default";
+            C_CallSerdeRef {
+                tag,
+                data: C_CallSerdeRefData::Case0(self.as_unknownOp()),
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct C_CallSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for C_Call {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = C_CallSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "C_opC_Hash" => {
+                let value = ::serde_json::from_value::<C_opC_In>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union C_Call payload decode failed for tag `C_opC_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: C_opC_Hash,
+                    data: C_CallData {
+                        opC: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "default" => {
+                let value = ::serde_json::from_value::<
+                    dds::rpc::UnknownOperation,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union C_Call payload decode failed for tag `default`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: i32::default(),
+                    data: C_CallData {
+                        unknownOp: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union C_Call tag/data mismatch for tag `{}`", helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_Request {
     pub header: dds::rpc::RequestHeader,
@@ -1673,6 +3363,39 @@ impl Drop for C_Return {
             unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
+        }
+    }
+}
+impl Clone for C_Return {
+    fn clone(&self) -> Self {
+        if matches!(self.tag, C_opC_Hash) {
+            Self::new_opC(self.as_opC().clone())
+        } else {
+            Self::new_unknownOp(self.as_unknownOp().clone())
+        }
+    }
+}
+impl core::fmt::Debug for C_Return {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("C_Return");
+        d.field("tag", &self.tag);
+        if matches!(self.tag, C_opC_Hash) {
+            d.field("opC", self.as_opC());
+        } else {
+            d.field("unknownOp", self.as_unknownOp());
+        }
+        d.finish()
+    }
+}
+impl PartialEq for C_Return {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        if matches!(self.tag, C_opC_Hash) {
+            self.as_opC() == other.as_opC()
+        } else {
+            self.as_unknownOp() == other.as_unknownOp()
         }
     }
 }
@@ -1745,11 +3468,98 @@ impl Default for C_Return {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct C_ReturnSerdeRef<'__a> {
+    tag: &'__a str,
+    data: C_ReturnSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum C_ReturnSerdeRefData<'__a> {
+    Case1(&'__a C_opC_Result),
+    Case0(&'__a dds::rpc::UnknownOperation),
+}
+impl serde::Serialize for C_Return {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = if matches!(self.tag, C_opC_Hash) {
+            let tag = "C_opC_Hash";
+            C_ReturnSerdeRef {
+                tag,
+                data: C_ReturnSerdeRefData::Case1(self.as_opC()),
+            }
+        } else {
+            let tag = "default";
+            C_ReturnSerdeRef {
+                tag,
+                data: C_ReturnSerdeRefData::Case0(self.as_unknownOp()),
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct C_ReturnSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for C_Return {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = C_ReturnSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "C_opC_Hash" => {
+                let value = ::serde_json::from_value::<C_opC_Result>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union C_Return payload decode failed for tag `C_opC_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: C_opC_Hash,
+                    data: C_ReturnData {
+                        opC: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "default" => {
+                let value = ::serde_json::from_value::<
+                    dds::rpc::UnknownOperation,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union C_Return payload decode failed for tag `default`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: i32::default(),
+                    data: C_ReturnData {
+                        unknownOp: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union C_Return tag/data mismatch for tag `{}`", helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_Reply {
     pub header: dds::rpc::ReplyHeader,
@@ -1793,6 +3603,7 @@ pub const A_f_Hash: i32 = 3712786831;
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct A_f_In {
     pub s: coord,
@@ -1803,6 +3614,7 @@ impl A_f_In {}
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct A_f_Out {
     pub dummy: dds::rpc::UnusedMember,
@@ -1828,6 +3640,35 @@ impl Drop for A_f_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+        }
+    }
+}
+impl Clone for A_f_Result {
+    fn clone(&self) -> Self {
+        match self.tag {
+            dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+        }
+    }
+}
+impl core::fmt::Debug for A_f_Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("A_f_Result");
+        d.field("tag", &self.tag);
+        match self.tag {
+            dds::RETCODE_OK => {
+                d.field("result", self.as_result());
+            }
+        }
+        d.finish()
+    }
+}
+impl PartialEq for A_f_Result {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        match self.tag {
+            dds::RETCODE_OK => self.as_result() == other.as_result(),
         }
     }
 }
@@ -1872,6 +3713,71 @@ impl Default for A_f_Result {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct A_f_ResultSerdeRef<'__a> {
+    tag: &'__a str,
+    data: A_f_ResultSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum A_f_ResultSerdeRefData<'__a> {
+    Case0(&'__a A_f_Out),
+}
+impl serde::Serialize for A_f_Result {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = match self.tag {
+            dds::RETCODE_OK => {
+                let tag = "RETCODE_OK";
+                A_f_ResultSerdeRef {
+                    tag,
+                    data: A_f_ResultSerdeRefData::Case0(self.as_result()),
+                }
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct A_f_ResultSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for A_f_Result {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = A_f_ResultSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "RETCODE_OK" => {
+                let value = ::serde_json::from_value::<A_f_Out>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union A_f_Result payload decode failed for tag `RETCODE_OK`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: dds::RETCODE_OK,
+                    data: A_f_ResultData {
+                        result: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union A_f_Result tag/data mismatch for tag `{}`", helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
@@ -1895,6 +3801,39 @@ impl Drop for A_Call {
             unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
+        }
+    }
+}
+impl Clone for A_Call {
+    fn clone(&self) -> Self {
+        if matches!(self.tag, A_f_Hash) {
+            Self::new_f(self.as_f().clone())
+        } else {
+            Self::new_unknownOp(self.as_unknownOp().clone())
+        }
+    }
+}
+impl core::fmt::Debug for A_Call {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("A_Call");
+        d.field("tag", &self.tag);
+        if matches!(self.tag, A_f_Hash) {
+            d.field("f", self.as_f());
+        } else {
+            d.field("unknownOp", self.as_unknownOp());
+        }
+        d.finish()
+    }
+}
+impl PartialEq for A_Call {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        if matches!(self.tag, A_f_Hash) {
+            self.as_f() == other.as_f()
+        } else {
+            self.as_unknownOp() == other.as_unknownOp()
         }
     }
 }
@@ -1967,11 +3906,98 @@ impl Default for A_Call {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct A_CallSerdeRef<'__a> {
+    tag: &'__a str,
+    data: A_CallSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum A_CallSerdeRefData<'__a> {
+    Case1(&'__a A_f_In),
+    Case0(&'__a dds::rpc::UnknownOperation),
+}
+impl serde::Serialize for A_Call {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = if matches!(self.tag, A_f_Hash) {
+            let tag = "A_f_Hash";
+            A_CallSerdeRef {
+                tag,
+                data: A_CallSerdeRefData::Case1(self.as_f()),
+            }
+        } else {
+            let tag = "default";
+            A_CallSerdeRef {
+                tag,
+                data: A_CallSerdeRefData::Case0(self.as_unknownOp()),
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct A_CallSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for A_Call {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = A_CallSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "A_f_Hash" => {
+                let value = ::serde_json::from_value::<A_f_In>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union A_Call payload decode failed for tag `A_f_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: A_f_Hash,
+                    data: A_CallData {
+                        f: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "default" => {
+                let value = ::serde_json::from_value::<
+                    dds::rpc::UnknownOperation,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union A_Call payload decode failed for tag `default`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: i32::default(),
+                    data: A_CallData {
+                        unknownOp: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union A_Call tag/data mismatch for tag `{}`", helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct A_Request {
     pub header: dds::rpc::RequestHeader,
@@ -2001,6 +4027,39 @@ impl Drop for A_Return {
             unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
+        }
+    }
+}
+impl Clone for A_Return {
+    fn clone(&self) -> Self {
+        if matches!(self.tag, A_f_Hash) {
+            Self::new_f(self.as_f().clone())
+        } else {
+            Self::new_unknownOp(self.as_unknownOp().clone())
+        }
+    }
+}
+impl core::fmt::Debug for A_Return {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("A_Return");
+        d.field("tag", &self.tag);
+        if matches!(self.tag, A_f_Hash) {
+            d.field("f", self.as_f());
+        } else {
+            d.field("unknownOp", self.as_unknownOp());
+        }
+        d.finish()
+    }
+}
+impl PartialEq for A_Return {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        if matches!(self.tag, A_f_Hash) {
+            self.as_f() == other.as_f()
+        } else {
+            self.as_unknownOp() == other.as_unknownOp()
         }
     }
 }
@@ -2073,11 +4132,98 @@ impl Default for A_Return {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct A_ReturnSerdeRef<'__a> {
+    tag: &'__a str,
+    data: A_ReturnSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum A_ReturnSerdeRefData<'__a> {
+    Case1(&'__a A_f_Result),
+    Case0(&'__a dds::rpc::UnknownOperation),
+}
+impl serde::Serialize for A_Return {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = if matches!(self.tag, A_f_Hash) {
+            let tag = "A_f_Hash";
+            A_ReturnSerdeRef {
+                tag,
+                data: A_ReturnSerdeRefData::Case1(self.as_f()),
+            }
+        } else {
+            let tag = "default";
+            A_ReturnSerdeRef {
+                tag,
+                data: A_ReturnSerdeRefData::Case0(self.as_unknownOp()),
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct A_ReturnSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for A_Return {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = A_ReturnSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "A_f_Hash" => {
+                let value = ::serde_json::from_value::<A_f_Result>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union A_Return payload decode failed for tag `A_f_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: A_f_Hash,
+                    data: A_ReturnData {
+                        f: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "default" => {
+                let value = ::serde_json::from_value::<
+                    dds::rpc::UnknownOperation,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union A_Return payload decode failed for tag `default`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: i32::default(),
+                    data: A_ReturnData {
+                        unknownOp: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union A_Return tag/data mismatch for tag `{}`", helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct A_Reply {
     pub header: dds::rpc::ReplyHeader,
@@ -2181,6 +4327,7 @@ pub const C_set_attribute_City_Hash: i32 = 1017480313;
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_get_attribute_Title_In {
     pub dummy: dds::rpc::UnusedMember,
@@ -2191,6 +4338,7 @@ impl C_get_attribute_Title_In {}
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_get_attribute_Title_Out {
     pub return_: string_t,
@@ -2216,6 +4364,35 @@ impl Drop for C_get_attribute_Title_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+        }
+    }
+}
+impl Clone for C_get_attribute_Title_Result {
+    fn clone(&self) -> Self {
+        match self.tag {
+            dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+        }
+    }
+}
+impl core::fmt::Debug for C_get_attribute_Title_Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("C_get_attribute_Title_Result");
+        d.field("tag", &self.tag);
+        match self.tag {
+            dds::RETCODE_OK => {
+                d.field("result", self.as_result());
+            }
+        }
+        d.finish()
+    }
+}
+impl PartialEq for C_get_attribute_Title_Result {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        match self.tag {
+            dds::RETCODE_OK => self.as_result() == other.as_result(),
         }
     }
 }
@@ -2262,11 +4439,82 @@ impl Default for C_get_attribute_Title_Result {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct C_get_attribute_Title_ResultSerdeRef<'__a> {
+    tag: &'__a str,
+    data: C_get_attribute_Title_ResultSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum C_get_attribute_Title_ResultSerdeRefData<'__a> {
+    Case0(&'__a C_get_attribute_Title_Out),
+}
+impl serde::Serialize for C_get_attribute_Title_Result {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = match self.tag {
+            dds::RETCODE_OK => {
+                let tag = "RETCODE_OK";
+                C_get_attribute_Title_ResultSerdeRef {
+                    tag,
+                    data: C_get_attribute_Title_ResultSerdeRefData::Case0(
+                        self.as_result(),
+                    ),
+                }
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct C_get_attribute_Title_ResultSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for C_get_attribute_Title_Result {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = C_get_attribute_Title_ResultSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "RETCODE_OK" => {
+                let value = ::serde_json::from_value::<
+                    C_get_attribute_Title_Out,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union C_get_attribute_Title_Result payload decode failed for tag `RETCODE_OK`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: dds::RETCODE_OK,
+                    data: C_get_attribute_Title_ResultData {
+                        result: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union C_get_attribute_Title_Result tag/data mismatch for tag `{}`",
+                            helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_set_attribute_Title_In {
     pub Title: string_t,
@@ -2277,6 +4525,7 @@ impl C_set_attribute_Title_In {}
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_set_attribute_Title_Out {
     pub dummy: dds::rpc::UnusedMember,
@@ -2302,6 +4551,35 @@ impl Drop for C_set_attribute_Title_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+        }
+    }
+}
+impl Clone for C_set_attribute_Title_Result {
+    fn clone(&self) -> Self {
+        match self.tag {
+            dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+        }
+    }
+}
+impl core::fmt::Debug for C_set_attribute_Title_Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("C_set_attribute_Title_Result");
+        d.field("tag", &self.tag);
+        match self.tag {
+            dds::RETCODE_OK => {
+                d.field("result", self.as_result());
+            }
+        }
+        d.finish()
+    }
+}
+impl PartialEq for C_set_attribute_Title_Result {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        match self.tag {
+            dds::RETCODE_OK => self.as_result() == other.as_result(),
         }
     }
 }
@@ -2348,11 +4626,82 @@ impl Default for C_set_attribute_Title_Result {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct C_set_attribute_Title_ResultSerdeRef<'__a> {
+    tag: &'__a str,
+    data: C_set_attribute_Title_ResultSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum C_set_attribute_Title_ResultSerdeRefData<'__a> {
+    Case0(&'__a C_set_attribute_Title_Out),
+}
+impl serde::Serialize for C_set_attribute_Title_Result {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = match self.tag {
+            dds::RETCODE_OK => {
+                let tag = "RETCODE_OK";
+                C_set_attribute_Title_ResultSerdeRef {
+                    tag,
+                    data: C_set_attribute_Title_ResultSerdeRefData::Case0(
+                        self.as_result(),
+                    ),
+                }
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct C_set_attribute_Title_ResultSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for C_set_attribute_Title_Result {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = C_set_attribute_Title_ResultSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "RETCODE_OK" => {
+                let value = ::serde_json::from_value::<
+                    C_set_attribute_Title_Out,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union C_set_attribute_Title_Result payload decode failed for tag `RETCODE_OK`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: dds::RETCODE_OK,
+                    data: C_set_attribute_Title_ResultData {
+                        result: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union C_set_attribute_Title_Result tag/data mismatch for tag `{}`",
+                            helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_get_attribute_Name_In {
     pub dummy: dds::rpc::UnusedMember,
@@ -2363,6 +4712,7 @@ impl C_get_attribute_Name_In {}
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_get_attribute_Name_Out {
     pub return_: A::string_t,
@@ -2388,6 +4738,35 @@ impl Drop for C_get_attribute_Name_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+        }
+    }
+}
+impl Clone for C_get_attribute_Name_Result {
+    fn clone(&self) -> Self {
+        match self.tag {
+            dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+        }
+    }
+}
+impl core::fmt::Debug for C_get_attribute_Name_Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("C_get_attribute_Name_Result");
+        d.field("tag", &self.tag);
+        match self.tag {
+            dds::RETCODE_OK => {
+                d.field("result", self.as_result());
+            }
+        }
+        d.finish()
+    }
+}
+impl PartialEq for C_get_attribute_Name_Result {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        match self.tag {
+            dds::RETCODE_OK => self.as_result() == other.as_result(),
         }
     }
 }
@@ -2432,11 +4811,82 @@ impl Default for C_get_attribute_Name_Result {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct C_get_attribute_Name_ResultSerdeRef<'__a> {
+    tag: &'__a str,
+    data: C_get_attribute_Name_ResultSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum C_get_attribute_Name_ResultSerdeRefData<'__a> {
+    Case0(&'__a C_get_attribute_Name_Out),
+}
+impl serde::Serialize for C_get_attribute_Name_Result {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = match self.tag {
+            dds::RETCODE_OK => {
+                let tag = "RETCODE_OK";
+                C_get_attribute_Name_ResultSerdeRef {
+                    tag,
+                    data: C_get_attribute_Name_ResultSerdeRefData::Case0(
+                        self.as_result(),
+                    ),
+                }
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct C_get_attribute_Name_ResultSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for C_get_attribute_Name_Result {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = C_get_attribute_Name_ResultSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "RETCODE_OK" => {
+                let value = ::serde_json::from_value::<
+                    C_get_attribute_Name_Out,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union C_get_attribute_Name_Result payload decode failed for tag `RETCODE_OK`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: dds::RETCODE_OK,
+                    data: C_get_attribute_Name_ResultData {
+                        result: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union C_get_attribute_Name_Result tag/data mismatch for tag `{}`",
+                            helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_set_attribute_Name_In {
     pub Name: A::string_t,
@@ -2447,6 +4897,7 @@ impl C_set_attribute_Name_In {}
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_set_attribute_Name_Out {
     pub dummy: dds::rpc::UnusedMember,
@@ -2472,6 +4923,35 @@ impl Drop for C_set_attribute_Name_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+        }
+    }
+}
+impl Clone for C_set_attribute_Name_Result {
+    fn clone(&self) -> Self {
+        match self.tag {
+            dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+        }
+    }
+}
+impl core::fmt::Debug for C_set_attribute_Name_Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("C_set_attribute_Name_Result");
+        d.field("tag", &self.tag);
+        match self.tag {
+            dds::RETCODE_OK => {
+                d.field("result", self.as_result());
+            }
+        }
+        d.finish()
+    }
+}
+impl PartialEq for C_set_attribute_Name_Result {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        match self.tag {
+            dds::RETCODE_OK => self.as_result() == other.as_result(),
         }
     }
 }
@@ -2516,11 +4996,82 @@ impl Default for C_set_attribute_Name_Result {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct C_set_attribute_Name_ResultSerdeRef<'__a> {
+    tag: &'__a str,
+    data: C_set_attribute_Name_ResultSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum C_set_attribute_Name_ResultSerdeRefData<'__a> {
+    Case0(&'__a C_set_attribute_Name_Out),
+}
+impl serde::Serialize for C_set_attribute_Name_Result {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = match self.tag {
+            dds::RETCODE_OK => {
+                let tag = "RETCODE_OK";
+                C_set_attribute_Name_ResultSerdeRef {
+                    tag,
+                    data: C_set_attribute_Name_ResultSerdeRefData::Case0(
+                        self.as_result(),
+                    ),
+                }
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct C_set_attribute_Name_ResultSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for C_set_attribute_Name_Result {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = C_set_attribute_Name_ResultSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "RETCODE_OK" => {
+                let value = ::serde_json::from_value::<
+                    C_set_attribute_Name_Out,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union C_set_attribute_Name_Result payload decode failed for tag `RETCODE_OK`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: dds::RETCODE_OK,
+                    data: C_set_attribute_Name_ResultData {
+                        result: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union C_set_attribute_Name_Result tag/data mismatch for tag `{}`",
+                            helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_get_attribute_City_In {
     pub dummy: dds::rpc::UnusedMember,
@@ -2531,6 +5082,7 @@ impl C_get_attribute_City_In {}
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_get_attribute_City_Out {
     pub return_: B::string_t,
@@ -2556,6 +5108,35 @@ impl Drop for C_get_attribute_City_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+        }
+    }
+}
+impl Clone for C_get_attribute_City_Result {
+    fn clone(&self) -> Self {
+        match self.tag {
+            dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+        }
+    }
+}
+impl core::fmt::Debug for C_get_attribute_City_Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("C_get_attribute_City_Result");
+        d.field("tag", &self.tag);
+        match self.tag {
+            dds::RETCODE_OK => {
+                d.field("result", self.as_result());
+            }
+        }
+        d.finish()
+    }
+}
+impl PartialEq for C_get_attribute_City_Result {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        match self.tag {
+            dds::RETCODE_OK => self.as_result() == other.as_result(),
         }
     }
 }
@@ -2600,11 +5181,82 @@ impl Default for C_get_attribute_City_Result {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct C_get_attribute_City_ResultSerdeRef<'__a> {
+    tag: &'__a str,
+    data: C_get_attribute_City_ResultSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum C_get_attribute_City_ResultSerdeRefData<'__a> {
+    Case0(&'__a C_get_attribute_City_Out),
+}
+impl serde::Serialize for C_get_attribute_City_Result {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = match self.tag {
+            dds::RETCODE_OK => {
+                let tag = "RETCODE_OK";
+                C_get_attribute_City_ResultSerdeRef {
+                    tag,
+                    data: C_get_attribute_City_ResultSerdeRefData::Case0(
+                        self.as_result(),
+                    ),
+                }
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct C_get_attribute_City_ResultSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for C_get_attribute_City_Result {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = C_get_attribute_City_ResultSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "RETCODE_OK" => {
+                let value = ::serde_json::from_value::<
+                    C_get_attribute_City_Out,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union C_get_attribute_City_Result payload decode failed for tag `RETCODE_OK`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: dds::RETCODE_OK,
+                    data: C_get_attribute_City_ResultData {
+                        result: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union C_get_attribute_City_Result tag/data mismatch for tag `{}`",
+                            helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_set_attribute_City_In {
     pub City: B::string_t,
@@ -2615,6 +5267,7 @@ impl C_set_attribute_City_In {}
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_set_attribute_City_Out {
     pub dummy: dds::rpc::UnusedMember,
@@ -2640,6 +5293,35 @@ impl Drop for C_set_attribute_City_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+        }
+    }
+}
+impl Clone for C_set_attribute_City_Result {
+    fn clone(&self) -> Self {
+        match self.tag {
+            dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+        }
+    }
+}
+impl core::fmt::Debug for C_set_attribute_City_Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("C_set_attribute_City_Result");
+        d.field("tag", &self.tag);
+        match self.tag {
+            dds::RETCODE_OK => {
+                d.field("result", self.as_result());
+            }
+        }
+        d.finish()
+    }
+}
+impl PartialEq for C_set_attribute_City_Result {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        match self.tag {
+            dds::RETCODE_OK => self.as_result() == other.as_result(),
         }
     }
 }
@@ -2681,6 +5363,76 @@ impl Default for C_set_attribute_City_Result {
             data: C_set_attribute_City_ResultData {
                 result: core::mem::ManuallyDrop::new(C_set_attribute_City_Out::default()),
             },
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct C_set_attribute_City_ResultSerdeRef<'__a> {
+    tag: &'__a str,
+    data: C_set_attribute_City_ResultSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum C_set_attribute_City_ResultSerdeRefData<'__a> {
+    Case0(&'__a C_set_attribute_City_Out),
+}
+impl serde::Serialize for C_set_attribute_City_Result {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = match self.tag {
+            dds::RETCODE_OK => {
+                let tag = "RETCODE_OK";
+                C_set_attribute_City_ResultSerdeRef {
+                    tag,
+                    data: C_set_attribute_City_ResultSerdeRefData::Case0(
+                        self.as_result(),
+                    ),
+                }
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct C_set_attribute_City_ResultSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for C_set_attribute_City_Result {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = C_set_attribute_City_ResultSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "RETCODE_OK" => {
+                let value = ::serde_json::from_value::<
+                    C_set_attribute_City_Out,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union C_set_attribute_City_Result payload decode failed for tag `RETCODE_OK`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: dds::RETCODE_OK,
+                    data: C_set_attribute_City_ResultData {
+                        result: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union C_set_attribute_City_Result tag/data mismatch for tag `{}`",
+                            helper.tag
+                        ),
+                    ),
+                )
+            }
         }
     }
 }
@@ -2732,6 +5484,69 @@ impl Drop for C_Call {
             unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
+        }
+    }
+}
+impl Clone for C_Call {
+    fn clone(&self) -> Self {
+        if matches!(self.tag, C_get_attribute_Title_Hash) {
+            Self::new_get_attribute_Title(self.as_get_attribute_Title().clone())
+        } else if matches!(self.tag, C_set_attribute_Title_Hash) {
+            Self::new_set_attribute_Title(self.as_set_attribute_Title().clone())
+        } else if matches!(self.tag, C_get_attribute_Name_Hash) {
+            Self::new_get_attribute_Name(self.as_get_attribute_Name().clone())
+        } else if matches!(self.tag, C_set_attribute_Name_Hash) {
+            Self::new_set_attribute_Name(self.as_set_attribute_Name().clone())
+        } else if matches!(self.tag, C_get_attribute_City_Hash) {
+            Self::new_get_attribute_City(self.as_get_attribute_City().clone())
+        } else if matches!(self.tag, C_set_attribute_City_Hash) {
+            Self::new_set_attribute_City(self.as_set_attribute_City().clone())
+        } else {
+            Self::new_unknownOp(self.as_unknownOp().clone())
+        }
+    }
+}
+impl core::fmt::Debug for C_Call {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("C_Call");
+        d.field("tag", &self.tag);
+        if matches!(self.tag, C_get_attribute_Title_Hash) {
+            d.field("get_attribute_Title", self.as_get_attribute_Title());
+        } else if matches!(self.tag, C_set_attribute_Title_Hash) {
+            d.field("set_attribute_Title", self.as_set_attribute_Title());
+        } else if matches!(self.tag, C_get_attribute_Name_Hash) {
+            d.field("get_attribute_Name", self.as_get_attribute_Name());
+        } else if matches!(self.tag, C_set_attribute_Name_Hash) {
+            d.field("set_attribute_Name", self.as_set_attribute_Name());
+        } else if matches!(self.tag, C_get_attribute_City_Hash) {
+            d.field("get_attribute_City", self.as_get_attribute_City());
+        } else if matches!(self.tag, C_set_attribute_City_Hash) {
+            d.field("set_attribute_City", self.as_set_attribute_City());
+        } else {
+            d.field("unknownOp", self.as_unknownOp());
+        }
+        d.finish()
+    }
+}
+impl PartialEq for C_Call {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        if matches!(self.tag, C_get_attribute_Title_Hash) {
+            self.as_get_attribute_Title() == other.as_get_attribute_Title()
+        } else if matches!(self.tag, C_set_attribute_Title_Hash) {
+            self.as_set_attribute_Title() == other.as_set_attribute_Title()
+        } else if matches!(self.tag, C_get_attribute_Name_Hash) {
+            self.as_get_attribute_Name() == other.as_get_attribute_Name()
+        } else if matches!(self.tag, C_set_attribute_Name_Hash) {
+            self.as_set_attribute_Name() == other.as_set_attribute_Name()
+        } else if matches!(self.tag, C_get_attribute_City_Hash) {
+            self.as_get_attribute_City() == other.as_get_attribute_City()
+        } else if matches!(self.tag, C_set_attribute_City_Hash) {
+            self.as_set_attribute_City() == other.as_set_attribute_City()
+        } else {
+            self.as_unknownOp() == other.as_unknownOp()
         }
     }
 }
@@ -2934,11 +5749,215 @@ impl Default for C_Call {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct C_CallSerdeRef<'__a> {
+    tag: &'__a str,
+    data: C_CallSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum C_CallSerdeRefData<'__a> {
+    Case1(&'__a C_get_attribute_Title_In),
+    Case2(&'__a C_set_attribute_Title_In),
+    Case3(&'__a C_get_attribute_Name_In),
+    Case4(&'__a C_set_attribute_Name_In),
+    Case5(&'__a C_get_attribute_City_In),
+    Case6(&'__a C_set_attribute_City_In),
+    Case0(&'__a dds::rpc::UnknownOperation),
+}
+impl serde::Serialize for C_Call {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = if matches!(self.tag, C_get_attribute_Title_Hash) {
+            let tag = "C_get_attribute_Title_Hash";
+            C_CallSerdeRef {
+                tag,
+                data: C_CallSerdeRefData::Case1(self.as_get_attribute_Title()),
+            }
+        } else if matches!(self.tag, C_set_attribute_Title_Hash) {
+            let tag = "C_set_attribute_Title_Hash";
+            C_CallSerdeRef {
+                tag,
+                data: C_CallSerdeRefData::Case2(self.as_set_attribute_Title()),
+            }
+        } else if matches!(self.tag, C_get_attribute_Name_Hash) {
+            let tag = "C_get_attribute_Name_Hash";
+            C_CallSerdeRef {
+                tag,
+                data: C_CallSerdeRefData::Case3(self.as_get_attribute_Name()),
+            }
+        } else if matches!(self.tag, C_set_attribute_Name_Hash) {
+            let tag = "C_set_attribute_Name_Hash";
+            C_CallSerdeRef {
+                tag,
+                data: C_CallSerdeRefData::Case4(self.as_set_attribute_Name()),
+            }
+        } else if matches!(self.tag, C_get_attribute_City_Hash) {
+            let tag = "C_get_attribute_City_Hash";
+            C_CallSerdeRef {
+                tag,
+                data: C_CallSerdeRefData::Case5(self.as_get_attribute_City()),
+            }
+        } else if matches!(self.tag, C_set_attribute_City_Hash) {
+            let tag = "C_set_attribute_City_Hash";
+            C_CallSerdeRef {
+                tag,
+                data: C_CallSerdeRefData::Case6(self.as_set_attribute_City()),
+            }
+        } else {
+            let tag = "default";
+            C_CallSerdeRef {
+                tag,
+                data: C_CallSerdeRefData::Case0(self.as_unknownOp()),
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct C_CallSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for C_Call {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = C_CallSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "C_get_attribute_Title_Hash" => {
+                let value = ::serde_json::from_value::<
+                    C_get_attribute_Title_In,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union C_Call payload decode failed for tag `C_get_attribute_Title_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: C_get_attribute_Title_Hash,
+                    data: C_CallData {
+                        get_attribute_Title: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "C_set_attribute_Title_Hash" => {
+                let value = ::serde_json::from_value::<
+                    C_set_attribute_Title_In,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union C_Call payload decode failed for tag `C_set_attribute_Title_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: C_set_attribute_Title_Hash,
+                    data: C_CallData {
+                        set_attribute_Title: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "C_get_attribute_Name_Hash" => {
+                let value = ::serde_json::from_value::<
+                    C_get_attribute_Name_In,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union C_Call payload decode failed for tag `C_get_attribute_Name_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: C_get_attribute_Name_Hash,
+                    data: C_CallData {
+                        get_attribute_Name: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "C_set_attribute_Name_Hash" => {
+                let value = ::serde_json::from_value::<
+                    C_set_attribute_Name_In,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union C_Call payload decode failed for tag `C_set_attribute_Name_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: C_set_attribute_Name_Hash,
+                    data: C_CallData {
+                        set_attribute_Name: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "C_get_attribute_City_Hash" => {
+                let value = ::serde_json::from_value::<
+                    C_get_attribute_City_In,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union C_Call payload decode failed for tag `C_get_attribute_City_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: C_get_attribute_City_Hash,
+                    data: C_CallData {
+                        get_attribute_City: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "C_set_attribute_City_Hash" => {
+                let value = ::serde_json::from_value::<
+                    C_set_attribute_City_In,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union C_Call payload decode failed for tag `C_set_attribute_City_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: C_set_attribute_City_Hash,
+                    data: C_CallData {
+                        set_attribute_City: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "default" => {
+                let value = ::serde_json::from_value::<
+                    dds::rpc::UnknownOperation,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union C_Call payload decode failed for tag `default`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: i32::default(),
+                    data: C_CallData {
+                        unknownOp: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union C_Call tag/data mismatch for tag `{}`", helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_Request {
     pub header: dds::rpc::RequestHeader,
@@ -2993,6 +6012,69 @@ impl Drop for C_Return {
             unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
+        }
+    }
+}
+impl Clone for C_Return {
+    fn clone(&self) -> Self {
+        if matches!(self.tag, C_get_attribute_Title_Hash) {
+            Self::new_get_attribute_Title(self.as_get_attribute_Title().clone())
+        } else if matches!(self.tag, C_set_attribute_Title_Hash) {
+            Self::new_set_attribute_Title(self.as_set_attribute_Title().clone())
+        } else if matches!(self.tag, C_get_attribute_Name_Hash) {
+            Self::new_get_attribute_Name(self.as_get_attribute_Name().clone())
+        } else if matches!(self.tag, C_set_attribute_Name_Hash) {
+            Self::new_set_attribute_Name(self.as_set_attribute_Name().clone())
+        } else if matches!(self.tag, C_get_attribute_City_Hash) {
+            Self::new_get_attribute_City(self.as_get_attribute_City().clone())
+        } else if matches!(self.tag, C_set_attribute_City_Hash) {
+            Self::new_set_attribute_City(self.as_set_attribute_City().clone())
+        } else {
+            Self::new_unknownOp(self.as_unknownOp().clone())
+        }
+    }
+}
+impl core::fmt::Debug for C_Return {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("C_Return");
+        d.field("tag", &self.tag);
+        if matches!(self.tag, C_get_attribute_Title_Hash) {
+            d.field("get_attribute_Title", self.as_get_attribute_Title());
+        } else if matches!(self.tag, C_set_attribute_Title_Hash) {
+            d.field("set_attribute_Title", self.as_set_attribute_Title());
+        } else if matches!(self.tag, C_get_attribute_Name_Hash) {
+            d.field("get_attribute_Name", self.as_get_attribute_Name());
+        } else if matches!(self.tag, C_set_attribute_Name_Hash) {
+            d.field("set_attribute_Name", self.as_set_attribute_Name());
+        } else if matches!(self.tag, C_get_attribute_City_Hash) {
+            d.field("get_attribute_City", self.as_get_attribute_City());
+        } else if matches!(self.tag, C_set_attribute_City_Hash) {
+            d.field("set_attribute_City", self.as_set_attribute_City());
+        } else {
+            d.field("unknownOp", self.as_unknownOp());
+        }
+        d.finish()
+    }
+}
+impl PartialEq for C_Return {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        if matches!(self.tag, C_get_attribute_Title_Hash) {
+            self.as_get_attribute_Title() == other.as_get_attribute_Title()
+        } else if matches!(self.tag, C_set_attribute_Title_Hash) {
+            self.as_set_attribute_Title() == other.as_set_attribute_Title()
+        } else if matches!(self.tag, C_get_attribute_Name_Hash) {
+            self.as_get_attribute_Name() == other.as_get_attribute_Name()
+        } else if matches!(self.tag, C_set_attribute_Name_Hash) {
+            self.as_set_attribute_Name() == other.as_set_attribute_Name()
+        } else if matches!(self.tag, C_get_attribute_City_Hash) {
+            self.as_get_attribute_City() == other.as_get_attribute_City()
+        } else if matches!(self.tag, C_set_attribute_City_Hash) {
+            self.as_set_attribute_City() == other.as_set_attribute_City()
+        } else {
+            self.as_unknownOp() == other.as_unknownOp()
         }
     }
 }
@@ -3195,11 +6277,215 @@ impl Default for C_Return {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct C_ReturnSerdeRef<'__a> {
+    tag: &'__a str,
+    data: C_ReturnSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum C_ReturnSerdeRefData<'__a> {
+    Case1(&'__a C_get_attribute_Title_Result),
+    Case2(&'__a C_set_attribute_Title_Result),
+    Case3(&'__a C_get_attribute_Name_Result),
+    Case4(&'__a C_set_attribute_Name_Result),
+    Case5(&'__a C_get_attribute_City_Result),
+    Case6(&'__a C_set_attribute_City_Result),
+    Case0(&'__a dds::rpc::UnknownOperation),
+}
+impl serde::Serialize for C_Return {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = if matches!(self.tag, C_get_attribute_Title_Hash) {
+            let tag = "C_get_attribute_Title_Hash";
+            C_ReturnSerdeRef {
+                tag,
+                data: C_ReturnSerdeRefData::Case1(self.as_get_attribute_Title()),
+            }
+        } else if matches!(self.tag, C_set_attribute_Title_Hash) {
+            let tag = "C_set_attribute_Title_Hash";
+            C_ReturnSerdeRef {
+                tag,
+                data: C_ReturnSerdeRefData::Case2(self.as_set_attribute_Title()),
+            }
+        } else if matches!(self.tag, C_get_attribute_Name_Hash) {
+            let tag = "C_get_attribute_Name_Hash";
+            C_ReturnSerdeRef {
+                tag,
+                data: C_ReturnSerdeRefData::Case3(self.as_get_attribute_Name()),
+            }
+        } else if matches!(self.tag, C_set_attribute_Name_Hash) {
+            let tag = "C_set_attribute_Name_Hash";
+            C_ReturnSerdeRef {
+                tag,
+                data: C_ReturnSerdeRefData::Case4(self.as_set_attribute_Name()),
+            }
+        } else if matches!(self.tag, C_get_attribute_City_Hash) {
+            let tag = "C_get_attribute_City_Hash";
+            C_ReturnSerdeRef {
+                tag,
+                data: C_ReturnSerdeRefData::Case5(self.as_get_attribute_City()),
+            }
+        } else if matches!(self.tag, C_set_attribute_City_Hash) {
+            let tag = "C_set_attribute_City_Hash";
+            C_ReturnSerdeRef {
+                tag,
+                data: C_ReturnSerdeRefData::Case6(self.as_set_attribute_City()),
+            }
+        } else {
+            let tag = "default";
+            C_ReturnSerdeRef {
+                tag,
+                data: C_ReturnSerdeRefData::Case0(self.as_unknownOp()),
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct C_ReturnSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for C_Return {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = C_ReturnSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "C_get_attribute_Title_Hash" => {
+                let value = ::serde_json::from_value::<
+                    C_get_attribute_Title_Result,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union C_Return payload decode failed for tag `C_get_attribute_Title_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: C_get_attribute_Title_Hash,
+                    data: C_ReturnData {
+                        get_attribute_Title: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "C_set_attribute_Title_Hash" => {
+                let value = ::serde_json::from_value::<
+                    C_set_attribute_Title_Result,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union C_Return payload decode failed for tag `C_set_attribute_Title_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: C_set_attribute_Title_Hash,
+                    data: C_ReturnData {
+                        set_attribute_Title: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "C_get_attribute_Name_Hash" => {
+                let value = ::serde_json::from_value::<
+                    C_get_attribute_Name_Result,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union C_Return payload decode failed for tag `C_get_attribute_Name_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: C_get_attribute_Name_Hash,
+                    data: C_ReturnData {
+                        get_attribute_Name: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "C_set_attribute_Name_Hash" => {
+                let value = ::serde_json::from_value::<
+                    C_set_attribute_Name_Result,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union C_Return payload decode failed for tag `C_set_attribute_Name_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: C_set_attribute_Name_Hash,
+                    data: C_ReturnData {
+                        set_attribute_Name: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "C_get_attribute_City_Hash" => {
+                let value = ::serde_json::from_value::<
+                    C_get_attribute_City_Result,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union C_Return payload decode failed for tag `C_get_attribute_City_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: C_get_attribute_City_Hash,
+                    data: C_ReturnData {
+                        get_attribute_City: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "C_set_attribute_City_Hash" => {
+                let value = ::serde_json::from_value::<
+                    C_set_attribute_City_Result,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union C_Return payload decode failed for tag `C_set_attribute_City_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: C_set_attribute_City_Hash,
+                    data: C_ReturnData {
+                        set_attribute_City: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "default" => {
+                let value = ::serde_json::from_value::<
+                    dds::rpc::UnknownOperation,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union C_Return payload decode failed for tag `default`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: i32::default(),
+                    data: C_ReturnData {
+                        unknownOp: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union C_Return tag/data mismatch for tag `{}`", helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct C_Reply {
     pub header: dds::rpc::ReplyHeader,
@@ -3225,7 +6511,16 @@ pub mod M {
     #[allow(non_snake_case)]
     #[allow(unused_variables)]
     #[allow(unreachable_patterns)]
-    #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+    #[derive(
+        Debug,
+        Clone,
+        PartialEq,
+        ::serde::Serialize,
+        ::serde::Deserialize,
+        Copy,
+        Eq,
+        Default,
+    )]
     pub enum Size {
         #[default]
         small,

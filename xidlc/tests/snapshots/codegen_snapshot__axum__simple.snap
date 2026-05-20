@@ -1167,7 +1167,7 @@ simple.rs
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
-#[derive(Debug, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Debug, ::serde::Serialize, ::serde::Deserialize, Clone, PartialEq)]
 #[derive(Default)]
 pub struct HealthResponse {
     pub healthy: bool,
@@ -1180,7 +1180,7 @@ impl HealthResponse {}
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
-#[derive(Debug, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Debug, ::serde::Serialize, ::serde::Deserialize, Clone, PartialEq)]
 #[derive(Default)]
 pub struct VersionResponse {
     pub short: String,
@@ -1192,7 +1192,7 @@ impl VersionResponse {}
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
-#[derive(Debug, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Debug, ::serde::Serialize, ::serde::Deserialize, Clone, PartialEq)]
 #[derive(Default)]
 pub struct MemoryResponse {
     pub allocated: u64,
@@ -1204,7 +1204,7 @@ impl MemoryResponse {}
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
-#[derive(Debug, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Debug, ::serde::Serialize, ::serde::Deserialize, Clone, PartialEq)]
 #[derive(Default)]
 pub struct UdpStatsResponse {
     pub tx: u64,
@@ -1216,7 +1216,7 @@ impl UdpStatsResponse {}
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
-#[derive(Debug, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Debug, ::serde::Serialize, ::serde::Deserialize, Clone, PartialEq)]
 #[derive(Default)]
 pub struct CreateTcpReverseRequest {
     pub local_addr: String,
@@ -1228,7 +1228,7 @@ impl CreateTcpReverseRequest {}
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
-#[derive(Debug, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Debug, ::serde::Serialize, ::serde::Deserialize, Clone, PartialEq)]
 #[derive(Default)]
 pub struct CreateSimpleResponse {
     pub id: u32,

@@ -2295,7 +2295,7 @@ http_defaults.rs
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
-#[derive(Debug, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Debug, ::serde::Serialize, ::serde::Deserialize, Clone, PartialEq)]
 #[derive(Default)]
 pub struct CreateUserRequest {
     pub name: String,

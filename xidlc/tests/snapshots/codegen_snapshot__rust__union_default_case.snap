@@ -10,7 +10,16 @@ union_default_case.rs
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    ::serde::Serialize,
+    ::serde::Deserialize,
+    Copy,
+    Eq,
+    Default,
+)]
 pub enum Tag {
     #[default]
     A,
@@ -39,6 +48,39 @@ impl Drop for DefaultUnion {
             unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.fallback);
             }
+        }
+    }
+}
+impl Clone for DefaultUnion {
+    fn clone(&self) -> Self {
+        if matches!(self.tag, A) {
+            Self::new_a(self.as_a().clone())
+        } else {
+            Self::new_fallback(self.as_fallback().clone())
+        }
+    }
+}
+impl core::fmt::Debug for DefaultUnion {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("DefaultUnion");
+        d.field("tag", &self.tag);
+        if matches!(self.tag, A) {
+            d.field("a", self.as_a());
+        } else {
+            d.field("fallback", self.as_fallback());
+        }
+        d.finish()
+    }
+}
+impl PartialEq for DefaultUnion {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        if matches!(self.tag, A) {
+            self.as_a() == other.as_a()
+        } else {
+            self.as_fallback() == other.as_fallback()
         }
     }
 }
@@ -106,6 +148,91 @@ impl Default for DefaultUnion {
             data: DefaultUnionData {
                 fallback: core::mem::ManuallyDrop::new(String::default()),
             },
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct DefaultUnionSerdeRef<'__a> {
+    tag: &'__a str,
+    data: DefaultUnionSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum DefaultUnionSerdeRefData<'__a> {
+    Case0(&'__a int),
+    Case1(&'__a String),
+}
+impl serde::Serialize for DefaultUnion {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = if matches!(self.tag, A) {
+            let tag = "A";
+            DefaultUnionSerdeRef {
+                tag,
+                data: DefaultUnionSerdeRefData::Case0(self.as_a()),
+            }
+        } else {
+            let tag = "default";
+            DefaultUnionSerdeRef {
+                tag,
+                data: DefaultUnionSerdeRefData::Case1(self.as_fallback()),
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct DefaultUnionSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for DefaultUnion {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = DefaultUnionSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "A" => {
+                let value = ::serde_json::from_value::<int>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union DefaultUnion payload decode failed for tag `A`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: A,
+                    data: DefaultUnionData {
+                        a: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "default" => {
+                let value = ::serde_json::from_value::<String>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union DefaultUnion payload decode failed for tag `default`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: Tag::default(),
+                    data: DefaultUnionData {
+                        fallback: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union DefaultUnion tag/data mismatch for tag `{}`", helper
+                            .tag
+                        ),
+                    ),
+                )
+            }
         }
     }
 }

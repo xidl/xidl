@@ -12,6 +12,7 @@ rust_annotation_passthrough.rs
 #[allow(unreachable_patterns)]
 #[serde(rename_all = camelCase)]
 #[inline]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct User {
     #[serde(rename = userId)]
@@ -25,7 +26,16 @@ impl User {}
 #[allow(unreachable_patterns)]
 #[repr(u8)]
 #[non_exhaustive]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    ::serde::Serialize,
+    ::serde::Deserialize,
+    Copy,
+    Eq,
+    Default,
+)]
 pub enum Color {
     #[deprecated(note = primary red)]
     #[default]
@@ -43,6 +53,7 @@ pub const Api_ping_Hash: i32 = 18846175;
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct Api_ping_In {
     pub dummy: dds::rpc::UnusedMember,
@@ -53,6 +64,7 @@ impl Api_ping_In {}
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct Api_ping_Out {
     pub dummy: dds::rpc::UnusedMember,
@@ -78,6 +90,35 @@ impl Drop for Api_ping_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+        }
+    }
+}
+impl Clone for Api_ping_Result {
+    fn clone(&self) -> Self {
+        match self.tag {
+            dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+        }
+    }
+}
+impl core::fmt::Debug for Api_ping_Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("Api_ping_Result");
+        d.field("tag", &self.tag);
+        match self.tag {
+            dds::RETCODE_OK => {
+                d.field("result", self.as_result());
+            }
+        }
+        d.finish()
+    }
+}
+impl PartialEq for Api_ping_Result {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        match self.tag {
+            dds::RETCODE_OK => self.as_result() == other.as_result(),
         }
     }
 }
@@ -122,6 +163,72 @@ impl Default for Api_ping_Result {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct Api_ping_ResultSerdeRef<'__a> {
+    tag: &'__a str,
+    data: Api_ping_ResultSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum Api_ping_ResultSerdeRefData<'__a> {
+    Case0(&'__a Api_ping_Out),
+}
+impl serde::Serialize for Api_ping_Result {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = match self.tag {
+            dds::RETCODE_OK => {
+                let tag = "RETCODE_OK";
+                Api_ping_ResultSerdeRef {
+                    tag,
+                    data: Api_ping_ResultSerdeRefData::Case0(self.as_result()),
+                }
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct Api_ping_ResultSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for Api_ping_Result {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = Api_ping_ResultSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "RETCODE_OK" => {
+                let value = ::serde_json::from_value::<Api_ping_Out>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union Api_ping_Result payload decode failed for tag `RETCODE_OK`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: dds::RETCODE_OK,
+                    data: Api_ping_ResultData {
+                        result: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union Api_ping_Result tag/data mismatch for tag `{}`",
+                            helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
@@ -145,6 +252,39 @@ impl Drop for Api_Call {
             unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
+        }
+    }
+}
+impl Clone for Api_Call {
+    fn clone(&self) -> Self {
+        if matches!(self.tag, Api_ping_Hash) {
+            Self::new_ping(self.as_ping().clone())
+        } else {
+            Self::new_unknownOp(self.as_unknownOp().clone())
+        }
+    }
+}
+impl core::fmt::Debug for Api_Call {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("Api_Call");
+        d.field("tag", &self.tag);
+        if matches!(self.tag, Api_ping_Hash) {
+            d.field("ping", self.as_ping());
+        } else {
+            d.field("unknownOp", self.as_unknownOp());
+        }
+        d.finish()
+    }
+}
+impl PartialEq for Api_Call {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        if matches!(self.tag, Api_ping_Hash) {
+            self.as_ping() == other.as_ping()
+        } else {
+            self.as_unknownOp() == other.as_unknownOp()
         }
     }
 }
@@ -217,11 +357,98 @@ impl Default for Api_Call {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct Api_CallSerdeRef<'__a> {
+    tag: &'__a str,
+    data: Api_CallSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum Api_CallSerdeRefData<'__a> {
+    Case1(&'__a Api_ping_In),
+    Case0(&'__a dds::rpc::UnknownOperation),
+}
+impl serde::Serialize for Api_Call {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = if matches!(self.tag, Api_ping_Hash) {
+            let tag = "Api_ping_Hash";
+            Api_CallSerdeRef {
+                tag,
+                data: Api_CallSerdeRefData::Case1(self.as_ping()),
+            }
+        } else {
+            let tag = "default";
+            Api_CallSerdeRef {
+                tag,
+                data: Api_CallSerdeRefData::Case0(self.as_unknownOp()),
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct Api_CallSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for Api_Call {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = Api_CallSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "Api_ping_Hash" => {
+                let value = ::serde_json::from_value::<Api_ping_In>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union Api_Call payload decode failed for tag `Api_ping_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: Api_ping_Hash,
+                    data: Api_CallData {
+                        ping: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "default" => {
+                let value = ::serde_json::from_value::<
+                    dds::rpc::UnknownOperation,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union Api_Call payload decode failed for tag `default`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: i32::default(),
+                    data: Api_CallData {
+                        unknownOp: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union Api_Call tag/data mismatch for tag `{}`", helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct Api_Request {
     pub header: dds::rpc::RequestHeader,
@@ -251,6 +478,39 @@ impl Drop for Api_Return {
             unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
+        }
+    }
+}
+impl Clone for Api_Return {
+    fn clone(&self) -> Self {
+        if matches!(self.tag, Api_ping_Hash) {
+            Self::new_ping(self.as_ping().clone())
+        } else {
+            Self::new_unknownOp(self.as_unknownOp().clone())
+        }
+    }
+}
+impl core::fmt::Debug for Api_Return {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("Api_Return");
+        d.field("tag", &self.tag);
+        if matches!(self.tag, Api_ping_Hash) {
+            d.field("ping", self.as_ping());
+        } else {
+            d.field("unknownOp", self.as_unknownOp());
+        }
+        d.finish()
+    }
+}
+impl PartialEq for Api_Return {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        if matches!(self.tag, Api_ping_Hash) {
+            self.as_ping() == other.as_ping()
+        } else {
+            self.as_unknownOp() == other.as_unknownOp()
         }
     }
 }
@@ -323,11 +583,98 @@ impl Default for Api_Return {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct Api_ReturnSerdeRef<'__a> {
+    tag: &'__a str,
+    data: Api_ReturnSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum Api_ReturnSerdeRefData<'__a> {
+    Case1(&'__a Api_ping_Result),
+    Case0(&'__a dds::rpc::UnknownOperation),
+}
+impl serde::Serialize for Api_Return {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = if matches!(self.tag, Api_ping_Hash) {
+            let tag = "Api_ping_Hash";
+            Api_ReturnSerdeRef {
+                tag,
+                data: Api_ReturnSerdeRefData::Case1(self.as_ping()),
+            }
+        } else {
+            let tag = "default";
+            Api_ReturnSerdeRef {
+                tag,
+                data: Api_ReturnSerdeRefData::Case0(self.as_unknownOp()),
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct Api_ReturnSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for Api_Return {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = Api_ReturnSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "Api_ping_Hash" => {
+                let value = ::serde_json::from_value::<Api_ping_Result>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union Api_Return payload decode failed for tag `Api_ping_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: Api_ping_Hash,
+                    data: Api_ReturnData {
+                        ping: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "default" => {
+                let value = ::serde_json::from_value::<
+                    dds::rpc::UnknownOperation,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union Api_Return payload decode failed for tag `default`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: i32::default(),
+                    data: Api_ReturnData {
+                        unknownOp: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union Api_Return tag/data mismatch for tag `{}`", helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct Api_Reply {
     pub header: dds::rpc::ReplyHeader,

@@ -51,6 +51,78 @@ impl Drop for {{ ident }} {
     }
 }
 
+{% if manual_derives and "Clone" in manual_derives %}
+    impl Clone for {{ ident }} {
+        fn clone(&self) -> Self {
+            {% if has_default %}
+                {% for case in cases %}
+                    {% if not loop.first %}else {% endif %}{% if not loop.last %}if matches!(self.tag, {{ case.pattern }}) {% endif %}{
+                        Self::new_{{ case.member }}(self.as_{{ case.member }}().clone())
+                    }
+                {% endfor %}
+            {% else %}
+                match self.tag {
+                    {% for case in cases %}
+                        {{ case.pattern }} => {
+                            Self::new_{{ case.member }}(self.as_{{ case.member }}().clone())
+                        }
+                    {% endfor %}
+                }
+            {% endif %}
+        }
+    }
+{% endif %}
+
+{% if manual_derives and "Debug" in manual_derives %}
+    impl core::fmt::Debug for {{ ident }} {
+        fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            let mut d = f.debug_struct("{{ ident }}");
+            d.field("tag", &self.tag);
+            {% if has_default %}
+                {% for case in cases %}
+                    {% if not loop.first %}else {% endif %}{% if not loop.last %}if matches!(self.tag, {{ case.pattern }}) {% endif %}{
+                        d.field("{{ case.member }}", self.as_{{ case.member }}());
+                    }
+                {% endfor %}
+            {% else %}
+                match self.tag {
+                    {% for case in cases %}
+                        {{ case.pattern }} => {
+                            d.field("{{ case.member }}", self.as_{{ case.member }}());
+                        }
+                    {% endfor %}
+                }
+            {% endif %}
+            d.finish()
+        }
+    }
+{% endif %}
+
+{% if manual_derives and "PartialEq" in manual_derives %}
+    impl PartialEq for {{ ident }} {
+        fn eq(&self, other: &Self) -> bool {
+            if self.tag != other.tag {
+                return false;
+            }
+            {% if has_default %}
+                {% for case in cases %}
+                    {% if not loop.first %}else {% endif %}{% if not loop.last %}if matches!(self.tag, {{ case.pattern }}) {% endif %}{
+                        self.as_{{ case.member }}() == other.as_{{ case.member }}()
+                    }
+                {% endfor %}
+            {% else %}
+                match self.tag {
+                    {% for case in cases %}
+                        {{ case.pattern }} => {
+                            self.as_{{ case.member }}() == other.as_{{ case.member }}()
+                        }
+                    {% endfor %}
+                }
+            {% endif %}
+        }
+    }
+{% endif %}
+
 impl {{ ident }} {
     {% for member in members %}
         {%- for line in member.doc %}

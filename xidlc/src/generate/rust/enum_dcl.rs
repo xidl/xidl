@@ -47,6 +47,7 @@ impl RustRender for hir::EnumDcl {
             renderer.with_ident(
                 json!({
                     "members": members,
+                    "derive": derive.all,
                     "has_serde_serialize": derive.has_serde_serialize,
                     "has_serde_deserialize": derive.has_serde_deserialize,
                     "serde_rename_all": serde_rename_all_from_annotations(&self.annotations),
