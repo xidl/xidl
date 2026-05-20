@@ -3,9 +3,9 @@ interface HttpStreamSseService {
     @stream_codec("sse")
     @path("/events/{topic}{?lang}")
     string watch_topic(
-        @path("topic")
+        @path @rename("topic")
         string topic,
-        @query("lang")
+        @query @rename("lang")
         string lang
     );
     @server_stream

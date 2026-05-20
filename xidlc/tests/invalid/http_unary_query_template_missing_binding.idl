@@ -4,7 +4,7 @@
 interface InvalidQueryTemplateService {
     @get(path = "/users/{id}{?lang,region}")
     string get_user(
-        @path("id") string id,
-        @query("lang") string lang
+        @path @rename("id") string id,
+        @query @rename("lang") string lang
     );
 };

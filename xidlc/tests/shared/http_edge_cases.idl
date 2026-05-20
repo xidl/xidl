@@ -5,15 +5,15 @@ interface HttpEdgeCasesService {
     // HEAD keeps request-side path/query parameters and always has no response body.
     @head(path = " //v1//health/ ")
     void health(
-        @query("trace_id") string trace
+        @query @rename("trace_id") string trace
     );
 
     // Multi-route + normalized paths + explicit @path binding.
     @get(path = "//v1//users/{id}//")
     @path("/v2/users/{id}/")
     string get_user(
-        @path("id") uint32 uid,
-        @query("lang") string locale
+        @path @rename("id") uint32 uid,
+        @query @rename("lang") string locale
     );
 
     // Duplicate routes after normalization should be de-duplicated.
@@ -33,6 +33,6 @@ interface HttpEdgeCasesService {
     // Default route is based on method name only; query does not affect path.
     string lookup(
         @query string keyword,
-        @query("limit") uint32 page_size
+        @query @rename("limit") uint32 page_size
     );
 };

@@ -43,12 +43,15 @@ interface E2eHttpStream {
     @stream_codec("sse")
     @get(path = "/v2/stream/events/{channel}{?cursor}")
     StructStreamEvent watch_channel(
-        @path("channel")
+        @path
+        @rename("channel")
         string channel,
-        @query("cursor")
+        @query
+        @rename("cursor")
         @optional
         string cursor,
-        @header("X-Trace-Id")
+        @header
+        @rename("X-Trace-Id")
         string trace_id
     );
 

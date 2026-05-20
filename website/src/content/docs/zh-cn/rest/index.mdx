@@ -56,14 +56,14 @@ interface UserApi {
 };
 ```
 
-如果需要重命名路由参数，可以在方法参数上使用 `@path("...")` 注解，例如：
+如果需要重命名路由参数，可以在方法参数上使用 `@path @rename("...")` 注解，例如：
 
 ```idl
 interface UserApi {
     @get(path = "/users/{x-id}{?x-lang}")
     string getUser(
-        @path("x-id") string user_id
-        @query("x-lang") @optional string lang
+        @path @rename("x-id") string user_id
+        @query @rename("x-lang") @optional string lang
     );
 };
 ```
@@ -78,7 +78,7 @@ interface UserApi {
     string getUser(
         @path string user_id,
         @query string locale,
-        @header("USER_NAME") string name,
+        @header @rename("USER_NAME") string name,
         @cookie string session_id,
         @body string payload
     );
@@ -102,7 +102,7 @@ interface ScopeApi {
 
     @get(path = "/v1/msgpack/{id}")
     @Produces("application/msgpack")
-    string getPacked(@path("id") string id);
+    string getPacked(@path @rename("id") string id);
 };
 ```
 
@@ -126,7 +126,7 @@ interface ScopeApi {
 @cors
 interface UserApi {
     @get(path = "/users/{id}")
-    string getUser(@path("id") string id);
+    string getUser(@path @rename("id") string id);
 
     @cors("https://console.example.com", "https://admin.example.com")
     @post(path = "/users")

@@ -28,7 +28,7 @@ sidebar:
 @api_key(in = "query", name = "org_key")
 interface AdminApi {
     @get(path = "/reports/{id}")
-    string getReport(@path("id") string id);
+    string getReport(@path @rename("id") string id);
 
     @http_bearer
     @api_key(in = "cookie", name = "session_key")

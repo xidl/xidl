@@ -17,7 +17,7 @@ fn test_build_operation_signature() {
     let spec = parse(
         r#"
         interface TestApi {
-            string test_op(@path("id") in string id, @optional in string opt, out string result);
+            string test_op(@path @rename("id") in string id, @optional in string opt, out string result);
         };
         "#,
     );

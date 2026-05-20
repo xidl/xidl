@@ -3,16 +3,19 @@
 interface HttpSecurityApi {
     @get(path = "/reports/{id}")
     string get_report(
-        @path("id")
+        @path
+        @rename("id")
         string id,
-        @header("X-Trace-Id")
+        @header
+        @rename("X-Trace-Id")
         string trace_id
     );
 
     @oauth2(scopes = "reports:write")
     @post(path = "/reports/{id}")
     string update_report(
-        @path("id")
+        @path
+        @rename("id")
         string id,
         string body
     );

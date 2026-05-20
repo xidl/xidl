@@ -11,7 +11,6 @@ mod tests;
 #[derive(Clone)]
 pub(super) struct SourceBinding {
     pub(super) source: HttpParamKind,
-    pub(super) bound_name: String,
 }
 
 pub(super) fn explicit_param_binding(
@@ -31,18 +30,9 @@ pub(super) fn explicit_param_binding(
             _ => None,
         };
         let Some(current) = current else { continue };
-        let bound_name = annotation_params(annotation)
-            .map(normalize_annotation_params)
-            .and_then(|params| params.get("value").cloned())
-            .unwrap_or_else(|| param.declarator.0.clone());
         match &found {
-            None => {
-                found = Some(SourceBinding {
-                    source: current,
-                    bound_name,
-                })
-            }
-            Some(previous) if previous.source == current && previous.bound_name == bound_name => {}
+            None => found = Some(SourceBinding { source: current }),
+            Some(previous) if previous.source == current => {}
             Some(_) => {
                 return Err(format!(
                     "parameter '{}' has conflicting source annotations (@path/@query/@body/@header/@cookie)",
@@ -121,10 +111,8 @@ pub(super) fn auto_default_method_path(
             .as_ref()
             .map(|value| value.source)
             .unwrap_or(super::validate::default_param_source(method));
-        let bound_name = binding
-            .as_ref()
-            .map(|value| value.bound_name.clone())
-            .unwrap_or_else(|| param.declarator.0.clone());
+        let bound_name =
+            hir::field_rename(&param.annotations).unwrap_or_else(|| param.declarator.0.clone());
         if matches!(source, HttpParamKind::Path) {
             path.push('/');
             path.push('{');

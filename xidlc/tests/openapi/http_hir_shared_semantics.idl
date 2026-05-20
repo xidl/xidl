@@ -6,12 +6,12 @@
 interface ReportApi {
   @get(path = "/reports/{id}{?lang}")
   string get_report(
-    @path("id") string id,
-    @query("lang") @optional string lang,
-    @header("X-Trace-Id") string trace_id
+    @path @rename("id") string id,
+    @query @rename("lang") @optional string lang,
+    @header @rename("X-Trace-Id") string trace_id
   );
 
   @server_stream
   @get(path = "/reports/{id}/events")
-  string watch_report(@path("id") string id);
+  string watch_report(@path @rename("id") string id);
 };

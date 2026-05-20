@@ -35,7 +35,7 @@ description: "XIDL interface 到 HTTP API 的映射规范。"
 - `@delete(path = "...")`
 - `@head(path = "...")`
 - `@options(path = "...")`
-- `@path("...")`
+- `@path @rename("...")`
 - `@Consumes("mime/type")`
 - `@Produces("mime/type")`
 - `@cors(...)`
@@ -169,7 +169,7 @@ HTTP 映射中最常见的理解方式：
 @cors
 interface UserApi {
     @get(path = "/users/{id}")
-    string getUser(@path("id") string id);
+    string getUser(@path @rename("id") string id);
 
     @cors("https://admin.example.com", "https://console.example.com")
     @post(path = "/users")

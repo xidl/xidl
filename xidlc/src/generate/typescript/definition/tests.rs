@@ -41,7 +41,7 @@ fn rejects_client_stream_with_non_body_inputs() {
           @stream_codec("ndjson")
           @path("/upload/{bucket}")
           string upload(
-            @path("bucket") string bucket,
+            @path @rename("bucket") string bucket,
             in sequence<octet> chunk
           );
         };

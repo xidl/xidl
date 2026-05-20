@@ -14,7 +14,7 @@ interface HttpDefaultsService {
     );
     @get
     string list_orders(
-        @path("uid")
+        @path @rename("uid")
         uint32 user_id,
         uint32 page,
         uint32 size
@@ -35,9 +35,9 @@ interface HttpDefaultsService {
         string lang
     );
     string get_user_alias(
-        @path("id")
+        @path @rename("id")
         uint32 user_id,
-        @query("lang")
+        @query @rename("lang")
         string locale
     );
 };

@@ -16,7 +16,7 @@ interface HttpDefaultsService {
     // default source for GET parameters -> query, except explicit path
     @get
     string list_orders(
-        @path("uid")
+        @path @rename("uid")
         uint32 user_id,
         uint32 page,
         uint32 size
@@ -53,9 +53,9 @@ interface HttpDefaultsService {
     );
     // explicit bound names
     string get_user_alias(
-        @path("id")
+        @path @rename("id")
         uint32 user_id,
-        @query("lang")
+        @query @rename("lang")
         string locale
     );
     // default source for DELETE parameters -> query
@@ -79,7 +79,7 @@ interface HttpDefaultsService {
     // default source for PUT parameters -> body except explicit path
     @put(path = "/users/{id}")
     string replace_user(
-        @path("id")
+        @path @rename("id")
         uint32 user_id,
         string name,
         uint32 age
@@ -87,7 +87,7 @@ interface HttpDefaultsService {
     // default source for PATCH parameters -> body except explicit path
     @patch(path = "/users/{id}")
     string patch_user(
-        @path("id")
+        @path @rename("id")
         uint32 user_id,
         string name,
         uint32 age

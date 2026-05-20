@@ -5,11 +5,14 @@
 interface SmartCityRestApi {
     @get(path = "/v1/stops/{stop_id}{?line,lang}")
     string get_stop_eta(
-        @path("stop_id")
+        @path
+        @rename("stop_id")
         string stop_id,
-        @query("line")
+        @query
+        @rename("line")
         string line,
-        @query("lang")
+        @query
+        @rename("lang")
         string locale,
         out uint32 eta_seconds,
         out string destination
@@ -17,15 +20,18 @@ interface SmartCityRestApi {
 
     @get(path = "/v1/stops/{stop_id}/nearby")
     sequence<string> list_nearby_stops(
-        @path("stop_id")
+        @path
+        @rename("stop_id")
         string stop_id
     );
 
     @get(path = "/v1/assets/{*path}")
     sequence<uint8> download_asset(
-        @path("path")
+        @path
+        @rename("path")
         string asset_path,
-        @query("version")
+        @query
+        @rename("version")
         string version,
         out string content_type,
         out string etag
@@ -34,16 +40,19 @@ interface SmartCityRestApi {
     @head(path = "/v1/parking/lots/{lot_id}")
     @no_security
     void probe_lot(
-        @path("lot_id")
+        @path
+        @rename("lot_id")
         string lot_id,
-        @query("trace_id")
+        @query
+        @rename("trace_id")
         string trace_id
     );
 
     @post(path = "/v1/parking/lots/{lot_id}/reserve")
     @api_key(in = "header", name = "X-Reserve-Key")
     string reserve_lot(
-        @path("lot_id")
+        @path
+        @rename("lot_id")
         string lot_id,
         string plate_number,
         uint32 minutes,
@@ -53,15 +62,18 @@ interface SmartCityRestApi {
 
     @delete(path = "/v1/parking/lots/{lot_id}/reservations/{reservation_id}")
     void cancel_reservation(
-        @path("lot_id")
+        @path
+        @rename("lot_id")
         string lot_id,
-        @path("reservation_id")
+        @path
+        @rename("reservation_id")
         string reservation_id
     );
 
     @get(path = "/v1/citizens/{citizen_id}")
     string get_profile(
-        @path("citizen_id")
+        @path
+        @rename("citizen_id")
         string citizen_id,
         out string display_name,
         out string phone_number,
@@ -70,7 +82,8 @@ interface SmartCityRestApi {
 
     @patch(path = "/v1/citizens/{citizen_id}")
     void update_profile(
-        @path("citizen_id")
+        @path
+        @rename("citizen_id")
         string citizen_id,
         string display_name,
         string phone_number,
@@ -79,13 +92,17 @@ interface SmartCityRestApi {
 
     @get(path = "/v1/devices/{device_id}{?locale}")
     string get_device_status(
-        @path("device_id")
+        @path
+        @rename("device_id")
         string device_id,
-        @header("X-Trace-Id")
+        @header
+        @rename("X-Trace-Id")
         string trace_id,
-        @cookie("session")
+        @cookie
+        @rename("session")
         string session_id,
-        @query("locale")
+        @query
+        @rename("locale")
         string locale,
         out string trace_echo,
         out string session_echo

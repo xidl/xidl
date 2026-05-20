@@ -1,5 +1,6 @@
 ---
 source: xidl-parser/tests/test-annotation.rs
+assertion_line: 74
 expression: hir
 ---
 Specification(
@@ -1279,15 +1280,10 @@ Specification(
                                                                         ],
                                                                         is_root: false,
                                                                     },
-                                                                    params: Some(
-                                                                        ConstExpr(
-                                                                            Literal(
-                                                                                StringLiteral(
-                                                                                    "\"X-Req-Id\"",
-                                                                                ),
-                                                                            ),
-                                                                        ),
-                                                                    ),
+                                                                    params: None,
+                                                                },
+                                                                Rename {
+                                                                    name: "X-Req-Id",
                                                                 },
                                                             ],
                                                             attr: None,

@@ -6,11 +6,11 @@ interface HttpStreamSseBindingsService {
     @stream_codec("sse")
     @get(path = "/files/{*path}{?lang,follow}")
     sequence<string> tail_file(
-        @path("path")
+        @path @rename("path")
         string path,
-        @query("lang")
+        @query @rename("lang")
         string lang,
-        @query("follow")
+        @query @rename("follow")
         boolean follow
     );
 };

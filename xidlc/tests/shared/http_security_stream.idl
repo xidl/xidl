@@ -6,7 +6,7 @@ interface HttpSecurityStreamService {
     @server_stream
     @stream_codec("sse")
     @get(path = "/channels/{channel}/events")
-    string watch_channel(@path("channel") string channel);
+    string watch_channel(@path @rename("channel") string channel);
 
     @no_security
     @server_stream

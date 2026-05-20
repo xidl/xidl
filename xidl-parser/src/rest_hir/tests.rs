@@ -19,7 +19,7 @@ fn projects_normalized_http_operations() {
             module api {
               interface CityApi {
                 @get(path="/cities/{id}{?region}")
-                string get_city(@path("id") in string id, @query("region") in string region, @header("X-Trace-Id") in string trace, out string etag);
+                string get_city(@path @rename("id") in string id, @query @rename("region") in string region, @header @rename("X-Trace-Id") in string trace, out string etag);
               };
             };
             "#,

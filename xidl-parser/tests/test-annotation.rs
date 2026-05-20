@@ -45,7 +45,7 @@ const TEST_CASES: &[(&str, &str)] = &[
             @deprecated(since = "2026-03-13", after = "2026-03-14T12:00:00+08:00")
             @oauth2(scopes = ["read:users", "write:users"])
             string update_user(
-                @header("X-Req-Id") string request_id,
+                @header @rename("X-Req-Id") string request_id,
                 string name
             );
 

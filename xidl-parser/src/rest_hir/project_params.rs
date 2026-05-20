@@ -53,9 +53,7 @@ pub(super) fn project_params(
         );
         let projected = HttpParam {
             name: param.declarator.0.clone(),
-            wire_name: binding
-                .as_ref()
-                .map(|value| value.bound_name.clone())
+            wire_name: hir::field_rename(&param.annotations)
                 .unwrap_or_else(|| param.declarator.0.clone()),
             ty: param.ty.clone(),
             kind: inferred_kind,
