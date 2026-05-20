@@ -1,0 +1,32 @@
+---
+title: "OpenAPI Metadata"
+description: "Minimum generation for the openapi target and currently supported pragma metadata."
+---
+
+The `openapi` target generates `openapi.json` for HTTP-style interfaces.
+
+## Minimum Generation Command
+
+```bash
+xidlc gen --out-dir generated openapi api.idl
+```
+
+## Currently Read Pragmas
+
+```idl
+#pragma xidlc package "Smart City Public APIs"
+#pragma xidlc version "v2.0.0"
+```
+
+Effects:
+
+- `package` -> `info.title`
+- `version` -> `info.version`
+
+If omitted, the generator falls back to default metadata.
+
+## Related Pages
+
+- [HTTP](./http/)
+- [Pragma](./pragma/)
+- [Target Generators](./targets/)

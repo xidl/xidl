@@ -1,0 +1,35 @@
+---
+title: "rust-axum Target"
+description: "What the rust-axum generator outputs and its relationship with xidl-rust-axum."
+---
+
+`rust-axum` generates Rust HTTP bindings for Axum-based services and clients.
+
+## Minimum Command
+
+```bash
+xidlc gen --out-dir generated rust-axum hello_world.idl
+```
+
+If you also need a Schema, it is usually generated together:
+
+```bash
+xidlc gen --out-dir generated openapi hello_world.idl
+```
+
+## Typical Generation Results
+
+- Business logic traits
+- Server wrappers for routing and request parsing
+- Client wrappers
+- Transport helper types
+
+## Runtime Support
+
+The generated code is designed to be used with `xidl-rust-axum` by default.
+
+## Recommended Reading
+
+- [HTTP](./http/)
+- [Rust Integration](./rust-integration/)
+- [HTTP RFC](../rfc/http/)

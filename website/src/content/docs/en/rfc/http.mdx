@@ -1,0 +1,228 @@
+---
+title: "HTTP RFC"
+description: "Mapping specification from XIDL interfaces to HTTP APIs."
+---
+
+# XIDL HTTP Mapping Specification
+
+This page defines the core mapping rules from XIDL `interface` to HTTP APIs, including:
+
+- Method and route mapping
+- Parameter source resolution
+- Request/response encoding
+- Attribute mapping
+
+This page does not discuss OpenAPI generation details, nor does it serve as a tutorial.
+
+## Scope
+
+This RFC mainly covers:
+
+- HTTP verb and path annotations
+- Route template resolution
+- Parameter source priority
+- Request and response body shaping
+- HTTP semantics of `in` / `out` / `inout`
+
+## Main Supported Annotations
+
+### Method-level Annotations
+
+- `@get(path = "...")`
+- `@post(path = "...")`
+- `@put(path = "...")`
+- `@patch(path = "...")`
+- `@delete(path = "...")`
+- `@head(path = "...")`
+- `@options(path = "...")`
+- `@path @rename("...")`
+- `@Consumes("mime/type")`
+- `@Produces("mime/type")`
+- `@cors(...)`
+- `@deprecated`
+
+### Parameter-level Annotations
+
+- `@path`
+- `@query`
+- `@body`
+- `@header`
+- `@cookie`
+- `@flatten`
+- `@optional`
+
+## HTTP Method Resolution
+
+Rules:
+
+- A method can only have one HTTP verb annotation.
+- When no explicit verb is provided, it defaults to `@post`.
+- The path can come from the `path` attribute in the verb annotation or from a method-level `@path(...)` annotation.
+- Multiple path declarations are merged, normalized, and de-duplicated.
+
+## Route Templates
+
+Supported formats:
+
+- `/users/{id}`
+- `/files/{*path}`
+- `/users/{id}{?lang,region}`
+
+Semantics:
+
+- `{name}`: Normal path variable.
+- `{*name}`: Capture trailing multi-segment paths.
+- `{?a,b}`: Declare query parameter names.
+
+## Route Normalization
+
+Before conflict detection and actual binding, all routes are normalized:
+
+1. Remove leading and trailing whitespace.
+2. Ensure it starts with `/`.
+3. Merge duplicate `/` characters.
+4. Remove trailing `/` characters.
+5. Maintain case; do not automatically rewrite segment content.
+
+## Automatic Path Generation
+
+When a method has no explicit path:
+
+1. Use `/{method_name}` as the base path.
+2. Append all Path parameters in the order they are declared.
+3. Query parameters do not participate in route template generation.
+
+Example:
+
+```idl
+void findUser(@path uint32 id, @query string locale);
+```
+
+Results in:
+
+```text
+POST /findUser/{id}
+```
+
+## Parameter Source Priority
+
+Each parameter's source is resolved according to the following priority:
+
+1. Explicit `@path`
+2. Explicit `@query`
+3. Explicit `@body`
+4. Explicit `@header`
+5. Explicit `@cookie`
+6. Default inference based on the HTTP method and direction.
+
+Default inference practices:
+
+- Unlabeled request parameters for `GET` / `DELETE` / `HEAD` / `OPTIONS` usually go to Query.
+- Unlabeled request parameters for `POST` / `PUT` / `PATCH` usually go to Body.
+
+## Request Side and Response Side
+
+Direction rules:
+
+- `in`: Participates only on the request side.
+- `out`: Participates only on the response side.
+- `inout`: Participates on both sides.
+
+Common interpretation in HTTP mapping:
+
+- Request-side parameters determine the path, query, headers, cookies, and body.
+- The response side is determined by the return value and `out` / `inout` parameters.
+
+## `HEAD` Special Rules
+
+`@head` has additional constraints:
+
+- The return type must be `void`.
+- It can only contain request-side parameters.
+- The response does not contain a body.
+
+## Media Types
+
+`@Consumes` and `@Produces` respectively define:
+
+- Request body decoding format.
+- Response body encoding format.
+
+The default value is `application/json`.
+
+Interface-level annotations serve as defaults, which method-level annotations override.
+
+## `@cors`
+
+The `@cors` annotation is used to declare Cross-Origin Resource Sharing (CORS) policies, targeting interfaces or methods.
+
+Think of it as "attaching a cross-origin response policy to this set of HTTP routes."
+
+Supported basic forms:
+
+- `@cors`: Unconditionally enable CORS.
+- `@cors("https://app.example.com", "https://admin.example.com")`: Accept only these origins.
+
+Example:
+
+```idl
+@cors
+interface UserApi {
+    @get(path = "/users/{id}")
+    string getUser(@path @rename("id") string id);
+
+    @cors("https://admin.example.com", "https://console.example.com")
+    @post(path = "/users")
+    void createUser(string name);
+};
+```
+
+Where:
+
+- `@cors` means the interface or method accepts cross-origin access from any origin.
+- `@cors("...", "...")` means the interface or method only accepts the listed Origins.
+- Multiple string parameters represent an origin allowlist.
+
+Inheritance and overriding rules:
+
+- Interface-level `@cors` serves as the default policy.
+- Method-level `@cors` overrides the interface-level default policy.
+- If a method does not declare `@cors`, it inherits the interface-level configuration.
+
+In the example above:
+
+- `getUser` inherits the interface-level `@cors`, thus unconditionally enabling CORS.
+- `createUser` uses its own method-level `@cors("...", "...")`.
+- The final policy for `createUser` follows the method declaration, accepting only the listed origins.
+
+Runtime semantic recommendations:
+
+- Routes matching `@cors` should return the corresponding `Access-Control-Allow-Origin`.
+- When a browser initiates an `OPTIONS` preflight request, the response should be calculated based on the same policy.
+- The difference between `@cors` and `@cors("...", "...")` is mainly in the set of allowed origins.
+
+These rules are HTTP boundary behaviors and do not change XIDL method signatures or participate in business parameter binding.
+
+## `@optional`
+
+In HTTP scenarios:
+
+- Optional Query parameters can be omitted.
+- Optional Body fields can be omitted.
+- Path parameters cannot be optional.
+
+This determines how field requirement is understood in OpenAPI and runtime validation.
+
+## Attribute Mapping
+
+Attributes are mapped to implicit operations, which then follow normal HTTP mapping rules.
+
+In other words, attributes themselves are not independent special channels; they enter HTTP semantics through the generated access operations.
+
+## Implementation Recommendations
+
+If you are implementing a generator or runtime:
+
+- Perform strict validation first; do not silently tolerate conflicting annotations.
+- Route normalization, parameter source resolution, and response shaping should be stable and reproducible.
+- Tutorial pages can be simplified, but RFC rules must not be ambiguous.

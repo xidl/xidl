@@ -1,0 +1,122 @@
+---
+title: "JSON-RPC Stream RFC"
+description: "Frame model, direction rules, and lifecycle of the XIDL JSON-RPC streaming extension."
+---
+
+# XIDL JSON-RPC Stream Mapping Specification
+
+This page defines streaming extensions for the JSON-RPC request/response model.
+
+Unlike standard JSON-RPC 2.0, this profile allows for long-lived, full-duplex streaming message exchanges.
+
+## Design Goals
+
+- Maintain the JSON-RPC control message shape as much as possible.
+- Express server / client / bidirectional streams within the same model.
+- Avoid tightly coupling the design to the half-duplex constraints of HTTP.
+
+## Stream Frame Model
+
+Each stream frame is still a JSON-RPC message, but carries streaming envelope fields within `params` or `result`.
+
+General envelope example:
+
+```json
+{
+  "seq": 1,
+  "kind": "next",
+  "data": { "value": 1 }
+}
+```
+
+Common fields:
+
+- `seq`: Monotonically increasing sequence number for each direction.
+- `kind`: `next|complete|cancel|error|ack|heartbeat`
+- `data`: Business payload.
+- `err`: In-stream error object.
+- `meta`: Additional metadata.
+
+## Method Declarations
+
+Streaming methods use one of the following annotations:
+
+- `@server_stream`
+- `@client_stream`
+- `@bidi_stream`
+
+The default stream codec follows JSON semantics.
+
+These annotations are mutually exclusive.
+
+## Control Method Names
+
+For a streaming method `chat`, the following can be derived:
+
+- `...chat.push`
+- `...chat.close`
+- `...chat.cancel`
+
+This allows the implementation to express persistent sessions over the standard JSON-RPC message model.
+
+## Direction Rules
+
+Direction semantics reuse XIDL's `in` / `out` / `inout`:
+
+- Request-side fields: `in` + `inout`
+- Response-side fields: `out` + `inout` + return value
+
+Streaming interpretation:
+
+- `@server_stream`: Server continuously sends `next`.
+- `@client_stream`: Client continuously sends `next`.
+- `@bidi_stream`: Both parties can concurrently send `next`.
+
+## Attribute Stream
+
+The most typical derived operations for attribute streams are:
+
+- `watch_attribute_<name>`
+
+Applicable for scenarios where observing attribute changes is desired.
+
+## Errors and Cancellation
+
+Two layers of errors need to be distinguished:
+
+- JSON-RPC protocol errors.
+- Business-level stream errors.
+
+Recommendations:
+
+- Invalid message structure -> JSON-RPC error object.
+- Business stream failure -> `kind=error`.
+
+Cancellation methods:
+
+- Explicit `cancel`.
+- Implicit cancellation of active streams upon connection loss.
+
+## Order and Reliability
+
+- `seq` must monotonically increase within each stream and direction.
+- A global total order across multiple streams is not required.
+- Stronger delivery guarantees should be handled by the runtime rather than being implicitly promised by the RFC.
+
+## Runtime Validation
+
+- Stream annotations are mutually exclusive.
+- Non-monotonic `seq` is treated as a protocol error.
+- Sending `next` after a termination frame is considered invalid.
+
+## Transport Notes
+
+This RFC remains transport-agnostic.
+
+Common choices include:
+
+- Line-delimited JSON over TCP.
+- WebSocket text frames.
+- In-process channels.
+
+Whether and how multiplexing is implemented is a runtime responsibility.
