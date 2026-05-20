@@ -11,6 +11,7 @@ bitset_def.rs
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Default)]
 pub struct A {}
 impl A {}
 #[allow(unused_imports)]
@@ -19,6 +20,7 @@ impl A {}
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Default)]
 pub struct A {
     pub base: B,
 }
@@ -29,6 +31,7 @@ impl A {}
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
 #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
+#[derive(Default)]
 pub struct A {
     pub base: B,
     pub a: bool,

@@ -243,6 +243,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     I32,
                 ),
@@ -258,6 +259,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     I32,
                 ),
@@ -273,6 +275,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     I32,
                 ),

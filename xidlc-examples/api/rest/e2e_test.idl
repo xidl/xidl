@@ -30,7 +30,6 @@ struct StructHttpBody {
     map<string, string> labels;
 };
 
-@derive(Serialize, Deserialize)
 union UnionSimple switch (EnumSimple1) {
     case EnumSimple1::V1:
         uint8 case1;

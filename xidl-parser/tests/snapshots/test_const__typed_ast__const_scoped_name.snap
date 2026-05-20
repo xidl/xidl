@@ -6,6 +6,7 @@ Specification(
     [
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: ScopedName(
                     ScopedName {
                         scoped_name: None,
@@ -45,6 +46,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     UnsignedInt(
                         UnsignedTinyInt(
@@ -82,6 +84,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     UnsignedInt(
                         UnsignedShortInt(
@@ -119,6 +122,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     UnsignedInt(
                         UnsignedLongInt(
@@ -156,6 +160,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     UnsignedInt(
                         UnsignedLongLongInt(
@@ -193,6 +198,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     SignedInt(
                         SignedTinyInt(
@@ -230,6 +236,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     SignedInt(
                         SignedShortInt(
@@ -267,6 +274,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     SignedInt(
                         SignedLongInt(
@@ -304,6 +312,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     SignedInt(
                         SignedLongLongInt(
@@ -341,6 +350,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: ScopedName(
                     ScopedName {
                         scoped_name: None,
@@ -380,6 +390,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: ScopedName(
                     ScopedName {
                         scoped_name: None,
@@ -419,6 +430,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: CharType(
                     CharType,
                 ),
@@ -450,6 +462,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: WideCharType(
                     WideCharType,
                 ),
@@ -481,6 +494,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: StringType(
                     StringType {
                         bound: None,
@@ -514,6 +528,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: WideStringType(
                     WideStringType {
                         bound: None,
@@ -547,6 +562,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: ScopedName(
                     ScopedName {
                         scoped_name: None,
@@ -588,6 +604,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: ScopedName(
                     ScopedName {
                         scoped_name: None,
@@ -627,6 +644,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: ScopedName(
                     ScopedName {
                         scoped_name: Some(
@@ -674,6 +692,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: ScopedName(
                     ScopedName {
                         scoped_name: Some(
@@ -729,6 +748,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: ScopedName(
                     ScopedName {
                         scoped_name: Some(
@@ -808,6 +828,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: ScopedName(
                     ScopedName {
                         scoped_name: Some(
@@ -865,6 +886,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: FloatingPtType(
                     FloatingPtType,
                 ),
@@ -904,6 +926,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: FloatingPtType(
                     FloatingPtType,
                 ),
@@ -943,6 +966,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: FloatingPtType(
                     FloatingPtType,
                 ),

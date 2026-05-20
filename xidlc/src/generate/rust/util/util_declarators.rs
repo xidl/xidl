@@ -36,12 +36,6 @@ pub fn type_with_decl(ty: &hir::TypeSpec, decl: &hir::Declarator) -> String {
     }
 }
 
-pub fn member_json(ty: &hir::TypeSpec, decl: &hir::Declarator) -> serde_json::Value {
-    let name = rust_ident(&declarator_name(decl));
-    let ty = type_with_decl(ty, decl);
-    json!({ "ty": ty, "name": name })
-}
-
 pub fn typedef_json(base: &str, decl: &hir::Declarator) -> serde_json::Value {
     let name = rust_ident(&declarator_name(decl));
     let dims = declarator_dims(decl);

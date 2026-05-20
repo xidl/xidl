@@ -18,6 +18,7 @@ Specification(
                 definition: [
                     ConstDcl(
                         ConstDcl {
+                            annotations: [],
                             ty: ScopedName(
                                 ScopedName {
                                     name: [

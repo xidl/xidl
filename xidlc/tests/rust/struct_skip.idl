@@ -1,4 +1,4 @@
-@derive(Serialize, Deserialize)
+
 struct SkipStruct {
     long a;
     @skip

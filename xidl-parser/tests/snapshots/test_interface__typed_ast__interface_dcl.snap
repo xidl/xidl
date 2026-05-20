@@ -809,6 +809,7 @@ Specification(
                                     ),
                                     ConstDcl(
                                         ConstDcl {
+                                            annotations: [],
                                             ty: ScopedName(
                                                 ScopedName {
                                                     scoped_name: None,
@@ -848,6 +849,7 @@ Specification(
                                     ),
                                     ExceptDcl(
                                         ExceptDcl {
+                                            annotations: [],
                                             ident: Identifier(
                                                 "A",
                                             ),

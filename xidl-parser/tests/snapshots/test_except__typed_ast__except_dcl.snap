@@ -6,6 +6,7 @@ Specification(
     [
         ExceptDcl(
             ExceptDcl {
+                annotations: [],
                 ident: Identifier(
                     "HelloWorld",
                 ),

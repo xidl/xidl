@@ -1,12 +1,12 @@
 ---
 source: xidl-parser/tests/test-annotation.rs
-assertion_line: 74
 expression: hir
 ---
 Specification(
     [
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     I32,
                 ),
@@ -22,6 +22,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     I32,
                 ),
@@ -37,6 +38,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     I32,
                 ),
@@ -52,6 +54,7 @@ Specification(
         ),
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     I32,
                 ),

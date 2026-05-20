@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ExceptDcl {
+    pub annotations: Vec<Annotation>,
     pub ident: String,
     pub member: Vec<Member>,
 }
@@ -10,6 +11,7 @@ pub struct ExceptDcl {
 impl From<crate::typed_ast::ExceptDcl> for ExceptDcl {
     fn from(value: crate::typed_ast::ExceptDcl) -> Self {
         Self {
+            annotations: expand_annotations(value.annotations),
             ident: value.ident.0,
             member: value.member.into_iter().map(Into::into).collect(),
         }

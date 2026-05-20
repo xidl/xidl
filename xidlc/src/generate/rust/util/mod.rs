@@ -8,8 +8,8 @@ mod util_types;
 pub use self::util_annotations::rust_passthrough_attrs_from_annotations;
 #[allow(unused_imports)]
 pub use self::util_declarators::{
-    array_type, constr_type_scoped_name, declarator_dims, declarator_name, member_json,
-    type_with_decl, typedef_json,
+    array_type, constr_type_scoped_name, declarator_dims, declarator_name, type_with_decl,
+    typedef_json,
 };
 #[allow(unused_imports)]
 pub use self::util_derives::{

@@ -11,11 +11,11 @@ union_serde.rs
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
 #[derive(
-    ::serde::Serialize,
-    ::serde::Deserialize,
     Debug,
     Clone,
     PartialEq,
+    ::serde::Serialize,
+    ::serde::Deserialize,
     Copy,
     Eq,
     Default,

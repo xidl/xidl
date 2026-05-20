@@ -2,7 +2,6 @@
 #pragma xidlc version v1.0.0
 #pragma xidlc service http://127.0.0.1:8080 union serde
 
-@derive(Serialize, Deserialize)
 enum Tag {
     V1,
     V2,
@@ -10,7 +9,6 @@ enum Tag {
 
 };
 
-@derive(Serialize, Deserialize)
 union UnionValue switch (Tag) {
     case Tag::V1:
         uint8 case1;
@@ -20,7 +18,6 @@ union UnionValue switch (Tag) {
         map<string, string> case3;
 };
 
-@derive(Serialize, Deserialize)
 union IntTagValue switch (long) {
     case 1:
         string one;
@@ -32,7 +29,6 @@ union IntTagValue switch (long) {
         boolean fallback;
 };
 
-@derive(Serialize, Deserialize)
 union BoolTagValue switch (boolean) {
     case TRUE:
         string yes;
@@ -40,7 +36,6 @@ union BoolTagValue switch (boolean) {
         string no;
 };
 
-@derive(Serialize, Deserialize)
 union CharTagValue switch (char) {
     case 'x':
         string ex;

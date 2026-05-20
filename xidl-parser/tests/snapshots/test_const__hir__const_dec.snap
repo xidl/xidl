@@ -6,6 +6,7 @@ Specification(
     [
         ConstDcl(
             ConstDcl {
+                annotations: [],
                 ty: IntegerType(
                     I32,
                 ),

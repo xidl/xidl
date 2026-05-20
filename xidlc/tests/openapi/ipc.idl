@@ -1,24 +1,24 @@
-@derive(Debug, Serialize, Deserialize)
+
 struct ArtifactHir {
     string lang;
     ::xidl_parser::hir::Specification hir;
     ::xidl_parser::hir::ParserProperties props;
 };
 
-@derive(Debug, Serialize, Deserialize)
+
 struct ArtifactFile {
     string path;
     string content;
 };
 
-@derive(Debug, Serialize, Deserialize)
+
 enum ArtifactKind {
     @default_literal
     Hir,
     File
 };
 
-@derive(Serialize, Deserialize)
+
 union Artifact switch (ArtifactKind) {
     case ArtifactKind::Hir:
         ArtifactHir hir;

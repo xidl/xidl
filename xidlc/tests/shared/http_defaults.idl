@@ -1,7 +1,7 @@
 #pragma xidlc package xidlc
 #pragma xidlc version v1.0.0
 
-@derive(Debug, Serialize, Deserialize)
+
 struct CreateUserRequest {
     string name;
     uint32 age;

@@ -1,4 +1,4 @@
-@derive(Serialize, Deserialize)
+
 enum Tag {
     A,
     B,
