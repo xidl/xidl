@@ -62,6 +62,7 @@ impl Drop for UnionValue {
     }
 }
 impl Clone for UnionValue {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         match self.tag {
             Tag::V1 => Self::new_case1(self.as_case1().clone()),
@@ -336,6 +337,7 @@ impl Drop for IntTagValue {
     }
 }
 impl Clone for IntTagValue {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         if matches!(self.tag, 1) {
             Self::new_one(self.as_one().clone())
@@ -620,6 +622,7 @@ impl Drop for BoolTagValue {
     }
 }
 impl Clone for BoolTagValue {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         match self.tag {
             true => Self::new_yes(self.as_yes().clone()),
@@ -840,6 +843,7 @@ impl Drop for CharTagValue {
     }
 }
 impl Clone for CharTagValue {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         if matches!(self.tag, 'x') {
             Self::new_ex(self.as_ex().clone())

@@ -21,6 +21,7 @@ impl Drop for B {
     }
 }
 impl Clone for B {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         match self.tag {}
     }
@@ -115,6 +116,7 @@ impl Drop for C {
     }
 }
 impl Clone for C {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         match self.tag {
             0 => Self::new_a(self.as_a().clone()),

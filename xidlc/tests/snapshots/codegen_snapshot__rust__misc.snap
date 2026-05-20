@@ -116,6 +116,7 @@ impl Drop for Bar {
     }
 }
 impl Clone for Bar {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         match self.tag {
             0 => Self::new_l_mem(self.as_l_mem().clone()),
@@ -379,6 +380,7 @@ impl Drop for A_make_it_so_Result {
     }
 }
 impl Clone for A_make_it_so_Result {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
@@ -541,6 +543,7 @@ impl Drop for A_Call {
     }
 }
 impl Clone for A_Call {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         if matches!(self.tag, A_make_it_so_Hash) {
             Self::new_make_it_so(self.as_make_it_so().clone())
@@ -767,6 +770,7 @@ impl Drop for A_Return {
     }
 }
 impl Clone for A_Return {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         if matches!(self.tag, A_make_it_so_Hash) {
             Self::new_make_it_so(self.as_make_it_so().clone())
@@ -1026,6 +1030,7 @@ impl Drop for B_make_it_so_Result {
     }
 }
 impl Clone for B_make_it_so_Result {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
@@ -1188,6 +1193,7 @@ impl Drop for B_Call {
     }
 }
 impl Clone for B_Call {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         if matches!(self.tag, B_make_it_so_Hash) {
             Self::new_make_it_so(self.as_make_it_so().clone())
@@ -1414,6 +1420,7 @@ impl Drop for B_Return {
     }
 }
 impl Clone for B_Return {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         if matches!(self.tag, B_make_it_so_Hash) {
             Self::new_make_it_so(self.as_make_it_so().clone())
@@ -1673,6 +1680,7 @@ impl Drop for A_opA_Result {
     }
 }
 impl Clone for A_opA_Result {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
@@ -1835,6 +1843,7 @@ impl Drop for A_Call {
     }
 }
 impl Clone for A_Call {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         if matches!(self.tag, A_opA_Hash) {
             Self::new_opA(self.as_opA().clone())
@@ -2061,6 +2070,7 @@ impl Drop for A_Return {
     }
 }
 impl Clone for A_Return {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         if matches!(self.tag, A_opA_Hash) {
             Self::new_opA(self.as_opA().clone())
@@ -2326,6 +2336,7 @@ impl Drop for B_opB_Result {
     }
 }
 impl Clone for B_opB_Result {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
@@ -2488,6 +2499,7 @@ impl Drop for B_Call {
     }
 }
 impl Clone for B_Call {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         if matches!(self.tag, B_opB_Hash) {
             Self::new_opB(self.as_opB().clone())
@@ -2714,6 +2726,7 @@ impl Drop for B_Return {
     }
 }
 impl Clone for B_Return {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         if matches!(self.tag, B_opB_Hash) {
             Self::new_opB(self.as_opB().clone())
@@ -2979,6 +2992,7 @@ impl Drop for C_opC_Result {
     }
 }
 impl Clone for C_opC_Result {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
@@ -3141,6 +3155,7 @@ impl Drop for C_Call {
     }
 }
 impl Clone for C_Call {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         if matches!(self.tag, C_opC_Hash) {
             Self::new_opC(self.as_opC().clone())
@@ -3367,6 +3382,7 @@ impl Drop for C_Return {
     }
 }
 impl Clone for C_Return {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         if matches!(self.tag, C_opC_Hash) {
             Self::new_opC(self.as_opC().clone())
@@ -3644,6 +3660,7 @@ impl Drop for A_f_Result {
     }
 }
 impl Clone for A_f_Result {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
@@ -3805,6 +3822,7 @@ impl Drop for A_Call {
     }
 }
 impl Clone for A_Call {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         if matches!(self.tag, A_f_Hash) {
             Self::new_f(self.as_f().clone())
@@ -4031,6 +4049,7 @@ impl Drop for A_Return {
     }
 }
 impl Clone for A_Return {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         if matches!(self.tag, A_f_Hash) {
             Self::new_f(self.as_f().clone())
@@ -4368,6 +4387,7 @@ impl Drop for C_get_attribute_Title_Result {
     }
 }
 impl Clone for C_get_attribute_Title_Result {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
@@ -4555,6 +4575,7 @@ impl Drop for C_set_attribute_Title_Result {
     }
 }
 impl Clone for C_set_attribute_Title_Result {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
@@ -4742,6 +4763,7 @@ impl Drop for C_get_attribute_Name_Result {
     }
 }
 impl Clone for C_get_attribute_Name_Result {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
@@ -4927,6 +4949,7 @@ impl Drop for C_set_attribute_Name_Result {
     }
 }
 impl Clone for C_set_attribute_Name_Result {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
@@ -5112,6 +5135,7 @@ impl Drop for C_get_attribute_City_Result {
     }
 }
 impl Clone for C_get_attribute_City_Result {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
@@ -5297,6 +5321,7 @@ impl Drop for C_set_attribute_City_Result {
     }
 }
 impl Clone for C_set_attribute_City_Result {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
@@ -5488,6 +5513,7 @@ impl Drop for C_Call {
     }
 }
 impl Clone for C_Call {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         if matches!(self.tag, C_get_attribute_Title_Hash) {
             Self::new_get_attribute_Title(self.as_get_attribute_Title().clone())
@@ -6016,6 +6042,7 @@ impl Drop for C_Return {
     }
 }
 impl Clone for C_Return {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         if matches!(self.tag, C_get_attribute_Title_Hash) {
             Self::new_get_attribute_Title(self.as_get_attribute_Title().clone())

@@ -78,6 +78,7 @@ impl Drop for U {
     }
 }
 impl Clone for U {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         if matches!(self.tag, 0) {
             Self::new_a(self.as_a().clone())
@@ -319,6 +320,7 @@ impl Drop for I_ping_Result {
     }
 }
 impl Clone for I_ping_Result {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
@@ -500,6 +502,7 @@ impl Drop for I_get_attribute_value_Result {
     }
 }
 impl Clone for I_get_attribute_value_Result {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
@@ -687,6 +690,7 @@ impl Drop for I_set_attribute_value_Result {
     }
 }
 impl Clone for I_set_attribute_value_Result {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
@@ -865,6 +869,7 @@ impl Drop for I_Call {
     }
 }
 impl Clone for I_Call {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         if matches!(self.tag, I_ping_Hash) {
             Self::new_ping(self.as_ping().clone())
@@ -1211,6 +1216,7 @@ impl Drop for I_Return {
     }
 }
 impl Clone for I_Return {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         if matches!(self.tag, I_ping_Hash) {
             Self::new_ping(self.as_ping().clone())

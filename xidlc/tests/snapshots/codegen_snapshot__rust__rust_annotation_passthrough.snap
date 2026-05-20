@@ -94,6 +94,7 @@ impl Drop for Api_ping_Result {
     }
 }
 impl Clone for Api_ping_Result {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         match self.tag {
             dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
@@ -256,6 +257,7 @@ impl Drop for Api_Call {
     }
 }
 impl Clone for Api_Call {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         if matches!(self.tag, Api_ping_Hash) {
             Self::new_ping(self.as_ping().clone())
@@ -482,6 +484,7 @@ impl Drop for Api_Return {
     }
 }
 impl Clone for Api_Return {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         if matches!(self.tag, Api_ping_Hash) {
             Self::new_ping(self.as_ping().clone())

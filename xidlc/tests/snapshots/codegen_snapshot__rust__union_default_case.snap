@@ -52,6 +52,7 @@ impl Drop for DefaultUnion {
     }
 }
 impl Clone for DefaultUnion {
+    #[allow(clippy::clone_on_copy)]
     fn clone(&self) -> Self {
         if matches!(self.tag, A) {
             Self::new_a(self.as_a().clone())
