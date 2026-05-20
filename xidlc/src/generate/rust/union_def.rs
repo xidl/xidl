@@ -7,7 +7,6 @@ use crate::generate::rust::util::{
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::doc_lines_from_annotations;
 use convert_case::{Case as ConvertCase, Casing};
-use itertools::Itertools;
 use serde_json::json;
 use std::collections::BTreeSet;
 use xidl_parser::hir;
@@ -170,6 +169,16 @@ pub(crate) fn render_union_with_config(
         });
 
     let derive = rust_derive_info_with_extra(&def.annotations, &def.annotations);
+    let mut manual_derives = Vec::new();
+    let mut auto_derives = Vec::new();
+    for d in derive.non_serde {
+        if matches!(d.as_str(), "Debug" | "Clone" | "PartialEq") {
+            manual_derives.push(d);
+        } else {
+            auto_derives.push(d);
+        }
+    }
+
     let ctx = renderer.enrich_scoped_ctx(
         json!({
             "ident": crate::generate::rust::util::rust_ident(&def.ident),
@@ -180,7 +189,8 @@ pub(crate) fn render_union_with_config(
             "default_case": default_case,
             "has_serde_serialize": derive.has_serde_serialize,
             "has_serde_deserialize": derive.has_serde_deserialize,
-            "derive": derive.non_serde.into_iter().collect_vec(),
+            "derive": auto_derives,
+            "manual_derives": manual_derives,
             "rust_attrs": rust_passthrough_attrs_from_annotations(&def.annotations),
         }),
         &doc_lines_from_annotations(&def.annotations),

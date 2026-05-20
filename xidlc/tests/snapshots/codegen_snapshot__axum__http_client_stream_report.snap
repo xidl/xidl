@@ -351,6 +351,7 @@ http_client_stream_report.rs
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct UploadChunk {
     pub part_id: String,
@@ -362,6 +363,7 @@ impl UploadChunk {}
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct UploadSummary {
     pub upload_id: String,

@@ -10,7 +10,16 @@ enum_simple_comma.rs
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    ::serde::Serialize,
+    ::serde::Deserialize,
+    Copy,
+    Eq,
+    Default,
+)]
 pub enum A {
     #[default]
     B,

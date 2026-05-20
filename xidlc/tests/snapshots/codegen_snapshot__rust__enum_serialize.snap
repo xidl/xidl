@@ -11,13 +11,13 @@ enum_serialize.rs
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
 #[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
     ::serde::Serialize,
     ::serde::Deserialize,
+    Debug,
+    Clone,
+    PartialEq,
+    Copy,
+    Eq,
     Default,
 )]
 pub enum Tag {

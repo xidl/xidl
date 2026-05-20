@@ -704,8 +704,18 @@ pub mod test {
     #[allow(non_snake_case)]
     #[allow(unused_variables)]
     #[allow(unreachable_patterns)]
-    #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+    #[derive(
+        Debug,
+        Clone,
+        PartialEq,
+        ::serde::Serialize,
+        ::serde::Deserialize,
+        Copy,
+        Eq,
+        Default,
+    )]
     pub enum Status {
+        #[serde(rename = "ok")]
         #[default]
         OK,
         FAILED,
@@ -715,9 +725,11 @@ pub mod test {
     #[allow(non_snake_case)]
     #[allow(unused_variables)]
     #[allow(unreachable_patterns)]
+    #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
     #[derive(Default)]
     pub struct User {
         pub id: u32,
+        #[serde(rename = "full_name")]
         pub name: String,
         pub status: Status,
     }

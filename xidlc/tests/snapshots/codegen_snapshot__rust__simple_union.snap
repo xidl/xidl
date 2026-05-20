@@ -10,7 +10,16 @@ simple_union.rs
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    ::serde::Serialize,
+    ::serde::Deserialize,
+    Copy,
+    Eq,
+    Default,
+)]
 pub enum Tag {
     #[default]
     A,
@@ -42,6 +51,40 @@ impl Drop for SimpleUnion {
                     core::mem::ManuallyDrop::drop(&mut self.data.b);
                 }
             }
+        }
+    }
+}
+impl Clone for SimpleUnion {
+    fn clone(&self) -> Self {
+        match self.tag {
+            A => Self::new_a(self.as_a().clone()),
+            B => Self::new_b(self.as_b().clone()),
+        }
+    }
+}
+impl core::fmt::Debug for SimpleUnion {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("SimpleUnion");
+        d.field("tag", &self.tag);
+        match self.tag {
+            A => {
+                d.field("a", self.as_a());
+            }
+            B => {
+                d.field("b", self.as_b());
+            }
+        }
+        d.finish()
+    }
+}
+impl PartialEq for SimpleUnion {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        match self.tag {
+            A => self.as_a() == other.as_a(),
+            B => self.as_b() == other.as_b(),
         }
     }
 }
@@ -109,6 +152,94 @@ impl Default for SimpleUnion {
             data: SimpleUnionData {
                 a: core::mem::ManuallyDrop::new(int::default()),
             },
+        }
+    }
+}
+#[derive(::serde::Serialize)]
+struct SimpleUnionSerdeRef<'__a> {
+    tag: &'__a str,
+    data: SimpleUnionSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum SimpleUnionSerdeRefData<'__a> {
+    Case0(&'__a int),
+    Case1(&'__a int),
+}
+impl serde::Serialize for SimpleUnion {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = match self.tag {
+            A => {
+                let tag = "A";
+                SimpleUnionSerdeRef {
+                    tag,
+                    data: SimpleUnionSerdeRefData::Case0(self.as_a()),
+                }
+            }
+            B => {
+                let tag = "B";
+                SimpleUnionSerdeRef {
+                    tag,
+                    data: SimpleUnionSerdeRefData::Case1(self.as_b()),
+                }
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct SimpleUnionSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for SimpleUnion {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = SimpleUnionSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "A" => {
+                let value = ::serde_json::from_value::<int>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union SimpleUnion payload decode failed for tag `A`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: A,
+                    data: SimpleUnionData {
+                        a: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "B" => {
+                let value = ::serde_json::from_value::<int>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union SimpleUnion payload decode failed for tag `B`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: B,
+                    data: SimpleUnionData {
+                        b: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union SimpleUnion tag/data mismatch for tag `{}`", helper
+                            .tag
+                        ),
+                    ),
+                )
+            }
         }
     }
 }

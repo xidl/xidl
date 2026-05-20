@@ -11,13 +11,13 @@ union_serde.rs
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
 #[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
     ::serde::Serialize,
     ::serde::Deserialize,
+    Debug,
+    Clone,
+    PartialEq,
+    Copy,
+    Eq,
     Default,
 )]
 pub enum Tag {
@@ -58,6 +58,45 @@ impl Drop for UnionValue {
                     core::mem::ManuallyDrop::drop(&mut self.data.case3);
                 }
             }
+        }
+    }
+}
+impl Clone for UnionValue {
+    fn clone(&self) -> Self {
+        match self.tag {
+            Tag::V1 => Self::new_case1(self.as_case1().clone()),
+            Tag::V2 => Self::new_case2(self.as_case2().clone()),
+            Tag::V3 => Self::new_case3(self.as_case3().clone()),
+        }
+    }
+}
+impl core::fmt::Debug for UnionValue {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("UnionValue");
+        d.field("tag", &self.tag);
+        match self.tag {
+            Tag::V1 => {
+                d.field("case1", self.as_case1());
+            }
+            Tag::V2 => {
+                d.field("case2", self.as_case2());
+            }
+            Tag::V3 => {
+                d.field("case3", self.as_case3());
+            }
+        }
+        d.finish()
+    }
+}
+impl PartialEq for UnionValue {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        match self.tag {
+            Tag::V1 => self.as_case1() == other.as_case1(),
+            Tag::V2 => self.as_case2() == other.as_case2(),
+            Tag::V3 => self.as_case3() == other.as_case3(),
         }
     }
 }
@@ -293,6 +332,45 @@ impl Drop for IntTagValue {
             unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.fallback);
             }
+        }
+    }
+}
+impl Clone for IntTagValue {
+    fn clone(&self) -> Self {
+        if matches!(self.tag, 1) {
+            Self::new_one(self.as_one().clone())
+        } else if matches!(self.tag, 2 | 3) {
+            Self::new_two_or_three(self.as_two_or_three().clone())
+        } else {
+            Self::new_fallback(self.as_fallback().clone())
+        }
+    }
+}
+impl core::fmt::Debug for IntTagValue {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("IntTagValue");
+        d.field("tag", &self.tag);
+        if matches!(self.tag, 1) {
+            d.field("one", self.as_one());
+        } else if matches!(self.tag, 2 | 3) {
+            d.field("two_or_three", self.as_two_or_three());
+        } else {
+            d.field("fallback", self.as_fallback());
+        }
+        d.finish()
+    }
+}
+impl PartialEq for IntTagValue {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        if matches!(self.tag, 1) {
+            self.as_one() == other.as_one()
+        } else if matches!(self.tag, 2 | 3) {
+            self.as_two_or_three() == other.as_two_or_three()
+        } else {
+            self.as_fallback() == other.as_fallback()
         }
     }
 }
@@ -541,6 +619,40 @@ impl Drop for BoolTagValue {
         }
     }
 }
+impl Clone for BoolTagValue {
+    fn clone(&self) -> Self {
+        match self.tag {
+            true => Self::new_yes(self.as_yes().clone()),
+            false => Self::new_no(self.as_no().clone()),
+        }
+    }
+}
+impl core::fmt::Debug for BoolTagValue {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("BoolTagValue");
+        d.field("tag", &self.tag);
+        match self.tag {
+            true => {
+                d.field("yes", self.as_yes());
+            }
+            false => {
+                d.field("no", self.as_no());
+            }
+        }
+        d.finish()
+    }
+}
+impl PartialEq for BoolTagValue {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        match self.tag {
+            true => self.as_yes() == other.as_yes(),
+            false => self.as_no() == other.as_no(),
+        }
+    }
+}
 impl BoolTagValue {
     pub fn new_yes(value: String) -> Self {
         Self {
@@ -724,6 +836,45 @@ impl Drop for CharTagValue {
             unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.other);
             }
+        }
+    }
+}
+impl Clone for CharTagValue {
+    fn clone(&self) -> Self {
+        if matches!(self.tag, 'x') {
+            Self::new_ex(self.as_ex().clone())
+        } else if matches!(self.tag, 'y') {
+            Self::new_why(self.as_why().clone())
+        } else {
+            Self::new_other(self.as_other().clone())
+        }
+    }
+}
+impl core::fmt::Debug for CharTagValue {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("CharTagValue");
+        d.field("tag", &self.tag);
+        if matches!(self.tag, 'x') {
+            d.field("ex", self.as_ex());
+        } else if matches!(self.tag, 'y') {
+            d.field("why", self.as_why());
+        } else {
+            d.field("other", self.as_other());
+        }
+        d.finish()
+    }
+}
+impl PartialEq for CharTagValue {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        if matches!(self.tag, 'x') {
+            self.as_ex() == other.as_ex()
+        } else if matches!(self.tag, 'y') {
+            self.as_why() == other.as_why()
+        } else {
+            self.as_other() == other.as_other()
         }
     }
 }

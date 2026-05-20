@@ -10,6 +10,7 @@ annotation_basic.rs
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct S {
     pub a: i32,
@@ -21,7 +22,16 @@ impl S {}
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    ::serde::Serialize,
+    ::serde::Deserialize,
+    Copy,
+    Eq,
+    Default,
+)]
 pub enum E {
     #[default]
     A,
@@ -32,6 +42,7 @@ pub enum E {
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 pub struct BM {
     pub value: u32,
 }
@@ -62,6 +73,39 @@ impl Drop for U {
             unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.b);
             }
+        }
+    }
+}
+impl Clone for U {
+    fn clone(&self) -> Self {
+        if matches!(self.tag, 0) {
+            Self::new_a(self.as_a().clone())
+        } else {
+            Self::new_b(self.as_b().clone())
+        }
+    }
+}
+impl core::fmt::Debug for U {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("U");
+        d.field("tag", &self.tag);
+        if matches!(self.tag, 0) {
+            d.field("a", self.as_a());
+        } else {
+            d.field("b", self.as_b());
+        }
+        d.finish()
+    }
+}
+impl PartialEq for U {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        if matches!(self.tag, 0) {
+            self.as_a() == other.as_a()
+        } else {
+            self.as_b() == other.as_b()
         }
     }
 }
@@ -132,6 +176,84 @@ impl Default for U {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct USerdeRef<'__a> {
+    tag: &'__a str,
+    data: USerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum USerdeRefData<'__a> {
+    Case0(&'__a i32),
+    Case1(&'__a i32),
+}
+impl serde::Serialize for U {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = if matches!(self.tag, 0) {
+            let tag = "0";
+            USerdeRef {
+                tag,
+                data: USerdeRefData::Case0(self.as_a()),
+            }
+        } else {
+            let tag = "default";
+            USerdeRef {
+                tag,
+                data: USerdeRefData::Case1(self.as_b()),
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct USerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for U {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = USerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "0" => {
+                let value = ::serde_json::from_value::<i32>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!("union U payload decode failed for tag `0`: {err}"),
+                    ))?;
+                Ok(Self {
+                    tag: 0,
+                    data: UData {
+                        a: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "default" => {
+                let value = ::serde_json::from_value::<i32>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!("union U payload decode failed for tag `default`: {err}"),
+                    ))?;
+                Ok(Self {
+                    tag: i32::default(),
+                    data: UData {
+                        b: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!("union U tag/data mismatch for tag `{}`", helper.tag),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
@@ -155,6 +277,7 @@ pub const I_set_attribute_value_Hash: i32 = 1976821110;
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct I_ping_In {
     pub dummy: dds::rpc::UnusedMember,
@@ -165,6 +288,7 @@ impl I_ping_In {}
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct I_ping_Out {
     pub dummy: dds::rpc::UnusedMember,
@@ -190,6 +314,35 @@ impl Drop for I_ping_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+        }
+    }
+}
+impl Clone for I_ping_Result {
+    fn clone(&self) -> Self {
+        match self.tag {
+            dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+        }
+    }
+}
+impl core::fmt::Debug for I_ping_Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("I_ping_Result");
+        d.field("tag", &self.tag);
+        match self.tag {
+            dds::RETCODE_OK => {
+                d.field("result", self.as_result());
+            }
+        }
+        d.finish()
+    }
+}
+impl PartialEq for I_ping_Result {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        match self.tag {
+            dds::RETCODE_OK => self.as_result() == other.as_result(),
         }
     }
 }
@@ -234,11 +387,78 @@ impl Default for I_ping_Result {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct I_ping_ResultSerdeRef<'__a> {
+    tag: &'__a str,
+    data: I_ping_ResultSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum I_ping_ResultSerdeRefData<'__a> {
+    Case0(&'__a I_ping_Out),
+}
+impl serde::Serialize for I_ping_Result {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = match self.tag {
+            dds::RETCODE_OK => {
+                let tag = "RETCODE_OK";
+                I_ping_ResultSerdeRef {
+                    tag,
+                    data: I_ping_ResultSerdeRefData::Case0(self.as_result()),
+                }
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct I_ping_ResultSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for I_ping_Result {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = I_ping_ResultSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "RETCODE_OK" => {
+                let value = ::serde_json::from_value::<I_ping_Out>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union I_ping_Result payload decode failed for tag `RETCODE_OK`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: dds::RETCODE_OK,
+                    data: I_ping_ResultData {
+                        result: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union I_ping_Result tag/data mismatch for tag `{}`", helper
+                            .tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct I_get_attribute_value_In {
     pub dummy: dds::rpc::UnusedMember,
@@ -249,6 +469,7 @@ impl I_get_attribute_value_In {}
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct I_get_attribute_value_Out {
     pub return_: i32,
@@ -274,6 +495,35 @@ impl Drop for I_get_attribute_value_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+        }
+    }
+}
+impl Clone for I_get_attribute_value_Result {
+    fn clone(&self) -> Self {
+        match self.tag {
+            dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+        }
+    }
+}
+impl core::fmt::Debug for I_get_attribute_value_Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("I_get_attribute_value_Result");
+        d.field("tag", &self.tag);
+        match self.tag {
+            dds::RETCODE_OK => {
+                d.field("result", self.as_result());
+            }
+        }
+        d.finish()
+    }
+}
+impl PartialEq for I_get_attribute_value_Result {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        match self.tag {
+            dds::RETCODE_OK => self.as_result() == other.as_result(),
         }
     }
 }
@@ -320,11 +570,82 @@ impl Default for I_get_attribute_value_Result {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct I_get_attribute_value_ResultSerdeRef<'__a> {
+    tag: &'__a str,
+    data: I_get_attribute_value_ResultSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum I_get_attribute_value_ResultSerdeRefData<'__a> {
+    Case0(&'__a I_get_attribute_value_Out),
+}
+impl serde::Serialize for I_get_attribute_value_Result {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = match self.tag {
+            dds::RETCODE_OK => {
+                let tag = "RETCODE_OK";
+                I_get_attribute_value_ResultSerdeRef {
+                    tag,
+                    data: I_get_attribute_value_ResultSerdeRefData::Case0(
+                        self.as_result(),
+                    ),
+                }
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct I_get_attribute_value_ResultSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for I_get_attribute_value_Result {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = I_get_attribute_value_ResultSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "RETCODE_OK" => {
+                let value = ::serde_json::from_value::<
+                    I_get_attribute_value_Out,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union I_get_attribute_value_Result payload decode failed for tag `RETCODE_OK`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: dds::RETCODE_OK,
+                    data: I_get_attribute_value_ResultData {
+                        result: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union I_get_attribute_value_Result tag/data mismatch for tag `{}`",
+                            helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct I_set_attribute_value_In {
     pub value: i32,
@@ -335,6 +656,7 @@ impl I_set_attribute_value_In {}
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct I_set_attribute_value_Out {
     pub dummy: dds::rpc::UnusedMember,
@@ -360,6 +682,35 @@ impl Drop for I_set_attribute_value_Result {
                     core::mem::ManuallyDrop::drop(&mut self.data.result);
                 }
             }
+        }
+    }
+}
+impl Clone for I_set_attribute_value_Result {
+    fn clone(&self) -> Self {
+        match self.tag {
+            dds::RETCODE_OK => Self::new_result(self.as_result().clone()),
+        }
+    }
+}
+impl core::fmt::Debug for I_set_attribute_value_Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("I_set_attribute_value_Result");
+        d.field("tag", &self.tag);
+        match self.tag {
+            dds::RETCODE_OK => {
+                d.field("result", self.as_result());
+            }
+        }
+        d.finish()
+    }
+}
+impl PartialEq for I_set_attribute_value_Result {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        match self.tag {
+            dds::RETCODE_OK => self.as_result() == other.as_result(),
         }
     }
 }
@@ -406,6 +757,76 @@ impl Default for I_set_attribute_value_Result {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct I_set_attribute_value_ResultSerdeRef<'__a> {
+    tag: &'__a str,
+    data: I_set_attribute_value_ResultSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum I_set_attribute_value_ResultSerdeRefData<'__a> {
+    Case0(&'__a I_set_attribute_value_Out),
+}
+impl serde::Serialize for I_set_attribute_value_Result {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = match self.tag {
+            dds::RETCODE_OK => {
+                let tag = "RETCODE_OK";
+                I_set_attribute_value_ResultSerdeRef {
+                    tag,
+                    data: I_set_attribute_value_ResultSerdeRefData::Case0(
+                        self.as_result(),
+                    ),
+                }
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct I_set_attribute_value_ResultSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for I_set_attribute_value_Result {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = I_set_attribute_value_ResultSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "RETCODE_OK" => {
+                let value = ::serde_json::from_value::<
+                    I_set_attribute_value_Out,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union I_set_attribute_value_Result payload decode failed for tag `RETCODE_OK`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: dds::RETCODE_OK,
+                    data: I_set_attribute_value_ResultData {
+                        result: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union I_set_attribute_value_Result tag/data mismatch for tag `{}`",
+                            helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
@@ -439,6 +860,51 @@ impl Drop for I_Call {
             unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
+        }
+    }
+}
+impl Clone for I_Call {
+    fn clone(&self) -> Self {
+        if matches!(self.tag, I_ping_Hash) {
+            Self::new_ping(self.as_ping().clone())
+        } else if matches!(self.tag, I_get_attribute_value_Hash) {
+            Self::new_get_attribute_value(self.as_get_attribute_value().clone())
+        } else if matches!(self.tag, I_set_attribute_value_Hash) {
+            Self::new_set_attribute_value(self.as_set_attribute_value().clone())
+        } else {
+            Self::new_unknownOp(self.as_unknownOp().clone())
+        }
+    }
+}
+impl core::fmt::Debug for I_Call {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("I_Call");
+        d.field("tag", &self.tag);
+        if matches!(self.tag, I_ping_Hash) {
+            d.field("ping", self.as_ping());
+        } else if matches!(self.tag, I_get_attribute_value_Hash) {
+            d.field("get_attribute_value", self.as_get_attribute_value());
+        } else if matches!(self.tag, I_set_attribute_value_Hash) {
+            d.field("set_attribute_value", self.as_set_attribute_value());
+        } else {
+            d.field("unknownOp", self.as_unknownOp());
+        }
+        d.finish()
+    }
+}
+impl PartialEq for I_Call {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        if matches!(self.tag, I_ping_Hash) {
+            self.as_ping() == other.as_ping()
+        } else if matches!(self.tag, I_get_attribute_value_Hash) {
+            self.as_get_attribute_value() == other.as_get_attribute_value()
+        } else if matches!(self.tag, I_set_attribute_value_Hash) {
+            self.as_set_attribute_value() == other.as_set_attribute_value()
+        } else {
+            self.as_unknownOp() == other.as_unknownOp()
         }
     }
 }
@@ -563,11 +1029,144 @@ impl Default for I_Call {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct I_CallSerdeRef<'__a> {
+    tag: &'__a str,
+    data: I_CallSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum I_CallSerdeRefData<'__a> {
+    Case1(&'__a I_ping_In),
+    Case2(&'__a I_get_attribute_value_In),
+    Case3(&'__a I_set_attribute_value_In),
+    Case0(&'__a dds::rpc::UnknownOperation),
+}
+impl serde::Serialize for I_Call {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = if matches!(self.tag, I_ping_Hash) {
+            let tag = "I_ping_Hash";
+            I_CallSerdeRef {
+                tag,
+                data: I_CallSerdeRefData::Case1(self.as_ping()),
+            }
+        } else if matches!(self.tag, I_get_attribute_value_Hash) {
+            let tag = "I_get_attribute_value_Hash";
+            I_CallSerdeRef {
+                tag,
+                data: I_CallSerdeRefData::Case2(self.as_get_attribute_value()),
+            }
+        } else if matches!(self.tag, I_set_attribute_value_Hash) {
+            let tag = "I_set_attribute_value_Hash";
+            I_CallSerdeRef {
+                tag,
+                data: I_CallSerdeRefData::Case3(self.as_set_attribute_value()),
+            }
+        } else {
+            let tag = "default";
+            I_CallSerdeRef {
+                tag,
+                data: I_CallSerdeRefData::Case0(self.as_unknownOp()),
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct I_CallSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for I_Call {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = I_CallSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "I_ping_Hash" => {
+                let value = ::serde_json::from_value::<I_ping_In>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union I_Call payload decode failed for tag `I_ping_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: I_ping_Hash,
+                    data: I_CallData {
+                        ping: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "I_get_attribute_value_Hash" => {
+                let value = ::serde_json::from_value::<
+                    I_get_attribute_value_In,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union I_Call payload decode failed for tag `I_get_attribute_value_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: I_get_attribute_value_Hash,
+                    data: I_CallData {
+                        get_attribute_value: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "I_set_attribute_value_Hash" => {
+                let value = ::serde_json::from_value::<
+                    I_set_attribute_value_In,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union I_Call payload decode failed for tag `I_set_attribute_value_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: I_set_attribute_value_Hash,
+                    data: I_CallData {
+                        set_attribute_value: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "default" => {
+                let value = ::serde_json::from_value::<
+                    dds::rpc::UnknownOperation,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union I_Call payload decode failed for tag `default`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: i32::default(),
+                    data: I_CallData {
+                        unknownOp: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union I_Call tag/data mismatch for tag `{}`", helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct I_Request {
     pub header: dds::rpc::RequestHeader,
@@ -607,6 +1206,51 @@ impl Drop for I_Return {
             unsafe {
                 core::mem::ManuallyDrop::drop(&mut self.data.unknownOp);
             }
+        }
+    }
+}
+impl Clone for I_Return {
+    fn clone(&self) -> Self {
+        if matches!(self.tag, I_ping_Hash) {
+            Self::new_ping(self.as_ping().clone())
+        } else if matches!(self.tag, I_get_attribute_value_Hash) {
+            Self::new_get_attribute_value(self.as_get_attribute_value().clone())
+        } else if matches!(self.tag, I_set_attribute_value_Hash) {
+            Self::new_set_attribute_value(self.as_set_attribute_value().clone())
+        } else {
+            Self::new_unknownOp(self.as_unknownOp().clone())
+        }
+    }
+}
+impl core::fmt::Debug for I_Return {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("I_Return");
+        d.field("tag", &self.tag);
+        if matches!(self.tag, I_ping_Hash) {
+            d.field("ping", self.as_ping());
+        } else if matches!(self.tag, I_get_attribute_value_Hash) {
+            d.field("get_attribute_value", self.as_get_attribute_value());
+        } else if matches!(self.tag, I_set_attribute_value_Hash) {
+            d.field("set_attribute_value", self.as_set_attribute_value());
+        } else {
+            d.field("unknownOp", self.as_unknownOp());
+        }
+        d.finish()
+    }
+}
+impl PartialEq for I_Return {
+    fn eq(&self, other: &Self) -> bool {
+        if self.tag != other.tag {
+            return false;
+        }
+        if matches!(self.tag, I_ping_Hash) {
+            self.as_ping() == other.as_ping()
+        } else if matches!(self.tag, I_get_attribute_value_Hash) {
+            self.as_get_attribute_value() == other.as_get_attribute_value()
+        } else if matches!(self.tag, I_set_attribute_value_Hash) {
+            self.as_set_attribute_value() == other.as_set_attribute_value()
+        } else {
+            self.as_unknownOp() == other.as_unknownOp()
         }
     }
 }
@@ -731,11 +1375,144 @@ impl Default for I_Return {
         }
     }
 }
+#[derive(::serde::Serialize)]
+struct I_ReturnSerdeRef<'__a> {
+    tag: &'__a str,
+    data: I_ReturnSerdeRefData<'__a>,
+}
+#[derive(::serde::Serialize)]
+#[serde(untagged)]
+enum I_ReturnSerdeRefData<'__a> {
+    Case1(&'__a I_ping_Result),
+    Case2(&'__a I_get_attribute_value_Result),
+    Case3(&'__a I_set_attribute_value_Result),
+    Case0(&'__a dds::rpc::UnknownOperation),
+}
+impl serde::Serialize for I_Return {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    where
+        __S: serde::Serializer,
+    {
+        let helper = if matches!(self.tag, I_ping_Hash) {
+            let tag = "I_ping_Hash";
+            I_ReturnSerdeRef {
+                tag,
+                data: I_ReturnSerdeRefData::Case1(self.as_ping()),
+            }
+        } else if matches!(self.tag, I_get_attribute_value_Hash) {
+            let tag = "I_get_attribute_value_Hash";
+            I_ReturnSerdeRef {
+                tag,
+                data: I_ReturnSerdeRefData::Case2(self.as_get_attribute_value()),
+            }
+        } else if matches!(self.tag, I_set_attribute_value_Hash) {
+            let tag = "I_set_attribute_value_Hash";
+            I_ReturnSerdeRef {
+                tag,
+                data: I_ReturnSerdeRefData::Case3(self.as_set_attribute_value()),
+            }
+        } else {
+            let tag = "default";
+            I_ReturnSerdeRef {
+                tag,
+                data: I_ReturnSerdeRefData::Case0(self.as_unknownOp()),
+            }
+        };
+        helper.serialize(__serializer)
+    }
+}
+#[derive(::serde::Deserialize)]
+struct I_ReturnSerdeOwned {
+    tag: String,
+    data: ::serde_json::Value,
+}
+impl<'de> serde::Deserialize<'de> for I_Return {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let helper = I_ReturnSerdeOwned::deserialize(deserializer)?;
+        match helper.tag.as_str() {
+            "I_ping_Hash" => {
+                let value = ::serde_json::from_value::<I_ping_Result>(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union I_Return payload decode failed for tag `I_ping_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: I_ping_Hash,
+                    data: I_ReturnData {
+                        ping: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "I_get_attribute_value_Hash" => {
+                let value = ::serde_json::from_value::<
+                    I_get_attribute_value_Result,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union I_Return payload decode failed for tag `I_get_attribute_value_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: I_get_attribute_value_Hash,
+                    data: I_ReturnData {
+                        get_attribute_value: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "I_set_attribute_value_Hash" => {
+                let value = ::serde_json::from_value::<
+                    I_set_attribute_value_Result,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union I_Return payload decode failed for tag `I_set_attribute_value_Hash`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: I_set_attribute_value_Hash,
+                    data: I_ReturnData {
+                        set_attribute_value: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            "default" => {
+                let value = ::serde_json::from_value::<
+                    dds::rpc::UnknownOperation,
+                >(helper.data)
+                    .map_err(|err| serde::de::Error::custom(
+                        format!(
+                            "union I_Return payload decode failed for tag `default`: {err}"
+                        ),
+                    ))?;
+                Ok(Self {
+                    tag: i32::default(),
+                    data: I_ReturnData {
+                        unknownOp: core::mem::ManuallyDrop::new(value),
+                    },
+                })
+            }
+            _ => {
+                Err(
+                    serde::de::Error::custom(
+                        format!(
+                            "union I_Return tag/data mismatch for tag `{}`", helper.tag
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+}
 #[allow(unused_imports)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct I_Reply {
     pub header: dds::rpc::ReplyHeader,

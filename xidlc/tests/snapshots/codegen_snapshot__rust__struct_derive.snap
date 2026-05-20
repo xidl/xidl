@@ -10,7 +10,7 @@ struct_derive.rs
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct A {}
 impl A {}
@@ -19,7 +19,7 @@ impl A {}
 #[allow(non_snake_case)]
 #[allow(unused_variables)]
 #[allow(unreachable_patterns)]
-#[derive(Debug, ::serde::Serialize)]
+#[derive(Debug, ::serde::Serialize, Clone, PartialEq, ::serde::Deserialize)]
 #[derive(Default)]
 pub struct A {}
 impl A {}

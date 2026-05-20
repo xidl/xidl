@@ -5,17 +5,11 @@
     #[{{ attr }}]
 {% endfor %}
 #[derive(
-Debug,
-Clone,
+{%- for item in derive %}
+    {{ item }},
+{%- endfor %}
 Copy,
-PartialEq,
 Eq,
-{% if has_serde_serialize %}
-    ::serde::Serialize,
-{% endif %}
-{% if has_serde_deserialize %}
-    ::serde::Deserialize,
-{% endif %}
 {% if members | length != 0 %}
     Default,
 {% endif %}

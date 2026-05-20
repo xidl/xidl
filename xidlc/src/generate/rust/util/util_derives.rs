@@ -63,6 +63,23 @@ pub fn rust_derives_from_annotations_with_extra(
             out.push(derive);
         }
     }
+
+    // Add default derives if not present
+    for default_derive in [
+        "Debug",
+        "Clone",
+        "PartialEq",
+        "Serialize",
+        "Deserialize",
+    ] {
+        if !seen.contains(default_derive)
+            && !seen.contains(&format!("::serde::{default_derive}"))
+            && seen.insert(default_derive.to_string())
+        {
+            out.push(default_derive.to_string());
+        }
+    }
+
     for value in &mut out {
         if value == "Serialize" {
             *value = "::serde::Serialize".to_string();
