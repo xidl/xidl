@@ -21,23 +21,18 @@
 
 // op params
 @annotation path {
-    string name default "";
 };
 
 @annotation query {
-    string name default "";
 };
 
 @annotation header {
-    string name default "";
 };
 
 @annotation cookie {
-    string name default "";
 };
 
 @annotation body {
-    string name default "";
 };
 
 // interface, op

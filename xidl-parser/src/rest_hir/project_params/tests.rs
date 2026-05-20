@@ -28,8 +28,24 @@ fn project_params_infers_kinds_and_tracks_bindings() {
         ty: OpTypeSpec::Void,
         ident: "get_city".to_string(),
         parameter: Some(ParameterDcls(vec![
-            param("id", vec![builtin("path", "\"cityId\"")]),
-            param("region", vec![builtin("query", "\"r\"")]),
+            param(
+                "id",
+                vec![
+                    builtin("path", ""),
+                    Annotation::Rename {
+                        name: "cityId".to_string(),
+                    },
+                ],
+            ),
+            param(
+                "region",
+                vec![
+                    builtin("query", ""),
+                    Annotation::Rename {
+                        name: "r".to_string(),
+                    },
+                ],
+            ),
             param("payload", vec![builtin("flatten", "")]),
         ])),
         raises: None,

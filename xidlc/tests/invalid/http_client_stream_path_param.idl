@@ -6,7 +6,7 @@ interface InvalidClientStreamPathService {
     @stream_codec("ndjson")
     @post(path = "/uploads/{bucket}")
     string upload(
-        @path("bucket") string bucket,
+        @path @rename("bucket") string bucket,
         sequence<octet> chunk
     );
 };

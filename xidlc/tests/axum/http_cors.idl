@@ -1,7 +1,7 @@
 @cors
 interface HttpCorsService {
     @get(path = "/v1/users/{id}")
-    string get_user(@path("id") string id);
+    string get_user(@path @rename("id") string id);
 
     @cors("https://console.example.com", "https://admin.example.com")
     @post(path = "/v1/users")

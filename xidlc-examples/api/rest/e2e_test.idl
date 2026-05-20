@@ -164,7 +164,8 @@ interface E2ePathSever {
     @post
     @path("/v1/op_with_params/{path}")
     sequence<string> op_with_params(
-        @path("path")
+        @path
+        @rename("path")
         string path_name,
         @query
         sequence<string> q,
@@ -221,7 +222,8 @@ interface E2eHttpScopeMatrix {
     @get(path = "/v2/scope/override-produces/{id}")
     @Produces("application/msgpack")
     StructHttpBody override_produces_only(
-        @path("id")
+        @path
+        @rename("id")
         string resource_id,
         out uint32 revision
     );
@@ -239,21 +241,24 @@ interface E2eHttpScopeMatrix {
     @deprecated
     @get(path = "/v2/scope/deprecated/plain/{id}")
     string deprecated_plain(
-        @path("id")
+        @path
+        @rename("id")
         string resource_id
     );
 
     @deprecated("2026-02-01")
     @get(path = "/v2/scope/deprecated/since/{id}")
     string deprecated_since_only(
-        @path("id")
+        @path
+        @rename("id")
         string resource_id
     );
 
     @deprecated(since = "2026-03-01", after = "2026-12-31")
     @get(path = "/v2/scope/deprecated/window/{id}")
     string deprecated_window(
-        @path("id")
+        @path
+        @rename("id")
         string resource_id
     );
 
@@ -264,22 +269,28 @@ interface E2eHttpRouteAndBody {
     @path("/resources/{id}")
     @path("/r/{id}")
     string get_resource(
-        @path("id")
+        @path
+        @rename("id")
         string resource_id,
-        @query("lang")
+        @query
+        @rename("lang")
         @optional
         string locale,
-        @header("X-Trace-Id")
+        @header
+        @rename("X-Trace-Id")
         string trace_id
     );
 
     @get(path = "/v2/files/{*path}{?download,version}")
     string get_file(
-        @path("path")
+        @path
+        @rename("path")
         string file_path,
-        @query("download")
+        @query
+        @rename("download")
         boolean download,
-        @query("version")
+        @query
+        @rename("version")
         @optional
         string version
     );
@@ -292,9 +303,11 @@ interface E2eHttpRouteAndBody {
 
     @put(path = "/v2/resources/{id}")
     void replace_resource(
-        @path("id")
+        @path
+        @rename("id")
         string resource_id,
-        @header("If-Match")
+        @header
+        @rename("If-Match")
         string etag,
         @body("payload")
         StructHttpBody payload
@@ -302,11 +315,14 @@ interface E2eHttpRouteAndBody {
 
     @patch(path = "/v2/resources/{id}")
     map<string, any> patch_resource(
-        @path("id")
+        @path
+        @rename("id")
         string resource_id,
-        @query("dry_run")
+        @query
+        @rename("dry_run")
         boolean dry_run,
-        @cookie("sid")
+        @cookie
+        @rename("sid")
         string session_id,
         @body("changes")
         map<string, any> changes
@@ -314,31 +330,37 @@ interface E2eHttpRouteAndBody {
 
     @delete(path = "/v2/resources/{id}")
     void delete_resource(
-        @path("id")
+        @path
+        @rename("id")
         string resource_id,
-        @query("force")
+        @query
+        @rename("force")
         @optional
         boolean force
     );
 
     @head(path = "/v2/resources/{id}")
     void probe_resource(
-        @path("id")
+        @path
+        @rename("id")
         string resource_id,
-        @header("If-None-Match")
+        @header
+        @rename("If-None-Match")
         string if_none_match
     );
 
     @options(path = "/v2/resources/{id}")
     void resource_options(
-        @path("id")
+        @path
+        @rename("id")
         string resource_id
     );
 
     @get(path = "/v2/msgpack/resources/{id}")
     @Produces("application/msgpack")
     StructHttpBody get_msgpack_resource(
-        @path("id")
+        @path
+        @rename("id")
         string resource_id,
         out uint32 revision
     );
@@ -381,7 +403,8 @@ interface E2eHttpDefaultsMatrix {
 
     @put(path = "/v2/defaults/resources/{id}")
     StructHttpBody replace_resource_default_body(
-        @path("id")
+        @path
+        @rename("id")
         string id,
         string name,
         @optional
@@ -390,7 +413,8 @@ interface E2eHttpDefaultsMatrix {
 
     @patch(path = "/v2/defaults/resources/{id}")
     StructHttpBody patch_resource_default_body(
-        @path("id")
+        @path
+        @rename("id")
         string id,
         string name,
         @optional
@@ -405,12 +429,15 @@ interface E2eHttpSecurity {
     @get(path = "/v2/secure/users/{id}")
     @deprecated("2026-01-01")
     string get_secure_user(
-        @path("id")
+        @path
+        @rename("id")
         string user_id,
-        @query("locale")
+        @query
+        @rename("locale")
         @optional
         string locale,
-        @header("X-Trace-Id")
+        @header
+        @rename("X-Trace-Id")
         string trace_id
     );
 
@@ -433,9 +460,11 @@ interface E2eHttpSecurity {
 interface E2eHttpSecurityMatrix {
     @get(path = "/v2/security/inherited/{id}")
     string inherited_security(
-        @path("id")
+        @path
+        @rename("id")
         string resource_id,
-        @header("X-Trace-Id")
+        @header
+        @rename("X-Trace-Id")
         string trace_id
     );
 
@@ -452,9 +481,11 @@ interface E2eHttpSecurityMatrix {
     @api_key(in = "header", name = "X-Alt-Key")
     @get(path = "/v2/security/alternatives/{id}")
     string alternative_security(
-        @path("id")
+        @path
+        @rename("id")
         string resource_id,
-        @query("locale")
+        @query
+        @rename("locale")
         @optional
         string locale
     );

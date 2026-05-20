@@ -97,7 +97,7 @@ interface HttpSecurityMatrixService {
     string alternative_security(
         @path
         string id,
-        @query("locale")
+        @query @rename("locale")
         @optional
         string locale
     );

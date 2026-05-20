@@ -27,9 +27,9 @@ interface HttpAnnoService {
         uint32 page
     );
     string get_user_alias(
-        @path("id")
+        @path @rename("id")
         uint32 user_id,
-        @query("lang")
+        @query @rename("lang")
         string locale
     );
     long add(

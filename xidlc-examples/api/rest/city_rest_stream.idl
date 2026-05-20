@@ -4,9 +4,11 @@ interface CityRestStreamApi {
     @stream_codec("sse")
     @path("/alerts/{district}{?lang}")
     string alerts(
-        @path("district")
+        @path
+        @rename("district")
         string district,
-        @query("lang")
+        @query
+        @rename("lang")
         string lang
     );
 

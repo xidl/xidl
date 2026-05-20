@@ -13,7 +13,8 @@ interface RestMediaTypesApi {
     @get(path = "/v1/msgpack/users/{user_id}")
     @Produces("application/msgpack")
     string get_msgpack_user(
-        @path("user_id")
+        @path
+        @rename("user_id")
         string user_id,
         out uint32 score
     );

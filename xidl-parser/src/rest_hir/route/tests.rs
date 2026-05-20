@@ -32,13 +32,13 @@ fn op(name: &str, params: Vec<ParamDcl>) -> OpDcl {
 
 #[test]
 fn explicit_param_binding_detects_conflicts_and_defaults_name() {
-    let param = string_param("city_id", vec![builtin("path", "\"id\"")], None);
+    let param = string_param("city_id", vec![builtin("path", "")], None);
     let binding = explicit_param_binding(&param).expect("path binding");
     assert_eq!(binding.expect("binding").source, HttpParamKind::Path);
 
     let conflict = string_param(
         "city_id",
-        vec![builtin("path", "\"id\""), builtin("query", "\"id\"")],
+        vec![builtin("path", ""), builtin("query", "")],
         None,
     );
     let err = explicit_param_binding(&conflict)
@@ -51,7 +51,7 @@ fn explicit_param_binding_detects_conflicts_and_defaults_name() {
 fn route_from_annotations_deduplicates_paths_and_rejects_multiple_verbs() {
     let annotations = vec![
         builtin("get", "path=\"//cities//{id}/\""),
-        builtin("path", "\"/cities/{id}\""),
+        builtin("path", "path=\"/cities/{id}\""),
         builtin("path", "path=\"/cities/{id}\""),
     ];
     let (method, paths) = route_from_annotations(&annotations, HttpMethod::Post).expect("route");
@@ -71,8 +71,26 @@ fn auto_default_method_path_uses_only_request_side_path_bindings() {
     let op = op(
         "watch_city",
         vec![
-            string_param("id", vec![builtin("path", "\"cityId\"")], Some("in")),
-            string_param("etag", vec![builtin("path", "\"etag\"")], Some("out")),
+            string_param(
+                "id",
+                vec![
+                    builtin("path", ""),
+                    Annotation::Rename {
+                        name: "cityId".to_string(),
+                    },
+                ],
+                Some("in"),
+            ),
+            string_param(
+                "etag",
+                vec![
+                    builtin("path", ""),
+                    Annotation::Rename {
+                        name: "etag".to_string(),
+                    },
+                ],
+                Some("out"),
+            ),
             string_param("region", Vec::new(), Some("in")),
         ],
     );

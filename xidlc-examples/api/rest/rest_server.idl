@@ -51,7 +51,8 @@ interface RestServer {
 
     @head(path = "/v1/database/{key}")
     void is_key_exists(
-        @path("key")
+        @path
+        @rename("key")
         string key_alias
     );
 

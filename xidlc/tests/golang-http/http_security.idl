@@ -9,7 +9,7 @@ interface HttpSecurityService {
     string get_user(
         @path uint32 id,
         @query @optional string locale,
-        @header("X-Trace-Id") string trace_id
+        @header @rename("X-Trace-Id") string trace_id
     );
 
     @oauth2(scopes = "write:users,read:users")

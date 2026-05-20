@@ -1,5 +1,6 @@
 ---
 source: xidl-parser/tests/test-annotation.rs
+assertion_line: 64
 expression: ast
 ---
 Specification(
@@ -363,6 +364,21 @@ Specification(
                                                                                 "header",
                                                                             ),
                                                                             node_text: "header",
+                                                                        },
+                                                                    ),
+                                                                    params: None,
+                                                                    builtin: None,
+                                                                    is_extend: false,
+                                                                    extra: [],
+                                                                },
+                                                                AnnotationAppl {
+                                                                    name: ScopedName(
+                                                                        ScopedName {
+                                                                            scoped_name: None,
+                                                                            identifier: Identifier(
+                                                                                "rename",
+                                                                            ),
+                                                                            node_text: "rename",
                                                                         },
                                                                     ),
                                                                     params: Some(

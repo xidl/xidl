@@ -103,7 +103,7 @@ fn render_openapi_json_rejects_conflicting_param_sources() {
         interface HttpApi {
           @get(path = "/users/{id}")
           string get_user(
-            @path("id") @query("user_id") string id
+            @path @rename("id") @query @rename("user_id") string id
           );
         };
         "#,
@@ -121,8 +121,8 @@ fn render_openapi_json_rejects_missing_query_template_binding() {
         interface HttpApi {
           @get(path = "/users/{id}{?lang,region}")
           string get_user(
-            @path("id") string id,
-            @query("lang") string lang
+            @path @rename("id") string id,
+            @query @rename("lang") string lang
           );
         };
         "#,
@@ -143,10 +143,10 @@ fn render_openapi_json_rejects_duplicate_route_bindings() {
         r#"
         interface HttpApi {
           @get(path = "/users/{id}")
-          string get_user(@path("id") string id);
+          string get_user(@path @rename("id") string id);
 
           @get(path = "/users/{id}")
-          string fetch_user(@path("id") string id);
+          string fetch_user(@path @rename("id") string id);
         };
         "#,
     );

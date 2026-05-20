@@ -4,7 +4,8 @@ interface HttpStreamApi {
     @stream_codec("sse")
     @path("/alerts/{district}")
     string alerts(
-        @path("district")
+        @path
+        @rename("district")
         string district
     );
 
